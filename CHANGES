@@ -1,0 +1,11 @@
+CHANGES - changes for libtpms
+
+version 0.5.1
+  first public release
+
+  - release 7 increased NVRAM area for being able to store more data in
+    the TPM's NVRAM areas, i.e., X.509 certificates
+
+  - release 9 added two more APIs:
+    - TPM_Free
+    - TPMLIB_DecodeBlob

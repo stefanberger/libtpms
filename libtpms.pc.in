@@ -1,0 +1,8 @@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libtpms
+Version: @VERSION@
+Description: libtpms
+Libs: -L${libdir} -ltpms
+Cflags: -I${includedir}

@@ -1,0 +1,89 @@
+What is libtpms?
+----------------
+
+Libtpms is a library that targets the integration of TPM functionality
+into hypervisors, primarily into Qemu. Libtpms provides a very narrow
+public API for this purpose so that integration is possible. Only the
+minimum of necessary APIs are made publicly available.
+
+It is assumed that the user of libtpms is familiar with the concepts
+of the Trusted Platform Module (TPM). For the interaction with libtpms
+it is necessary to know how to construct valid TPM commands and to
+be able to parse their results. It is not within the scope of libtpms's
+documentation to provide background on this. See the section on references
+below.
+
+
+What files does the libtpms package provide?
+--------------------------------------------
+
+The main libtpms package provides the following files:
+
+/usr/lib64/libtpms.so.0
+/usr/lib64/libtpms.so.0.5.1
+/usr/share/doc/libtpms-0.5.1
+/usr/share/doc/libtpms-0.5.1/CHANGES
+/usr/share/doc/libtpms-0.5.1/LICENSE
+/usr/share/doc/libtpms-0.5.1/README
+
+Applications can link with -ltpms.
+
+
+What files does the libtpms development package provide?
+--------------------------------------------------------
+
+The libtpms development package (libtpms-devel) provides the following
+include files for applications to use:
+
+tpm_error.h
+tpm_library.h
+tpm_memory.h
+tpm_nvfilename.h
+tpm_tis.h
+tpm_types.h
+
+These files contain the data structures, data types and API calls supported
+by libtpms. It is recommended to not use any other API calls than those
+provided in these include files.
+
+All APIs are described in man pages. The man pages are part of the libtpms
+development package as well:
+
+TPMLIB_DecodeBlob
+TPMLIB_GetTPMProperty
+TPMLIB_GetVersion
+TPMLIB_MainInit
+TPMLIB_Process
+TPMLIB_RegisterCallbacks
+TPMLIB_Terminate
+TPMLIB_VolatileAll_Store
+TPM_Free
+TPM_IO_Hash_Data
+TPM_IO_Hash_End
+TPM_IO_Hash_Start
+TPM_IO_TpmEstablished_Get
+TPM_Malloc
+TPM_Realloc
+
+
+Where can I send bug reports to?
+--------------------------------
+
+There's a mailing list on the ibmswtpm project on sourceforge where you can
+send bug reports to.
+
+http://sourceforge.net/projects/ibmswtpm/support
+
+Otherwise you may contact us directly.
+
+Stefan Berger, stefanb@us.ibm.com
+Kenneth Goldman, kgoldman@us.ibm.com
+
+
+References:
+-----------
+
+Documentation about the Trusted Platform Module (TPM) can be downloaded
+from the Trusted Computing Group's website at
+
+http://www.trustedcomputinggroup.org
