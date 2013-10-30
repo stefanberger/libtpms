@@ -66,18 +66,19 @@ TPM_Malloc
 TPM_Realloc
 
 
-Where can I send bug reports to?
---------------------------------
+How to contribute?
+------------------
+The mailing list for libtpms is libtpms@librelist.com.
 
-There's a mailing list on the ibmswtpm project on sourceforge where you can
-send bug reports to.
+You can subscribe to the list by sending your first message to
+libtpms@librelist.com.  The message will be dropped from the list and you
+will receive a confirmation email to reply to.
 
-http://sourceforge.net/projects/ibmswtpm/support
 
-Otherwise you may contact us directly.
-
-Stefan Berger, stefanb@us.ibm.com
-Kenneth Goldman, kgoldman@us.ibm.com
+Maintainers
+-----------
+libtpms is currently being maintained by Stefan Berger <stefanb@us.ibm.com>
+and Corey Bryant <coreyb@linux.vnet.ibm.com>.
 
 
 References:
