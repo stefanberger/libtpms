@@ -1,25 +1,39 @@
 This document contains the following sections:
 ==============================================
 
+- Quick start
 - Building libtpms
-- Installing libtpms, include files and manpages
-- Uninstalling libtpms, include files and manpages
-- Installation and uninstallation of libtpms manpages only
+- Installing libtpms, include files and man pages
+- Uninstalling libtpms, include files and man pages
+- More on man pages
 
+Quick start:
+------------
+
+The libtpms library can be built using the three common steps:
+
+    # ./configure
+    # make
+    # sudo make install
 
 Building libtpms:
 -----------------
 
-Building libtpms can be done using 
+The configure script needs to be run first, and can be done using:
 
-make -f makefile-libtpms clean all
+./configure
 
-This generates the dynamic link library and symbolic links to the library
-and places it in the same directory where the sources are.
+By default, files will be installed in '/usr/local/lib', etc.  If you
+would like to have these files installed in '/usr/lib', etc, then run
+configure using:
 
-lrwxrwxrwx 1 root root      12 Feb  2 19:11 libtpms.so -> libtpms.so.0
-lrwxrwxrwx 1 root root      16 Feb  2 19:11 libtpms.so.0 -> libtpms.so.0.5.1
--rwxrwxr-x 1 root root 1489596 Feb  2 19:11 libtpms.so.0.5.1
+./configure --prefix=/usr
+
+For more details on configure options, run "./configure -h".
+
+Building libtpms can be done using:
+
+make clean all
 
 The library is known to build on Linux and Cygwin systems and possible
 other Operating Systems that use .so as library extensions.
@@ -49,14 +63,14 @@ installed prior to compilation:
 
 By default, libtpms is built with the openssl crypto library, which was
 shown above. To build with the freebl crypto library the following command
-line can be used
+line can be used:
 
-make -f makefile-libtpms CRYPTO_SUBSYSTEM=freebl clean all
+make CRYPTO_SUBSYSTEM=freebl clean all
 
 To verify that libtpms was built with freebl as the crypto backend, one
-can run
+can run:
 
-ldd libtpms.so
+ldd /usr/lib/libtpms.so
 
 	linux-vdso.so.1 =>  (0x00007fff8d5ff000)
 	libgmp.so.3 => /usr/lib64/libgmp.so.3 (0x00007f5352a13000)
@@ -74,7 +88,7 @@ The fact that the libraries libgmp, libnspr4, libnssutil3, libnss3,
 libpc4, and libplds4 are linked agaist is an indication that the freebl
 library was used for linking.
 
-In case of openssl's libcrypto the output would be the following
+In case of openssl's libcrypto the output would be the following:
 
 	linux-vdso.so.1 =>  (0x00007fffcbdff000)
 	libcrypto.so.10 => /lib64/libcrypto.so.10 (0x00007fdb1d00e000)
@@ -87,16 +101,16 @@ In case of openssl's libcrypto the output would be the following
 A debug build that prints out __lots__ of debugging information on the
 TPM level can be built by invoking make as follows:
 
-make -f makefile-libtpms CRYPTO_SUBSYSTEM=freebl BUILD_TYPE=debug
+make CRYPTO_SUBSYSTEM=freebl BUILD_TYPE=debug
 
 
-Installing libtpms, include files and manpages:
------------------------------------------------
+Installing libtpms, include files and man pages:
+------------------------------------------------
 
 The installation of libtpms, the development include files (headers) and
 man pages can be achieved through:
 
-make -f makefile-libtpms install
+make install
 
 This will copy libtpms into the standard library directory on your Linux
 system such as /usr/lib or /usr/lib64, depending on whether you built for
@@ -107,34 +121,25 @@ The public include files of libtpms will be copied to /usr/include/libtpms.
 The man pages explaining the libtpms API will be copied to /usr/share/man.
 
 
-
-Uninstalling libtpms, include files and manpages:
--------------------------------------------------
+Uninstalling libtpms, include files and man pages:
+--------------------------------------------------
 
 The libtpms library, its development include files (headers) and man pages
 can be uninstalled from their standard locations using
 
-make -f makefile-libtpms uninstall
+make uninstall
 
 
-Installation and uninstallation of libtpms man pages only:
-----------------------------------------------------------
+More on man pages
+-----------------
 
-All API calls of libtpms have a man page. The man pages can be separately
-installed using
+All of the libtpms APIs have a man page.  The man pages contain explanations
+on how to use the APIs as well as examples.  Once installed, they can be
+viewed as a typical man page:
 
-make -f makefile-libtpms manpages-install
+man TPMLIB_MainInit
 
-and uninstalled using
-
-make -f makefile-libtpms manpages-uninstall
-
-
-If the man pages are not installed into the standard man pages directory
-the can then be looked at using
+Otherwise, if they are not installed, they can then be viewed from the
+libtpms root directory using:
 
 man -M ./man TPMLIB_MainInit
-
-from the TPM's source directory that contains the 'man' directory.
-
-The man pages contain explanations on how to use the API as well as examples.
