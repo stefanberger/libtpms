@@ -2452,7 +2452,7 @@ void TPM_State_Trace(tpm_state_t *tpm_state)
 
    - set '*response' to NULL at the first call
 
-   - on subsequent calls, pass 'response' and 'response_total' back in.  Set 'response_total' back
+   - on subsequent calls, pass 'response' and 'response_total' back in.  Set 'response_size' back
      to 0.
 
    On input:

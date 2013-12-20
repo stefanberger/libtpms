@@ -207,27 +207,44 @@ void TPM_Global_Delete(tpm_state_t *tpm_state)
 
 /* TPM_Global_GetPhysicalPresence() returns 'physicalPresence' TRUE if either TPM_STCLEAR_FLAGS ->
    physicalPresence is TRUE or hardware physical presence is indicated.
+
+   The physicalPresenceHWEnable and physicalPresenceCMDEnable flags MUST mask their respective
+   signals before further processing. The hardware signal, if enabled by the
+   physicalPresenceHWEnable flag, MUST be logically ORed with the PhysicalPresence flag, if enabled,
+   to obtain the final physical presence value used to allow or disallow local commands.
 */
 
 TPM_RESULT TPM_Global_GetPhysicalPresence(TPM_BOOL *physicalPresence,
                                           const tpm_state_t *tpm_state)
 {
     TPM_RESULT  rc = 0;
+    *physicalPresence = FALSE;
 
-    /* check for physicalPresence set by the command ordinal */
-    *physicalPresence = tpm_state->tpm_stclear_flags.physicalPresence;
-    printf("  TPM_Global_GetPhysicalPresence: physicalPresence flag is %02x\n", *physicalPresence);
+    /* is CMD physical presence enabled */
+    printf("  TPM_Global_GetPhysicalPresence: physicalPresenceCMDEnable is %02x\n",
+	   tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable);
+    if (tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable) {
+	printf("  TPM_Global_GetPhysicalPresence: physicalPresence flag is %02x\n",
+	       tpm_state->tpm_stclear_flags.physicalPresence);
+	/* if enabled, check for physicalPresence set by the command ordinal */
+	*physicalPresence = tpm_state->tpm_stclear_flags.physicalPresence;
+    }
+
     /* if the software flag is true, result is true, no need to check the hardware */
     /* if the TPM_STCLEAR_FLAGS flag is FALSE, check the hardware */
     if (!(*physicalPresence)) {
+	printf("  TPM_Global_GetPhysicalPresence: physicalPresenceHWEnable is %02x\n",
+	       tpm_state->tpm_permanent_flags.physicalPresenceHWEnable);
         /* if physicalPresenceHWEnable is FALSE, the hardware signal is disabled */
         if (tpm_state->tpm_permanent_flags.physicalPresenceHWEnable) {
-            /* If it's TRUE, check the hardware signal */
+            /* if enabled, check the hardware signal */
             rc = TPM_IO_GetPhysicalPresence(physicalPresence, tpm_state->tpm_number);
-            printf("  TPM_Global_GetPhysicalPresence: physicalPresence signal is %02x\n",
-                   *physicalPresence);
+	    printf("  TPM_Global_GetPhysicalPresence: physicalPresence HW is %02x\n",
+		   *physicalPresence);
         }
     }
+    printf("  TPM_Global_GetPhysicalPresence: physicalPresence is %02x\n",
+	   *physicalPresence);
     return rc;
 }
 
