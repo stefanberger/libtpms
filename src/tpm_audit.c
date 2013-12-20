@@ -896,7 +896,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_GetAuditDigestSigned: Error, invalid sigScheme%04hx\n",
+	    printf("TPM_Process_GetAuditDigestSigned: Error, invalid sigScheme %04hx\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
