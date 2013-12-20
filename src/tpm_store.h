@@ -59,7 +59,7 @@ void 	   TPM_Sbuffer_GetAll(TPM_STORE_BUFFER *sbuffer,
 			      unsigned char **buffer,
 			      uint32_t *length,
 			      uint32_t *total);
-TPM_RESULT TPM_SBuffer_Set(TPM_STORE_BUFFER *sbuffer,
+TPM_RESULT TPM_Sbuffer_Set(TPM_STORE_BUFFER *sbuffer,
 			   unsigned char *buffer,
 			   const uint32_t length,
 			   const uint32_t total);

@@ -152,7 +152,7 @@ void TPM_Sbuffer_GetAll(TPM_STORE_BUFFER *sbuffer,
     return;
 }
 
-/* TPM_SBuffer_Set() creates a TPM_STORE_BUFFER from
+/* TPM_Sbuffer_Set() creates a TPM_STORE_BUFFER from
 
    'buffer' - pointer to a buffer that was allocated (can be NULL)
 
@@ -162,7 +162,7 @@ void TPM_Sbuffer_GetAll(TPM_STORE_BUFFER *sbuffer,
    greater than total.
 */
 
-TPM_RESULT TPM_SBuffer_Set(TPM_STORE_BUFFER *sbuffer,
+TPM_RESULT TPM_Sbuffer_Set(TPM_STORE_BUFFER *sbuffer,
 			   unsigned char *buffer,
 			   const uint32_t length,
 			   const uint32_t total)
@@ -171,7 +171,7 @@ TPM_RESULT TPM_SBuffer_Set(TPM_STORE_BUFFER *sbuffer,
 
     if (rc == 0) {
 	if (sbuffer == NULL) {
-	    printf("TPM_SBuffer_Set: Error (fatal), sbuffer is NULL\n");
+	    printf("TPM_Sbuffer_Set: Error (fatal), sbuffer is NULL\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -179,7 +179,7 @@ TPM_RESULT TPM_SBuffer_Set(TPM_STORE_BUFFER *sbuffer,
 	if (buffer != NULL) {
 	    if (rc == 0) {
 		if (length > total) {
-		    printf("TPM_SBuffer_Set: Error (fatal), length %u > total %u\n",
+		    printf("TPM_Sbuffer_Set: Error (fatal), length %u > total %u\n",
 			   length, total);
 		    rc = TPM_FAIL;
 		}

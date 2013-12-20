@@ -2486,7 +2486,7 @@ TPM_RESULT TPM_ProcessA(unsigned char **response,
 
     /* set the sbuffer from the response parameters */
     if (rc == 0) {
-	rc = TPM_SBuffer_Set(&responseSbuffer,
+	rc = TPM_Sbuffer_Set(&responseSbuffer,
 			     *response,
 			     *response_size,
 			     *response_total);
