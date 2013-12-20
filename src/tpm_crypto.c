@@ -623,7 +623,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char* encrypt_data,    /* encrypted dat
     unsigned char *padded_data = NULL;
     
     printf(" TPM_RSAPublicEncrypt: Input data size %lu\n", (unsigned long)decrypt_data_size);
-    /* intermediate buffer for the decrypted by still padded data */
+    /* intermediate buffer for the decrypted but still padded data */
     if (rc == 0) {
         rc = TPM_Malloc(&padded_data, encrypt_data_size);               /* freed @2 */
     }
