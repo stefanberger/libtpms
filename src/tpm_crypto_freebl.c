@@ -757,7 +757,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     if (rc == 0) {
 	if (encrypt_data_size != nbytes) {
 	    printf("TPM_RSAPublicEncryptRaw: Error, Output data size is %u not %u\n",
-		   decrypt_data_size, nbytes);
+		   encrypt_data_size, nbytes);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
     }
