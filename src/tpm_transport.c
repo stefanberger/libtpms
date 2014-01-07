@@ -1198,7 +1198,7 @@ TPM_RESULT TPM_TransportAuth_Load(TPM_TRANSPORT_AUTH *tpm_transport_auth,
     }
     /* load authData */
     if (rc == 0) {
-	TPM_Secret_Load(tpm_transport_auth->authData, stream, stream_size);
+	rc = TPM_Secret_Load(tpm_transport_auth->authData, stream, stream_size);
     }
     return rc;
 }

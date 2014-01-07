@@ -1167,11 +1167,11 @@ TPM_RESULT TPM_DAABlob_Load(TPM_DAA_BLOB *tpm_daa_blob,
     }
     /* load blobIntegrity */
     if (rc == 0) {
-	TPM_Digest_Load(tpm_daa_blob->blobIntegrity, stream, stream_size);
+	rc = TPM_Digest_Load(tpm_daa_blob->blobIntegrity, stream, stream_size);
     }
     /* load additionalData */
     if (rc == 0) {
-	TPM_SizedBuffer_Load(&(tpm_daa_blob->additionalData), stream, stream_size);
+	rc = TPM_SizedBuffer_Load(&(tpm_daa_blob->additionalData), stream, stream_size);
     }
     /* load sensitiveData */
     if (rc == 0) {

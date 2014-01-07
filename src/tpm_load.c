@@ -247,7 +247,7 @@ TPM_RESULT TPM_LoadLong(unsigned long *result,
 	for (i = 0 ; i < stream_size ; i++) {
 	    /* copy big endian stream, put lowest address in an upper byte, highest address in byte
 	       0 */
-	    *result |= stream[i] << ((stream_size - 1 - i) * 8);
+	    *result |= (unsigned long)(((unsigned long)stream[i]) << ((stream_size - 1 - i) * 8));
 	}
 	printf(" TPM_LoadLong: Result %08lx\n", *result);
     }

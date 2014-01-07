@@ -1740,15 +1740,19 @@ TPM_RESULT TPM_bin2bn(TPM_BIGNUM *bn_in, const unsigned char *bin, unsigned int 
 {
     TPM_RESULT rc = 0;
 
-    TPM_BN_new(bn_in);
-    mpz_t *bn = (mpz_t *)*bn_in;
-    mpz_import(*bn,		/* output */
-	       bytes,		/* count */
-	       1,		/* order, MSB first */
-	       1,		/* size, char */
-	       0,		/* endian, native (unused) */
-	       0,		/* nail, don't discard */
-	       bin);		/* input */
+    if (rc == 0) {
+	rc = TPM_BN_new(bn_in);
+    }
+    if (rc == 0) {
+	mpz_t *bn = (mpz_t *)*bn_in;
+	mpz_import(*bn,		/* output */
+		   bytes,	/* count */
+		   1,		/* order, MSB first */
+		   1,		/* size, char */
+		   0,		/* endian, native (unused) */
+		   0,		/* nail, don't discard */
+		   bin);	/* input */
+    }
     return rc;
 }
 
