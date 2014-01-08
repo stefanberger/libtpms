@@ -391,7 +391,7 @@ static unsigned char *TPMLIB_GetPlaintext(const char *stream,
     start = strstr(stream, starttag);
     if (start) {
         start += strlen(starttag);
-        while (isspace(*start))
+        while (isspace((int)*start))
             start++;
         end = strstr(start, endtag);
         if (end) {
