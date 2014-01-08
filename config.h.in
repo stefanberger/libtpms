@@ -64,6 +64,12 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* use freebl crypto library */
+#undef USE_FREEBL_CRYPTO_LIBRARY
+
+/* use openssl crypto library */
+#undef USE_OPENSSL_CRYPTO_LIBRARY
+
 /* Version number of package */
 #undef VERSION
 

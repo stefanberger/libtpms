@@ -37,13 +37,22 @@
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.		*/
 /********************************************************************************/
 
+#include <config.h>
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-#include <plbase64.h>
+#ifdef USE_FREEBL_CRYPTO_LIBRARY
+# include <plbase64.h>
+#endif
+
+#ifdef USE_OPENSSL_CRYPTO_LIBRARY
+# include <openssl/bio.h>
+# include <openssl/evp.h>
+#endif
 
 #include "tpm_debug.h"
 #include "tpm_error.h"
@@ -256,6 +265,46 @@ static int is_base64ltr(char c)
              c == '=');
 }
 
+#ifdef USE_OPENSSL_CRYPTO_LIBRARY
+static unsigned char *TPMLIB_OpenSSL_Base64Decode(char *input,
+                                                  unsigned int outputlen)
+{
+    BIO *b64, *bmem;
+    unsigned char *res = NULL;
+    int n;
+    TPM_RESULT rc;
+
+    b64 = BIO_new(BIO_f_base64());
+    if (!b64) {
+        return NULL;
+    }
+
+    bmem = BIO_new_mem_buf(input, strlen(input));
+    if (!bmem) {
+        BIO_free(b64);
+        goto cleanup;
+    }
+    bmem = BIO_push(b64, bmem);
+    BIO_set_flags(bmem, BIO_FLAGS_BASE64_NO_NL);
+
+    rc = TPM_Malloc(&res, outputlen);
+    if (rc != TPM_SUCCESS) {
+        goto cleanup;
+    }
+
+    n = BIO_read(bmem, res, outputlen);
+    if (n <= 0) {
+        TPM_Free(res);
+        res = NULL;
+        goto cleanup;
+    }
+
+cleanup:
+    BIO_free_all(bmem);
+
+    return res;
+}
+#endif
 
 /*
  * Base64 decode the string starting at 'start' and the last
@@ -289,10 +338,12 @@ static unsigned char *TPMLIB_Base64Decode(const char *start, const char *end,
 
     while (s < end) {
         c = *s;
-        if (c != '=' && is_base64ltr(c)) {
+        if (is_base64ltr(c)) {
             *d = c;
             d++;
-            numbase64chars++;
+            if (c != '=') {
+                numbase64chars++;
+            }
         } else if (c == 0) {
             break;
         }
@@ -314,7 +365,13 @@ static unsigned char *TPMLIB_Base64Decode(const char *start, const char *end,
     break;
     }
 
+#ifdef USE_FREEBL_CRYPTO_LIBRARY
     ret = (unsigned char *)PL_Base64Decode(input, 0, NULL);
+#endif
+
+#ifdef USE_OPENSSL_CRYPTO_LIBRARY
+    ret = TPMLIB_OpenSSL_Base64Decode(input, *length);
+#endif
 
 err_exit:
     free(input);

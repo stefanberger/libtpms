@@ -74,10 +74,16 @@ case "$cryptolib" in
 freebl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, true)
 	AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, false)
+        AC_DEFINE([USE_FREEBL_CRYPTO_LIBRARY],
+                  [1],
+                  [use freebl crypto library])
 	;;
 openssl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)
 	AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, true)
+        AC_DEFINE([USE_OPENSSL_CRYPTO_LIBRARY],
+                  [1],
+                  [use openssl crypto library])
 	;;
 esac
 
