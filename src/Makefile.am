@@ -9,7 +9,8 @@ lib_LTLIBRARIES=libtpms.la
 libtpms_la_LIBADD=
 
 libtpms_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
-                     -version-info $(LIBTPMS_VERSION_INFO)
+                     -version-info $(LIBTPMS_VERSION_INFO) \
+                     -no-undefined
 
 libtpms_la_CFLAGS = -include tpm_library_conf.h -I$(top_srcdir)/include/libtpms
 
@@ -142,8 +143,6 @@ if LIBTPMS_USE_OPENSSL
 
 libtpms_la_SOURCES += tpm_crypto.c
 libtpms_la_LIBADD += -lcrypto
-libtpms_la_LDFLAGS += $(shell nspr-config --libs)
-libtpms_la_CFLAGS += $(shell nspr-config --cflags)
 
 endif # LIBTPMS_USE_OPENSSL
 
