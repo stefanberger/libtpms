@@ -10,8 +10,9 @@ This document contains the following sections:
 Quick start:
 ------------
 
-The libtpms library can be built using the three common steps:
+The libtpms library can be built using the steps:
 
+    # ./bootstrap.sh
     # ./configure
     # make
     # sudo make install

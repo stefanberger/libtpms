@@ -108,7 +108,6 @@ AC_CONFIG_FILES(Makefile                   \
 		include/Makefile           \
 		include/libtpms/Makefile   \
 		include/libtpms/tpm_library.h \
-		m4/Makefile                \
 		man/Makefile               \
 		man/man3/Makefile          \
 		src/Makefile               \

@@ -23,7 +23,6 @@
 
 SUBDIRS   = \
 	include \
-	m4 \
 	man \
 	src \
 	tests
