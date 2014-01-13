@@ -3,9 +3,11 @@
 *.la
 *.lo
 *.o
+*.patch
 *~
 .deps
 .libs
+configure
 Makefile.in
 Makefile
 /aclocal.m4
