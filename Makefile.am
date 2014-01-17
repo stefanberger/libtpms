@@ -34,6 +34,7 @@ EXTRA_DIST = \
 	INSTALL \
 	LICENSE \
 	README \
+	bootstrap.sh \
 	libtpms.pc.in
 
 pkgconfigdir = $(libdir)/pkgconfig

@@ -27,6 +27,7 @@ BuildRequires:  nss-softokn-freebl-devel >= 3.12.9-2
 BuildRequires:  nss-softokn-freebl-static >= 3.12.9-2
 BuildRequires:  nss-softokn-devel >= 3.12.9-2, gmp-devel
 BuildRequires:  pkgconfig gawk
+BuildRequires:  automake autoconf libtool bash coreutils
 Requires:       nss-softokn-freebl >= 3.12.9-2, nss-softokn >= 3.12.9-2
 Requires:       gmp
 %endif
@@ -72,6 +73,7 @@ Libtpms header files and documentation.
 %define _enable_debug --enable-debug
 %endif
 
+./bootstrap.sh
 %configure \
         --disable-static \
         --prefix=/usr \
