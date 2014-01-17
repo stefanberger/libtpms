@@ -2,7 +2,7 @@
 
 %define name      @PACKAGE@
 %define version   @VERSION@
-%define release   14
+%define release   19
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %define crypto_subsystem  freebl
@@ -13,12 +13,12 @@
 Summary: Library providing Trusted Platform Module (TPM) functionality
 Name:           %{name}
 Version:        %{version}
-Release:        %{release}
+Release:        %{release}%{?dist}
 License:        BSD
 Group:          Development/Libraries
 Url:            http://sourceforge.net/projects/ibmswtpm
 Source:         http://bergerstefan.users.sourceforge.net/libtpms/%{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+
 %if %{crypto_subsystem} == openssl
 BuildRequires:  openssl-devel
 %else
@@ -28,6 +28,7 @@ BuildRequires:  nss-softokn-freebl-static >= 3.12.9-2
 BuildRequires:  nss-softokn-devel >= 3.12.9-2, gmp-devel
 BuildRequires:  pkgconfig gawk
 Requires:       nss-softokn-freebl >= 3.12.9-2, nss-softokn >= 3.12.9-2
+Requires:       gmp
 %endif
 
 %description
@@ -93,6 +94,22 @@ make %{?_smp_mflags} install DESTDIR=${RPM_BUILD_ROOT}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.1-19
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Mon Mar 25 2013 Stefan Berger - 0.5.1-18
+- Ran autoreconf for support of aarch64
+- Checking for __arm64__ in code
+
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.1-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.1-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Feb 17 2012 Peter Robinson <pbrobinson@fedoraproject.org> - 0.5.1-15
+- Add dist tag as required by package guidelines
+
 * Fri Jan 27 2012 Stefan Berger - 0.5.1-14
 - fix gcc-4.7 compilation problem
 
