@@ -448,6 +448,10 @@ void TPM_NVDataSensitive_Delete(TPM_NV_DATA_SENSITIVE *tpm_nv_data_sensitive)
 {
     printf(" TPM_NVDataSensitive_Delete:\n");
     if (tpm_nv_data_sensitive != NULL) {
+	/* zero any secrets in NV index data */
+	if (tpm_nv_data_sensitive->data != NULL) {
+	    memset(tpm_nv_data_sensitive->data, 0xff, tpm_nv_data_sensitive->pubInfo.dataSize);
+	}
 	TPM_NVDataPublic_Delete(&(tpm_nv_data_sensitive->pubInfo));
 	TPM_Secret_Delete(tpm_nv_data_sensitive->authValue);
 	free(tpm_nv_data_sensitive->data);
