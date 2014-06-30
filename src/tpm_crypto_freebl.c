@@ -1848,7 +1848,7 @@ void TPM_SHA1Delete(void **context)
     defined(__powerpc64__) || \
     defined(__s390x__) || \
     (defined(__sparc__) && defined(__arch64__)) || \
-    defined(__arm64__)
+    defined(__aarch64__)
 
 #define IS_64
 typedef PRUint64 SHA_HW_t;
