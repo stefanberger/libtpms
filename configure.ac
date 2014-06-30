@@ -3,7 +3,7 @@
 #
 # See the LICENSE file for the license associated with this file.
 
-AC_INIT([libtpms], [0.5.1])
+AC_INIT([libtpms], [0.5.2])
 AC_PREREQ(2.12)
 AC_CONFIG_SRCDIR(Makefile.am)
 AM_CONFIG_HEADER(config.h)

@@ -2,7 +2,7 @@
 
 %define name      @PACKAGE@
 %define version   @VERSION@
-%define release   19
+%define release   1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %define crypto_subsystem  freebl
@@ -96,6 +96,14 @@ make %{?_smp_mflags} install DESTDIR=${RPM_BUILD_ROOT}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Jun 30 2014 Stefan Berger - 0.5.2-1
+- Updated to version 0.5.2
+- coverity fixes
+- fixes for ARM64 using __aarch64__
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.1-20.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.5.1-19
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
