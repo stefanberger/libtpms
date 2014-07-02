@@ -24,7 +24,9 @@ BuildRequires:  openssl-devel
 %else
 BuildRequires:  nss-devel >= 3.12.9-2
 BuildRequires:  nss-softokn-freebl-devel >= 3.12.9-2
+%if 0%{?rhel} > 6
 BuildRequires:  nss-softokn-freebl-static >= 3.12.9-2
+%endif
 BuildRequires:  nss-softokn-devel >= 3.12.9-2, gmp-devel
 BuildRequires:  pkgconfig gawk
 BuildRequires:  automake autoconf libtool bash coreutils
