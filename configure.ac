@@ -77,6 +77,24 @@ freebl)
         AC_DEFINE([USE_FREEBL_CRYPTO_LIBRARY],
                   [1],
                   [use freebl crypto library])
+
+	CFLAGS_save=$CFLAGS
+
+	CFLAGS="$CFLAGS $(nspr-config --cflags)"
+	if test $? -ne 0; then
+		AC_MSG_ERROR(Could not find nspr-config. Is nspr-devel installed?)
+	fi
+	AC_CHECK_HEADERS([nspr4/plbase64.h],[],
+			 AC_MSG_ERROR(You must install nspr-devel))
+
+	CFLAGS="$CFLAGS $(nss-config --cflags)"
+	if test $? -ne 0; then
+		AC_MSG_ERROR(Could not find nss-config. Is nss-devel installed?)
+	fi
+	AC_CHECK_HEADERS([nss3/ssl.h],[],
+			 AC_MSG_ERROR(You must install nss-devel))
+
+	CFLAGS=$CFLAGS_save
 	;;
 openssl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)
