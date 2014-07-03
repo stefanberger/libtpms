@@ -96,6 +96,8 @@ TPM_RESULT TPMLIB_MainInit(void)
 void TPMLIB_Terminate(void)
 {
     TPM_Global_Delete(tpm_instances[0]);
+    free(tpm_instances[0]);
+    tpm_instances[0] = NULL;
 }
 
 
