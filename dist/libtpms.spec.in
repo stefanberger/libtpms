@@ -81,9 +81,11 @@ Libtpms header files and documentation.
         --prefix=/usr \
         --libdir=%{_libdir} \
         %{?_with_openssl} \
-	%{?_enable_debug}
+        %{?_enable_debug}
 
 make %{?_smp_mflags}
+
+%check
 make check
 
 %install
@@ -134,7 +136,7 @@ make %{?_smp_mflags} install DESTDIR=${RPM_BUILD_ROOT}
 * Wed Nov 2 2011 Stefan Berger - 0.5.1-11
 - added (lib)gmp as runtime dependency
 
-* Tue Oct 8 2011 Stefan Berger - 0.5.1-10
+* Sat Oct 8 2011 Stefan Berger - 0.5.1-10
 - internal fixes; callback fixes
 
 * Tue Aug 30 2011 Stefan Berger - 0.5.1-9
@@ -185,7 +187,7 @@ make %{?_smp_mflags} install DESTDIR=${RPM_BUILD_ROOT}
 * Fri Jan 14 2011 Stefan Berger - 0.5.0-1
 - Changes following Fedora review comments
 
-* Tue Dec 02 2010 Stefan Berger
+* Thu Dec 2 2010 Stefan Berger
 - Small tweaks after reading the FedoreCore packaging requirements
 
 * Tue Nov 16 2010 Stefan Berger
