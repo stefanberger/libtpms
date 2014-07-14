@@ -44,6 +44,10 @@
 
 #include "tpm_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TPM_LIBRARY_VER_MAJOR @LIBTPMS_VER_MAJOR@
 #define TPM_LIBRARY_VER_MINOR @LIBTPMS_VER_MINOR@
 #define TPM_LIBRARY_VER_MICRO @LIBTPMS_VER_MICRO@
@@ -124,5 +128,8 @@ enum TPMLIB_BlobType {
 TPM_RESULT TPMLIB_DecodeBlob(const char *data, enum TPMLIB_BlobType type,
                              unsigned char **result, size_t *result_len);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TPM_LIBRARY_H */

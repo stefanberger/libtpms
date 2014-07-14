@@ -46,6 +46,10 @@
 #include <netinet/in.h>         /* for byte order conversions */
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* 2.2.1 Basic data types rev 87 */
 typedef unsigned char  BYTE;            /* Basic byte used to transmit all character fields.  */
 typedef unsigned char  TPM_BOOL;        /* TRUE/FALSE field. TRUE = 0x01, FALSE = 0x00 Use TPM_BOOL
@@ -134,5 +138,9 @@ typedef uint16_t  TPM_TAG;		/* The command and response tags */
 
 typedef unsigned char *	TPM_SYMMETRIC_KEY_TOKEN;	/* abstract symmetric key token */
 typedef unsigned char *	TPM_BIGNUM;			/* abstract bignum */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

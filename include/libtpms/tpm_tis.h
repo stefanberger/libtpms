@@ -42,6 +42,10 @@
 
 #include "tpm_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 TPM_RESULT TPM_IO_Hash_Start(void);
 TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data,
 			    uint32_t data_length);
@@ -49,5 +53,8 @@ TPM_RESULT TPM_IO_Hash_End(void);
 
 TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -42,8 +42,17 @@
 
 #include "tpm_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 TPM_RESULT TPM_Malloc(unsigned char **buffer, uint32_t size);
 TPM_RESULT TPM_Realloc(unsigned char **buffer, uint32_t size);
 void       TPM_Free(unsigned char *buffer);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif
