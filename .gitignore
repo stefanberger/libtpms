@@ -13,6 +13,7 @@ Makefile
 /aclocal.m4
 /autom4te.cache
 /config.h
+/config.h.in
 /config.log
 /config.status
 /libtool
@@ -21,6 +22,7 @@ Makefile
 /ltmain.sh
 /stamp-h1
 /dist/libtpms.spec
+/include/libtpms/tpm_library.h
 /m4/*
 /tests/base64decode
 /tests/freebl_sha1flattensize
