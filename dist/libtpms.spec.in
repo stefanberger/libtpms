@@ -48,7 +48,6 @@ Libtpms header files and documentation.
 
 %files
 %defattr(-, root, root, -)
-%{_libdir}/%{name}.la
 %{_libdir}/%{name}.so.%{version}
 %{_libdir}/%{name}.so.0
 %doc LICENSE README CHANGES
@@ -94,6 +93,8 @@ install -d -m 0755 $RPM_BUILD_ROOT%{_includedir}/libtpms
 install -d -m 0755 $RPM_BUILD_ROOT%{_mandir}/man3
 
 make %{?_smp_mflags} install DESTDIR=${RPM_BUILD_ROOT}
+
+rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 
 %post -p /sbin/ldconfig
 
