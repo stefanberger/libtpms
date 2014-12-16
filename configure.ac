@@ -64,7 +64,8 @@ AC_ARG_WITH([openssl],
                             [AES_set_encrypt_key],
                             [],
                             AC_MSG_ERROR(Faulty openssl crypto library))
-               AC_CHECK_HEADERS([openssl/aes.h])
+               AC_CHECK_HEADERS([openssl/aes.h],[],
+                            AC_MSG_ERROR(Is openssl-devel/libssl-dev installed?))
                AC_MSG_RESULT([Building with openssl crypto library])
                cryptolib=openssl
               ]
@@ -80,21 +81,26 @@ freebl)
 
 	CFLAGS_save=$CFLAGS
 
-	CFLAGS="$CFLAGS $(nspr-config --cflags)"
-	if test $? -ne 0; then
-		AC_MSG_ERROR(Could not find nspr-config. Is nspr-devel installed?)
-	fi
-	AC_CHECK_HEADERS([nspr4/plbase64.h],[],
-			 AC_MSG_ERROR(You must install nspr-devel))
+	AC_CHECK_HEADERS([gmp.h],[],
+			 AC_MSG_ERROR(gmp-devel/libgmp-dev is bad))
 
-	CFLAGS="$CFLAGS $(nss-config --cflags)"
+	CFLAGS="$(nspr-config --cflags)"
 	if test $? -ne 0; then
-		AC_MSG_ERROR(Could not find nss-config. Is nss-devel installed?)
+		AC_MSG_ERROR(Could not find nspr-config. Is nspr-devel/libnspr4-dev installed?)
 	fi
-	AC_CHECK_HEADERS([nss3/ssl.h],[],
-			 AC_MSG_ERROR(You must install nss-devel))
+	CPPFLAGS=$CFLAGS
+	AC_CHECK_HEADERS([plbase64.h],[],
+			 AC_MSG_ERROR(You must install nspr-devel/libnspr4-dev))
 
-	CFLAGS=$CFLAGS_save
+	CFLAGS="$(nss-config --cflags) $CFLAGS"
+	if test $? -ne 0; then
+		AC_MSG_ERROR(Could not find nss-config. Is nss-devel/libnss3-dev installed?)
+	fi
+	CPPFLAGS="$CPPFLAGS $CFLAGS"
+	AC_CHECK_HEADERS([sslerr.h],[],
+			 AC_MSG_ERROR(nss-devel/libnss3-dev is bad))
+
+	CFLAGS="$CFLAGS_save $CFLAGS"
 	;;
 openssl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)

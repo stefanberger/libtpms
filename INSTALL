@@ -51,16 +51,28 @@ openssl.
 To build for openssl, the following development packages must have been
 installed:
 
+Fedora/RedHat:
 - glibc-headers
 - openssl-devel
+
+Ubuntu:
+- libc6-dev
+- libssl-dev
 
 To build for freebl, the following development packages must have been
 installed prior to compilation:
 
+Fedora/RedHat:
 - glibc-headers
 - nss-softokn-freebl-devel (preferably version 3.12.9-2 or newer)
 - nss-softokn-devel (preferably version 3.12.9-2 or newer)
 - gmp-devel
+
+Ubuntu:
+- libc6-dev
+- libgmp-dev
+- libnspr4-dev
+- libnss3-dev (preferably version 3.17.2; needs to have blapi.h)
 
 By default, libtpms is built with the openssl crypto library, which was
 shown above. To build with the freebl crypto library the following command
