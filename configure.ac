@@ -100,6 +100,16 @@ freebl)
 	AC_CHECK_HEADERS([sslerr.h],[],
 			 AC_MSG_ERROR(nss-devel/libnss3-dev is bad))
 
+	# Check for missing headers
+	AC_CHECK_HEADERS([blapi.h],[],
+			 AC_MSG_ERROR(nss-softokn-freebl-devel/libnss3-dev is missing blapi.h))
+	# Check for missing freebl library or missing library functions
+	LIBS_save="$LIBS"
+	LIBS="$(nss-config --libs) $(nspr-config --libs)"
+	AC_SEARCH_LIBS([AES_CreateContext], [freebl],[],
+             AC_MSG_ERROR("Could not find AES_CreateContext(). Is nss-softokn-freebl-devel/libnss3-dev installed?"),
+             [])
+	LIBS="$LIBS_save"
 	CFLAGS="$CFLAGS_save $CFLAGS"
 	;;
 openssl)
