@@ -12,7 +12,8 @@ libtpms_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
                      -version-info $(LIBTPMS_VERSION_INFO) \
                      -no-undefined
 
-libtpms_la_CFLAGS = -include tpm_library_conf.h -I$(top_srcdir)/include/libtpms
+libtpms_la_CFLAGS = -include tpm_library_conf.h -I$(top_srcdir)/include/libtpms \
+                    $(HARDENING_CFLAGS)
 
 #Build 1.2 TPM
 libtpms_la_CFLAGS += -DTPM_V12

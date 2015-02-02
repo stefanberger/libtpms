@@ -134,6 +134,9 @@ AC_C_INLINE
 
 AC_TYPE_SIZE_T
 
+HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
+HARDENING_CFLAGS+="-D_FORTIFY_SOURCE=2"
+AC_SUBST([HARDENING_CFLAGS])
 
 CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
 
