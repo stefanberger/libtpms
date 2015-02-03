@@ -135,7 +135,14 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 
 HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
-HARDENING_CFLAGS+="-D_FORTIFY_SOURCE=2"
+HARDENING_CFLAGS+="-D_FORTIFY_SOURCE=2 "
+dnl Check ld for 'relro' and 'now'
+if $LD --help 2>&1 | $GREP '\-z relro ' > /dev/null; then
+  HARDENING_CFLAGS+="-Wl,-z,relro "
+fi
+if $LD --help 2>&1 | $GREP '\-z now ' > /dev/null; then
+  HARDENING_CFLAGS+="-Wl,-z,now "
+fi
 AC_SUBST([HARDENING_CFLAGS])
 
 CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
