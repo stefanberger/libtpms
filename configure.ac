@@ -121,6 +121,7 @@ openssl)
 	;;
 esac
 
+LT_INIT
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
