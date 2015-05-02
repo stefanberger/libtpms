@@ -51,7 +51,10 @@ fi
 
 debug_defines=
 if test "$DEBUG" == "yes"; then
-	debug_defines="-DTPM_DEBUG -DTPM_VOLATILE_STORE"
+	debug_defines="-DTPM_DEBUG"
+	# Enable the following only if ABSOLUTELY necessary
+	# volatile state will be written and behavior changes
+	#"-DTPM_VOLATILE_STORE"
 fi
 AC_SUBST(DEBUG_DEFINES, $debug_defines)
 
@@ -166,5 +169,16 @@ AC_CONFIG_FILES(Makefile                   \
 		tests/Makefile)
 AC_OUTPUT
 
+if test -z "$enable_debug" ; then
+    enable_debug="no"
+fi
+
+echo
 echo "CFLAGS=$CFLAGS"
 echo "LDFLAGS=$LDFLAGS"
+echo
+echo "Version to build : $PACKAGE_VERSION"
+echo "Crypto library   : $cryptolib"
+echo "Debug build      : $enable_debug"
+echo
+echo
