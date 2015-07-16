@@ -18,6 +18,7 @@ License:        BSD
 Group:          Development/Libraries
 Url:            http://sourceforge.net/projects/ibmswtpm
 Source:         http://bergerstefan.users.sourceforge.net/libtpms/%{name}-%{version}.tar.gz
+Provides:       libtpms-%{crypto_subsystem}
 
 %if %{crypto_subsystem} == openssl
 BuildRequires:  openssl-devel
