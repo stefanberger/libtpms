@@ -29,11 +29,16 @@ BuildRequires:  nss-softokn-freebl-devel >= 3.12.9-2
 BuildRequires:  nss-softokn-freebl-static >= 3.12.9-2
 %endif
 BuildRequires:  nss-softokn-devel >= 3.12.9-2, gmp-devel
+%endif
 BuildRequires:  pkgconfig gawk sed
 BuildRequires:  automake autoconf libtool bash coreutils
+
+%if %{crypto_subsystem} == openssl
+Requires:       openssl
+%else
 Requires:       nss-softokn-freebl >= 3.12.9-2, nss-softokn >= 3.12.9-2
-Requires:       gmp
 %endif
+Requires:       gmp
 
 %description
 A library providing TPM functionality for VMs. Targeted for integration
