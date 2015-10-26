@@ -138,12 +138,11 @@ AC_C_INLINE
 
 AC_TYPE_SIZE_T
 
-AX_CHECK_COMPILE_FLAG(-fstack-protector-strong, ax_support_stack_protector_strong=yes, [])
-AX_CHECK_COMPILE_FLAG(-Wstack-protector, ax_support_stack_protector=yes, [])
-if test x"$ax_support_stack_protector_strong" = x"yes"; then
-  HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
+TMP="$($CC -fstack-protector-strong 2>&1)"
+if echo $TMP | $GREP 'unrecognized command line option' >/dev/null; then
+  HARDENING_CFLAGS="-fstack-protector -Wstack-protector "
 else
-  HARDENING_CFLGAS="-fstack-protector -Wstack-protector"
+  HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
 fi
 
 dnl Must not have -O0 but must have a -O for -D_FORTIFY_SOURCE=2
@@ -181,6 +180,7 @@ fi
 
 echo
 echo "CFLAGS=$CFLAGS"
+echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
 echo "LDFLAGS=$LDFLAGS"
 echo
 echo "Version to build : $PACKAGE_VERSION"
