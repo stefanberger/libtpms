@@ -138,13 +138,19 @@ AC_C_INLINE
 
 AC_TYPE_SIZE_T
 
-HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
+AX_CHECK_COMPILE_FLAG(-fstack-protector-strong, ax_support_stack_protector_strong=yes, [])
+AX_CHECK_COMPILE_FLAG(-Wstack-protector, ax_support_stack_protector=yes, [])
+if test x"$ax_support_stack_protector_strong" = x"yes"; then
+  HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
+else
+  HARDENING_CFLGAS="-fstack-protector -Wstack-protector"
+fi
 
 dnl Must not have -O0 but must have a -O for -D_FORTIFY_SOURCE=2
 TMP1="$(echo $CFLAGS | sed -n 's/.*\(-O0\).*/\1/p')"
 TMP2="$(echo $CFLAGS | sed -n 's/.*\(-O\).*/\1/p')"
 if test -z "$TMP1" && test -n "$TPM2"; then
-    HARDENING_CFLAGS+="-D_FORTIFY_SOURCE=2 "
+  HARDENING_CFLAGS+="-D_FORTIFY_SOURCE=2 "
 fi
 dnl Check ld for 'relro' and 'now'
 if $LD --help 2>&1 | $GREP '\-z relro ' > /dev/null; then
