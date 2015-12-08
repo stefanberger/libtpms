@@ -54,15 +54,15 @@
 # include <openssl/evp.h>
 #endif
 
-#include "tpm_debug.h"
+#include "tpm12/tpm_debug.h"
 #include "tpm_error.h"
-#include "tpm_init.h"
+#include "tpm12/tpm_init.h"
 #include "tpm_library.h"
 #include "tpm_library_intern.h"
-#include "tpm_key.h"
+#include "tpm12/tpm_key.h"
 #include "tpm_memory.h"
-#include "tpm_process.h"
-#include "tpm_startup.h"
+#include "tpm12/tpm_process.h"
+#include "tpm12/tpm_startup.h"
 
 #define ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
