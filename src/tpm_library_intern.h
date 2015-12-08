@@ -41,6 +41,37 @@
 
 #include "tpm_library.h"
 
+#define ROUNDUP(VAL, SIZE) \
+  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
+
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void);
+
+/*
+ * TPM functionality must all be accessible with this interface
+ */
+struct tpm_interface {
+    TPM_RESULT (*MainInit)(void);
+    void (*Terminate)(void);
+    TPM_RESULT (*Process)(unsigned char **respbuffer, uint32_t *resp_size,
+                          uint32_t *respbufsize,
+		          unsigned char *command, uint32_t command_size);
+    TPM_RESULT (*VolatileAllStore)(unsigned char **buffer, uint32_t *buflen);
+    TPM_RESULT (*GetTPMProperty)(enum TPMLIB_TPMProperty prop,
+                                 int *result);
+    TPM_RESULT (*TpmEstablishedGet)(TPM_BOOL *tpmEstablished);
+    TPM_RESULT (*HashStart)(void);
+    TPM_RESULT (*HashData)(const unsigned char *data,
+                           uint32_t data_length);
+    TPM_RESULT (*HashEnd)(void);
+};
+
+extern const struct tpm_interface TPM12Interface;
+
+/* prototypes for TPM 1.2 */
+TPM_RESULT TPM12_IO_Hash_Start(void);
+TPM_RESULT TPM12_IO_Hash_Data(const unsigned char *data,
+			      uint32_t data_length);
+TPM_RESULT TPM12_IO_Hash_End(void);
+TPM_RESULT TPM12_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
 
 #endif /* TPM_LIBRARY_INTERN_H */

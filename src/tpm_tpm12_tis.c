@@ -44,17 +44,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "tpm_constants.h"
-#include "tpm_crypto.h"
-#include "tpm_cryptoh.h"
-#include "tpm_debug.h"
+#include "tpm12/tpm_crypto.h"
+#include "tpm12/tpm_cryptoh.h"
+#include "tpm12/tpm_debug.h"
 #include "tpm_error.h"
-#include "tpm_digest.h"
-#include "tpm_global.h"
-#include "tpm_pcr.h"
-#include "tpm_permanent.h"
-#include "tpm_process.h"
-#include "tpm_transport.h"
+#include "tpm12/tpm_digest.h"
+#include "tpm12/tpm_global.h"
+#include "tpm12/tpm_pcr.h"
+#include "tpm12/tpm_permanent.h"
+#include "tpm12/tpm_platform.h"
+#include "tpm12/tpm_process.h"
+#include "tpm12/tpm_transport.h"
 
 #include "tpm_tis.h"
 
@@ -65,8 +65,7 @@
 
 /* TPM_IO_Hash_Start() implements the LPC bus TPM_HASH_START command
  */
-
-TPM_RESULT TPM_IO_Hash_Start()
+TPM_RESULT TPM12_IO_Hash_Start(void)
 {
     TPM_RESULT		rc = 0;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
@@ -112,7 +111,7 @@ TPM_RESULT TPM_IO_Hash_Start()
     }
     if (rc == 0) {
 	/* (6) Set the TPM_STANY_FLAGS->TOSPresent flag to TRUE (1). */
-	tpm_state->tpm_stany_flags.TOSPresent = TRUE; 
+	tpm_state->tpm_stany_flags.TOSPresent = TRUE;
 	/* (7) Set PCRs per column labeled TPM_HASH_START in Table 5: PCR Initial and Reset Values.
 	   (PCR 17-22 to zero, others unchanged */
 	TPM_PCR_Store(tpm_state->tpm_stclear_data.PCRS, 17, zeroPCR);
@@ -129,7 +128,7 @@ TPM_RESULT TPM_IO_Hash_Start()
     rc = TPM_PermanentAll_NVStore(tpm_state,
 				  altered,
 				  rc);
-    /* 
+    /*
        1) Upon any error in the above steps the TPM:
        a) MUST enter Failure Mode.
        NOTE: Done by caller
@@ -145,9 +144,8 @@ TPM_RESULT TPM_IO_Hash_Start()
 
 /* TPM_IO_Hash_Data() implements the LPC bus TPM_HASH_DATA command
  */
-
-TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data,
-			    uint32_t data_length)
+TPM_RESULT TPM12_IO_Hash_Data(const unsigned char *data,
+			      uint32_t data_length)
 {
     TPM_RESULT 		rc = 0;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
@@ -164,7 +162,7 @@ TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data,
     if (rc == 0) {
 	rc = TPM_SHA1UpdateCmd(tpm_state->sha1_context_tis, data, data_length);
     }
-    /* 
+    /*
        1) Upon any error in the above steps the TPM:
        a) MUST enter Failure Mode.
        NOTE: Done by caller
@@ -180,14 +178,13 @@ TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data,
 
 /* TPM_IO_Hash_End() implements the LPC bus TPM_HASH_END command
  */
-    
-TPM_RESULT TPM_IO_Hash_End()
+TPM_RESULT TPM12_IO_Hash_End(void)
 {
     TPM_RESULT 		rc = 0;
     TPM_PCRVALUE	zeroPCR;
     TPM_DIGEST 		extendDigest;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
-    
+
     printf("\nTPM_IO_Hash_End: Ordinal Entry\n");
     if (rc == 0) {
 	if (tpm_state->sha1_context_tis == NULL) {
@@ -207,14 +204,14 @@ TPM_RESULT TPM_IO_Hash_End()
 	   TPM_PCRVALUE = 0 (i.e., 20 bytes of all zeros). */
 	TPM_Digest_Init(zeroPCR);	/* initial PCR value */
 	/* PCR[Locality 4] = SHA-1( PCR[Locality 4] || tempLoc) */
-	rc = TPM_SHA1(tpm_state->tpm_stclear_data.PCRS[TPM_LOCALITY_4_PCR],	
+	rc = TPM_SHA1(tpm_state->tpm_stclear_data.PCRS[TPM_LOCALITY_4_PCR],
 		      TPM_DIGEST_SIZE, zeroPCR,
 		      TPM_DIGEST_SIZE, extendDigest,
 		      0, NULL);
     }
     /* NOTE: Done by caller
        (4) Clear TPM_ACCESS_x.activeLocality for Locality 4. */
-    /* 
+    /*
        1) Upon any error in the above steps the TPM:
        a) MUST enter Failure Mode.
        NOTE: Done by caller
@@ -229,7 +226,7 @@ TPM_RESULT TPM_IO_Hash_End()
     return rc;
 }
 
-TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
+TPM_RESULT TPM12_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
 {
     TPM_RESULT 		rc = 0;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
@@ -237,7 +234,7 @@ TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
     if (rc == 0) {
 	*tpmEstablished = tpm_state->tpm_permanent_flags.tpmEstablished;
     }
-    /* 
+    /*
        1) Upon any error in the above steps the TPM:
        a) MUST enter Failure Mode.
        NOTE: Done by caller
@@ -251,3 +248,33 @@ TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
     return 0;
 }
 
+TPM_RESULT TPM12_IO_TpmEstablished_Reset(void)
+{
+    TPM_RESULT          returnCode = 0;
+    tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
+    TPM_BOOL		writeAllNV = FALSE;	/* flag to write back flags */
+
+    if (returnCode == TPM_SUCCESS) {
+        returnCode = TPM_IO_GetLocality(&(tpm_state->tpm_stany_flags.localityModifier),
+                                        tpm_state->tpm_number);
+    }
+
+    /* 1. Validate the assertion of locality 3 or locality 4 */
+    if (returnCode == TPM_SUCCESS) {
+	returnCode = TPM_Locality_Check(TPM_LOC_THREE | TPM_LOC_FOUR,  /* BYTE bitmap */
+					tpm_state->tpm_stany_flags.localityModifier);
+    }
+    /* 2. Set TPM_PERMANENT_FLAGS -> tpmEstablished to FALSE */
+    if (returnCode == TPM_SUCCESS) {
+	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
+			       &(tpm_state->tpm_permanent_flags.tpmEstablished),	/* flag */
+			       FALSE);							/* value */
+
+    }
+    /* Store the permanent flags back to NVRAM */
+    returnCode = TPM_PermanentAll_NVStore(tpm_state,
+					  writeAllNV,
+					  returnCode);
+
+    return returnCode;
+}

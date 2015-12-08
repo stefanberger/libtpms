@@ -56,18 +56,9 @@
 
 #include "tpm12/tpm_debug.h"
 #include "tpm_error.h"
-#include "tpm12/tpm_init.h"
 #include "tpm_library.h"
 #include "tpm_library_intern.h"
-#include "tpm12/tpm_key.h"
 #include "tpm_memory.h"
-#include "tpm12/tpm_process.h"
-#include "tpm12/tpm_startup.h"
-
-#define ROUNDUP(VAL, SIZE) \
-  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
-
-
 
 static const struct tags_and_indices {
     const char    *starttag;
@@ -80,7 +71,9 @@ static const struct tags_and_indices {
     },
 };
 
-
+static const struct tpm_interface *const tpm_iface[] = {
+    &TPM12Interface,
+};
 
 uint32_t TPMLIB_GetVersion(void)
 {
@@ -89,17 +82,13 @@ uint32_t TPMLIB_GetVersion(void)
 
 TPM_RESULT TPMLIB_MainInit(void)
 {
-    return TPM_MainInit();
+    return tpm_iface[0]->MainInit();
 }
-
 
 void TPMLIB_Terminate(void)
 {
-    TPM_Global_Delete(tpm_instances[0]);
-    free(tpm_instances[0]);
-    tpm_instances[0] = NULL;
+    tpm_iface[0]->Terminate();
 }
-
 
 /*
  * Send a command to the TPM. The command buffer must hold a well formatted
@@ -114,11 +103,9 @@ TPM_RESULT TPMLIB_Process(unsigned char **respbuffer, uint32_t *resp_size,
                           uint32_t *respbufsize,
 		          unsigned char *command, uint32_t command_size)
 {
-    *resp_size = 0;
-    return TPM_ProcessA(respbuffer, resp_size, respbufsize,
-                        command, command_size);
+    return tpm_iface[0]->Process(respbuffer, resp_size, respbufsize,
+                                 command, command_size);
 }
-
 
 /*
  * Get the volatile state from the TPM. This function will return the
@@ -128,29 +115,8 @@ TPM_RESULT TPMLIB_Process(unsigned char **respbuffer, uint32_t *resp_size,
 TPM_RESULT TPMLIB_VolatileAll_Store(unsigned char **buffer,
                                     uint32_t *buflen)
 {
-    TPM_RESULT rc;
-    TPM_STORE_BUFFER tsb;
-    TPM_Sbuffer_Init(&tsb);
-    uint32_t total;
-
-#ifdef TPM_DEBUG
-    assert(tpm_instances[0] != NULL);
-#endif
-
-    rc = TPM_VolatileAll_Store(&tsb, tpm_instances[0]);
-
-    if (rc == TPM_SUCCESS) {
-        /* caller now owns the buffer and needs to free it */
-        TPM_Sbuffer_GetAll(&tsb, buffer, buflen, &total);
-    } else {
-        TPM_Sbuffer_Delete(&tsb);
-        *buflen = 0;
-        *buffer = NULL;
-    }
-
-    return rc;
+    return tpm_iface[0]->VolatileAllStore(buffer, buflen);
 }
-
 
 /*
  * Get a property of the TPM. The functions currently only
@@ -162,73 +128,35 @@ TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop,
                                  int *result)
 {
     switch (prop) {
-    case  TPMPROP_TPM_RSA_KEY_LENGTH_MAX:
-        *result = TPM_RSA_KEY_LENGTH_MAX;
-        break;
-
     case  TPMPROP_TPM_BUFFER_MAX:
         *result = TPM_BUFFER_MAX;
         break;
-        
-    case  TPMPROP_TPM_KEY_HANDLES:
-        *result = TPM_KEY_HANDLES;
-        break;
-
-    case  TPMPROP_TPM_OWNER_EVICT_KEY_HANDLES:
-        *result = TPM_OWNER_EVICT_KEY_HANDLES;
-        break;
-
-    case  TPMPROP_TPM_MIN_AUTH_SESSIONS:
-        *result = TPM_MIN_AUTH_SESSIONS;
-        break;
-
-    case  TPMPROP_TPM_MIN_TRANS_SESSIONS:
-        *result = TPM_MIN_TRANS_SESSIONS;
-        break;
-
-    case  TPMPROP_TPM_MIN_DAA_SESSIONS:
-        *result = TPM_MIN_DAA_SESSIONS;
-        break;
-
-    case  TPMPROP_TPM_MIN_SESSION_LIST:
-        *result = TPM_MIN_SESSION_LIST;
-        break;
-
-    case  TPMPROP_TPM_MIN_COUNTERS:
-        *result = TPM_MIN_COUNTERS;
-        break;
-
-    case  TPMPROP_TPM_NUM_FAMILY_TABLE_ENTRY_MIN:
-        *result = TPM_NUM_FAMILY_TABLE_ENTRY_MIN;
-        break;
-
-    case  TPMPROP_TPM_NUM_DELEGATE_TABLE_ENTRY_MIN:
-        *result = TPM_NUM_DELEGATE_TABLE_ENTRY_MIN;
-        break;
-
-    case  TPMPROP_TPM_SPACE_SAFETY_MARGIN:
-        *result = TPM_SPACE_SAFETY_MARGIN;
-        break;
-
-    case  TPMPROP_TPM_MAX_NV_SPACE:
-        /* fill up 20 kb.; this provides some safety margin (currently
-           >4Kb) for possible future expansion of this blob */
-        *result = ROUNDUP(TPM_MAX_NV_SPACE, 20 * 1024);
-        break;
-
-    case  TPMPROP_TPM_MAX_SAVESTATE_SPACE:
-        *result = TPM_MAX_SAVESTATE_SPACE;
-        break;
-
-    case  TPMPROP_TPM_MAX_VOLATILESTATE_SPACE:
-        *result = TPM_MAX_VOLATILESTATE_SPACE;
-        break;
 
     default:
-        return TPM_FAIL;
+        return tpm_iface[0]->GetTPMProperty(prop, result);
     }
 
     return TPM_SUCCESS;
+}
+
+TPM_RESULT TPM_IO_Hash_Start(void)
+{
+    return tpm_iface[0]->HashStart();
+}
+
+TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data, uint32_t data_length)
+{
+    return tpm_iface[0]->HashData(data, data_length);
+}
+
+TPM_RESULT TPM_IO_Hash_End(void)
+{
+    return tpm_iface[0]->HashEnd();
+}
+
+TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
+{
+    return tpm_iface[0]->TpmEstablishedGet(tpmEstablished);
 }
 
 static struct libtpms_callbacks libtpms_cbs;
@@ -237,7 +165,6 @@ struct libtpms_callbacks *TPMLIB_GetCallbacks(void)
 {
     return &libtpms_cbs;
 }
-
 
 TPM_RESULT TPMLIB_RegisterCallbacks(struct libtpms_callbacks *callbacks)
 {
@@ -255,7 +182,6 @@ TPM_RESULT TPMLIB_RegisterCallbacks(struct libtpms_callbacks *callbacks)
 
     return TPM_SUCCESS;
 }
-
 
 static int is_base64ltr(char c)
 {
@@ -381,7 +307,6 @@ err_exit:
     return ret;
 }
 
-
 static unsigned char *TPMLIB_GetPlaintext(const char *stream,
                                           const char *starttag,
                                           const char *endtag,
@@ -403,7 +328,6 @@ static unsigned char *TPMLIB_GetPlaintext(const char *stream,
     return plaintext;
 }
 
-
 TPM_RESULT TPMLIB_DecodeBlob(const char *buffer, enum TPMLIB_BlobType type,
                              unsigned char **result, size_t *result_len)
 {
@@ -420,4 +344,3 @@ TPM_RESULT TPMLIB_DecodeBlob(const char *buffer, enum TPMLIB_BlobType type,
 
     return res;
 }
-

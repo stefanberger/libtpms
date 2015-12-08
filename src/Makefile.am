@@ -77,10 +77,11 @@ libtpms_tpm12_la_SOURCES = \
 	tpm12/tpm_storage.c \
 	tpm12/tpm_ticks.c \
 	tpm12/tpm_time.c \
-	tpm12/tpm_tis.c \
 	tpm12/tpm_transport.c \
 	tpm12/tpm_ver.c \
-	tpm12/tpm_svnrevision.c
+	tpm12/tpm_svnrevision.c \
+	tpm_tpm12_interface.c \
+	tpm_tpm12_tis.c
 
 noinst_HEADERS = \
 	tpm12/tpm_admin.h \
