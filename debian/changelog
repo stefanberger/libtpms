@@ -1,0 +1,5 @@
+libtpms (0.6.0) UNRELEASED; urgency=medium
+
+  * Initial Release.
+
+ -- Stefan Berger <stefanb@linux.vnet.ibm.com>  Tue, 12 Jan 2016 11:28:33 -0500

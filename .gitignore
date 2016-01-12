@@ -26,3 +26,9 @@ Makefile
 /m4/*
 /tests/base64decode
 /tests/freebl_sha1flattensize
+/debian/*debhelper*
+/debian/*substvars
+/debian/files
+/debian/libtpms
+/debian/libtpms-dev
+/debian/tmp
