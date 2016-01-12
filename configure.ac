@@ -138,11 +138,12 @@ AC_C_INLINE
 
 AC_TYPE_SIZE_T
 
+# Some version of gcc fail with -Wstack-protector enabled
 TMP="$($CC -fstack-protector-strong 2>&1)"
 if echo $TMP | $GREP 'unrecognized command line option' >/dev/null; then
-  HARDENING_CFLAGS="-fstack-protector -Wstack-protector "
+  HARDENING_CFLAGS="-fstack-protector "
 else
-  HARDENING_CFLAGS="-fstack-protector-strong -Wstack-protector "
+  HARDENING_CFLAGS="-fstack-protector-strong "
 fi
 
 dnl Must not have -O0 but must have a -O for -D_FORTIFY_SOURCE=2
