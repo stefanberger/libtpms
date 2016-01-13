@@ -1,19 +1,22 @@
 Source: libtpms
 Maintainer: Stefan Berger <stefanb@linux.vnet.ibm.com>
-Section: misc
+Section: libs
 Priority: optional
 Build-Depends: automake, autoconf, libtool, libssl-dev, sed,
  make, coreutils, pkg-config, gawk, sed, bash, dh-exec
 
 Package: libtpms
 Architecture: any
+Multi-Arch: same
 Depends: openssl,
 	 ${shlibs:Depends},
 	 ${misc:Pre-Depends}
-Description: A library providing TPM functionality.
- A library providing TPM functionality.
+Description: TPM emulation library
+ Libtpms is a library that provides TPM functionality.
 
 Package: libtpms-dev
 Architecture: all
 Section: libdevel
 Description: libtpms header files and man pages
+ The libtpms-dev package provides header files and man pages for the
+ functions provided by libtpms.
