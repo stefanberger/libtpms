@@ -143,10 +143,15 @@ TPM_IO_TpmEstablished_Get  \- get the value of the TPMEstablished flag
 \&\fB#include <libtpms/tpm_error.h\fR>
 .PP
 \&\fB\s-1TPM_RESULT\s0 TPM_IO_TpmEstablished_Get(\s-1TPM_BOOL\s0\fR *\fItpmEstablished\fR\fB);\fR
+.PP
+\&\fB\s-1TPM_RESULT\s0 TPM_IO_TpmEstablished_Reset(void);\fR
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 The \fB\f(BITPM_IO_TpmEstablished_Get()\fB\fR function returns the value of the 
 TPMEstablished flag of the \s-1TPM\s0's permanent data.
+.PP
+The \fB\f(BITPM_IO_TpmEstablished_Reset()\fB\fR function resets the TPMEstablished
+flag.
 .SH "ERRORS"
 .IX Header "ERRORS"
 .IP "\fB\s-1TPM_SUCCESS\s0\fR" 4
@@ -155,6 +160,9 @@ The function completed sucessfully.
 .IP "\fB\s-1TPM_FAIL\s0\fR" 4
 .IX Item "TPM_FAIL"
 General failure.
+.IP "\fB\s-1TPM_BAD_LOCALITY\s0\fR" 4
+.IX Item "TPM_BAD_LOCALITY"
+The locality used for resetting the flags is wrong.
 .PP
 For a complete list of \s-1TPM\s0 error codes please consult the include file
 \&\fBlibtpms/tpm_error.h\fR

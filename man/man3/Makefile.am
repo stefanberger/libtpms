@@ -8,6 +8,8 @@
 man3_PODS = \
 	TPM_IO_Hash_Start.pod \
 	TPM_IO_TpmEstablished_Get.pod \
+	TPMLIB_CancelCommand.pod \
+	TPMLIB_ChooseTPMVersion.pod \
 	TPMLIB_DecodeBlob.pod \
 	TPMLIB_GetInfo.pod \
 	TPMLIB_GetTPMProperty.pod \
@@ -29,12 +31,15 @@ man3_MANS = \
 	TPMLIB_GetState.3 \
 	TPMLIB_SetDebugPrefix.3 \
 	TPMLIB_SetDebugLevel.3 \
+	TPM_IO_TpmEstablished_Reset.3 \
 	TPMLIB_Terminate.3 \
 	TPM_Realloc.3
 
 man3_MANS += \
 	TPM_IO_Hash_Start.3 \
 	TPM_IO_TpmEstablished_Get.3 \
+	TPMLIB_CancelCommand.3 \
+	TPMLIB_ChooseTPMVersion.3 \
 	TPMLIB_DecodeBlob.3 \
 	TPMLIB_GetInfo.3 \
 	TPMLIB_GetTPMProperty.3 \
