@@ -333,3 +333,32 @@ _rpc__Shutdown(
 #endif
     return;
 }
+
+
+// Extensions
+static BOOL tpmEstablished;
+
+void
+_rpc__Signal_SetTPMEstablished(void)
+{
+    // If TPM is power off, reject this signal
+    if(!s_isPowerOn) return;
+
+    tpmEstablished = TRUE;
+}
+
+void
+_rpc__Signal_ResetTPMEstablished(void)
+{
+    // If TPM is power off, reject this signal
+    if(!s_isPowerOn) return;
+
+    /* check for locality 3 or 4 already done by caller */
+    tpmEstablished = FALSE;
+}
+
+BOOL
+_rpc__Signal_GetTPMEstablished(void)
+{
+    return tpmEstablished;
+}
