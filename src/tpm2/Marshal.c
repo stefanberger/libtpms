@@ -335,7 +335,7 @@ UINT16
 TPMA_SESSION_Marshal(TPMA_SESSION *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal(source, buffer, size);
+    written += UINT8_Marshal((UINT8 *)source, buffer, size);
     return written;
 }
 
@@ -345,7 +345,7 @@ UINT16
 TPMA_LOCALITY_Marshal(TPMA_LOCALITY *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal(source, buffer, size);
+    written += UINT8_Marshal((UINT8 *)source, buffer, size);
     return written;
 }
 
@@ -2088,7 +2088,7 @@ UINT16
 TPMA_NV_Marshal(TPMA_NV *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT32_Marshal(source, buffer, size);
+    written += UINT32_Marshal((UINT32 *)source, buffer, size);
     return written;
 }
 
