@@ -349,8 +349,8 @@
 #define  CONTEXT_ENCRYPT_ALGORITHM      AES
 #define  NV_CLOCK_UPDATE_INTERVAL       12
 #define  NUM_POLICY_PCR                 1
-#define  MAX_COMMAND_SIZE               4096
-#define  MAX_RESPONSE_SIZE              4096
+#define  MAX_COMMAND_SIZE               TPM_BUFFER_MAX
+#define  MAX_RESPONSE_SIZE              TPM_BUFFER_MAX
 #define  ORDERLY_BITS                   8
 #define  MAX_SYM_DATA                   128
 #define  MAX_RNG_ENTROPY_SIZE           64

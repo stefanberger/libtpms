@@ -161,9 +161,8 @@ if $LD --help 2>&1 | $GREP '\-z now ' > /dev/null; then
 fi
 AC_SUBST([HARDENING_CFLAGS])
 
-dnl FIXME: removed -Werror
 if test "$test_CFLAGS" != set; then
-  CFLAGS="$CFLAGS -Wall -Wreturn-type -Wsign-compare"
+  CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
 fi
 
 AC_CONFIG_FILES(Makefile                   \
