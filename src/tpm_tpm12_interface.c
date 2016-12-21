@@ -96,6 +96,12 @@ TPM_RESULT TPM12_VolatileAllStore(unsigned char **buffer,
     return rc;
 }
 
+TPM_RESULT TPM12_CancelCommand(void)
+{
+    return TPM_FAIL; /* not supported */
+}
+
+
 TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
                                 int *result)
 {
@@ -182,8 +188,10 @@ const struct tpm_interface TPM12Interface = {
     .Terminate = TPM12_Terminate,
     .Process = TPM12_Process,
     .VolatileAllStore = TPM12_VolatileAllStore,
+    .CancelCommand = TPM12_CancelCommand,
     .GetTPMProperty = TPM12_GetTPMProperty,
     .TpmEstablishedGet = TPM12_IO_TpmEstablished_Get,
+    .TpmEstablishedReset = TPM12_IO_TpmEstablished_Reset,
     .HashStart = TPM12_IO_Hash_Start,
     .HashData = TPM12_IO_Hash_Data,
     .HashEnd = TPM12_IO_Hash_End,

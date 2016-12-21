@@ -63,6 +63,13 @@ extern "C" {
 
 uint32_t TPMLIB_GetVersion(void);
 
+/* TPM implementation version to choose */
+typedef enum TPMLIB_TPMVersion {
+    TPMLIB_TPM_VERSION_1_2,
+    TPMLIB_TPM_VERSION_2,
+} TPMLIB_TPMVersion;
+
+TPM_RESULT TPMLIB_ChooseTPMVersion(TPMLIB_TPMVersion ver);
 TPM_RESULT TPMLIB_MainInit(void);
 
 void TPMLIB_Terminate(void);
@@ -72,6 +79,8 @@ TPM_RESULT TPMLIB_Process(unsigned char **respbuffer, uint32_t *resp_size,
                           unsigned char *command, uint32_t command_size);
 
 TPM_RESULT TPMLIB_VolatileAll_Store(unsigned char **buffer, uint32_t *buflen);
+
+TPM_RESULT TPMLIB_CancelCommand(void);
 
 enum TPMLIB_TPMProperty {
     TPMPROP_TPM_RSA_KEY_LENGTH_MAX = 1,

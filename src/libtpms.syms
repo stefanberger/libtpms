@@ -23,6 +23,9 @@ LIBTPMS_0.5.1 {
 
 LIBTPMS_0.6.0 {
     global:
+	TPM_IO_TpmEstablished_Reset;
+	TPMLIB_CancelCommand;
+	TPMLIB_ChooseTPMVersion;
         TPMLIB_SetBufferSize;
 	TPMLIB_SetDebugFD;
 	TPMLIB_SetDebugLevel;

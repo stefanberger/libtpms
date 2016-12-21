@@ -1,11 +1,10 @@
 /********************************************************************************/
 /*                                                                              */
-/*                           TPM TIS I/O					*/
-/*                           Written by Ken Goldman                             */
+/*                              TPM TIS I/O					*/
+/*                           Written by Stefan Berger                           */
 /*                     IBM Thomas J. Watson Research Center                     */
-/*            $Id: tpm_tis.h 4285 2011-01-17 21:27:05Z kgoldman $            */
 /*                                                                              */
-/* (c) Copyright IBM Corporation 2006, 2011.					*/
+/* (c) Copyright IBM Corporation 2015.						*/
 /*										*/
 /* All rights reserved.								*/
 /* 										*/
@@ -37,25 +36,52 @@
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.		*/
 /********************************************************************************/
 
-#ifndef TPM_TIS_H
-#define TPM_TIS_H
+#include <config.h>
 
-#include "tpm_types.h"
+#include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* tpm2/TPM_Types.h gives type definition clashes with TPM 1.2 headers */
+typedef uint32_t UINT32;
 
-TPM_RESULT TPM_IO_Hash_Start(void);
-TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data,
-			    uint32_t data_length);
-TPM_RESULT TPM_IO_Hash_End(void);
+#include "tpm_library_intern.h"
+#include "tpm_error.h"
+#include "tpm2/TpmBuildSwitches.h"
+#include "tpm2/_TPM_Hash_Start_fp.h"
+#include "tpm2/_TPM_Hash_Data_fp.h"
+#include "tpm2/_TPM_Hash_End_fp.h"
 
-TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
-TPM_RESULT TPM_IO_TpmEstablished_Reset(void);
+TPM_RESULT TPM2_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
+{
+    // FIXME: Missing
+    *tpmEstablished = FALSE;
 
-#ifdef __cplusplus
+    return TPM_SUCCESS;
 }
-#endif
 
-#endif
+TPM_RESULT TPM2_IO_TpmEstablished_Reset(void)
+{
+    // FIXME: Missing
+    return TPM_SUCCESS;
+}
+
+TPM_RESULT TPM2_IO_Hash_Start(void)
+{
+    _TPM_Hash_Start();
+
+    return TPM_SUCCESS;
+}
+
+TPM_RESULT TPM2_IO_Hash_Data(const unsigned char *data,
+                             uint32_t data_length)
+{
+    _TPM_Hash_Data(data_length, (unsigned char *)data);
+
+    return TPM_SUCCESS;
+}
+
+TPM_RESULT TPM2_IO_Hash_End(void)
+{
+    _TPM_Hash_End();
+
+    return TPM_SUCCESS;
+}

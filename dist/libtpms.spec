@@ -5,8 +5,8 @@
 %define release   1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
-%if "%{crypto_subsystem}" == ""
-%define crypto_subsystem freebl 
+%if "%{?crypto_subsystem}" == ""
+%define crypto_subsystem openssl
 %endif
 
 # Valid build types are 'production' or 'debug'
@@ -83,7 +83,11 @@ Libtpms header files and documentation.
 %endif
 
 ./bootstrap.sh
+%if %{build_type} == debug
+CFLAGS=-O0
+%endif
 %configure \
+	--with-tpm2 \
         --disable-static \
         --prefix=/usr \
         --libdir=%{_libdir} \
