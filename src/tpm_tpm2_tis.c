@@ -49,24 +49,44 @@ typedef uint32_t UINT32;
 #include "tpm2/_TPM_Hash_Start_fp.h"
 #include "tpm2/_TPM_Hash_Data_fp.h"
 #include "tpm2/_TPM_Hash_End_fp.h"
+#include "tpm2/TpmTcpProtocol.h"
+#include "tpm2/Platform_fp.h"
+#include "tpm2/Simulator_fp.h"
 
 TPM_RESULT TPM2_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
 {
-    // FIXME: Missing
-    *tpmEstablished = FALSE;
+    *tpmEstablished = _rpc__Signal_GetTPMEstablished();
 
     return TPM_SUCCESS;
 }
 
 TPM_RESULT TPM2_IO_TpmEstablished_Reset(void)
 {
-    // FIXME: Missing
-    return TPM_SUCCESS;
+    TPM_RESULT ret = TPM_SUCCESS;
+    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+    TPM_MODIFIER_INDICATOR locality = 0;
+    uint32_t tpm_number = 0;
+
+    if (cbs->tpm_io_getlocality) {
+        cbs->tpm_io_getlocality(&locality, tpm_number);
+    }
+
+    _plat__LocalitySet(locality);
+
+    if (locality == 3 || locality == 4) {
+        _rpc__Signal_ResetTPMEstablished();
+    } else {
+        ret = TPM_BAD_LOCALITY;
+    }
+
+    return ret;
 }
 
 TPM_RESULT TPM2_IO_Hash_Start(void)
 {
     _TPM_Hash_Start();
+
+    _rpc__Signal_SetTPMEstablished();
 
     return TPM_SUCCESS;
 }

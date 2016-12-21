@@ -333,3 +333,26 @@ _rpc__Shutdown(
 #endif
     return;
 }
+
+
+// Extensions
+static BOOL tpmEstablished;
+
+void
+_rpc__Signal_SetTPMEstablished(void)
+{
+    tpmEstablished = TRUE;
+}
+
+void
+_rpc__Signal_ResetTPMEstablished(void)
+{
+    /* check for locality 3 or 4 already done by caller */
+    tpmEstablished = FALSE;
+}
+
+BOOL
+_rpc__Signal_GetTPMEstablished(void)
+{
+    return tpmEstablished;
+}
