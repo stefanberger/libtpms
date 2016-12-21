@@ -196,5 +196,10 @@ main(
      int              argc,
      char            *argv[]
      );
+// Extensions:
+void _rpc__Signal_SetTPMEstablished(void);
+BOOL _rpc__Signal_GetTPMEstablished(void);
+void _rpc__Signal_ResetTPMEstablished(void);
+
 #endif  // _SIMULATOR_FP_H_
 
