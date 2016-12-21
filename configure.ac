@@ -124,6 +124,18 @@ openssl)
 	;;
 esac
 
+AC_ARG_WITH([tpm2],
+	AC_HELP_STRING([--with-tpm2],
+		       [build libtpms with TPM2 support (experimental)]),
+	AC_MSG_RESULT([Building with TPM2 support])
+	if test "x$cryptolib" = "xfreebl"; then
+		AC_MSG_ERROR([TPM2 support requires openssl crypto library])
+	fi
+	AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
+	AM_CONDITIONAL(WITH_TPM2, true),
+	AM_CONDITIONAL(WITH_TPM2, false)
+)
+
 LT_INIT
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -180,14 +192,24 @@ AC_OUTPUT
 if test -z "$enable_debug" ; then
     enable_debug="no"
 fi
+if test -z "$with_tpm2"; then
+    with_tpm2=no
+fi
+if test "x$with_tpm2" = "xyes"; then
+    # remove the following to compile anyway; created vTPM state
+    # will not be compatible
+    AC_MSG_ERROR([Not compiling with TPM2 support])
+    exit 1
+fi
 
 echo
 echo "CFLAGS=$CFLAGS"
 echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
 echo "LDFLAGS=$LDFLAGS"
 echo
-echo "Version to build : $PACKAGE_VERSION"
-echo "Crypto library   : $cryptolib"
-echo "Debug build      : $enable_debug"
+echo "Version to build  : $PACKAGE_VERSION"
+echo "Crypto library    : $cryptolib"
+echo "Debug build       : $enable_debug"
+echo "With TPM2 support : $with_tpm2"
 echo
 echo

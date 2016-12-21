@@ -45,6 +45,9 @@
 #define ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
 
+#define _STRINGIFY(x) #x
+#define STRINGIFY(x) _STRINGIFY(x)
+
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void);
 
 /*
@@ -59,10 +62,12 @@ struct tpm_interface {
                           uint32_t *respbufsize,
 		          unsigned char *command, uint32_t command_size);
     TPM_RESULT (*VolatileAllStore)(unsigned char **buffer, uint32_t *buflen);
+    TPM_RESULT (*CancelCommand)(void);
     TPM_RESULT (*GetTPMProperty)(enum TPMLIB_TPMProperty prop,
                                  int *result);
     char *(*GetInfo)(enum TPMLIB_InfoFlags flags);
     TPM_RESULT (*TpmEstablishedGet)(TPM_BOOL *tpmEstablished);
+    TPM_RESULT (*TpmEstablishedReset)(void);
     TPM_RESULT (*HashStart)(void);
     TPM_RESULT (*HashData)(const unsigned char *data,
                            uint32_t data_length);
@@ -76,6 +81,7 @@ struct tpm_interface {
 };
 
 extern const struct tpm_interface TPM12Interface;
+extern const struct tpm_interface TPM2Interface;
 
 /* prototypes for TPM 1.2 */
 TPM_RESULT TPM12_IO_Hash_Start(void);
@@ -86,12 +92,24 @@ TPM_RESULT TPM12_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
 
 uint32_t TPM12_GetBufferSize(void);
 
+TPM_RESULT TPM12_IO_TpmEstablished_Reset(void);
+
 /* internal logging function */
 int TPMLIB_LogPrintf(const char *format, ...);
 void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...);
 
 #define TPMLIB_LogTPM12Error(format, ...) \
      TPMLIB_LogPrintfA(~0, "libtpms/tpm12: "format, __VA_ARGS__)
+#define TPMLIB_LogTPM2Error(format, ...) \
+     TPMLIB_LogPrintfA(~0, "libtpms/tpm2: "format, __VA_ARGS__)
+
+/* prototypes for TPM2 */
+TPM_RESULT TPM2_IO_Hash_Start(void);
+TPM_RESULT TPM2_IO_Hash_Data(const unsigned char *data,
+                             uint32_t data_length);
+TPM_RESULT TPM2_IO_Hash_End(void);
+TPM_RESULT TPM2_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
+TPM_RESULT TPM2_IO_TpmEstablished_Reset(void);
 
 struct sized_buffer {
     unsigned char *buffer;

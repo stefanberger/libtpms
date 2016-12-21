@@ -77,6 +77,10 @@ static const struct tags_and_indices {
 
 static const struct tpm_interface *const tpm_iface[] = {
     &TPM12Interface,
+#if WITH_TPM2
+    &TPM2Interface,
+#endif
+    NULL,
 };
 
 static int debug_fd = -1;
@@ -85,19 +89,50 @@ static char *debug_prefix = NULL;
 
 static struct sized_buffer cached_blobs[TPMLIB_STATE_SAVE_STATE + 1];
 
+static int tpmvers_choice = 0; /* default is TPM1.2 */
+static TPM_BOOL tpmvers_locked = FALSE;
+
 uint32_t TPMLIB_GetVersion(void)
 {
     return TPM_LIBRARY_VERSION;
 }
 
+TPM_RESULT TPMLIB_ChooseTPMVersion(TPMLIB_TPMVersion ver)
+{
+    TPM_RESULT ret = TPM_SUCCESS;
+
+    /* TPMLIB_Terminate will reset previous choice */
+    if (tpmvers_locked)
+        return TPM_FAIL;
+
+    switch (ver) {
+    case TPMLIB_TPM_VERSION_1_2:
+        tpmvers_choice = 0; // entry 0 in tpm_iface
+        break;
+    case TPMLIB_TPM_VERSION_2:
+#if WITH_TPM2
+        tpmvers_choice = 1; // entry 1 in tpm_iface
+        break;
+#endif
+    default:
+        ret = TPM_FAIL;
+    }
+
+    return ret;
+}
+
 TPM_RESULT TPMLIB_MainInit(void)
 {
-    return tpm_iface[0]->MainInit();
+    tpmvers_locked = TRUE;
+
+    return tpm_iface[tpmvers_choice]->MainInit();
 }
 
 void TPMLIB_Terminate(void)
 {
-    tpm_iface[0]->Terminate();
+    tpm_iface[tpmvers_choice]->Terminate();
+
+    tpmvers_locked = FALSE;
 }
 
 /*
@@ -113,7 +148,8 @@ TPM_RESULT TPMLIB_Process(unsigned char **respbuffer, uint32_t *resp_size,
                           uint32_t *respbufsize,
 		          unsigned char *command, uint32_t command_size)
 {
-    return tpm_iface[0]->Process(respbuffer, resp_size, respbufsize,
+    return tpm_iface[tpmvers_choice]->Process(respbuffer,
+                                 resp_size, respbufsize,
                                  command, command_size);
 }
 
@@ -125,7 +161,15 @@ TPM_RESULT TPMLIB_Process(unsigned char **respbuffer, uint32_t *resp_size,
 TPM_RESULT TPMLIB_VolatileAll_Store(unsigned char **buffer,
                                     uint32_t *buflen)
 {
-    return tpm_iface[0]->VolatileAllStore(buffer, buflen);
+    return tpm_iface[tpmvers_choice]->VolatileAllStore(buffer, buflen);
+}
+
+/*
+ *  Have the TPM cancel an ongoing command
+ */
+TPM_RESULT TPMLIB_CancelCommand(void)
+{
+    return tpm_iface[tpmvers_choice]->CancelCommand();
 }
 
 /*
@@ -143,7 +187,7 @@ TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop,
         break;
 
     default:
-        return tpm_iface[0]->GetTPMProperty(prop, result);
+        return tpm_iface[tpmvers_choice]->GetTPMProperty(prop, result);
     }
 
     return TPM_SUCCESS;
@@ -151,7 +195,7 @@ TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop,
 
 char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags)
 {
-    return tpm_iface[0]->GetInfo(flags);
+    return tpm_iface[tpmvers_choice]->GetInfo(flags);
 }
 
 TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
@@ -168,35 +212,42 @@ TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
 
 TPM_RESULT TPM_IO_Hash_Start(void)
 {
-    return tpm_iface[0]->HashStart();
+    return tpm_iface[tpmvers_choice]->HashStart();
 }
 
 TPM_RESULT TPM_IO_Hash_Data(const unsigned char *data, uint32_t data_length)
 {
-    return tpm_iface[0]->HashData(data, data_length);
+    return tpm_iface[tpmvers_choice]->HashData(data, data_length);
 }
 
 TPM_RESULT TPM_IO_Hash_End(void)
 {
-    return tpm_iface[0]->HashEnd();
+    return tpm_iface[tpmvers_choice]->HashEnd();
 }
 
 TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
 {
-    return tpm_iface[0]->TpmEstablishedGet(tpmEstablished);
+    return tpm_iface[tpmvers_choice]->TpmEstablishedGet(tpmEstablished);
+}
+
+TPM_RESULT TPM_IO_TpmEstablished_Reset(void)
+{
+    return tpm_iface[tpmvers_choice]->TpmEstablishedReset();
 }
 
 uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size,
                               uint32_t *min_size,
                               uint32_t *max_size)
 {
-    return tpm_iface[0]->SetBufferSize(wanted_size, min_size, max_size);
+    return tpm_iface[tpmvers_choice]->SetBufferSize(wanted_size,
+                                                    min_size,
+                                                    max_size);
 }
 
 TPM_RESULT TPMLIB_ValidateState(enum TPMLIB_StateType st,
                                 unsigned int flags)
 {
-    return tpm_iface[0]->ValidateState(st, flags);
+    return tpm_iface[tpmvers_choice]->ValidateState(st, flags);
 }
 
 static struct libtpms_callbacks libtpms_cbs;

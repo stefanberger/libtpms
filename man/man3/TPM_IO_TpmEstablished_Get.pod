@@ -1,6 +1,8 @@
 =head1 NAME
 
-TPM_IO_TpmEstablished_Get  - get the value of the TPMEstablished flag
+TPM_IO_TpmEstablished_Get   - get the value of the TPMEstablished flag
+
+TPM_IO_TpmEstablished_Reset - reset the TPMEstablished flag
 
 =head1 LIBRARY
 
@@ -16,10 +18,15 @@ B<#include <libtpms/tpm_error.h>>
 
 B<TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL> *I<tpmEstablished>B<);>
 
+B<TPM_RESULT TPM_IO_TpmEstablished_Reset(void);>
+
 =head1 DESCRIPTION
 
 The B<TPM_IO_TpmEstablished_Get()> function returns the value of the 
 TPMEstablished flag of the TPM's permanent data. 
+
+The B<TPM_IO_TpmEstablished_Reset()> function resets the TPMEstablished
+flag.
 
 =head1 ERRORS
 
@@ -32,6 +39,10 @@ The function completed sucessfully.
 =item B<TPM_FAIL>
 
 General failure.
+
+=item B<TPM_BAD_LOCALITY>
+
+The locality used for resetting the flags is wrong.
 
 =back
 
