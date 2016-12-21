@@ -6,6 +6,10 @@
 
 lib_LTLIBRARIES=libtpms.la
 
+common_CFLAGS = -include tpm_library_conf.h \
+                -I$(top_srcdir)/include/libtpms \
+                $(HARDENING_CFLAGS)
+
 #
 # TPM1.2
 #
@@ -16,9 +20,7 @@ libtpms_la_LIBADD = libtpms_tpm12.la
 
 libtpms_tpm12_la_LIBADD =
 
-libtpms_tpm12_la_CFLAGS = -include tpm_library_conf.h \
-                          -I$(top_srcdir)/include/libtpms \
-                          $(HARDENING_CFLAGS)
+libtpms_tpm12_la_CFLAGS = $(common_CFLAGS)
 
 #Build 1.2 TPM
 libtpms_tpm12_la_CFLAGS += -DTPM_V12
@@ -154,6 +156,353 @@ endif # LIBTPMS_USE_OPENSSL
 
 endif # LIBTPMS_USE_FREEBL
 
+# TPM2
+#
+
+noinst_LTLIBRARIES += libtpms_tpm2.la
+
+libtpms_la_LIBADD += libtpms_tpm2.la
+
+libtpms_tpm2_la_LIBADD =
+
+libtpms_tpm2_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
+                          -version-info $(LIBTPMS_VERSION_INFO) \
+                          -no-undefined
+
+libtpms_tpm2_la_CFLAGS = $(common_CFLAGS) \
+                         -Wstrict-aliasing=3
+
+libtpms_tpm2_la_CFLAGS += -D_POSIX_
+libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
+
+libtpms_tpm2_la_SOURCES = \
+	tpm2/AlgorithmCap.c \
+	tpm2/AlgorithmTests.c \
+	tpm2/AsymmetricCommands.c \
+	tpm2/AttestationCommands.c \
+	tpm2/Attest_spt.c \
+	tpm2/AuditCommands.c \
+	tpm2/Bits.c \
+	tpm2/BnConvert.c \
+	tpm2/BnEccData.c \
+	tpm2/BnMath.c \
+	tpm2/BnMemory.c \
+	tpm2/Cancel.c \
+	tpm2/CapabilityCommands.c \
+	tpm2/Clock.c \
+	tpm2/ClockCommands.c \
+	tpm2/CommandAudit.c \
+	tpm2/CommandCodeAttributes.c \
+	tpm2/CommandDispatcher.c \
+	tpm2/ContextCommands.c \
+	tpm2/Context_spt.c \
+	tpm2/CryptSelfTest.c \
+	tpm2/CryptUtil.c \
+	tpm2/DA.c \
+	tpm2/DictionaryCommands.c \
+	tpm2/DuplicationCommands.c \
+	tpm2/EACommands.c \
+	tpm2/EncryptDecrypt_spt.c \
+	tpm2/Entity.c \
+	tpm2/Entropy.c \
+	tpm2/EphemeralCommands.c \
+	tpm2/ExecCommand.c \
+	tpm2/Global.c \
+	tpm2/Handle.c \
+	tpm2/HashCommands.c \
+	tpm2/Hierarchy.c \
+	tpm2/HierarchyCommands.c \
+	tpm2/IntegrityCommands.c \
+	tpm2/IoBuffers.c \
+	tpm2/Locality.c \
+	tpm2/LocalityPlat.c \
+	tpm2/ManagementCommands.c \
+	tpm2/Manufacture.c \
+	tpm2/Marshal.c \
+	tpm2/MathOnByteBuffers.c \
+	tpm2/Memory.c \
+	tpm2/NVCommands.c \
+	tpm2/NVDynamic.c \
+	tpm2/NVMem.c \
+	tpm2/NVReserved.c \
+	tpm2/NV_spt.c \
+	tpm2/Object.c \
+	tpm2/ObjectCommands.c \
+	tpm2/Object_spt.c \
+	tpm2/PCR.c \
+	tpm2/PlatformData.c \
+	tpm2/Policy_spt.c \
+	tpm2/Power.c \
+	tpm2/PowerPlat.c \
+	tpm2/PP.c \
+	tpm2/PPPlat.c \
+	tpm2/PrimeData.c \
+	tpm2/PropertyCap.c \
+	tpm2/RandomCommands.c \
+	tpm2/Response.c \
+	tpm2/ResponseCodeProcessing.c \
+	tpm2/RunCommand.c \
+	tpm2/Session.c \
+	tpm2/SessionCommands.c \
+	tpm2/SessionProcess.c \
+	tpm2/SigningCommands.c \
+	tpm2/StartupCommands.c \
+	tpm2/SymmetricCommands.c \
+	tpm2/TestingCommands.c \
+	tpm2/Ticket.c \
+	tpm2/Time.c \
+	tpm2/TpmSizeChecks.c \
+	tpm2/TPMCmdp.c \
+	tpm2/TpmFail.c \
+	tpm2/Unique.c \
+	tpm2/Unmarshal.c \
+	tpm2/Vendor_TCG_Test.c
+
+noinst_HEADERS += \
+	tpm2/crypto/CryptDes_fp.h \
+	tpm2/crypto/CryptEcc.h \
+	tpm2/crypto/CryptEccKeyExchange_fp.h \
+	tpm2/crypto/CryptEccMain_fp.h \
+	tpm2/crypto/CryptEccSignature_fp.h \
+	tpm2/crypto/CryptHashData.h \
+	tpm2/crypto/CryptHash_fp.h \
+	tpm2/crypto/CryptHash.h \
+	tpm2/crypto/CryptPrime_fp.h \
+	tpm2/crypto/CryptPrimeSieve_fp.h \
+	tpm2/crypto/CryptRand_fp.h \
+	tpm2/crypto/CryptRand.h \
+	tpm2/crypto/CryptRsa_fp.h \
+	tpm2/crypto/CryptRsa.h \
+	tpm2/crypto/CryptSelfTest_fp.h \
+	tpm2/crypto/CryptSym_fp.h \
+	tpm2/crypto/CryptTest.h \
+	tpm2/crypto/CryptUtil_fp.h \
+	tpm2/ActivateCredential_fp.h \
+	tpm2/AlgorithmCap_fp.h \
+	tpm2/AlgorithmTests_fp.h \
+	tpm2/Attest_spt_fp.h \
+	tpm2/BaseTypes.h \
+	tpm2/Bits_fp.h \
+	tpm2/Capabilities.h \
+	tpm2/CertifyCreation_fp.h \
+	tpm2/Certify_fp.h \
+	tpm2/ChangeEPS_fp.h \
+	tpm2/ChangePPS_fp.h \
+	tpm2/ClearControl_fp.h \
+	tpm2/Clear_fp.h \
+	tpm2/ClockRateAdjust_fp.h \
+	tpm2/ClockSet_fp.h \
+	tpm2/CommandAttributeData.h \
+	tpm2/CommandAttributes.h \
+	tpm2/CommandAudit_fp.h \
+	tpm2/CommandCodeAttributes_fp.h \
+	tpm2/CommandDispatchData.h \
+	tpm2/CommandDispatcher_fp.h \
+	tpm2/Commit_fp.h \
+	tpm2/CompilerDependencies.h \
+	tpm2/ContextLoad_fp.h \
+	tpm2/ContextSave_fp.h \
+	tpm2/Context_spt_fp.h \
+	tpm2/Create_fp.h \
+	tpm2/CreateLoaded_fp.h \
+	tpm2/CreatePrimary_fp.h \
+	tpm2/CryptSelfTest_fp.h \
+	tpm2/CryptUtil_fp.h \
+	tpm2/DA_fp.h \
+	tpm2/DictionaryAttackLockReset_fp.h \
+	tpm2/DictionaryAttackParameters_fp.h \
+	tpm2/Duplicate_fp.h \
+	tpm2/EccTestData.h \
+	tpm2/ECC_Parameters_fp.h \
+	tpm2/ECDH_KeyGen_fp.h \
+	tpm2/ECDH_ZGen_fp.h \
+	tpm2/EC_Ephemeral_fp.h \
+	tpm2/EncryptDecrypt2_fp.h \
+	tpm2/EncryptDecrypt_fp.h \
+	tpm2/EncryptDecrypt_spt.h \
+	tpm2/EncryptDecrypt_spt_fp.h \
+	tpm2/Entity_fp.h \
+	tpm2/EventSequenceComplete_fp.h \
+	tpm2/EvictControl_fp.h \
+	tpm2/ExecCommand_fp.h \
+	tpm2/FlushContext_fp.h \
+	tpm2/GetCapability_fp.h \
+	tpm2/GetCommandAuditDigest_fp.h \
+	tpm2/GetRandom_fp.h \
+	tpm2/GetSessionAuditDigest_fp.h \
+	tpm2/GetTestResult_fp.h \
+	tpm2/GetTime_fp.h \
+	tpm2/Global.h \
+	tpm2/GpMacros.h \
+	tpm2/Handle_fp.h \
+	tpm2/Hash_fp.h \
+	tpm2/HashSequenceStart_fp.h \
+	tpm2/HashTestData.h \
+	tpm2/HierarchyChangeAuth_fp.h \
+	tpm2/HierarchyControl_fp.h \
+	tpm2/Hierarchy_fp.h \
+	tpm2/HMAC_fp.h \
+	tpm2/HMAC_Start_fp.h \
+	tpm2/Implementation.h \
+	tpm2/Import_fp.h \
+	tpm2/IncrementalSelfTest_fp.h \
+	tpm2/InternalRoutines.h \
+	tpm2/IoBuffers_fp.h \
+	tpm2/LoadExternal_fp.h \
+	tpm2/Load_fp.h \
+	tpm2/Locality_fp.h \
+	tpm2/MakeCredential_fp.h \
+	tpm2/Manufacture_fp.h \
+	tpm2/Marshal_fp.h \
+	tpm2/MathOnByteBuffers_fp.h \
+	tpm2/Memory_fp.h \
+	tpm2/NV_Certify_fp.h \
+	tpm2/NV_ChangeAuth_fp.h \
+	tpm2/NV_DefineSpace_fp.h \
+	tpm2/NVDynamic_fp.h \
+	tpm2/NV_Extend_fp.h \
+	tpm2/NV_GlobalWriteLock_fp.h \
+	tpm2/NV.h \
+	tpm2/NV_Increment_fp.h \
+	tpm2/NV_Read_fp.h \
+	tpm2/NV_ReadLock_fp.h \
+	tpm2/NV_ReadPublic_fp.h \
+	tpm2/NVReserved_fp.h \
+	tpm2/NV_SetBits_fp.h \
+	tpm2/NV_spt_fp.h \
+	tpm2/NV_UndefineSpace_fp.h \
+	tpm2/NV_UndefineSpaceSpecial_fp.h \
+	tpm2/NV_Write_fp.h \
+	tpm2/NV_WriteLock_fp.h \
+	tpm2/ObjectChangeAuth_fp.h \
+	tpm2/Object_fp.h \
+	tpm2/Object_spt_fp.h \
+	tpm2/PCR_Allocate_fp.h \
+	tpm2/PCR_Event_fp.h \
+	tpm2/PCR_Extend_fp.h \
+	tpm2/PCR_fp.h \
+	tpm2/PCR_Read_fp.h \
+	tpm2/PCR_Reset_fp.h \
+	tpm2/PCR_SetAuthPolicy_fp.h \
+	tpm2/PCR_SetAuthValue_fp.h \
+	tpm2/PlatformData.h \
+	tpm2/Platform_fp.h \
+	tpm2/PolicyAuthorize_fp.h \
+	tpm2/PolicyAuthorizeNV_fp.h \
+	tpm2/PolicyAuthValue_fp.h \
+	tpm2/PolicyCommandCode_fp.h \
+	tpm2/PolicyCounterTimer_fp.h \
+	tpm2/PolicyCpHash_fp.h \
+	tpm2/PolicyDuplicationSelect_fp.h \
+	tpm2/PolicyGetDigest_fp.h \
+	tpm2/PolicyLocality_fp.h \
+	tpm2/PolicyNameHash_fp.h \
+	tpm2/PolicyNV_fp.h \
+	tpm2/PolicyNvWritten_fp.h \
+	tpm2/PolicyOR_fp.h \
+	tpm2/PolicyPassword_fp.h \
+	tpm2/PolicyPCR_fp.h \
+	tpm2/PolicyPhysicalPresence_fp.h \
+	tpm2/PolicyRestart_fp.h \
+	tpm2/PolicySecret_fp.h \
+	tpm2/PolicySigned_fp.h \
+	tpm2/Policy_spt_fp.h \
+	tpm2/PolicyTemplate_fp.h \
+	tpm2/PolicyTicket_fp.h \
+	tpm2/Power_fp.h \
+	tpm2/PP_Commands_fp.h \
+	tpm2/PP_fp.h \
+	tpm2/PRNG_TestVectors.h \
+	tpm2/PropertyCap_fp.h \
+	tpm2/Quote_fp.h \
+	tpm2/ReadClock_fp.h \
+	tpm2/ReadPublic_fp.h \
+	tpm2/ResponseCodeProcessing_fp.h \
+	tpm2/Response_fp.h \
+	tpm2/Rewrap_fp.h \
+	tpm2/RsaTestData.h \
+	tpm2/RSA_Decrypt_fp.h \
+	tpm2/RSA_Encrypt_fp.h \
+	tpm2/SelfTest.h \
+	tpm2/SelfTest_fp.h \
+	tpm2/SequenceComplete_fp.h \
+	tpm2/SequenceUpdate_fp.h \
+	tpm2/Session_fp.h \
+	tpm2/SessionProcess_fp.h \
+	tpm2/SetAlgorithmSet_fp.h \
+	tpm2/SetCommandCodeAuditStatus_fp.h \
+	tpm2/SetPrimaryPolicy_fp.h \
+	tpm2/Shutdown_fp.h \
+	tpm2/Sign_fp.h \
+	tpm2/Simulator_fp.h \
+	tpm2/StartAuthSession_fp.h \
+	tpm2/Startup_fp.h \
+	tpm2/StirRandom_fp.h \
+	tpm2/SupportLibraryFunctionPrototypes_fp.h \
+	tpm2/SymmetricTest.h \
+	tpm2/SymmetricTestData.h \
+	tpm2/swap.h \
+	tpm2/TcpServerPosix_fp.h \
+	tpm2/TestParms_fp.h \
+	tpm2/Ticket_fp.h \
+	tpm2/Time_fp.h \
+	tpm2/TPMB.h \
+	tpm2/TpmBuildSwitches.h \
+	tpm2/TpmError.h \
+	tpm2/TpmFail_fp.h \
+	tpm2/Tpm.h \
+	tpm2/_TPM_Hash_Data_fp.h \
+	tpm2/_TPM_Hash_End_fp.h \
+	tpm2/_TPM_Hash_Start_fp.h \
+	tpm2/_TPM_Init_fp.h \
+	tpm2/TpmSizeChecks_fp.h \
+	tpm2/TpmTcpProtocol.h \
+	tpm2/TpmTypes.h \
+	tpm2/Unmarshal_fp.h \
+	tpm2/Unseal_fp.h \
+	tpm2/VendorString.h \
+	tpm2/Vendor_TCG_Test_fp.h \
+	tpm2/VerifySignature_fp.h \
+	tpm2/ZGen_2Phase_fp.h
+
+if LIBTPMS_USE_OPENSSL
+
+libtpms_tpm2_la_SOURCES += \
+	tpm2/crypto/openssl/CryptDes.c \
+	tpm2/crypto/openssl/CryptEccKeyExchange.c \
+	tpm2/crypto/openssl/CryptEccMain.c \
+	tpm2/crypto/openssl/CryptEccSignature.c \
+	tpm2/crypto/openssl/CryptHash.c \
+	tpm2/crypto/openssl/CryptHashData.c \
+	tpm2/crypto/openssl/CryptPrime.c \
+	tpm2/crypto/openssl/CryptPrimeSieve.c \
+	tpm2/crypto/openssl/CryptRand.c \
+	tpm2/crypto/openssl/CryptRsa.c \
+	tpm2/crypto/openssl/CryptSym.c \
+	tpm2/crypto/openssl/TpmToOsslDesSupport.c \
+	tpm2/crypto/openssl/TpmToOsslMath.c \
+	tpm2/crypto/openssl/TpmToOsslSupport.c
+
+noinst_HEADERS += \
+	tpm2/crypto/openssl/BnConvert_fp.h \
+	tpm2/crypto/openssl/BnMath_fp.h \
+	tpm2/crypto/openssl/BnMemory_fp.h \
+	tpm2/crypto/openssl/BnValues.h \
+	tpm2/crypto/openssl/LibSupport.h \
+	tpm2/crypto/openssl/TpmToOsslDesSupport_fp.h \
+	tpm2/crypto/openssl/TpmToOsslHash.h \
+	tpm2/crypto/openssl/TpmToOsslMath_fp.h \
+	tpm2/crypto/openssl/TpmToOsslMath.h \
+	tpm2/crypto/openssl/TpmToOsslSupport_fp.h \
+	tpm2/crypto/openssl/TpmToOsslSym.h
+
+libtpms_tpm2_la_CFLAGS += \
+	-I tpm2 \
+	-I tpm2/crypto \
+	-I tpm2/crypto/openssl
+
+endif # LIBTPMS_USE_OPENSSL
+
 #
 # Library API layer
 #
@@ -161,8 +510,7 @@ endif # LIBTPMS_USE_FREEBL
 libtpms_la_SOURCES = \
 	tpm_library.c
 
-libtpms_la_CFLAGS = \
-	$(libtpms_tpm12_la_CFLAGS)
+libtpms_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_la_LDFLAGS = -Wl,--version-script=$(srcdir)/libtpms.syms \
                      -version-info $(LIBTPMS_VERSION_INFO) \
