@@ -128,6 +128,10 @@ enum TPMLIB_BlobType {
 TPM_RESULT TPMLIB_DecodeBlob(const char *data, enum TPMLIB_BlobType type,
                              unsigned char **result, size_t *result_len);
 
+void TPMLIB_SetDebugFD(int fd);
+void TPMLIB_SetDebugLevel(unsigned int level);
+TPM_RESULT TPMLIB_SetDebugPrefix(const char *prefix);
+
 #ifdef __cplusplus
 }
 #endif

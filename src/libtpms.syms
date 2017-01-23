@@ -12,6 +12,9 @@ LIBTPMS_0.5.1 {
 	TPMLIB_MainInit;
 	TPMLIB_Process;
 	TPMLIB_RegisterCallbacks;
+	TPMLIB_SetDebugFD;
+	TPMLIB_SetDebugLevel;
+	TPMLIB_SetDebugPrefix;
 	TPMLIB_Terminate;
 	TPMLIB_VolatileAll_Store;
 	TPM_Free;

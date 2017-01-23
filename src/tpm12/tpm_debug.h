@@ -41,13 +41,14 @@
 #define TPM_DEBUG_H
 
 #include "tpm_types.h"
+#include "tpm_library_intern.h"
 
 /* prototypes */
 
 void TPM_PrintFour(const char *string, const unsigned char* buff);
 void TPM_PrintAll(const char *string, const unsigned char* buff, uint32_t length);
 
-
+#if 0
 #ifndef TPM_DEBUG       /* if debug is turned off */
 
 /* dummy function to match the printf prototype */
@@ -61,5 +62,8 @@ extern int swallow_rc;
 #define TPM_PrintFour(arg1, arg2)
 
 #endif  /* TPM_DEBUG */
+#endif
+
+#define printf(...) TPMLIB_LogPrintf(__VA_ARGS__);
 
 #endif

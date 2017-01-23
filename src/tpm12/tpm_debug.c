@@ -43,9 +43,9 @@
 #include "tpm_load.h"
 
 #include "tpm_debug.h"
+#undef printf
 
-
-#ifndef TPM_DEBUG
+#if 0
 
 int swallow_rc = 0;
 
@@ -62,7 +62,7 @@ int tpm_swallow_printf_args(const char *format, ...)
 void TPM_PrintFour(const char *string, const unsigned char* buff)
 {
     if (buff != NULL) {
-        printf("%s %02x %02x %02x %02x\n",
+        TPMLIB_LogPrintf("%s %02x %02x %02x %02x\n",
                string,
                buff[0],
                buff[1],
@@ -70,7 +70,7 @@ void TPM_PrintFour(const char *string, const unsigned char* buff)
                buff[3]);
     }
     else {
-        printf("%s null\n", string);
+        TPMLIB_LogPrintf("%s null\n", string);
     }
     return;
 }
@@ -83,18 +83,23 @@ void TPM_PrintFour(const char *string, const unsigned char* buff)
 void TPM_PrintAll(const char *string, const unsigned char* buff, uint32_t length)
 {
     uint32_t i;
+    int indent;
+
     if (buff != NULL) {
-        printf("%s length %u\n ", string, length);
+        indent = TPMLIB_LogPrintf("%s length %u\n ", string, length);
+        if (indent < 0)
+            return;
+
         for (i = 0 ; i < length ; i++) {
             if (i && !( i % 16 )) {
-                printf("\n ");
+                TPMLIB_LogPrintfA(0, "\n ");
             }
-            printf("%.2X ",buff[i]);
+            TPMLIB_LogPrintfA(!(i % 16) ? indent : 0, "%.2X ", buff[i]);
         }
-        printf("\n");
+        TPMLIB_LogPrintfA(0, "\n");
     }
     else {
-        printf("%s null\n", string);
+        TPMLIB_LogPrintf("%s null\n", string);
     }
     return;
 }
