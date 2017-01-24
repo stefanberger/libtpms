@@ -405,8 +405,8 @@ int TPMLIB_LogPrintf(const char *format, ...)
     }
 
     if (debug_prefix)
-        vdprintf(debug_fd, debug_prefix, NULL);
-    vdprintf(debug_fd, buffer, NULL);
+        dprintf(debug_fd, debug_prefix);
+    dprintf(debug_fd, buffer);
 
     return i;
 }
