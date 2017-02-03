@@ -428,7 +428,7 @@ void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
             indent = sizeof(spaces) - 1;
         memset(spaces, ' ', indent);
         spaces[indent] = 0;
-        vdprintf(debug_fd, spaces, NULL);
+        dprintf(debug_fd, "%s", spaces);
     }
 
     va_start(args, format);
