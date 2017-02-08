@@ -75,6 +75,10 @@ static const struct tpm_interface *const tpm_iface[] = {
     &TPM12Interface,
 };
 
+static int debug_fd = -1;
+static unsigned debug_level = 0;
+static char *debug_prefix = NULL;
+
 uint32_t TPMLIB_GetVersion(void)
 {
     return TPM_LIBRARY_VERSION;
@@ -343,4 +347,90 @@ TPM_RESULT TPMLIB_DecodeBlob(const char *buffer, enum TPMLIB_BlobType type,
     }
 
     return res;
+}
+
+void TPMLIB_SetDebugFD(int fd)
+{
+    debug_fd = fd;
+}
+
+void TPMLIB_SetDebugLevel(unsigned level)
+{
+    debug_level = level;
+}
+
+TPM_RESULT TPMLIB_SetDebugPrefix(const char *prefix)
+{
+    free(debug_prefix);
+
+    if (prefix) {
+        debug_prefix = strdup(prefix);
+        if (!debug_prefix)
+            return TPM_FAIL;
+    } else {
+        debug_prefix = NULL;
+    }
+
+    return TPM_SUCCESS;
+}
+
+int TPMLIB_LogPrintf(const char *format, ...)
+{
+    unsigned level = debug_level, i;
+    va_list args;
+    char buffer[256];
+    int n;
+
+    if (!debug_fd || !debug_level)
+        return -1;
+
+    va_start(args, format);
+    n = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    if (n < 0 || n >= (int)sizeof(buffer))
+        return -1;
+
+    level--;
+
+    i = 0;
+    while (1) {
+        if (buffer[i] == 0)
+            return -1;
+        if (buffer[i] != ' ')
+            break;
+        if (i == level)
+            return -1;
+        i++;
+    }
+
+    if (debug_prefix)
+        dprintf(debug_fd, debug_prefix);
+    dprintf(debug_fd, buffer);
+
+    return i;
+}
+
+/*
+ * TPMLIB_LogPrintfA: Printf to the logfd without indentation check
+ */
+void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
+{
+    va_list args;
+    char spaces[20];
+
+    if (!debug_fd || !debug_level)
+        return;
+
+    if (indent) {
+        if (indent > sizeof(spaces) - 1)
+            indent = sizeof(spaces) - 1;
+        memset(spaces, ' ', indent);
+        spaces[indent] = 0;
+        vdprintf(debug_fd, spaces, NULL);
+    }
+
+    va_start(args, format);
+    vdprintf(debug_fd, format, args);
+    va_end(args);
 }

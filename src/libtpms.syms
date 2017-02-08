@@ -20,3 +20,12 @@ LIBTPMS_0.5.1 {
     local:
 	*;
 };
+
+LIBTPMS_0.6.0 {
+    global:
+	TPMLIB_SetDebugFD;
+	TPMLIB_SetDebugLevel;
+	TPMLIB_SetDebugPrefix;
+    local:
+	*;
+} LIBTPMS_0.5.1;

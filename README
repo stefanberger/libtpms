@@ -70,6 +70,9 @@ How to contribute?
 ------------------
 The mailing list for libtpms is libtpms@googlegroups.com.
 
+For patch submissions, please use a Signed-off-by: <your email> to indicate
+agreement to the DCO1.1.txt.
+
 
 Maintainers
 -----------
