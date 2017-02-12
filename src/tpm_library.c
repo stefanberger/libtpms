@@ -43,6 +43,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <ctype.h>
 
 #ifdef USE_FREEBL_CRYPTO_LIBRARY
