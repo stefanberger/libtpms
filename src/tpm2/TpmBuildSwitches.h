@@ -76,7 +76,7 @@
 #define USE_BN_ECC_DATA
 /* Comment these out as needed */
 #ifndef SIMULATION
-#  define SIMULATION
+//#  define SIMULATION
 #endif
 /* Define this to run the function that checks the format compatibility for the chosen big number
    math library. Not all ports use this. */
@@ -203,7 +203,7 @@
    are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
    either direction (MSb0() or LSb0()). For an MSB0+MSb0() machine this value should be defined */
 #ifndef NO_BIT_FIELD_STRUCTURES
-//#   define NO_BIT_FIELD_STRUCTURES
+#   define NO_BIT_FIELD_STRUCTURES
 #endif
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
