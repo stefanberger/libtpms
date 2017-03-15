@@ -149,7 +149,9 @@ _rpc__ForceFailureMode(
 		       void
 		       )
 {
+#ifdef SIMULATION
     SetForceFailureMode();
+#endif
 }
 /* D.4.3.5. _rpc__Signal_PhysicalPresenceOn() */
 /* This function is called to simulate activation of the physical presence pin. */
