@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
-/*			     Written by Ken Goldman				*/
+/*			  Marshalling and unmarshalling of state		*/
+/*			     Written by Stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,59 +54,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef NVRESERVED_FP_H
-#define NVRESERVED_FP_H
+#ifndef STATE_MARSHAL_H
+#define STATE_MARSHAL_H
 
-#include "NVMarshal.h"
+#include "BaseTypes.h"
 
-void
-NvCheckState(
-	     void
-	     );
-BOOL
-NvCommit(
-	 void
-	 );
-BOOL
-NvPowerOn(
-	  void
-	  );
-void
-NvManufacture(
-	      void
-	      );
-void
-NvRead(
-       void            *outBuffer,     // OUT: buffer to receive data
-       UINT32           nvOffset,      // IN: offset in NV of value
-       UINT32           size           // IN: size of the value to read
-       );
-void
-NvWrite(
-	UINT32           nvOffset,      // IN: location in NV to receive data
-	UINT32           size,          // IN: size of the data to move
-	void            *inBuffer       // IN: location containing data to write
-	);
-void
-NvUpdatePersistent(
-		   UINT32           offset,        // IN: location in PERMANENT_DATA to be updated
-		   UINT32           size,          // IN: size of the value
-		   void            *buffer         // IN: the new data
-		   );
-void
-NvClearPersistent(
-		  UINT32           offset,        // IN: the offset in the PERMANENT_DATA
-		  //     structure to be cleared (zeroed)
-		  UINT32           size           // IN: number of bytes to clear
-		  );
-void
-NvReadPersistent(
-		 void
-		 );
+/*
+ * we keep these in a separate file to avoid symbol clashes when
+ * included from the interface code.
+ */
+void VolatileLoad(void);
+UINT16 VolatileSave(BYTE **buffer, INT32 *size);
 
+#endif /* STATE_MARSHAL_H */
 
-#endif

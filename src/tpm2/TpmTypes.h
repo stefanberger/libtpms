@@ -1792,10 +1792,12 @@ typedef union {
 } TPM2B_ID_OBJECT;
 /* Table 2:202 - Definition of TPM_NV_INDEX Bits */
 #ifndef NO_BIT_FIELD_STRUCTURES
+#if 0
 typedef struct TPM_NV_INDEX{
     unsigned    index           : 24;
     unsigned    RH_NV           : 8 ;
 } TPM_NV_INDEX;
+#endif
 /* This is the initializer for a TPMA_NV_INDEX structure. */
 #define TPM_NV_INDEX_INITIALIZER(tpm_nv_index_index, tpm_nv_index_RH_NV) \
     {tpm_nv_index_index, tpm_nv_index_RH_NV}

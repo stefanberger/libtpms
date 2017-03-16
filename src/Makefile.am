@@ -262,7 +262,11 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Unmarshal.c \
 	tpm2/Vendor_TCG_Test.c \
 	tpm_tpm2_interface.c \
-	tpm_tpm2_tis.c
+	tpm_tpm2_tis.c \
+	\
+	tpm2/NVMarshal.c \
+	tpm2/StateMarshal.c \
+	tpm2/Volatile.c
 
 noinst_HEADERS += \
 	tpm2/crypto/CryptDes_fp.h \
@@ -469,7 +473,11 @@ noinst_HEADERS += \
 	tpm2/VendorString.h \
 	tpm2/Vendor_TCG_Test_fp.h \
 	tpm2/VerifySignature_fp.h \
-	tpm2/ZGen_2Phase_fp.h
+	tpm2/ZGen_2Phase_fp.h \
+	\
+	tpm2/NVMarshal.h \
+	tpm2/StateMarshal.h \
+	tpm2/Volatile.h
 
 if LIBTPMS_USE_OPENSSL
 
@@ -513,7 +521,7 @@ endif # LIBTPMS_USE_OPENSSL
 # we do not want to loose these modifications
 check:
 	n=`grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	exp=16; \
+	exp=18; \
 	if test $$n -ne $$exp; then \
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \

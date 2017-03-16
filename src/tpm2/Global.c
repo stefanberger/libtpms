@@ -115,7 +115,7 @@ TPMA_SESSION         s_attributes[MAX_SESSION_NUM];
 TPM_HANDLE           s_associatedHandles[MAX_SESSION_NUM];
 TPM2B_NONCE          s_nonceCaller[MAX_SESSION_NUM];
 TPM2B_AUTH           s_inputAuthValues[MAX_SESSION_NUM];
-SESSION             *s_usedSessions[MAX_SESSION_NUM];
+//SESSION             *s_usedSessions[MAX_SESSION_NUM];
 UINT32               s_encryptSessionIndex;
 UINT32               s_decryptSessionIndex;
 UINT32               s_auditSessionIndex;

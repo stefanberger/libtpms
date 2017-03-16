@@ -356,7 +356,7 @@ typedef struct PCR_SAVE
 typedef struct PCR_POLICY
 {
     TPMI_ALG_HASH       hashAlg[NUM_POLICY_PCR_GROUP];
-    TPM2B_DIGEST        a;
+//    TPM2B_DIGEST        a;
     TPM2B_DIGEST        policy[NUM_POLICY_PCR_GROUP];
 } PCR_POLICY;
 #endif
@@ -848,6 +848,8 @@ extern STATE_RESET_DATA gr;
 /* 5.10.13 Global Macro Definitions */
 /* The NV_READ_PERSISTENT and NV_WRITE_PERSISTENT macros are used to access members of the
    PERSISTENT_DATA structure in NV. */
+#if 0
+
 #define NV_READ_PERSISTENT(to, from)					\
     NvRead(&to, offsetof(PERSISTENT_DATA, from), sizeof(to))
 #define NV_WRITE_PERSISTENT(to, from)					\
@@ -855,6 +857,20 @@ extern STATE_RESET_DATA gr;
 #define CLEAR_PERSISTENT(item)						\
     NvClearPersistent(offsetof(PERSISTENT_DATA, item), sizeof(gp.item))
 #define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
+
+#else
+
+#define NV_WRITE_PERSISTENT(to, from)					\
+    do {								\
+        PERSISTENT_DATA mgp;						\
+        NvRead_PERSISTENT_DATA(&mgp, NV_PERSISTENT_DATA, sizeof(mgp));  \
+        memcpy(&mgp.to, &from, sizeof(mgp.to));				\
+        NvWrite_PERSISTENT_DATA(NV_PERSISTENT_DATA, sizeof(mgp), &mgp);	\
+    } while (0)
+
+#define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
+
+#endif
 /* At the start of command processing, the index of the command is determined. This index value is
    used to access the various data tables that contain per-command information. There are multiple
    options for how the per-command tables can be implemented. This is resolved in

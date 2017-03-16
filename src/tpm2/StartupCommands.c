@@ -62,6 +62,7 @@
 /* 9.2	_TPM_Init */
 #include "Tpm.h"
 #include "_TPM_Init_fp.h"
+#include "StateMarshal.h"
 // This function is used to process a _TPM_Init indication.
 LIB_EXPORT void
 _TPM_Init(
@@ -100,9 +101,11 @@ _TPM_Init(
 	    NvReadPersistent();
 	    // Load the orderly data (clock and DRBG state).
 	    // If this is not done here, things break
-	    NvRead(&go, NV_ORDERLY_DATA, sizeof(go));
+	    NvRead_ORDERLY_DATA(&go, NV_ORDERLY_DATA, sizeof(go));
 	    // Start clock. Need to do this after NV has been restored.
 	    TimePowerOn();
+
+            VolatileLoad();
 	}
     return;
 }
@@ -174,13 +177,13 @@ TPM2_Startup(
 	{
 	    // Always read the data that is only cleared on a Reset because this is not
 	    // a reset
-	    NvRead(&gr, NV_STATE_RESET_DATA, sizeof(gr));
+	    NvRead_STATE_RESET_DATA(&gr, NV_STATE_RESET_DATA, sizeof(gr));
 	    if(in->startupType == TPM_SU_STATE)
 	        {
 	            // If this is a startup STATE (a Resume) need to read the data
 	            // that is cleared on a startup CLEAR because this is not a Reset
 	            // or Restart.
-	            NvRead(&gc, NV_STATE_CLEAR_DATA, sizeof(gc));
+	            NvRead_STATE_CLEAR_DATA(&gc, NV_STATE_CLEAR_DATA, sizeof(gc));
 	            startup = SU_RESUME;
 	        }
 	    else
@@ -294,12 +297,12 @@ TPM2_Shutdown(
     go.time = g_time;
 #endif
     // Save all orderly data
-    NvWrite(NV_ORDERLY_DATA, sizeof(ORDERLY_DATA), &go);
+    NvWrite_ORDERLY_DATA(NV_ORDERLY_DATA, sizeof(ORDERLY_DATA), &go);
     if(in->shutdownType == TPM_SU_STATE)
 	{
 	    // Save STATE_RESET and STATE_CLEAR data
-	    NvWrite(NV_STATE_CLEAR_DATA, sizeof(STATE_CLEAR_DATA), &gc);
-	    NvWrite(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
+	    NvWrite_STATE_CLEAR_DATA(NV_STATE_CLEAR_DATA, sizeof(STATE_CLEAR_DATA), &gc);
+	    NvWrite_STATE_RESET_DATA(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
 	    // Save the startup flags for resume
 	    if(g_DrtmPreStartup)
 		gp.orderlyState = TPM_SU_STATE | PRE_STARTUP_FLAG;
@@ -309,7 +312,7 @@ TPM2_Shutdown(
     else if(in->shutdownType == TPM_SU_CLEAR)
 	{
 	    // Save STATE_RESET data
-	    NvWrite(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
+	    NvWrite_STATE_RESET_DATA(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
 	}
     else
 	FAIL(FATAL_ERROR_INTERNAL);
