@@ -407,14 +407,14 @@ TPM2_Clear(
     // Reset clock
     go.clock = 0;
     go.clockSafe = YES;
-    NvWrite(NV_ORDERLY_DATA, sizeof(ORDERLY_DATA), &go);
+    NvWrite_ORDERLY_DATA(NV_ORDERLY_DATA, sizeof(ORDERLY_DATA), &go);
     // Reset counters
     gp.resetCount = gr.restartCount = gr.clearCount = 0;
     gp.auditCounter = 0;
     // Save persistent data changes to NV
     // Note: since there are so many changes to the persistent data structure, the
     // entire PERSISTENT_DATA structure is written as a unit
-    NvWrite(NV_PERSISTENT_DATA, sizeof(PERSISTENT_DATA), &gp);
+    NvWrite_PERSISTENT_DATA(NV_PERSISTENT_DATA, sizeof(PERSISTENT_DATA), &gp);
     // Reset the PCR authValues (this does not change the PCRs)
     PCR_ClearAuth();
     // Bump the PCR counter

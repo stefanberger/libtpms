@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
-/*			     Written by Ken Goldman				*/
+/*			  Marshalling and unmarshalling of state		*/
+/*			     Written by Stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,59 +54,80 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef NVRESERVED_FP_H
-#define NVRESERVED_FP_H
+#include <endian.h>
+#include <string.h>
 
+#include "config.h"
+
+#include "assert.h"
 #include "NVMarshal.h"
+#include "Volatile.h"
 
-void
-NvCheckState(
-	     void
-	     );
-BOOL
-NvCommit(
-	 void
-	 );
-BOOL
-NvPowerOn(
-	  void
-	  );
-void
-NvManufacture(
-	      void
-	      );
-void
-NvRead(
-       void            *outBuffer,     // OUT: buffer to receive data
-       UINT32           nvOffset,      // IN: offset in NV of value
-       UINT32           size           // IN: size of the value to read
-       );
-void
-NvWrite(
-	UINT32           nvOffset,      // IN: location in NV to receive data
-	UINT32           size,          // IN: size of the data to move
-	void            *inBuffer       // IN: location containing data to write
-	);
-void
-NvUpdatePersistent(
-		   UINT32           offset,        // IN: location in PERMANENT_DATA to be updated
-		   UINT32           size,          // IN: size of the value
-		   void            *buffer         // IN: the new data
-		   );
-void
-NvClearPersistent(
-		  UINT32           offset,        // IN: the offset in the PERMANENT_DATA
-		  //     structure to be cleared (zeroed)
-		  UINT32           size           // IN: number of bytes to clear
-		  );
-void
-NvReadPersistent(
-		 void
-		 );
+#include "tpm_library_intern.h"
 
+TPM_RC
+VolatileState_Load(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    BYTE hash[SHA1_DIGEST_SIZE], acthash[SHA1_DIGEST_SIZE];
+    UINT16 hashAlg = TPM_ALG_SHA1;
 
-#endif
+    if (rc == TPM_RC_SUCCESS) {
+        CryptHashBlock(hashAlg, *size - sizeof(hash), *buffer,
+                       sizeof(acthash), acthash);
+        rc = VolatileState_Unmarshal(buffer, size);
+        if (rc != TPM_RC_SUCCESS)
+            TPMLIB_LogTPM2Error("Error unmarshalling volatile state: 0x%02x",
+                                rc);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        /*
+         * advance pointer towards hash if we have a later version of
+         * the state that has extra data we didn't read
+         */
+        if (*size > 0 && (UINT32)*size > sizeof(hash)) {
+            *buffer += *size - sizeof(hash);
+            *size = sizeof(hash);
+        }
+        rc = Array_Unmarshal(hash, sizeof(hash), buffer, size);
+        if (rc != TPM_RC_SUCCESS)
+            TPMLIB_LogTPM2Error("Error unmarshalling volatile state hash: "
+                                "0x%02x", rc);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        if (memcmp(acthash, hash, sizeof(hash))) {
+            rc = TPM_RC_HASH;
+            TPMLIB_LogTPM2Error("Volatile state checksum error: 0x%02x\n",
+                                rc);
+        }
+    }
+
+    if (rc != TPM_RC_SUCCESS)
+        g_inFailureMode = TRUE;
+
+    return rc;
+}
+
+UINT16
+VolatileState_Save(BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    const BYTE *start;
+    BYTE hash[SHA1_DIGEST_SIZE];
+    TPM_ALG_ID hashAlg = TPM_ALG_SHA1;
+
+    start = *buffer;
+    written = VolatileState_Marshal(buffer, size);
+
+    /* append the checksum */
+    CryptHashBlock(hashAlg, written, start, sizeof(hash), hash);
+    written += Array_Marshal(hash, sizeof(hash), buffer, size);
+
+    return written;
+}

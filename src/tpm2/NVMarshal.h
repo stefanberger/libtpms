@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
-/*			     Written by Ken Goldman				*/
+/*			  Marshalling and unmarshalling of state		*/
+/*			     Written by Stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,59 +54,54 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef NVRESERVED_FP_H
-#define NVRESERVED_FP_H
+#ifndef NVMARSHAL_H
+#define NVMARSHAL_H
 
-#include "NVMarshal.h"
+#include <stdbool.h>
 
-void
-NvCheckState(
-	     void
-	     );
-BOOL
-NvCommit(
-	 void
-	 );
-BOOL
-NvPowerOn(
-	  void
-	  );
-void
-NvManufacture(
-	      void
-	      );
-void
-NvRead(
-       void            *outBuffer,     // OUT: buffer to receive data
-       UINT32           nvOffset,      // IN: offset in NV of value
-       UINT32           size           // IN: size of the value to read
-       );
-void
-NvWrite(
-	UINT32           nvOffset,      // IN: location in NV to receive data
-	UINT32           size,          // IN: size of the data to move
-	void            *inBuffer       // IN: location containing data to write
-	);
-void
-NvUpdatePersistent(
-		   UINT32           offset,        // IN: location in PERMANENT_DATA to be updated
-		   UINT32           size,          // IN: size of the value
-		   void            *buffer         // IN: the new data
-		   );
-void
-NvClearPersistent(
-		  UINT32           offset,        // IN: the offset in the PERMANENT_DATA
-		  //     structure to be cleared (zeroed)
-		  UINT32           size           // IN: number of bytes to clear
-		  );
-void
-NvReadPersistent(
-		 void
-		 );
+#include "Tpm.h"
+#include "TpmTypes.h"
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
+
+UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
+TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
+
+void NvWrite_ORDERLY_DATA(UINT32 nvOffset, UINT32 size, ORDERLY_DATA *data);
+void NvWrite_STATE_RESET_DATA(UINT32 nvOffset, UINT32 size, STATE_RESET_DATA *data);
+void NvWrite_STATE_CLEAR_DATA(UINT32 nvOffset, UINT32 size, STATE_CLEAR_DATA *data);
+void NvWrite_PERSISTENT_DATA(UINT32 nvOffset, UINT32 size, PERSISTENT_DATA *data);
+void NvWrite_NV_LIST_TERMINATOR(UINT32 nvOffset, UINT32 size, NV_LIST_TERMINATOR *data);
+void NvWrite_UINT32(UINT32 nvOffset, UINT32 size, UINT32 *data);
+void NvWrite_TPM_HANDLE(UINT32 nvOffset, UINT32 size, UINT32 *data);
+void NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data);
+
+void NvRead_UINT32(UINT32 *data, UINT32 nvOffset, UINT32 size);
+void NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size);
+void NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size);
+void NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size);
+void NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size);
+void NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size);
+void NvRead_OBJECT_ATTRIBUTES(OBJECT_ATTRIBUTES *data, UINT32 nvOffset, UINT32 size);
+void NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size);
+void NvRead_TPMA_NV(TPMA_NV *data, UINT32 nvOffset, UINT32 size);
+void NvRead_NV_INDEX(NV_INDEX *data, UINT32 nvOffset, UINT32 size);
+void NvRead_NV_ENTRY_HEADER(NV_ENTRY_HEADER *data, UINT32 nvOffset, UINT32 size);
+
+void TPMA_NV_SWAP(TPMA_NV *t, TPMA_NV *s);
+void OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native);
+void NV_INDEX_SWAP(NV_INDEX *t, NV_INDEX *s);
+
+static inline void TPM2B_SWAP(TPM2B *t, TPM2B *s, size_t bufsize)
+{
+    t->size = htobe16(s->size);
+    memcpy(t->buffer, s->buffer, bufsize);
+}
 
 
-#endif
+#endif /* NVMARSHAL_H */
+
