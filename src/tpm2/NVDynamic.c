@@ -225,13 +225,13 @@ NvWriteNvListEnd(
 		 )
 {
     // Marker is initialized with zeros
-    BYTE        listEndMarker[sizeof(NV_LIST_TERMINATOR)] = {0};
+    NV_LIST_TERMINATOR listEndMarker = {0};
     UINT64      maxCount = NvReadMaxCount();
     //
     // This is a constant check that can be resolved at compile time.
     cAssert(sizeof(UINT64) <= sizeof(NV_LIST_TERMINATOR) - sizeof(UINT32));
     // Copy the maxCount value to the marker buffer
-    MemoryCopy(&listEndMarker[sizeof(UINT32)], &maxCount, sizeof(UINT64));
+    listEndMarker.maxCount = maxCount;
     pAssert(end + sizeof(NV_LIST_TERMINATOR) <= s_evictNvEnd);
     // Write it to memory
     NvWrite(end, sizeof(NV_LIST_TERMINATOR), &listEndMarker);
