@@ -81,10 +81,15 @@
 #define  SET      1
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
-#ifndef  BIG_ENDIAN_TPM       
+#include <endian.h>
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 #define  BIG_ENDIAN_TPM       NO
+#define  LITTLE_ENDIAN_TPM    YES
 #endif
-#define  LITTLE_ENDIAN_TPM          !BIG_ENDIAN_TPM
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define  BIG_ENDIAN_TPM       YES
+#define  LITTLE_ENDIAN_TPM    NO
+#endif
 #define  MOST_SIGNIFICANT_BIT_0     NO
 #define  LEAST_SIGNIFICANT_BIT_0    !MOST_SIGNIFICANT_BIT_0
 #define  AUTO_ALIGN                 NO
