@@ -86,19 +86,21 @@ void TPM_PrintAll(const char *string, const unsigned char* buff, uint32_t length
     int indent;
 
     if (buff != NULL) {
-        indent = TPMLIB_LogPrintf("%s length %u\n ", string, length);
+        indent = TPMLIB_LogPrintf("%s length %u\n", string, length);
         if (indent < 0)
             return;
 
         for (i = 0 ; i < length ; i++) {
-            if (i && !( i % 16 )) {
-                TPMLIB_LogPrintfA(0, "\n ");
-            }
-            TPMLIB_LogPrintfA(!(i % 16) ? indent : 0, "%.2X ", buff[i]);
+            if (i && !( i % 16 ))
+                TPMLIB_LogPrintfA(0, "\n");
+
+            if (!(i % 16))
+                TPMLIB_LogPrintf(" %.2X ", buff[i]);
+            else
+                TPMLIB_LogPrintfA(0, "%.2X ", buff[i]);
         }
         TPMLIB_LogPrintfA(0, "\n");
-    }
-    else {
+    } else {
         TPMLIB_LogPrintf("%s null\n", string);
     }
     return;
