@@ -2,12 +2,17 @@
 *.exe.stackdump
 *.la
 *.lo
+*.log
 *.o
 *.patch
+*.trs
 *~
 .deps
 .libs
 configure
+compile
+depcomp
+missing
 Makefile.in
 Makefile
 /aclocal.m4
