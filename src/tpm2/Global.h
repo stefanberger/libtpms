@@ -542,11 +542,28 @@ extern TPM_RC           g_NvStatus;
 extern TPM2B_AUTH       g_platformUniqueAuthorities; // Reserved for RNG
 extern TPM2B_AUTH       g_platformUniqueDetails;   // referenced by VENDOR_PERMANENT
 
+typedef struct
+{
+    UINT16 version;
+    UINT32 magic;
+} NV_HEADER;
+
+#define PERSISTENT_DATA_MAGIC   0x12213443
+#define ORDERLY_DATA_MAGIC      0x56657887
+#define STATE_CLEAR_DATA_MAGIC  0x98897667
+#define STATE_RESET_DATA_MAGIC  0x01102332
+
+#define PERSISTENT_DATA_VERSION 1
+#define ORDERLY_DATA_VERSION 1
+#define STATE_CLEAR_DATA_VERSION 1
+#define STATE_RESET_DATA_VERSION 1
+
 /* This structure holds the persistent values that only change as a consequence of a specific
    Protected Capability and are not affected by TPM power events (TPM2_Startup() or
    TPM2_Shutdown(). */
 typedef struct
 {
+    NV_HEADER      nvHeader;
     //*********************************************************************************
     //          Hierarchy
     //*********************************************************************************
@@ -677,6 +694,7 @@ extern PERSISTENT_DATA  gp;
 /* The data in this structure is saved to NV on each TPM2_Shutdown(). */
 typedef struct orderly_data
 {
+    NV_HEADER      nvHeader;
     //*****************************************************************************
     //           TIME
     //*****************************************************************************
@@ -719,6 +737,7 @@ extern ORDERLY_DATA     go;
    on each Startup(CLEAR). */
 typedef struct state_clear_data
 {
+    NV_HEADER      nvHeader;
     //*****************************************************************************
     //           Hierarchy Control
     //*****************************************************************************
@@ -750,6 +769,7 @@ extern STATE_CLEAR_DATA gc;
 /* If a default value is specified in the comments this value is applied on TPM Reset. */
 typedef struct state_reset_data
 {
+    NV_HEADER      nvHeader;
     //*****************************************************************************
     //          Hierarchy Control
     //*****************************************************************************
@@ -838,11 +858,15 @@ extern STATE_RESET_DATA gr;
 /* c) a STATE_CLEAR_DATA structure */
 /* d) an ORDERLY_DATA structure */
 /* e) the user defined NV index space */
-#define NV_PERSISTENT_DATA  (0)
-#define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + sizeof(PERSISTENT_DATA))
-#define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + sizeof(STATE_RESET_DATA))
-#define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + sizeof(STATE_CLEAR_DATA))
-#define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + sizeof(ORDERLY_DATA))
+
+#define NV_ROUNDUP(VAL, SIZE) \
+  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
+
+#define NV_PERSISTENT_DATA  (0L) /* long also on 32 bit platforms */
+#define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + NV_ROUNDUP(sizeof(PERSISTENT_DATA), 1536))
+#define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + NV_ROUNDUP(sizeof(STATE_RESET_DATA), 1024))
+#define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + NV_ROUNDUP(sizeof(STATE_CLEAR_DATA), 1024))
+#define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + NV_ROUNDUP(sizeof(ORDERLY_DATA), 512))
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
 /* 5.10.13 Global Macro Definitions */
