@@ -74,6 +74,8 @@
 #include "Marshal_fp.h"
 #include "Unmarshal_fp.h"
 #include "Global.h"
+#include "TpmTcpProtocol.h"
+#include "Simulator_fp.h"
 
 UINT16
 TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
@@ -831,6 +833,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     UINT16 written;
     UINT16 version = 1; /* blob version */
     size_t i;
+    BOOL tpmEst;
 
     written = UINT16_Marshal(&version, buffer, size);
 
@@ -954,6 +957,10 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     /* s_actionOutputBuffer: skip; only used during a single command */
 #endif
     written += UINT8_Marshal((UINT8 *)&g_inFailureMode, buffer, size); /* line 1078 */
+
+    /* TPM established bit */
+    tpmEst = _rpc__Signal_GetTPMEstablished();
+    written += UINT8_Marshal((UINT8 *)&tpmEst, buffer, size);
 
     return written;
 }
@@ -1121,6 +1128,18 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
 #endif
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT8_Unmarshal((UINT8 *)&g_inFailureMode, buffer, size); /* line 1078 */
+    }
+
+    /* TPM established bit */
+    if (rc == TPM_RC_SUCCESS) {
+        BOOL tpmEst;
+        rc = UINT8_Unmarshal((UINT8 *)&tpmEst, buffer, size);
+        if (rc == TPM_RC_SUCCESS) {
+            if (tpmEst)
+                _rpc__Signal_SetTPMEstablished();
+            else
+                _rpc__Signal_ResetTPMEstablished();
+        }
     }
 
     return rc;
