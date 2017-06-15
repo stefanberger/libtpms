@@ -58,6 +58,9 @@
 #include "tpm2/Simulator_fp.h"
 #include "tpm2/_TPM_Hash_Data_fp.h"
 #include "tpm2/_TPM_Init_fp.h"
+#include "tpm2/TpmTypes.h"
+
+extern BOOL      g_inFailureMode;
 
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
@@ -85,6 +88,8 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
 TPM_RESULT TPM2_MainInit(void)
 {
     TPM_RESULT ret = TPM_SUCCESS;
+
+    g_inFailureMode = FALSE;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -114,6 +119,11 @@ TPM_RESULT TPM2_MainInit(void)
     _rpc__Signal_NvOn();
 
     _TPM_Init();
+
+    if (ret == TPM_SUCCESS) {
+        if (g_inFailureMode)
+            ret = TPM_RC_FAILURE;
+    }
 
     return ret;
 }
