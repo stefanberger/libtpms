@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Clock.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -115,7 +115,8 @@ static uint64_t tpmclock(void)
    hardware events. */
 /* C.3.3.2. _plat__TimerReset() */
 /* This function sets current system clock time as t0 for counting TPM time. This function is called
-   at a power on event to reset the clock. */
+   at a power on event to reset the clock.  When the clock is reset, the indication that the clock
+   was stopped is also set. */
 LIB_EXPORT void
 _plat__TimerReset(
 		  void

@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			    Duplication Commands 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DuplicationCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: DuplicationCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -81,7 +81,7 @@ TPM2_Duplicate(
     // Get new parent
     newParent = HandleToObject(in->newParentHandle);
     // duplicate key must have fixParent bit CLEAR.
-    if(object->publicArea.objectAttributes.fixedParent == SET)
+    if(IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, fixedParent))
 	return TPM_RCS_ATTRIBUTES + RC_Duplicate_objectHandle;
     // Do not duplicate object with NULL nameAlg
     if(object->publicArea.nameAlg == TPM_ALG_NULL)
@@ -92,7 +92,8 @@ TPM2_Duplicate(
 	return TPM_RCS_TYPE + RC_Duplicate_newParentHandle;
     // If the duplicated object has encryptedDuplication SET, then there must be
     // an inner wrapper and the new parent may not be TPM_RH_NULL
-    if(object->publicArea.objectAttributes.encryptedDuplication == SET)
+    if(IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT,
+		    encryptedDuplication))
 	{
 	    if(in->symmetricAlg.algorithm == TPM_ALG_NULL)
 		return TPM_RCS_SYMMETRIC + RC_Duplicate_symmetricAlg;
@@ -167,7 +168,7 @@ TPM2_Rewrap(
 	return TPM_RCS_HANDLE + RC_Rewrap_oldParent;
     if(in->oldParent != TPM_RH_NULL)
 	{
-	    OBJECT              *oldParent = HandleToObject(in->oldParent);;
+	    OBJECT              *oldParent = HandleToObject(in->oldParent);
 	    // old parent key must be a storage object
 	    if(!ObjectIsStorage(in->oldParent))
 		return TPM_RCS_TYPE + RC_Rewrap_oldParent;
@@ -260,12 +261,15 @@ TPM2_Import(
     TPM2B_DATA               data;                   // symmetric key
     TPMT_SENSITIVE           sensitive;
     TPM2B_NAME               name;
+    TPMA_OBJECT              attributes;
     UINT16                   innerKeySize = 0;       // encrypt key size for inner
     // wrapper
     // Input Validation
+    // to save typing
+    attributes = in->objectPublic.publicArea.objectAttributes;
     // FixedTPM and fixedParent must be CLEAR
-    if(in->objectPublic.publicArea.objectAttributes.fixedTPM == SET
-       || in->objectPublic.publicArea.objectAttributes.fixedParent == SET)
+    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM)
+       || IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedParent))
 	return TPM_RCS_ATTRIBUTES + RC_Import_objectPublic;
     // Get parent pointer
     parentObject = HandleToObject(in->parentHandle);
@@ -287,7 +291,7 @@ TPM2_Import(
 		return TPM_RCS_SIZE + RC_Import_encryptionKey;
 	    // If encryptedDuplication is SET, then the object must have an inner
 	    // wrapper
-	    if(in->objectPublic.publicArea.objectAttributes.encryptedDuplication)
+	    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, encryptedDuplication))
 		return TPM_RCS_ATTRIBUTES + RC_Import_encryptionKey;
 	}
     // See if there is an outer wrapper
@@ -310,7 +314,7 @@ TPM2_Import(
 	{
 	    // If encrytpedDuplication is set, then the object must have an outer
 	    // wrapper
-	    if(in->objectPublic.publicArea.objectAttributes.encryptedDuplication)
+	    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, encryptedDuplication))
 		return TPM_RCS_ATTRIBUTES + RC_Import_inSymSeed;
 	    data.t.size = 0;
 	}
@@ -329,7 +333,7 @@ TPM2_Import(
     // If the parent of this object has fixedTPM SET, then validate this
     // object as if it were being loaded so that validation can be skipped
     // when it is actually loaded.
-    if(parentObject->publicArea.objectAttributes.fixedTPM == SET)
+    if(IS_ATTRIBUTE(parentObject->publicArea.objectAttributes, TPMA_OBJECT, fixedTPM))
 	{
 	    result = ObjectLoad(NULL, NULL, &in->objectPublic.publicArea,
 				&sensitive, RC_Import_objectPublic, RC_Import_duplicate,

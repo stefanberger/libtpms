@@ -3,7 +3,7 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Global.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -79,7 +79,6 @@ UINT64               g_time;
 #ifdef CLOCK_STOPS
 CLOCK_NONCE          g_timeEpoch;
 #endif
-BOOL                 g_timeNewEpochNeeded;
 BOOL                 g_pcrReConfig;
 TPMI_DH_OBJECT       g_DRTMHandle;
 BOOL                 g_DrtmPreStartup;
@@ -94,6 +93,15 @@ UPDATE_TYPE          g_updateNV;
 BOOL                 g_nvOk;
 TPM_RC               g_NvStatus;
 TPM2B_AUTH           g_platformUniqueDetails;
+ALGORITHM_VECTOR     g_implementedAlgorithms;
+ALGORITHM_VECTOR     g_toTest;
+CRYPTO_SELF_TEST_STATE    g_cryptoSelfTestState;    // This structure contains the
+// cryptographic self-test
+#ifdef SIMULATION
+BOOL                 g_forceFailureMode;
+#endif
+BOOL                 g_inFailureMode;
+// cryptographic self-test
 STATE_CLEAR_DATA     gc;
 STATE_RESET_DATA     gr;
 PERSISTENT_DATA      gp;
@@ -127,9 +135,11 @@ UINT64               s_maxCounter;
 NV_REF               s_evictNvEnd;
 TPM_RC               g_NvStatus;
 BYTE                 s_indexOrderlyRam[RAM_INDEX_SPACE];
+#ifndef __IGNORE_STATE__        // DO NOT DEFINE THIS VALUE
 NV_INDEX             s_cachedNvIndex;
 NV_REF               s_cachedNvRef;
 BYTE                *s_cachedNvRamRef;
+#endif // __IGNORE_STATE__
 /* 9.5.4.4 Object.c */
 OBJECT              s_objects[MAX_LOADED_OBJECTS];
 /* 9.5.4.5 PCR.c */
@@ -146,27 +156,11 @@ int                  s_freeSessionSlots;
 UINT32   s_actionInputBuffer[1024];          // action input buffer
 UINT32   s_actionOutputBuffer[1024];         // action output buffer
 #endif
-/* 9.5.4.8 SelfTest.c */
-ALGORITHM_VECTOR         g_implementedAlgorithms;
-ALGORITHM_VECTOR         g_toTest;
-/* 9.5.4.9 g_cryptoSelfTestState */
-/* This structure contains the cryptographic self-test state values. */
-CRYPTO_SELF_TEST_STATE    g_cryptoSelfTestState;
-ALGORITHM_VECTOR          AlgToTest;
 /* 9.5.4.10 TpmFail.c */
-#ifdef SIMULATION
-BOOL                 g_forceFailureMode;
-#endif
-BOOL                 g_inFailureMode;
 UINT32               s_failFunction;
 UINT32               s_failLine;
 UINT32               s_failCode;
-#if 0
-#ifdef TPM_ALG_ECC
-/* 9.5.4.11 ECC Curves */
-ECC_CURVE   c_curves[ECC_CURVE_COUNT];
-#endif
-#endif // 0
+/* 9.5.5.9 CryptRand.c */
 /* This is the state used when the library uses a random number generator. A special function is
    installed for the library to call. That function picks up the state from this location and uses
    it for the generation of the random number. */
@@ -180,7 +174,7 @@ BOOL                 g_manufactured = FALSE;
 /* This is here for the same reason that g_manufactured is here. Both of these values can be
    provided by the actual platform-specific code or by hardware indications. */
 BOOL                 g_initialized;
-/* 9.5.4.14 Purpose String Constants */
+/* 9.5.4.14 Purpose-specific String Constants */
 /* These string constants are shared across functions to make sure that they are all using
    consistent sting values. */
 TPM2B_STRING(PRIMARY_OBJECT_CREATION, "Primary Object Creation");

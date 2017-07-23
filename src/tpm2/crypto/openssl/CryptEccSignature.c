@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptEccSignature.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -216,6 +216,7 @@ BnSignEcdsa(
    this function u */
 /* Error Returns Meaning */
 /* TPM_RC_SCHEME unsupported hash algorithm */
+/* TPM_RC_NO_RESULT cannot get values from random number generator */
 static TPM_RC
 BnSignEcdaa(
 	    TPM2B_ECC_PARAMETER     *nonceK,        // OUT: nonce component of the signature
@@ -242,14 +243,18 @@ BnSignEcdaa(
 	retVal = TPM_RC_VALUE;
     else
 	{
-	    // This allocation is here because k is not defined until CrypGenerateR()
-	    // is done.
+	    // This allocation is here because 'r' doesn't have a value until
+	    // CrypGenerateR() is done.
 	    ECC_INITIALIZED(bnR, &r);
 	    do
 		{
 		    // generate nonceK such that 0 < nonceK < n
 		    // use bnT as a temp.
-		    BnEccGetPrivate(bnT, AccessCurveData(E), rand);
+		    if(!BnEccGetPrivate(bnT, AccessCurveData(E), rand))
+			{
+			    retVal = TPM_RC_NO_RESULT;
+			    break;
+			}
 		    BnTo2B(bnT, &nonceK->b, 0);
 		    T.t.size = CryptHashStart(&state, scheme->details.ecdaa.hashAlg);
 		    if(T.t.size == 0)
@@ -397,7 +402,7 @@ BnSignEcSm2(
 	    //     debug)
 	    )
 {
-    BN_MAX_INITIALIZZED(bnE, digest);   // Don't know how big digest might be
+    BN_MAX_INITIALIZED(bnE, digest);   // Don't know how big digest might be
     ECC_NUM(bnN);
     ECC_NUM(bnK);
     ECC_NUM(bnX1);

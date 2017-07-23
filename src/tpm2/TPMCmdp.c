@@ -3,7 +3,7 @@
 /*			  Process the commands    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TPMCmdp.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: TPMCmdp.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -216,7 +216,8 @@ _rpc__Signal_HashEnd(
     _TPM_Hash_End();
     return;
 }
-/* Command interface Entry of a RPC call */
+/* D.5.3.10. rpc_Send_Command() */
+/* This is the interface to the TPM code. */
 void
 _rpc__Send_Command(
 		   unsigned char    locality,

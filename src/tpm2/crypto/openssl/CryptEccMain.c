@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -333,8 +333,6 @@ CryptGenerateR(
     // requirements of the random value.
     // want to generate a new r.
     r->t.size = n.t.size;
-    // Arbitrary upper limit on the number of times that we can look for
-    // a suitable random value.  The normally number of tries will be 1.
     for(iterations = 1; iterations < 1000000;)
 	{
 	    int     i;
@@ -489,7 +487,7 @@ CryptEccIsValidPrivateKey(
 /* Error Returns Meaning */
 /* TPM_RC_NO_RESULTS result of multiplication is a point at infinity */
 /* TPM_RC_ECC_POINT S or Q is not on the curve */
-/* TPM_RC_VALUE d or u is not 0 < d < n */
+/* TPM_RC_VALUE d or u is not < n */
 TPM_RC
 BnPointMult(
 	    bigPoint             R,         // OUT: computed point
@@ -543,6 +541,9 @@ BnPointMult(
    search will take more than one iteration is very small. As a consequence, the weighted-average
    run time for this function is significantly less than the method of key pair generation with
    extra random bits. */
+/* Return Value Meaning */
+/* TRUE value generated */
+/* FALSE failure generating private key */
 BOOL
 BnEccGetPrivate(
 		bigNum                   dOut,      // OUT: the qualified random value
@@ -551,16 +552,31 @@ BnEccGetPrivate(
 		RAND_STATE              *rand       // IN: state for DRBG
 		)
 {
-    //
     bigConst                 order = CurveGetOrder(C);
+    BOOL                     OK;
+    UINT32                   orderBits = BnSizeInBits(order);
+#if 1 // This is the "extra bits" method of key generation
+    UINT32                   orderBytes = BITS_TO_BYTES(orderBits);
+    BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
+    BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
     //
+    OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);
+    OK = OK && BnSubWord(nMinus1, order, 1);
+    OK = OK && BnMod(bnExtraBits, nMinus1);
+    OK = OK && BnAddWord(dOut, bnExtraBits, 1);
+#else
+    // This is the "testing candidates" version of key generation
     do
 	{
-	    BnGetRandomBits(dOut, BnSizeInBits(order), rand);
-	    BnAddWord(dOut, dOut, 1);
-	} while(BnUnsignedCmp(dOut, order) >= 0);
-    return TRUE;
+	    OK = BnGetRandomBits(dOut, BnSizeInBits(order), rand);
+	    OK = OK && BnAddWord(dOut, dOut, 1);
+	} while(OK && BnUnsignedCmp(dOut, order) >= 0);
+#endif
+    return OK;
 }
+/* 10.2.11.2.21 BnEccGenerateKeyPair() */
+/* This function gets a private scalar from the source of random bits and does the point multiply to
+   get the public key. */
 BOOL
 BnEccGenerateKeyPair(
 		     bigNum               bnD,            // OUT: private scalar
@@ -570,14 +586,10 @@ BnEccGenerateKeyPair(
 		     )
 {
     BOOL                 OK = FALSE;
-    int                  limit;
-    for(limit = 100; (limit > 0) && !OK; limit--)
-	{
-	    // Get a private scalar
-	    BnEccGetPrivate(bnD, E->C, rand);
-	    // Do a point multiply
-	    OK = BnEccModMult(ecQ, NULL, bnD, E);
-	}
+    // Get a private scalar
+    OK = BnEccGetPrivate(bnD, E->C, rand);
+    // Do a point multiply
+    OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
     if(!OK)
 	BnSetWord(ecQ->z, 0);
     else
@@ -688,7 +700,7 @@ CryptEccIsPointOnCurve(
    key */
 /* Error Returns Meaning */
 /* TPM_RC_CURVE curve is not supported */
-/* TPM_RC_FAIL ??? */
+/* TPM_RC_NO_RESULT could not verify key with signature (FIPS only) */
 LIB_EXPORT TPM_RC
 CryptEccGenerateKey(
 		    TPMT_PUBLIC         *publicArea,        // IN/OUT: The public area template for
@@ -706,9 +718,8 @@ CryptEccGenerateKey(
     CURVE_INITIALIZED(E, publicArea->parameters.eccDetail.curveID);
     ECC_NUM(bnD);
     POINT(ecQ);
-    const UINT32             MaxCount = 100;
-    UINT32                   count = 0;
-    TPM_RC                   retVal = TPM_RC_NO_RESULT;
+    BOOL                     OK;
+    TPM_RC                   retVal;
     TEST(TPM_ALG_ECDSA); // ECDSA is used to verify each key
     // Validate parameters
     if(E == NULL)
@@ -716,37 +727,32 @@ CryptEccGenerateKey(
     publicArea->unique.ecc.x.t.size = 0;
     publicArea->unique.ecc.y.t.size = 0;
     sensitive->sensitive.ecc.t.size = 0;
-    // Start search for key (should be quick)
-    for(count = 1; (count < MaxCount) && (retVal != TPM_RC_SUCCESS); count++)
+    OK = BnEccGenerateKeyPair(bnD, ecQ, E, rand);
+    if(OK)
 	{
-	    if(!BnEccGenerateKeyPair(bnD, ecQ, E, rand))
-		FAIL(FATAL_ERROR_INTERNAL);
-	    retVal = TPM_RC_SUCCESS;
-#ifdef FIPS_COMPLIANT
-	    // See if PWCT is required
-	    if(publicArea->objectAttributes.sign)
-		{
-		    ECC_NUM(bnT);
-		    ECC_NUM(bnS);
-		    TPM2B_DIGEST    digest;
-		    TEST(TPM_ALG_ECDSA);
-		    digest.t.size =
-			(UINT16)BITS_TO_BYTES(BnSizeInBits(CurveGetPrime(
-									 AccessCurveData(E))));
-		    // Get a random value to sign using the current DRBG state
-		    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
-		    BnSignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
-		    // and make sure that we can validate the signature
-		    retVal = BnValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest);
-		}
-#endif
+	    BnPointTo2B(&publicArea->unique.ecc, ecQ, E);
+	    BnTo2B(bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
 	}
-    // if counter maxed out, put the TPM to failure mode
-    if(count == MaxCount)
-	FAIL(FATAL_ERROR_INTERNAL);
-    // Convert results
-    BnPointTo2B(&publicArea->unique.ecc, ecQ, E);
-    BnTo2B(bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
+#if defined FIPS_COMPLIANT || 1
+    // See if PWCT is required
+    if(OK && (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)))	// kgold
+		// if(OK && publicArea->objectAttributes.sign)
+	{
+	    ECC_NUM(bnT);
+	    ECC_NUM(bnS);
+	    TPM2B_DIGEST    digest;
+	    TEST(TPM_ALG_ECDSA);
+	    digest.t.size =
+		(UINT16)BITS_TO_BYTES(BnSizeInBits(CurveGetPrime(
+								 AccessCurveData(E))));
+	    // Get a random value to sign using the built in DRBG state
+	    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
+	    BnSignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
+	    // and make sure that we can validate the signature
+	    OK = BnValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest) == TPM_RC_SUCCESS;
+	}
+#endif
+    retVal = (OK) ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
  Exit:
     CURVE_FREE(E);
     return retVal;

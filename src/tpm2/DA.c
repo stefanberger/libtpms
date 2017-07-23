@@ -3,7 +3,7 @@
 /*			   Dictionary Attack Logic.  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DA.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: DA.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -89,7 +89,7 @@ DAPreInstall_Init(
     NV_SYNC_PERSISTENT(lockOutAuthEnabled);
     return;
 }
-/* 8.2.3.3 DAStartup() */
+/* 8.2.3.2 DAStartup() */
 /* This function is called by TPM2_Startup() to initialize the DA parameters. In the case of
    Startup(CLEAR), use of lockoutAuth will be enabled if the lockout recovery time is 0. Otherwise,
    lockoutAuth will not be enabled until the TPM has been continuously powered for the
@@ -153,7 +153,7 @@ DAStartup(
     TimeUpdate();
     return;
 }
-/* 8.2.3.4 DARegisterFailure() */
+/* 8.2.3.3 DARegisterFailure() */
 /* This function is called when a authorization failure occurs on an entity that is subject to
    dictionary-attack protection. When a DA failure is triggered, register the failure by resetting
    the relevant self-healing timer to the current time. */
@@ -169,7 +169,7 @@ DARegisterFailure(
 	s_selfHealTimer = g_time;
     return;
 }
-/* 8.2.3.5 DASelfHeal() */
+/* 8.2.3.4 DASelfHeal() */
 /* This function is called to check if sufficient time has passed to allow decrement of failedTries
    or to re-enable use of lockoutAuth. */
 /* This function should be called when the time interval is updated. */

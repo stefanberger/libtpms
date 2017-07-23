@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TcpServer.c 812 2016-11-16 21:28:29Z kgoldman $		*/
+/*            $Id: TcpServer.c 1048 2017-07-20 20:28:26Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -66,9 +66,12 @@
 #include "TpmBuildSwitches.h"
 #include <stdio.h>
 
+#ifdef TPM_WINDOWS
 #include <windows.h>
 #include <winsock.h>
-
+#else
+typedef int SOCKET
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>

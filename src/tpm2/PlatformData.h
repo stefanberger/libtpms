@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: PlatformData.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017.				*/
 /*										*/
 /********************************************************************************/
 
@@ -72,10 +72,6 @@
    canceled */
 extern int     s_isCanceled;
 #include    <time.h>
-typedef struct {
-    time_t tv_sec;  // Seconds - >= 0
-    long   tv_nsec; // Nanoseconds - [0, 999999999]
-} timespec_t;
 #ifndef HARDWARE_CLOCK
 /* This is the value returned the last time that the system clock was read. This is only relevant
    for a simulator or virtual TPM. */

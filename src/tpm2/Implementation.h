@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Implementation.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Implementation.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -81,14 +81,18 @@
 #define  SET      1
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
+#ifndef  BIG_ENDIAN_TPM       
 #define  BIG_ENDIAN_TPM       NO
-#define  LITTLE_ENDIAN_TPM    YES
-#define  AUTO_ALIGN           NO
+#endif
+#define  LITTLE_ENDIAN_TPM          !BIG_ENDIAN_TPM
+#define  MOST_SIGNIFICANT_BIT_0     NO
+#define  LEAST_SIGNIFICANT_BIT_0    !MOST_SIGNIFICANT_BIT_0
+#define  AUTO_ALIGN                 NO
 /* From Vendor-Specific: Table 2 - Defines for Implemented Algorithms */
 #define  ALG_RSA               ALG_YES
 #define  ALG_SHA1              ALG_YES
 #define  ALG_HMAC              ALG_YES
-#define  ALG_TDES              ALG_YES
+#define  ALG_TDES              ALG_NO
 #define  ALG_AES               ALG_YES
 #define  ALG_MGF1              ALG_YES
 #define  ALG_XOR               ALG_YES
@@ -113,6 +117,7 @@
 #define  ALG_KDF1_SP800_56A    (ALG_YES*ALG_ECC)
 #define  ALG_KDF2              ALG_NO
 #define  ALG_KDF1_SP800_108    ALG_YES
+#define  ALG_CMAC              ALG_NO
 #define  ALG_CTR               ALG_YES
 #define  ALG_OFB               ALG_YES
 #define  ALG_CBC               ALG_YES
@@ -213,8 +218,10 @@
 #define  CC_HashSequenceStart             CC_YES
 #define  CC_HierarchyChangeAuth           CC_YES
 #define  CC_HierarchyControl              CC_YES
-#define  CC_HMAC                          CC_YES
-#define  CC_HMAC_Start                    CC_YES
+#define  CC_HMAC                          (CC_YES^ALG_CMAC)
+#define  CC_MAC                           (CC_NO^ALG_CMAC)
+#define  CC_HMAC_Start                    (CC_YES^ALG_CMAC)
+#define  CC_MAC_Start                     (CC_NO^ALG_CMAC)
 #define  CC_Import                        CC_YES
 #define  CC_IncrementalSelfTest           CC_YES
 #define  CC_Load                          CC_YES
@@ -353,6 +360,7 @@
 #define  CRT_FORMAT_RSA                 YES
 #define  VENDOR_COMMAND_COUNT           0
 #define  MAX_VENDOR_BUFFER_SIZE         1024
+#define  TPM_MAX_DERIVATION_BITS        8192
 /* From TCG Algorithm Registry: Table 2 - Definition of TPM_ALG_ID Constants */
 typedef  UINT16             TPM_ALG_ID;
 #define  ALG_ERROR_VALUE             0x0000
@@ -478,6 +486,10 @@ typedef  UINT16             TPM_ALG_ID;
 #define  ALG_CAMELLIA_VALUE          0x0026
 #if defined ALG_CAMELLIA && ALG_CAMELLIA == YES
 #define  TPM_ALG_CAMELLIA            (TPM_ALG_ID)(ALG_CAMELLIA_VALUE)
+#endif
+#define  ALG_CMAC_VALUE              0x003F
+#if defined ALG_CMAC && ALG_CMAC == YES
+#define  TPM_ALG_CMAC                (TPM_ALG_ID)(ALG_CMAC_VALUE)
 #endif
 #define  ALG_CTR_VALUE               0x0040
 #if defined ALG_CTR && ALG_CTR == YES
@@ -913,6 +925,12 @@ typedef  UINT32             TPM_CC;
 #if CC_HMAC == YES
 #define  TPM_CC_HMAC                          (TPM_CC)(0x00000155)
 #endif
+#ifndef CC_MAC
+#   define CC_MAC NO
+#endif
+#if CC_MAC == YES
+#define  TPM_CC_MAC                           (TPM_CC)(0x00000155)
+#endif
 #ifndef CC_Import
 #   define CC_Import NO
 #endif
@@ -942,6 +960,12 @@ typedef  UINT32             TPM_CC;
 #endif
 #if CC_HMAC_Start == YES
 #define  TPM_CC_HMAC_Start                    (TPM_CC)(0x0000015b)
+#endif
+#ifndef CC_MAC_Start
+#   define CC_MAC_Start NO
+#endif
+#if CC_MAC_Start == YES
+#define  TPM_CC_MAC_Start                     (TPM_CC)(0x0000015b)
 #endif
 #ifndef CC_SequenceUpdate
 #   define CC_SequenceUpdate NO
@@ -1261,6 +1285,12 @@ typedef  UINT32             TPM_CC;
 #if CC_EncryptDecrypt2 == YES
 #define  TPM_CC_EncryptDecrypt2               (TPM_CC)(0x00000193)
 #endif
+#ifndef CC_AC_GetCapability
+#   define CC_AC_GetCapability NO
+#endif
+#if CC_AC_GetCapability == YES
+#define  TPM_CC_AC_GetCapability              (TPM_CC)(0x00000194)
+#endif
 #ifndef CC_AC_Send
 #   define CC_AC_Send NO
 #endif
@@ -1272,12 +1302,6 @@ typedef  UINT32             TPM_CC;
 #endif
 #if CC_Policy_AC_SendSelect == YES
 #define  TPM_CC_Policy_AC_SendSelect          (TPM_CC)(0x00000196)
-#endif
-#ifndef CC_SMAC
-#   define CC_SMAC NO
-#endif
-#if CC_SMAC == YES
-#define  TPM_CC_SMAC                          (TPM_CC)(0x00000197)
 #endif
 #define  CC_VEND                              (TPM_CC)(0x20000000)
 #ifndef CC_Vendor_TCG_Test
@@ -1349,13 +1373,13 @@ typedef  UINT32             TPM_CC;
 					  + (ADD_FILL || CC_Rewrap)                     /* 0x00000152 */ \
 					  + (ADD_FILL || CC_Create)                     /* 0x00000153 */ \
 					  + (ADD_FILL || CC_ECDH_ZGen)                  /* 0x00000154 */ \
-					  + (ADD_FILL || CC_HMAC)                       /* 0x00000155 */ \
+					  + (ADD_FILL   || CC_HMAC  || CC_MAC)          /* 0x00000155 */ \
 					  + (ADD_FILL || CC_Import)                     /* 0x00000156 */ \
 					  + (ADD_FILL || CC_Load)                       /* 0x00000157 */ \
 					  + (ADD_FILL || CC_Quote)                      /* 0x00000158 */ \
 					  + (ADD_FILL || CC_RSA_Decrypt)                /* 0x00000159 */ \
 					  + ADD_FILL                                             /* 0x0000015a */ \
-					  + (ADD_FILL || CC_HMAC_Start)                 /* 0x0000015b */ \
+					  + (ADD_FILL   || CC_HMAC_Start  || CC_MAC_Start) /* 0x0000015b */ \
 					  + (ADD_FILL || CC_SequenceUpdate)             /* 0x0000015c */ \
 					  + (ADD_FILL || CC_Sign)                       /* 0x0000015d */ \
 					  + (ADD_FILL || CC_Unseal)                     /* 0x0000015e */ \
@@ -1417,7 +1441,6 @@ typedef  UINT32             TPM_CC;
 					  + (ADD_FILL || CC_Policy_AC_SendSelect)       /* 0x00000196 */ \
 					  + ADD_FILL                                    /* 0x00000197 */ \
 					  )
-
 #define VENDOR_COMMAND_ARRAY_SIZE   ( 0				\
 				      + CC_Vendor_TCG_Test	\
 				      )
@@ -1496,6 +1519,4 @@ typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
 #if MAX_SYM_KEY_BITS == 0 || MAX_SYM_BLOCK_SIZE == 0
 #   error Bad size for MAX_SYM_KEY_BITS or MAX_SYM_BLOCK_SIZE
 #endif
-/*     Define the 2B structure for a seed */
-TPM2B_TYPE(SEED, PRIMARY_SEED_SIZE);
 #endif  // _IMPLEMENTATION_H_

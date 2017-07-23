@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: MathOnByteBuffers_fp.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -102,6 +102,9 @@ AdjustNumberB(
 	      TPM2B           *num,
 	      UINT16           requestedSize
 	      );
-
+TPM2B *
+ShiftLeft(
+	  TPM2B       *value          // IN/OUT: value to shift and shifted value out
+	  );
 
 #endif

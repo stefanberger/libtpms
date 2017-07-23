@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Interfaces to the CryptoEngine()			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptUtil.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -129,6 +129,7 @@ CryptHMACVerifySignature(
 /* 10.2.6.3.3 CryptGenerateKeyedHash() */
 /* This function creates a keyedHash object. */
 /* Error Returns Meaning */
+/* TPM_RC_NO_RESULT cannot get values from random number generator */
 /* TPM_RC_SIZE sensitive data size is larger than allowed for the scheme */
 static TPM_RC
 CryptGenerateKeyedHash(
@@ -163,8 +164,8 @@ CryptGenerateKeyedHash(
     //If the user provided the key, check that it is a proper size
     if(sensitiveCreate->data.t.size != 0)
 	{
-	    if(publicArea->objectAttributes.decrypt
-	       || publicArea->objectAttributes.sign)
+	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, decrypt)
+	       || IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
 		{
 		    if(sensitiveCreate->data.t.size > hashBlockSize)
 			return TPM_RC_SIZE;
@@ -180,12 +181,12 @@ CryptGenerateKeyedHash(
 	}
     else
 	{
-	    // If the TPM is going to generate the data, then set the size to be the
+	    // The TPM is going to generate the data, so set the size to be the
 	    // size of the digest of the algorithm
-	    int                      sizeInBits = digestSize * 8;
-	    TPM2B_SENSITIVE_DATA    *key = &sensitive->sensitive.bits;
-	    key->t.size = CryptRandMinMax(key->t.buffer, sizeInBits, sizeInBits / 2,
-					  rand);
+	    sensitive->sensitive.bits.t.size =
+		DRBG_Generate(rand, sensitive->sensitive.bits.t.buffer, digestSize);
+	    if(sensitive->sensitive.bits.t.size == 0)
+		return TPM_RC_NO_RESULT;
 	}
     return TPM_RC_SUCCESS;
 }
@@ -240,7 +241,7 @@ void
 ParmEncryptSym(
 	       TPM_ALG_ID       symAlg,        // IN: symmetric algorithm
 	       TPM_ALG_ID       hash,          // IN: hash algorithm for KDFa
-	       UINT16           keySizeInBits, // IN: AES key size in bits
+	       UINT16           keySizeInBits, // IN: AES symmetric key size in bits
 	       TPM2B           *key,           // IN: KDF HMAC key
 	       TPM2B           *nonceCaller,   // IN: nonce caller
 	       TPM2B           *nonceTpm,      // IN: nonce TPM
@@ -271,9 +272,10 @@ ParmEncryptSym(
 /* This function generates a symmetric cipher key. The derivation process is determined by the type
    of the provided rand */
 /* Error Returns Meaning */
-/* TPM_RCS_KEY_SIZE key size in the public area does not match the size in the sensitive creation
+/* TPM_RC_NO_RESULT cannot get a random value */
+/* TPM_RC_KEY_SIZE key size in the public area does not match the size in the sensitive creation
    area */
-/* TPM_RCS_KEY provided key value is not allowed */
+/* TPM_RC_KEY provided key value is not allowed */
 static TPM_RC
 CryptGenerateKeySymmetric(
 			  TPMT_PUBLIC             *publicArea,        // IN/OUT: The public area template
@@ -307,9 +309,13 @@ CryptGenerateKeySymmetric(
 #endif
     else
 	{
-	    sensitive->sensitive.sym.t.size = CryptRandMinMax(
-							      sensitive->sensitive.sym.t.buffer, keyBits, keyBits / 2, rand);
-	    result = TPM_RC_SUCCESS;
+	    {
+		sensitive->sensitive.sym.t.size =
+		    DRBG_Generate(rand, sensitive->sensitive.sym.t.buffer,
+				  BITS_TO_BYTES(keyBits));
+		result = (sensitive->sensitive.sym.t.size == 0)
+			 ? TPM_RC_NO_RESULT : TPM_RC_SUCCESS;
+	    }
 	}
     return result;
 }
@@ -475,7 +481,7 @@ CryptSecretEncrypt(
     // The encryption scheme is OAEP using the nameAlg of the encrypt key.
     scheme.scheme = TPM_ALG_OAEP;
     scheme.details.anySig.hashAlg = encryptKey->publicArea.nameAlg;
-    if(encryptKey->publicArea.objectAttributes.decrypt != SET)
+    if(!IS_ATTRIBUTE(encryptKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RC_ATTRIBUTES;
     switch(encryptKey->publicArea.type)
 	{
@@ -678,8 +684,7 @@ CryptSecretDecrypt(
 		    //    seed = XOR(secret, hash, key, nonceCaller, nullNonce)
 		    //    where:
 		    //    secret  the secret parameter from the TPM2_StartAuthHMAC
-		    //            command
-		    //            which contains the seed value
+		    //            command that contains the seed value
 		    //    hash    nameAlg  of tpmKey
 		    //    key     the key or data value in the object referenced by
 		    //            entityHandle in the TPM2_StartAuthHMAC command
@@ -779,7 +784,7 @@ CryptParameterEncryption(
 	{
 	    FAIL(FATAL_ERROR_INTERNAL);
 	}
-    // Compute encryption key by concatenating sessionAuth with extra key
+    // Compute encryption key by concatenating sessionKey with extra key
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
     MemoryConcat2B(&key.b, &extraKey->b, sizeof(key.t.buffer));
     if(session->symmetric.algorithm == TPM_ALG_XOR)
@@ -869,8 +874,8 @@ CryptComputeSymmetricUnique(
 {
     // For parents (symmetric and derivation), use an HMAC to compute
     // the 'unique' field
-    if(publicArea->objectAttributes.restricted
-       && publicArea->objectAttributes.decrypt)
+    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted)
+       && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, decrypt))
 	{
 	    // Unique field is HMAC(sensitive->seedValue, sensitive->sensitive)
 	    HMAC_STATE      hmacState;
@@ -906,12 +911,13 @@ CryptComputeSymmetricUnique(
    use seed, label and context with context being the hash of the template. If the Primary Object is
    in the Endorsement hierarchy, it will also populate proof with ehProof. */
 /* For derived keys, seed will be the secret value from the parent, label and context will be set
-   according to the parameters of TPM2_Derive() and hashAlg will be set which causes the RAND_STATE
+   according to the parameters of TPM2_CreateLoaded() and hashAlg will be set which causes the RAND_STATE
    to be a KDF generator. */
 /* Error Returns Meaning */
 /* TPM_RC_KEY a provided key is not an allowed value */
 /* TPM_RC_KEY_SIZE key size in the public area does not match the size in the sensitive creation
    area for a symmetric key */
+/* TPM_RC_NO_RESULT unable to get random values (only in derivation) */
 /* TPM_RC_RANGE for an RSA key, the exponent is not supported */
 /* TPM_RC_SIZE sensitive data size is larger than allowed for the scheme for a keyed hash object */
 /* TPM_RC_VALUE exponent is not prime or could not find a prime using the provided parameters for an
@@ -933,7 +939,8 @@ CryptCreateObject(
     object->sensitive.authValue = sensitiveCreate->userAuth;
     // If the TPM is the source of the data, set the size of the provided data to
     // zero so that there's no confusion about what to do.
-    if(object->publicArea.objectAttributes.sensitiveDataOrigin)
+    if(IS_ATTRIBUTE(object->publicArea.objectAttributes,
+		    TPMA_OBJECT, sensitiveDataOrigin))
 	sensitiveCreate->data.t.size = 0;
     // Generate the key and unique fields for the asymmetric keys and just the
     // sensitive value for symmetric object
@@ -971,18 +978,20 @@ CryptCreateObject(
 	return result;
     // Create the sensitive seed value
     // If this is a primary key in the endorsement hierarchy, stir the DRBG state
-    // This implementation uses the proof of the storage hierarchy but the
-    // proof of the endorsement hierarchy would also work
+    // This implementation uses both shProof and ehProof to make sure that there
+    // is no leakage of either.
     if(object->attributes.primary && object->attributes.epsHierarchy)
-	DRBG_AdditionalData((DRBG_STATE *)rand, &gp.shProof.b);
-    // Set the seed value to the size of the digest produced by the nameAlg
-    object->sensitive.seedValue.b.size
-	= CryptHashGetDigestSize(publicArea->nameAlg);
-    object->sensitive.seedValue.t.size = CryptRandMinMax(
-							 object->sensitive.seedValue.t.buffer,
-							 object->sensitive.seedValue.t.size * 8,
-							 object->sensitive.seedValue.t.size * 8 / 2, rand);
-    // For symmetric values, need to compute the unique value
+	{
+	    DRBG_AdditionalData((DRBG_STATE *)rand, &gp.shProof.b);
+	    DRBG_AdditionalData((DRBG_STATE *)rand, &gp.ehProof.b);
+	}
+    // Generate a seedValue that is the size of the digest produced by nameAlg
+    object->sensitive.seedValue.t.size =
+	DRBG_Generate(rand, object->sensitive.seedValue.t.buffer,
+		      CryptHashGetDigestSize(publicArea->nameAlg));
+    if(object->sensitive.seedValue.t.size == 0)
+	return TPM_RC_NO_RESULT;
+    // For symmetric objects, need to compute the unique value for the public area
     if(publicArea->type == TPM_ALG_SYMCIPHER
        || publicArea->type == TPM_ALG_KEYEDHASH)
 	{
@@ -992,9 +1001,9 @@ CryptCreateObject(
     else
 	{
 	    // if this is an asymmetric key and it isn't a parent, then
-	    // can get rid of the seed.
-	    if(publicArea->objectAttributes.sign
-	       || !publicArea->objectAttributes.restricted)
+	    // get rid of the seed.
+	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)
+	       || !IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
 		memset(&object->sensitive.seedValue, 0,
 		       sizeof(object->sensitive.seedValue));
 	}
@@ -1648,8 +1657,13 @@ CryptValidateKeys(
 		    if(publicArea->nameAlg != TPM_ALG_NULL)
 			{
 			    TPM2B_DIGEST            compare;
+#if 1
 			    if(sensitive->seedValue.t.size != digestSize)
-				return TPM_RCS_KEY_SIZE;
+#else
+				if((sensitive->seedValue.t.size > digestSize)
+				   || (sensitive->seedValue.t.size < digestSize/2))
+#endif
+				    return TPM_RCS_KEY_SIZE;
 			    CryptComputeSymmetricUnique(publicArea, sensitive, &compare);
 			    if(!MemoryEqual2B(&unique->sym.b, &compare.b))
 				return TPM_RC_BINDING;
@@ -1659,8 +1673,8 @@ CryptValidateKeys(
 	}
     // For a parent, need to check that the seedValue is the correct size for
     // protections. It should be at least half the size of the nameAlg
-    if(publicArea->objectAttributes.restricted
-       && publicArea->objectAttributes.decrypt
+    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted)
+       && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, decrypt)
        && sensitive != NULL
        && publicArea->nameAlg != TPM_ALG_NULL)
 	{
@@ -1681,4 +1695,141 @@ CryptAlgsSetImplemented(
 			)
 {
     AlgorithmGetImplementedVector(&g_implementedAlgorithms);
+}
+/* 10.2.6.6.21 CryptSelectMac() */
+/* This function is used to set the MAC scheme based on the key parameters and the input scheme. */
+/* Error Returns Meaning */
+/* TPM_RC_SCHEME the scheme is not a valid mac scheme */
+/* TPM_RC_TYPE the input key is not a type that supports a mac */
+/* TPM_RC_VALUE the input scheme and the key scheme are not compatible */
+TPM_RC
+CryptSelectMac(
+	       TPMT_PUBLIC             *publicArea,
+	       TPMI_ALG_MAC_SCHEME     *inMac
+	       )
+{
+    TPM_ALG_ID              macAlg = TPM_ALG_NULL;
+    switch(publicArea->type)
+	{
+	  case TPM_ALG_KEYEDHASH:
+	      {
+		  // Local value to keep lines from getting too long
+		  TPMT_KEYEDHASH_SCHEME   *scheme;
+		  scheme = &publicArea->parameters.keyedHashDetail.scheme;
+		  // Expect that the scheme is either HMAC or NULL
+		  if(scheme->scheme != TPM_ALG_NULL)
+		      macAlg = scheme->details.hmac.hashAlg;
+		  break;
+	      }
+	  case TPM_ALG_SYMCIPHER:
+	      {
+		  TPMT_SYM_DEF_OBJECT     *scheme;
+		  scheme = &publicArea->parameters.symDetail.sym;
+		  // Expect that the scheme is either valid symmetric cipher or NULL
+		  if(scheme->algorithm != TPM_ALG_NULL)
+		      macAlg = scheme->mode.sym;
+		  break;
+	      }
+	  default:
+	    return TPM_RCS_TYPE;
+	}
+    // If the input value is not TPM_ALG_NULL ...
+    if(*inMac != TPM_ALG_NULL)
+	{
+	    // ... then either the scheme in the key must be TPM_ALG_NULL or the input
+	    // value must match
+	    if((macAlg != TPM_ALG_NULL) && (*inMac != macAlg))
+		return TPM_RCS_VALUE;
+	}
+    else
+	{
+	    // Since the input value is TPM_ALG_NULL, then the key value can't be
+	    // TPM_ALG_NULL
+	    if(macAlg == TPM_ALG_NULL)
+		return TPM_RCS_VALUE;
+	    *inMac = macAlg;
+	}
+    if(!CryptMacIsValidForKey(publicArea->type, *inMac, FALSE))
+	return TPM_RCS_SCHEME;
+    return TPM_RC_SUCCESS;
+}
+/* 10.2.6.6.22 CryptMacIsValidForKey() */
+/* Check to see if the key type is compatible with the mac type */
+BOOL
+CryptMacIsValidForKey(
+		      TPM_ALG_ID          keyType,
+		      TPM_ALG_ID          macAlg,
+		      BOOL                flag
+		      )
+{
+    switch(keyType)
+	{
+	  case TPM_ALG_KEYEDHASH:
+	    return CryptHashIsValidAlg(macAlg, flag);
+	    break;
+	  case TPM_ALG_SYMCIPHER:
+	    return CryptSmacIsValidAlg(macAlg, flag);
+	    break;
+	  default:
+	    break;
+	}
+    return FALSE;
+}
+/* 10.2.6.6.23 CryptSmacIsValidAlg() */
+/* This function is used to test if an algorithm is a supported SMAC algorithm. It needs to be
+   updated as new algorithms are added. */
+BOOL
+CryptSmacIsValidAlg(
+		    TPM_ALG_ID      alg,
+		    BOOL            FLAG        // IN: Indicates if TPM_ALG_NULL is valid
+		    )
+{
+    switch (alg)
+	{
+#ifdef TPM_ALG_CMAC
+	  case TPM_ALG_CMAC:
+	    return TRUE;
+	    break;
+#endif
+	  case TPM_ALG_NULL:
+	    return FLAG;
+	    break;
+	  default:
+	    return FALSE;
+	}
+}
+/* 10.2.6.6.24 CryptSymModeIsValid() */
+/* Function checks to see if an algorithm ID is a valid, symmetric block cipher mode for the TPM. If
+   flag is SET, them TPM_ALG_NULL is a valid mode. not include the modes used for SMAC */
+BOOL
+CryptSymModeIsValid(
+		    TPM_ALG_ID          mode,
+		    BOOL                flag
+		    )
+{
+    switch(mode)
+	{
+#if         ALG_CTR
+	  case TPM_ALG_CTR:
+#endif // ALG_CTR
+#if         ALG_OFB
+	  case TPM_ALG_OFB:
+#endif // ALG_OFB
+#if         ALG_CBC
+	  case TPM_ALG_CBC:
+#endif // ALG_CBC
+#if         ALG_CFB
+	  case TPM_ALG_CFB:
+#endif // ALG_CFB
+#if         ALG_ECB
+	  case TPM_ALG_ECB:
+#endif // ALG_ECB
+	    return TRUE;
+	  case TPM_ALG_NULL:
+	    return flag;
+	    break;
+	  default:
+	    break;
+	}
+    return FALSE;
 }

@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Object.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -76,7 +76,6 @@ ObjectFlush(
 	    )
 {
     object->attributes.occupied = CLEAR;
-    //    MemorySet(&object->attributes, 0, sizeof(OBJECT_ATTRIBUTES));
 }
 /* 8.6.3.2 ObjectSetInUse() */
 /* This access function sets the occupied attribute of an object slot. */
@@ -317,9 +316,12 @@ ObjectSetLoadedAttributes(
 			  )
 {
     OBJECT              *parent = HandleToObject(parentHandle);
+    TPMA_OBJECT          objectAttributes = object->publicArea.objectAttributes;
+    //
     // Copy the stClear attribute from the public area. This could be overwritten
     // if the parent has stClear SET
-    object->attributes.stClear = object->publicArea.objectAttributes.stClear;
+    object->attributes.stClear =
+	IS_ATTRIBUTE(objectAttributes, TPMA_OBJECT, stClear);
     // If parent handle is a permanent handle, it is a primary (unless it is NULL
     if(parent == NULL)
 	{
@@ -346,7 +348,7 @@ ObjectSetLoadedAttributes(
 	{
 	    // is this a stClear object
 	    object->attributes.stClear =
-		(object->publicArea.objectAttributes.stClear == SET
+		(IS_ATTRIBUTE(objectAttributes, TPMA_OBJECT, stClear)
 		 || (parent->attributes.stClear == SET));
 	    object->attributes.epsHierarchy = parent->attributes.epsHierarchy;
 	    object->attributes.spsHierarchy = parent->attributes.spsHierarchy;
@@ -363,9 +365,9 @@ ObjectSetLoadedAttributes(
     else
 	{
 	    // check attributes for different types of parents
-	    if(object->publicArea.objectAttributes.restricted
+	    if(IS_ATTRIBUTE(objectAttributes, TPMA_OBJECT, restricted)
 	       && !object->attributes.publicOnly
-	       && object->publicArea.objectAttributes.decrypt
+	       && IS_ATTRIBUTE(objectAttributes, TPMA_OBJECT, decrypt)
 	       && object->publicArea.nameAlg != TPM_ALG_NULL)
 		{
 		    // This is a parent. If it is not a KEYEDHASH, it is an ordinary parent.
@@ -404,6 +406,7 @@ ObjectLoad(
 {
     TPM_RC           result = TPM_RC_SUCCESS;
     BOOL             doCheck;
+    //
     // Do validations of public area object descriptions
     // Is this public only or a no-name object?
     if(sensitive == NULL || publicArea->nameAlg == TPM_ALG_NULL)
@@ -414,6 +417,13 @@ ObjectLoad(
 	}
     else
 	{
+	    // For any sensitive area, make sure that the seedSize is no larger than the
+	    // digest size of nameAlg
+#if 1 //??
+	    if(sensitive->seedValue.t.size
+	       > CryptHashGetDigestSize(publicArea->nameAlg))
+		return TPM_RC_SENSITIVE;    // not a 'safe' return code so no add
+#endif
 	    // Check attributes and schemes for consistency
 	    result = PublicAttributesValidation(parent, publicArea);
 	}
@@ -426,7 +436,8 @@ ObjectLoad(
     // If the parent is not NULL, then this is an ordinary load and we only check
     // if the parent is not fixedTPM
     else if(parent != NULL)
-	doCheck = parent->publicArea.objectAttributes.fixedTPM == CLEAR;
+	doCheck = !IS_ATTRIBUTE(parent->publicArea.objectAttributes,
+				TPMA_OBJECT, fixedTPM);
     else
 	// This is a loadExternal. Check everything.
 	// Note: the check functions will filter things based on the name algorithm
@@ -495,7 +506,7 @@ AllocateSequenceSlot(
 	    // be marked as temporary so that it can't be persisted
 	    object->attributes.temporary = SET;
 	    // A sequence object is DA exempt.
-	    object->objectAttributes.noDA = SET;
+	    SET_ATTRIBUTE(object->objectAttributes, TPMA_OBJECT, noDA);
 	    // Copy the authorization value
 	    if(auth != NULL)
 		object->auth = *auth;
@@ -508,6 +519,7 @@ AllocateSequenceSlot(
 /* This function creates an internal HMAC sequence object. */
 /* Error Returns Meaning */
 /* TPM_RC_OBJECT_MEMORY if there is no free slot for an object */
+#if defined TPM_CC_HMAC_Start || defined TPM_CC_MAC_Start
 TPM_RC
 ObjectCreateHMACSequence(
 			 TPMI_ALG_HASH    hashAlg,       // IN: hash algorithm
@@ -517,17 +529,27 @@ ObjectCreateHMACSequence(
 			 )
 {
     HASH_OBJECT         *hmacObject;
+    //
     // Try to allocate a slot for new object
     hmacObject = AllocateSequenceSlot(newHandle, auth);
     if(hmacObject == NULL)
 	return TPM_RC_OBJECT_MEMORY;
     // Set HMAC sequence bit
     hmacObject->attributes.hmacSeq = SET;
-    CryptHmacStart(&hmacObject->state.hmacState, hashAlg,
-		   keyObject->sensitive.sensitive.bits.b.size,
-		   keyObject->sensitive.sensitive.bits.b.buffer);
+#ifndef SMAC_IMPLEMENTED
+    if(CryptHmacStart(&hmacObject->state.hmacState, hashAlg,
+		      keyObject->sensitive.sensitive.bits.b.size,
+		      keyObject->sensitive.sensitive.bits.b.buffer) == 0)
+#else
+	if(CryptMacStart(&hmacObject->state.hmacState,
+			 &keyObject->publicArea.parameters,
+			 hashAlg, &keyObject->sensitive.sensitive.any.b) == 0)
+#endif // SMAC_IMPLEMENTED
+	    return TPM_RC_FAILURE;
     return TPM_RC_SUCCESS;
 }
+#endif
+
 /* 8.6.3.18 ObjectCreateHashSequence() */
 /* This function creates a hash sequence object. */
 /* Error Returns Meaning */
@@ -587,7 +609,7 @@ ObjectTerminateEvent(
     if(hashObject->attributes.eventSeq)
 	{
 	    // If it is, close any open hash contexts. This is done in case
-	    // the crypto implementation has some context values that need to be
+	    // the cryptographic implementation has some context values that need to be
 	    // cleaned up (hygiene).
 	    //
 	    for(count = 0; CryptHashGetAlgByIndex(count) != TPM_ALG_NULL; count++)
@@ -738,18 +760,15 @@ ObjectLoadEvict(
 TPM2B_NAME *
 ObjectComputeName(
 		  UINT32           size,          // IN: the size of the area to digest
-		  BYTE            *publicArea,    // IN: the public area to digest area
+		  BYTE            *publicArea,    // IN: the public area to digest
 		  TPM_ALG_ID       nameAlg,       // IN: the hash algorithm to use
 		  TPM2B_NAME      *name           // OUT: Computed name
 		  )
 {
-    HASH_STATE           hashState;         // hash state
-    // Start hash stack
-    name->t.size = CryptHashStart(&hashState, nameAlg);
-    // Adding public area
-    CryptDigestUpdate(&hashState, size, publicArea);
-    // Complete hash leaving room for the name algorithm
-    CryptHashEnd(&hashState, name->t.size, &name->t.name[2]);
+    // Hash the publicArea into the name buffer leaving room for the nameAlg
+    name->t.size = CryptHashBlock(nameAlg, size, publicArea,
+				  sizeof(name->t.name) - 2,
+				  &name->t.name[2]);
     // set the nameAlg
     UINT16_TO_BYTE_ARRAY(nameAlg, name->t.name);
     name->t.size += 2;
@@ -781,20 +800,11 @@ PublicMarshalAndComputeName(
 	}
     return name;
 }
-/* 8.6.3.27 AlgOfName() */
-/* This function as a macro returns the nameAlg from a TPM2B_NAME. */
-TPMI_ALG_HASH
-AlgOfName(
-	  TPM2B_NAME      *name
-	  )
-{
-    return BYTE_ARRAY_TO_UINT16(name->t.name);
-}
 /* 8.6.3.28 ComputeQualifiedName() */
 /* This function computes the qualified name of an object. */
 void
 ComputeQualifiedName(
-		     TPM_HANDLE       parentHandle,  // IN: parent's name
+		     TPM_HANDLE       parentHandle,  // IN: parent's handle
 		     TPM_ALG_ID       nameAlg,       // IN: name hash
 		     TPM2B_NAME      *name,          // IN: name of the object
 		     TPM2B_NAME      *qualifiedName  // OUT: qualified name of the object
@@ -804,6 +814,7 @@ ComputeQualifiedName(
     TPM2B_NAME      parentName;
     if(parentHandle == TPM_RH_UNASSIGNED)
 	{
+	    MemoryCopy2B(&qualifiedName->b, &name->b, sizeof(qualifiedName->t.name));
 	    *qualifiedName = *name;
 	}
     else
@@ -838,10 +849,11 @@ ObjectIsStorage(
 {
     OBJECT           *object = HandleToObject(handle);
     TPMT_PUBLIC      *publicArea = ((object != NULL) ? &object->publicArea : NULL);
+    //
     return (publicArea != NULL
-	    && publicArea->objectAttributes.restricted == SET
-	    && publicArea->objectAttributes.decrypt == SET
-	    && publicArea->objectAttributes.sign == CLEAR
+	    && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted)
+	    && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, decrypt)
+	    && !IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)
 	    && (object->publicArea.type == ALG_RSA_VALUE
 		|| object->publicArea.type == ALG_ECC_VALUE));
 }

@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -72,22 +72,6 @@
 #include "Tpm.h"
 #if MATH_LIB == OSSL
 #include "TpmToOsslMath_fp.h"
-/*     B.2.3.2.3. Functions */
-#if 0
-INLINE  void
-SetSizeOsslToTpm(
-		 bigNum        a,
-		 BIGNUM       *b
-		 )
-{
-    if(a != NULL)
-	{
-	    pAssert(((crypt_uword_t *)b->d == &a->d[0])
-		    && ((unsigned)b->top <= a->allocated));
-	    a->size = b->top;
-	}
-}
-#endif
 /* B.2.3.2.3.1. OsslToTpmBn() */
 /* This function converts an OpenSSL() BIGNUM to a TPM bignum. In this implementation it is assumed
    that OpenSSL() used the same format for a big number as does the TPM -- an array of native-endian
@@ -220,8 +204,11 @@ BnModMult(
     pAssert(BnGetAllocated(result) >= BnGetSize(modulus));
     OK = BN_mul(bnTemp, bnOp1, bnOp2, CTX);
     OK = OK && BN_div(NULL, bnResult, bnTemp, bnMod, CTX);
-    result->size = bnResult->top;
-    OsslToTpmBn(result, bnResult);
+    if(OK)
+	{
+	    result->size = bnResult->top;
+	    OsslToTpmBn(result, bnResult);
+	}
     OSSL_LEAVE();
     return OK;
 }
@@ -244,13 +231,17 @@ BnMult(
 	    (BITS_TO_CRYPT_WORDS(BnSizeInBits(multiplicand)
 				 + BnSizeInBits(multiplier))));
     OK = BN_mul(bnTemp, bnA, bnB, CTX);
-    OsslToTpmBn(temp, bnTemp);
+    if(OK)
+	{
+	    OsslToTpmBn(temp, bnTemp);
+	    BnCopy(result, temp);
+	}
     OSSL_LEAVE();
-    BnCopy(result, temp);
     return OK;
 }
 /* B.2.3.2.3.4. BnDiv() */
-/* This function divides two bigNum values. The function always returns TRUE. */
+/* This function divides two bigNum values. The function returns FALSE if there is an error in the
+   operation. */
 LIB_EXPORT BOOL
 BnDiv(
       bigNum               quotient,
@@ -282,8 +273,11 @@ BnDiv(
 	    pAssert((remainder == NULL)
 		    || (remainder->allocated >= divisor->size));
 	    OK = BN_div(bnQ, bnR, bnDend, bnSor, CTX);
-	    OsslToTpmBn(quotient, bnQ);
-	    OsslToTpmBn(remainder, bnR);
+	    if(OK)
+		{
+		    OsslToTpmBn(quotient, bnQ);
+		    OsslToTpmBn(remainder, bnR);
+		}
 	}
     DEBUG_PRINT("In BnDiv:\n");
     BIGNUM_PRINT("   bnDividend: ", bnDend, TRUE);
@@ -310,8 +304,11 @@ BnGcd(
     BOOL            OK;
     pAssert(gcd != NULL);
     OK = BN_gcd(bnGcd, bn1, bn2, CTX);
-    OsslToTpmBn(gcd, bnGcd);
-    gcd->size = bnGcd->top;
+    if(OK)
+	{
+	    OsslToTpmBn(gcd, bnGcd);
+	    gcd->size = bnGcd->top;
+	}
     OSSL_LEAVE();
     return OK;
 }
@@ -334,7 +331,10 @@ BnModExp(
     BOOL            OK;
     //
     OK = BN_mod_exp(bnResult, bnN, bnE, bnM, CTX);
-    OsslToTpmBn(result, bnResult);
+    if(OK)
+	{
+	    OsslToTpmBn(result, bnResult);
+	}
     OSSL_LEAVE();
     return OK;
 }
@@ -353,7 +353,10 @@ BnModInverse(
     BIG_INITIALIZED(bnM, modulus);
     BOOL                OK;
     OK = (BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
-    OsslToTpmBn(result, bnResult);
+    if(OK)
+	{
+	    OsslToTpmBn(result, bnResult);
+	}
     OSSL_LEAVE();
     return OK;
 }

@@ -3,7 +3,7 @@
 /*			    Manage the session context counter 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Session.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Session.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -199,9 +199,9 @@ SessionIsSaved(
 	return FALSE;
     return TRUE;
 }
-/* 8.9.5.3 SequenceNumbereForSavedContextIsValid() */
+/* 8.9.5.3 SequenceNumberForSavedContextIsValid() */
 BOOL
-SequenceNumbereForSavedContextIsValid(
+SequenceNumberForSavedContextIsValid(
 				      TPMS_CONTEXT    *context        // IN: pointer to a context
 				      // structure to be validated
 				      )

@@ -3,7 +3,7 @@
 /*		fUnctions that return the type of a handle.	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Handle.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Handle.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -79,7 +79,6 @@ HandleGetType(
 /* This function returns the permanent handle that is equal to the input value or is the next higher
    value. If there is no handle with the input value and there is no next higher value, it returns
    0: */
-/* Return Values Meaning */
 TPM_HANDLE
 NextPermanentHandle(
 		    TPM_HANDLE       inHandle       // IN: the handle to check

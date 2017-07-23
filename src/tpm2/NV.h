@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NV.h 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: NV.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,53 +62,43 @@
 #ifndef NV_H
 #define NV_H
 
+/* 5.14.1	Index Type Definitions */
 /* These definitions allow the same code to be used pre and post 1.21. The main action is to
    redefine the index type values from the bit values. Use TPM_NT_ORDINARY to indicate if the TPM_NT
    type is defined */
 #ifdef     TPM_NT_ORDINARY
-#   define NV_ATTRIBUTES_TO_TYPE(attributes) (attributes.TPM_NT)
+/* If TPM_NT_ORDINARY is defined, then the TPM_NT field is present in a TPMA_NV */
+#   define GET_TPM_NT(attributes) GET_ATTRIBUTE(attributes, TPMA_NV, TPM_NT)
 #else
-#   define NV_ATTRIBUTES_TO_TYPE(attributes)		    \
-    (   attributes.TPMA_NV_COUNTER					\
-	+   (attributes.TPMA_NV_BITS << 1)				\
-	+   (attributes.TPMA_NV_EXTEND << 2)				\
+/* If TPM_NT_ORDINARY is not defined, then need to synthesize it from the attributes */
+#   define GetNv_TPM_NV(attributes)					\
+    (   IS_ATTRIBUTE(attributes, TPMA_NV, COUNTER)			\
+	+   (IS_ATTRIBUTE(attributes, TPMA_NV, BITS) << 1)		\
+	+   (IS_ATTRIBUTE(attributes, TPMA_NV, EXTEND) << 2)		\
 	)
+#   define TPM_NT_ORDINARY (0)
+#   define TPM_NT_COUNTER  (1)
+#   define TPM_NT_BITS     (2)
+#   define TPM_NT_EXTEND   (4)
 #endif
-/* 5.17.2 Attribute Macros */
+/* 5.14.2	Attribute Macros */
 /* These macros are used to isolate the differences in the way that the index type changed in
    version 1.21 of the specification */
-#ifdef TPM_NT_ORDINARY
-#   define  IsNvOrdinaryIndex(attributes) (attributes.TPM_NT == TPM_NT_ORDINARY)
-#else
 #   define IsNvOrdinaryIndex(attributes)				\
-    ((attributes.TPMA_NV_COUNTER == CLEAR)				\
-    && (attributes.TPMA_NV_BITS == CLEAR)				\
-    && (attributes.TPMA_NV_EXTEND == CLEAR)
-#   define TPM_NT_ORDINARY  (0)
-#endif
-#ifdef  TPM_NT_COUNTER
-#   define  IsNvCounterIndex(attributes) (attributes.TPM_NT == TPM_NT_COUNTER)
-#else
-#   define IsNvCounterIndex(attributes) (attributes.TPMA_NV_COUNTER == SET)
-#   define  TPM_NT_COUNTER  (1)
-#endif
-#ifdef  TPM_NT_BITS
-#   define  IsNvBitsIndex(attributes) (attributes.TPM_NT == TPM_NT_BITS)
-#else
-#   define  IsNvBitsIndex(attributes) (attributes.TPMA_NV_BITS == SET)
-#   define  TPM_NT_BITS (2)
-#endif
-#ifdef  TPM_NT_EXTEND
-#   define  IsNvExtendIndex(attributes) (attributes.TPM_NT == TPM_NT_EXTEND)
-#else
-#   define IsNvExtendIndex(attributes) (attributes.TPMA_NV_EXTEND == SET)
-#   define  TPM_NT_EXTEND   (4)
-#endif
+    (GET_TPM_NT(attributes) == TPM_NT_ORDINARY)
+#   define  IsNvCounterIndex(attributes)				\
+    (GET_TPM_NT(attributes) == TPM_NT_COUNTER)
+#   define  IsNvBitsIndex(attributes)					\
+    (GET_TPM_NT(attributes) == TPM_NT_BITS)
+#   define  IsNvExtendIndex(attributes)					\
+    (GET_TPM_NT(attributes) == TPM_NT_EXTEND)
 #ifdef TPM_NT_PIN_PASS
-#   define  IsNvPinPassIndex(attributes) (attributes.TPM_NT == TPM_NT_PIN_PASS)
+#   define  IsNvPinPassIndex(attributes)				\
+    (GET_TPM_NT(attributes) == TPM_NT_PIN_PASS)
 #endif
 #ifdef TPM_NT_PIN_FAIL
-#   define  IsNvPinFailIndex(attributes) (attributes.TPM_NT == TPM_NT_PIN_FAIL)
+#   define  IsNvPinFailIndex(attributes)				\
+    (GET_TPM_NT(attributes) == TPM_NT_PIN_FAIL)
 #endif
 typedef struct {
     UINT32      size;
@@ -118,7 +108,7 @@ typedef struct {
     (sizeof(UINT32)  + sizeof(TPM_HANDLE) + sizeof(OBJECT))
 #define NV_INDEX_COUNTER_SIZE						\
     (sizeof(UINT32) + sizeof(NV_INDEX) + sizeof(UINT64))
-#define NV_RAM_INDEX_COUNTER_SIZE					\
+#define NV_RAM_INDEX_COUNTER_SIZE			\
     (sizeof(NV_RAM_HEADER) + sizeof(UINT64))
 typedef struct {
     UINT32          size;
@@ -130,22 +120,20 @@ typedef struct {
    UINT32 values so that there is no padding between the UINT32 list end marker and the UIT64m()
    maxCounter value. */
 typedef UINT32 NV_LIST_TERMINATOR[3];
-
-/* 5.15.3	Orderly RAM Values */
-
+/* 5.14.3	Orderly RAM Values */
 /* The following defines are for accessing orderly RAM values. This is the initialize for the RAM
    reference iterator. */
 #define     NV_RAM_REF_INIT         0
 /* This is the starting address of the RAM space used for orderly data */
-#define     RAM_ORDERLY_START					\
-	    (&s_indexOrderlyRam[0])
+#define     RAM_ORDERLY_START			\
+    (&s_indexOrderlyRam[0])
 /* This is the offset within NV that is used to save the orderly data on an orderly shutdown. */
-#define     NV_ORDERLY_START					\
-	    (NV_INDEX_RAM_DATA)
+#define     NV_ORDERLY_START			\
+    (NV_INDEX_RAM_DATA)
 /* This is the end of the orderly RAM space. It is actually the first byte after the last byte of
    orderly RAM data */
 #define     RAM_ORDERLY_END						\
-	    (RAM_ORDERLY_START + sizeof(s_indexOrderlyRam))
+    (RAM_ORDERLY_START + sizeof(s_indexOrderlyRam))
 /* This is the end of the orderly space in NV memory. As with RAM_ORDERLY_END, it is actually the
    offset of the first byte after the end of the NV orderly data. */
 #define     NV_ORDERLY_END						\
@@ -153,17 +141,17 @@ typedef UINT32 NV_LIST_TERMINATOR[3];
 /* Macro to check that an orderly RAM address is with range. */
 #define ORDERLY_RAM_ADDRESS_OK(start, offset)				\
     ((start >= RAM_ORDERLY_START) && ((start + offset - 1) < RAM_ORDERLY_END))
-#define RETURN_IF_NV_IS_NOT_AVAILABLE					\
-    {									\
-	if(g_NvStatus != TPM_RC_SUCCESS)				\
-	    return g_NvStatus;						\
+#define RETURN_IF_NV_IS_NOT_AVAILABLE			    \
+    {							    \
+	if(g_NvStatus != TPM_RC_SUCCESS)			    \
+	    return g_NvStatus;					    \
     }
 /* Routinely have to clear the orderly flag and fail if the NV is not available so that it can be
    cleared. */
-#define RETURN_IF_ORDERLY						\
-    {									\
-	if(NvClearOrderly() != TPM_RC_SUCCESS)				\
-	    return g_NvStatus;						\
+#define RETURN_IF_ORDERLY				    \
+    {							    \
+	if(NvClearOrderly() != TPM_RC_SUCCESS)			    \
+	    return g_NvStatus;					    \
     }
 #define NV_IS_AVAILABLE     (g_NvStatus == TPM_RC_SUCCESS)
 #define IS_ORDERLY(value)   (value < SU_DA_USED_VALUE)
@@ -171,5 +159,4 @@ typedef UINT32 NV_LIST_TERMINATOR[3];
 /* Macro to set the NV UPDATE_TYPE. This deals with the fact that the update is possibly a
    combination of UT_NV and UT_ORDERLY. */
 #define SET_NV_UPDATE(type)     g_updateNV |= (type)
-
-#endif
+#endif  // _NV_H_

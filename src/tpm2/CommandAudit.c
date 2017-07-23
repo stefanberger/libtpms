@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandAudit.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CommandAudit.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -214,8 +214,9 @@ CommandAuditCapGetCCList(
 			{
 			    // If we have not filled up the return list, add this command
 			    // code to its
-			    TPM_CC      cc = s_ccAttr[commandIndex].commandIndex;
-			    if(s_ccAttr[commandIndex].V)
+			    TPM_CC      cc = GET_ATTRIBUTE(s_ccAttr[commandIndex],
+							   TPMA_CC, commandIndex);
+			    if(IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V))
 				cc += (1 << 29);
 			    commandList->commandCodes[commandList->count] = cc;
 			    commandList->count++;

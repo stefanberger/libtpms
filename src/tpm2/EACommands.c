@@ -3,7 +3,7 @@
 /*			    Enhanced Authorization Commands			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EACommands.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: EACommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -155,18 +155,23 @@ TPM2_PolicySigned(
        && session->attributes.isTrialPolicy == CLEAR)
 	{
 	    BOOL        expiresOnReset = (in->nonceTPM.t.size == 0);
-	    // Generate timeout buffer.  The format of output timeout buffer is
-	    // TPM-specific.
-	    // In this implementation, the timeout parameter is the timeout relative
-	    // to g_time with a one byte flag to indicate if the ticket will expire on
-	    // TPM Reset
-	    out->timeout.t.size = sizeof(authTimeout) + 1;
-	    UINT64_TO_BYTE_ARRAY(authTimeout, out->timeout.t.buffer);
-	    out->timeout.t.buffer[sizeof(authTimeout)] = (BYTE)expiresOnReset;
 	    // Compute policy ticket
+	    authTimeout &= ~EXPIRATION_BIT;
 	    TicketComputeAuth(TPM_ST_AUTH_SIGNED, EntityGetHierarchy(in->authObject),
 			      authTimeout, expiresOnReset, &in->cpHashA, &in->policyRef,
 			      &entityName, &out->policyTicket);
+	    // Generate timeout buffer.  The format of output timeout buffer is
+	    // TPM-specific.
+	    // Note: In this implementation, the timeout buffer value is computed after
+	    // the ticket is produced so, when the ticket is checked, the expiration
+	    // flag needs to be extracted before the ticket is checked.
+	    // In the Windows compatible version, the least-significant bit of the
+	    // timeout value is used as a flag to indicate if the authorization expires
+	    // on reset. The flag is the MSb.
+	    out->timeout.t.size = sizeof(authTimeout);
+	    if(expiresOnReset)
+		authTimeout |= EXPIRATION_BIT;
+	    UINT64_TO_BYTE_ARRAY(authTimeout, out->timeout.t.buffer);
 	}
     else
 	{
@@ -231,18 +236,23 @@ TPM2_PolicySecret(
        && !NvIsPinPassIndex(in->authHandle))
 	{
 	    BOOL        expiresOnReset = (in->nonceTPM.t.size == 0);
-	    // Generate timeout buffer.  The format of output timeout buffer is
-	    // TPM-specific.
-	    // In this implementation, the timeout parameter is the timeout relative
-	    // to g_time with a one byte flag to indicate if the ticket will expire on
-	    // TPM Reset
-	    out->timeout.t.size = sizeof(authTimeout) + 1;
-	    UINT64_TO_BYTE_ARRAY(authTimeout, out->timeout.t.buffer);
-	    out->timeout.t.buffer[sizeof(authTimeout)] = (BYTE)expiresOnReset;
 	    // Compute policy ticket
+	    authTimeout &= ~EXPIRATION_BIT;
 	    TicketComputeAuth(TPM_ST_AUTH_SECRET, EntityGetHierarchy(in->authHandle),
 			      authTimeout, expiresOnReset, &in->cpHashA, &in->policyRef,
 			      &entityName, &out->policyTicket);
+	    // Generate timeout buffer.  The format of output timeout buffer is
+	    // TPM-specific.
+	    // Note: In this implementation, the timeout buffer value is computed after
+	    // the ticket is produced so, when the ticket is checked, the expiration
+	    // flag needs to be extracted before the ticket is checked.
+	    out->timeout.t.size = sizeof(authTimeout);
+	    // In the Windows compatible version, the least-significant bit of the
+	    // timeout value is used as a flag to indicate if the authorization expires
+	    // on reset. The flag is the MSb.
+	    if(expiresOnReset)
+		authTimeout |= EXPIRATION_BIT;
+	    UINT64_TO_BYTE_ARRAY(authTimeout, out->timeout.t.buffer);
 	}
     else
 	{
@@ -287,12 +297,16 @@ TPM2_PolicyTicket(
     if(session->attributes.isTrialPolicy)
 	return TPM_RCS_ATTRIBUTES + RC_PolicyTicket_policySession;
     // Restore timeout data.  The format of timeout buffer is TPM-specific.
-    // In this implementation, we simply copy the value of timeout to the
-    // buffer.
-    if(in->timeout.t.size != sizeof(UINT64) + 1)
+    // In this implementation, the most significant bit of the timeout value is
+    // used as the flag to indicate that the ticket expires on TPM Reset or
+    // TPM Restart. The flag has to be removed before the parameters and ticket
+    // are checked.
+    if(in->timeout.t.size != sizeof(UINT64))
 	return TPM_RCS_SIZE + RC_PolicyTicket_timeout;
     authTimeout = BYTE_ARRAY_TO_UINT64(in->timeout.t.buffer);
-    expiresOnReset = in->timeout.t.buffer[sizeof(authTimeout)];
+    // extract the flag
+    expiresOnReset = (authTimeout & EXPIRATION_BIT) != 0;
+    authTimeout &= ~EXPIRATION_BIT;
     // Do the normal checks on the cpHashA and timeout values
     result = PolicyParameterChecks(session, authTimeout,
 				   &in->cpHashA,
@@ -898,7 +912,7 @@ TPM2_PolicyAuthorize(
     hashAlg = BYTE_ARRAY_TO_UINT16(in->keySign.t.name);
     // 'keySign' parameter needs to use a supported hash algorithm, otherwise
     // can't tell how large the digest should be
-    if(!CryptHashIsImplemented(hashAlg, 0))
+    if(!CryptHashIsValidAlg(hashAlg, FALSE))
 	return TPM_RCS_HASH + RC_PolicyAuthorize_keySign;
     digestSize = CryptHashGetDigestSize(hashAlg);
     if(digestSize != (in->keySign.t.size - 2))

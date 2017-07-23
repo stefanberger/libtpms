@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HashCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: HashCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -79,10 +79,12 @@ TPM2_HMAC_Start(
     if(publicArea->type != TPM_ALG_KEYEDHASH)
 	return TPM_RCS_TYPE + RC_HMAC_Start_handle;
     // and that it is unrestricted
-    if(publicArea->objectAttributes.restricted == SET)
+    if (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
+	//if(publicArea->objectAttributes.restricted == SET)	kgold
 	return TPM_RCS_ATTRIBUTES + RC_HMAC_Start_handle;
     // and that it is a signing key
-    if(publicArea->objectAttributes.sign != SET)
+    if (!IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
+	// if(publicArea->objectAttributes.sign != SET)		kgold
 	return TPM_RCS_KEY + RC_HMAC_Start_handle;
     // See if the key has a default
     if(publicArea->parameters.keyedHashDetail.scheme.scheme == TPM_ALG_NULL)
@@ -109,6 +111,53 @@ TPM2_HMAC_Start(
 				    &out->sequenceHandle);
 }
 #endif // CC_HMAC_Start
+#include "Tpm.h"
+#include "MAC_Start_fp.h"
+#ifdef TPM_CC_MAC_Start  // Conditional expansion of this file
+/* Error Returns Meaning */
+/* TPM_RC_ATTRIBUTES key referenced by handle is not a signing key or is restricted */
+/* TPM_RC_OBJECT_MEMORY no space to create an internal object */
+/* TPM_RC_KEY key referenced by handle is not an HMAC key */
+/* TPM_RC_VALUE hashAlg is not compatible with the hash algorithm of the scheme of the object
+   referenced by handle */
+TPM_RC
+TPM2_MAC_Start(
+	       MAC_Start_In   *in,            // IN: input parameter list
+	       MAC_Start_Out  *out            // OUT: output parameter list
+	       )
+{
+    OBJECT                  *keyObject;
+    TPMT_PUBLIC             *publicArea;
+    TPM_RC                   result;
+    // Input Validation
+    // Get HMAC key object and public area pointers
+    keyObject = HandleToObject(in->handle);
+    publicArea = &keyObject->publicArea;
+    // Make sure that the key can do what is required
+    result = CryptSelectMac(publicArea, &in->inScheme);
+    // If the key is not able to do a MAC, indicate that the handle selects an
+    // object that can't do a MAC
+    if(result == TPM_RCS_TYPE)
+	return TPM_RCS_TYPE + RC_MAC_Start_handle;
+    // If there is another error type, indicate that the scheme and key are not
+    // compatible
+    if(result != TPM_RC_SUCCESS)
+	return RcSafeAddToResult(result, RC_MAC_Start_inScheme);
+    // Make sure that the key is not restricted
+    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
+	return TPM_RCS_ATTRIBUTES + RC_MAC_Start_handle;
+    // and that it is a signing key
+    if(!IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
+	return TPM_RCS_KEY + RC_MAC_Start_handle;
+    // Internal Data Update
+    // Create a HMAC sequence object. A TPM_RC_OBJECT_MEMORY error may be
+    // returned at this point
+    return ObjectCreateHMACSequence(in->inScheme,
+				    keyObject,
+				    &in->auth,
+				    &out->sequenceHandle);
+}
+#endif // CC_MAC_Start
 #include "Tpm.h"
 #include "HashSequenceStart_fp.h"
 #ifdef TPM_CC_HashSequenceStart  // Conditional expansion of this file
@@ -177,7 +226,7 @@ TPM2_SequenceUpdate(
 	        }
 	    else if(object->attributes.hmacSeq == SET)
 	        {
-	            // Update sequence object hash/HMAC stack
+	            // Update sequence object HMAC stack
 	            CryptDigestUpdate2B(&hashObject->state.hmacState.hashState,
 	                                &in->buffer.b);
 	        }
@@ -188,72 +237,77 @@ TPM2_SequenceUpdate(
 #include "Tpm.h"
 #include "SequenceComplete_fp.h"
 #ifdef TPM_CC_SequenceComplete  // Conditional expansion of this file
+/* Error Returns Meaning */
+/* TPM_RC_MODE sequenceHandle does not reference a hash or HMAC sequence object */
 TPM_RC
 TPM2_SequenceComplete(
 		      SequenceComplete_In     *in,            // IN: input parameter list
 		      SequenceComplete_Out    *out            // OUT: output parameter list
 		      )
 {
-    OBJECT                      *object;
+    HASH_OBJECT                      *hashObject;
     // Input validation
     // Get hash object pointer
-    object = HandleToObject(in->sequenceHandle);
+    hashObject = (HASH_OBJECT *)HandleToObject(in->sequenceHandle);
     // input handle must be a hash or HMAC sequence object.
-    if(object->attributes.hashSeq == CLEAR
-       && object->attributes.hmacSeq == CLEAR)
+    if(hashObject->attributes.hashSeq == CLEAR
+       && hashObject->attributes.hmacSeq == CLEAR)
 	return TPM_RCS_MODE + RC_SequenceComplete_sequenceHandle;
     // Command Output
-    if(object->attributes.hashSeq == SET)           // sequence object for hash
+    if(hashObject->attributes.hashSeq == SET)           // sequence object for hash
 	{
-	    // Update last piece of data
-	    HASH_OBJECT     *hashObject = (HASH_OBJECT *)object;
 	    // Get the hash algorithm before the algorithm is lost in CryptHashEnd
 	    TPM_ALG_ID       hashAlg = hashObject->state.hashState[0].hashAlg;
+	    // Update last piece of the data
 	    CryptDigestUpdate2B(&hashObject->state.hashState[0], &in->buffer.b);
 	    // Complete hash
-	    out->result.t.size
-		= CryptHashGetDigestSize(
-					 CryptHashGetContextAlg(&hashObject->state.hashState[0]));
-	    CryptHashEnd2B(&hashObject->state.hashState[0], &out->result.b);
+	    out->result.t.size = CryptHashEnd(&hashObject->state.hashState[0],
+					      sizeof(out->result.t.buffer),
+					      out->result.t.buffer);
 	    // Check if the first block of the sequence has been received
 	    if(hashObject->attributes.firstBlock == CLEAR)
-	        {
-	            // If not, then this is the first block so see if it is 'safe'
-	            // to sign.
-	            if(TicketIsSafe(&in->buffer.b))
-	                hashObject->attributes.ticketSafe = SET;
-	        }
+		{
+		    // If not, then this is the first block so see if it is 'safe'
+		    // to sign.
+		    if(TicketIsSafe(&in->buffer.b))
+			hashObject->attributes.ticketSafe = SET;
+		}
 	    // Output ticket
 	    out->validation.tag = TPM_ST_HASHCHECK;
 	    out->validation.hierarchy = in->hierarchy;
 	    if(in->hierarchy == TPM_RH_NULL)
-	        {
-	            // Ticket is not required
-	            out->validation.digest.t.size = 0;
-	        }
-	    else if(object->attributes.ticketSafe == CLEAR)
-	        {
-	            // Ticket is not safe to generate
-	            out->validation.hierarchy = TPM_RH_NULL;
-	            out->validation.digest.t.size = 0;
-	        }
+		{
+		    // Ticket is not required
+		    out->validation.digest.t.size = 0;
+		}
+	    else if(hashObject->attributes.ticketSafe == CLEAR)
+		{
+		    // Ticket is not safe to generate
+		    out->validation.hierarchy = TPM_RH_NULL;
+		    out->validation.digest.t.size = 0;
+		}
 	    else
-	        {
-	            // Compute ticket
-	            TicketComputeHashCheck(out->validation.hierarchy, hashAlg,
-	                                   &out->result, &out->validation);
-	        }
+		{
+		    // Compute ticket
+		    TicketComputeHashCheck(out->validation.hierarchy, hashAlg,
+					   &out->result, &out->validation);
+		}
 	}
     else
 	{
-	    HASH_OBJECT     *hashObject = (HASH_OBJECT *)object;
 	    //   Update last piece of data
 	    CryptDigestUpdate2B(&hashObject->state.hmacState.hashState, &in->buffer.b);
-	    // Complete hash/HMAC
-	    out->result.t.size =
-		CryptHashGetDigestSize(
-				       CryptHashGetContextAlg(&hashObject->state.hmacState.hashState));
-	    CryptHmacEnd2B(&(hashObject->state.hmacState), &out->result.b);
+#ifndef SMAC_IMPLEMENTED
+	    // Complete HMAC
+	    out->result.t.size = CryptHmacEnd(&(hashObject->state.hmacState),
+					      sizeof(out->result.t.buffer),
+					      out->result.t.buffer);
+#else
+	    // Complete the MAC
+	    out->result.t.size = CryptMacEnd(&hashObject->state.hmacState,
+					     sizeof(out->result.t.buffer),
+					     out->result.t.buffer);
+#endif
 	    // No ticket is generated for HMAC sequence
 	    out->validation.tag = TPM_ST_HASHCHECK;
 	    out->validation.hierarchy = TPM_RH_NULL;
@@ -261,7 +315,7 @@ TPM2_SequenceComplete(
 	}
     // Internal Data Update
     // mark sequence object as evict so it will be flushed on the way out
-    object->attributes.evict = SET;
+    hashObject->attributes.evict = SET;
     return TPM_RC_SUCCESS;
 }
 #endif // CC_SequenceComplete
