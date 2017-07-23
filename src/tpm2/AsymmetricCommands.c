@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Asymmetric Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AsymmetricCommands.c 809 2016-11-16 18:31:54Z kgoldman $	*/
+/*            $Id: AsymmetricCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -78,7 +78,7 @@ TPM2_RSA_Encrypt(
     if(rsaKey->publicArea.type != TPM_ALG_RSA)
 	return TPM_RCS_KEY + RC_RSA_Encrypt_keyHandle;
     // selected key must have the decryption attribute
-    if(rsaKey->publicArea.objectAttributes.decrypt != SET)
+    if(!IS_ATTRIBUTE(rsaKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RCS_ATTRIBUTES + RC_RSA_Encrypt_keyHandle;
     // Is there a label?
     if(!IsLabelProperlyFormatted(&in->label.b))
@@ -116,8 +116,8 @@ TPM2_RSA_Decrypt(
     if(rsaKey->publicArea.type != TPM_ALG_RSA)
 	return TPM_RCS_KEY + RC_RSA_Decrypt_keyHandle;
     // The selected key must be an unrestricted decryption key
-    if(rsaKey->publicArea.objectAttributes.restricted == SET
-       || rsaKey->publicArea.objectAttributes.decrypt == CLEAR)
+    if(IS_ATTRIBUTE(rsaKey->publicArea.objectAttributes, TPMA_OBJECT, restricted)
+       || !IS_ATTRIBUTE(rsaKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RCS_ATTRIBUTES + RC_RSA_Decrypt_keyHandle;
     // NOTE: Proper operation of this command requires that the sensitive area
     // of the key is loaded. This is assured because authorization is required
@@ -207,8 +207,8 @@ TPM2_ECDH_ZGen(
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_ECDH_ZGen_keyHandle;
     // Selected key needs to be unrestricted with the 'decrypt' attribute
-    if(eccKey->publicArea.objectAttributes.restricted == SET
-       || eccKey->publicArea.objectAttributes.decrypt != SET)
+    if(IS_ATTRIBUTE(eccKey->publicArea.objectAttributes, TPMA_OBJECT, restricted)
+       || !IS_ATTRIBUTE(eccKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RCS_ATTRIBUTES + RC_ECDH_ZGen_keyHandle;
     // Make sure the scheme allows this use
     if(eccKey->publicArea.parameters.eccDetail.scheme.scheme != TPM_ALG_ECDH
@@ -265,9 +265,8 @@ TPM2_ZGen_2Phase(
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_ZGen_2Phase_keyA;
     // keyA must not be restricted and must be a decrypt key
-    if(eccKey->publicArea.objectAttributes.restricted == SET
-       || eccKey->publicArea.objectAttributes.decrypt != SET
-       )
+    if(IS_ATTRIBUTE(eccKey->publicArea.objectAttributes, TPMA_OBJECT, restricted)
+       || !IS_ATTRIBUTE(eccKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RCS_ATTRIBUTES + RC_ZGen_2Phase_keyA;
     // if the scheme of keyA is TPM_ALG_NULL, then use the input scheme; otherwise
     // the input scheme must be the same as the scheme of keyA

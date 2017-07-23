@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   Context Management	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ContextCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: ContextCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -63,6 +63,9 @@
 #include "ContextSave_fp.h"
 #ifdef TPM_CC_ContextSave  // Conditional expansion of this file
 #include "Context_spt_fp.h"
+/* Error Returns Meaning */
+/* TPM_RC_CONTEXT_GAP a contextID could not be assigned for a session context save */
+/* TPM_RC_TOO_MANY_CONTEXTS no more contexts can be saved as the counter has maxed out */
 TPM_RC
 TPM2_ContextSave(
 		 ContextSave_In      *in,            // IN: input parameter list
@@ -82,7 +85,18 @@ TPM2_ContextSave(
     // the update of state reset data. If the state is orderly and
     // cannot be changed, exit early.
     RETURN_IF_ORDERLY;
+    
     // Internal Data Update
+    
+    // This implementation does not do things in quite the same way as described in
+    // Part 2 of the specification. In Part 2, it indicates that the 
+    // TPMS_CONTEXT_DATA contains two TPM2B values. That is not how this is 
+    // implemented. Rather, the size field of the TPM2B_CONTEXT_DATA is used to 
+    // determine the amount of data in the encrypted data. That part is not 
+    // independently sized. This makes the actual size 2 bytes smaller than 
+    // calculated using Part 2. Since this is opaque to the caller, it is not 
+    // necessary to fix. The actual size is returned by TPM2_GetCapabilties().
+    
     // Initialize output handle.  At the end of command action, the output
     // handle of an object will be replaced, while the output handle
     // for a session will be the same as input
@@ -215,7 +229,6 @@ TPM2_ContextLoad(
 		 ContextLoad_Out     *out            // OUT: output parameter list
 		 )
 {
-    // Local Variables
     TPM_RC              result;
     TPM2B_DIGEST        integrityToCompare;
     TPM2B_DIGEST        integrity;
@@ -225,6 +238,9 @@ TPM2_ContextLoad(
     TPM2B_SYM_KEY       symKey;
     TPM2B_IV            iv;
     // Input Validation
+
+    // See discussion about the context format in TPM2_ContextSave Detailed Actions
+
     // IF this is a session context, make sure that the sequence number is
     // consistent with the version in the slot
     // Check context blob size
@@ -297,7 +313,7 @@ TPM2_ContextLoad(
 		  RETURN_IF_ORDERLY;
 		  // Check if input handle points to a valid saved session and that the
 		  // sequence number makes sense
-		  if(!SequenceNumbereForSavedContextIsValid(&in->context))
+		  if(!SequenceNumberForSavedContextIsValid(&in->context))
 		      return TPM_RCS_HANDLE + RC_ContextLoad_context;
 		  // Restore session.  A TPM_RC_SESSION_MEMORY, TPM_RC_CONTEXT_GAP error
 		  // may be returned at this point

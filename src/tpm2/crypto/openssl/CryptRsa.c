@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			implementation of cryptographic primitives for RSA	*/
+/*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -410,12 +410,12 @@ OaepDecode(
 	dataOut->size = 0;
     return retVal;
 }
-/* 10.2.19.4.7 PKSC1v1_5Encode() */
+/* 10.2.19.4.7 PKCS1v1_5Encode() */
 /* This function performs the encoding for RSAES-PKCS1-V1_5-ENCRYPT as defined in PKCS#1V2.1 */
 /* Error Returns Meaning */
 /* TPM_RC_VALUE message size is too large */
 static TPM_RC
-RSAES_PKSC1v1_5Encode(
+RSAES_PKCS1v1_5Encode(
 		      TPM2B       *padded,        // OUT: the pad data
 		      TPM2B       *message,       // IN: the message being padded
 		      RAND_STATE  *rand
@@ -638,7 +638,7 @@ static TPM_RC
 RSASSA_Encode(
 	      TPM2B               *pOut,      // IN:OUT on in, the size of the public key
 	      //        on out, the encoded area
-	      TPM_ALG_ID           hashAlg,   // IN: hash algorithm for PKSC1v1_5
+	      TPM_ALG_ID           hashAlg,   // IN: hash algorithm for PKCS1v1_5
 	      TPM2B               *hIn        // IN: digest value to encode
 	      )
 {
@@ -863,7 +863,7 @@ CryptRsaEncrypt(
 	      }
 	      break;
 	  case TPM_ALG_RSAES:
-	    retVal = RSAES_PKSC1v1_5Encode(&cOut->b, dIn, rand);
+	    retVal = RSAES_PKCS1v1_5Encode(&cOut->b, dIn, rand);
 	    break;
 	  case TPM_ALG_OAEP:
 	    retVal = OaepEncode(&cOut->b, scheme->details.oaep.hashAlg, label, dIn,
@@ -1143,7 +1143,7 @@ CryptRsaGenerateKey(
 		}
 	    retVal = TPM_RC_SUCCESS;
 	    // Do a trial encryption decryption if this is a signing key
-	    if(publicArea->objectAttributes.sign)
+	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
 		{
 		    BN_RSA(temp1);
 		    BN_RSA(temp2);

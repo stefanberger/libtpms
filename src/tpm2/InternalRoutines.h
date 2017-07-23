@@ -3,7 +3,7 @@
 /*			Include Headers for Internal Routines			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: InternalRoutines.h 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: InternalRoutines.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -106,7 +106,7 @@
 #include "IoBuffers_fp.h"
 #include "Memory_fp.h"
 #include "ResponseCodeProcessing_fp.h"
-/* Internal crypto functions */
+/* Internal cryptographic functions */
 #include "BnConvert_fp.h"
 #include "BnMath_fp.h"
 #include "BnMemory_fp.h"
@@ -129,6 +129,12 @@
 #include "CryptEccMain_fp.h"
 #include "CryptEccSignature_fp.h"
 #include "CryptEccKeyExchange_fp.h"
+#endif
+#if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
+#   include "CryptSmac_fp.h"
+#   ifdef TPM_ALG_CMAC
+#       include "CryptCmac_fp.h"
+#   endif
 #endif
 /* Support library */
 #include "SupportLibraryFunctionPrototypes_fp.h"

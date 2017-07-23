@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015, 2016					*/
 /*										*/
@@ -470,10 +470,10 @@ TPMA_ALGORITHM_Unmarshal(TPMA_ALGORITHM *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal(target, buffer, size);  
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (*(UINT32 *)target & TPMA_ALGORITHM_RESERVED) {
+	if (*target & TPMA_ALGORITHM_reserved) {
 	    rc = TPM_RC_RESERVED_BITS;
 	}
     }
@@ -488,10 +488,10 @@ TPMA_OBJECT_Unmarshal(TPMA_OBJECT *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal(target, buffer, size);  
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (*(UINT32 *)target & TPMA_OBJECT_RESERVED) {
+	if (*target & TPMA_OBJECT_reserved) {
 	    rc = TPM_RC_RESERVED_BITS;
 	}
     }
@@ -506,10 +506,10 @@ TPMA_SESSION_Unmarshal(TPMA_SESSION *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT8_Unmarshal(&target->val, buffer, size);  
+	rc = UINT8_Unmarshal(target, buffer, size);  
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (target->val & TPMA_SESSION_RESERVED) {
+	if (*target & TPMA_SESSION_reserved) {
 	    rc = TPM_RC_RESERVED_BITS;
 	}
     }
@@ -524,7 +524,7 @@ TPMA_LOCALITY_Unmarshal(TPMA_LOCALITY *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT8_Unmarshal(&target->val, buffer, size);  
+	rc = UINT8_Unmarshal(target, buffer, size);  
     }
     return rc;
 }
@@ -537,10 +537,10 @@ TPMA_CC_Unmarshal(TPMA_CC *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal(target, buffer, size);  
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (*(UINT32 *)target & TPMA_CC_RESERVED) {
+	if (*target & TPMA_CC_reserved) {
 	    rc = TPM_RC_RESERVED_BITS;
 	}
     }
@@ -1163,6 +1163,9 @@ TPMI_ALG_SYM_MODE_Unmarshal(TPMI_ALG_SYM_MODE *target, BYTE **buffer, INT32 *siz
 #ifdef TPM_ALG_ECB	
 	  case TPM_ALG_ECB:
 #endif
+#ifdef TPM_ALG_CMAC
+	  case TPM_ALG_CMAC:
+#endif
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1311,7 +1314,88 @@ TPMI_ST_COMMAND_TAG_Unmarshal(TPMI_ST_COMMAND_TAG *target, BYTE **buffer, INT32 
     }
     return rc;
 }
- 
+
+/* Table 70 TPMI_ALG_MAC_SCHEME */
+
+TPM_RC
+TPMI_ALG_MAC_SCHEME_Unmarshal(TPMI_ALG_MAC_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_ALG_ID_Unmarshal(target, buffer, size);  
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	switch (*target) {
+#ifdef TPM_ALG_SHA1
+	  case TPM_ALG_SHA1:
+#endif
+#ifdef TPM_ALG_SHA256	
+	  case TPM_ALG_SHA256:
+#endif
+#ifdef TPM_ALG_SHA384
+	  case 	TPM_ALG_SHA384:
+#endif
+#ifdef TPM_ALG_SHA512
+	  case 	TPM_ALG_SHA512:
+#endif
+#ifdef TPM_ALG_SM3_256
+	  case TPM_ALG_SM3_256:
+#endif
+#ifdef TPM_ALG_CMAC
+	  case TPM_ALG_CMAC:
+#endif
+	    break;
+	  case TPM_ALG_NULL:
+	    if (allowNull) {
+		break;
+	    }
+	  default:
+	    rc = TPM_RC_SYMMETRIC;
+	}
+    }
+    return rc;
+}
+    
+/* Table 70 TPMI_ALG_CIPHER_MODE */
+
+TPM_RC
+TPMI_ALG_CIPHER_MODE_Unmarshal(TPMI_ALG_CIPHER_MODE*target, BYTE **buffer, INT32 *size, BOOL allowNull)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_ALG_ID_Unmarshal(target, buffer, size);  
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	switch (*target) {
+#ifdef TPM_ALG_CTR	
+	  case TPM_ALG_CTR:
+#endif
+#ifdef TPM_ALG_OFB	
+	  case TPM_ALG_OFB:
+#endif
+#ifdef TPM_ALG_CBC
+	  case TPM_ALG_CBC:
+#endif
+#ifdef TPM_ALG_CFB	
+	  case TPM_ALG_CFB:
+#endif
+#ifdef TPM_ALG_ECB	
+	  case TPM_ALG_ECB:
+#endif
+	    break;
+	  case TPM_ALG_NULL:
+	    if (allowNull) {
+		break;
+	    }
+	  default:
+	    rc = TPM_RC_MODE;
+	}
+    }
+    return rc;
+}
+
 /* Table 68 - Definition of TPMS_EMPTY Structure <IN/OUT> */
 
 TPM_RC
@@ -1493,7 +1577,7 @@ TPM2B_TIMEOUT_Unmarshal(TPM2B_TIMEOUT *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_DIGEST_Unmarshal(target, buffer, size);
+	rc = TPM2B_Unmarshal(&target->b, sizeof(target->t.buffer), buffer, size);
     }
     return rc;
 }
@@ -4128,10 +4212,10 @@ TPMA_NV_Unmarshal(TPMA_NV *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal(&target->val, buffer, size);  
+	rc = UINT32_Unmarshal(target, buffer, size);  
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (target->val & TPMA_NV_RESERVED) {
+	if (*target & TPMA_NV_RESERVED) {
 	    rc = TPM_RC_RESERVED_BITS;
 	}
     }

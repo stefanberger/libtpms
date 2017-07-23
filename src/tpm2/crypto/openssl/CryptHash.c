@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptHash.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -81,6 +81,8 @@ HASH_DEF_TEMPLATE(SHA512);
 #endif
 HASH_DEF nullDef = {{0}};
 /* 10.2.14.3 Obligatory Initialization Functions */
+/* This function is called by _TPM_Init() do perform the initialization operations for the
+   library. */
 BOOL
 CryptHashInit(
 	      void
@@ -89,6 +91,9 @@ CryptHashInit(
     LibHashInit();
     return TRUE;
 }
+/* 10.2.13.3.2 CryptHashStartup() */
+/* This function is called by TPM2_Startup() in case there is work to do at startup. Currently, this
+   is a placeholder. */
 BOOL
 CryptHashStartup(
 		 void
@@ -136,17 +141,17 @@ CryptGetHashDef(
 	}
     return retVal;
 }
-/* 10.2.14.4.3 CryptHashIsImplemented() */
+/* 10.2.13.4.3 CryptHashIsValidAlg() */
 /* This function tests to see if an algorithm ID is a valid hash algorithm. If flag is true, then
    TPM_ALG_NULL is a valid hash. */
-/* Return Values Meaning */
-/* TRUE hashAlg is a valid, implemented hash on this TPM. */
-/* FALSE not valid */
+/*     Return Value Meaning */
+/*     TRUE hashAlg is a valid, implemented hash on this TPM. */
+/*     FALSE	not valid */
 BOOL
-CryptHashIsImplemented(
-		       TPM_ALG_ID       hashAlg,
-		       BOOL             flag
-		       )
+CryptHashIsValidAlg(
+		    TPM_ALG_ID       hashAlg,
+		    BOOL             flag
+		    )
 {
     switch(hashAlg)
 	{
@@ -263,7 +268,6 @@ CryptHashGetContextAlg(
     return state->hashAlg;
 }
 /* 10.2.14.5 State Import and Export */
-#if 1
 /* 10.2.14.5.1 CryptHashCopyState */
 /* This function is used to clone a HASH_STATE. */
 LIB_EXPORT void
@@ -290,7 +294,6 @@ CryptHashCopyState(
 	}
     return;
 }
-#endif //0
 /* 10.2.14.5.2 CryptHashExportState() */
 /* This function is used to export a hash or HMAC hash state. This function would be called when
    preparing to context save a sequence object. */
@@ -304,11 +307,21 @@ CryptHashExportState(
     BYTE                    *outBuf = (BYTE *)externalFmt;
     //
     cAssert(sizeof(HASH_STATE) <= sizeof(EXPORT_HASH_STATE));
+    // the following #define is used to move data from an aligned internal data
+    // structure to a byte buffer (external format data.
 #define CopyToOffset(value)						\
     memcpy(&outBuf[offsetof(HASH_STATE,value)], &internalFmt->value,	\
 	   sizeof(internalFmt->value))
+    // Copy the hashAlg
     CopyToOffset(hashAlg);
     CopyToOffset(type);
+#ifdef HASH_STATE_SMAC
+    if(internalFmt->type == HASH_STATE_SMAC)
+	{
+	    memcpy(outBuf, internalFmt, sizeof(HASH_STATE));
+	    return;
+	}
+#endif
     if(internalFmt->type == HASH_STATE_HMAC)
 	{
 	    HMAC_STATE              *from = (HMAC_STATE *)internalFmt;
@@ -339,6 +352,13 @@ CryptHashImportState(
     CopyFromOffset(type);
     if(internalFmt->hashAlg != TPM_ALG_NULL)
 	{
+#ifdef HASH_STATE_SMAC
+	    if(internalFmt->type == HASH_STATE_SMAC)
+		{
+		    memcpy(internalFmt, inBuf, sizeof(HASH_STATE));
+		    return;
+		}
+#endif
 	    internalFmt->def = CryptGetHashDef(internalFmt->hashAlg);
 	    HASH_STATE_IMPORT(internalFmt, inBuf);
 	    if(internalFmt->type == HASH_STATE_HMAC)
@@ -362,7 +382,8 @@ HashEnd(
 	)
 {
     BYTE                temp[MAX_DIGEST_SIZE];
-    if(hashState->hashAlg == TPM_ALG_NULL)
+    if((hashState->hashAlg == TPM_ALG_NULL)
+       || (hashState->type != HASH_STATE_HASH))
 	dOutSize = 0;
     if(dOutSize > 0)
 	{
@@ -377,7 +398,6 @@ HashEnd(
 	    memcpy(dOut, &temp, dOutSize);
 	}
     hashState->type = HASH_STATE_EMPTY;
-    //    hashState->hashAlg = TPM_ALG_ERROR;
     return (UINT16)dOutSize;
 }
 /* 10.2.14.6.2 CryptHashStart() */
@@ -415,9 +435,9 @@ CryptHashStart(
     hashState->type = HASH_STATE_HASH;
     return retVal;
 }
-/* 10.2.14.6.3 CryptDigestUpdate() */
-/* Add data to a hash or HMAC stack. */
-LIB_EXPORT void
+/* 10.2.13.6.3 CryptDigestUpdate() */
+/* Add data to a hash or HMAC, SMAC stack. */
+void
 CryptDigestUpdate(
 		  PHASH_STATE      hashState,     // IN: the hash context information
 		  UINT32           dataSize,      // IN: the size of data to be added
@@ -426,10 +446,21 @@ CryptDigestUpdate(
 {
     if(hashState->hashAlg != TPM_ALG_NULL)
 	{
+#ifndef SMAC_IMPLEMENTED
 	    pAssert((hashState->type == HASH_STATE_HASH)
 		    || (hashState->type == HASH_STATE_HMAC));
-	    hashState->def = CryptGetHashDef(hashState->hashAlg);
+	    //??        hashState->def = CryptGetHashDef(hashState->hashAlg);
 	    HASH_DATA(hashState, dataSize, (BYTE *)data);
+#else
+	    if((hashState->type == HASH_STATE_HASH)
+	       || (hashState->type == HASH_STATE_HMAC))
+		HASH_DATA(hashState, dataSize, (BYTE *)data);
+	    else if(hashState->type == HASH_STATE_SMAC)
+		(hashState->state.smac.smacMethods.data)(&hashState->state.smac.state,
+							 dataSize, data);
+	    else
+		FAIL(FATAL_ERROR_INTERNAL);
+#endif // SMAC_IMPLEMENTED
 	}
     return;
 }
@@ -489,7 +520,7 @@ CryptDigestUpdate2B(
     return;
 }
 /* 10.2.14.6.7 CryptHashEnd2B() */
-/* This function is the same as CypteCompleteHash() but the digest is placed in a TPM2B. This is the
+/* This function is the same as CryptCompleteHash() but the digest is placed in a TPM2B. This is the
    most common use and this is provided for specification clarity. 'digest.size' should be set to
    indicate the number of bytes to place in the buffer */
 /* Return Values Meaning */
@@ -513,7 +544,7 @@ CryptDigestUpdateInt(
 		     UINT64           intValue       // IN: integer value to be hashed
 		     )
 {
-#if LITTLE_ENDIAN_TPM == YES
+#if LITTLE_ENDIAN_TPM
     intValue = REVERSE_ENDIAN_64(intValue);
 #endif
     CryptDigestUpdate(state, intSize, &((BYTE *)&intValue)[8 - intSize]);
@@ -593,6 +624,13 @@ CryptHmacEnd(
 {
     BYTE                 temp[MAX_DIGEST_SIZE];
     PHASH_STATE          hState = (PHASH_STATE)&state->hashState;
+#ifdef SMAC_IMPLEMENTED
+    if(hState->type == HASH_STATE_SMAC)
+	return (state->hashState.state.smac.smacMethods.end)
+	    (&state->hashState.state.smac.state,
+	     dOutSize,
+	     dOut);
+#endif
     pAssert(hState->type == HASH_STATE_HMAC);
     hState->def = CryptGetHashDef(hState->hashAlg);
     // Change the state type for completion processing
@@ -713,18 +751,18 @@ CryptKDFa(
 	  UINT32          *counterInOut,  // IN/OUT: caller may provide the iteration
 	  //     counter for incremental operations to
 	  //     avoid large intermediate buffers.
-	  BOOL             once           // IN: TRUE - only 1 iteration is performed
-	  //     FALSE if iteration count determined by
-	  //     "sizeInBits"
+	  UINT16           blocks         // IN: If non-zero, this is the maximum number
+	  //     of blocks to be returned, regardless
+	  //     of sizeInBit
 	  )
 {
-    UINT32                   counter = 0;    // counter value
-    INT16                    bytes;          // number of bytes to produce
+    UINT32                   counter = 0;       // counter value
+    INT16                    bytes;             // number of bytes to produce
+    UINT16                   generated;         // number of bytes generated
     BYTE                    *stream = keyStream;
     HMAC_STATE               hState;
     UINT16                   digestSize = CryptHashGetDigestSize(hashAlg);
     pAssert(key != NULL && keyStream != NULL);
-    pAssert(once == FALSE || (sizeInBits & 7) == 0);
     if(digestSize == 0)
 	return 0;
     if(counterInOut != NULL)
@@ -732,13 +770,16 @@ CryptKDFa(
     // If the size of the request is larger than the numbers will handle,
     // it is a fatal error.
     pAssert(((sizeInBits + 7) / 8) <= INT16_MAX);
-    bytes = once ? digestSize : (INT16)((sizeInBits + 7) / 8);
+    // The number of bytes to be generated is the smaller of the sizeInBits bytes or
+    // the number of requested blocks. The number of blocks is the smaller of the
+    // number requested or the number allowed by sizeInBits. A partial block is
+    // a full block.
+    bytes = (blocks > 0) ? blocks * digestSize : (UINT16)BITS_TO_BYTES(sizeInBits);
+    generated = bytes;
     // Generate required bytes
     for(; bytes > 0; bytes -= digestSize)
 	{
 	    counter++;
-	    if(bytes < digestSize)
-		digestSize = bytes;
 	    // Start HMAC
 	    if(CryptHmacStart(&hState, hashAlg, key->size, key->buffer) == 0)
 		return 0;
@@ -764,15 +805,22 @@ CryptKDFa(
 		HASH_DATA(&hState.hashState, contextV->size, contextV->buffer);
 	    // Adding size in bits
 	    CryptDigestUpdateInt(&hState.hashState, 4, sizeInBits);
-	    CryptHmacEnd(&hState, digestSize, stream);
+	    // Complete and put the data in the buffer
+	    CryptHmacEnd(&hState, bytes, stream);
 	    stream = &stream[digestSize];
 	}
-    // Mask off bits if the required bits is not a multiple of byte size
-    if((sizeInBits % 8) != 0)
+    // Mask off bits if the required bits is not a multiple of byte size. Only do
+    // this if this is a call that is returning all the blocks indicated in
+    // sizeInBits
+#if 0 //?? Masking in the KDF is disabled. If the calling function wants something
+    //?? less than even number of bytes, then the caller should do the masking
+    //?? because there is no universal way to do it here
+    if((blocks == 0) && (sizeInBits % 8) != 0)
 	keyStream[0] &= ((1 << (sizeInBits % 8)) - 1);
+#endif
     if(counterInOut != NULL)
 	*counterInOut = counter;
-    return (UINT16)((sizeInBits + 7) / 8);
+    return generated;
 }
 /* 	10.2.14.8.3 CryptKDFe() */
 /* KDFe() as defined in TPM specification part 1. */

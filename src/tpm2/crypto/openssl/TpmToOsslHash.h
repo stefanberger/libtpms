@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -72,9 +72,10 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <openssl/ossl_typ.h>
-/*     Redefine the internal name used for each of the hash state structures to the name used by the
-       library. These defines need to be known in all parts of the TPM so that the structure sizes
-       can be properly computed when needed. */
+/* B.2.2.1.2. Links to the OpenSSL HASH code */
+/* Redefine the internal name used for each of the hash state structures to the name used by the
+   library. These defines need to be known in all parts of the TPM so that the structure sizes can
+   be properly computed when needed. */
 #define tpmHashStateSHA1_t        SHA_CTX
 #define tpmHashStateSHA256_t      SHA256_CTX
 #define tpmHashStateSHA384_t      SHA512_CTX
@@ -82,9 +83,9 @@
 #ifdef TPM_ALG_SM3
 #   error "The version of OpenSSL used by this code does not support SM3"
 #endif
-/*     The defines below are only needed when compiling CryptHash.c. This isolation is primarily to
-       avoid name space collision. However, if there is a real collision, it will likely show up
-       when the linker tries to put things together. */
+/*     The defines below are only needed when compiling CryptHash.c or CryptSmac.c. This isolation
+       is primarily to avoid name space collision. However, if there is a real collision, it will
+       likely show up when the linker tries to put things together. */
 #ifdef _CRYPT_HASH_C_
 typedef BYTE          *PBYTE;
 typedef const BYTE    *PCBYTE;

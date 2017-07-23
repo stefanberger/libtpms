@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptRand_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -113,7 +113,8 @@ DRBG_InstantiateSeededKdf(
 			  TPM_ALG_ID       kdf,           // IN: the KDF to use
 			  TPM2B           *seed,          // IN: the seed to use
 			  const TPM2B     *label,         // IN: a label for the generation process.
-			  TPM2B           *context        // IN: the context value
+			  TPM2B           *context,       // IN: the context value
+			  UINT32           limit          // IN: Maximum number of bits from the KDF
 			  );
 LIB_EXPORT void
 DRBG_AdditionalData(

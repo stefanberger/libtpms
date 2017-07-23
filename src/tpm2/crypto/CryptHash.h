@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptHash.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,8 +62,10 @@
 #ifndef CRYPTHASH_H
 #define CRYPTHASH_H
 
-/* 10.1.3 CryptHash.h */
-/* 10.1.3.1 Hash Related Structures */
+/* This header contains the hash structure definitions used in the TPM code to define the amount of
+   space to be reserved for the hash state. This allows the TPM code to not have to import all of
+   the symbols used by the hash computations. This lets the build environment of the TPM code not to
+   have include the header files associated with the CryptoEngine() code. */
 typedef struct
 {
     const TPM_ALG_ID     alg;
@@ -72,6 +74,43 @@ typedef struct
     const UINT16         derSize;
     const BYTE           der[20];
 } HASH_INFO;
+union SMAC_STATES;
+/* These definitions add the high-level methods for processing state that may be an SMAC */
+typedef void(* SMAC_DATA_METHOD)(
+				 union SMAC_STATES       *state,
+				 UINT32                   size,
+				 const BYTE              *buffer
+				 );
+typedef UINT16(* SMAC_END_METHOD)(
+				  union SMAC_STATES       *state,
+				  UINT32                   size,
+				  BYTE                    *buffer
+				  );
+typedef struct sequenceMethods {
+    SMAC_DATA_METHOD          data;
+    SMAC_END_METHOD           end;
+} SMAC_METHODS;
+#if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
+#   define      SMAC_IMPLEMENTED
+#endif
+/* These definitions are here because the SMAC state is in the union of hash states. */
+typedef struct tpmCmacState {
+    TPM_ALG_ID              symAlg;
+    UINT16                  keySizeBits;
+    INT16                   bcount; // current count of bytes accumulated in IV
+    TPM2B_IV                iv;     // IV buffer
+    TPM2B_SYM_KEY           symKey;
+} tpmCmacState_t;
+typedef union SMAC_STATES {
+#ifdef TPM_ALG_CMAC
+    tpmCmacState_t          cmac;
+#endif
+    UINT64                  pad;
+} SMAC_STATES;
+typedef struct SMAC_STATE {
+    SMAC_METHODS            smacMethods;
+    SMAC_STATES             state;
+} SMAC_STATE;
 typedef union
 {
 #ifdef TPM_ALG_SHA1
@@ -85,6 +124,10 @@ typedef union
 #endif
 #ifdef TPM_ALG_SHA512
     tpmHashStateSHA512_t       Sha512;
+#endif
+    // Additions for symmetric block cipher MAC
+#ifdef SMAC_IMPLEMENTED
+    SMAC_STATE                 smac;
 #endif
     // to force structure alignment to be no worse than HASH_ALIGNMENT
 #if HASH_ALIGNMENT == 4
@@ -124,10 +167,10 @@ typedef  ANY_HASH_STATE ALIGNED_HASH_STATE;
 #   define  HASH_STATE_EXPORT_METHOD_DEF   void (HASH_STATE_EXPORT_METHOD)(void)
 #endif
 #ifndef  HASH_STATE_IMPORT_METHOD_DEF
-#   define  HASH_STATE_IMPORT_METHOD_DEF   void ( HASH_STATE_IMPORT_METHOD)(void)
+#   define  HASH_STATE_IMPORT_METHOD_DEF   void (HASH_STATE_IMPORT_METHOD)(void)
 #endif
-/*     Define the prototypical function call for each of the methods. This defines the order in
-       which the parameters are passed to the underlying function. */
+/* Define the prototypical function call for each of the methods. This defines the order in which
+   the parameters are passed to the underlying function. */
 typedef HASH_START_METHOD_DEF;
 typedef HASH_DATA_METHOD_DEF;
 typedef HASH_END_METHOD_DEF;
@@ -139,10 +182,10 @@ typedef struct _HASH_METHODS
     HASH_START_METHOD           *start;
     HASH_DATA_METHOD            *data;
     HASH_END_METHOD             *end;
-    HASH_STATE_COPY_METHOD      *copy;          // Copy a hash block
-    HASH_STATE_EXPORT_METHOD    *copyOut;       // Copy a hash block from a hash
+    HASH_STATE_COPY_METHOD      *copy;      // Copy a hash block
+    HASH_STATE_EXPORT_METHOD    *copyOut;   // Copy a hash block from a hash
     // context
-    HASH_STATE_IMPORT_METHOD    *copyIn;        // Copy a hash block to a proper hash
+    HASH_STATE_IMPORT_METHOD    *copyIn;    // Copy a hash block to a proper hash
     // context
 } HASH_METHODS, *PHASH_METHODS;
 #if ALG_SHA1
@@ -184,13 +227,16 @@ typedef const struct
 	HASH##_DIGEST_SIZE,    /*data size */				\
 	sizeof(tpmHashState##HASH##_t),					\
 	TPM_ALG_##HASH}
-/*     These definitions are for the types that can be in a hash state structure. These types are
-       used in the crypto utilities. This is a define rather than an enum so that the size of this
-       field can be explicit. */
+/* These definitions are for the types that can be in a hash state structure. These types are used
+   in the cryptographic utilities. This is a define rather than an enum so that the size of this
+   field can be explicit. */
 typedef BYTE    HASH_STATE_TYPE;
 #define HASH_STATE_EMPTY        ((HASH_STATE_TYPE) 0)
 #define HASH_STATE_HASH         ((HASH_STATE_TYPE) 1)
 #define HASH_STATE_HMAC         ((HASH_STATE_TYPE) 2)
+#if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
+#define HASH_STATE_SMAC         ((HASH_STATE_TYPE) 3)
+#endif
 /* This is the structure that is used for passing a context into the hashing functions. It should be
    the same size as the function context used within the hashing functions. This is checked when the
    hash function is initialized. This version uses a new layout for the contexts and a different
@@ -198,14 +244,18 @@ typedef BYTE    HASH_STATE_TYPE;
    the structure on a HASH_UNIT boundary. If the structure is not properly aligned, the code that
    manipulates the structure will copy to a properly aligned structure before it is used and copy
    the result back. This just makes things slower. */
+/*     NOTE: This version of the state had the pointer to the update method in the state. This is to
+       allow the SMAC functions to use the same structure without having to replicate the entire
+       HASH_DEF structure. */
 typedef struct _HASH_STATE
 {
-    PHASH_DEF                def;
-    TPM_ALG_ID               hashAlg;
     HASH_STATE_TYPE          type;               // type of the context
+    TPM_ALG_ID               hashAlg;
+    PHASH_DEF                def;
     ANY_HASH_STATE           state;
 } HASH_STATE, *PHASH_STATE;
 typedef const HASH_STATE *PCHASH_STATE;
+
 /* 10.1.3.2 HMAC State Structures */
 /* This header contains the hash structure definitions used in the TPM code to define the amount of
    space to be reserved for the hash state. This allows the TPM code to not have to import all of
@@ -215,7 +265,7 @@ typedef const HASH_STATE *PCHASH_STATE;
 /* An HMAC_STATE structure contains an opaque HMAC stack state. A caller would use this structure
    when performing incremental HMAC operations. This structure contains a hash state and an HMAC key
    and allows slightly better stack optimization than adding an HMAC key to each hash state. */
-typedef struct
+typedef struct hmacState
 {
     HASH_STATE           hashState;          // the hash state
     TPM2B_HASH_BLOCK     hmacKey;            // the HMAC key

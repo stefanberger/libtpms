@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmFail.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: TpmFail.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -194,10 +194,10 @@ TpmFail(
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
 #ifndef NO_FAIL_TRACE
-    s_failFunction = *(UINT32*)&function;
+    s_failFunction = *(UINT32 *)&function;
     s_failLine = line;
 #else
-    s_failFunction = 0;		/* kgold was NULL */
+    s_failFunction = (UINT32)NULL;
     s_failLine = 0;
 #endif
     s_failCode = code;

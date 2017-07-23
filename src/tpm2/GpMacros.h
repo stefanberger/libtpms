@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 960 2017-03-10 19:08:17Z kgoldman $		*/
+/*            $Id: GpMacros.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,15 +62,14 @@
 #ifndef GPMACROS_H
 #define GPMACROS_H
 
-/* 5.11	GpMacros.h */
-
+/* 5.11.1	Introduction */
 /* This file is a collection of miscellaneous macros. */
 #ifndef NULL
 #define NULL 0
 #endif
 #include "swap.h"
 #include "VendorString.h"
-/* 5.13.2 For Self-test */
+/* 5.11.2	For Self-test */
 /* These macros are used in CryptUtil() to invoke the incremental self test. */
 #ifdef SELF_TEST
 #   define     TEST(alg) if(TEST_BIT(alg, g_toTest)) CryptTestAlgorithm(alg, NULL)
@@ -84,22 +83,14 @@
 #   define TEST(alg)
 #   define TEST_HASH(alg)
 #endif // SELF_TEST
-/* 5.13.3 For Failures */
-#if 0
+/* 5.11.3	For Failures */
 #if defined _POSIX_
 #   define FUNCTION_NAME        0
 #else
 #   define FUNCTION_NAME        __FUNCTION__
 #endif
-#endif
-
-#if defined ( WIN32 )
-#define __func__ __FUNCTION__
-#endif
-#   define FUNCTION_NAME        __func__
-
 #ifdef NO_FAIL_TRACE
-#   define FAIL(errorCode) (TpmFail(errorCode))	
+#   define FAIL(errorCode) (TpmFail(errorCode))
 #else
 #   define FAIL(errorCode) (TpmFail(FUNCTION_NAME, __LINE__, errorCode))
 #endif
@@ -119,26 +110,26 @@
 #define REQUIRE(condition, errorCode, returnCode)		\
     {								\
 	if(!!(condition))					\
-	    {								\
-		FAIL(FATAL_ERROR_errorCode);				\
-		FAIL_RETURN(returnCode);				\
-	    }								\
+	    {							\
+		FAIL(FATAL_ERROR_errorCode);			\
+		FAIL_RETURN(returnCode);			\
+	    }							\
     }
 #define PARAMETER_CHECK(condition, returnCode)		\
     REQUIRE((condition), PARAMETER, returnCode)
-#if defined(EMPTY_ASSERT)
+#if defined EMPTY_ASSERT
 #   define pAssert(a)  ((void)0)
 #else
 #   define pAssert(a) {if(!(a)) FAIL(FATAL_ERROR_PARAMETER);}
 #endif
-/* 5.13.4 Derived from Vendor-specific values */
+/* 5.11.4	Derived from Vendor-specific values */
 /* Values derived from vendor specific settings in Implementation.h */
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
 #define PRIVATE_VENDOR_SPECIFIC_BYTES					\
     ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))
-/* 5.13.5 Compile-time Checks */
+/* 5.11.5	Compile-time Checks */
 /* In some cases, the relationship between two values may be dependent on things that change based
    on various selections like the chosen cryptographic libraries. It is possible that these
    selections will result in incompatible settings. These are often detectable by the compiler but
@@ -192,6 +183,10 @@
 #  define DEBUG YES
 #endif
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
+#define JOIN(x,y) x##y
+#define CONCAT(x,y) JOIN(x, y)
+/*     If CONTEXT_INTEGRITY_HASH_ALG is defined, then the vendor is using the old style
+       table. Otherwise, pick the strongest implemented hash algorithm as the context hash. */
 #ifndef CONTEXT_HASH_ALGORITHM
 #   if defined ALG_SHA512 && ALG_SHA512 == YES
 #       define CONTEXT_HASH_ALGORITHM    SHA512
@@ -202,32 +197,97 @@
 #   elif defined ALG_SM3_256 && ALG_SM3_256 == YES
 #       define CONTEXT_HASH_ALGORITHM    SM3_256
 #   elif defined ALG_SHA1 && ALG_SHA1 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA1
+#       define CONTEXT_HASH_ALGORITHM  SHA1
+#   endif
+#   define CONTEXT_INTEGRITY_HASH_ALG  CONCAT(TPM_ALG_, CONTEXT_HASH_ALGORITHM)
+#endif
+#ifndef CONTEXT_INTEGRITY_HASH_SIZE
+#define CONTEXT_INTEGRITY_HASH_SIZE CONCAT(CONTEXT_HASH_ALGORITHM, _DIGEST_SIZE)
+#endif
+#ifdef TPM_ALG_RSA
+#define     RSA_SECURITY_STRENGTH (MAX_RSA_KEY_BITS >= 15360 ? 256 :	\
+				   (MAX_RSA_KEY_BITS >=  7680 ? 192 :	\
+				    (MAX_RSA_KEY_BITS >=  3072 ? 128 :	\
+				     (MAX_RSA_KEY_BITS >=  2048 ? 112 : \
+				      (MAX_RSA_KEY_BITS >=  1024 ?  80 :  0)))))
+#else
+#define     RSA_SECURITY_STRENGTH   0
+#endif
+#ifdef TPM_ALG_ECC
+#define     ECC_SECURITY_STRENGTH (MAX_ECC_KEY_BITS >= 521 ? 256 :	\
+				   (MAX_ECC_KEY_BITS >= 384 ? 192 :	\
+				    (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
+#else
+#define     ECC_SECURITY_STRENGTH   0
+#endif // TPM_AGL_ECC
+#define     MAX_ASYM_SECURITY_STRENGTH					\
+    MAX(RSA_SECURITY_STRENGTH, ECC_SECURITY_STRENGTH)
+#define     MAX_HASH_SECURITY_STRENGTH  ((CONTEXT_INTEGRITY_HASH_SIZE * 8) / 2)
+/*     Unless some algorithm is broken... */
+#define     MAX_SYM_SECURITY_STRENGTH   MAX_SYM_KEY_BITS
+#define MAX_SECURITY_STRENGTH_BITS					\
+    MAX(MAX_ASYM_SECURITY_STRENGTH,					\
+	MAX(MAX_SYM_SECURITY_STRENGTH,					\
+	    MAX_HASH_SECURITY_STRENGTH))
+/*     This is the size that was used before the 1.38 errata requiring that P1.14.4 be followed */
+#define PROOF_SIZE      CONTEXT_INTEGRITY_HASH_SIZE
+/*     As required by P1.14.4 */
+#define COMPLIANT_PROOF_SIZE						\
+    (MAX(CONTEXT_INTEGRITY_HASH_SIZE, (2 * MAX_SYM_KEY_BYTES)))
+/*     As required by P1.14.3.1 */
+#define COMPLIANT_PRIMARY_SEED_SIZE				\
+    BITS_TO_BYTES(MAX_SECURITY_STRENGTH_BITS * 2)
+/*     This is the pre-errata version */
+#ifndef PRIMARY_SEED_SIZE
+#   define PRIMARY_SEED_SIZE    PROOF_SIZE
+#endif
+#ifdef USE_SPEC_COMPLIANT_PROOFS
+#   undef PROOF_SIZE
+#   define PROOF_SIZE           COMPLIANT_PROOF_SIZE
+#   undef PRIMARY_SEED_SIZE
+#   define PRIMARY_SEED_SIZE    COMPLIANT_PRIMARY_SEED_SIZE
+#endif  // USE_SPEC_COMPLIANT_PROOFS || !defined PRIMARY_SEED_SIZE
+#ifndef SKIP_PROOF_ERRORS
+#   if PROOF_SIZE < COMPLIANT_PROOF_SIZE
+#       error "PROOF_SIZE is not compliant with TPM specification"
+#   endif
+#   if PRIMARY_SEED_SIZE < COMPLIANT_PRIMARY_SEED_SIZE
+#       error  "Implementation.h specifies a non-compliant PRIMARY_SEED_SIZE"
 #   endif
 #endif
-#define JOIN(x,y) x##y
-#define CONCAT(x,y) JOIN(x, y)
-
-/* If CONTEXT_INTEGRITY_HASH_ALG is defined, then the vendor is using the old style table */
-
-#ifndef CONTEXT_INTEGRITY_HASH_ALG
-#define CONTEXT_INTEGRITY_HASH_ALG      CONCAT(TPM_ALG_, CONTEXT_HASH_ALGORITHM)
-#define CONTEXT_INTEGRITY_HASH_SIZE     CONCAT(CONTEXT_HASH_ALGORITHM, _DIGEST_SIZE)
-#endif
-#define PROOF_SIZE                      CONTEXT_INTEGRITY_HASH_SIZE
-
 /* If CONTEXT_ENCRYP_ALG is defined, then the vendor is using the old style table */
-
 #ifndef CONTEXT_ENCRYPT_ALG
 #define CONTEXT_ENCRYPT_ALG             CONCAT(TPM_ALG_, CONTEXT_ENCRYPT_ALGORITHM)
 #define CONTEXT_ENCRYPT_KEY_BITS					\
     CONCAT(CONCAT(MAX_, CONTEXT_ENCRYPT_ALGORITHM), _KEY_BITS)
 #define CONTEXT_ENCRYPT_KEY_BYTES       ((CONTEXT_ENCRYPT_KEY_BITS+7)/8)
 #endif
-#if ALG_ECC
-#   define LABEL_MAX_BUFFER MAX_ECC_KEY_BYTES
-#else
-#   define LABEL_MAX_BUFFER MAX_DIGEST_SIZE
+/* This is updated to follow the requirement of P2 that the label not be larger than 32 bytes. */
+#ifndef LABEL_MAX_BUFFER
+#define LABEL_MAX_BUFFER MIN(32, MIN(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
 #endif
-
+/* This bit is used to indicate that an authorization ticket expires on TPM Reset and TPM Restart.It
+   is added to the timeout value returned by TPM2_PoliySigned() and TPM2_PolicySecret() and used by
+   TPM2_PolicyTicket(). The timeout value is relative to Time (g_time). Time is reset whenever the
+   TPM loses power and cannot be moved forward by the user (as can Clock). g_time is a 64-bit value
+   expressing time in ms. Sealing the MSb() for a flag means that the TPM needs to be reset at least
+   once every 292,471,208 years rather than once every 584,942,417 years. */
+#define EXPIRATION_BIT ((UINT64)1 << 63)
+/* Check for consistency of the bit ordering an bit fields */
+#if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && !defined NO_BIT_FIELD_STRUCTURES
+#   error "Settings not consistent"
+#endif
+/* These macros are used to handle the variation in handling of bit fields. If */
+#ifndef NO_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
+#   define IS_ATTRIBUTE(a, type, b)    ((a.b != 0))
+#   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
+#   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
+#   define GET_ATTRIBUTE(a, type, b)        (a.b)
+#else
+#   define IS_ATTRIBUTE(a, type, b)         ((a & type##_##b) != 0)
+#   define SET_ATTRIBUTE(a, type, b)        (a |= type##_##b)
+#   define CLEAR_ATTRIBUTE(a, type, b)      (a &= ~type##_##b)
+#   define GET_ATTRIBUTE(a, type, b)					\
+    (type)((a & type##_##b) >> type##_##b##_SHIFT)
+#endif
 #endif // GP_MACROS_H

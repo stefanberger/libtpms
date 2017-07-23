@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: TpmToOsslSym.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -74,6 +74,7 @@
 #include <openssl/des.h>
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
+/* B.2.2.3.2. Links to the OpenSSL AES code */
 #ifdef TPM_ALG_SM4
 #error "SM4 is not available"
 #endif

@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDes.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptDes.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -167,7 +167,8 @@ CryptGenerateKeyDes(
 	    BYTE                    *pK = sensitive->sensitive.sym.t.buffer;
 	    int                      i = (sensitive->sensitive.sym.t.size + 7) / 8;
 	    // Use the random number generator to generate the required number of bits
-	    DRBG_Generate(rand, pK, sensitive->sensitive.sym.t.size);
+	    if(DRBG_Generate(rand, pK, sensitive->sensitive.sym.t.size) == 0)
+		return TPM_RC_NO_RESULT;
 	    for(; i > 0; pK += 8, i--)
 		{
 		    UINT64      k = BYTE_ARRAY_TO_UINT64(pK);

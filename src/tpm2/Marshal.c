@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Marshal.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -335,7 +335,7 @@ UINT16
 TPMA_SESSION_Marshal(TPMA_SESSION *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal(&source->val, buffer, size);
+    written += UINT8_Marshal(source, buffer, size);
     return written;
 }
 
@@ -345,7 +345,7 @@ UINT16
 TPMA_LOCALITY_Marshal(TPMA_LOCALITY *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal(&source->val, buffer, size);
+    written += UINT8_Marshal(source, buffer, size);
     return written;
 }
 
@@ -555,6 +555,15 @@ TPM2B_MAX_BUFFER_Marshal(TPM2B_MAX_BUFFER *source, BYTE **buffer, INT32 *size)
 
 UINT16
 TPM2B_MAX_NV_BUFFER_Marshal(TPM2B_MAX_NV_BUFFER *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM2B_Marshal(&source->b, buffer, size);
+    return written;
+}
+
+/* Table 80 - Definition of TPM2B_TIMEOUT Structure <IN/OUT> */
+UINT16
+TPM2B_TIMEOUT_Marshal(TPM2B_TIMEOUT *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPM2B_Marshal(&source->b, buffer, size);
@@ -1690,8 +1699,8 @@ TPMS_ALGORITHM_DETAIL_ECC_Marshal(TPMS_ALGORITHM_DETAIL_ECC *source, BYTE **buff
     
     written += TPM_ECC_CURVE_Marshal(&source->curveID, buffer, size);
     written += UINT16_Marshal(&source->keySize, buffer, size);
-    written += TPMT_KDF_SCHEME_Marshal(&source->kdf, buffer, size);;
-    written += TPMT_ECC_SCHEME_Marshal(&source->sign, buffer, size);;
+    written += TPMT_KDF_SCHEME_Marshal(&source->kdf, buffer, size);
+    written += TPMT_ECC_SCHEME_Marshal(&source->sign, buffer, size);
     written += TPM2B_ECC_PARAMETER_Marshal(&source->p, buffer, size);
     written += TPM2B_ECC_PARAMETER_Marshal(&source->a, buffer, size);
     written += TPM2B_ECC_PARAMETER_Marshal(&source->b, buffer, size);
@@ -2079,7 +2088,7 @@ UINT16
 TPMA_NV_Marshal(TPMA_NV *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT32_Marshal(&source->val, buffer, size);
+    written += UINT32_Marshal(source, buffer, size);
     return written;
 }
 

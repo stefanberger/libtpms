@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: PCR.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -792,7 +792,7 @@ PCRRead(
 					    pcr++;
 					}
 				    // Exit inner loop
-				    break;;
+				    break;
 				}
 			    // Need the size of each digest
 			    digest->digests[digest->count].t.size =

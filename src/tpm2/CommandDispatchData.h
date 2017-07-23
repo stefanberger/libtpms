@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatchData.h 828 2016-11-18 21:19:43Z kgoldman $	*/
+/*            $Id: CommandDispatchData.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -68,6 +68,10 @@
 const UNMARSHAL_t UnmarshalArray[] = {
 #define  TPMI_DH_CONTEXT_H_UNMARSHAL        0
     (UNMARSHAL_t)TPMI_DH_CONTEXT_Unmarshal,
+#if 0
+#define TPMI_RH_AC_H_UNMARSHAL          (TPMI_DH_CONTEXT_H_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPMI_RH_AC_Unmarshal,
+#endif
 #define TPMI_RH_CLEAR_H_UNMARSHAL       (TPMI_DH_CONTEXT_H_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_RH_CLEAR_Unmarshal,
 #define TPMI_RH_HIERARCHY_AUTH_H_UNMARSHAL  (TPMI_RH_CLEAR_H_UNMARSHAL + 1)
@@ -140,7 +144,9 @@ const UNMARSHAL_t UnmarshalArray[] = {
     (UNMARSHAL_t)TPM2B_SENSITIVE_DATA_Unmarshal,
 #define TPM2B_TEMPLATE_P_UNMARSHAL      (TPM2B_SENSITIVE_DATA_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPM2B_TEMPLATE_Unmarshal,
-#define UINT8_P_UNMARSHAL               (TPM2B_TEMPLATE_P_UNMARSHAL + 1)
+#define TPM2B_TIMEOUT_P_UNMARSHAL       (TPM2B_TEMPLATE_P_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPM2B_TIMEOUT_Unmarshal,
+#define UINT8_P_UNMARSHAL               (TPM2B_TIMEOUT_P_UNMARSHAL + 1)
     (UNMARSHAL_t)UINT8_Unmarshal,
 #define TPMI_DH_CONTEXT_P_UNMARSHAL     (UINT8_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_DH_CONTEXT_Unmarshal,
@@ -172,6 +178,10 @@ const UNMARSHAL_t UnmarshalArray[] = {
     (UNMARSHAL_t)TPMT_TK_HASHCHECK_Unmarshal,
 #define TPMT_TK_VERIFIED_P_UNMARSHAL    (TPMT_TK_HASHCHECK_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMT_TK_VERIFIED_Unmarshal,
+#if 0
+#define TPM_AT_P_UNMARSHAL              (TPMT_TK_VERIFIED_P_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPM_AT_Unmarshal,
+#endif
 #define TPM_CAP_P_UNMARSHAL             (TPMT_TK_VERIFIED_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPM_CAP_Unmarshal,
 #define TPM_CLOCK_ADJUST_P_UNMARSHAL    (TPM_CAP_P_UNMARSHAL + 1)
@@ -190,11 +200,13 @@ const UNMARSHAL_t UnmarshalArray[] = {
 #define PARAMETER_FIRST_FLAG_TYPE       (UINT64_P_UNMARSHAL + 1)
 #define TPM2B_PUBLIC_P_UNMARSHAL        (UINT64_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPM2B_PUBLIC_Unmarshal,
-#define TPMI_ALG_HASH_P_UNMARSHAL       (TPM2B_PUBLIC_P_UNMARSHAL + 1)
+#define TPMI_ALG_CIPHER_MODE_P_UNMARSHAL  (TPM2B_PUBLIC_P_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPMI_ALG_CIPHER_MODE_Unmarshal,
+#define TPMI_ALG_HASH_P_UNMARSHAL       (TPMI_ALG_CIPHER_MODE_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_ALG_HASH_Unmarshal,
-#define TPMI_ALG_SYM_MODE_P_UNMARSHAL   (TPMI_ALG_HASH_P_UNMARSHAL + 1)
-    (UNMARSHAL_t)TPMI_ALG_SYM_MODE_Unmarshal,
-#define TPMI_DH_PCR_P_UNMARSHAL         (TPMI_ALG_SYM_MODE_P_UNMARSHAL + 1)
+#define TPMI_ALG_MAC_SCHEME_P_UNMARSHAL  (TPMI_ALG_HASH_P_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPMI_ALG_MAC_SCHEME_Unmarshal,
+#define TPMI_DH_PCR_P_UNMARSHAL         (TPMI_ALG_MAC_SCHEME_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_DH_PCR_Unmarshal,
 #define TPMI_ECC_KEY_EXCHANGE_P_UNMARSHAL  (TPMI_DH_PCR_P_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_ECC_KEY_EXCHANGE_Unmarshal,
@@ -253,8 +265,14 @@ const MARSHAL_t MarshalArray[] = {
     (MARSHAL_t)TPM2B_PUBLIC_KEY_RSA_Marshal,
 #define TPM2B_SENSITIVE_DATA_P_MARSHAL  (TPM2B_PUBLIC_KEY_RSA_P_MARSHAL + 1)
     (MARSHAL_t)TPM2B_SENSITIVE_DATA_Marshal,
-#define UINT8_P_MARSHAL                 (TPM2B_SENSITIVE_DATA_P_MARSHAL + 1)
+#define TPM2B_TIMEOUT_P_MARSHAL         (TPM2B_SENSITIVE_DATA_P_MARSHAL + 1)
+    (MARSHAL_t)TPM2B_TIMEOUT_Marshal,
+#define UINT8_P_MARSHAL                 (TPM2B_TIMEOUT_P_MARSHAL + 1)
     (MARSHAL_t)UINT8_Marshal,
+#if 0
+#define TPML_AC_CAPABILITIES_P_MARSHAL  (UINT8_P_MARSHAL + 1)
+    (MARSHAL_t)TPML_AC_CAPABILITIES_Marshal,
+#endif
 #define TPML_ALG_P_MARSHAL              (UINT8_P_MARSHAL + 1)
     (MARSHAL_t)TPML_ALG_Marshal,
 #define TPML_DIGEST_P_MARSHAL           (TPML_ALG_P_MARSHAL + 1)
@@ -263,6 +281,10 @@ const MARSHAL_t MarshalArray[] = {
     (MARSHAL_t)TPML_DIGEST_VALUES_Marshal,
 #define TPML_PCR_SELECTION_P_MARSHAL    (TPML_DIGEST_VALUES_P_MARSHAL + 1)
     (MARSHAL_t)TPML_PCR_SELECTION_Marshal,
+#if 0
+#define TPMS_AC_OUTPUT_P_MARSHAL        (TPML_PCR_SELECTION_P_MARSHAL + 1)
+    (MARSHAL_t)TPMS_AC_OUTPUT_Marshal,
+#endif
 #define TPMS_ALGORITHM_DETAIL_ECC_P_MARSHAL  (TPML_PCR_SELECTION_P_MARSHAL + 1)
     (MARSHAL_t)TPMS_ALGORITHM_DETAIL_ECC_Marshal,
 #define TPMS_CAPABILITY_DATA_P_MARSHAL  (TPMS_ALGORITHM_DETAIL_ECC_P_MARSHAL + 1)
@@ -288,9 +310,7 @@ const MARSHAL_t MarshalArray[] = {
 #define UINT16_P_MARSHAL                (UINT32_P_MARSHAL + 1)
     (MARSHAL_t)UINT16_Marshal,
 
-
 #define RESPONSE_PARAMETER_LAST_TYPE    (UINT16_P_MARSHAL)
-
 };
 #if CC_Startup == YES
 #include "Startup_fp.h"
@@ -1138,7 +1158,7 @@ EncryptDecrypt_COMMAND_DESCRIPTOR_t _EncryptDecryptData = {
 			   (UINT16)(offsetof(EncryptDecrypt_Out, ivOut))},
     /* types */           {TPMI_DH_OBJECT_H_UNMARSHAL,
 			   TPMI_YES_NO_P_UNMARSHAL,
-			   TPMI_ALG_SYM_MODE_P_UNMARSHAL + ADD_FLAG,
+			   TPMI_ALG_CIPHER_MODE_P_UNMARSHAL + ADD_FLAG,
 			   TPM2B_IV_P_UNMARSHAL,
 			   TPM2B_MAX_BUFFER_P_UNMARSHAL,
 			   END_OF_LIST,
@@ -1177,7 +1197,7 @@ EncryptDecrypt2_COMMAND_DESCRIPTOR_t _EncryptDecrypt2Data = {
     /* types */           {TPMI_DH_OBJECT_H_UNMARSHAL,
 			   TPM2B_MAX_BUFFER_P_UNMARSHAL,
 			   TPMI_YES_NO_P_UNMARSHAL,
-			   TPMI_ALG_SYM_MODE_P_UNMARSHAL + ADD_FLAG,
+			   TPMI_ALG_CIPHER_MODE_P_UNMARSHAL + ADD_FLAG,
 			   TPM2B_IV_P_UNMARSHAL,
 			   END_OF_LIST,
 			   TPM2B_MAX_BUFFER_P_MARSHAL,
@@ -1253,6 +1273,38 @@ HMAC_COMMAND_DESCRIPTOR_t _HMACData = {
 #define _HMACDataAddress (&_HMACData)
 #else
 #define _HMACDataAddress 0
+#endif
+#if CC_MAC == YES
+#include "MAC_fp.h"
+typedef TPM_RC  (MAC_Entry)(
+			    MAC_In *in,
+			    MAC_Out *out
+			    );
+typedef const struct {
+    MAC_Entry    *entry;
+    UINT16       inSize;
+    UINT16       outSize;
+    UINT16       offsetOfTypes;
+    UINT16       paramOffsets[2];
+    BYTE         types[6];
+} MAC_COMMAND_DESCRIPTOR_t;
+MAC_COMMAND_DESCRIPTOR_t _MACData = {
+    /* entry  */          &TPM2_MAC,
+    /* inSize */          (UINT16)(sizeof(MAC_In)),
+    /* outSize */         (UINT16)(sizeof(MAC_Out)),
+    /* offsetOfTypes */   offsetof(MAC_COMMAND_DESCRIPTOR_t, types),
+    /* offsets */         {(UINT16)(offsetof(MAC_In, buffer)),
+			   (UINT16)(offsetof(MAC_In, inScheme))},
+    /* types */           {TPMI_DH_OBJECT_H_UNMARSHAL,
+			   TPM2B_MAX_BUFFER_P_UNMARSHAL,
+			   TPMI_ALG_MAC_SCHEME_P_UNMARSHAL + ADD_FLAG,
+			   END_OF_LIST,
+			   TPM2B_DIGEST_P_MARSHAL,
+			   END_OF_LIST}
+};
+#define _MACDataAddress (&_MACData)
+#else
+#define _MACDataAddress 0
 #endif
 #if CC_GetRandom == YES
 #include "GetRandom_fp.h"
@@ -1339,6 +1391,38 @@ HMAC_Start_COMMAND_DESCRIPTOR_t _HMAC_StartData = {
 #define _HMAC_StartDataAddress (&_HMAC_StartData)
 #else
 #define _HMAC_StartDataAddress 0
+#endif
+#if CC_MAC_Start == YES
+#include "MAC_Start_fp.h"
+typedef TPM_RC  (MAC_Start_Entry)(
+				  MAC_Start_In *in,
+				  MAC_Start_Out *out
+				  );
+typedef const struct {
+    MAC_Start_Entry    *entry;
+    UINT16             inSize;
+    UINT16             outSize;
+    UINT16             offsetOfTypes;
+    UINT16             paramOffsets[2];
+    BYTE               types[6];
+} MAC_Start_COMMAND_DESCRIPTOR_t;
+MAC_Start_COMMAND_DESCRIPTOR_t _MAC_StartData = {
+    /* entry  */          &TPM2_MAC_Start,
+    /* inSize */          (UINT16)(sizeof(MAC_Start_In)),
+    /* outSize */         (UINT16)(sizeof(MAC_Start_Out)),
+    /* offsetOfTypes */   offsetof(MAC_Start_COMMAND_DESCRIPTOR_t, types),
+    /* offsets */         {(UINT16)(offsetof(MAC_Start_In, auth)),
+			   (UINT16)(offsetof(MAC_Start_In, inScheme))},
+    /* types */           {TPMI_DH_OBJECT_H_UNMARSHAL,
+			   TPM2B_DIGEST_P_UNMARSHAL,
+			   TPMI_ALG_MAC_SCHEME_P_UNMARSHAL + ADD_FLAG,
+			   END_OF_LIST,
+			   UINT32_H_MARSHAL,
+			   END_OF_LIST}
+};
+#define _MAC_StartDataAddress (&_MAC_StartData)
+#else
+#define _MAC_StartDataAddress 0
 #endif
 #if CC_HashSequenceStart == YES
 #include "HashSequenceStart_fp.h"
@@ -2100,7 +2184,7 @@ PolicySigned_COMMAND_DESCRIPTOR_t _PolicySignedData = {
 			   UINT32_P_UNMARSHAL,
 			   TPMT_SIGNATURE_P_UNMARSHAL,
 			   END_OF_LIST,
-			   TPM2B_DIGEST_P_MARSHAL,
+			   TPM2B_TIMEOUT_P_MARSHAL,
 			   TPMT_TK_AUTH_P_MARSHAL,
 			   END_OF_LIST}
 };
@@ -2140,7 +2224,7 @@ PolicySecret_COMMAND_DESCRIPTOR_t _PolicySecretData = {
 			   TPM2B_DIGEST_P_UNMARSHAL,
 			   UINT32_P_UNMARSHAL,
 			   END_OF_LIST,
-			   TPM2B_DIGEST_P_MARSHAL,
+			   TPM2B_TIMEOUT_P_MARSHAL,
 			   TPMT_TK_AUTH_P_MARSHAL,
 			   END_OF_LIST}
 };
@@ -2172,7 +2256,7 @@ PolicyTicket_COMMAND_DESCRIPTOR_t _PolicyTicketData = {
 			   (UINT16)(offsetof(PolicyTicket_In, authName)),
 			   (UINT16)(offsetof(PolicyTicket_In, ticket))},
     /* types */           {TPMI_SH_POLICY_H_UNMARSHAL,
-			   TPM2B_DIGEST_P_UNMARSHAL,
+			   TPM2B_TIMEOUT_P_UNMARSHAL,
 			   TPM2B_DIGEST_P_UNMARSHAL,
 			   TPM2B_DIGEST_P_UNMARSHAL,
 			   TPM2B_NAME_P_UNMARSHAL,
@@ -3802,6 +3886,108 @@ NV_Certify_COMMAND_DESCRIPTOR_t _NV_CertifyData = {
 #else
 #define _NV_CertifyDataAddress 0
 #endif
+#if CC_AC_GetCapability == YES
+#include "AC_GetCapability_fp.h"
+typedef TPM_RC  (AC_GetCapability_Entry)(
+					 AC_GetCapability_In *in,
+					 AC_GetCapability_Out *out
+					 );
+typedef const struct {
+    AC_GetCapability_Entry    *entry;
+    UINT16                    inSize;
+    UINT16                    outSize;
+    UINT16                    offsetOfTypes;
+    UINT16                    paramOffsets[3];
+    BYTE                      types[7];
+} AC_GetCapability_COMMAND_DESCRIPTOR_t;
+AC_GetCapability_COMMAND_DESCRIPTOR_t _AC_GetCapabilityData = {
+    /* entry  */          &TPM2_AC_GetCapability,
+    /* inSize */          (UINT16)(sizeof(AC_GetCapability_In)),
+    /* outSize */         (UINT16)(sizeof(AC_GetCapability_Out)),
+    /* offsetOfTypes */   offsetof(AC_GetCapability_COMMAND_DESCRIPTOR_t, types),
+    /* offsets */         {(UINT16)(offsetof(AC_GetCapability_In, capability)),
+			   (UINT16)(offsetof(AC_GetCapability_In, count)),
+			   (UINT16)(offsetof(AC_GetCapability_Out, capabilitiesData))},
+    /* types */           {TPMI_RH_AC_H_UNMARSHAL,
+			   TPM_AT_P_UNMARSHAL,
+			   UINT32_P_UNMARSHAL,
+			   END_OF_LIST,
+			   UINT8_P_MARSHAL,
+			   TPML_AC_CAPABILITIES_P_MARSHAL,
+			   END_OF_LIST}
+};
+#define _AC_GetCapabilityDataAddress (&_AC_GetCapabilityData)
+#else
+#define _AC_GetCapabilityDataAddress 0
+#endif
+#if CC_AC_Send == YES
+#include "AC_Send_fp.h"
+typedef TPM_RC  (AC_Send_Entry)(
+				AC_Send_In *in,
+				AC_Send_Out *out
+				);
+typedef const struct {
+    AC_Send_Entry    *entry;
+    UINT16           inSize;
+    UINT16           outSize;
+    UINT16           offsetOfTypes;
+    UINT16           paramOffsets[3];
+    BYTE             types[7];
+} AC_Send_COMMAND_DESCRIPTOR_t;
+AC_Send_COMMAND_DESCRIPTOR_t _AC_SendData = {
+    /* entry  */          &TPM2_AC_Send,
+    /* inSize */          (UINT16)(sizeof(AC_Send_In)),
+    /* outSize */         (UINT16)(sizeof(AC_Send_Out)),
+    /* offsetOfTypes */   offsetof(AC_Send_COMMAND_DESCRIPTOR_t, types),
+    /* offsets */         {(UINT16)(offsetof(AC_Send_In, authHandle)),
+			   (UINT16)(offsetof(AC_Send_In, ac)),
+			   (UINT16)(offsetof(AC_Send_In, acDataIn))},
+    /* types */           {TPMI_DH_OBJECT_H_UNMARSHAL,
+			   TPMI_RH_NV_AUTH_H_UNMARSHAL,
+			   TPMI_RH_AC_H_UNMARSHAL,
+			   TPM2B_MAX_BUFFER_P_UNMARSHAL,
+			   END_OF_LIST,
+			   TPMS_AC_OUTPUT_P_MARSHAL,
+			   END_OF_LIST}
+};
+#define _AC_SendDataAddress (&_AC_SendData)
+#else
+#define _AC_SendDataAddress 0
+#endif
+#if CC_Policy_AC_SendSelect == YES
+#include "Policy_AC_SendSelect_fp.h"
+typedef TPM_RC  (Policy_AC_SendSelect_Entry)(
+					     Policy_AC_SendSelect_In *in
+					     );
+typedef const struct {
+    Policy_AC_SendSelect_Entry    *entry;
+    UINT16                        inSize;
+    UINT16                        outSize;
+    UINT16                        offsetOfTypes;
+    UINT16                        paramOffsets[4];
+    BYTE                          types[7];
+} Policy_AC_SendSelect_COMMAND_DESCRIPTOR_t;
+Policy_AC_SendSelect_COMMAND_DESCRIPTOR_t _Policy_AC_SendSelectData = {
+    /* entry  */          &TPM2_Policy_AC_SendSelect,
+    /* inSize */          (UINT16)(sizeof(Policy_AC_SendSelect_In)),
+    /* outSize */         0,
+    /* offsetOfTypes */   offsetof(Policy_AC_SendSelect_COMMAND_DESCRIPTOR_t, types),
+    /* offsets */         {(UINT16)(offsetof(Policy_AC_SendSelect_In, objectName)),
+			   (UINT16)(offsetof(Policy_AC_SendSelect_In, authHandleName)),
+			   (UINT16)(offsetof(Policy_AC_SendSelect_In, acName)),
+			   (UINT16)(offsetof(Policy_AC_SendSelect_In, includeObject))},
+    /* types */           {TPMI_SH_POLICY_H_UNMARSHAL,
+			   TPM2B_NAME_P_UNMARSHAL,
+			   TPM2B_NAME_P_UNMARSHAL,
+			   TPM2B_NAME_P_UNMARSHAL,
+			   TPMI_YES_NO_P_UNMARSHAL,
+			   END_OF_LIST,
+			   END_OF_LIST}
+};
+#define _Policy_AC_SendSelectDataAddress (&_Policy_AC_SendSelectData)
+#else
+#define _Policy_AC_SendSelectDataAddress 0
+#endif
 #if CC_Vendor_TCG_Test == YES
 #include "Vendor_TCG_Test_fp.h"
 typedef TPM_RC  (Vendor_TCG_Test_Entry)(
@@ -3994,9 +4180,17 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ECDH_ZGen)
     (COMMAND_DESCRIPTOR_t *)_ECDH_ZGenDataAddress,
 #endif
-#if (PAD_LIST || CC_HMAC)
+#if (PAD_LIST || (CC_HMAC || CC_MAC))
+#    if CC_HMAC
     (COMMAND_DESCRIPTOR_t *)_HMACDataAddress,
-#endif
+#    endif
+#    if CC_MAC
+    (COMMAND_DESCRIPTOR_t *)_MACDataAddress,
+#    endif
+#    if (CC_HMAC || CC_MAC) > 1
+#        error "More than one aliased command defined"
+#    endif
+#endif // CC_HMAC CC_MAC
 #if (PAD_LIST || CC_Import)
     (COMMAND_DESCRIPTOR_t *)_ImportDataAddress,
 #endif
@@ -4012,9 +4206,17 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST)
     (COMMAND_DESCRIPTOR_t *)0,
 #endif
-#if (PAD_LIST || CC_HMAC_Start)
+#if (PAD_LIST || (CC_HMAC_Start || CC_MAC_Start))
+#    if CC_HMAC_Start
     (COMMAND_DESCRIPTOR_t *)_HMAC_StartDataAddress,
-#endif
+#    endif
+#    if CC_MAC_Start
+    (COMMAND_DESCRIPTOR_t *)_MAC_StartDataAddress,
+#    endif
+#    if (CC_HMAC_Start || CC_MAC_Start) > 1
+#        error "More than one aliased command defined"
+#    endif
+#endif // CC_HMAC_Start CC_MAC_Start
 #if (PAD_LIST || CC_SequenceUpdate)
     (COMMAND_DESCRIPTOR_t *)_SequenceUpdateDataAddress,
 #endif
@@ -4183,6 +4385,15 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_EncryptDecrypt2)
     (COMMAND_DESCRIPTOR_t *)_EncryptDecrypt2DataAddress,
 #endif
+#if (PAD_LIST || CC_AC_GetCapability)
+    (COMMAND_DESCRIPTOR_t *)_AC_GetCapabilityDataAddress,
+#endif // CC_AC_GetCapability
+#if (PAD_LIST || CC_AC_Send)
+    (COMMAND_DESCRIPTOR_t *)_AC_SendDataAddress,
+#endif // CC_AC_Send
+#if (PAD_LIST || CC_Policy_AC_SendSelect)
+    (COMMAND_DESCRIPTOR_t *)_Policy_AC_SendSelectDataAddress,
+#endif // CC_Policy_AC_SendSelect
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif

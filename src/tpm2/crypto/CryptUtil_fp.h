@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptUtil_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -220,6 +220,26 @@ void
 CryptAlgsSetImplemented(
 			void
 			);
-
+TPM_RC
+CryptSelectMac(
+	       TPMT_PUBLIC             *publicArea,
+	       TPMI_ALG_MAC_SCHEME     *inMac
+	       );
+BOOL
+CryptMacIsValidForKey(
+		      TPM_ALG_ID          keyType,
+		      TPM_ALG_ID          macAlg,
+		      BOOL                flag
+		      );
+BOOL
+CryptSmacIsValidAlg(
+		    TPM_ALG_ID      alg,
+		    BOOL            FLAG        // IN: Indicates if TPM_ALG_NULL is valid
+		    );
+BOOL
+CryptSymModeIsValid(
+		    TPM_ALG_ID          mode,
+		    BOOL                flag
+		    );
 
 #endif

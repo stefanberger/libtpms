@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Object Command Support   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt_fp.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Object_spt_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -224,15 +224,14 @@ MemoryRemoveTrailingZeros(
 TPM_RC
 SetLabelAndContext(
 		   TPMS_DERIVE             *labelContext,  // OUT: the recovered label and context
-		   TPMT_PUBLIC             *publicArea,    // IN/OUT: the public area containing
-		   //         the unmarshaled template
 		   TPM2B_SENSITIVE_DATA    *sensitive      // IN: the sensitive data
 		   );
 TPM_RC
 UnmarshalToPublic(
 		  TPMT_PUBLIC         *tOut,       // OUT: output
 		  TPM2B_TEMPLATE      *tIn,        // IN:
-		  BOOL                 derivation  // IN: indicates if this is for a derivation
+		  BOOL                 derivation,  // IN: indicates if this is for a derivation
+		  TPMS_DERIVE         *labelContext // OUT: label and context if derivation
 		  );
 void
 ObjectSetHierarchy(

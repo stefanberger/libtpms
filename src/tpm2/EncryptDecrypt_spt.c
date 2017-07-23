@@ -3,7 +3,7 @@
 /*			 	Encrypt Decrypt Support 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EncryptDecrypt_spt.c 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: EncryptDecrypt_spt.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -94,13 +94,19 @@ EncryptDecryptShared(
     if(symKey->publicArea.type != TPM_ALG_SYMCIPHER)
 	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
     // The key must be unrestricted and allow the selected operation
-    OK = symKey->publicArea.objectAttributes.restricted != SET;
+    OK = !IS_ATTRIBUTE(symKey->publicArea.objectAttributes,
+		       TPMA_OBJECT, restricted);
     if(YES == decryptIn)
-	OK = OK && symKey->publicArea.objectAttributes.decrypt == SET;
+	OK = OK && IS_ATTRIBUTE(symKey->publicArea.objectAttributes,
+				TPMA_OBJECT, decrypt);
     else
-	OK = OK && symKey->publicArea.objectAttributes.sign == SET;
+	OK = OK && IS_ATTRIBUTE(symKey->publicArea.objectAttributes,
+				TPMA_OBJECT, sign);
     if(!OK)
 	return TPM_RCS_ATTRIBUTES + RC_EncryptDecrypt_keyHandle;
+    // Make sure that key is an encrypt/decrypt key and not SMAC
+    if(!CryptSymModeIsValid(mode, TRUE))
+	return TPM_RCS_MODE + RC_EncryptDecrypt_keyHandle;
     // If the key mode is not TPM_ALG_NULL...
     // or TPM_ALG_NULL
     if(mode != TPM_ALG_NULL)

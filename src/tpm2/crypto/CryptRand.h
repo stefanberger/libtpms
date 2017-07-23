@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptRand.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -149,11 +149,14 @@ typedef struct
 {
     UINT64               counter;
     UINT32               magic;
+    UINT32               limit;
     TPM2B               *seed;
     const TPM2B         *label;
     TPM2B               *context;
     TPM_ALG_ID           hash;
     TPM_ALG_ID           kdf;
+    UINT16               digestSize;
+    TPM2B_DIGEST         residual;
 } KDF_STATE, *pKDR_STATE;
 #define KDF_MAGIC    ((UINT32) 0x4048444a) // "KDF " backwards
 /* Make sure that any other structures added to this union start with a 64-bit counter and a 32-bit

@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Functions used for ticket computations.				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Ticket.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Ticket.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -102,7 +102,7 @@ TicketComputeVerified(
 		      TPMT_TK_VERIFIED    *ticket         // OUT: verified ticket
 		      )
 {
-    TPM2B_AUTH          *proof;
+    TPM2B_PROOF          *proof;
     HMAC_STATE           hmacState;
     //
     // Fill in ticket fields
@@ -137,7 +137,7 @@ TicketComputeAuth(
 		  TPMT_TK_AUTH        *ticket         // OUT: Created ticket
 		  )
 {
-    TPM2B_AUTH          *proof;
+    TPM2B_PROOF          *proof;
     HMAC_STATE           hmacState;
     //
     // Get proper proof
@@ -182,7 +182,7 @@ TicketComputeHashCheck(
 		       TPMT_TK_HASHCHECK   *ticket         // OUT: Created ticket
 		       )
 {
-    TPM2B_AUTH          *proof;
+    TPM2B_PROOF          *proof;
     HMAC_STATE           hmacState;
     //
     // Get proper proof
@@ -213,7 +213,7 @@ TicketComputeCreation(
 		      TPMT_TK_CREATION    *ticket         // OUT: created ticket
 		      )
 {
-    TPM2B_AUTH          *proof;
+    TPM2B_PROOF          *proof;
     HMAC_STATE           hmacState;
     // Get proper proof
     proof = HierarchyGetProof(hierarchy);

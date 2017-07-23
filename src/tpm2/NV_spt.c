@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NV_spt.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: NV_spt.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -80,7 +80,7 @@ NvReadAccessChecks(
 		   )
 {
     // If data is read locked, returns an error
-    if(IsNv_TPMA_NV_READLOCKED(attributes))
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, READLOCKED))
 	return TPM_RC_NV_LOCKED;
     // If the authorization was provided by the owner or platform, then check
     // that the attributes allow the read.  If the authorization handle
@@ -89,13 +89,13 @@ NvReadAccessChecks(
     if(authHandle == TPM_RH_OWNER)
 	{
 	    // If Owner provided authorization then ONWERWRITE must be SET
-	    if(!IsNv_TPMA_NV_OWNERREAD(attributes))
+	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, OWNERREAD))
 		return TPM_RC_NV_AUTHORIZATION;
 	}
     else if(authHandle == TPM_RH_PLATFORM)
 	{
 	    // If Platform provided authorization then PPWRITE must be SET
-	    if(!IsNv_TPMA_NV_PPREAD(attributes))
+	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, PPREAD))
 		return TPM_RC_NV_AUTHORIZATION;
 	}
     // If neither Owner nor Platform provided authorization, make sure that it was
@@ -105,7 +105,7 @@ NvReadAccessChecks(
     // If the index has not been written, then the value cannot be read
     // NOTE: This has to come after other access checks to make sure that
     // the proper authorization is given to TPM2_NV_ReadLock()
-    if(!IsNv_TPMA_NV_WRITTEN(attributes))
+    if(!IS_ATTRIBUTE(attributes, TPMA_NV, WRITTEN))
 	return TPM_RC_NV_UNINITIALIZED;
     return TPM_RC_SUCCESS;
 }
@@ -124,7 +124,7 @@ NvWriteAccessChecks(
 		    )
 {
     // If data is write locked, returns an error
-    if(IsNv_TPMA_NV_WRITELOCKED(attributes))
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, WRITELOCKED))
 	return TPM_RC_NV_LOCKED;
     // If the authorization was provided by the owner or platform, then check
     // that the attributes allow the write.  If the authorization handle
@@ -133,13 +133,13 @@ NvWriteAccessChecks(
     if(authHandle == TPM_RH_OWNER)
 	{
 	    // If Owner provided authorization then ONWERWRITE must be SET
-	    if(!IsNv_TPMA_NV_OWNERWRITE(attributes))
+	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, OWNERWRITE))
 		return TPM_RC_NV_AUTHORIZATION;
 	}
     else if(authHandle == TPM_RH_PLATFORM)
 	{
 	    // If Platform provided authorization then PPWRITE must be SET
-	    if(!IsNv_TPMA_NV_PPWRITE(attributes))
+	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, PPWRITE))
 		return TPM_RC_NV_AUTHORIZATION;
 	}
     // If neither Owner nor Platform provided authorization, make sure that it was

@@ -3,7 +3,7 @@
 /*			     Hierarchy Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HierarchyCommands.c 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: HierarchyCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,7 +68,6 @@ TPM2_CreatePrimary(
 		   CreatePrimary_Out   *out            // OUT: output parameter list
 		   )
 {
-    // Local variables
     TPM_RC              result = TPM_RC_SUCCESS;
     TPMT_PUBLIC         *publicArea;
     DRBG_STATE           rand;
@@ -289,13 +288,12 @@ TPM2_ChangePPS(
     RETURN_IF_NV_IS_NOT_AVAILABLE;
     // Input parameter is not reference in command action
     NOT_REFERENCED(in);
-    // in = NULL; kgold 
     // Internal Data Update
     // Reset platform hierarchy seed from RNG
-    CryptRandomGenerate(PRIMARY_SEED_SIZE, gp.PPSeed.t.buffer);
+    CryptRandomGenerate(sizeof(gp.PPSeed.t.buffer), gp.PPSeed.t.buffer);
     // Create a new phProof value from RNG to prevent the saved platform
     // hierarchy contexts being loaded
-    CryptRandomGenerate(PROOF_SIZE, gp.phProof.t.buffer);
+    CryptRandomGenerate(sizeof(gp.phProof.t.buffer), gp.phProof.t.buffer);
     // Set platform authPolicy to null
     gc.platformAlg = TPM_ALG_NULL;
     gc.platformPolicy.t.size = 0;
@@ -336,9 +334,9 @@ TPM2_ChangeEPS(
     NOT_REFERENCED(in);
     // Internal Data Update
     // Reset endorsement hierarchy seed from RNG
-    CryptRandomGenerate(PRIMARY_SEED_SIZE, gp.EPSeed.t.buffer);
+    CryptRandomGenerate(sizeof(gp.EPSeed.t.buffer), gp.EPSeed.t.buffer);
     // Create new ehProof value from RNG
-    CryptRandomGenerate(PROOF_SIZE, gp.ehProof.t.buffer);
+    CryptRandomGenerate(sizeof(gp.ehProof.t.buffer), gp.ehProof.t.buffer);
     // Enable endorsement hierarchy
     gc.ehEnable = TRUE;
     // set authValue buffer to zeros
@@ -383,10 +381,10 @@ TPM2_Clear(
 	return TPM_RC_DISABLED;
     // Internal Data Update
     // Reset storage hierarchy seed from RNG
-    CryptRandomGenerate(PRIMARY_SEED_SIZE, gp.SPSeed.t.buffer);
+    CryptRandomGenerate(sizeof(gp.SPSeed.t.buffer), gp.SPSeed.t.buffer);
     // Create new shProof and ehProof value from RNG
-    CryptRandomGenerate(PROOF_SIZE, gp.shProof.t.buffer);
-    CryptRandomGenerate(PROOF_SIZE, gp.ehProof.t.buffer);
+    CryptRandomGenerate(sizeof(gp.shProof.t.buffer), gp.shProof.t.buffer);
+    CryptRandomGenerate(sizeof(gp.ehProof.t.buffer), gp.ehProof.t.buffer);
     // Enable storage and endorsement hierarchy
     gc.shEnable = gc.ehEnable = TRUE;
     // set the authValue buffers to zero

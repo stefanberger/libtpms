@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SigningCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: SigningCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -73,7 +73,7 @@ TPM2_VerifySignature(
     TPMI_RH_HIERARCHY        hierarchy;
     // Input Validation
     // The object to validate the signature must be a signing key.
-    if(signObject->publicArea.objectAttributes.sign != SET)
+    if(!IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, sign))
 	return TPM_RCS_ATTRIBUTES + RC_VerifySignature_keyHandle;
     // Validate Signature.  TPM_RC_SCHEME, TPM_RC_HANDLE or TPM_RC_SIGNATURE
     // error may be returned by CryptCVerifySignatrue()
@@ -123,7 +123,7 @@ TPM2_Sign(
 	return TPM_RCS_SCHEME + RC_Sign_inScheme;
     // If validation is provided, or the key is restricted, check the ticket
     if(in->validation.digest.t.size != 0
-       || signObject->publicArea.objectAttributes.restricted == SET)
+       || IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, restricted))
 	{
 	    // Compute and compare ticket
 	    TicketComputeHashCheck(in->validation.hierarchy,

@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Context_spt.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Context_spt.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -75,7 +75,7 @@ ComputeContextProtectionKey(
 {
     UINT16           symKeyBits;    // number of bits in the parent's
     //   symmetric key
-    TPM2B_AUTH      *proof = NULL;  // the proof value to use. Is null for
+    TPM2B_PROOF      *proof = NULL;  // the proof value to use. Is null for
     //   everything but a primary object in
     //   the Endorsement Hierarchy
     BYTE             kdfResult[sizeof(TPMU_HA) * 2];// Value produced by the KDF
@@ -119,7 +119,7 @@ ComputeContextIntegrity(
 			)
 {
     HMAC_STATE          hmacState;
-    TPM2B_AUTH          *proof;
+    TPM2B_PROOF         *proof;
     UINT16              integritySize;
     // Get proof value
     proof = HierarchyGetProof(contextBlob->hierarchy);

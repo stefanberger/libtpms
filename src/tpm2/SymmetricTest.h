@@ -3,7 +3,7 @@
 /*		Structures and data definitions for the symmetric tests		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricTest.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: SymmetricTest.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -72,7 +72,7 @@
 #define     _SYMMETRIC_TEST_H
 #include    "SymmetricTestData.h"
 
-/* 10.1.11.2	Structures */
+/* 10.1.11.2 Symmetric Test Structures */
 
 const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS] = {
 #undef  COMMA

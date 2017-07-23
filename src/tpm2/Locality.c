@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Locality.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Locality.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -76,19 +76,19 @@ LocalityGetAttributes(
     switch(locality)
 	{
 	  case 0:
-	    locality_attributes.TPM_LOC_ZERO = SET;
+	    SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_ZERO);
 	    break;
 	  case 1:
-	    locality_attributes.TPM_LOC_ONE = SET;
+	    SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_ONE);
 	    break;
 	  case 2:
-	    locality_attributes.TPM_LOC_TWO = SET;
+	    SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_TWO);
 	    break;
 	  case 3:
-	    locality_attributes.TPM_LOC_THREE = SET;
+	    SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_THREE);
 	    break;
 	  case 4:
-	    locality_attributes.TPM_LOC_FOUR = SET;
+	    SET_ATTRIBUTE(locality_attributes, TPMA_LOCALITY, TPM_LOC_FOUR);
 	    break;
 	  default:
 	    pAssert(locality > 31);

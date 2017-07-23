@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Global.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,10 +59,11 @@
 /*										*/
 /********************************************************************************/
 
-/* 5.12	Global.h */
+/* 5.10	Global.h */
+/* 5.10.2	Includes */
 
 #if !defined _TPM_H_
-#error "Should not be called"
+#error "Should only be instanced in TPM.h"
 #endif
 
 #ifndef         GLOBAL_H
@@ -70,7 +71,6 @@
 //#define SELF_TEST
 _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
-//#include <setjmp.h>
 #include <stddef.h>
 _NORMAL_WARNING_LEVEL_
 #ifdef SIMULATION
@@ -83,6 +83,7 @@ _NORMAL_WARNING_LEVEL_
 #include "CryptTest.h"
 #include "BnValues.h"
 #include "CryptHash.h"
+#include "CryptSym.h"
 #include "CryptRand.h"
 #include "CryptEcc.h"
 #include "CryptRsa.h"
@@ -105,6 +106,10 @@ typedef BYTE    AUTH_VALUE[sizeof(TPMU_HA)];
 typedef BYTE    TIME_INFO[sizeof(TPMS_TIME_INFO)];
 /* A NAME is a BYTE array that can contain a TPMU_NAME */
 typedef BYTE    NAME[sizeof(TPMU_NAME)];
+/* Definition for a PROOF value */
+TPM2B_TYPE(PROOF, PROOF_SIZE);
+/* Definition for a Primary Seed value */
+TPM2B_TYPE(SEED, PRIMARY_SEED_SIZE);
 /* A CLOCK_NONCE is used to tag the time value in the authorization session and in the ticket
    computation so that the ticket expires when there is a time discontinuity. When the clock stops
    during normal operation, the nonce is 64-bit value kept in RAM but it is a 32-bit counter when
@@ -139,7 +144,7 @@ typedef struct
     unsigned            primary : 1;        //5) SET for a primary object
     unsigned            temporary : 1;      //6) SET for a temporary object
     unsigned            stClear : 1;        //7) SET for an stClear object
-    unsigned            hmacSeq : 1;        //8) SET for an HMAC sequence object
+    unsigned            hmacSeq : 1;        //8) SET for an HMAC or MAC sequence object
     unsigned            hashSeq : 1;        //9) SET for a hash sequence object
     unsigned            eventSeq : 1;       //10) SET for an event sequence object
     unsigned            ticketSafe : 1;     //11) SET if a ticket is safe to create
@@ -388,7 +393,7 @@ typedef BYTE            *NV_RAM_REF;
    all the values on a little endian system. This will put the bytes with the 4-octet values in the
    correct order but will swap the pinLimit and pinCount values. When written, the PIN index is
    simply handled as a normal index with the octets in canonical order. */
-#if BIG_ENDIAN_TPM == YES
+#if BIG_ENDIAN_TPM
 typedef struct
 {
     UINT32      pinCount;
@@ -422,7 +427,9 @@ extern const UINT16     g_rcIndex[15];
    exclusive audit session, the location is set to TPM_RH_UNASSIGNED. */
 extern TPM_HANDLE       g_exclusiveAuditSession;
 /* This is the value in which we keep the current command time. This is initialized at the start of
-   each command. The time is in mS. */
+   each command. The time is the accumulated time since the last time that the TPM's timer was
+   last powered up. Clock is the accumulated time since the last time that the TPM was
+   cleared. g_time is in mS. */
 extern  UINT64          g_time;
 /* This value contains the current clock Epoch. It changes when there is a clock discontinuity. It
    may be necessary to place this in NV should the timer be able to run across a power down of the
@@ -433,42 +440,42 @@ extern CLOCK_NONCE       g_timeEpoch;
 #else
 #define g_timeEpoch      gp.timeEpoch
 #endif
-/* 5.12.10.7 g_phEnable */
+/* 5.10.10.7 g_phEnable */
 /* This is the platform hierarchy control and determines if the platform hierarchy is
    available. This value is SET on each TPM2_Startup(). The default value is SET. */
 extern BOOL             g_phEnable;
-/* 5.12.10.8 g_pcrReConfig */
+/* 5.10.10.8 g_pcrReConfig */
 /* This value is SET if a TPM2_PCR_Allocate() command successfully executed since the last
    TPM2_Startup(). If so, then the next shutdown is required to be Shutdown(CLEAR). */
 extern BOOL             g_pcrReConfig;
-/* 5.12.10.9 g_DRTMHandle */
+/* 5.10.10.9 g_DRTMHandle */
 /* This location indicates the sequence object handle that holds the DRTM sequence data. When not
    used, it is set to TPM_RH_UNASSIGNED. A sequence DRTM sequence is started on either _TPM_Init()
    or _TPM_Hash_Start(). */
 extern TPMI_DH_OBJECT   g_DRTMHandle;
-/* 5.12.10.10 g_DrtmPreStartup */
+/* 5.10.10.10 g_DrtmPreStartup */
 /* This value indicates that an H-CRTM occurred after _TPM_Init() but before TPM2_Startup(). The
    define for PRE_STARTUP_FLAG is used to add the g_DrtmPreStartup value to gp_orderlyState at
    shutdown. This hack is to avoid adding another NV variable. */
 extern  BOOL            g_DrtmPreStartup;
-/* 5.12.10.11 g_StartupLocality3 */
+/* 5.10.10.11 g_StartupLocality3 */
 /* This value indicates that a TPM2_Startup() occurred at locality 3. Otherwise, it at locality
    0. The define for STARTUP_LOCALITY_3 is to indicate that the startup was not at locality 0. This
    hack is to avoid adding another NV variable. */
 extern  BOOL            g_StartupLocality3;
-/* 5.12.10.12 TPM_SU_NONE */
+/* 5.10.10.12 TPM_SU_NONE */
 /* Part 2 defines the two shutdown/startup types that may be used in TPM2_Shutdown() and
    TPM2_Starup(). This additional define is used by the TPM to indicate that no shutdown was
    received. */
 /* NOTE: This is a reserved value. */
 #define SU_NONE_VALUE           (0xFFFF)
 #define TPM_SU_NONE             (TPM_SU)(SU_NONE_VALUE)
-/* 5.12.10.13 TPM_SU_DA_USED */
+/* 5.10.10.13 TPM_SU_DA_USED */
 /* As with TPM_SU_NONE, this value is added to allow indication that the shutdown was not orderly
    and that a DA=protected object was reference during the previous cycle. */
 #define SU_DA_USED_VALUE    (SU_NONE_VALUE - 1)
 #define TPM_SU_DA_USED      (TPM_SU)(SU_DA_USED_VALUE)
-/*     5.12.10.14 Startup Flags */
+/*     5.10.10.14 Startup Flags */
 /* These flags are included in gp.orderlyState. These are hacks and are being used to avoid having
    to change the layout of gp. The PRE_STARTUP_FLAG indicates that a
    _TPM_Hash_Start()/_Data()/_End() sequence was received after _TPM_Init() but before
@@ -477,13 +484,13 @@ extern  BOOL            g_StartupLocality3;
 #define PRE_STARTUP_FLAG	 0x8000
 #define STARTUP_LOCALITY_3   0x4000
 #ifdef USE_DA_USED
-/*     5.12.10.15 g_daUsed */
+/*     5.10.10.15 g_daUsed */
 /* This location indicates if a DA-protected value is accessed during a boot cycle. If none has,
    then there is no need to increment failedTries on the next non-orderly startup. This bit is
    merged with gp.orderlyState when that gp.orderly is set to SU_NONE_VALUE */
 extern	BOOL			g_daUsed;
 #endif
-/* 5.12.10.16 g_updateNV */
+/* 5.10.10.16 g_updateNV */
 /* This flag indicates if NV should be updated at the end of a command. This flag is set to UT_NONE
    at the beginning of each command in ExecuteCommand(). This flag is checked in ExecuteCommand()
    after the detailed actions of a command complete. If the command execution was successful and
@@ -494,7 +501,7 @@ typedef BYTE        UPDATE_TYPE;
 #define UT_NV       (UPDATE_TYPE)1
 #define UT_ORDERLY  (UPDATE_TYPE)(UT_NV + 2)
 extern UPDATE_TYPE          g_updateNV;
-/* 5.12.10.17 g_powerWasLost */
+/* 5.10.10.17 g_powerWasLost */
 /* This flag is used to indicate if the power was lost. It is SET in _TPM__Init(). This flag is
    cleared by TPM2_Startup() after all power-lost activities are completed. */
 /* NOTE: When power is applied, this value can come up as anything. However, _plat__WasPowerLost()
@@ -502,19 +509,19 @@ extern UPDATE_TYPE          g_updateNV;
    correct answer. When power was not lost, but the power-lost processing has not been completed
    before the next _TPM_Init(), then the TPM still does the correct thing. */
 extern BOOL             g_powerWasLost;
-/* 5.12.10.18 g_clearOrderly */
+/* 5.10.10.18 g_clearOrderly */
 /* This flag indicates if the execution of a command should cause the orderly state to be cleared.
    This flag is set to FALSE at the beginning of each command in ExecuteCommand() and is checked in
    ExecuteCommand() after the detailed actions of a command complete but before the check of
    g_updateNV. If this flag is TRUE, and the orderly state is not SU_NONE_VALUE, then the orderly
    state in NV memory will be changed to SU_NONE_VALUE or SU_DA_USED_VALUE. */
 extern BOOL             g_clearOrderly;
-/* 5.12.10.19 g_prevOrderlyState */
+/* 5.10.10.19 g_prevOrderlyState */
 /* This location indicates how the TPM was shut down before the most recent TPM2_Startup(). This
    value, along with the startup type, determines if the TPM should do a TPM Reset, TPM Restart, or
    TPM Resume. */
 extern TPM_SU           g_prevOrderlyState;
-/* 5.12.10.20 g_nvOk */
+/* 5.10.10.20 g_nvOk */
 /* This value indicates if the NV integrity check was successful or not. If not and the failure was
    severe, then the TPM would have been put into failure mode after it had been re-manufactured. If
    the NV failure was in the area where the state-save data is kept, then this variable will have a
@@ -523,7 +530,7 @@ extern BOOL             g_nvOk;
 /* NV availability is sampled as the start of each command and stored here so that its value remains
    consistent during the command execution */
 extern TPM_RC           g_NvStatus;
-/* 5.12.10.21 g_platformUnique */
+/* 5.10.10.21 g_platformUnique */
 /* This location contains the unique value(s) used to identify the TPM. It is loaded on every
    _TPM2_Startup() The first value is used to seed the RNG. The second value is used as a vendor
    authValue. The value used by the RNG would be the value derived from the chip unique value (such
@@ -563,9 +570,9 @@ typedef struct
     TPM2B_SEED          PPSeed;
     // Note there is a nullSeed in the state_reset memory.
     // Hierarchy proofs
-    TPM2B_AUTH          phProof;
-    TPM2B_AUTH          shProof;
-    TPM2B_AUTH          ehProof;
+    TPM2B_PROOF          phProof;
+    TPM2B_PROOF          shProof;
+    TPM2B_PROOF          ehProof;
     // Note there is a nullProof in the state_reset memory.
     //*********************************************************************************
     //          Reset Events
@@ -665,7 +672,7 @@ typedef struct
 #endif
 } PERSISTENT_DATA;
 extern PERSISTENT_DATA  gp;
-/* 																			  5.12.11.3
+/* 																			  5.10.11.3
  																			  ORDERLY_DATA */
 /* The data in this structure is saved to NV on each TPM2_Shutdown(). */
 typedef struct orderly_data
@@ -689,8 +696,6 @@ typedef struct orderly_data
     // of entropy. By keeping the old state and adding entropy, the entropy will
     // accumulate.
     DRBG_STATE          drbgState;
-
-
     // These values allow the accumulation of self-healing time across orderly shutdown
     // of the TPM.
 #ifdef ACCUMULATE_SELF_HEAL_TIMER
@@ -705,8 +710,8 @@ typedef struct orderly_data
 #endif  // ACCUMULATE_SELF_HEAL_TIMER
 #  define drbgDefault go.drbgState
 extern ORDERLY_DATA     go;
-    
-/* 5.12.11.4  STATE_CLEAR_DATA */
+
+/* 5.10.11.4  STATE_CLEAR_DATA */
 /* This structure contains the data that is saved on Shutdown(STATE). and restored on
    Startup(STATE).  The values are set to their default settings on any Startup(Clear). In other
    words the data is only persistent across TPM Resume. */
@@ -736,7 +741,7 @@ typedef struct state_clear_data
     PCR_AUTHVALUE       pcrAuthValues;
 } STATE_CLEAR_DATA;
 extern STATE_CLEAR_DATA gc;
-/* 																			  5.12.11.5
+/* 																			  5.10.11.5
  																			  State
  																			  Reset
  																			  Data */
@@ -748,7 +753,7 @@ typedef struct state_reset_data
     //*****************************************************************************
     //          Hierarchy Control
     //*****************************************************************************
-    TPM2B_AUTH          nullProof;          // The proof value associated with
+    TPM2B_PROOF          nullProof;          // The proof value associated with
     // the TPM_RH_NULL hierarchy. The
     // default reset value is from the RNG.
     TPM2B_SEED          nullSeed;           // The seed value for the TPM_RN_NULL
@@ -824,7 +829,7 @@ typedef struct state_reset_data
 #endif //TPM_ALG_ECC
 } STATE_RESET_DATA;
 extern STATE_RESET_DATA gr;
-/* 																			  5.12.12
+/* 																			  5.10.12
  																			  NV
  																			  Layout */
 /* The NV data organization is */
@@ -840,7 +845,7 @@ extern STATE_RESET_DATA gr;
 #define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + sizeof(ORDERLY_DATA))
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
-/* 5.12.13 Global Macro Definitions */
+/* 5.10.13 Global Macro Definitions */
 /* The NV_READ_PERSISTENT and NV_WRITE_PERSISTENT macros are used to access members of the
    PERSISTENT_DATA structure in NV. */
 #define NV_READ_PERSISTENT(to, from)					\
@@ -930,7 +935,7 @@ extern BOOL              g_manufactured;
    This flag is maintained in power simulation module because this is the only place that may
    reliably set this flag to FALSE. */
 extern BOOL              g_initialized;
-/* 5.12.14 Private data */
+/* 5.10.14 Private data */
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
 /* From SessionProcess.c */
 /* The following arrays are used to save command sessions information so that the command
