@@ -3,7 +3,7 @@
 /*		Accessing properties for handles of various types		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entity.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Entity.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -448,7 +448,8 @@ EntityGetHierarchy(
 		  // If only the platform can delete the index, then it is
 		  // considered to be in the platform hierarchy, otherwise it
 		  // is in the owner hierarchy.
-		  if(IsNv_TPMA_NV_PLATFORMCREATE(nvIndex->publicArea.attributes))
+		  if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV,
+				  PLATFORMCREATE))
 		      hierarchy = TPM_RH_PLATFORM;
 		  else
 		      hierarchy = TPM_RH_OWNER;

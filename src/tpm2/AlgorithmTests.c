@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: AlgorithmTests.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -319,7 +319,7 @@ TestSymmetric(
 /* The tests are for public key only operations and for private key operations. Signature
    verification and encryption are public key operations. They are tested by using a KVT. For
    signature verification, this means that a known good signature is checked by
-   _cpri_ValidateSignatureRSA(). If it fails, then the TPM enters failure mode. For encryption, the
+   CryptRsaValidateSignature(). If it fails, then the TPM enters failure mode. For encryption, the
    TPM encrypts known values using the selected scheme and checks that the returned value matches
    the expected value. */
 /* For private key operations, a full scheme check is used. For a signing key, a known key is used
@@ -751,12 +751,15 @@ TestEcc(
 }
 #endif // TPM_ALG_ECC
 /* 10.2.1.6.4 TestAlgorithm() */
-/* Dispatches to the correct test function for the algorithm. If algorithm is not If toTest is not
-   NULL, then the test decisions are based on the algorithm selections in toTest. Otherwise,
-   g_toTest is used. When bits are clear in g_toTest they will also be cleared toTest. If there
-   doesn't happen to be a test for the algorithm, its associated bit quietly cleared. If alg is zero
-   (TPM_ALG_ERROR), then the toTest vector is cleared of any bits for which there is a test (i.e. no
-   tests are actually run but the vector is cleared. */
+/* Dispatches to the correct test function for the algorithm or get a list of testable
+   algorithms. */
+/* If toTest is not NULL, then the test decisions are based on the algorithm selections in
+   toTest. Otherwise, g_toTest is used. When bits are clear in g_toTest they will also be cleared
+   toTest. */
+/*     If there doesn't happen to be a test for the algorithm, its associated bit is quietly
+       cleared. */
+/* If alg is zero (TPM_ALG_ERROR), then the toTest vector is cleared of any bits for which there is
+   no test (i.e. no tests are actually run but the vector is cleared). */
 /* NOTE: toTest will only ever have bits set for implemented algorithms but alg can be anything. */
 /* Error Returns Meaning */
 /* TPM_RC_SUCCESS test complete */

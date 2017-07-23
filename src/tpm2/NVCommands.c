@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			    Non-Volatile Storage 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVCommands.c 847 2016-11-29 21:17:44Z kgoldman $		*/
+/*            $Id: NVCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -75,7 +75,7 @@ TPM2_NV_DefineSpace(
     // If the UndefineSpaceSpecial command is not implemented, then can't have
     // an index that can only be deleted with policy
 #if CC_NV_UndefineSpaceSpecial == NO
-    if(IsNv_TPMA_NV_POLICY_DELETE(attributes))
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, POLICY_DELETE))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
 #endif
     // check that the authPolicy consistent with hash algorithm
@@ -94,7 +94,7 @@ TPM2_NV_DefineSpace(
 	return TPM_RCS_HIERARCHY + RC_NV_DefineSpace_authHandle;
     // Attribute checks
     // Eliminate the unsupported types
-    switch(NV_ATTRIBUTES_TO_TYPE(attributes))
+    switch(GET_TPM_NT(attributes))
 	{
 #if CC_NV_Increment == YES
 	  case TPM_NT_COUNTER:
@@ -105,7 +105,7 @@ TPM2_NV_DefineSpace(
 #if CC_NV_Extend == YES
 	  case TPM_NT_EXTEND:
 #endif
-#if CC_PolicySigned == YES && defined TPM_NT_PIN_PASS
+#if CC_PolicySecret == YES && defined TPM_NT_PIN_PASS
 	  case TPM_NT_PIN_PASS:
 	  case TPM_NT_PIN_FAIL:
 #endif
@@ -116,7 +116,7 @@ TPM2_NV_DefineSpace(
 	    break;
 	}
     // Check that the sizes are OK based on the type
-    switch(NV_ATTRIBUTES_TO_TYPE(attributes))
+    switch(GET_TPM_NT(attributes))
 	{
 	  case TPM_NT_ORDINARY:
 	    // Can't exceed the allowed size for the implementation
@@ -134,11 +134,11 @@ TPM2_NV_DefineSpace(
 	    break;
 	}
     // Handle other specifics
-    switch(NV_ATTRIBUTES_TO_TYPE(attributes))
+    switch(GET_TPM_NT(attributes))
 	{
 	  case TPM_NT_COUNTER:
 	    // Counter can't have TPMA_NV_CLEAR_STCLEAR SET (don't clear counters)
-	    if(IsNv_TPMA_NV_CLEAR_STCLEAR(attributes))
+	    if(IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR))
 		return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
 	    break;
 #ifdef TPM_NT_PIN_FAIL
@@ -153,15 +153,15 @@ TPM2_NV_DefineSpace(
 	    // (i.e., with platform authorization , owner authorization,
 	    // or with policyAuth.)
 	    // It is not allowed to create a PIN Index that can't be modified.
-	    if(!IsNv_TPMA_NV_NO_DA(attributes))
+	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, NO_DA))
 		return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
 #endif
 #ifdef TPM_NT_PIN_PASS
 	  case TPM_NT_PIN_PASS:
 	    // AUTHWRITE must be CLEAR (see note above to TPM_NT_PIN_FAIL)
-	    if(IsNv_TPMA_NV_AUTHWRITE(attributes)
-	       || IsNv_TPMA_NV_GLOBALLOCK(attributes)
-	       || IsNv_TPMA_NV_WRITEDEFINE(attributes))
+	    if(IS_ATTRIBUTE(attributes, TPMA_NV, AUTHWRITE)
+	       || IS_ATTRIBUTE(attributes, TPMA_NV, GLOBALLOCK)
+	       || IS_ATTRIBUTE(attributes, TPMA_NV, WRITEDEFINE))
 		return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
 #endif  // this comes before break because PIN_FAIL falls through
 	    break;
@@ -169,41 +169,41 @@ TPM2_NV_DefineSpace(
 	    break;
 	}
     // Locks may not be SET and written cannot be SET
-    if(IsNv_TPMA_NV_WRITTEN(attributes)
-       || IsNv_TPMA_NV_WRITELOCKED(attributes)
-       || IsNv_TPMA_NV_READLOCKED(attributes))
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, WRITTEN)
+       || IS_ATTRIBUTE(attributes, TPMA_NV, WRITELOCKED)
+       || IS_ATTRIBUTE(attributes, TPMA_NV, READLOCKED))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
     // There must be a way to read the index.
-    if(!IsNv_TPMA_NV_OWNERREAD(attributes)
-       && !IsNv_TPMA_NV_PPREAD(attributes)
-       && !IsNv_TPMA_NV_AUTHREAD(attributes)
-       && !IsNv_TPMA_NV_POLICYREAD(attributes))
+    if(!IS_ATTRIBUTE(attributes, TPMA_NV, OWNERREAD)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, PPREAD)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, AUTHREAD)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, POLICYREAD))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
     // There must be a way to write the index
-    if(!IsNv_TPMA_NV_OWNERWRITE(attributes)
-       && !IsNv_TPMA_NV_PPWRITE(attributes)
-       && !IsNv_TPMA_NV_AUTHWRITE(attributes)
-       && !IsNv_TPMA_NV_POLICYWRITE(attributes))
+    if(!IS_ATTRIBUTE(attributes, TPMA_NV, OWNERWRITE)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, PPWRITE)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, AUTHWRITE)
+       && !IS_ATTRIBUTE(attributes, TPMA_NV, POLICYWRITE))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
     // An index with TPMA_NV_CLEAR_STCLEAR can't have TPMA_NV_WRITEDEFINE SET
-    if(IsNv_TPMA_NV_CLEAR_STCLEAR(attributes)
-       &&  IsNv_TPMA_NV_WRITEDEFINE(attributes))
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR)
+       &&  IS_ATTRIBUTE(attributes, TPMA_NV, WRITEDEFINE))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
     // Make sure that the creator of the index can delete the index
-    if((IsNv_TPMA_NV_PLATFORMCREATE(attributes)
+    if((IS_ATTRIBUTE(attributes, TPMA_NV, PLATFORMCREATE)
 	&& in->authHandle == TPM_RH_OWNER)
-       || (!IsNv_TPMA_NV_PLATFORMCREATE(attributes)
+       || (!IS_ATTRIBUTE(attributes, TPMA_NV, PLATFORMCREATE)
 	   && in->authHandle == TPM_RH_PLATFORM))
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_authHandle;
     // If TPMA_NV_POLICY_DELETE is SET, then the index must be defined by
     // the platform
-    if(IsNv_TPMA_NV_POLICY_DELETE(attributes)
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, POLICY_DELETE)
        &&  TPM_RH_PLATFORM != in->authHandle)
 	return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
     // Make sure that the TPMA_NV_WRITEALL is not set if the index size is larger
     // than the allowed NV buffer size.
     if(in->publicInfo.nvPublic.dataSize > MAX_NV_BUFFER_SIZE
-       &&  IsNv_TPMA_NV_WRITEALL(attributes))
+       &&  IS_ATTRIBUTE(attributes, TPMA_NV, WRITEALL))
 	return TPM_RCS_SIZE + RC_NV_DefineSpace_publicInfo;
     // And finally, see if the index is already defined.
     if(NvIndexIsDefined(in->publicInfo.nvPublic.nvIndex))
@@ -225,12 +225,12 @@ TPM2_NV_UndefineSpace(
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     // Input Validation
     // This command can't be used to delete an index with TPMA_NV_POLICY_DELETE SET
-    if(IsNv_TPMA_NV_POLICY_DELETE(nvIndex->publicArea.attributes))
+    if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, POLICY_DELETE))
 	return TPM_RCS_ATTRIBUTES + RC_NV_UndefineSpace_nvIndex;
     // The owner may only delete an index that was defined with ownerAuth. The
     // platform may delete an index that was created with either authorization.
     if(in->authHandle == TPM_RH_OWNER
-       && IsNv_TPMA_NV_PLATFORMCREATE(nvIndex->publicArea.attributes))
+       && IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, PLATFORMCREATE))
 	return TPM_RC_NV_AUTHORIZATION;
     // Internal Data Update
     // Call implementation dependent internal routine to delete NV index
@@ -251,7 +251,7 @@ TPM2_NV_UndefineSpaceSpecial(
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     // Input Validation
     // This operation only applies when the TPMA_NV_POLICY_DELETE attribute is SET
-    if(!IsNv_TPMA_NV_POLICY_DELETE(nvIndex->publicArea.attributes))
+    if(!IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, POLICY_DELETE))
 	return TPM_RCS_ATTRIBUTES + RC_NV_UndefineSpaceSpecial_nvIndex;
     // Internal Data Update
     // Call implementation dependent internal routine to delete NV index
@@ -317,7 +317,7 @@ TPM2_NV_Write(
     // full sized.
     // Note: if the requested size is the same as the Index data size, then offset
     // will have to be zero. Otherwise, the range check above would have failed.
-    if(IsNv_TPMA_NV_WRITEALL(attributes)
+    if(IS_ATTRIBUTE(attributes, TPMA_NV, WRITEALL)
        && in->data.t.size < nvIndex->publicArea.dataSize)
 	return TPM_RC_NV_RANGE;
     // Internal Data Update
@@ -353,7 +353,7 @@ TPM2_NV_Increment(
 	return TPM_RCS_ATTRIBUTES + RC_NV_Increment_nvIndex;
     // Internal Data Update
     // If counter index is not been written, initialize it
-    if(!IsNv_TPMA_NV_WRITTEN(nvIndex->publicArea.attributes))
+    if(!IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
 	countValue = NvReadMaxCount();
     else
 	// Read NV data in native format for TPM CPU.
@@ -369,12 +369,12 @@ TPM2_NV_Increment(
 	    // If a counter just rolled over, then force the NV update.
 	    // Note, if this is an orderly counter, then the write-back needs to be
 	    // forced, for other counters, the write-back will happen anyway
-	    if(IsNv_TPMA_NV_ORDERLY(nvIndex->publicArea.attributes)
+	    if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, ORDERLY)
 	       && (countValue & MAX_ORDERLY_COUNT) == 0 )
-	        {
-	            // Need to force an NV update of orderly data
-	            SET_NV_UPDATE(UT_ORDERLY);
-	        }
+		{
+		    // Need to force an NV update of orderly data
+		    SET_NV_UPDATE(UT_ORDERLY);
+		}
 	}
     return result;
 }
@@ -408,7 +408,7 @@ TPM2_NV_Extend(
     // Perform the write.
     oldDigest.t.size = CryptHashGetDigestSize(nvIndex->publicArea.nameAlg);
     pAssert(oldDigest.t.size <= sizeof(oldDigest.t.buffer));
-    if(IsNv_TPMA_NV_WRITTEN(nvIndex->publicArea.attributes))
+    if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
 	{
 	    NvGetIndexData(nvIndex, locator, 0, oldDigest.t.size, oldDigest.t.buffer);
 	}
@@ -454,7 +454,7 @@ TPM2_NV_SetBits(
     if(!IsNvBitsIndex(nvIndex->publicArea.attributes))
 	return TPM_RCS_ATTRIBUTES + RC_NV_SetBits_nvIndex;
     // If index is not been written, initialize it
-    if(!IsNv_TPMA_NV_WRITTEN(nvIndex->publicArea.attributes))
+    if(!IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
 	oldValue = 0;
     else
 	// Read index data
@@ -491,14 +491,14 @@ TPM2_NV_WriteLock(
 	}
     // if neither TPMA_NV_WRITEDEFINE nor TPMA_NV_WRITE_STCLEAR is set, the index
     // can not be write-locked
-    if(nvAttributes.TPMA_NV_WRITEDEFINE == CLEAR
-       && nvAttributes.TPMA_NV_WRITE_STCLEAR == CLEAR)
+    if(!IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITEDEFINE)
+       && !IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITE_STCLEAR))
 	return TPM_RCS_ATTRIBUTES + RC_NV_WriteLock_nvIndex;
     // Internal Data Update
     // Set the WRITELOCK attribute.
     // Note: if TPMA_NV_WRITELOCKED were already SET, then the write access check
     // above would have failed and this code isn't executed.
-    nvAttributes.TPMA_NV_WRITELOCKED = SET;
+    SET_ATTRIBUTE(nvAttributes, TPMA_NV, WRITELOCKED);
     // Write index info back
     return NvWriteIndexAttributes(nvIndex->publicArea.nvIndex, locator,
 				  nvAttributes);
@@ -522,6 +522,13 @@ TPM2_NV_GlobalWriteLock(
 #include "Tpm.h"
 #include "NV_Read_fp.h"
 #ifdef TPM_CC_NV_Read  // Conditional expansion of this file
+/* TPM_RC_NV_AUTHORIZATION the authorization was valid but the authorizing entity (authHandle) is
+   not allowed to read from the Index referenced by nvIndex */
+/* TPM_RC_NV_LOCKED the Index referenced by nvIndex is read locked */
+/* TPM_RC_NV_RANGE read range defined by size and offset is outside the range of the Index
+   referenced by nvIndex */
+/* TPM_RC_NV_UNINITIALIZED the Index referenced by nvIndex has not been initialized (written) */
+/* TPM_RC_VALUE the read size is larger than the MAX_NV_BUFFER_SIZE */
 TPM_RC
 TPM2_NV_Read(
 	     NV_Read_In      *in,            // IN: input parameter list
@@ -583,11 +590,11 @@ TPM2_NV_ReadLock(
     // If NvReadAccessChecks return TPM_RC_NV_UNINITALIZED, then continue.
     // It is not an error to read lock an uninitialized Index.
     // if TPMA_NV_READ_STCLEAR is not set, the index can not be read-locked
-    if(nvAttributes.TPMA_NV_READ_STCLEAR == CLEAR)
+    if(!IS_ATTRIBUTE(nvAttributes, TPMA_NV, READ_STCLEAR))
 	return TPM_RCS_ATTRIBUTES + RC_NV_ReadLock_nvIndex;
     // Internal Data Update
     // Set the READLOCK attribute
-    nvAttributes.TPMA_NV_READLOCKED = SET;
+    SET_ATTRIBUTE(nvAttributes, TPMA_NV, READLOCKED);
     // Write NV info back
     return NvWriteIndexAttributes(nvIndex->publicArea.nvIndex,
 				  locator,
@@ -646,6 +653,10 @@ TPM2_NV_Certify(
     if((UINT32)in->size + (UINT32)in->offset > (UINT32)nvIndex->publicArea.dataSize)
 	return TPM_RC_NV_RANGE;
     // Make sure the data will fit the return buffer
+    // NOTE: This check may be modified if the output buffer will not hold the
+    // maximum sized NV buffer as part of the certified data. The difference in
+    // size could be substantial if the signature scheme was produced a large
+    // signature (e.g., RSA 4096).
     if(in->size > MAX_NV_BUFFER_SIZE)
 	return TPM_RCS_VALUE + RC_NV_Certify_size;
     // Command Output

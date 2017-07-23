@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash_fp.h 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: CryptHash_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -75,10 +75,10 @@ CryptGetHashDef(
 		TPM_ALG_ID       hashAlg
 		);
 BOOL
-CryptHashIsImplemented(
-		       TPM_ALG_ID       hashAlg,
-		       BOOL             flag
-		       );
+CryptHashIsValidAlg(
+		    TPM_ALG_ID       hashAlg,
+		    BOOL             flag
+		    );
 LIB_EXPORT TPM_ALG_ID
 CryptHashGetAlgByIndex(
 		       UINT32           index          // IN: the index
@@ -202,11 +202,7 @@ CryptKDFa(
 	  UINT32           sizeInBits,    // IN: size of generated key in bits
 	  BYTE            *keyStream,     // OUT: key buffer
 	  UINT32          *counterInOut,  // IN/OUT: caller may provide the iteration
-	  //     counter for incremental operations to
-	  //     avoid large intermediate buffers.
-	  BOOL             once           // IN: TRUE - only 1 iteration is performed
-	  //     FALSE if iteration count determined by
-	  //     "sizeInBits"
+	  UINT16           blocks         // IN: If non-zero, this is the maximum number
 	  );
 LIB_EXPORT UINT16
 CryptKDFe(

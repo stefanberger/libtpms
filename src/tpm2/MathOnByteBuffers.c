@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: MathOnByteBuffers.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -64,7 +64,7 @@
 /* This file contains implementation of the math functions that are performed with canonical
    integers in byte buffers. The canonical integer is big-endian bytes. */
 #include "Tpm.h"
-/* 9.11.1.1 UnsignedCmpB */
+/* 9.11.2.1 UnsignedCmpB */
 /* This function compare two unsigned values. The values are byte-aligned, big-endian numbers (e.g,
    a hash). */
 /* Return Values Meaning */
@@ -94,7 +94,7 @@ UnsignedCompareB(
 	}
     return 0;
 }
-/* 9.11.1.2 SignedCompareB() */
+/* 9.11.2.2 SignedCompareB() */
 /* Compare two signed integers: */
 /* Return Values Meaning */
 /* 1 if a > b */
@@ -126,7 +126,7 @@ SignedCompareB(
 	// do unsigned compare the other way
 	return 0 - UnsignedCompareB(aSize, a, bSize, b);
 }
-/*     9.11.1.3 ModExpB */
+/* 9.11.3.3 ModExpB */
 /* This function is used to do modular exponentiation in support of RSA. The most typical uses are:
    c = m^e mod n (RSA encrypt) and m = c^d mod n (RSA decrypt).  When doing decryption, the e
    parameter of the function will contain the private exponent d instead of the public exponent
@@ -174,7 +174,7 @@ ModExpB(
  Exit:
     return retVal;
 }
-/* 	9.11.1.4 DivideB() */
+/* 9.11.2.4 DivideB() */
 /* Divide an integer (n) by an integer (d) producing a quotient (q) and a remainder (r). If q or r
    is not needed, then the pointer to them may be set to NULL. */
 /* Error Returns Meaning */
@@ -205,7 +205,7 @@ DivideB(
 	    return TPM_RC_NO_RESULT;
     return TPM_RC_SUCCESS;
 }
-/* 9.11.1.5 AdjustNumberB() */
+/* 9.11.2.5 AdjustNumberB() */
 /* Remove/add leading zeros from a number in a TPM2B. Will try to make the number by adding or
    removing leading zeros. If the number is larger than the requested size, it will make the number
    as small as possible. Setting requestedSize to zero is equivalent to requesting that the number
@@ -241,4 +241,25 @@ AdjustNumberB(
 	    num->size = requestedSize;
 	}
     return num->size;
+}
+
+/* 9.11.2.6 ShiftLeft() */
+/* This function shifts a byte buffer (a TPM2B) one byte to the left. That is, the most significant
+   bit of the most significant byte is lost. */
+TPM2B *
+ShiftLeft(
+	  TPM2B       *value          // IN/OUT: value to shift and shifted value out
+	  )
+{
+    UINT16       count = value->size;
+    BYTE        *buffer = value->buffer;
+    if(count > 0)
+	{
+	    for(count -= 1; count > 0; buffer++, count--)
+		{
+		    buffer[0] = (buffer[0] << 1) + ((buffer[1] & 0x80) ? 1 : 0);
+		}
+	    *buffer <<= 1;
+	}
+    return value;
 }

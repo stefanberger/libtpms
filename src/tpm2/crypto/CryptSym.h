@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Implementation of the symmetric block cipher modes 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptSym.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,70 +55,99 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2017					*/
 /*										*/
 /********************************************************************************/
 
-#ifndef TPMTOOSSLMATH_H
-#define TPMTOOSSLMATH_H
+/* kgold - Missing in 146 code merge.  Taken from 142. */
 
-/* B.2.2.1. TpmToOsslMath.h */
-/* B.2.2.1.1. Introduction */
-/* This file contains the structure definitions used for ECC in the LibTopCrypt() version of the
-   code. These definitions would change, based on the library. The ECC-related structures that cross
-   the TPM interface are defined in TpmTypes.h */
-#ifndef _TPM_TO_OSSL_MATH_H
-#define _TPM_TO_OSSL_MATH_H
-#if MATH_LIB == OSSL
-#include <openssl/evp.h>
-#include <openssl/ec.h>
-#include <openssl/bn.h>
-/* B.2.2.2.2. Macros and Defines */
-/* Make sure that the library is using the correct size for a crypt word */
-#if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)		\
-    || defined SIXTY_FOUR_BIT && (RADIX_BITS != 64)
-#  error "Ossl library is using different radix"
+#ifndef CRYPTSYM_H
+#define CRYPTSYM_H
+
+union tpmCryptKeySchedule_t {
+#ifdef TPM_ALG_AES
+    tpmKeyScheduleAES           AES;
 #endif
-/*     Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a
-       local BIGNUM. The bigNum is initialized and then the BIGNUM is set to reference the local
-       value. */
-#define BIG_VAR(name, bits)						\
-    BN_VAR(name##Bn, (bits));						\
-    BIGNUM          _##name;						\
-    BIGNUM          *name = BigInitialized(&_##name,			\
-					   BnInit(name##Bn,		\
-						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
-/* 				    Allocate a BIGNUM and initialize with the values in a bigNum
- 				    initializer */
-#define BIG_INITIALIZED(name, initializer)				\
-    BIGNUM           _##name;						\
-    BIGNUM          *name = BigInitialized(&_##name, initializer)
-typedef struct
-{
-    const ECC_CURVE_DATA    *C;     // the TPM curve values
-    EC_GROUP                *G;     // group parameters
-    BN_CTX                  *CTX;   // the context for the math (this might not be
-    // the context in which the curve was created>;
-} OSSL_CURVE_DATA;
-typedef OSSL_CURVE_DATA      *bigCurve;
-#define AccessCurveData(E)  ((E)->C)
-#define CURVE_INITIALIZED(name, initializer)				\
-    OSSL_CURVE_DATA     _##name;					\
-    bigCurve            name =  BnCurveInitialize(&_##name, initializer)
-#include "TpmToOsslSupport_fp.h"
-#define CURVE_FREE(E)							\
-    if(E != NULL)							\
-	{								\
-	    if(E->G != NULL)						\
-		EC_GROUP_free(E->G);					\
-	    OsslContextLeave(E->CTX);					\
+#ifdef TPM_ALG_SM4
+    tpmKeyScheduleSM4           SM4;
+#endif
+#ifdef TPM_ALG_CAMELLIA
+    tpmKeyScheduleCAMELLIA      CAMELLIA;
+#endif
+#ifdef TPM_ALG_TDES
+    tpmKeyScheduleTDES          TDES[3];
+#endif
+#if SYMMETRIC_ALIGNMENT == 8
+    uint64_t            alignment;
+#else
+    uint32_t            alignment;
+#endif
+};
+/* Each block cipher within a library is expected to conform to the same calling conventions with
+   three parameters (keySchedule, in, and out) in the same order. That means that all algorithms
+   would use the same order of the same parameters. The code is written assuming the (keySchedule,
+   in, and out) order. However, if the library uses a different order, the order can be changed with
+   a SWIZZLE macro that puts the parameters in the correct order. Note that all algorithms have to
+   use the same order and number of parameters because the code to build the calling list is common
+   for each call to encrypt or decrypt with the algorithm chosen by setting a function pointer to
+   select the algorithm that is used. */
+#   define ENCRYPT(keySchedule, in, out)	\
+    encrypt(SWIZZLE(keySchedule, in, out))
+#   define DECRYPT(keySchedule, in, out)	\
+    decrypt(SWIZZLE(keySchedule, in, out))
+/* Note that the macros rely on encrypt as local values in the functions that use these
+   macros. Those parameters are set by the macro that set the key schedule to be used for the
+   call. */
+#define ENCRYPT_CASE(ALG)						\
+    case TPM_ALG_##ALG:							\
+    TpmCryptSetEncryptKey##ALG(key, keySizeInBits, &keySchedule.ALG);	\
+    encrypt = (TpmCryptSetSymKeyCall_t)TpmCryptEncrypt##ALG;		\
+    break;
+#define DECRYPT_CASE(ALG)						\
+    case TPM_ALG_##ALG:							\
+    TpmCryptSetDecryptKey##ALG(key, keySizeInBits, &keySchedule.ALG);	\
+    decrypt = (TpmCryptSetSymKeyCall_t)TpmCryptDecrypt##ALG;		\
+    break;
+#ifdef TPM_ALG_AES
+#define ENCRYPT_CASE_AES    ENCRYPT_CASE(AES)
+#define DECRYPT_CASE_AES    DECRYPT_CASE(AES)
+#else
+#define ENCRYPT_CASE_AES
+#define DECRYPT_CASE_AES
+#endif
+#ifdef TPM_ALG_SM4
+#define ENCRYPT_CASE_SM4    ENCRYPT_CASE(SM4)
+#define DECRYPT_CASE_SM4    DECRYPT_CASE(SM4)
+#else
+#define ENCRYPT_CASE_SM4
+#define DECRYPT_CASE_SM4
+#endif
+#ifdef TPM_ALG_CAMELLIA
+#define ENCRYPT_CASE_CAMELLIA    ENCRYPT_CASE(CAMELLIA)
+#define DECRYPT_CASE_CAMELLIA    DECRYPT_CASE(CAMELLIA)
+#else
+#define ENCRYPT_CASE_CAMELLIA
+#define DECRYPT_CASE_CAMELLIA
+#endif
+#ifdef TPM_ALG_TDES
+#define ENCRYPT_CASE_TDES    ENCRYPT_CASE(TDES)
+#define DECRYPT_CASE_TDES    DECRYPT_CASE(TDES)
+#else
+#define ENCRYPT_CASE_TDES
+#define DECRYPT_CASE_TDES
+#endif
+/* For each algorithm the case will either be defined or null. */
+#define     SELECT(direction)			\
+    switch(algorithm)				\
+	{					\
+	    direction##_CASE_AES		\
+		direction##_CASE_SM4		\
+		direction##_CASE_CAMELLIA	\
+		direction##_CASE_TDES		\
+	  default:				\
+	    return TPM_RC_FAILURE;		\
 	}
-#define OSSL_ENTER()     BN_CTX      *CTX = OsslContextEnter()
-#define OSSL_LEAVE()     OsslContextLeave(CTX)
-/* This definition would change if there were something to report */
-#define MathLibSimulationEnd()
-#endif // MATH_LIB == OSSL
-#endif
+
 
 
 #endif

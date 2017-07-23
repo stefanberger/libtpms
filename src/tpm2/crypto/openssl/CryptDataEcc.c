@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDataEcc.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptDataEcc.c 1012 2017-05-23 21:45:57Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -300,7 +300,7 @@ const TPM2B_32_BYTE_VALUE BN_P256_p = {32,
 const TPM2B_1_BYTE_VALUE BN_P256_a = {1,{0}};
 const TPM2B_1_BYTE_VALUE BN_P256_b = {1,{3}};
 const TPM2B_1_BYTE_VALUE BN_P256_gX = {1,{1}};
-const TPM2B_1_BYTE_VALUE BN_P256_gY = {1,{2}};;
+const TPM2B_1_BYTE_VALUE BN_P256_gY = {1,{2}};
 const TPM2B_32_BYTE_VALUE BN_P256_n = {32,
 				       {0xFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFC, 0XF0, 0XCD,
 					0X46, 0XE5, 0XF2, 0X5E, 0XEE, 0X71, 0XA4, 0X9E,

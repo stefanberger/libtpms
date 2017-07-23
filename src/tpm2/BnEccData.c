@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnEccData.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: BnEccData.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,15 +55,15 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
 /* 10.2.3 BnEccData.c */
 #include    "Tpm.h"
-/* both the new, refactored code and the old code (this is necessary so that errata can be
+/* both the new, re-factored code and the old code (this is necessary so that errata can be
    handled). Another script (BnEccData().pl) does the conversion and generates BnEccData.c for use
-   in the refactored code. */
+   in the re-factored code. */
 #if defined TPM_ALG_ECC && !defined USE_2B_ECC_DATA
 const struct {
     crypt_uword_t       allocated;

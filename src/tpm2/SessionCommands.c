@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     	Session Commands				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: SessionCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -97,7 +97,7 @@ TPM2_StartAuthSession(
 		return TPM_RCS_HANDLE + RC_StartAuthSession_tpmKey;
 	    // HMAC session input handle check.
 	    // tpmKey should be a decryption key
-	    if(tpmKey->publicArea.objectAttributes.decrypt != SET)
+	    if(!IS_ATTRIBUTE(tpmKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 		return TPM_RCS_ATTRIBUTES + RC_StartAuthSession_tpmKey;
 	    // Secret Decryption.  A TPM_RC_VALUE, TPM_RC_KEY or Unmarshal errors
 	    // may be returned at this point

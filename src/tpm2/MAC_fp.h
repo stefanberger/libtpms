@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslDesSupport.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: MAC_fp.h 1049 2017-07-20 21:00:18Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,63 +55,34 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
 /*										*/
 /********************************************************************************/
 
-/* B.2.3.1. TpmToOsslDesSupport.c */
-/* B.2.3.1.1. Introduction */
-/* The functions in this file are used for initialization of the interface to the OpenSSL()
-   library. */
-/* B.2.3.1.2. Defines and Includes */
-#include "Tpm.h"
-#if SYM_LIB == OSSL && defined TPM_ALG_TDES
-/*     B.2.3.1.3. Functions */
-/* B.2.3.1.3.1. TDES_set_encyrpt_key() */
-/* This function makes creation of a TDES key look like the creation of a key for any of the other
-   OpenSSL() block ciphers. It will create three key schedules, one for each of the DES keys. If
-   there are only two keys, then the third schedule is a copy of the first. */
-void
-TDES_set_encrypt_key(
-		     const BYTE                  *key,
-		     UINT16                       keySizeInBits,
-		     tpmKeyScheduleTDES          *keySchedule
-		     )
-{
-    DES_set_key_unchecked((const_DES_cblock *)key, &keySchedule[0]);
-    DES_set_key_unchecked((const_DES_cblock *)&key[8], &keySchedule[1]);
-    // If is two-key, copy the schedule for K1 into K3, otherwise, compute the
-    // the schedule for K3
-    if(keySizeInBits == 128)
-	keySchedule[2] = keySchedule[0];
-    else
-	DES_set_key_unchecked((const_DES_cblock *)&key[16],
-			      &keySchedule[2]);
-}
-/* B.2.3.1.3.2. TDES_encyrpt() */
-/* The TPM code uses one key schedule. For TDES, the schedule contains three schedules. OpenSSL()
-   wants the schedules referenced separately. This function does that. */
-void TDES_encrypt(
-		  const BYTE              *in,
-		  BYTE                    *out,
-		  tpmKeyScheduleTDES      *ks
-		  )
-{
-    DES_ecb3_encrypt((const_DES_cblock *)in, (DES_cblock *)out,
-		     &ks[0], &ks[1], &ks[2],
-		     DES_ENCRYPT);
-}
-/* B.2.3.1.3.3. TDES_decrypt() */
-/* As with TDES_encypt() this function bridges between the TPM single schedule model and the
-   OpenSSL() three schedule model. */
-void TDES_decrypt(
-		  const BYTE          *in,
-		  BYTE                *out,
-		  tpmKeyScheduleTDES   *ks
-		  )
-{
-    DES_ecb3_encrypt((const_DES_cblock *)in, (DES_cblock *)out,
-		     &ks[0], &ks[1], &ks[2],
-		     DES_DECRYPT);
-}
-#endif // SYM_LIB == OSSL
+/* rev 119 */
+
+#ifndef MAC_FP_H
+#define MAC_FP_H
+
+typedef struct {
+    TPMI_DH_OBJECT		handle;
+    TPM2B_MAX_BUFFER		buffer;
+    TPMI_ALG_MAC_SCHEME		inScheme;
+} Mac_In;
+
+#define RC_Mac_handle 		(TPM_RC_H + TPM_RC_1)
+#define RC_Mac_buffer		(TPM_RC_P + TPM_RC_1)
+#define RC_Mac_inScheme		(TPM_RC_P + TPM_RC_2)
+
+typedef struct {
+    TPM2B_MAX_BUFFER	outMac;
+} Mac_Out;
+
+TPM_RC
+TPM2_Mac(
+		    Mac_In   *in,            // IN: input parameter list
+		    Mac_Out  *out            // OUT: output parameter list
+		    );
+
+
+#endif

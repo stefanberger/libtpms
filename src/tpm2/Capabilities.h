@@ -3,7 +3,7 @@
 /*	Number of capability values that will fit into the largest data buffer	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Capabilities.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: Capabilities.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,6 +61,7 @@
 
 #ifndef     _CAPABILITIES_H
 #define     _CAPABILITIES_H
+
 #define    MAX_CAP_DATA         (MAX_CAP_BUFFER - sizeof(TPM_CAP)-sizeof(UINT32))
 #define    MAX_CAP_ALGS         (MAX_CAP_DATA / sizeof(TPMS_ALG_PROPERTY))
 #define    MAX_CAP_HANDLES      (MAX_CAP_DATA / sizeof(TPM_HANDLE))
@@ -69,9 +70,6 @@
 #define    MAX_PCR_PROPERTIES   (MAX_CAP_DATA / sizeof(TPMS_TAGGED_PCR_SELECT))
 #define    MAX_ECC_CURVES       (MAX_CAP_DATA / sizeof(TPM_ECC_CURVE))
 #define    MAX_TAGGED_POLICIES  (MAX_CAP_DATA / sizeof(TPMS_TAGGED_POLICY))
+#define    MAX_AC_CAPABILITIES  (MAX_CAP_DATA / sizeof(TPMS_AC_OUTPUT))
 
-#ifdef TPM_CC_AC_GetCapability
-/* This is #defined because TPMA_AC_CAPABILITIES might not be defined */
-#   define  MAX_AC_CAPABILITIES (MAX_CAP_DATA / sizeof(TPMS_AC_OUTPUT))
-#endif
 #endif

@@ -3,7 +3,7 @@
 /*			  constant definitions used for self-test.   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptTest.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptTest.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -65,12 +65,14 @@
 /* 10.1.7 CryptTest.h */
 /* This file contains constant definitions used for self test */
 /* This is the definition of a bit array with one bit per algorithm */
+/* NOTE: Since bit numbering starts at zero, when ALG_LAST_VALUE is a multiple of 8,
+   ALGORITHM_VECTOR will need to have byte for the single bit in the last byte. So, for example,
+   when ALG_LAST_VECTOR is 8, ALGORITHM_VECTOR will need 2 bytes. */
 #define ALGORITHM_VECTOR_BYTES  ((ALG_LAST_VALUE + 8) / 8)
 typedef BYTE    ALGORITHM_VECTOR[ALGORITHM_VECTOR_BYTES];
 #ifdef  TEST_SELF_TEST
 LIB_EXPORT    extern  ALGORITHM_VECTOR    LibToTest;
 #endif
-/* 10.1.7.2 Self-test */
 /* This structure is used to contain self-test tracking information for the cryptographic
    modules. Each of the major modules is given a 32-bit value in which it may maintain its own self
    test information. The convention for this state is that when all of the bits in this structure
@@ -87,7 +89,6 @@ typedef struct
     UINT32      ecc;
 #endif
 } CRYPTO_SELF_TEST_STATE;
-/* 10.1.7.2.1 g_cryptoSelfTestState */
 /* This structure contains the cryptographic self-test state values. */
 extern CRYPTO_SELF_TEST_STATE   g_cryptoSelfTestState;
 #endif // _CRYPT_TEST_H

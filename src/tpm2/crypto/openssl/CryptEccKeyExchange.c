@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptEccKeyExchange.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

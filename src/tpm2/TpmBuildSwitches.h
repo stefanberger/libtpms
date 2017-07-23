@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -151,13 +151,13 @@
 #endif  // SIMULATION
 #ifndef NDEBUG
 /* In some cases, the relationship between two values may be dependent on things that change based
-   on various selections like the chosen crypto libraries. It is possible that these selections will
-   result in incompatible settings. These are often detectable by the compiler but it isn't always
-   possible to do the check in the preprocessor code. For example, when the check requires use of
-   'sizeof()' then the preprocessor can't do the comparison. For these cases, we include a special
-   macro that, depending on the compiler will generate a warning to indicate if the check always
-   passes or always fails because it involves fixed constants. To run these checks, define
-   COMPILER_CHECKS. */
+   on various selections like the chosen cryptographic libraries. It is possible that these
+   selections will result in incompatible settings. These are often detectable by the compiler but
+   it isn't always possible to do the check in the preprocessor code. For example, when the check
+   requires use of 'sizeof()' then the preprocessor can't do the comparison. For these cases, we
+   include a special macro that, depending on the compiler will generate a warning to indicate if
+   the check always passes or always fails because it involves fixed constants. To run these checks,
+   define COMPILER_CHECKS. */
 #ifndef COMPILER_CHECKS
 //#   define COMPILER_CHECKS
 #endif
@@ -168,17 +168,17 @@
 #ifndef RUNTIME_SIZE_CHECKS
 #define RUNTIME_SIZE_CHECKS
 #endif
+
 /* If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
    make sure that the dbgDumpMemBlock() function has been added someplace (preferably, somewhere in
    CryptRand.c) */
 #ifndef DRBG_DEBUG_PRINT
 //#  define DRBG_DEBUG_PRINT
 #endif
-
 /* If an assertion event it not going to produce any trace information (function and line number)
    then define NO_FAIL_TRACE */
 #ifndef NO_FAIL_TRACE
-#   define NO_FAIL_TRACE
+//#   define NO_FAIL_TRACE
 #endif
 #endif // NDEBUG
 /* If the implementation is going to give lockout time credit for time up to the last orderly
@@ -186,5 +186,30 @@
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
 #define ACCUMULATE_SELF_HEAL_TIMER
 #endif // ACCUMULATE_SELF_HEAL_TIMER
+/* If the implementation is to compute the sizes of the proof and primary seed size values based on
+   the implemented algorithms, then use this define. */
+#ifndef USE_SPEC_COMPLIANT_PROOFS
+#define  USE_SPEC_COMPLIANT_PROOFS
+#endif
+/* Comment this out to allow compile to continue even though the chosen proof values do not match
+   the compliant values. This is written so that someone would have to proactively ignore errors. */
+#ifndef SKIP_PROOF_ERRORS
+//#define SKIP_PROOF_ERRORS
+#endif
+/* This define is used to eliminate the use of bit-fields. It can be enable for big- or
+   little-endian machines but is required of big-endian system that number bits in registers from
+   left to right. Little-endian machines number from right to left with the least significant bit
+   having assigned a bit number of 0. These are LSb0() machines (they are also little-endian so they
+   are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
+   either direction (MSb0() or LSb0()). For an MSB0+MSb0() machine this value should be defined */
+#ifndef NO_BIT_FIELD_STRUCTURES
+//#   define NO_BIT_FIELD_STRUCTURES
+#endif
+/* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
+   algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
+#define      ALG_YES      YES
+#define      ALG_NO       NO
+#define      CC_YES       YES
+#define      CC_NO        NO
 #endif // _TPM_BUILD_SWITCHES_H_
 

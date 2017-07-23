@@ -3,7 +3,7 @@
 /*			     Object Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ObjectCommands.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: ObjectCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -203,9 +203,11 @@ TPM2_LoadExternal(
 	    // An external object with a sensitive area must have fixedTPM == CLEAR
 	    // fixedParent == CLEAR so that it does not appear to be a key created by
 	    // this TPM.
-	    if(in->inPublic.publicArea.objectAttributes.fixedTPM != CLEAR
-	       || in->inPublic.publicArea.objectAttributes.fixedParent != CLEAR
-	       || in->inPublic.publicArea.objectAttributes.restricted != CLEAR)
+	    if(IS_ATTRIBUTE(in->inPublic.publicArea.objectAttributes, TPMA_OBJECT, fixedTPM)
+	       || IS_ATTRIBUTE(in->inPublic.publicArea.objectAttributes, TPMA_OBJECT,
+			       fixedParent)
+	       || IS_ATTRIBUTE(in->inPublic.publicArea.objectAttributes, TPMA_OBJECT,
+			       restricted))
 		return TPM_RCS_ATTRIBUTES + RC_LoadExternal_inPublic;
 	    // Have sensitive point to something other than NULL so that object
 	    // initialization will load the sensitive part too
@@ -269,8 +271,9 @@ TPM2_ActivateCredential(
     activateObject = HandleToObject(in->activateHandle);
     // input decrypt key must be an asymmetric, restricted decryption key
     if(!CryptIsAsymAlgorithm(object->publicArea.type)
-       || object->publicArea.objectAttributes.decrypt == CLEAR
-       || object->publicArea.objectAttributes.restricted == CLEAR)
+       || !IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, decrypt)
+       || !IS_ATTRIBUTE(object->publicArea.objectAttributes,
+			TPMA_OBJECT, restricted))
 	return TPM_RCS_TYPE + RC_ActivateCredential_keyHandle;
     // Command output
     // Decrypt input credential data via asymmetric decryption.  A
@@ -314,8 +317,8 @@ TPM2_MakeCredential(
     // input key must be an asymmetric, restricted decryption key
     // NOTE: Needs to be restricted to have a symmetric value.
     if(!CryptIsAsymAlgorithm(object->publicArea.type)
-       || object->publicArea.objectAttributes.decrypt == CLEAR
-       || object->publicArea.objectAttributes.restricted == CLEAR)
+       || !IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, decrypt)
+       || !IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, restricted))
 	return TPM_RCS_TYPE + RC_MakeCredential_handle;
     // The credential information may not be larger than the digest size used for
     // the Name of the key associated with handle.
@@ -349,9 +352,9 @@ TPM2_Unseal(
     // Input handle must be a data object
     if(object->publicArea.type != TPM_ALG_KEYEDHASH)
 	return TPM_RCS_TYPE + RC_Unseal_itemHandle;
-    if(object->publicArea.objectAttributes.decrypt == SET
-       || object->publicArea.objectAttributes.sign == SET
-       || object->publicArea.objectAttributes.restricted == SET)
+    if(IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, decrypt)
+       || IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, sign)
+       || IS_ATTRIBUTE(object->publicArea.objectAttributes, TPMA_OBJECT, restricted))
 	return TPM_RCS_ATTRIBUTES + RC_Unseal_itemHandle;
     // Command Output
     // Copy data
@@ -407,9 +410,7 @@ TPM2_CreateLoaded(
 		  CreateLoaded_Out   *out            // OUT: output parameter list
 		  )
 {
-    // Local variables
     TPM_RC                       result = TPM_RC_SUCCESS;
-    // These are the values used in object creation
     OBJECT                      *parent = HandleToObject(in->parentHandle);
     OBJECT                      *newObject;
     BOOL                         derivation;
@@ -439,7 +440,8 @@ TPM2_CreateLoaded(
     // unmarshaled like other public areas. Since it is not, this command needs its
     // on template that is a TPM2B that is unmarshaled as a BYTE array with a
     // its own unmarshal function.
-    result = UnmarshalToPublic(publicArea, &in->inPublic, derivation);
+    result = UnmarshalToPublic(publicArea, &in->inPublic, derivation,
+			       &labelContext);
     if(result != TPM_RC_SUCCESS)
 	return result + RC_CreateLoaded_inPublic;
     // Validate that the authorization size is appropriate
@@ -459,7 +461,8 @@ TPM2_CreateLoaded(
 		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
 	    // sensitiveDataOrigin has to be CLEAR in a derived object. Since this
 	    // is specific to a derived object, it is checked here.
-	    if(publicArea->objectAttributes.sensitiveDataOrigin)
+	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT,
+			    sensitiveDataOrigin))
 		return TPM_RCS_ATTRIBUTES;
 	    // Check the reset of the attributes
 	    result = PublicAttributesValidation(parent, publicArea);
@@ -467,8 +470,7 @@ TPM2_CreateLoaded(
 		return RcSafeAddToResult(result, RC_CreateLoaded_inPublic);
 	    // Process the template and sensitive areas to get the actual 'label' and
 	    // 'context' values to be used for this derivation.
-	    result = SetLabelAndContext(&labelContext, publicArea,
-					&in->inSensitive.sensitive.data);
+	    result = SetLabelAndContext(&labelContext, &in->inSensitive.sensitive.data);
 	    if(result != TPM_RC_SUCCESS)
 		return result;
 	    // Set up the KDF for object generation
@@ -477,7 +479,8 @@ TPM2_CreateLoaded(
 				      scheme->details.xorr.kdf,
 				      &parent->sensitive.sensitive.bits.b,
 				      &labelContext.label.b,
-				      &labelContext.context.b);
+				      &labelContext.context.b,
+				      TPM_MAX_DERIVATION_BITS);
 	    // Clear the sensitive size so that the creation functions will not try
 	    // to use this value.
 	    in->inSensitive.sensitive.data.t.size = 0;

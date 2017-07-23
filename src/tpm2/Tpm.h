@@ -3,7 +3,7 @@
 /*		Root header file for building any TPM.lib code			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Tpm.h 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Tpm.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,14 +59,14 @@
 /*										*/
 /********************************************************************************/
 
-/* 5.20	Tpm.h */
+/* 5.19	Tpm.h */
 /* Root header file for building any TPM.lib code */
 #ifndef     _TPM_H_
 #define     _TPM_H_
 #include "Implementation.h"
-#include "LibSupport.h"         // Types from the library. These need to come before
-/* Global.h because some of the structures in that file depend on the structures used by the
-   cryptographic libraries. */
+#include "LibSupport.h"         /* Types from the library. These need to come before Global.h
+				   because some of the structures in that file depend on the
+				   structures used by the cryptographic libraries. */
 #include "GpMacros.h"           // Define additional macros
 #include "Global.h"             // Define other TPM types
 #include "InternalRoutines.h"   // Function prototypes

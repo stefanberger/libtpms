@@ -3,7 +3,7 @@
 /*		Functions relating to the TPM's time functions 	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Time.c 953 2017-03-06 20:31:40Z kgoldman $			*/
+/*            $Id: Time.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -124,7 +124,7 @@ TimeStartup(
    an NV write occurs, then go.safe is SET. */
 void
 TimeClockUpdate(
-		UINT64           newTime
+		UINT64           newTime    // IN: New time value in mS.
 		)
 {
 #define CLOCK_UPDATE_MASK  ((1ULL << NV_CLOCK_UPDATE_INTERVAL)- 1)

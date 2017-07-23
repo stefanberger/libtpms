@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Hierarchy_fp.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -70,7 +70,7 @@ void
 HierarchyStartup(
 		 STARTUP_TYPE     type           // IN: start up type
 		 );
-TPM2B_AUTH *
+TPM2B_PROOF *
 HierarchyGetProof(
 		  TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy constant
 		  );
