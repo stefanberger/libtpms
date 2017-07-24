@@ -195,12 +195,6 @@ fi
 if test -z "$with_tpm2"; then
     with_tpm2=no
 fi
-if test "x$with_tpm2" = "xyes"; then
-    # remove the following to compile anyway; created vTPM state
-    # will not be compatible
-    AC_MSG_ERROR([Not compiling with TPM2 support])
-    exit 1
-fi
 
 echo
 echo "CFLAGS=$CFLAGS"
