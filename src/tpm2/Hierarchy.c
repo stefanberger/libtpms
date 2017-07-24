@@ -146,8 +146,8 @@ HierarchyStartup(
 	{
 	    gr.nullProof.t.size = sizeof(gr.nullProof.t.buffer);
 	    CryptRandomGenerate(gr.nullProof.t.size, gr.nullProof.t.buffer);
-	    gr.nullSeed.t.size = sizeof(gr.nullProof.t.buffer);
-	    CryptRandomGenerate(gr.nullProof.t.size, gr.nullSeed.t.buffer);
+	    gr.nullSeed.t.size = sizeof(gr.nullSeed.t.buffer);
+	    CryptRandomGenerate(gr.nullSeed.t.size, gr.nullSeed.t.buffer);
 	}
     return;
 }
