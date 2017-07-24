@@ -79,6 +79,33 @@
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
 
+/* BOOL is 'int' but we store a single byte */
+static UINT8
+BOOL_Marshal(BOOL *boolean, BYTE **buffer, INT32 *size)
+{
+    UINT8 _bool = (*boolean != 0);
+    UINT16 written = 0;
+    written += UINT8_Marshal(&_bool, buffer, size);
+    return written;
+}
+
+static TPM_RC
+BOOL_Unmarshal(BOOL *boolean, BYTE **buffer, INT32 *size)
+{
+    UINT8 _bool;
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT8_Unmarshal(&_bool, buffer, size);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        *boolean = (_bool != 0);
+    }
+
+    return rc;
+}
+
 UINT16
 TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
 {
@@ -441,9 +468,9 @@ STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 
     written = NV_HEADER_Marshal(&data->nvHeader, buffer, size,
                                 STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
-    written += UINT8_Marshal((UINT8 *)&data->shEnable, buffer, size);
-    written += UINT8_Marshal((UINT8 *)&data->ehEnable, buffer, size);
-    written += UINT8_Marshal((UINT8 *)&data->phEnableNV, buffer, size);
+    written += BOOL_Marshal(&data->shEnable, buffer, size);
+    written += BOOL_Marshal(&data->ehEnable, buffer, size);
+    written += BOOL_Marshal(&data->phEnableNV, buffer, size);
     written += UINT16_Marshal(&data->platformAlg, buffer, size);
     written += TPM2B_DIGEST_Marshal(&data->platformPolicy, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->platformAuth, buffer, size);
@@ -468,13 +495,13 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
         return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&data->shEnable, buffer, size);
+        rc = BOOL_Unmarshal(&data->shEnable, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&data->ehEnable, buffer, size);
+        rc = BOOL_Unmarshal(&data->ehEnable, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&data->phEnableNV, buffer, size);
+        rc = BOOL_Unmarshal(&data->phEnableNV, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&data->platformAlg, buffer, size);
@@ -885,7 +912,7 @@ SESSION_SLOT_Marshal(SESSION_SLOT *data, BYTE **buffer, INT32* size)
 {
     UINT16 written;
 
-    written = UINT8_Marshal((UINT8 *)&data->occupied, buffer, size);
+    written = BOOL_Marshal(&data->occupied, buffer, size);
     if (!data->occupied)
         return written;
 
@@ -900,7 +927,7 @@ SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&data->occupied, buffer, size);
+        rc = BOOL_Unmarshal(&data->occupied, buffer, size);
     }
     if (!data->occupied)
         return rc;
@@ -927,25 +954,25 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += UINT64_Marshal(&g_time, buffer, size); /* line 426 */
     /* g_timeEpoch: skipped so far -- needs investigation */
     /* g_phEnable: since we won't call TPM2_Starup, we need to write it */
-    written += UINT8_Marshal((UINT8 *)&g_phEnable, buffer, size); /* line 439 */
+    written += BOOL_Marshal(&g_phEnable, buffer, size); /* line 439 */
     /* g_pcrReconfig: must write */
-    written += UINT8_Marshal((UINT8 *)&g_pcrReConfig, buffer, size); /* line 443 */
+    written += BOOL_Marshal(&g_pcrReConfig, buffer, size); /* line 443 */
     /* g_DRTMHandle: must write */
     written += TPM_HANDLE_Marshal(&g_DRTMHandle, buffer, size); /* line 448 */
     /* g_DrtmPreStartup: must write */
-    written += UINT8_Marshal((UINT8 *)&g_DrtmPreStartup, buffer, size); /* line 453 */
+    written += BOOL_Marshal(&g_DrtmPreStartup, buffer, size); /* line 453 */
     /* g_StartupLocality3: must write */
-    written += UINT8_Marshal((UINT8 *)&g_StartupLocality3, buffer, size); /* line 458 */
+    written += BOOL_Marshal(&g_StartupLocality3, buffer, size); /* line 458 */
     /* g_daUsed: must write */
-    written += UINT8_Marshal((UINT8 *)&g_daUsed, buffer, size); /* line 484 */
+    written += BOOL_Marshal(&g_daUsed, buffer, size); /* line 484 */
     /* g_updateNV: can skip since it seems to only be valid during execution of a command*/
     /* g_powerWasLost: must write */
-    written += UINT8_Marshal((UINT8 *)&g_powerWasLost, buffer, size); /* line 504 */
+    written += BOOL_Marshal(&g_powerWasLost, buffer, size); /* line 504 */
     /* g_clearOrderly: can skip since it seems to only be valid during execution of a command */
     /* g_prevOrderlyState: must write */
     written += UINT16_Marshal(&g_prevOrderlyState, buffer, size); /* line 516 */
     /* g_nvOk: must write */
-    written += UINT8_Marshal((UINT8 *)&g_nvOk, buffer, size); /* line 522 */
+    written += BOOL_Marshal(&g_nvOk, buffer, size); /* line 522 */
     /* g_NvStatus: can skip since it seems to only be valid during execution of a command */
 
 #if 0 /* does not exist */
@@ -961,9 +988,9 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += STATE_RESET_DATA_Marshal(&gr, buffer, size); /* line 826 */
 
     /* g_manufactured: needs more investigation */
-    written += UINT8_Marshal((UINT8 *)&g_manufactured, buffer, size); /* line 928 */
+    written += BOOL_Marshal(&g_manufactured, buffer, size); /* line 928 */
     /* g_initialized: must write */
-    written += UINT8_Marshal((UINT8 *)&g_initialized, buffer, size); /* line 932 */
+    written += BOOL_Marshal(&g_initialized, buffer, size); /* line 932 */
 
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     /*
@@ -986,7 +1013,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += TPM2B_DIGEST_Marshal(&s_cpHashForCommandAudit, buffer, size);
 #endif
     /* s_DAPendingOnNV: needs investigation ... */
-    written += UINT8_Marshal((UINT8 *)&s_DAPendingOnNV, buffer, size);
+    written += BOOL_Marshal(&s_DAPendingOnNV, buffer, size);
 #endif
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&s_selfHealTimer, buffer, size); /* line 975 */
@@ -1040,11 +1067,11 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     /* s_actionInputBuffer: skip; only used during a single command */
     /* s_actionOutputBuffer: skip; only used during a single command */
 #endif
-    written += UINT8_Marshal((UINT8 *)&g_inFailureMode, buffer, size); /* line 1078 */
+    written += BOOL_Marshal(&g_inFailureMode, buffer, size); /* line 1078 */
 
     /* TPM established bit */
     tpmEst = _rpc__Signal_GetTPMEstablished();
-    written += UINT8_Marshal((UINT8 *)&tpmEst, buffer, size);
+    written += BOOL_Marshal(&tpmEst, buffer, size);
 
     return written;
 }
@@ -1066,31 +1093,31 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&g_time, buffer, size); /* line 426 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_phEnable, buffer, size); /* line 439 */
+        rc = BOOL_Unmarshal(&g_phEnable, buffer, size); /* line 439 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_pcrReConfig, buffer, size); /* line 443 */
+        rc = BOOL_Unmarshal(&g_pcrReConfig, buffer, size); /* line 443 */
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&g_DRTMHandle, buffer, size); /* line 448 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_DrtmPreStartup, buffer, size); /* line 453 */
+        rc = BOOL_Unmarshal(&g_DrtmPreStartup, buffer, size); /* line 453 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_StartupLocality3, buffer, size); /* line 458 */
+        rc = BOOL_Unmarshal(&g_StartupLocality3, buffer, size); /* line 458 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_daUsed, buffer, size); /* line 484 */
+        rc = BOOL_Unmarshal(&g_daUsed, buffer, size); /* line 484 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_powerWasLost, buffer, size); /* line 504 */
+        rc = BOOL_Unmarshal(&g_powerWasLost, buffer, size); /* line 504 */
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&g_prevOrderlyState, buffer, size); /* line 516 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_nvOk, buffer, size); /* line 522 */
+        rc = BOOL_Unmarshal(&g_nvOk, buffer, size); /* line 522 */
     }
 #if 0 /* does not exist */
     if (rc == TPM_RC_SUCCESS) {
@@ -1112,10 +1139,10 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_manufactured, buffer, size); /* line 928 */
+        rc = BOOL_Unmarshal(&g_manufactured, buffer, size); /* line 928 */
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_initialized, buffer, size); /* line 932 */
+        rc = BOOL_Unmarshal(&g_initialized, buffer, size); /* line 932 */
     }
 
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
@@ -1152,7 +1179,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&s_DAPendingOnNV, buffer, size);
+        rc = BOOL_Unmarshal(&s_DAPendingOnNV, buffer, size);
     }
 #endif
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
@@ -1211,13 +1238,13 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT8_Unmarshal((UINT8 *)&g_inFailureMode, buffer, size); /* line 1078 */
+        rc = BOOL_Unmarshal(&g_inFailureMode, buffer, size); /* line 1078 */
     }
 
     /* TPM established bit */
     if (rc == TPM_RC_SUCCESS) {
         BOOL tpmEst;
-        rc = UINT8_Unmarshal((UINT8 *)&tpmEst, buffer, size);
+        rc = BOOL_Unmarshal(&tpmEst, buffer, size);
         if (rc == TPM_RC_SUCCESS) {
             if (tpmEst)
                 _rpc__Signal_SetTPMEstablished();
