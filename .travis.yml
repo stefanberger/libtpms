@@ -1,8 +1,9 @@
 language: c
 dist: trusty
 before_install:
-- sudo apt-get install automake autoconf libtool libssl-dev sed make gawk sed bash dh-exec
-script: "./bootstrap.sh && ./configure --with-openssl --prefix=/usr &&
+- sudo apt-get install automake autoconf libtool libssl-dev sed make gawk sed bash
+  dh-exec
+script: "./bootstrap.sh && ./configure --with-openssl --prefix=/usr --with-tpm2 &&
   make -j4 check"
 env:
   global:
@@ -16,3 +17,4 @@ addons:
     build_command_prepend: "./bootstrap.sh; ./configure --with-openssl --with-tpm2; make clean"
     build_command: make -j4
     branch_pattern: coverity_scan
+script: ./bootstrap.sh && ./configure --with-openssl --prefix=/usr --with-tpm2 && make -j4 check
