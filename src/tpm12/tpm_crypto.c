@@ -3,7 +3,7 @@
 /*                      Platform Dependent Crypto                               */
 /*                           Written by Ken Goldman                             */
 /*                     IBM Thomas J. Watson Research Center                     */
-/*            $Id: tpm_crypto.c 4603 2011-08-16 20:40:26Z kgoldman $            */
+/*            $Id: tpm_crypto.c 4767 2017-07-27 23:06:32Z kgoldman $            */
 /*                                                                              */
 /* (c) Copyright IBM Corporation 2006, 2010.					*/
 /*										*/
@@ -182,7 +182,6 @@ TPM_RESULT TPM_Crypto_Init()
     TPM_RESULT rc = 0;
 
     printf("TPM_Crypto_Init: OpenSSL library %08lx\n", (unsigned long)OPENSSL_VERSION_NUMBER);
-    OpenSSL_add_all_algorithms();
     /* sanity check that the SHA1 context handling remains portable */
     if (rc == 0) {
 	if ((sizeof(SHA_LONG) != sizeof(uint32_t)) ||
@@ -325,6 +324,11 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
 {
     TPM_RESULT rc = 0;
     RSA *rsa = NULL;
+    const BIGNUM *bnn = NULL;
+    BIGNUM *bne = NULL;
+    const BIGNUM *bnp = NULL;
+    const BIGNUM *bnq = NULL;
+    const BIGNUM *bnd = NULL;
     uint32_t nbytes;
     uint32_t pbytes;
     uint32_t qbytes;
@@ -358,28 +362,52 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
 	rc = TPM_RSA_exponent_verify(e);
     }
     if (rc == 0) {
+	rsa = RSA_new();                        	/* freed @1 */
+	if (rsa == NULL) {
+            printf("TPM_RSAGenerateKeyPair: Error in RSA_new()\n");
+            rc = TPM_SIZE;
+        }
+    }
+    if (rc == 0) {
+        rc = TPM_bin2bn((TPM_BIGNUM *)&bne, earr, e_size);	/* freed @2 */
+    }
+    if (rc == 0) {
         printf("  TPM_RSAGenerateKeyPair: num_bits %d exponent %08lx\n", num_bits, e);
-        rsa = RSA_generate_key(num_bits, e, NULL, NULL);                /* freed @1 */
-        if (rsa == NULL) {
-            printf("TPM_RSAGenerateKeyPair: Error calling RSA_generate_key()\n");
+        int irc = RSA_generate_key_ex(rsa, num_bits, bne, NULL);
+        if (irc != 1) {
+            printf("TPM_RSAGenerateKeyPair: Error calling RSA_generate_key_ex()\n");
             rc = TPM_BAD_KEY_PROPERTY;
         }
     }
+    if (rc == 0) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000
+	bnn = rsa->n;
+	bnp = rsa->p;
+	bnq = rsa->q;
+	bnd = rsa->d;
+#else
+	/* currently, this function accepts NULL inputs, but it's not guaranteed by the
+	   documentation */
+	const BIGNUM *bnetmp = NULL;	/* not needed */
+	RSA_get0_key(rsa, &bnn, &bnetmp, &bnd);
+	RSA_get0_factors(rsa, &bnp, &bnq);
+#endif
+    }
     /* load n */
     if (rc == 0) {
-        rc = TPM_bn2binMalloc(n, &nbytes, (TPM_BIGNUM)rsa->n, num_bits/8); /* freed by caller */
+        rc = TPM_bn2binMalloc(n, &nbytes, (TPM_BIGNUM)bnn, num_bits/8); /* freed by caller */
     }
     /* load p */
     if (rc == 0) {
-        rc = TPM_bn2binMalloc(p, &pbytes, (TPM_BIGNUM)rsa->p, num_bits/16); /* freed by caller */
+        rc = TPM_bn2binMalloc(p, &pbytes, (TPM_BIGNUM)bnp, num_bits/16); /* freed by caller */
     }
     /* load q */
     if (rc == 0) {
-        rc = TPM_bn2binMalloc(q, &qbytes, (TPM_BIGNUM)rsa->q, num_bits/16); /* freed by caller */
+        rc = TPM_bn2binMalloc(q, &qbytes, (TPM_BIGNUM)bnq, num_bits/16); /* freed by caller */
     }
     /* load d */
     if (rc == 0) {
-        rc = TPM_bn2binMalloc(d, &dbytes, (TPM_BIGNUM)rsa->d, num_bits/8); /* freed by caller */
+        rc = TPM_bn2binMalloc(d, &dbytes, (TPM_BIGNUM)bnd, num_bits/8); /* freed by caller */
     }
     if (rc == 0) {
         printf("  TPM_RSAGenerateKeyPair: length of n,p,q,d = %d / %d / %d / %d\n",
@@ -397,6 +425,9 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
     }
     if (rsa != NULL) {
         RSA_free(rsa);  /* @1 */
+    }
+    if (bne != NULL) {
+        BN_free(bne);  	/* @2 */
     }
     return rc;
 }
@@ -435,12 +466,20 @@ static TPM_RESULT TPM_RSAGeneratePublicToken(RSA **rsa_pub_key,		/* freed by cal
         rc = TPM_bin2bn((TPM_BIGNUM *)&n, narr, nbytes);	/* freed by caller */
     }
     if (rc == 0) {
-        (*rsa_pub_key)->n = n;
         rc = TPM_bin2bn((TPM_BIGNUM *)&e, earr, ebytes);	/* freed by caller */
     }
     if (rc == 0) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000
+        (*rsa_pub_key)->n = n;
         (*rsa_pub_key)->e = e;
         (*rsa_pub_key)->d = NULL;
+#else
+	int irc = RSA_set0_key(*rsa_pub_key, n, e, NULL);
+	if (irc != 1) {
+            printf("TPM_RSAGeneratePublicToken: Error in RSA_set0_key()\n");
+            rc = TPM_SIZE;
+	}
+#endif
     }
     return rc;
 }
@@ -482,16 +521,24 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSA **rsa_pri_key,	/* freed by cal
         rc = TPM_bin2bn((TPM_BIGNUM *)&n, narr, nbytes);	/* freed by caller */
     }
     if (rc == 0) {
-        (*rsa_pri_key)->n = n;
         rc = TPM_bin2bn((TPM_BIGNUM *)&e, earr, ebytes);	/* freed by caller */
     }
     if (rc == 0) {
-        (*rsa_pri_key)->e = e;
         rc = TPM_bin2bn((TPM_BIGNUM *)&d, darr, dbytes);	/* freed by caller */
     }
     if (rc == 0) {
-        (*rsa_pri_key)->d = d;
-    }
+#if OPENSSL_VERSION_NUMBER < 0x10100000
+	(*rsa_pri_key)->n = n;
+        (*rsa_pri_key)->e = e;
+	(*rsa_pri_key)->d = d;
+#else
+	int irc = RSA_set0_key(*rsa_pri_key, n, e, d);
+	if (irc != 1) {
+            printf("TPM_RSAGeneratePrivateToken: Error in RSA_set0_key()\n");
+            rc = TPM_SIZE;
+	}
+#endif
+     }
     return rc;
 }
 
