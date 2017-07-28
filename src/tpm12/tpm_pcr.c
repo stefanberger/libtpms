@@ -3,7 +3,7 @@
 /*				PCR Handler					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*	      $Id: tpm_pcr.c 4620 2011-09-07 21:43:19Z kgoldman $		*/
+/*	      $Id: tpm_pcr.c 4730 2014-09-08 22:02:18Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2006, 2010.					*/
 /*										*/
@@ -677,6 +677,7 @@ TPM_RESULT TPM_PCRComposite_Set(TPM_PCR_COMPOSITE *tpm_pcr_composite,
 	    /* iterate through all bits in each byte */
 	    for (j = 0x0001 ; j != (0x0001 << CHAR_BIT) ; j <<= 1, pcr_num++) {
 		if (tpm_pcr_selection->pcrSelect[i] & j) {	/* if the bit is set in the map */
+		    printf("  TPM_PCRComposite_Set: Adding PCR %u\n", pcr_num);
 		    /* append the the PCR value to TPM_PCR_COMPOSITE.pcrValue */
 		    /* NOTE: Ignore return code since range checked by
 		       TPM_PCRSelection_CheckRange() */
@@ -2739,6 +2740,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
     }
     /* get targetPCR parameter */
     if (returnCode == TPM_SUCCESS) {
+	TPM_PrintFour("TPM_Process_Quote: externalData", externalData);
 	returnCode = TPM_PCRSelection_Load(&targetPCR, &command, &paramSize);
     }
     /* save the ending point of inParam's for authorization and auditing */
@@ -3051,6 +3053,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     }
     /* get targetPCR parameter */
     if (returnCode == TPM_SUCCESS) {
+	TPM_PrintFour("TPM_Process_Quote2: externalData", externalData);
 	returnCode = TPM_PCRSelection_Load(&targetPCR, &command, &paramSize);
     }
     /* get addVersion parameter */
