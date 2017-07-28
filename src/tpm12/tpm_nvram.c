@@ -3,7 +3,7 @@
 /*				NVRAM Utilities					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*	      $Id: tpm_nvram.c 4621 2011-09-09 20:19:42Z kgoldman $		*/
+/*	      $Id: tpm_nvram.c 4724 2014-08-11 20:33:23Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2006, 2010.					*/
 /*										*/
@@ -3278,8 +3278,11 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	printf("TPM_Process_NVDefineSpace: Checking for %u bytes free space\n", pubInfo->dataSize);
 	returnCode = TPM_NVIndexEntries_GetFreeSpace(&freeSpace,
 						     &(tpm_state->tpm_nv_index_entries));
+	if (returnCode != TPM_SUCCESS) {
+	    printf("TPM_Process_NVDefineSpace: Error: No space\n");
+	}
     }
-    /* If there is no free space, free the NV index in-memory structure.  This implicitly removes
+     /* if there is no free space, free the NV index in-memory structure.  This implicitly removes
        the entry from tpm_nv_index_entries.  If pubInfo -> nvIndex is TPM_NV_INDEX_TRIAL, the entry
        should also be removed. */
     if ((returnCode != TPM_SUCCESS) ||
