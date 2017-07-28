@@ -1,1 +1,1 @@
-const unsigned short tpm_svn_revision = 4668;
+const unsigned short tpm_svn_revision = 4766;
