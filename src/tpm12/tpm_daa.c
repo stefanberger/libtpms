@@ -3,7 +3,7 @@
 /*				DAA Handler					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*	      $Id: tpm_daa.c 4526 2011-03-24 21:14:42Z kgoldman $		*/
+/*	      $Id: tpm_daa.c 4768 2017-07-28 13:19:28Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2006, 2010.					*/
 /*										*/
@@ -1175,7 +1175,7 @@ TPM_RESULT TPM_DAABlob_Load(TPM_DAA_BLOB *tpm_daa_blob,
     }
     /* load sensitiveData */
     if (rc == 0) {
-	TPM_SizedBuffer_Load(&(tpm_daa_blob->sensitiveData), stream, stream_size);
+	rc = TPM_SizedBuffer_Load(&(tpm_daa_blob->sensitiveData), stream, stream_size);
     }
     return rc;
 }
@@ -1206,15 +1206,15 @@ TPM_RESULT TPM_DAABlob_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* store blobIntegrity */
     if (rc == 0) {
-	TPM_Digest_Store(sbuffer, tpm_daa_blob->blobIntegrity);
+	rc = TPM_Digest_Store(sbuffer, tpm_daa_blob->blobIntegrity);
     }
     /* store additionalData */
     if (rc == 0) {
-	TPM_SizedBuffer_Store(sbuffer, &(tpm_daa_blob->additionalData));
+	rc = TPM_SizedBuffer_Store(sbuffer, &(tpm_daa_blob->additionalData));
     }
     /* store sensitiveData */
     if (rc == 0) {
-	TPM_SizedBuffer_Store(sbuffer, &(tpm_daa_blob->sensitiveData));
+	rc = TPM_SizedBuffer_Store(sbuffer, &(tpm_daa_blob->sensitiveData));
     }
     return rc;
 }
@@ -3961,7 +3961,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
-    if (rc == 0)
+    if (rc == 0) {
 	printf("TPM_DAASign_Stage10: selector %u\n", selector);
 	switch (selector) {
 	  case 1:
@@ -4038,6 +4038,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
 	    printf("TPM_DAASign_Stage10: Error, bad selector %u\n", selector);
 	    rc = TPM_DAA_INPUT_DATA0;
 	    break;
+	}
     }
     /* j. Set outputData = DAA_session -> DAA_digest  */
     if (rc == 0) {
