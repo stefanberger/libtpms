@@ -3,7 +3,7 @@
 /*				Transport					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*	      $Id: tpm_transport.c 4526 2011-03-24 21:14:42Z kgoldman $		*/
+/*	      $Id: tpm_transport.c 4719 2014-01-15 21:17:47Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2006, 2010.					*/
 /*										*/
@@ -1221,7 +1221,7 @@ TPM_RESULT TPM_TransportAuth_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* store authData */
     if (rc == 0) {
-	TPM_Secret_Store(sbuffer, tpm_transport_auth->authData);
+	rc = TPM_Secret_Store(sbuffer, tpm_transport_auth->authData);
     }
     return rc;
 }
