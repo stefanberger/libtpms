@@ -84,15 +84,12 @@
        value. */
 #define BIG_VAR(name, bits)						\
     BN_VAR(name##Bn, (bits));						\
-    BIGNUM          _##name;						\
-    BIGNUM          *name = BigInitialized(&_##name,			\
-					   BnInit(name##Bn,		\
+    BIGNUM          *name = BigInitialized(BnInit(name##Bn,		\
 						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
 /* 				    Allocate a BIGNUM and initialize with the values in a bigNum
  				    initializer */
 #define BIG_INITIALIZED(name, initializer)				\
-    BIGNUM           _##name;						\
-    BIGNUM          *name = BigInitialized(&_##name, initializer)
+    BIGNUM          *name = BigInitialized(initializer)
 typedef struct
 {
     const ECC_CURVE_DATA    *C;     // the TPM curve values

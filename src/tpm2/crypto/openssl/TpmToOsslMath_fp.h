@@ -69,7 +69,6 @@ OsslToTpmBn(
 	    );
 BIGNUM *
 BigInitialized(
-	       BIGNUM             *toInit,
 	       bigConst            initializer
 	       );
 void
