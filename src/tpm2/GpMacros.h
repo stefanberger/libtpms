@@ -162,6 +162,9 @@
 #ifndef BITS_TO_BYTES
 #  define BITS_TO_BYTES(bits) (((bits) + 7) >> 3)
 #endif
+#ifndef DIV_UP
+#  define DIV_UP(var, div) ((var + div - 1) / (div))
+#endif
 /* These are defined for use when the size of the vector being checked is known at compile time. */
 #define TEST_BIT(bit, vector)   TestBit((bit), (BYTE *)&(vector), sizeof(vector))
 #define SET_BIT(bit, vector)    SetBit((bit), (BYTE *)&(vector), sizeof(vector))

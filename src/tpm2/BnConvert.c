@@ -288,3 +288,28 @@ BnPointTo2B(
     return TRUE;
 }
 #endif // TPM_ALG_ECC
+
+LIB_EXPORT int
+Bn2bin(bigConst    initializer,
+       unsigned char *buffer,
+       size_t         buffer_len)
+{
+    int i = initializer->size;
+    int bits, j, t = 0;
+    const size_t sz = sizeof(crypt_uword_t);
+
+    if (i > 0) {
+        i -= 1;
+        bits = i * BN_BITS2 + BN_num_bits_word(initializer->d[i]);
+        j = BITS_TO_BYTES(bits);
+
+        pAssert(j < (int)buffer_len)
+
+        while (j--) {
+            t++;
+            *(buffer++) = initializer->d[j / sz] >> (8 * (j % sz));
+        }
+    }
+
+    return t;
+}
