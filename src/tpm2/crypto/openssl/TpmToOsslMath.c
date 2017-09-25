@@ -59,6 +59,13 @@
 /*										*/
 /********************************************************************************/
 
+/* Temporary:
+ * Define OSSL_VERIFY on OpenSSL < 1.1 to verify that the code conversions
+ * to OpenSSL 1.1 are correct by comparing OpenSSL 1.1 API call results
+ * with previous results.
+ */
+//#define OSSL_VERIFY
+
 /* B.2.3.2. TpmToOsslMath.c */
 /* B.2.3.2.1. Introduction */
 /* This file contains the math functions that are not implemented in the BnMath() library
@@ -72,6 +79,7 @@
 #include "Tpm.h"
 #if MATH_LIB == OSSL
 #include "TpmToOsslMath_fp.h"
+#include "BnConvert_fp.h"
 /* B.2.3.2.3.1. OsslToTpmBn() */
 /* This function converts an OpenSSL() BIGNUM to a TPM bignum. In this implementation it is assumed
    that OpenSSL() used the same format for a big number as does the TPM -- an array of native-endian
@@ -84,33 +92,63 @@ OsslToTpmBn(
 	    BIGNUM          *osslBn
 	    )
 {
+    unsigned char buffer[MAX_RSA_KEY_BYTES + 1];
+    int buffer_len;
+#ifdef OSSL_VERIFY
+    int i;
+#endif
+
     if(bn != NULL)
 	{
-	    if((crypt_uword_t *)osslBn->d != bn->d)
-		{
-		    int         i;
-		    pAssert((unsigned)osslBn->top <= BnGetAllocated(bn));
-		    for(i = 0; i < osslBn->top; i++)
-			bn->d[i] = osslBn->d[i];
-		}
-	    BnSetTop(bn, osslBn->top);
+	    pAssert(BN_num_bytes(osslBn) >= 0);
+	    pAssert(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
+
+	    buffer_len = BN_bn2bin(osslBn, buffer);
+	    BnFromBytes(bn, buffer, buffer_len);
+
+#ifdef OSSL_VERIFY
+	    for (i = 0; i < osslBn->top; i++)
+	        pAssert(bn->d[i] == osslBn->d[i])
+#endif
 	}
 }
 /* B.2.3.2.3.2.	BigInitialized() */
 /* This function initializes an OSSL BIGNUM from a TPM bignum. */
 BIGNUM *
 BigInitialized(
-	       BIGNUM             *toInit,
 	       bigConst            initializer
 	       )
 {
-    if(toInit == NULL || initializer == NULL)
+    unsigned char buffer[MAX_RSA_KEY_BYTES + 1];
+    size_t buffer_len = sizeof(buffer);
+    BIGNUM *toInit =  BN_new();
+#ifdef OSSL_VERIFY
+    unsigned char buffer2[MAX_RSA_KEY_BYTES + 1];
+    BIGNUM _toInit2, *toInit2 = &_toInit2;
+    int buffer2_len;
+#endif
+
+    if(toInit == NULL || initializer == NULL) {
+        BN_free(toInit);
 	return NULL;
-    toInit->d = (BN_ULONG *)&initializer->d[0];
-    toInit->dmax = initializer->allocated;
-    toInit->top = initializer->size;
-    toInit->neg = 0;
-    toInit->flags = 0;
+    }
+
+    buffer_len = Bn2bin(initializer, buffer, buffer_len);
+    BN_bin2bn(buffer, buffer_len, toInit);
+
+#ifdef OSSL_VERIFY
+    toInit2->d = (BN_ULONG *)&initializer->d[0];
+    toInit2->dmax = initializer->allocated;
+    toInit2->top = initializer->size;
+    toInit2->neg = 0;
+    toInit2->flags = 0;
+
+    buffer2_len = BN_bn2bin(toInit2, buffer2);
+    (void)buffer2_len;
+
+    pAssert(BN_cmp(toInit, toInit2) == 0);
+#endif
+
     return toInit;
 }
 #ifndef OSSL_DEBUG
@@ -126,9 +164,10 @@ void BIGNUM_print(
 		  BOOL             eol
 		  )
 {
-    BN_ULONG        *d;
     int              i;
     int              notZero = FALSE;
+    unsigned char    buffer[MAX_RSA_KEY_BYTES + 1];
+    int              buffer_len;
     if(label != NULL)
 	printf("%s", label);
     if(a == NULL)
@@ -136,21 +175,17 @@ void BIGNUM_print(
 	    printf("NULL");
 	    goto done;
 	}
-    if (a->neg)
+    if (BN_is_negative(a))
 	printf("-");
-    for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
+
+    buffer_len = BN_bn2bin(a, buffer);
+    for (i = 0; i < buffer_len; i++)
 	{
-	    int         j;
-	    BN_ULONG    l = *d--;
-	    for(j = BN_BITS2 - 8; j >= 0; j -= 8)
-		{
-		    BYTE    b = (BYTE)((l >> j) & 0xFF);
-		    notZero = notZero || (b != 0);
-		    if(notZero)
-			printf("%02x", b);
-		}
-	    if(!notZero)
-		printf("0");
+	    notZero = notZero || (buffer[i] != 0);
+	    if(notZero)
+	        printf("%02x", buffer[i]);
+	    if (!notZero)
+	        printf("0");
 	}
  done:
     if(eol)
@@ -178,9 +213,11 @@ MathLibraryCompatibilityCheck(
     // Convert the test TPM2B to an OpenSSL BIGNUM
     BN_bin2bn(test.t.buffer, test.t.size, osslTemp);
     // Make sure the values are consistent
+#ifdef OSSL_VERIFY
     cAssert(osslTemp->top == (int)tpmTemp->size);
     for(i = 0; i < tpmTemp->size; i++)
 	cAssert(osslTemp->d[0] == tpmTemp->d[0]);
+#endif
     OSSL_LEAVE();
 }
 #endif
@@ -206,9 +243,19 @@ BnModMult(
     OK = OK && BN_div(NULL, bnResult, bnTemp, bnMod, CTX);
     if(OK)
 	{
-	    result->size = bnResult->top;
+	    result->size = DIV_UP(BN_num_bytes(bnResult),
+                                  sizeof(crypt_uword_t));
+#ifdef OSSL_VERIFY
+            pAssert(result->size == (size_t)bnResult->top);
+#endif
 	    OsslToTpmBn(result, bnResult);
 	}
+    BN_free(bnTemp);
+    BN_free(bnMod);
+    BN_free(bnOp2);
+    BN_free(bnOp1);
+    BN_free(bnResult);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -236,6 +283,11 @@ BnMult(
 	    OsslToTpmBn(temp, bnTemp);
 	    BnCopy(result, temp);
 	}
+
+    BN_free(bnB);
+    BN_free(bnA);
+    BN_free(bnTemp);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -284,6 +336,12 @@ BnDiv(
     BIGNUM_PRINT("    bnDivisor: ", bnSor, TRUE);
     BIGNUM_PRINT("   bnQuotient: ", bnQ, TRUE);
     BIGNUM_PRINT("  bnRemainder: ", bnR, TRUE);
+
+    BN_free(bnSor);
+    BN_free(bnDend);
+    BN_free(bnR);
+    BN_free(bnQ);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -307,8 +365,16 @@ BnGcd(
     if(OK)
 	{
 	    OsslToTpmBn(gcd, bnGcd);
-	    gcd->size = bnGcd->top;
+	    gcd->size = DIV_UP(BN_num_bytes(bnGcd), sizeof(crypt_uword_t));
+#ifdef OSSL_VERIFY
+	    pAssert(gcd->size == (size_t)bnGcd->top);
+#endif
 	}
+
+    BN_free(bn2);
+    BN_free(bn1);
+    BN_free(bnGcd);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -335,6 +401,11 @@ BnModExp(
 	{
 	    OsslToTpmBn(result, bnResult);
 	}
+    BN_free(bnM);
+    BN_free(bnE);
+    BN_free(bnN);
+    BN_free(bnResult);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -357,6 +428,10 @@ BnModInverse(
 	{
 	    OsslToTpmBn(result, bnResult);
 	}
+    BN_free(bnM);
+    BN_free(bnN);
+    BN_free(bnResult);
+
     OSSL_LEAVE();
     return OK;
 }
@@ -408,6 +483,10 @@ EcPointInitialized(
     pAssert(E != NULL);
     if(P != NULL)
 	EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX);
+
+    BN_free(bnY);
+    BN_free(bnX);
+
     return P;
 }
 /* B.2.3.2.3.10. BnCurveInitialize() */
@@ -463,6 +542,15 @@ BnCurveInitialize(
     E->G = group;
     E->CTX = CTX;
     E->C = C;
+
+    BN_free(bnH);
+    BN_free(bnN);
+    BN_free(bnY);
+    BN_free(bnX);
+    BN_free(bnB);
+    BN_free(bnA);
+    BN_free(bnP);
+
     return OK ? E : NULL;
 }
 /* B.2.3.2.3.11. BnEccModMult() */
@@ -487,6 +575,7 @@ BnEccModMult(
     PointFromOssl(R, pR, E);
     EC_POINT_free(pR);
     EC_POINT_free(pS);
+    BN_free(bnD);
     return !BnEqualZero(R->z);
 }
 /* B.2.3.2.3.12. BnEccModMult2() */
@@ -524,6 +613,10 @@ BnEccModMult2(
     EC_POINT_free(pR);
     EC_POINT_free(pS);
     EC_POINT_free(pQ);
+
+    BN_free(bnD);
+    BN_free(bnU);
+
     return !BnEqualZero(R->z);
 }
 /* B.2.3.2.4. BnEccAdd() */
