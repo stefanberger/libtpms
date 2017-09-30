@@ -543,6 +543,17 @@ srccheck:
 
 all: srccheck
 
+check_PROGRAMS = \
+	tpm2_nvram_offsetchecks
+
+TESTS = tpm2_nvram_offsetchecks
+
+tpm2_nvram_offsetchecks_SOURCES = \
+	tests/tpm2_nvram_offsetchecks.c
+
+tpm2_nvram_offsetchecks_CFLAGS = \
+	$(libtpms_tpm2_la_CFLAGS)
+
 endif # WITH_TPM2
 
 #
