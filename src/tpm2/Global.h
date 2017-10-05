@@ -185,6 +185,7 @@ typedef struct OBJECT
     // handle of an object slot.
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
+    UINT32              _pad1;
 } OBJECT;
 /* This structure holds a hash sequence object or an event sequence object. */
 /* The first four components of this structure are manually set to be the same as the first four
@@ -598,6 +599,7 @@ typedef struct
     // time of TPM.  The value of this counter is initialized to 1 during TPM
     // manufacture process. It is used to invalidate all saved contexts after a TPM
     // Reset.
+    UINT32              _pad1;
     UINT64              totalResetCount;
     // This counter increments on each TPM Reset. The counter is reset by
     // TPM2_Clear().
@@ -706,6 +708,7 @@ typedef struct orderly_data
     // attribute is clear.
     UINT64              clock;              // The orderly version of clock
     TPMI_YES_NO         clockSafe;          // Indicates if the clock value is
+    UINT32              _pad1;
     // safe.
     // In many implementations, the quality of the entropy available is not that
     // high. To compensate, the current value of the drbgState can be saved and
@@ -833,6 +836,7 @@ typedef struct state_reset_data
     //       do not increment this counter to increment.
     UINT32              pcrCounter;         // The default reset value is 0.
 #ifdef TPM_ALG_ECC
+    UINT32              _pad2;
     //*****************************************************************************
     //         ECDAA
     //*****************************************************************************
@@ -847,6 +851,7 @@ typedef struct state_reset_data
     // power of 2 (8, 16, 32, 64, etc.) and no greater than 64K.
     BYTE                 commitArray[16];   // The default reset value is {0}.
 #endif //TPM_ALG_ECC
+    UINT32               _pad1;
 } STATE_RESET_DATA;
 extern STATE_RESET_DATA gr;
 /* 																			  5.10.12
