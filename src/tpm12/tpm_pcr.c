@@ -555,7 +555,7 @@ TPM_RESULT TPM_PCRs_Store(TPM_STORE_BUFFER *sbuffer,
 	/* FALSE: Saved by TPM_SaveState
 	   TRUE: MUST not be part of any state stored by TPM_SaveState */
 	if (!(tpm_pcr_attributes[i].pcrReset)) {
-	    TPM_Digest_Store(sbuffer, tpm_pcrs[i]);
+	    rc = TPM_Digest_Store(sbuffer, tpm_pcrs[i]);
 	}
     }
     return rc;
