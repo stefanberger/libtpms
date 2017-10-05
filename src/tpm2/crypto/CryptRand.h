@@ -140,6 +140,7 @@ typedef union
     {
 	UINT64      reseedCounter;
 	UINT32      magic;
+	UINT32      _pad1;
 	DRBG_SEED   seed; // contains the key and IV for the counter mode DRBG
 	UINT32      lastValue[4];   // used when the TPM does continuous self-test
 	// for FIPS compliance of DRBG
