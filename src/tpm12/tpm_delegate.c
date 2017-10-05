@@ -142,7 +142,7 @@ TPM_RESULT TPM_DelegatePublic_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* store pcrInfo */
     if (rc == 0) {
-	rc =TPM_PCRInfoShort_Store(sbuffer, &(tpm_delegate_public->pcrInfo), FALSE); 
+	rc = TPM_PCRInfoShort_Store(sbuffer, &(tpm_delegate_public->pcrInfo), FALSE); 
     } 
     /* store permissions */
     if (rc == 0) {
@@ -1528,11 +1528,11 @@ TPM_RESULT TPM_DelegateTableRow_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* store pub */
     if (rc == 0) {
-	rc =TPM_DelegatePublic_Store(sbuffer, &(tpm_delegate_table_row->pub)); 
+	rc = TPM_DelegatePublic_Store(sbuffer, &(tpm_delegate_table_row->pub)); 
     }
     /* store authValue */
     if (rc == 0) {
-	rc =TPM_Secret_Store(sbuffer, tpm_delegate_table_row->authValue);
+	rc = TPM_Secret_Store(sbuffer, tpm_delegate_table_row->authValue);
     }
     /* store valid */
     if (rc == 0) {
