@@ -164,7 +164,7 @@ libtpms_la_SOURCES = \
 libtpms_la_CFLAGS = \
 	$(libtpms_tpm12_la_CFLAGS)
 
-libtpms_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
+libtpms_la_LDFLAGS = -Wl,--version-script=$(srcdir)/libtpms.syms \
                      -version-info $(LIBTPMS_VERSION_INFO) \
                      -no-undefined
 
