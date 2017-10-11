@@ -161,7 +161,9 @@ if $LD --help 2>&1 | $GREP '\-z now ' > /dev/null; then
 fi
 AC_SUBST([HARDENING_CFLAGS])
 
-CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
+if test "$test_CFLAGS" != set; then
+  CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
+fi
 
 AC_CONFIG_FILES(Makefile                   \
 		dist/libtpms.spec          \
