@@ -132,6 +132,14 @@ static TPM_RESULT TPM_SymmetricKeyData_Crypt(unsigned char *data_out,
 
 #include <openssl/aes.h>
 
+#if defined(__OpenBSD__)
+ # define OPENSSL_OLD_API
+#else
+ #if OPENSSL_VERSION_NUMBER < 0x10100000
+  #define OPENSSL_OLD_API
+ #endif
+#endif
+
 /* AES requires data lengths that are a multiple of the block size */
 #define TPM_AES_BITS 128
 /* The AES block size is always 16 bytes */
@@ -380,7 +388,7 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
         }
     }
     if (rc == 0) {
-#if OPENSSL_VERSION_NUMBER < 0x10100000
+#if defined OPENSSL_OLD_API
 	bnn = rsa->n;
 	bnp = rsa->p;
 	bnq = rsa->q;
@@ -469,7 +477,7 @@ static TPM_RESULT TPM_RSAGeneratePublicToken(RSA **rsa_pub_key,		/* freed by cal
         rc = TPM_bin2bn((TPM_BIGNUM *)&e, earr, ebytes);	/* freed by caller */
     }
     if (rc == 0) {
-#if OPENSSL_VERSION_NUMBER < 0x10100000
+#if defined OPENSSL_OLD_API
         (*rsa_pub_key)->n = n;
         (*rsa_pub_key)->e = e;
         (*rsa_pub_key)->d = NULL;
@@ -527,7 +535,7 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSA **rsa_pri_key,	/* freed by cal
         rc = TPM_bin2bn((TPM_BIGNUM *)&d, darr, dbytes);	/* freed by caller */
     }
     if (rc == 0) {
-#if OPENSSL_VERSION_NUMBER < 0x10100000
+#if defined OPENSSL_OLD_API
 	(*rsa_pri_key)->n = n;
         (*rsa_pri_key)->e = e;
 	(*rsa_pri_key)->d = d;
