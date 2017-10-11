@@ -175,10 +175,18 @@ LDFLAGS_ARCH += $(findstring -m32, $(LDFLAGS))
 LDFLAGS_ARCH += $(findstring -m64, $(LDFLAGS))
 
 check-local:
-	@($(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms 2>/dev/null || \
+	@case $(host_os) in \
+	  openbsd*) ADDLIBS="-lc" ;; \
+	  *) ADDLIBS="" ;; \
+	esac; \
+	 ($(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null || \
 	 (echo "There are undefined symbols in libtpms ($(LDFLAGS_ARCH))";\
-	  $(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms 2>&1 | grep libtpms))
-	@$(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms 2>/dev/null
+	  $(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>&1 | grep libtpms))
+	@case $(host_os) in \
+	  openbsd*) ADDLIBS="-lc" ;; \
+	  *) ADDLIBS="" ;; \
+	esac; \
+	$(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null
 
 EXTRA_DIST = \
 	tpm12/tpm_crypto_freebl.c \
