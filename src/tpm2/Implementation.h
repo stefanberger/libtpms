@@ -82,13 +82,26 @@
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
 #include <endian.h>
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define  BIG_ENDIAN_TPM       NO
-#define  LITTLE_ENDIAN_TPM    YES
-#endif
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define  BIG_ENDIAN_TPM       YES
-#define  LITTLE_ENDIAN_TPM    NO
+#if defined __linux__ || defined __CYGWIN__
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+  #define  BIG_ENDIAN_TPM       NO
+  #define  LITTLE_ENDIAN_TPM    YES
+ #endif
+ #if __BYTE_ORDER == __BIG_ENDIAN
+  #define  BIG_ENDIAN_TPM       YES
+  #define  LITTLE_ENDIAN_TPM    NO
+ #endif
+#elif defined __OpenBSD__
+ #if _BYTE_ORDER == _LITTLE_ENDIAN
+  #define  BIG_ENDIAN_TPM       NO
+  #define  LITTLE_ENDIAN_TPM    YES
+ #endif
+ #if _BYTE_ORDER == _BIG_ENDIAN
+  #define  BIG_ENDIAN_TPM       YES
+  #define  LITTLE_ENDIAN_TPM    NO
+ #endif
+#else
+ #error Unsupported OS
 #endif
 #define  MOST_SIGNIFICANT_BIT_0     NO
 #define  LEAST_SIGNIFICANT_BIT_0    !MOST_SIGNIFICANT_BIT_0
