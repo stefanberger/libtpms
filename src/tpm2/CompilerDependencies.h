@@ -126,9 +126,25 @@
 #ifndef _MSC_VER
 #   define WINAPI
 #   define __pragma(x)
-#   define REVERSE_ENDIAN_16(_Number) __builtin_bswap16(_Number)
-#   define REVERSE_ENDIAN_32(_Number) __builtin_bswap32(_Number)
-#   define REVERSE_ENDIAN_64(_Number) __builtin_bswap64(_Number)
+#   if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR >= 2)
+#     define REVERSE_ENDIAN_16(_Number) __builtin_bswap16(_Number)
+#     define REVERSE_ENDIAN_32(_Number) __builtin_bswap32(_Number)
+#     define REVERSE_ENDIAN_64(_Number) __builtin_bswap64(_Number)
+#   else
+#     if defined __linux__ || defined __CYGWIN__
+#       include <byteswap.h>
+#       define REVERSE_ENDIAN_16(_Number) bswap_16(_Number)
+#       define REVERSE_ENDIAN_32(_Number) bswap_32(_Number)
+#       define REVERSE_ENDIAN_64(_Number) bswap_64(_Number)
+#     elif defined __OpenBSD__
+#       include <endian.h>
+#       define REVERSE_ENDIAN_16(_Number) swap16(_Number)
+#       define REVERSE_ENDIAN_32(_Number) swap32(_Number)
+#       define REVERSE_ENDIAN_64(_Number) swap64(_Number)
+#     else
+#       error Unsupported OS
+#     endif
+#   endif
 #   ifdef INLINE_FUNCTIONS
 #      define INLINE static inline
 #   endif
