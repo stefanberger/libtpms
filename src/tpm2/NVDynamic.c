@@ -1088,7 +1088,7 @@ NvAddEvictObject(
     object->attributes.evict = SET;
     object->evictHandle = evictHandle;
     // Now put this in NV
-    OBJECT_SWAP(&be_object, object, FALSE);
+    ANY_OBJECT_SWAP(&be_object, object, FALSE);
     result = NvAdd(sizeof(OBJECT), sizeof(OBJECT), evictHandle, (BYTE *)&be_object);
     // Put things back the way they were
     object->attributes.evict = CLEAR;

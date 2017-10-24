@@ -755,17 +755,422 @@ privateExponent_t_SWAP(privateExponent_t *t, privateExponent_t *s)
 }
 
 static UINT16
+HASH_STATE_TYPE_Marshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = UINT8_Marshal(data, buffer, size);
+
+    return written;
+}
+
+static UINT16
+HASH_STATE_TYPE_Unmarshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
+{
+    return UINT8_Unmarshal(data, buffer, size);
+}
+
+static inline UINT16
+SHA_LONG_Marshal(SHA_LONG *data, BYTE **buffer, INT32 *size)
+{
+    return UINT32_Marshal(data, buffer, size);
+}
+
+static inline UINT16
+SHA_LONG_Unmarshal(SHA_LONG *data, BYTE **buffer, INT32 *size)
+{
+    return UINT32_Unmarshal(data, buffer, size);
+}
+
+static inline UINT16
+SHA_LONG64_Marshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
+{
+    assert(sizeof(*data) == 8);
+    return UINT64_Marshal((UINT64 *)data, buffer, size);
+}
+
+static inline UINT16
+SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
+{
+    assert(sizeof(*data) == 8);
+    return UINT64_Unmarshal((UINT64 *)data, buffer, size);
+}
+
+#ifdef TPM_ALG_SHA1
+static UINT16
+tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = SHA_LONG_Marshal(&data->h0, buffer, size);
+    written += SHA_LONG_Marshal(&data->h1, buffer, size);
+    written += SHA_LONG_Marshal(&data->h2, buffer, size);
+    written += SHA_LONG_Marshal(&data->h3, buffer, size);
+    written += SHA_LONG_Marshal(&data->h4, buffer, size);
+    written += SHA_LONG_Marshal(&data->Nl, buffer, size);
+    written += SHA_LONG_Marshal(&data->Nh, buffer, size);
+
+    /* data must be written as array */
+    written += Array_Marshal((BYTE *)&data->data[0], sizeof(data->data),
+                             buffer, size);
+
+    written += UINT32_Marshal(&data->num, buffer, size);
+
+    return written;
+}
+
+static UINT16
+tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->h0, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->h1, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->h2, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->h3, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->h4, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->Nl, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->Nh, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->data[0], sizeof(data->data),
+                             buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->num, buffer, size);
+    }
+
+    return rc;
+}
+#endif
+
+#ifdef TPM_ALG_SHA256
+static UINT16
+tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    size_t i;
+
+    for (i = 0; i < ARRAY_SIZE(data->h); i++) {
+        written += SHA_LONG_Marshal(&data->h[i], buffer, size);
+    }
+    written += SHA_LONG_Marshal(&data->Nl, buffer, size);
+    written += SHA_LONG_Marshal(&data->Nh, buffer, size);
+
+    /* data must be written as array */
+    written += Array_Marshal((BYTE *)&data->data[0], sizeof(data->data),
+                             buffer, size);
+
+    written += UINT32_Marshal(&data->num, buffer, size);
+    written += UINT32_Marshal(&data->md_len, buffer, size);
+
+    return written;
+}
+
+static UINT16
+tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+    size_t i;
+
+    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(data->h); i++) {
+        rc = SHA_LONG_Unmarshal(&data->h[i], buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->Nl, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG_Unmarshal(&data->Nh, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->data[0], sizeof(data->data),
+                             buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->num, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->md_len, buffer, size);
+    }
+
+    return rc;
+}
+#endif
+
+#if defined(TPM_ALG_SHA384) || defined(TPM_ALG_SHA512)
+static UINT16
+tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    size_t i;
+
+    for (i = 0; i < ARRAY_SIZE(data->h); i++) {
+        written += SHA_LONG64_Marshal(&data->h[i], buffer, size);
+    }
+    written += SHA_LONG64_Marshal(&data->Nl, buffer, size);
+    written += SHA_LONG64_Marshal(&data->Nh, buffer, size);
+
+    written += Array_Marshal(&data->u.p[0], sizeof(data->u.p), buffer, size);
+
+    written += UINT32_Marshal(&data->num, buffer, size);
+    written += UINT32_Marshal(&data->md_len, buffer, size);
+
+    return written;
+}
+
+static UINT16
+tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+    size_t i;
+
+    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(data->h); i++) {
+        rc = SHA_LONG64_Unmarshal(&data->h[i], buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG64_Unmarshal(&data->Nl, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SHA_LONG64_Unmarshal(&data->Nh, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal(&data->u.p[0], sizeof(data->u.p), buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->num, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->md_len, buffer, size);
+    }
+
+    return rc;
+}
+#endif
+
+static UINT16
+ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
+                       UINT16 hashAlg)
+{
+    UINT16 written = 0;
+
+    switch (hashAlg) {
+#ifdef TPM_ALG_SHA1
+    case ALG_SHA1_VALUE:
+        written = tpmHashStateSHA1_Marshal(&data->Sha1, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA256
+    case ALG_SHA256_VALUE:
+        written = tpmHashStateSHA256_Marshal(&data->Sha256, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA384
+    case ALG_SHA384_VALUE:
+        written = tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA512
+    case ALG_SHA512_VALUE:
+        written = tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size);
+        break;
+#endif
+    default:
+        break;
+    }
+    return written;
+}
+
+static UINT16
+ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
+                         UINT16 hashAlg)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+
+    switch (hashAlg) {
+#ifdef TPM_ALG_SHA1
+    case ALG_SHA1_VALUE:
+        rc = tpmHashStateSHA1_Unmarshal(&data->Sha1, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA256
+    case ALG_SHA256_VALUE:
+        rc = tpmHashStateSHA256_Unmarshal(&data->Sha256, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA384
+    case ALG_SHA384_VALUE:
+        rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size);
+        break;
+#endif
+#ifdef TPM_ALG_SHA512
+    case ALG_SHA512_VALUE:
+        rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size);
+        break;
+#endif
+    }
+    return rc;
+}
+
+static UINT16
+HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = HASH_STATE_TYPE_Marshal(&data->type, buffer, size);
+    written += TPM_ALG_ID_Marshal(&data->hashAlg, buffer, size);
+    /* def does not need to be written */
+    written += ANY_HASH_STATE_Marshal(&data->state, buffer, size, data->hashAlg);
+
+    return written;
+}
+
+static UINT16
+HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = HASH_STATE_TYPE_Unmarshal(&data->type, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc  = TPM_ALG_ID_Unmarshal(&data->hashAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        data->def = CryptGetHashDef(data->hashAlg);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = ANY_HASH_STATE_Unmarshal(&data->state, buffer, size, data->hashAlg);
+    }
+
+    return rc;
+}
+
+static inline UINT16
+TPM2B_HASH_BLOCK_Marshal(TPM2B_HASH_BLOCK *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = TPM2B_Marshal(&data->b, buffer, size);
+
+    return written;
+}
+
+static inline UINT16
+TPM2B_HASH_BLOCK_Unmarshal(TPM2B_HASH_BLOCK *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc;
+
+    rc = TPM2B_Unmarshal(&data->b, sizeof(data->t.buffer), buffer, size);
+
+    return rc;
+}
+
+static UINT16
+HMAC_STATE_Marshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = HASH_STATE_Marshal(&data->hashState, buffer, size);
+    written += TPM2B_HASH_BLOCK_Marshal(&data->hmacKey, buffer, size);
+
+    return written;
+}
+
+static UINT16
+HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = HASH_STATE_Unmarshal(&data->hashState, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_HASH_BLOCK_Unmarshal(&data->hmacKey, buffer, size);
+    }
+
+    return rc;
+}
+
+static UINT16
+HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    size_t i;
+
+    written = TPMI_ALG_PUBLIC_Marshal(&data->type, buffer, size);
+    written += TPMI_ALG_HASH_Marshal(&data->nameAlg, buffer, size);
+    written += TPMA_OBJECT_Marshal(&data->objectAttributes, buffer, size);
+    written += TPM2B_AUTH_Marshal(&data->auth, buffer, size);
+    if (data->attributes.hashSeq == SET) {
+        for (i = 0; i < ARRAY_SIZE(data->state.hashState); i++) {
+            written += HASH_STATE_Marshal(&data->state.hashState[i], buffer,
+                                          size);
+        }
+    } else if (data->attributes.hmacSeq == SET) {
+        written += HMAC_STATE_Marshal(&data->state.hmacState, buffer, size);
+    }
+
+    return written;
+}
+
+static UINT16
+HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    size_t i;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPMI_ALG_PUBLIC_Unmarshal(&data->type, buffer, size);
+        if (rc == TPM_RC_TYPE)
+            rc = TPM_RC_SUCCESS;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPMI_ALG_HASH_Unmarshal(&data->nameAlg, buffer, size, TRUE);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPMA_OBJECT_Unmarshal(&data->objectAttributes, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_AUTH_Unmarshal(&data->auth, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (data->attributes.hashSeq == SET) {
+            for (i = 0; rc == TPM_RC_SUCCESS &&
+                        i < ARRAY_SIZE(data->state.hashState); i++) {
+                rc = HASH_STATE_Unmarshal(&data->state.hashState[i],
+                                          buffer, size);
+            }
+        } else if (data->attributes.hmacSeq == SET) {
+            rc = HMAC_STATE_Unmarshal(&data->state.hmacState, buffer, size);
+        }
+    }
+
+    return rc;
+}
+
+static UINT16
 OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
-    UINT16 *ptr = (UINT16 *)&data->attributes;
 
-    written = UINT16_Marshal(ptr, buffer, size);
-    /* the slot must be occupied, otherwise the rest may not be initialized */
-    if (!data->attributes.occupied)
-        return written;
+    /*
+     * attributes are written in ANY_OBJECT_Marshal
+     */
 
-    written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
+    written = TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
 #ifdef TPM_ALG_RSA
     written += privateExponent_t_Marshal(&data->privateExponent,
@@ -782,14 +1187,10 @@ static TPM_RC
 OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    UINT16 *ptr = (UINT16 *)&data->attributes;
 
-    if (rc == TPM_RC_SUCCESS) {
-        rc = UINT16_Unmarshal(ptr, buffer, size);
-    }
-
-    if (!data->attributes.occupied)
-        return rc;
+    /*
+     * attributes are read in ANY_OBJECT_Unmarshal
+     */
 
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMT_PUBLIC_Unmarshal(&data->publicArea, buffer, size, TRUE);
@@ -814,6 +1215,44 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
     }
 
     return rc;
+}
+
+static UINT16
+ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    UINT32 *ptr = (UINT32 *)&data->attributes;
+
+    written = UINT32_Marshal(ptr, buffer, size);
+    /* the slot must be occupied, otherwise the rest may not be initialized */
+    if (!data->attributes.occupied)
+        return written;
+
+    if (ObjectIsSequence(data))
+        return written + HASH_OBJECT_Marshal((HASH_OBJECT *)data, buffer, size);
+
+    return written + OBJECT_Marshal(data, buffer, size);
+}
+
+static TPM_RC
+ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT32 *ptr = (UINT32 *)&data->attributes;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(ptr, buffer, size);
+    }
+
+    if (!data->attributes.occupied)
+        return rc;
+    if (rc != TPM_RC_SUCCESS)
+        return rc;
+
+    if (ObjectIsSequence(data))
+        return HASH_OBJECT_Unmarshal((HASH_OBJECT *)data, buffer, size);
+
+    return OBJECT_Unmarshal(data, buffer, size);
 }
 
 static UINT16
@@ -1041,7 +1480,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      * persistent memory, so what is lost upon TPM2_Shutdown?
      */
     for (i = 0; i < ARRAY_SIZE(s_objects); i++) {
-        written += OBJECT_Marshal(&s_objects[i], buffer, size);
+        written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size);
     }
 #endif
 
@@ -1213,7 +1652,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
 #endif
 #if defined OBJECT_C || defined GLOBAL_C
     for (i = 0; i < ARRAY_SIZE(s_objects) && rc == TPM_RC_SUCCESS; i++) {
-        rc = OBJECT_Unmarshal(&s_objects[i], buffer, size);
+        rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size);
     }
 #endif
 
@@ -1874,13 +2313,6 @@ TPMT_SENSITIVE_SWAP(TPMT_SENSITIVE *t, TPMT_SENSITIVE *s, bool to_native)
 void
 OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native)
 {
-    UINT32 attributes, attributes_be;
-
-    memcpy(&attributes, &s->attributes, sizeof(attributes));
-    attributes_be = htobe32(attributes);
-
-    memcpy(&t->attributes, &attributes_be, sizeof(t->attributes));
-
     TPMT_PUBLIC_SWAP(&t->publicArea, &s->publicArea, to_native);
     TPMT_SENSITIVE_SWAP(&t->sensitive, &s->sensitive, to_native);
 
@@ -1891,6 +2323,38 @@ OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native)
                sizeof(t->qualifiedName.t.name));
     t->evictHandle = htobe32(s->evictHandle);
     TPM2B_SWAP(&t->name.b, &s->name.b, sizeof(t->name.t.name));
+}
+
+void
+HASH_OBJECT_SWAP(HASH_OBJECT *t, HASH_OBJECT *s)
+{
+    TPMI_ALG_PUBLIC_SWAP(&t->type, &s->type);
+    TPMI_ALG_HASH_SWAP(&t->nameAlg, &s->nameAlg);
+    TPMA_OBJECT_SWAP(&t->objectAttributes, &s->objectAttributes);
+    TPM2B_SWAP(&t->auth.b, &s->auth.b, sizeof(t->auth.t.buffer));
+}
+
+void
+ANY_OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native)
+{
+    UINT32 attributes, attributes_be;
+    OBJECT_ATTRIBUTES attrs;
+
+    memcpy(&attributes, &s->attributes, sizeof(attributes));
+    attributes_be = htobe32(attributes);
+
+    memcpy(&t->attributes, &attributes_be, sizeof(t->attributes));
+
+    attrs = to_native ? t->attributes
+                      : s->attributes;
+
+    if (attrs.eventSeq == SET ||
+        attrs.hashSeq == SET ||
+        attrs.hmacSeq == SET) {
+        HASH_OBJECT_SWAP((HASH_OBJECT *)t, (HASH_OBJECT *)s);
+    } else {
+        OBJECT_SWAP(t, s, to_native);
+    }
 }
 
 static void
@@ -2317,7 +2781,7 @@ NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size)
 
     NvRead(&t, nvOffset, size);
 
-    OBJECT_SWAP(data, &t, TRUE);
+    ANY_OBJECT_SWAP(data, &t, TRUE);
 }
 
 void
