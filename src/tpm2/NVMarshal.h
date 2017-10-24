@@ -93,7 +93,7 @@ void NvRead_NV_INDEX(NV_INDEX *data, UINT32 nvOffset, UINT32 size);
 void NvRead_NV_ENTRY_HEADER(NV_ENTRY_HEADER *data, UINT32 nvOffset, UINT32 size);
 
 void TPMA_NV_SWAP(TPMA_NV *t, TPMA_NV *s);
-void OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native);
+void ANY_OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native);
 void NV_INDEX_SWAP(NV_INDEX *t, NV_INDEX *s);
 
 static inline void TPM2B_SWAP(TPM2B *t, TPM2B *s, size_t bufsize)
