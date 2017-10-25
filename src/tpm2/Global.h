@@ -124,6 +124,7 @@ typedef UINT32          CLOCK_NONCE;
    OBJECT_ATTRIBUTES is used in the definition of the OBJECT data type. */
 typedef struct
 {
+#if LITTLE_ENDIAN_TPM == YES
     unsigned            publicOnly : 1;     //0) SET if only the public portion of
     //   an object is loaded
     unsigned            epsHierarchy : 1;   //1) SET if the object belongs to EPS
@@ -161,6 +162,30 @@ typedef struct
     //        parent
     unsigned            external : 1;       //17) SET when the object is loaded with
     //    TPM2_LoadExternal();
+    unsigned            reserved : 14;      //18-31)
+#endif
+#if BIG_ENDIAN_TPM == YES
+    unsigned            reserved : 14;      //18-31)
+    unsigned            external : 1;       //17) SET when the object is loaded with
+    unsigned            derivation : 1;     //16) SET when the key is a derivation
+    unsigned            occupied : 1;       //15) SET when the slot is occupied.
+    unsigned            privateExp : 1;     //14) SET when the private exponent
+    unsigned            isParent : 1;       //13) SET if the key has the proper
+    unsigned            firstBlock : 1;     //12) SET if the first block of hash
+    unsigned            ticketSafe : 1;     //11) SET if a ticket is safe to create
+    unsigned            eventSeq : 1;       //10) SET for an event sequence object
+    unsigned            hashSeq : 1;        //9) SET for a hash sequence object
+    unsigned            hmacSeq : 1;        //8) SET for an HMAC sequence object
+    unsigned            stClear : 1;        //7) SET for an stClear object
+    unsigned            temporary : 1;      //6) SET for a temporary object
+    unsigned            primary : 1;        //5) SET for a primary object
+
+    unsigned            evict : 1;          //4) SET if the object is a platform or
+    unsigned            spsHierarchy : 1;   //3) SET f the object belongs to SPS
+    unsigned            ppsHierarchy : 1;   //2) SET if the object belongs to PPS
+    unsigned            epsHierarchy : 1;   //1) SET if the object belongs to EPS
+    unsigned            publicOnly : 1;     //0) SET if only the public portion of
+#endif
 } OBJECT_ATTRIBUTES;
 /* An OBJECT structure holds the object public, sensitive, and meta-data associated. This structure
    is implementation dependent. For this implementation, the structure is not optimized for space
@@ -227,6 +252,7 @@ typedef UINT32          AUTH_ROLE;
    within the SESSION structure. */
 typedef struct SESSION_ATTRIBUTES
 {
+#if LITTLE_ENDIAN_TPM == YES
     unsigned    isPolicy : 1;           //1) SET if the session may only be used
     //   for policy
     unsigned    isAudit : 1;            //2) SET if the session is used for audit
@@ -274,6 +300,25 @@ typedef struct SESSION_ATTRIBUTES
     unsigned    isTemplateSet : 1;      //14) SET if the templateHash needs to be
     //    checked for Create, CreatePrimary, or
     //    CreateLoaded.
+    unsigned    _reserved : 18;         //15-32
+#endif
+#if BIG_ENDIAN_TPM == YES
+    unsigned    _reserved : 18;         //15-32
+    unsigned    isTemplateSet : 1;      //14) SET if the templateHash needs to be
+    unsigned    nvWrittenState : 1;     //13) SET if TPMA_NV_WRITTEN is required to
+    unsigned    checkNvWritten : 1;     //12) SET if the TPMA_NV_WRITTEN attribute
+    unsigned    includeAuth : 1;        //11) This attribute is SET when the
+    unsigned    isLockoutBound : 1;     //10) SET if the session is bound to
+    unsigned    isDaBound : 1;          //9) SET if the bind entity had noDA CLEAR.
+    unsigned    isTrialPolicy : 1;      //8) SET if the policy session is created
+    unsigned    isPPRequired : 1;       //7) SET if physical presence is required to
+    unsigned    isPasswordNeeded : 1;   //6) SET if a password authValue is required
+    unsigned    isAuthValueNeeded : 1;  //5) SET if the authValue is required for
+    unsigned    isCpHashDefined : 1;    //4) SET if the cpHash has been defined
+    unsigned    isBound : 1;            //3) SET if the session is bound to with an
+    unsigned    isAudit : 1;            //2) SET if the session is used for audit
+    unsigned    isPolicy : 1;           //1) SET if the session may only be used
+#endif
 } SESSION_ATTRIBUTES;
 /* The SESSION structure contains all the context of a session except for the associated
    contextID. */
