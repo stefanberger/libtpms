@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entropy.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Entropy.c 1091 2017-10-31 20:31:59Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -64,6 +64,9 @@
 #define _CRT_RAND_S
 #include <stdlib.h>
 #include <memory.h>
+
+#include <openssl/rand.h> 			
+
 #include "PlatformData.h"
 #include "Platform_fp.h"
 /* C.4.2. Local values */
@@ -98,7 +101,9 @@ _plat__GetEntropy(
 	}
     // Only provide entropy 32 bits at a time to test the ability
     // of the caller to deal with partial results.
-    rndNum = rand();
+    /* rndNum = rand(); kgold rand() is not random */
+    RAND_bytes((unsigned char *)&rndNum, sizeof(uint32_t));	/* kgold */
+    
     if(firstValue)
 	firstValue = 0;
     else
