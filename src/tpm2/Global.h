@@ -951,13 +951,22 @@ extern STATE_RESET_DATA gr;
    GetClosestCommandIndex(). */
 typedef UINT16      COMMAND_INDEX;
 #define UNIMPLEMENTED_COMMAND_INDEX     ((COMMAND_INDEX)(~0))
+#if 0
 typedef struct _COMMAND_FLAGS_
 {
+#if LITTLE_ENDIAN_TPM == YES
     unsigned    trialPolicy : 1;    //1) If SET, one of the handles references a
     //   trial policy and authorization may be
     //   skipped. This is only allowed for a policy
     //   command.
+    unsigned    reserved : 31;     //2-31)
+#endif
+#if BIG_ENDIAN_TPM == YES
+    unsigned    reserved : 31;     //2-31)
+    unsigned    trialPolicy : 1;    //1) If SET, one of the handles references a
+#endif
 } COMMAND_FLAGS;
+#endif
 /* This structure is used to avoid having to manage a large number of parameters being passed
    through various levels of the command input processing. */
 typedef struct _COMMAND_
