@@ -14,6 +14,7 @@ man3_PODS = \
 	TPMLIB_MainInit.pod \
 	TPMLIB_Process.pod \
 	TPMLIB_RegisterCallbacks.pod \
+	TPMLIB_SetBufferSize.pod \
 	TPMLIB_SetDebugFD.pod \
 	TPMLIB_VolatileAll_Store.pod \
 	TPM_Malloc.pod
@@ -36,6 +37,7 @@ man3_MANS += \
 	TPMLIB_MainInit.3 \
 	TPMLIB_Process.3 \
 	TPMLIB_SetDebugFD.3 \
+	TPMLIB_SetBufferSize.3 \
 	TPMLIB_RegisterCallbacks.3 \
 	TPMLIB_VolatileAll_Store.3 \
 	TPM_Malloc.3

@@ -165,6 +165,12 @@ TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
     return TPM_SUCCESS;
 }
 
+uint32_t TPM12_SetBufferSize(uint32_t wanted_size)
+{
+    /* TPM 1.2 has a fixed buffer size; the TIS can handle that */
+    return TPM_BUFFER_MAX;
+}
+
 const struct tpm_interface TPM12Interface = {
     .MainInit = TPM12_MainInit,
     .Terminate = TPM12_Terminate,
@@ -175,4 +181,5 @@ const struct tpm_interface TPM12Interface = {
     .HashStart = TPM12_IO_Hash_Start,
     .HashData = TPM12_IO_Hash_Data,
     .HashEnd = TPM12_IO_Hash_End,
+    .SetBufferSize = TPM12_SetBufferSize,
 };

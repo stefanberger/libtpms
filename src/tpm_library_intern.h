@@ -52,6 +52,7 @@ struct libtpms_callbacks *TPMLIB_GetCallbacks(void);
 struct tpm_interface {
     TPM_RESULT (*MainInit)(void);
     void (*Terminate)(void);
+    uint32_t (*SetBufferSize)(uint32_t wanted_size);
     TPM_RESULT (*Process)(unsigned char **respbuffer, uint32_t *resp_size,
                           uint32_t *respbufsize,
 		          unsigned char *command, uint32_t command_size);
