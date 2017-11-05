@@ -526,7 +526,7 @@ check:
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \
 	fi; \
-	n=`grep TPM_BUFFER_MAX tpm2/Implementation.h | grep -E "^#define" | wc -l`; \
+	n=`grep TPM2_GetBufferSize tpm2/Implementation.h | grep -E "^#define" | wc -l`; \
 	exp=2; \
 	if test $$n -ne $$exp; then \
 		echo "Lost patches to tpm2/Implementation.h ?"; \

@@ -132,4 +132,6 @@ TPM_RESULT CopyCachedState(enum TPMLIB_StateType st,
 const char *TPMLIB_StateTypeToName(enum TPMLIB_StateType st);
 enum TPMLIB_StateType TPMLIB_NameToStateType(const char *name);
 
+uint32_t TPM2_GetBufferSize(void);
+
 #endif /* TPM_LIBRARY_INTERN_H */
