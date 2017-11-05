@@ -164,9 +164,11 @@ TPM_RESULT TPM_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
     return tpm_iface[0]->TpmEstablishedGet(tpmEstablished);
 }
 
-uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size)
+uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size,
+                              uint32_t *min_size,
+                              uint32_t *max_size)
 {
-    return tpm_iface[0]->SetBufferSize(wanted_size);
+    return tpm_iface[0]->SetBufferSize(wanted_size, min_size, max_size);
 }
 
 static struct libtpms_callbacks libtpms_cbs;

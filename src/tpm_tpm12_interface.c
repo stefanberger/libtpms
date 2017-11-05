@@ -165,9 +165,15 @@ TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
     return TPM_SUCCESS;
 }
 
-uint32_t TPM12_SetBufferSize(uint32_t wanted_size)
+uint32_t TPM12_SetBufferSize(uint32_t wanted_size,
+                             uint32_t *min_size,
+                             uint32_t *max_size)
 {
     /* TPM 1.2 has a fixed buffer size; the TIS can handle that */
+    if (min_size)
+        *min_size = TPM_BUFFER_MAX;
+    if (max_size)
+        *max_size = TPM_BUFFER_MAX;
     return TPM_BUFFER_MAX;
 }
 

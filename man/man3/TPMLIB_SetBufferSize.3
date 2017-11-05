@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "TPMLIB_SetBufferSize 3"
-.TH TPMLIB_SetBufferSize 3 "2017-11-04" "libtpms" ""
+.TH TPMLIB_SetBufferSize 3 "2017-11-05" "libtpms" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -147,11 +147,13 @@ TPMLIB_SetBufferSize  \- Set the TPM's I/O buffer size
 .IX Header "SYNOPSIS"
 \&\fB#include <libtpms/tpm_library.h\fR>
 .PP
-\&\fBuint32_t TPMLIB_SetBufferSize(uint32_t);\fR
+\&\fBuint32_t TPMLIB_SetBufferSize(uint32_t, uint32_t *, uint32_t *);\fR
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 The \fB\f(BITPMLIB_SetBufferSize()\fB\fR function sets the size of the buffer
 the \s-1TPM\s0 can use for input and output and that it advertises to users.
+It also allows to get the minimum and maximum supported buffer
+size.
 .PP
 If 0 is given on input, the currently used buffer size is returned.
 Any other number will try to change the buffer size. The returned
@@ -160,7 +162,9 @@ above a maximum. The returned size may be larger than the requested
 one, if the requested one was below a minimum.
 .PP
 This function must be called after \fB\f(BITPMLIB_ChooseTPMVersion()\fB\fR has
+been called. It should not be called after \fB\f(BITPMLIB_MainInit()\fB\fR has
+been called but can again be called once \fB\f(BITPMLIB_Terminate()\fB\fR has
 been called.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fBTPMLIB_ChooseTPMVersion\fR(3)
+\&\fBTPMLIB_ChooseTPMVersion\fR(3), \fBTPMLIB_MainInit\fR(3), \fBTPMLIB_Terminat\fR(3)

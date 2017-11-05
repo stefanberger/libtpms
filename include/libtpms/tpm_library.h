@@ -132,7 +132,9 @@ void TPMLIB_SetDebugFD(int fd);
 void TPMLIB_SetDebugLevel(unsigned int level);
 TPM_RESULT TPMLIB_SetDebugPrefix(const char *prefix);
 
-uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size);
+uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size,
+                              uint32_t *min_size,
+                              uint32_t *max_size);
 
 #ifdef __cplusplus
 }
