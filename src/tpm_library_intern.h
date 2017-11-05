@@ -98,4 +98,6 @@ TPM_RESULT TPM2_IO_Hash_End(void);
 TPM_RESULT TPM2_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
 TPM_RESULT TPM2_IO_TpmEstablished_Reset(void);
 
+uint32_t TPM2_GetBufferSize(void);
+
 #endif /* TPM_LIBRARY_INTERN_H */

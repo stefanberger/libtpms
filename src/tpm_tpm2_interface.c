@@ -248,16 +248,36 @@ TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
     return TPM_SUCCESS;
 }
 
+static uint32_t tpm2_buffersize = TPM_BUFFER_MAX;
+
 uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
                             uint32_t *min_size,
                             uint32_t *max_size)
 {
-    /* FIXME: this needs to become adjustable */
+    const uint32_t min = MAX_CONTEXT_SIZE + 128;
+    const uint32_t max = TPM_BUFFER_MAX;
+
     if (min_size)
-        *min_size = MAX_COMMAND_SIZE;
+        *min_size = min;
     if (max_size)
-        *max_size = MAX_COMMAND_SIZE;
-    return MAX_COMMAND_SIZE;
+        *max_size = max;
+
+    if (wanted_size == 0)
+        return tpm2_buffersize;
+
+    if (wanted_size > max)
+        wanted_size = max;
+    else if (wanted_size < min)
+        wanted_size = min;
+
+    tpm2_buffersize = wanted_size;
+
+    return tpm2_buffersize;
+}
+
+uint32_t TPM2_GetBufferSize(void)
+{
+    return TPM2_SetBufferSize(0, NULL, NULL);
 }
 
 const struct tpm_interface TPM2Interface = {
