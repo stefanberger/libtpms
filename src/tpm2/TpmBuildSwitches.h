@@ -189,12 +189,12 @@
 /* If the implementation is to compute the sizes of the proof and primary seed size values based on
    the implemented algorithms, then use this define. */
 #ifndef USE_SPEC_COMPLIANT_PROOFS
-//#define  USE_SPEC_COMPLIANT_PROOFS
+#define  USE_SPEC_COMPLIANT_PROOFS
 #endif
 /* Comment this out to allow compile to continue even though the chosen proof values do not match
    the compliant values. This is written so that someone would have to proactively ignore errors. */
 #ifndef SKIP_PROOF_ERRORS
-#define SKIP_PROOF_ERRORS
+//#define SKIP_PROOF_ERRORS
 #endif
 /* This define is used to eliminate the use of bit-fields. It can be enable for big- or
    little-endian machines but is required of big-endian system that number bits in registers from
