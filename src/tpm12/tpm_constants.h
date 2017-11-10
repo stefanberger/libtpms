@@ -146,7 +146,7 @@
 /* This value is used to limit memory allocation to prevent resource overload. */
 
 #ifndef TPM_ALLOC_MAX
-#define TPM_ALLOC_MAX  0x10000  /* 64k bytes */
+#define TPM_ALLOC_MAX  0x20000  /* 128k bytes */
 #endif
 
 /* This is the increment by which the TPM_STORE_BUFFER grows.  A larger number saves realloc's.  A
