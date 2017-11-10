@@ -92,7 +92,7 @@
 #define  ALG_RSA               ALG_YES
 #define  ALG_SHA1              ALG_YES
 #define  ALG_HMAC              ALG_YES
-#define  ALG_TDES              ALG_YES
+#define  ALG_TDES              ALG_NO
 #define  ALG_AES               ALG_YES
 #define  ALG_MGF1              ALG_YES
 #define  ALG_XOR               ALG_YES
