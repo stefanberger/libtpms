@@ -94,7 +94,7 @@ _TPM_Init(
     // Initialize the NvEnvironment.
     g_nvOk = NvPowerOn();
     // Initialize cryptographic functions
-    g_inFailureMode = (CryptInit() == FALSE);
+    g_inFailureMode |= (CryptInit() == FALSE); // stefanb
     if(!g_inFailureMode)
 	{
 	    // Load the persistent data
