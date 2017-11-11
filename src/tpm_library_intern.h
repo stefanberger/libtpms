@@ -80,4 +80,7 @@ TPM_RESULT TPM12_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished);
 int TPMLIB_LogPrintf(const char *format, ...);
 void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...);
 
+#define TPMLIB_LogTPM12Error(format, ...) \
+     TPMLIB_LogPrintfA(~0, "libtpms/tpm12: "format, __VA_ARGS__)
+
 #endif /* TPM_LIBRARY_INTERN_H */

@@ -45,6 +45,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #ifdef USE_FREEBL_CRYPTO_LIBRARY
 # include <plbase64.h>
@@ -421,24 +422,36 @@ int TPMLIB_LogPrintf(const char *format, ...)
 
 /*
  * TPMLIB_LogPrintfA: Printf to the logfd without indentation check
+ *
+ * @indent: how many spaces to indent; indent of ~0 forces logging
+ *          with indent 0 even if not debug_level is set
+ * @format: format to use for formatting the following parameters
+ * @...: varargs
  */
 void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
 {
     va_list args;
     char spaces[20];
+    int fd;
 
-    if (!debug_fd || !debug_level)
-        return;
+    if (indent != ~0) {
+        if (!debug_fd || !debug_level)
+           return;
+        fd = debug_fd;
+    } else {
+        indent = 0;
+        fd = (debug_fd >= 0) ? debug_fd : STDERR_FILENO;
+    }
 
     if (indent) {
         if (indent > sizeof(spaces) - 1)
             indent = sizeof(spaces) - 1;
         memset(spaces, ' ', indent);
         spaces[indent] = 0;
-        dprintf(debug_fd, "%s", spaces);
+        dprintf(fd, "%s", spaces);
     }
 
     va_start(args, format);
-    vdprintf(debug_fd, format, args);
+    vdprintf(fd, format, args);
     va_end(args);
 }
