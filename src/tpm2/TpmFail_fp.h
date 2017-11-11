@@ -77,6 +77,14 @@ TpmFail(
 	int              code
 	);
 void
+TpmSetFailureMode(
+#ifndef NO_FAIL_TRACE
+	const char      *function,
+	int              line,
+#endif
+	int              code
+	);
+void
 TpmFailureMode(
 	       unsigned int     inRequestSize,     // IN: command buffer size
 	       unsigned char   *inRequest,         // IN: command buffer
