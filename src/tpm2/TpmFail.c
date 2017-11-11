@@ -191,13 +191,13 @@ TpmFail(
 	)
 {
 #if 0
+#ifndef NO_FAIL_TRACE
     UINT32     *failFuncp;
-#endif
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
-#ifndef NO_FAIL_TRACE
-    s_failFunction = *(UINT32 *)&function;
+    failFuncp = (UINT32 *)&function;
+    s_failFunction = *failFuncp;
     s_failLine = line;
 #else
     s_failFunction = (UINT32)0;
@@ -215,9 +215,54 @@ TpmFail(
     // Clear this flag
     g_forceFailureMode = FALSE;
 #endif
+
+#else
+
+    TpmSetFailureMode(
+#ifndef NO_FAIL_TRACE
+                      function, line,
+#endif
+                      code);
+
+#endif
     // Jump to the failure mode code.
     // Note: only get here if asserts are off or if we are testing failure mode
     _plat__Fail();
+}
+
+void
+TpmSetFailureMode(
+#ifndef NO_FAIL_TRACE
+	const char      *function,
+	int              line,
+#endif
+	int              code
+	)
+{
+    // Save the values that indicate where the error occurred.
+    // On a 64-bit machine, this may truncate the address of the string
+    // of the function name where the error occurred.
+#ifndef NO_FAIL_TRACE
+    s_failFunction = *(UINT32 *)function;
+    s_failLine = line;
+#else
+    s_failFunction = (UINT32)0;
+    s_failLine = 0;
+#endif
+    s_failCode = code;
+
+    TPMLIB_LogTPM2Error("Entering failure mode; code: %d"
+#ifndef NO_FAIL_TRACE
+    ", location: %s line %d"
+#endif
+    "\n", s_failCode
+#ifndef NO_FAIL_TRACE
+    , function, s_failLine
+#endif
+    );
+
+    // We are in failure mode
+    g_inFailureMode = TRUE;
 }
 /* 9.17.5 TpmFailureMode */
 /* This function is called by the interface code when the platform is in failure mode. */

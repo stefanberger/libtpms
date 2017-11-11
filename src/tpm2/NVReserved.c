@@ -123,7 +123,7 @@ NvPowerOn(
     if(g_powerWasLost)
 	{
 	    if((nvError = _plat__NVEnable(0)) < 0)
-		FAIL(FATAL_ERROR_NV_UNRECOVERABLE);
+		FAIL_NOCMD(FATAL_ERROR_NV_UNRECOVERABLE);
 	    NvInitStatic();
 	}
     return nvError == 0;
