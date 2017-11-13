@@ -2,7 +2,7 @@
 
 %define name      libtpms
 %define version   0.6.0
-%define release   1
+%define release   1_dev1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %if "%{?crypto_subsystem}" == ""
