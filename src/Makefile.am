@@ -284,6 +284,7 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptRsa_fp.h \
 	tpm2/crypto/CryptRsa.h \
 	tpm2/crypto/CryptSelfTest_fp.h \
+	tpm2/crypto/CryptSym.h \
 	tpm2/crypto/CryptSym_fp.h \
 	tpm2/crypto/CryptTest.h \
 	tpm2/crypto/CryptUtil_fp.h \
@@ -361,6 +362,8 @@ noinst_HEADERS += \
 	tpm2/LoadExternal_fp.h \
 	tpm2/Load_fp.h \
 	tpm2/Locality_fp.h \
+	tpm2/MAC_fp.h \
+	tpm2/MAC_Start_fp.h \
 	tpm2/MakeCredential_fp.h \
 	tpm2/Manufacture_fp.h \
 	tpm2/Marshal_fp.h \
