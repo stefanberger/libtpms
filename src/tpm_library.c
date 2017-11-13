@@ -434,7 +434,7 @@ void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
     char spaces[20];
     int fd;
 
-    if (indent != ~0) {
+    if (indent != (unsigned int)~0) {
         if (!debug_fd || !debug_level)
            return;
         fd = debug_fd;
