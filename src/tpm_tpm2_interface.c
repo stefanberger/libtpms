@@ -79,7 +79,7 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
     if (cbs->tpm_nvram_loaddata) {
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
         TPM_Free(data);
-        if (ret == TPM_SUCCESS)
+        if (ret == TPM_SUCCESS || ret == TPM_DECRYPT_ERROR)
             return TRUE;
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
