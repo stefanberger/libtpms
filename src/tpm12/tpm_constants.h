@@ -42,6 +42,8 @@
 
 #include <stdint.h>
 
+#include <tpm_library_intern.h>
+
 /*
   NOTE implementation Specific
 */
@@ -169,6 +171,10 @@
 #define TPM_BUFFER_MAX  0x1000  /* 4k bytes */
 #endif
 
+#ifndef TPM_BUFFER_MIN
+#define TPM_BUFFER_MIN  0x0c00  /* 3k bytes */
+#endif
+
 /* Random number generator */
 
 /* maximum bytes in one TPM_GetRandom() call
@@ -176,7 +182,7 @@
    Use maximum input buffer size minus tag, paramSize, returnCode, randomBytesSize.
 */
 
-#define TPM_RANDOM_MAX  (TPM_BUFFER_MAX \
+#define TPM_RANDOM_MAX  (TPM12_GetBufferSize() \
                          - sizeof(TPM_TAG) - sizeof(uint32_t) \
 			 - sizeof(TPM_RESULT) - sizeof(uint32_t))
 
@@ -185,7 +191,7 @@
    Use maximum input buffer size minus tag, paramSize, ordinal, numBytes.
 */
 
-#define TPM_SHA1_MAXNUMBYTES    (TPM_BUFFER_MAX - 64)
+#define TPM_SHA1_MAXNUMBYTES    (TPM12_GetBufferSize() - 64)
 
 /* extra audit status bits for TSC commands outside the normal ordinal range */
 #define TSC_PHYS_PRES_AUDIT     0x01

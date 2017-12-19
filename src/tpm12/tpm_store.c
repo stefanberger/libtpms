@@ -416,9 +416,9 @@ TPM_RESULT TPM_Sbuffer_StoreFinalResponse(TPM_STORE_BUFFER *sbuffer,
     printf(" TPM_Sbuffer_StoreFinalResponse: returnCode %08x\n", returnCode);
     /* determine whether the response would exceed the output buffer size */
     TPM_Sbuffer_Get(sbuffer, &buffer, &length);
-    if (length > TPM_BUFFER_MAX) {
+    if (length > TPM12_GetBufferSize()) {
 	printf("TPM_Sbuffer_StoreFinalResponse: Error, response buffer %u exceeds max %u\n",
-	       length, TPM_BUFFER_MAX);
+	       length, TPM12_GetBufferSize());
 	returnCode = TPM_SIZE;
     }
     if (returnCode == TPM_SUCCESS) {
