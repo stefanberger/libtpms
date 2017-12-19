@@ -308,7 +308,7 @@ Bn2bin(bigConst       bn,
         pAssert(t < (int)buffer_len)
 
 #if BIG_ENDIAN_TPM
-        int count;
+        unsigned int count;
 	// Copy the constant input value into a modifiable value
 	BN_VAR(bnL, LARGEST_NUMBER_BITS * 2);
 	BnCopy(bnL, bn);
