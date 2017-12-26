@@ -171,13 +171,13 @@ uint32_t TPM12_SetBufferSize(uint32_t wanted_size,
                              uint32_t *min_size,
                              uint32_t *max_size)
 {
-    if (wanted_size == 0)
-        return tpm12_buffersize;
-
     if (min_size)
         *min_size = TPM_BUFFER_MIN;
     if (max_size)
         *max_size = TPM_BUFFER_MAX;
+
+    if (wanted_size == 0)
+        return tpm12_buffersize;
 
     if (wanted_size > TPM_BUFFER_MAX)
         wanted_size = TPM_BUFFER_MAX;
