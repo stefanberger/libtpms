@@ -1377,11 +1377,13 @@ SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define VOLATILE_STATE_VERSION 1
+
 UINT16
 VolatileState_Marshal(BYTE **buffer, INT32 *size)
 {
     UINT16 written;
-    UINT16 version = 1; /* blob version */
+    UINT16 version = VOLATILE_STATE_VERSION; /* blob version */
     size_t i;
     BOOL tpmEst;
 
@@ -1524,6 +1526,12 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
 
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&version, buffer, size); /* line 426 */
+        if (version > VOLATILE_STATE_VERSION) {
+            rc = TPM_RC_FAILURE;
+            TPMLIB_LogTPM2Error("Not accepting volatile state version %u, "
+                                "only supporting up to %u\n",
+                                version, VOLATILE_STATE_VERSION);
+        }
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&g_exclusiveAuditSession, buffer, size); /* line 423 */
