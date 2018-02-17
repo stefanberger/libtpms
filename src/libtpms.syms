@@ -27,6 +27,7 @@ LIBTPMS_0.6.0 {
 	TPMLIB_SetDebugFD;
 	TPMLIB_SetDebugLevel;
 	TPMLIB_SetDebugPrefix;
+	TPMLIB_ValidateState;
     local:
 	*;
 } LIBTPMS_0.5.1;

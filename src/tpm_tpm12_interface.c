@@ -48,6 +48,8 @@
 #include "tpm_library_intern.h"
 #include "tpm12/tpm_process.h"
 #include "tpm12/tpm_startup.h"
+#include "tpm12/tpm_global.h"
+#include "tpm12/tpm_permanent.h"
 
 TPM_RESULT TPM12_MainInit(void)
 {
@@ -194,6 +196,45 @@ uint32_t TPM12_GetBufferSize(void)
     return TPM12_SetBufferSize(0, NULL, NULL);
 }
 
+TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
+                               unsigned int flags)
+{
+    TPM_RESULT ret = TPM_SUCCESS;
+    tpm_state_t tpm_state;
+
+#ifdef TPM_LIBTPMS_CALLBACKS
+    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+
+    if (cbs->tpm_nvram_init) {
+        ret = cbs->tpm_nvram_init();
+        if (ret != TPM_SUCCESS)
+            return ret;
+    }
+#endif
+
+    ret = TPM_Global_Init(&tpm_state);
+    tpm_state.tpm_number = 0;
+
+    if ((ret == TPM_SUCCESS) &
+        (st & TPMLIB_STATE_PERMANENT)) {
+        ret = TPM_PermanentAll_NVLoad(&tpm_state);
+    }
+
+    if ((ret == TPM_SUCCESS) &
+        (st & TPMLIB_STATE_VOLATILE)) {
+        ret = TPM_SaveState_NVLoad(&tpm_state);
+    }
+
+    if ((ret == TPM_SUCCESS) &
+        (st & TPMLIB_STATE_SAVE_STATE)) {
+        ret = TPM_VolatileAll_NVLoad(&tpm_state);
+    }
+
+    TPM_Global_Delete(&tpm_state);
+
+    return ret;
+}
+
 const struct tpm_interface TPM12Interface = {
     .MainInit = TPM12_MainInit,
     .Terminate = TPM12_Terminate,
@@ -205,4 +246,5 @@ const struct tpm_interface TPM12Interface = {
     .HashData = TPM12_IO_Hash_Data,
     .HashEnd = TPM12_IO_Hash_End,
     .SetBufferSize = TPM12_SetBufferSize,
+    .ValidateState = TPM12_ValidateState,
 };

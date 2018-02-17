@@ -172,6 +172,12 @@ uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size,
     return tpm_iface[0]->SetBufferSize(wanted_size, min_size, max_size);
 }
 
+TPM_RESULT TPMLIB_ValidateState(enum TPMLIB_StateType st,
+                                unsigned int flags)
+{
+    return tpm_iface[0]->ValidateState(st, flags);
+}
+
 static struct libtpms_callbacks libtpms_cbs;
 
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void)

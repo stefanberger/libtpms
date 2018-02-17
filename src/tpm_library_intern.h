@@ -65,6 +65,8 @@ struct tpm_interface {
     TPM_RESULT (*HashData)(const unsigned char *data,
                            uint32_t data_length);
     TPM_RESULT (*HashEnd)(void);
+    TPM_RESULT (*ValidateState)(enum TPMLIB_StateType st,
+                                unsigned int flags);
 };
 
 extern const struct tpm_interface TPM12Interface;

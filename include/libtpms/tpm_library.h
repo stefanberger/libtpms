@@ -136,6 +136,15 @@ uint32_t TPMLIB_SetBufferSize(uint32_t wanted_size,
                               uint32_t *min_size,
                               uint32_t *max_size);
 
+enum TPMLIB_StateType {
+    TPMLIB_STATE_PERMANENT  = (1 << 0),
+    TPMLIB_STATE_VOLATILE   = (1 << 1),
+    TPMLIB_STATE_SAVE_STATE = (1 << 2),
+};
+
+TPM_RESULT TPMLIB_ValidateState(enum TPMLIB_StateType st,
+                                unsigned int flags);
+
 #ifdef __cplusplus
 }
 #endif
