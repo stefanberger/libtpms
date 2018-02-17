@@ -354,7 +354,51 @@ uint32_t TPM2_GetBufferSize(void)
 TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
                               unsigned int flags)
 {
-    return TPM_SUCCESS;
+    TPM_RESULT ret = TPM_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+#ifdef TPM_LIBTPMS_CALLBACKS
+    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+
+    if (cbs->tpm_nvram_init) {
+        ret = cbs->tpm_nvram_init();
+        if (ret != TPM_SUCCESS)
+            return ret;
+    }
+#endif
+
+    if ((rc == TPM_RC_SUCCESS) &&
+        (st & TPMLIB_STATE_PERMANENT)) {
+        PERSISTENT_DATA tmp_gp;
+        ORDERLY_DATA tmp_go;
+
+        rc = NvRead_PERSISTENT_DATA(&tmp_gp,
+                                    NV_PERSISTENT_DATA, sizeof(tmp_gp));
+        if (rc == TPM_RC_SUCCESS)
+            rc = NvRead_ORDERLY_DATA(&tmp_go,
+                                     NV_ORDERLY_DATA, sizeof(tmp_go));
+    }
+
+    if ((rc == TPM_RC_SUCCESS) &&
+        (st & TPMLIB_STATE_VOLATILE)) {
+        rc = VolatileLoad();
+    }
+
+    if ((rc == TPM_RC_SUCCESS) &&
+        (st & TPMLIB_STATE_SAVE_STATE)) {
+        STATE_RESET_DATA tmp_tr;
+        STATE_CLEAR_DATA tmp_gc;
+
+        rc = NvRead_STATE_RESET_DATA(&tmp_tr,
+                                     NV_STATE_RESET_DATA, sizeof(tmp_tr));
+        if (rc == TPM_RC_SUCCESS)
+            rc = NvRead_STATE_CLEAR_DATA(&tmp_gc,
+                                         NV_STATE_CLEAR_DATA, sizeof(tmp_gc));
+    }
+
+    ret = rc;
+
+    return ret;
 }
 
 const struct tpm_interface TPM2Interface = {
