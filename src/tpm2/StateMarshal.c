@@ -15,9 +15,11 @@ VolatileSave(BYTE **buffer, INT32 *size)
     return VolatileState_Save(buffer, size);
 }
 
-void
+TPM_RC
 VolatileLoad(void)
 {
+    TPM_RC rc = TPM_RC_SUCCESS;
+
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
 
@@ -30,7 +32,7 @@ VolatileLoad(void)
 
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
         if (ret == TPM_SUCCESS) {
-            VolatileState_Load(&data, (INT32 *)&length);
+            rc = VolatileState_Load(&data, (INT32 *)&length);
             /*
              * if this failed, VolatileState_Load will have started
              * failure mode.
@@ -38,4 +40,6 @@ VolatileLoad(void)
         }
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
+
+    return rc;
 }
