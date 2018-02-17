@@ -159,8 +159,8 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
         rc = UINT32_Unmarshal(&data->magic, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS && exp_magic != data->magic) {
-        TPMLIB_LogPrintf("%s: Invalid magic. Expected 0x%08x, got 0x%08x\n",
-                         __func__, exp_magic, data->magic);
+        TPMLIB_LogTPM2Error("%s: Invalid magic. Expected 0x%08x, got 0x%08x\n",
+                            __func__, exp_magic, data->magic);
         rc = TPM_RC_BAD_TAG;
     }
 
@@ -255,8 +255,8 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
                                  ORDERLY_DATA_MAGIC);
     }
-    if (data->nvHeader.version != ORDERLY_DATA_VERSION) {
-        TPMLIB_LogPrintf("Invalid orderly data version. Expected %d, got %d\n",
+    if (data->nvHeader.version > ORDERLY_DATA_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported orderly data version. Expected <= %d, got %d\n",
                           ORDERLY_DATA_VERSION, data->nvHeader.version);
         return TPM_RC_BAD_TAG;
     }
@@ -489,8 +489,8 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
                                  STATE_CLEAR_DATA_MAGIC);
     }
-    if (data->nvHeader.version != STATE_CLEAR_DATA_VERSION) {
-        TPMLIB_LogPrintf("Invalid state clear data version. Expected %d, got %d\n",
+    if (data->nvHeader.version > STATE_CLEAR_DATA_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported state clear data version. Expected <= %d, got %d\n",
                          STATE_CLEAR_DATA_VERSION, data->nvHeader.version);
         return TPM_RC_BAD_TAG;
     }
@@ -531,8 +531,8 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
                                  STATE_RESET_DATA_MAGIC);
     }
-    if (data->nvHeader.version != STATE_RESET_DATA_VERSION) {
-        TPMLIB_LogPrintf("Invalid state reset data version. Expected %d, got %d\n",
+    if (data->nvHeader.version > STATE_RESET_DATA_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported state reset data version. Expected <= %d, got %d\n",
                          STATE_RESET_DATA_VERSION, data->nvHeader.version);
         return TPM_RC_BAD_TAG;
     }
@@ -2433,23 +2433,10 @@ NV_INDEX_SWAP(NV_INDEX *t, NV_INDEX *s)
 }
 
 static void
-PERSISTENT_DATA_SWAP(PERSISTENT_DATA *t, PERSISTENT_DATA *s, int check)
+PERSISTENT_DATA_SWAP(PERSISTENT_DATA *t, PERSISTENT_DATA *s)
 {
-    if (!check)
-        NV_HEADER_INIT(&s->nvHeader, PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
     NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
 
-    if (check &&
-        (t->nvHeader.version != 0 || t->nvHeader.magic != 0)) {
-        if (t->nvHeader.version != PERSISTENT_DATA_VERSION) {
-            TPMLIB_LogPrintf("Invalid persistent data version. Expected %d, got %d\n",
-                             PERSISTENT_DATA_VERSION, t->nvHeader.version);
-        }
-        if (t->nvHeader.magic != PERSISTENT_DATA_MAGIC) {
-            TPMLIB_LogPrintf("Invalid persistent data magic. Expected 0x%08x, got 0x%08x\n",
-                             PERSISTENT_DATA_MAGIC, t->nvHeader.magic);
-        }
-    }
     t->disableClear = s->disableClear;
 
     TPM_ALG_ID_SWAP(&t->ownerAlg, &s->ownerAlg);
@@ -2512,23 +2499,10 @@ PERSISTENT_DATA_SWAP(PERSISTENT_DATA *t, PERSISTENT_DATA *s, int check)
 }
 
 static void
-ORDERLY_DATA_SWAP(ORDERLY_DATA *t, ORDERLY_DATA *s, int check)
+ORDERLY_DATA_SWAP(ORDERLY_DATA *t, ORDERLY_DATA *s)
 {
-    if (!check)
-        NV_HEADER_INIT(&s->nvHeader, ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
     NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
 
-    if (check &&
-        (t->nvHeader.version != 0 || t->nvHeader.magic != 0)) {
-        if (t->nvHeader.version != ORDERLY_DATA_VERSION) {
-            TPMLIB_LogPrintf("Invalid orderly data version. Expected %d, got %d\n",
-                             ORDERLY_DATA_VERSION, t->nvHeader.version);
-        }
-        if (t->nvHeader.magic != ORDERLY_DATA_MAGIC) {
-            TPMLIB_LogPrintf("Invalid orderly data magic. Expected 0x%08x, got 0x%08x\n",
-                             ORDERLY_DATA_MAGIC, t->nvHeader.magic);
-        }
-    }
     t->clock = htobe64(s->clock);
     t->clockSafe = s->clockSafe;
 
@@ -2542,23 +2516,10 @@ ORDERLY_DATA_SWAP(ORDERLY_DATA *t, ORDERLY_DATA *s, int check)
 }
 
 static void
-STATE_CLEAR_DATA_SWAP(STATE_CLEAR_DATA *t, STATE_CLEAR_DATA *s, int check)
+STATE_CLEAR_DATA_SWAP(STATE_CLEAR_DATA *t, STATE_CLEAR_DATA *s)
 {
-    if (!check)
-        NV_HEADER_INIT(&s->nvHeader, STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
     NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
 
-    if (check &&
-        (t->nvHeader.version != 0 || t->nvHeader.magic != 0)) {
-        if (t->nvHeader.version != STATE_CLEAR_DATA_VERSION) {
-            TPMLIB_LogPrintf("Invalid state clear data version. Expected %d, got %d\n",
-                             STATE_CLEAR_DATA_VERSION, t->nvHeader.version);
-        }
-        if (t->nvHeader.magic != STATE_CLEAR_DATA_MAGIC) {
-            TPMLIB_LogPrintf("Invalid state clear data magic. Expected 0x%08x, got 0x%08x\n",
-                             STATE_CLEAR_DATA_MAGIC, t->nvHeader.magic);
-        }
-    }
     t->shEnable = s->shEnable;
     t->ehEnable = s->ehEnable;
     t->phEnableNV = s->phEnableNV;
@@ -2576,23 +2537,9 @@ STATE_CLEAR_DATA_SWAP(STATE_CLEAR_DATA *t, STATE_CLEAR_DATA *s, int check)
 }
 
 static void
-STATE_RESET_DATA_SWAP(STATE_RESET_DATA *t, STATE_RESET_DATA *s, int check)
+STATE_RESET_DATA_SWAP(STATE_RESET_DATA *t, STATE_RESET_DATA *s)
 {
-    if (!check)
-        NV_HEADER_INIT(&s->nvHeader, STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
     NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
-
-    if (check &&
-        (t->nvHeader.version != 0 || t->nvHeader.magic != 0)) {
-        if (t->nvHeader.version != STATE_RESET_DATA_VERSION) {
-            TPMLIB_LogPrintf("Invalid state reset data version. Expected %d, got %d\n",
-                             STATE_RESET_DATA_VERSION, t->nvHeader.version);
-        }
-        if (t->nvHeader.magic != STATE_RESET_DATA_MAGIC) {
-            TPMLIB_LogPrintf("Invalid state reset data magic. Expected 0x%08x, got 0x%08x\n",
-                             STATE_RESET_DATA_MAGIC, t->nvHeader.magic);
-        }
-    }
 
     TPM2B_SWAP(&t->nullProof.b, &s->nullProof.b, sizeof(t->nullProof.t.buffer));
 
@@ -2695,19 +2642,52 @@ NvWrite_PERSISTENT_DATA(UINT32 nvOffset, UINT32 size, PERSISTENT_DATA *data)
 {
     PERSISTENT_DATA t;
 
-    PERSISTENT_DATA_SWAP(&t, data, 0);
+    NV_HEADER_INIT(&data->nvHeader,
+                   PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
+    PERSISTENT_DATA_SWAP(&t, data);
 
     NvWrite(nvOffset, size, &t);
 }
 
-void
+TPM_RC
 NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size)
 {
+    NV_HEADER hdr;
     PERSISTENT_DATA t;
+
+    /* read header only */
+    NvRead(&hdr, nvOffset, sizeof(hdr));
+    NV_HEADER_SWAP(&t.nvHeader, &hdr);
+
+    /* newly initialized NVRAM has version and magic = 0 */
+    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
+        NV_HEADER_INIT(&t.nvHeader,
+                       PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
+
+    if (t.nvHeader.magic != PERSISTENT_DATA_MAGIC) {
+        TPMLIB_LogTPM2Error("Invalid persistent data magic. Expected 0x%08x, got 0x%08x\n",
+                         PERSISTENT_DATA_MAGIC, t.nvHeader.magic);
+        return TPM_RC_BAD_TAG;
+    }
+    if (t.nvHeader.version > PERSISTENT_DATA_VERSION ||
+        t.nvHeader.version == 0) {
+        TPMLIB_LogTPM2Error("Unsupprted persistent data version. Expected <= %d, got %d\n",
+                         PERSISTENT_DATA_VERSION, t.nvHeader.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    switch (t.nvHeader.version) {
+    /* read data at given version and upgrade */
+    case PERSISTENT_DATA_VERSION:
+        /* current version */
+        break;
+    }
 
     NvRead(&t, nvOffset, size);
 
-    PERSISTENT_DATA_SWAP(data, &t, 1);
+    PERSISTENT_DATA_SWAP(data, &t);
+
+    return TPM_RC_SUCCESS;
 }
 
 void
@@ -2715,19 +2695,51 @@ NvWrite_ORDERLY_DATA(UINT32 nvOffset, UINT32 size, ORDERLY_DATA *data)
 {
     ORDERLY_DATA t;
 
-    ORDERLY_DATA_SWAP(&t, data, 0);
+    NV_HEADER_INIT(&data->nvHeader, ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
+    ORDERLY_DATA_SWAP(&t, data);
 
     NvWrite(nvOffset, size, &t);
 }
 
-void
+TPM_RC
 NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size)
 {
+    NV_HEADER hdr;
     ORDERLY_DATA t;
+
+    /* read header only */
+    NvRead(&hdr, nvOffset, sizeof(hdr));
+    NV_HEADER_SWAP(&t.nvHeader, &hdr);
+
+    /* newly initialized NVRAM has version and magic = 0 */
+    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
+        NV_HEADER_INIT(&t.nvHeader,
+                       ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
+
+    if (t.nvHeader.magic != ORDERLY_DATA_MAGIC) {
+        TPMLIB_LogTPM2Error("Invalid orderly data magic. Expected 0x%08x, got 0x%08x\n",
+                         ORDERLY_DATA_MAGIC, t.nvHeader.magic);
+        return TPM_RC_BAD_TAG;
+    }
+    if (t.nvHeader.version > ORDERLY_DATA_VERSION ||
+        t.nvHeader.version == 0) {
+        TPMLIB_LogTPM2Error("Unsupported orderly data version. Expected <= %d, got %d\n",
+                         ORDERLY_DATA_VERSION, t.nvHeader.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    switch (t.nvHeader.version) {
+    /* read data at given version and upgrade */
+    case ORDERLY_DATA_VERSION:
+        /* current version */
+        break;
+    }
 
     NvRead(&t, nvOffset, size);
 
-    ORDERLY_DATA_SWAP(data, &t, 1);
+    ORDERLY_DATA_SWAP(data, &t);
+
+    return TPM_RC_SUCCESS;
 }
 
 void
@@ -2735,19 +2747,52 @@ NvWrite_STATE_CLEAR_DATA(UINT32 nvOffset, UINT32 size, STATE_CLEAR_DATA *data)
 {
     STATE_CLEAR_DATA t;
 
-    STATE_CLEAR_DATA_SWAP(&t, data, 0);
+    NV_HEADER_INIT(&data->nvHeader,
+                   STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
+    STATE_CLEAR_DATA_SWAP(&t, data);
 
     NvWrite(nvOffset, size, &t);
 }
 
-void
+TPM_RC
 NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size)
 {
+    NV_HEADER hdr;
     STATE_CLEAR_DATA t;
+
+    /* read header only */
+    NvRead(&hdr, nvOffset, sizeof(hdr));
+    NV_HEADER_SWAP(&t.nvHeader, &hdr);
+
+    /* newly initialized NVRAM has version and magic = 0 */
+    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
+        NV_HEADER_INIT(&t.nvHeader,
+                       STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
+
+    if (t.nvHeader.magic != STATE_CLEAR_DATA_MAGIC) {
+        TPMLIB_LogTPM2Error("Invalid state clear data magic. Expected 0x%08x, got 0x%08x\n",
+                         STATE_CLEAR_DATA_MAGIC, t.nvHeader.magic);
+        return TPM_RC_BAD_TAG;
+    }
+    if (t.nvHeader.version > STATE_CLEAR_DATA_VERSION ||
+        t.nvHeader.version == 0) {
+        TPMLIB_LogTPM2Error("Unsupported state clear data version. Expected <= %d, got %d\n",
+                         STATE_CLEAR_DATA_VERSION, t.nvHeader.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    switch (t.nvHeader.version) {
+    /* read data at given version and upgrade */
+    case STATE_CLEAR_DATA_VERSION:
+        /* current version */
+        break;
+    }
 
     NvRead(&t, nvOffset, size);
 
-    STATE_CLEAR_DATA_SWAP(data, &t, 1);
+    STATE_CLEAR_DATA_SWAP(data, &t);
+
+    return TPM_RC_SUCCESS;
 }
 
 void
@@ -2755,19 +2800,52 @@ NvWrite_STATE_RESET_DATA(UINT32 nvOffset, UINT32 size, STATE_RESET_DATA *data)
 {
     STATE_RESET_DATA t;
 
-    STATE_RESET_DATA_SWAP(&t, data, 0);
+    NV_HEADER_INIT(&data->nvHeader,
+                   STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
+    STATE_RESET_DATA_SWAP(&t, data);
 
     NvWrite(nvOffset, size, &t);
 }
 
-void
+TPM_RC
 NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size)
 {
+    NV_HEADER hdr;
     STATE_RESET_DATA t;
+
+    /* read header only */
+    NvRead(&hdr, nvOffset, sizeof(hdr));
+    NV_HEADER_SWAP(&t.nvHeader, &hdr);
+
+    /* newly initialized NVRAM has version and magic = 0 */
+    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
+        NV_HEADER_INIT(&t.nvHeader,
+                       STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
+
+    if (t.nvHeader.magic != STATE_RESET_DATA_MAGIC) {
+        TPMLIB_LogTPM2Error("Invalid state reset data magic. Expected 0x%08x, got 0x%08x\n",
+                            STATE_RESET_DATA_MAGIC, t.nvHeader.magic);
+        return TPM_RC_BAD_TAG;
+    }
+    if (t.nvHeader.version > STATE_RESET_DATA_VERSION ||
+        t.nvHeader.version == 0) {
+        TPMLIB_LogTPM2Error("Unsupported state reset data version. Expected <= %d, got %d\n",
+                            STATE_RESET_DATA_VERSION, t.nvHeader.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    switch (t.nvHeader.version) {
+    /* read data at given version and upgrade */
+    case STATE_RESET_DATA_VERSION:
+        /* current version */
+        break;
+    }
 
     NvRead(&t, nvOffset, size);
 
-    STATE_RESET_DATA_SWAP(data, &t, 1);
+    STATE_RESET_DATA_SWAP(data, &t);
+
+    return TPM_RC_SUCCESS;
 }
 
 void
