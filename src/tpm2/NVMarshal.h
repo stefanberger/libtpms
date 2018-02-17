@@ -82,10 +82,10 @@ void NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data);
 
 void NvRead_UINT32(UINT32 *data, UINT32 nvOffset, UINT32 size);
 void NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size);
-void NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size);
-void NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size);
-void NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size);
-void NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size);
+TPM_RC NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size);
+TPM_RC NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size);
+TPM_RC NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size);
+TPM_RC NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size);
 void NvRead_OBJECT_ATTRIBUTES(OBJECT_ATTRIBUTES *data, UINT32 nvOffset, UINT32 size);
 void NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size);
 void NvRead_TPMA_NV(TPMA_NV *data, UINT32 nvOffset, UINT32 size);
