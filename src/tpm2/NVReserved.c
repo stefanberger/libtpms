@@ -214,11 +214,10 @@ NvClearPersistent(
 }
 /* 8.5.3.9 NvReadPersistent() */
 /* This function reads persistent data to the RAM copy of the gp structure. */
-void
+TPM_RC
 NvReadPersistent(
 		 void
 		 )
 {
-    NvRead_PERSISTENT_DATA(&gp, NV_PERSISTENT_DATA, sizeof(gp));
-    return;
+    return NvRead_PERSISTENT_DATA(&gp, NV_PERSISTENT_DATA, sizeof(gp));
 }

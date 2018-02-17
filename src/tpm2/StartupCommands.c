@@ -98,10 +98,16 @@ _TPM_Init(
     if(!g_inFailureMode)
 	{
 	    // Load the persistent data
-	    NvReadPersistent();
+	    if (NvReadPersistent()) {
+	        g_inFailureMode = TRUE;
+	        return;
+	    }
 	    // Load the orderly data (clock and DRBG state).
 	    // If this is not done here, things break
-	    NvRead_ORDERLY_DATA(&go, NV_ORDERLY_DATA, sizeof(go));
+	    if (NvRead_ORDERLY_DATA(&go, NV_ORDERLY_DATA, sizeof(go))) {
+	        g_inFailureMode = TRUE;
+	        return;
+	    }
 	    // Start clock. Need to do this after NV has been restored.
 	    TimePowerOn();
 
@@ -177,13 +183,19 @@ TPM2_Startup(
 	{
 	    // Always read the data that is only cleared on a Reset because this is not
 	    // a reset
-	    NvRead_STATE_RESET_DATA(&gr, NV_STATE_RESET_DATA, sizeof(gr));
+	    if (NvRead_STATE_RESET_DATA(&gr, NV_STATE_RESET_DATA, sizeof(gr))) {
+	        g_inFailureMode = TRUE;
+	        return TPM_RC_FAILURE;
+	    }
 	    if(in->startupType == TPM_SU_STATE)
 	        {
 	            // If this is a startup STATE (a Resume) need to read the data
 	            // that is cleared on a startup CLEAR because this is not a Reset
 	            // or Restart.
-	            NvRead_STATE_CLEAR_DATA(&gc, NV_STATE_CLEAR_DATA, sizeof(gc));
+	            if (NvRead_STATE_CLEAR_DATA(&gc, NV_STATE_CLEAR_DATA, sizeof(gc))) {
+	                g_inFailureMode = TRUE;
+	                return TPM_RC_FAILURE;
+	            }
 	            startup = SU_RESUME;
 	        }
 	    else
