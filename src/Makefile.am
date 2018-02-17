@@ -524,7 +524,7 @@ endif # LIBTPMS_USE_OPENSSL
 # we do not want to loose these modifications
 check:
 	n=`grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	exp=18; \
+	exp=19; \
 	if test $$n -ne $$exp; then \
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \
