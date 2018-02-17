@@ -62,12 +62,13 @@
 #define STATE_MARSHAL_H
 
 #include "BaseTypes.h"
+#include "TpmTypes.h"
 
 /*
  * we keep these in a separate file to avoid symbol clashes when
  * included from the interface code.
  */
-void VolatileLoad(void);
+TPM_RC VolatileLoad(void);
 UINT16 VolatileSave(BYTE **buffer, INT32 *size);
 
 #endif /* STATE_MARSHAL_H */
