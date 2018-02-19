@@ -80,9 +80,7 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
         CryptHashBlock(hashAlg, *size - sizeof(hash), *buffer,
                        sizeof(acthash), acthash);
         rc = VolatileState_Unmarshal(buffer, size);
-        if (rc != TPM_RC_SUCCESS)
-            TPMLIB_LogTPM2Error("Error unmarshalling volatile state: 0x%02x",
-                                rc);
+        /* specific error has already been reported */
     }
 
     if (rc == TPM_RC_SUCCESS) {

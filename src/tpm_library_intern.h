@@ -50,7 +50,8 @@
 
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void);
 
-/* additional TPM 2 error codes */
+/* additional TPM 2 error codes from TPM 1.2 */
+#define TPM_RC_BAD_PARAMETER    0x03
 #define TPM_RC_BAD_VERSION      0x2e
 
 /*
