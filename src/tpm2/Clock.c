@@ -65,13 +65,14 @@
 #include <stdio.h>
 #include <time.h>
 
-static uint64_t tpmclock(void);
+#include "Tpm.h"
+#include "Platform_fp.h"
 
 #ifdef TPM_WINDOWS
 
 /* Windows returns result in units of CLOCKS_PER_SEC.  seconds = clock() / CLOCKS_PER_SEC */
 
-static uint64_t tpmclock(void)
+uint64_t tpmclock(void)
 {
     clock_t clocktime = clock();
     uint64_t tpmtime = ((uint64_t)clocktime * 1000) / (uint64_t)CLOCKS_PER_SEC;
@@ -87,7 +88,7 @@ static uint64_t tpmclock(void)
 
 /* return time in milliseconds */
 
-static uint64_t tpmclock(void)
+uint64_t tpmclock(void)
 {
     struct timeval      tval;
     uint64_t		tpmtime;
