@@ -1428,7 +1428,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += STATE_CLEAR_DATA_Marshal(&gc, buffer, size); /* line 738 */
     written += STATE_RESET_DATA_Marshal(&gr, buffer, size); /* line 826 */
 
-    /* g_manufactured: needs more investigation */
+    /* g_manufactured: must write */
     written += BOOL_Marshal(&g_manufactured, buffer, size); /* line 928 */
     /* g_initialized: must write */
     written += BOOL_Marshal(&g_initialized, buffer, size); /* line 932 */
@@ -1436,7 +1436,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     /*
      * The session related variables may only be valid during the execution
-     * of a single command; FIXME: needs more investigation
+     * of a single command; safer to store
      */
     for (i = 0; i < ARRAY_SIZE(s_sessionHandles); i++) {
         written += TPM_HANDLE_Marshal(&s_sessionHandles[i], buffer, size);
@@ -1472,10 +1472,12 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      */
     written += Array_Marshal(s_indexOrderlyRam, sizeof(s_indexOrderlyRam), buffer, size);
     written += UINT64_Marshal(&s_maxCounter, buffer, size); /* line 992 */
-    /* not sure about the following; NvIndexCacheInit initializes them partly */
-    //written += NV_INDEX_Marshal(&s_cachedNvIndex, buffer, size); /* line 1003 */
-    //written += UINT32_Marshal(&s_cachedNvRef, buffer, size); /* line 1004 */
-    //written += UINT8_Marshal(s_cachedNvRamRef, buffer, size); /* line 1005 */
+    /* the following need not be written; NvIndexCacheInit initializes them partly
+     * and NvIndexCacheInit() is alled during ExecuteCommand()
+     * - s_cachedNvIndex
+     * - s_cachedNvRef
+     * - s_cachedNvRamRef
+     */
 #endif
 #if defined OBJECT_C || defined GLOBAL_C
     /* used in many places; it doesn't look like TPM2_Shutdown writes this into
@@ -1647,16 +1649,11 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&s_maxCounter, buffer, size); /* line 992 */
     }
-    /* not sure about the following; NvIndexCacheInit initializes them partly */
-    if (rc == TPM_RC_SUCCESS) {
-        //rc = NV_INDEX_Unmarshal(&s_cachedNvIndex, buffer, size); /* line 1003 */
-    }
-    if (rc == TPM_RC_SUCCESS) {
-        //rc = UINT32_Unmarshal(&s_cachedNvRef, buffer, size); /* line 1004 */
-    }
-    if (rc == TPM_RC_SUCCESS) {
-        //rc = UINT8_Unmarshal(s_cachedNvRamRef, buffer, size); /* line 1005 */
-    }
+    /* The following are not included:
+     * - s_cachedNvIndex
+     * - s_cachedNvRef
+     * - s_cachedNvRamRef
+     */
 #endif
 #if defined OBJECT_C || defined GLOBAL_C
     for (i = 0; i < ARRAY_SIZE(s_objects) && rc == TPM_RC_SUCCESS; i++) {
