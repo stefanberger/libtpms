@@ -137,11 +137,15 @@ NV_HEADER_Marshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
                   UINT16 version, UINT32 magic)
 {
     UINT16 written;
+    NV_HEADER hdr;
 
-    NV_HEADER_INIT(data, version, magic);
+    NV_HEADER_INIT(&hdr, version, magic);
 
-    written = UINT16_Marshal(&data->version, buffer, size);
-    written += UINT32_Marshal(&data->magic, buffer, size);
+    written = UINT16_Marshal(&hdr.version, buffer, size);
+    written += UINT32_Marshal(&hdr.magic, buffer, size);
+
+    if (data)
+        *data = hdr;
 
     return written;
 }
@@ -174,16 +178,27 @@ NV_HEADER_SWAP(NV_HEADER *t, NV_HEADER *s)
     t->magic = htobe32(s->magic);
 }
 
+#define DRBG_STATE_MAGIC 0x6fe83ea1
+#define DRBG_STATE_VERSION 1
 static UINT16
 DRBG_STATE_Marshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     size_t i;
+    UINT16 array_size;
 
-    written = UINT64_Marshal(&data->reseedCounter, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                DRBG_STATE_VERSION, DRBG_STATE_MAGIC);
+    written += UINT64_Marshal(&data->reseedCounter, buffer, size);
     written += UINT32_Marshal(&data->magic, buffer, size);
-    written += Array_Marshal(&data->seed.bytes[0], sizeof(data->seed.bytes), buffer, size);
-    for (i = 0; i < ARRAY_SIZE(data->lastValue); i++) {
+
+    array_size = sizeof(data->seed.bytes);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(&data->seed.bytes[0], array_size, buffer, size);
+
+    array_size = ARRAY_SIZE(data->lastValue);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    for (i = 0; i < array_size; i++) {
         written += UINT32_Marshal(&data->lastValue[i], buffer, size);
     }
 
@@ -195,6 +210,20 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc= TPM_RC_SUCCESS;
     size_t i;
+    NV_HEADER hdr;
+    UINT16 array_size;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 DRBG_STATE_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS && hdr.version > DRBG_STATE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported DRBG_STATE version. "
+                            "Expected <= %d, got %d\n",
+                            DRBG_STATE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->reseedCounter, buffer, size);
@@ -202,11 +231,34 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->magic, buffer, size);
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal(&data->seed.bytes[0], sizeof(data->seed.bytes), buffer, size);
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (array_size != ARRAY_SIZE(data->seed.bytes)) {
+            TPMLIB_LogTPM2Error("Non-matching DRBG_STATE seed array size. "
+                                "Expected %d, got %d\n",
+                                ARRAY_SIZE(data->seed.bytes), array_size);
+            rc = TPM_RC_SIZE;
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal(&data->seed.bytes[0], array_size, buffer, size);
     }
 
-    for (i = 0; i < ARRAY_SIZE(data->lastValue) && rc == TPM_RC_SUCCESS; i++) {
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (array_size != ARRAY_SIZE(data->lastValue)) {
+            TPMLIB_LogTPM2Error("Non-matching DRBG_STATE lastValue array size. "
+                                "Expected %d, got %d\n",
+                                ARRAY_SIZE(data->lastValue), array_size);
+            rc = TPM_RC_SIZE;
+        }
+    }
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = UINT32_Unmarshal(&data->lastValue[i], buffer, size);
     }
 
@@ -286,31 +338,70 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define PCR_SAVE_MAGIC 0x7372eabc
+#define PCR_SAVE_VERSION 1
 static UINT16
 PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
+    TPM_ALG_ID algid;
+    UINT16 array_size;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PCR_SAVE_VERSION, PCR_SAVE_MAGIC);
+
+    array_size = NUM_STATIC_PCR;
+    written += UINT16_Marshal(&array_size, buffer, size);
 
 #ifdef TPM_ALG_SHA1
-    written = Array_Marshal((BYTE *)&data->sha1, sizeof(data->sha1),
+    algid = TPM_ALG_SHA1;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha1);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha1, array_size,
                             buffer, size);
 #endif
 #ifdef TPM_ALG_SHA256
-    written += Array_Marshal((BYTE *)&data->sha256, sizeof(data->sha256),
+    algid = TPM_ALG_SHA256;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha256);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha256, array_size,
                               buffer, size);
 #endif
 #ifdef TPM_ALG_SHA384
-    written += Array_Marshal((BYTE *)&data->sha384, sizeof(data->sha384),
+    algid = TPM_ALG_SHA384;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha384);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha384, array_size,
                              buffer, size);
 #endif
 #ifdef TPM_ALG_SHA512
-    written += Array_Marshal((BYTE *)&data->sha512, sizeof(data->sha512),
+    algid = TPM_ALG_SHA512;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha512);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha512, array_size,
                              buffer, size);
 #endif
 #ifdef TPM_ALG_SM3_256
-    written += Array_Marshal((BYTE *)&data->sm3_256, sizeof(data->sm3_256),
+    algid = TPM_ALG_SM3_256;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sm3_256);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sm3_256, array_size,
                              buffer, size);
 #endif
+
+    /* end marker */
+    algid = TPM_ALG_NULL;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
     return written;
 }
@@ -319,68 +410,166 @@ static TPM_RC
 PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    UINT16 array_size, needed_size;
+    NV_HEADER hdr;
+    TPM_ALG_ID algid;
+    BOOL end = FALSE;
+    BYTE *t = NULL;
 
-#ifdef TPM_ALG_SHA1
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha1, sizeof(data->sha1),
-                              buffer, size);
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PCR_SAVE_MAGIC);
     }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > PCR_SAVE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PCR_SAVE version. "
+                            "Expected <= %d, got %d\n",
+                            PCR_SAVE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != NUM_STATIC_PCR) {
+        TPMLIB_LogTPM2Error("Non-matching PCR_SAVE NUM_STATIC_PCR. "
+                            "Expected %d, got %d\n",
+                            sizeof(NUM_STATIC_PCR), array_size);
+        rc = TPM_RC_SIZE;
+    }
+
+    while (rc == TPM_RC_SUCCESS && !end) {
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM_ALG_ID_Unmarshal(&algid, buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            switch (algid) {
+#ifdef TPM_ALG_SHA1
+            case TPM_ALG_SHA1:
+                needed_size = sizeof(data->sha1);
+                t = (BYTE *)&data->sha1;
+            break;
 #endif
 #ifdef TPM_ALG_SHA256
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha256, sizeof(data->sha256),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA256:
+                needed_size = sizeof(data->sha256);
+                t = (BYTE *)&data->sha256;
+            break;
 #endif
 #ifdef TPM_ALG_SHA384
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha384, sizeof(data->sha384),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA384:
+                needed_size = sizeof(data->sha384);
+                t = (BYTE *)&data->sha384;
+            break;
 #endif
 #ifdef TPM_ALG_SHA512
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha512, sizeof(data->sha512),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA512:
+                needed_size = sizeof(data->sha512);
+                t = (BYTE *)&data->sha512;
+            break;
 #endif
 #ifdef TPM_ALG_SM3_256
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sm3_256, sizeof(data->sm3_256),
-                              buffer, size);
-    }
+            case TPM_ALG_SM3_256:
+                needed_size = sizeof(data->sm3_256);
+                t = (BYTE *)&data->sm3_256;
+            break;
 #endif
+            case TPM_ALG_NULL:
+                /* end marker */
+                end = TRUE;
+                t = NULL;
+            break;
+            default:
+                TPMLIB_LogTPM2Error("PCR_SAVE: Unsupported algid %d.",
+                                    algid);
+                rc = TPM_RC_BAD_PARAMETER;
+            }
+        }
+        if (t) {
+            if (rc == TPM_RC_SUCCESS) {
+                rc = UINT16_Unmarshal(&array_size, buffer, size);
+            }
+            if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
+                TPMLIB_LogTPM2Error("PCR_SAVE: Bad size for PCRs for hash 0x%x; "
+                                    "Expected %u, got %d\n",
+                                    needed_size, array_size);
+                rc = TPM_RC_BAD_PARAMETER;
+            }
+            if (rc == TPM_RC_SUCCESS) {
+                rc = Array_Unmarshal(t, array_size, buffer, size);
+            }
+        }
+    }
 
     return rc;
 }
 
 
 #ifdef PCR_C
+
+#define PCR_MAGIC 0xe95f0387
+#define PCR_VERSION 1
 static UINT16
 PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 written = 0;
+    UINT16 written;
+    TPM_ALG_ID algid;
+    UINT16 array_size;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PCR_VERSION, PCR_MAGIC);
 
 #ifdef TPM_ALG_SHA1
-    written = Array_Marshal((BYTE *)&data->sha1Pcr, sizeof(data->sha1Pcr),
+    algid = TPM_ALG_SHA1;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha1Pcr);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha1Pcr, array_size,
                             buffer, size);
 #endif
 #ifdef TPM_ALG_SHA256
-    written += Array_Marshal((BYTE *)&data->sha256Pcr, sizeof(data->sha256Pcr),
+    algid = TPM_ALG_SHA256;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha256Pcr);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha256Pcr, array_size,
                               buffer, size);
 #endif
 #ifdef TPM_ALG_SHA384
-    written += Array_Marshal((BYTE *)&data->sha384Pcr, sizeof(data->sha384Pcr),
+    algid = TPM_ALG_SHA384;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha384Pcr);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha384Pcr, array_size,
                              buffer, size);
 #endif
 #ifdef TPM_ALG_SHA512
-    written += Array_Marshal((BYTE *)&data->sha512Pcr, sizeof(data->sha512Pcr),
+    algid = TPM_ALG_SHA512;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sha512Pcr);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sha512Pcr, array_size,
                              buffer, size);
 #endif
 #ifdef TPM_ALG_SM3_256
-    written += Array_Marshal((BYTE *)&data->sm3_256Pcr, sizeof(data->sm3_256Pcr),
+    algid = TPM_ALG_SM3_256;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    array_size = sizeof(data->sm3_256Pcr);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->sm3_256Pcr, array_size,
                              buffer, size);
 #endif
+
+    /* end marker */
+    algid = TPM_ALG_NULL;
+    written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
     return written;
 }
@@ -389,49 +578,104 @@ static TPM_RC
 PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    BOOL end = FALSE;
+    BYTE *t = NULL;
+    UINT16 needed_size, array_size;
+    TPM_ALG_ID algid;
 
-#ifdef TPM_ALG_SHA1
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha1Pcr, sizeof(data->sha1Pcr),
-                              buffer, size);
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, PCR_MAGIC);
     }
+    if (rc == TPM_RC_SUCCESS && hdr.version > PCR_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PCR version. "
+                            "Expected <= %d, got %d\n",
+                            PCR_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    while (rc == TPM_RC_SUCCESS && !end) {
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM_ALG_ID_Unmarshal(&algid, buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            switch (algid) {
+#ifdef TPM_ALG_SHA1
+            case TPM_ALG_SHA1:
+                needed_size = sizeof(data->sha1Pcr);
+                t = (BYTE *)&data->sha1Pcr;
+            break;
 #endif
 #ifdef TPM_ALG_SHA256
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha256Pcr, sizeof(data->sha256Pcr),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA256:
+                needed_size = sizeof(data->sha256Pcr);
+                t = (BYTE *)&data->sha256Pcr;
+            break;
 #endif
 #ifdef TPM_ALG_SHA384
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha384Pcr, sizeof(data->sha384Pcr),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA384:
+                needed_size = sizeof(data->sha384Pcr);
+                t = (BYTE *)&data->sha384Pcr;
+            break;
 #endif
 #ifdef TPM_ALG_SHA512
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sha512Pcr, sizeof(data->sha512Pcr),
-                              buffer, size);
-    }
+            case TPM_ALG_SHA512:
+                needed_size = sizeof(data->sha512Pcr);
+                t = (BYTE *)&data->sha512Pcr;
+            break;
 #endif
 #ifdef TPM_ALG_SM3_256
-    if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->sm3_256Pcr, sizeof(data->sm3_256Pcr),
-                              buffer, size);
-    }
+            case TPM_ALG_SM3_256:
+                needed_size = sizeof(data->sm3_256Pcr);
+                t = (BYTE *)&data->sm3_256Pcr;
+            break;
 #endif
+            case TPM_ALG_NULL:
+                /* end marker */
+                end = TRUE;
+                t = NULL;
+            break;
+            default:
+                TPMLIB_LogTPM2Error("PCR: Unsupported algid %d.",
+                                    algid);
+                rc = TPM_RC_BAD_PARAMETER;
+            }
+        }
+        if (t) {
+            if (rc == TPM_RC_SUCCESS) {
+                rc = UINT16_Unmarshal(&array_size, buffer, size);
+            }
+            if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
+                TPMLIB_LogTPM2Error("PCR: Bad size for PCR for hash 0x%x; "
+                                    "Expected %u, got %d\n",
+                                    needed_size, array_size);
+                rc = TPM_RC_BAD_PARAMETER;
+            }
+            if (rc == TPM_RC_SUCCESS) {
+                rc = Array_Unmarshal(t, array_size, buffer, size);
+            }
+        }
+    }
 
     return rc;
 }
 #endif
 
+#define PCR_AUTHVALUE_MAGIC 0x6be82eaf
+#define PCR_AUTHVALUE_VERSION 1
 static UINT16
 PCR_AUTHVALUE_Marshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 written = 0;
+    UINT16 written;
     size_t i;
+    UINT16 array_size;
 
-    for (i = 0; i < ARRAY_SIZE(data->auth); i++) {
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PCR_AUTHVALUE_VERSION, PCR_AUTHVALUE_MAGIC);
+
+    array_size = ARRAY_SIZE(data->auth);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    for (i = 0; i < array_size; i++) {
         written += TPM2B_DIGEST_Marshal(&data->auth[i], buffer, size);
     }
 
@@ -443,8 +687,33 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     size_t i;
+    NV_HEADER hdr;
+    UINT16 array_size;
 
-    for (i = 0; i < ARRAY_SIZE(data->auth) && rc == TPM_RC_SUCCESS; i++) {
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PCR_AUTHVALUE_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > PCR_AUTHVALUE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PCR_AUTHVALUE version. "
+                            "Expected <= %d, got %d\n",
+                            PCR_AUTHVALUE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(data->auth)) {
+        TPMLIB_LogTPM2Error("PCR_AUTHVALUE: Bad array size for auth; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(data->auth), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = TPM2B_DIGEST_Unmarshal(&data->auth[i], buffer, size);
     }
 
@@ -526,6 +795,8 @@ TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    BOOL needs_block, has_block;
+    UINT16 array_size;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
@@ -548,8 +819,20 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->objectContextID, buffer, size);
     }
+
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->contextArray, sizeof(data->contextArray),
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(data->contextArray)) {
+        TPMLIB_LogTPM2Error("STATE_RESET_DATA: Bad array size for contextArray; "
+                            "expected %u, got %u\n",
+                            sizeof(data->contextArray), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->contextArray, array_size,
                               buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -565,6 +848,20 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->pcrCounter, buffer, size);
     }
+
+#ifdef TPM_ALG_ECC
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("STATE_RESET_DATA %s commitCounter\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
 #ifdef TPM_ALG_ECC
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->commitCounter, buffer, size);
@@ -572,9 +869,19 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_AUTH_Unmarshal(&data->commitNonce, buffer, size);
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->commitArray,
-                              sizeof(data->commitArray),
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(data->commitArray)) {
+        TPMLIB_LogTPM2Error("STATE_RESET_DATA: Bad array size for commitArray; "
+                            "expected %u, got %u\n",
+                            sizeof(data->commitArray), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->commitArray, array_size,
                               buffer, size);
     }
 #endif
@@ -586,6 +893,8 @@ UINT16
 STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BOOL has_block;
+    UINT16 array_size;
 
     written = NV_HEADER_Marshal(&data->nvHeader, buffer, size,
                                 STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
@@ -593,34 +902,51 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
     written += UINT32_Marshal(&data->clearCount, buffer, size);
     written += UINT64_Marshal(&data->objectContextID, buffer, size);
-    written += Array_Marshal((BYTE *)&data->contextArray, sizeof(data->contextArray),
+
+    array_size = sizeof(data->contextArray);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->contextArray, array_size,
                               buffer, size);
+
     written += UINT64_Marshal(&data->contextCounter, buffer, size);
     written += TPM2B_DIGEST_Marshal(&data->commandAuditDigest,
                               buffer, size);
     written += UINT32_Marshal(&data->restartCount, buffer, size);
     written += UINT32_Marshal(&data->pcrCounter, buffer, size);
 #ifdef TPM_ALG_ECC
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
+#ifdef TPM_ALG_ECC
     written += UINT64_Marshal(&data->commitCounter, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->commitNonce, buffer, size);
-    written += Array_Marshal((BYTE *)&data->commitArray,
-                             sizeof(data->commitArray),
-                              buffer, size);
+
+    array_size = sizeof(data->commitArray);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->commitArray, array_size,
+                             buffer, size);
 #endif
 
     return written;
 }
 
+#define BN_PRIME_T_MAGIC 0x2fe736ab
+#define BN_PRIME_T_VERSION 1
 static UINT16
 bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written, numbytes;
     size_t i, idx;
 
-    /* we do not write 'allocated' */
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                BN_PRIME_T_VERSION, BN_PRIME_T_MAGIC);
 
+    /* we do not write 'allocated' */
     numbytes = data->size * sizeof(crypt_uword_t);
-    written = UINT16_Marshal(&numbytes, buffer, size);
+    written += UINT16_Marshal(&numbytes, buffer, size);
 
     for (i = 0, idx = 0;
          i < numbytes;
@@ -644,6 +970,20 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
     size_t i, idx;
     UINT16 numbytes;
     UINT32 word;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 BN_PRIME_T_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > BN_PRIME_T_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported BN_PRIME_T version. "
+                            "Expected <= %d, got %d\n",
+                            BN_PRIME_T_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     data->allocated = ARRAY_SIZE(data->d);
 
@@ -651,6 +991,8 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
         rc = UINT16_Unmarshal(&numbytes, buffer, size);
         data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
         if (data->size > data->allocated) {
+            TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %u than allocated %u\n",
+                                data->size, data->allocated);
             rc = TPM_RC_SIZE;
         }
     }
@@ -699,11 +1041,16 @@ bn_prime_t_SWAP(bn_prime_t *t, bn_prime_t *s)
 #endif
 }
 
+#define PRIVATE_EXPONENT_T_MAGIC 0x854eab2
+#define PRIVATE_EXPONENT_T_VERSION 1
 static UINT16
 privateExponent_t_Marshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 written = 0;
+    UINT16 written;
 
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PRIVATE_EXPONENT_T_VERSION,
+                                PRIVATE_EXPONENT_T_MAGIC);
 #if CRT_FORMAT_RSA == NO
 #error Missing code
 #else
@@ -720,6 +1067,20 @@ static TPM_RC
 privateExponent_t_Unmarshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PRIVATE_EXPONENT_T_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > PRIVATE_EXPONENT_T_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PRIVATE_EXPONENT_T version. "
+                            "Expected <= %d, got %d\n",
+                            PRIVATE_EXPONENT_T_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
 #if CRT_FORMAT_RSA == NO
 #error Missing code
@@ -797,12 +1158,20 @@ SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
 }
 
 #ifdef TPM_ALG_SHA1
+
+#define HASH_STATE_SHA1_MAGIC   0x19d46f50
+#define HASH_STATE_SHA1_VERSION 1
+
 static UINT16
 tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    UINT16 array_size;
 
-    written = SHA_LONG_Marshal(&data->h0, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size, 
+                                HASH_STATE_SHA1_VERSION,
+                                HASH_STATE_SHA1_MAGIC);
+    written += SHA_LONG_Marshal(&data->h0, buffer, size);
     written += SHA_LONG_Marshal(&data->h1, buffer, size);
     written += SHA_LONG_Marshal(&data->h2, buffer, size);
     written += SHA_LONG_Marshal(&data->h3, buffer, size);
@@ -811,7 +1180,9 @@ tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     written += SHA_LONG_Marshal(&data->Nh, buffer, size);
 
     /* data must be written as array */
-    written += Array_Marshal((BYTE *)&data->data[0], sizeof(data->data),
+    array_size = sizeof(data->data);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->data[0], array_size,
                              buffer, size);
 
     written += UINT32_Marshal(&data->num, buffer, size);
@@ -823,6 +1194,21 @@ static UINT16
 tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    UINT16 array_size;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 BN_PRIME_T_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > HASH_STATE_SHA1_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA1 version. "
+                            "Expected <= %d, got %d\n",
+                            HASH_STATE_SHA1_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = SHA_LONG_Unmarshal(&data->h0, buffer, size);
@@ -845,8 +1231,19 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = SHA_LONG_Unmarshal(&data->Nh, buffer, size);
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->data[0], sizeof(data->data),
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(data->data)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA1: Bad array size for data; "
+                            "expected %u, got %u\n",
+                            sizeof(data->data), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->data[0], array_size,
                              buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -858,20 +1255,32 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 #endif
 
 #ifdef TPM_ALG_SHA256
+#define HASH_STATE_SHA256_MAGIC 0x6ea059d0
+#define HASH_STATE_SHA256_VERSION 1
+
 static UINT16
 tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
+    UINT16 array_size;
     size_t i;
 
-    for (i = 0; i < ARRAY_SIZE(data->h); i++) {
+    written = NV_HEADER_Marshal(NULL, buffer, size, 
+                                HASH_STATE_SHA256_VERSION,
+                                HASH_STATE_SHA256_MAGIC);
+
+    array_size = sizeof(data->h);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    for (i = 0; i < array_size; i++) {
         written += SHA_LONG_Marshal(&data->h[i], buffer, size);
     }
     written += SHA_LONG_Marshal(&data->Nl, buffer, size);
     written += SHA_LONG_Marshal(&data->Nh, buffer, size);
 
     /* data must be written as array */
-    written += Array_Marshal((BYTE *)&data->data[0], sizeof(data->data),
+    array_size = sizeof(data->data);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&data->data[0], array_size,
                              buffer, size);
 
     written += UINT32_Marshal(&data->num, buffer, size);
@@ -885,8 +1294,33 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
 {
     UINT16 rc = TPM_RC_SUCCESS;
     size_t i;
+    UINT16 array_size;
+    NV_HEADER hdr;
 
-    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(data->h); i++) {
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 HASH_STATE_SHA256_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > HASH_STATE_SHA256_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA256 version. "
+                            "Expected <= %d, got %d\n",
+                            HASH_STATE_SHA256_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(data->h)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for h; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(data->h), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; rc == TPM_RC_SUCCESS && i < array_size; i++) {
         rc = SHA_LONG_Unmarshal(&data->h[i], buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -895,8 +1329,19 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS) {
         rc = SHA_LONG_Unmarshal(&data->Nh, buffer, size);
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->data[0], sizeof(data->data),
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(data->data)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for data; "
+                            "expected %u, got %u\n",
+                            sizeof(data->data), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&data->data[0], array_size,
                              buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -911,19 +1356,32 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
 #endif
 
 #if defined(TPM_ALG_SHA384) || defined(TPM_ALG_SHA512)
+
+#define HASH_STATE_SHA512_MAGIC 0x14814b08
+#define HASH_STATE_SHA512_VERSION 1
+
 static UINT16
 tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
+    UINT16 array_size;
     size_t i;
 
-    for (i = 0; i < ARRAY_SIZE(data->h); i++) {
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                HASH_STATE_SHA512_VERSION,
+                                HASH_STATE_SHA512_MAGIC);
+
+    array_size = sizeof(data->h);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    for (i = 0; i < array_size; i++) {
         written += SHA_LONG64_Marshal(&data->h[i], buffer, size);
     }
     written += SHA_LONG64_Marshal(&data->Nl, buffer, size);
     written += SHA_LONG64_Marshal(&data->Nh, buffer, size);
 
-    written += Array_Marshal(&data->u.p[0], sizeof(data->u.p), buffer, size);
+    array_size = sizeof(data->u.p);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(&data->u.p[0], array_size, buffer, size);
 
     written += UINT32_Marshal(&data->num, buffer, size);
     written += UINT32_Marshal(&data->md_len, buffer, size);
@@ -936,8 +1394,33 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
 {
     UINT16 rc = TPM_RC_SUCCESS;
     size_t i;
+    UINT16 array_size;
+    NV_HEADER hdr;
 
-    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(data->h); i++) {
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 HASH_STATE_SHA512_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > HASH_STATE_SHA512_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA512 version. "
+                            "Expected <= %d, got %d\n",
+                            HASH_STATE_SHA512_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(data->h)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad array size for h; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(data->h), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; rc == TPM_RC_SUCCESS && i < array_size; i++) {
         rc = SHA_LONG64_Unmarshal(&data->h[i], buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -946,8 +1429,19 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = SHA_LONG64_Unmarshal(&data->Nh, buffer, size);
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal(&data->u.p[0], sizeof(data->u.p), buffer, size);
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(data->u.p)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for u.p; "
+                            "expected %u, got %u\n",
+                            sizeof(data->u.p), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal(&data->u.p[0], array_size, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->num, buffer, size);
@@ -960,11 +1454,18 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
 }
 #endif
 
+#define ANY_HASH_STATE_MAGIC 0x349d494b
+#define ANY_HASH_STATE_VERSION 1
+
 static UINT16
 ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                        UINT16 hashAlg)
 {
-    UINT16 written = 0;
+    UINT16 written;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                ANY_HASH_STATE_VERSION,
+                                ANY_HASH_STATE_MAGIC);
 
     switch (hashAlg) {
 #ifdef TPM_ALG_SHA1
@@ -998,6 +1499,20 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                          UINT16 hashAlg)
 {
     UINT16 rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 ANY_HASH_STATE_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > ANY_HASH_STATE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported ANY_HASH_STATE version. "
+                            "Expected <= %d, got %d\n",
+                            ANY_HASH_STATE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     switch (hashAlg) {
 #ifdef TPM_ALG_SHA1
@@ -1024,12 +1539,19 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     return rc;
 }
 
+#define HASH_STATE_MAGIC 0x562878a2
+#define HASH_STATE_VERSION 1
+
 static UINT16
 HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = HASH_STATE_TYPE_Marshal(&data->type, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                HASH_STATE_VERSION,
+                                HASH_STATE_MAGIC);
+
+    written += HASH_STATE_TYPE_Marshal(&data->type, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->hashAlg, buffer, size);
     /* def does not need to be written */
     written += ANY_HASH_STATE_Marshal(&data->state, buffer, size, data->hashAlg);
@@ -1041,6 +1563,20 @@ static UINT16
 HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 HASH_STATE_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > HASH_STATE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported HASH_STATE version. "
+                            "Expected <= %d, got %d\n",
+                            HASH_STATE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = HASH_STATE_TYPE_Unmarshal(&data->type, buffer, size);
@@ -1050,6 +1586,11 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         data->def = CryptGetHashDef(data->hashAlg);
+        if (!data->def) {
+            TPMLIB_LogTPM2Error("Could not get hash function interface for "
+                                "hashAlg 0x%02x\n", data->hashAlg);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = ANY_HASH_STATE_Unmarshal(&data->state, buffer, size, data->hashAlg);
@@ -1104,18 +1645,26 @@ HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define HASH_OBJECT_MAGIC 0xb874fe38
+#define HASH_OBJECT_VERSION 1
+
 static UINT16
 HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     size_t i;
+    UINT16 array_size;
 
-    written = TPMI_ALG_PUBLIC_Marshal(&data->type, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                HASH_OBJECT_VERSION, HASH_OBJECT_MAGIC);
+    written += TPMI_ALG_PUBLIC_Marshal(&data->type, buffer, size);
     written += TPMI_ALG_HASH_Marshal(&data->nameAlg, buffer, size);
     written += TPMA_OBJECT_Marshal(&data->objectAttributes, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->auth, buffer, size);
     if (data->attributes.hashSeq == SET) {
-        for (i = 0; i < ARRAY_SIZE(data->state.hashState); i++) {
+        array_size = ARRAY_SIZE(data->state.hashState);
+        written += UINT16_Marshal(&array_size, buffer, size);
+        for (i = 0; i < array_size; i++) {
             written += HASH_STATE_Marshal(&data->state.hashState[i], buffer,
                                           size);
         }
@@ -1131,6 +1680,18 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     size_t i;
+    UINT16 array_size;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, HASH_OBJECT_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS && hdr.version > HASH_OBJECT_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported HASH_OBJECT version. "
+                            "Expected <= %d, got %d\n",
+                            HASH_OBJECT_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMI_ALG_PUBLIC_Unmarshal(&data->type, buffer, size);
@@ -1148,8 +1709,19 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         if (data->attributes.hashSeq == SET) {
-            for (i = 0; rc == TPM_RC_SUCCESS &&
-                        i < ARRAY_SIZE(data->state.hashState); i++) {
+            if (rc == TPM_RC_SUCCESS) {
+                rc = UINT16_Unmarshal(&array_size, buffer, size);
+            }
+            if (rc == TPM_RC_SUCCESS) {
+                if (array_size != ARRAY_SIZE(data->state.hashState)) {
+                    TPMLIB_LogTPM2Error("HASH_OBJECT: Bad array size for state.hashState; "
+                                        "expected %u, got %u\n",
+                                        ARRAY_SIZE(data->state.hashState),
+                                        array_size);
+                    rc = TPM_RC_SIZE;
+                }
+            }
+            for (i = 0; rc == TPM_RC_SUCCESS && i < array_size; i++) {
                 rc = HASH_STATE_Unmarshal(&data->state.hashState[i],
                                           buffer, size);
             }
@@ -1161,16 +1733,21 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define OBJECT_MAGIC 0x75be73af
+#define OBJECT_VERSION 1
+
 static UINT16
 OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                OBJECT_VERSION, OBJECT_MAGIC);
+
     /*
      * attributes are written in ANY_OBJECT_Marshal
      */
-
-    written = TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
+    written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
 #ifdef TPM_ALG_RSA
     written += privateExponent_t_Marshal(&data->privateExponent,
@@ -1187,10 +1764,20 @@ static TPM_RC
 OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
 
     /*
      * attributes are read in ANY_OBJECT_Unmarshal
      */
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, OBJECT_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS && hdr.version > OBJECT_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported OBJECT version. "
+                            "Expected <= %d, got %d\n",
+                            OBJECT_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMT_PUBLIC_Unmarshal(&data->publicArea, buffer, size, TRUE);
@@ -1217,13 +1804,19 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define ANY_OBJECT_MAGIC 0xfe9a3974
+#define ANY_OBJECT_VERSION 1
+
 static UINT16
 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     UINT32 *ptr = (UINT32 *)&data->attributes;
 
-    written = UINT32_Marshal(ptr, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC);
+
+    written += UINT32_Marshal(ptr, buffer, size);
     /* the slot must be occupied, otherwise the rest may not be initialized */
     if (!data->attributes.occupied)
         return written;
@@ -1239,7 +1832,17 @@ ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     UINT32 *ptr = (UINT32 *)&data->attributes;
+    NV_HEADER hdr;
 
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, ANY_OBJECT_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS && hdr.version > ANY_OBJECT_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported ANY_OBJECT version. "
+                            "Expected <= %d, got %d\n",
+                            ANY_OBJECT_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(ptr, buffer, size);
     }
@@ -1267,12 +1870,17 @@ TPMT_SYM_DEF_Marshal(TPMT_SYM_DEF *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
+#define SESSION_MAGIC 0x44be9f45
+#define SESSION_VERSION 1
+
 static UINT16
 SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = UINT32_Marshal((UINT32 *)&data->attributes, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                SESSION_VERSION, SESSION_MAGIC);
+    written += UINT32_Marshal((UINT32 *)&data->attributes, buffer, size);
     written += UINT32_Marshal(&data->pcrCounter, buffer, size);
     written += UINT64_Marshal(&data->startTime, buffer, size);
     written += UINT64_Marshal(&data->timeout, buffer, size);
@@ -1298,7 +1906,17 @@ static TPM_RC
 SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
 
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, SESSION_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS && hdr.version > SESSION_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported SESSION version. "
+                            "Expected <= %d, got %d\n",
+                            SESSION_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal((UINT32 *)&data->attributes, buffer, size);
     }
@@ -1346,12 +1964,19 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define SESSION_SLOT_MAGIC 0x3664aebc
+#define SESSION_SLOT_VERSION 1
+
 static UINT16
 SESSION_SLOT_Marshal(SESSION_SLOT *data, BYTE **buffer, INT32* size)
 {
     UINT16 written;
 
-    written = BOOL_Marshal(&data->occupied, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                SESSION_SLOT_VERSION,
+                                SESSION_SLOT_MAGIC);
+
+    written += BOOL_Marshal(&data->occupied, buffer, size);
     if (!data->occupied)
         return written;
 
@@ -1364,6 +1989,17 @@ static TPM_RC
 SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, SESSION_SLOT_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS && hdr.version > SESSION_SLOT_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported SESSION_SLOT version. "
+                            "Expected <= %d, got %d\n",
+                            SESSION_SLOT_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&data->occupied, buffer, size);
@@ -1378,16 +2014,21 @@ SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
 }
 
 #define VOLATILE_STATE_VERSION 1
+#define VOLATILE_STATE_MAGIC 0x45637889
 
 UINT16
 VolatileState_Marshal(BYTE **buffer, INT32 *size)
 {
     UINT16 written;
-    UINT16 version = VOLATILE_STATE_VERSION; /* blob version */
     size_t i;
     BOOL tpmEst;
+    UINT64 tmp_uint64;
+    UINT32 tmp_uint32;
+    BOOL has_block;
+    UINT16 array_size;
 
-    written = UINT16_Marshal(&version, buffer, size);
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC);
 
     /* skip g_rcIndex: these are 'constants' */
     written += TPM_HANDLE_Marshal(&g_exclusiveAuditSession, buffer, size); /* line 423 */
@@ -1434,11 +2075,21 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += BOOL_Marshal(&g_initialized, buffer, size); /* line 932 */
 
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+
+    written += BOOL_Marshal(&has_block, buffer, size);
+#if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     /*
      * The session related variables may only be valid during the execution
      * of a single command; safer to store
      */
-    for (i = 0; i < ARRAY_SIZE(s_sessionHandles); i++) {
+    array_size = ARRAY_SIZE(s_sessionHandles);
+    written += UINT16_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
         written += TPM_HANDLE_Marshal(&s_sessionHandles[i], buffer, size);
         written += TPMA_SESSION_Marshal(&s_attributes[i], buffer, size);
         written += TPM_HANDLE_Marshal(&s_associatedHandles[i], buffer, size);
@@ -1449,22 +2100,45 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += TPM_HANDLE_Marshal(&s_encryptSessionIndex, buffer, size);
     written += TPM_HANDLE_Marshal(&s_decryptSessionIndex, buffer, size);
     written += TPM_HANDLE_Marshal(&s_auditSessionIndex, buffer, size);
+
+#ifdef  TPM_CC_GetCommandAuditDigest
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
 #ifdef  TPM_CC_GetCommandAuditDigest
     /* s_cpHashForCommandAudit: seems not used; better to write it */
     written += TPM2B_DIGEST_Marshal(&s_cpHashForCommandAudit, buffer, size);
 #endif
+
     /* s_DAPendingOnNV: needs investigation ... */
     written += BOOL_Marshal(&s_DAPendingOnNV, buffer, size);
 #endif
+
+#ifndef ACCUMULATE_SELF_HEAL_TIMER
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&s_selfHealTimer, buffer, size); /* line 975 */
     written += UINT64_Marshal(&s_lockoutTimer, buffer, size); /* line 977 */
 #endif
 
 #if defined NV_C || defined GLOBAL_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
     /* s_evictNvEnd set in NvInitStatic called by NvPowerOn in case g_powerWasLost
      * Unless we set g_powerWasLost=TRUE and call NvPowerOn, we have to include it.
      */
+#if defined NV_C || defined GLOBAL_C
     written += UINT32_Marshal(&s_evictNvEnd, buffer, size); /* line 984 */
     /* s_indexOrderlyRam read from NVRAM in NvEntityStartup and written to it
      * in NvUpdateIndexOrderlyData called by TPM2_Shutdown and initialized
@@ -1479,25 +2153,56 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      * - s_cachedNvRamRef
      */
 #endif
+
+#if defined OBJECT_C || defined GLOBAL_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
 #if defined OBJECT_C || defined GLOBAL_C
     /* used in many places; it doesn't look like TPM2_Shutdown writes this into
      * persistent memory, so what is lost upon TPM2_Shutdown?
      */
-    for (i = 0; i < ARRAY_SIZE(s_objects); i++) {
+    array_size = ARRAY_SIZE(s_objects);
+    written += UINT16_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
         written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size);
     }
 #endif
 
 #if defined PCR_C || defined GLOBAL_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
+#if defined PCR_C || defined GLOBAL_C
     /* s_pcrs: Marshal *all* PCRs, even those for which stateSave bit is not set */
-    for (i = 0; i < ARRAY_SIZE(s_pcrs); i++) {
+    array_size = ARRAY_SIZE(s_pcrs);
+    written += UINT16_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
         written += PCR_Marshal(&s_pcrs[i], buffer, size);
     }
 #endif
 
 #if defined SESSION_C || defined GLOBAL_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
+#if defined SESSION_C || defined GLOBAL_C
     /* s_sessions: */
-    for (i = 0; i < ARRAY_SIZE(s_sessions); i++) {
+    array_size = ARRAY_SIZE(s_sessions);
+    written += UINT16_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
         written += SESSION_SLOT_Marshal(&s_sessions[i], buffer, size);
     }
     /* s_oldestSavedSession: */
@@ -1516,6 +2221,28 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     tpmEst = _rpc__Signal_GetTPMEstablished();
     written += BOOL_Marshal(&tpmEst, buffer, size);
 
+    /* appended in v2 */
+    written += UINT32_Marshal(&s_failFunction, buffer, size);
+    written += UINT32_Marshal(&s_failLine, buffer, size);
+    written += UINT32_Marshal(&s_failCode, buffer, size);
+
+    tmp_uint64 = s_realTimePrevious;
+    written += UINT64_Marshal(&tmp_uint64, buffer, size);
+    tmp_uint64 = s_tpmTime;
+    written += UINT64_Marshal(&tmp_uint64, buffer, size);
+    written += BOOL_Marshal(&s_timerReset, buffer, size);
+    written += BOOL_Marshal(&s_timerStopped, buffer, size);
+    written += UINT32_Marshal(&s_adjustRate, buffer, size);
+
+    tmp_uint64 = tpmclock();
+    written += UINT64_Marshal(&tmp_uint64, buffer, size);
+
+    /* future extensions insert here: */
+
+    /* keep marker at end */
+    tmp_uint32 = VOLATILE_STATE_MAGIC;
+    written += UINT32_Marshal(&tmp_uint32, buffer, size);
+
     return written;
 }
 
@@ -1523,18 +2250,25 @@ TPM_RC
 VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    UINT16 version;
     size_t i;
+    UINT64 tmp_uint64;
+    UINT32 tmp_uint32;
+    NV_HEADER hdr;
+    BOOL has_block, needs_block;
+    UINT16 array_size;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT16_Unmarshal(&version, buffer, size); /* line 426 */
-        if (version > VOLATILE_STATE_VERSION) {
-            rc = TPM_RC_FAILURE;
-            TPMLIB_LogTPM2Error("Not accepting volatile state version %u, "
-                                "only supporting up to %u\n",
-                                version, VOLATILE_STATE_VERSION);
-        }
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, VOLATILE_STATE_MAGIC);
     }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > VOLATILE_STATE_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported VOLATILE_STATE version. "
+                            "Expected <= %d, got %d\n",
+                            VOLATILE_STATE_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&g_exclusiveAuditSession, buffer, size); /* line 423 */
     }
@@ -1595,7 +2329,30 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
 
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
-    for (i = 0; i < ARRAY_SIZE(s_sessionHandles) && rc == TPM_RC_SUCCESS; i++) {
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_sessionHandles\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+#if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(s_sessionHandles)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_sessionHandles; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(s_sessionHandles), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         if (rc == TPM_RC_SUCCESS) {
             rc = TPM_HANDLE_Unmarshal(&s_sessionHandles[i], buffer, size);
         }
@@ -1622,6 +2379,20 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&s_auditSessionIndex, buffer, size);
     }
+
+#ifdef  TPM_CC_GetCommandAuditDigest
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_cpHashForCommandAudit\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
 #ifdef  TPM_CC_GetCommandAuditDigest
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_DIGEST_Unmarshal(&s_cpHashForCommandAudit, buffer, size);
@@ -1631,6 +2402,20 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = BOOL_Unmarshal(&s_DAPendingOnNV, buffer, size);
     }
 #endif
+
+#ifndef ACCUMULATE_SELF_HEAL_TIMER
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_selfHealTimer\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&s_selfHealTimer, buffer, size); /* line 975 */
@@ -1639,6 +2424,21 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&s_lockoutTimer, buffer, size); /* line 977 */
     }
 #endif
+
+#if defined NV_C || defined GLOBAL_C
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_evictNvEnd\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+
 #if defined NV_C || defined GLOBAL_C
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&s_evictNvEnd, buffer, size); /* line 984 */
@@ -1655,21 +2455,91 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
      * - s_cachedNvRamRef
      */
 #endif
+
 #if defined OBJECT_C || defined GLOBAL_C
-    for (i = 0; i < ARRAY_SIZE(s_objects) && rc == TPM_RC_SUCCESS; i++) {
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_objects\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+#if defined OBJECT_C || defined GLOBAL_C
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(s_objects)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_objects; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(s_objects), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size);
     }
 #endif
 
 #if defined PCR_C || defined GLOBAL_C
-    for (i = 0; i < ARRAY_SIZE(s_pcrs) && rc == TPM_RC_SUCCESS; i++) {
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_pcrs\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+#if defined PCR_C || defined GLOBAL_C
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(s_pcrs)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_pcrs; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(s_pcrs), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = PCR_Unmarshal(&s_pcrs[i], buffer, size);
     }
 #endif
 
 #if defined SESSION_C || defined GLOBAL_C
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s s_sessions\n",
+                             needs_block ? "needs" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+#if defined SESSION_C || defined GLOBAL_C
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(s_sessions)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_sessions; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(s_sessions), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
     /* s_sessions: */
-    for (i = 0; i < ARRAY_SIZE(s_sessions) && rc == TPM_RC_SUCCESS; i++) {
+    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = SESSION_SLOT_Unmarshal(&s_sessions[i], buffer, size);
     }
     /* s_oldestSavedSession: */
@@ -1694,6 +2564,63 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
                 _rpc__Signal_SetTPMEstablished();
             else
                 _rpc__Signal_ResetTPMEstablished();
+        }
+    }
+
+    /* appended in v2 */
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&s_failFunction, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&s_failLine, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&s_failCode, buffer, size);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
+        s_realTimePrevious = tmp_uint64;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
+        s_tpmTime = tmp_uint64;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&s_timerReset, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&s_timerStopped, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+       rc = UINT32_Unmarshal(&s_adjustRate, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        UINT64 backthen, now;
+        INT64 timediff;
+
+        rc = UINT64_Unmarshal(&backthen, buffer, size);
+        now = tpmclock();
+
+        timediff = now - backthen;
+        g_time += timediff;
+        s_realTimePrevious += timediff;
+        s_tpmTime += timediff;
+    }
+
+    /* future extensions parse here: */
+
+    /* keep marker at end: */
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&tmp_uint32, buffer, size);
+        if (rc == TPM_RC_SUCCESS) {
+            if (tmp_uint32 != VOLATILE_STATE_MAGIC) {
+                TPMLIB_LogTPM2Error("Invalid volatile state magic. "
+                                    "Expected 0x%08x, got 0x%08x\n",
+                                    __func__, VOLATILE_STATE_MAGIC,
+                                    tmp_uint32);
+                rc = TPM_RC_BAD_TAG;
+            }
         }
     }
 
