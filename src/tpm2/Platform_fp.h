@@ -367,4 +367,8 @@ _plat__GetUnique(
 		 uint32_t             bSize,         // size of the buffer
 		 unsigned char       *b              // output buffer
 		 );
+
+/* libtpms: tpmclock() needs to be public */
+uint64_t tpmclock(void);
+
 #endif  // _PLATFORM_FP_H_
