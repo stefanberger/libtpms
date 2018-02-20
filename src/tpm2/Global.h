@@ -753,7 +753,7 @@ typedef struct orderly_data
     // attribute is clear.
     UINT64              clock;              // The orderly version of clock
     TPMI_YES_NO         clockSafe;          // Indicates if the clock value is
-    UINT32              _pad1;
+    UINT8               _pad1[7];
     // safe.
     // In many implementations, the quality of the entropy available is not that
     // high. To compensate, the current value of the drbgState can be saved and
@@ -867,6 +867,7 @@ typedef struct state_reset_data
     //*****************************************************************************
     //           Boot counter
     //*****************************************************************************
+    UINT8               _pad3[2];
     UINT32              restartCount;       // This counter counts TPM Restarts.
     // The default reset value is 0.
     //*********************************************************************************
