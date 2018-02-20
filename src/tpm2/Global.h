@@ -935,12 +935,12 @@ extern STATE_RESET_DATA gr;
 
 #else
 
-#define NV_WRITE_PERSISTENT(to, from)					\
-    do {								\
-        PERSISTENT_DATA mgp;						\
-        NvRead_PERSISTENT_DATA(&mgp, NV_PERSISTENT_DATA, sizeof(mgp));  \
-        memcpy(&mgp.to, &from, sizeof(mgp.to));				\
-        NvWrite_PERSISTENT_DATA(NV_PERSISTENT_DATA, sizeof(mgp), &mgp);	\
+#define NV_WRITE_PERSISTENT(to, from)		\
+    do {					\
+        PERSISTENT_DATA mgp;			\
+        NvRead_PERSISTENT_DATA(&mgp);		\
+        memcpy(&mgp.to, &from, sizeof(mgp.to));	\
+        NvWrite_PERSISTENT_DATA(&mgp);		\
     } while (0)
 
 #define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
