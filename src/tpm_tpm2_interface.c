@@ -372,11 +372,9 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
         PERSISTENT_DATA tmp_gp;
         ORDERLY_DATA tmp_go;
 
-        rc = NvRead_PERSISTENT_DATA(&tmp_gp,
-                                    NV_PERSISTENT_DATA, sizeof(tmp_gp));
+        rc = NvRead_PERSISTENT_DATA(&tmp_gp);
         if (rc == TPM_RC_SUCCESS)
-            rc = NvRead_ORDERLY_DATA(&tmp_go,
-                                     NV_ORDERLY_DATA, sizeof(tmp_go));
+            rc = NvRead_ORDERLY_DATA(&tmp_go);
     }
 
     if ((rc == TPM_RC_SUCCESS) &&
@@ -389,11 +387,9 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
         STATE_RESET_DATA tmp_tr;
         STATE_CLEAR_DATA tmp_gc;
 
-        rc = NvRead_STATE_RESET_DATA(&tmp_tr,
-                                     NV_STATE_RESET_DATA, sizeof(tmp_tr));
+        rc = NvRead_STATE_RESET_DATA(&tmp_tr);
         if (rc == TPM_RC_SUCCESS)
-            rc = NvRead_STATE_CLEAR_DATA(&tmp_gc,
-                                         NV_STATE_CLEAR_DATA, sizeof(tmp_gc));
+            rc = NvRead_STATE_CLEAR_DATA(&tmp_gc);
     }
 
     ret = rc;

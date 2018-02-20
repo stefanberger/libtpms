@@ -3562,22 +3562,24 @@ NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size)
 }
 
 void
-NvWrite_PERSISTENT_DATA(UINT32 nvOffset, UINT32 size, PERSISTENT_DATA *data)
+NvWrite_PERSISTENT_DATA(PERSISTENT_DATA *data)
 {
     PERSISTENT_DATA t;
+    UINT32 nvOffset = NV_PERSISTENT_DATA;
 
     NV_HEADER_INIT(&data->nvHeader,
                    PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
     PERSISTENT_DATA_SWAP(&t, data);
 
-    NvWrite(nvOffset, size, &t);
+    NvWrite(nvOffset, sizeof(t), &t);
 }
 
 TPM_RC
-NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size)
+NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data)
 {
     NV_HEADER hdr;
     PERSISTENT_DATA t;
+    UINT32 nvOffset = NV_PERSISTENT_DATA;
 
     /* read header only */
     NvRead(&hdr, nvOffset, sizeof(hdr));
@@ -3607,7 +3609,7 @@ NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size)
         break;
     }
 
-    NvRead(&t, nvOffset, size);
+    NvRead(&t, nvOffset, sizeof(t));
 
     PERSISTENT_DATA_SWAP(data, &t);
 
@@ -3615,21 +3617,23 @@ NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size)
 }
 
 void
-NvWrite_ORDERLY_DATA(UINT32 nvOffset, UINT32 size, ORDERLY_DATA *data)
+NvWrite_ORDERLY_DATA(ORDERLY_DATA *data)
 {
     ORDERLY_DATA t;
+    UINT32 nvOffset = NV_ORDERLY_DATA;
 
     NV_HEADER_INIT(&data->nvHeader, ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
     ORDERLY_DATA_SWAP(&t, data);
 
-    NvWrite(nvOffset, size, &t);
+    NvWrite(nvOffset, sizeof(t), &t);
 }
 
 TPM_RC
-NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size)
+NvRead_ORDERLY_DATA(ORDERLY_DATA *data)
 {
     NV_HEADER hdr;
     ORDERLY_DATA t;
+    UINT32 nvOffset = NV_ORDERLY_DATA;
 
     /* read header only */
     NvRead(&hdr, nvOffset, sizeof(hdr));
@@ -3659,7 +3663,7 @@ NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size)
         break;
     }
 
-    NvRead(&t, nvOffset, size);
+    NvRead(&t, nvOffset, sizeof(t));
 
     ORDERLY_DATA_SWAP(data, &t);
 
@@ -3667,22 +3671,24 @@ NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size)
 }
 
 void
-NvWrite_STATE_CLEAR_DATA(UINT32 nvOffset, UINT32 size, STATE_CLEAR_DATA *data)
+NvWrite_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data)
 {
     STATE_CLEAR_DATA t;
+    UINT32 nvOffset = NV_STATE_CLEAR_DATA;
 
     NV_HEADER_INIT(&data->nvHeader,
                    STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
     STATE_CLEAR_DATA_SWAP(&t, data);
 
-    NvWrite(nvOffset, size, &t);
+    NvWrite(nvOffset, sizeof(t), &t);
 }
 
 TPM_RC
-NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size)
+NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data)
 {
     NV_HEADER hdr;
     STATE_CLEAR_DATA t;
+    UINT32 nvOffset = NV_STATE_CLEAR_DATA;
 
     /* read header only */
     NvRead(&hdr, nvOffset, sizeof(hdr));
@@ -3712,7 +3718,7 @@ NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size)
         break;
     }
 
-    NvRead(&t, nvOffset, size);
+    NvRead(&t, nvOffset, sizeof(t));
 
     STATE_CLEAR_DATA_SWAP(data, &t);
 
@@ -3720,22 +3726,24 @@ NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size)
 }
 
 void
-NvWrite_STATE_RESET_DATA(UINT32 nvOffset, UINT32 size, STATE_RESET_DATA *data)
+NvWrite_STATE_RESET_DATA(STATE_RESET_DATA *data)
 {
     STATE_RESET_DATA t;
+    UINT32 nvOffset = NV_STATE_RESET_DATA;
 
     NV_HEADER_INIT(&data->nvHeader,
                    STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
     STATE_RESET_DATA_SWAP(&t, data);
 
-    NvWrite(nvOffset, size, &t);
+    NvWrite(nvOffset, sizeof(t), &t);
 }
 
 TPM_RC
-NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size)
+NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data)
 {
     NV_HEADER hdr;
     STATE_RESET_DATA t;
+    UINT32 nvOffset = NV_STATE_RESET_DATA;
 
     /* read header only */
     NvRead(&hdr, nvOffset, sizeof(hdr));
@@ -3765,7 +3773,7 @@ NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size)
         break;
     }
 
-    NvRead(&t, nvOffset, size);
+    NvRead(&t, nvOffset, sizeof(t));
 
     STATE_RESET_DATA_SWAP(data, &t);
 

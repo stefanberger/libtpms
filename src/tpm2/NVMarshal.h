@@ -71,10 +71,10 @@
 UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
 TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
 
-void NvWrite_ORDERLY_DATA(UINT32 nvOffset, UINT32 size, ORDERLY_DATA *data);
-void NvWrite_STATE_RESET_DATA(UINT32 nvOffset, UINT32 size, STATE_RESET_DATA *data);
-void NvWrite_STATE_CLEAR_DATA(UINT32 nvOffset, UINT32 size, STATE_CLEAR_DATA *data);
-void NvWrite_PERSISTENT_DATA(UINT32 nvOffset, UINT32 size, PERSISTENT_DATA *data);
+void NvWrite_ORDERLY_DATA(ORDERLY_DATA *data);
+void NvWrite_STATE_RESET_DATA(STATE_RESET_DATA *data);
+void NvWrite_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data);
+void NvWrite_PERSISTENT_DATA(PERSISTENT_DATA *data);
 void NvWrite_NV_LIST_TERMINATOR(UINT32 nvOffset, UINT32 size, NV_LIST_TERMINATOR *data);
 void NvWrite_UINT32(UINT32 nvOffset, UINT32 size, UINT32 *data);
 void NvWrite_TPM_HANDLE(UINT32 nvOffset, UINT32 size, UINT32 *data);
@@ -82,10 +82,10 @@ void NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data);
 
 void NvRead_UINT32(UINT32 *data, UINT32 nvOffset, UINT32 size);
 void NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size);
-TPM_RC NvRead_ORDERLY_DATA(ORDERLY_DATA *data, UINT32 nvOffset, UINT32 size);
-TPM_RC NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data, UINT32 nvOffset, UINT32 size);
-TPM_RC NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data, UINT32 nvOffset, UINT32 size);
-TPM_RC NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data, UINT32 nvOffset, UINT32 size);
+TPM_RC NvRead_ORDERLY_DATA(ORDERLY_DATA *data);
+TPM_RC NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data);
+TPM_RC NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data);
+TPM_RC NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data);
 void NvRead_OBJECT_ATTRIBUTES(OBJECT_ATTRIBUTES *data, UINT32 nvOffset, UINT32 size);
 void NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size);
 void NvRead_TPMA_NV(TPMA_NV *data, UINT32 nvOffset, UINT32 size);
