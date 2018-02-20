@@ -84,9 +84,10 @@ int persistent_data_check_offsets(void)
 {
   int ret = 0;
 
-  CHECK_OFFSET(PERSISTENT_DATA, disableClear, 8);
+  CHECK_OFFSET(PERSISTENT_DATA, disableClear, 8); /* BOOL is 4 bytes! */
   CHECK_OFFSET(PERSISTENT_DATA, ownerAlg, 12);
   CHECK_OFFSET(PERSISTENT_DATA, endorsementAlg, 14);
+  CHECK_OFFSET(PERSISTENT_DATA, lockoutAlg, 16);
   CHECK_OFFSET(PERSISTENT_DATA, ownerPolicy, 18);
   CHECK_OFFSET(PERSISTENT_DATA, endorsementPolicy, 68);
   CHECK_OFFSET(PERSISTENT_DATA, lockoutPolicy, 118);
@@ -99,18 +100,22 @@ int persistent_data_check_offsets(void)
   CHECK_OFFSET(PERSISTENT_DATA, phProof, 516);
   CHECK_OFFSET(PERSISTENT_DATA, shProof, 582);
   CHECK_OFFSET(PERSISTENT_DATA, ehProof, 648);
+  /* v1: 6 byte gap */
   CHECK_OFFSET(PERSISTENT_DATA, totalResetCount, 720);
   CHECK_OFFSET(PERSISTENT_DATA, resetCount, 728);
   CHECK_OFFSET(PERSISTENT_DATA, pcrPolicies, 732);
   CHECK_OFFSET(PERSISTENT_DATA, pcrAllocated, 784);
   CHECK_OFFSET(PERSISTENT_DATA, ppList, 808);
+  /* v1: 2 byte gap */
   CHECK_OFFSET(PERSISTENT_DATA, failedTries, 824);
+  CHECK_OFFSET(PERSISTENT_DATA, maxTries, 828);
   CHECK_OFFSET(PERSISTENT_DATA, recoveryTime, 832);
   CHECK_OFFSET(PERSISTENT_DATA, lockoutRecovery, 836);
-  CHECK_OFFSET(PERSISTENT_DATA, lockOutAuthEnabled, 840);
+  CHECK_OFFSET(PERSISTENT_DATA, lockOutAuthEnabled, 840); /* BOOL is 4 bytes! */
   CHECK_OFFSET(PERSISTENT_DATA, orderlyState, 844);
   CHECK_OFFSET(PERSISTENT_DATA, auditCommands, 846);
   CHECK_OFFSET(PERSISTENT_DATA, auditHashAlg, 860);
+  /* v1: 2 byte gap */
   CHECK_OFFSET(PERSISTENT_DATA, auditCounter, 864);
   CHECK_OFFSET(PERSISTENT_DATA, algorithmSet, 872);
   CHECK_OFFSET(PERSISTENT_DATA, firmwareV1, 876);
@@ -133,11 +138,14 @@ int state_reset_data_check_offsets(void)
   CHECK_OFFSET(STATE_RESET_DATA, contextArray, 152);
   CHECK_OFFSET(STATE_RESET_DATA, contextCounter, 216);
   CHECK_OFFSET(STATE_RESET_DATA, commandAuditDigest, 224);
+  /* v1: 2 bytes gap */
   CHECK_OFFSET(STATE_RESET_DATA, restartCount, 276);
   CHECK_OFFSET(STATE_RESET_DATA, pcrCounter, 280);
+  /* v1: 4 bytes gap */
   CHECK_OFFSET(STATE_RESET_DATA, commitCounter, 288);
   CHECK_OFFSET(STATE_RESET_DATA, commitNonce, 296);
   CHECK_OFFSET(STATE_RESET_DATA, commitArray, 346);
+  /* v1: 2 + 4 bytes gap */
 
   CHECK_SIZE(STATE_RESET_DATA, 368);
 
@@ -148,14 +156,16 @@ int state_clear_data_check_offsets(void)
 {
   int ret = 0;
 
-  CHECK_OFFSET(STATE_CLEAR_DATA, shEnable, 8);
-  CHECK_OFFSET(STATE_CLEAR_DATA, ehEnable, 12);
-  CHECK_OFFSET(STATE_CLEAR_DATA, phEnableNV, 16);
+  CHECK_OFFSET(STATE_CLEAR_DATA, shEnable, 8); /* BOOL is 4 bytes! */
+  CHECK_OFFSET(STATE_CLEAR_DATA, ehEnable, 12); /* BOOL is 4 bytes! */
+  CHECK_OFFSET(STATE_CLEAR_DATA, phEnableNV, 16); /* BOOL is 4 bytes! */
   CHECK_OFFSET(STATE_CLEAR_DATA, platformAlg, 20);
   CHECK_OFFSET(STATE_CLEAR_DATA, platformPolicy, 22);
   CHECK_OFFSET(STATE_CLEAR_DATA, platformAuth, 72);
+  /* v1: 2 bytes gap */
   CHECK_OFFSET(STATE_CLEAR_DATA, pcrSave, 124);
   CHECK_OFFSET(STATE_CLEAR_DATA, pcrAuthValues, 1728);
+  /* v1: 2 bytes gap */
 
   CHECK_SIZE(STATE_CLEAR_DATA, 1780);
 
@@ -168,6 +178,7 @@ int orderly_data_check_offsets(void)
 
   CHECK_OFFSET(ORDERLY_DATA, clock, 8);
   CHECK_OFFSET(ORDERLY_DATA, clockSafe, 16);
+  /* v1: 7 bytes gap */
   CHECK_OFFSET(ORDERLY_DATA, drbgState, 24);
   CHECK_OFFSET(ORDERLY_DATA, selfHealTimer, 104);
   CHECK_OFFSET(ORDERLY_DATA, lockoutTimer, 112);
@@ -178,6 +189,26 @@ int orderly_data_check_offsets(void)
   return ret;
 }
 
+int TPML_PCR_SELECTION_check_offsets(void)
+{
+  int ret = 0;
+
+  CHECK_OFFSET(TPML_PCR_SELECTION, count, 0);
+  CHECK_OFFSET(TPML_PCR_SELECTION, pcrSelections[0], 4);
+  CHECK_OFFSET(TPML_PCR_SELECTION, pcrSelections[1], 10);
+  CHECK_OFFSET(TPML_PCR_SELECTION, pcrSelections[2], 16);
+
+  CHECK_SIZE(TPML_PCR_SELECTION, 24);
+
+  CHECK_OFFSET(TPMS_PCR_SELECTION, hash, 0);
+  CHECK_OFFSET(TPMS_PCR_SELECTION, sizeofSelect, 2);
+  CHECK_OFFSET(TPMS_PCR_SELECTION, pcrSelect, 3);
+
+  CHECK_SIZE(TPMS_PCR_SELECTION, 6);
+
+   return ret;
+}
+
 int main(void)
 {
   assert(privateExponent_check_offsets() == 0);
@@ -185,6 +216,7 @@ int main(void)
   assert(OBJECT_check_offsets() == 0);
   assert(DRBG_STATE_check_offsets() == 0);
   assert(persistent_data_check_offsets() == 0);
+  assert(TPML_PCR_SELECTION_check_offsets() == 0);
 
   printf("sizeof(PERSISTENT_DATA) = %zd\n", sizeof(PERSISTENT_DATA));
   printf("available space = %ld\n",
