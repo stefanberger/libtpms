@@ -125,6 +125,23 @@ TPM2B_PROOF_Unmarshal(TPM2B_PROOF *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+TPM_RC
+UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
+                       const char *msg)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        UINT32_Unmarshal(data, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && exp != *data) {
+        TPMLIB_LogTPM2Error("%s: Expected value: 0x%08x, found: 0x%08x\n",
+                            __func__, exp, *data);
+        rc = TPM_RC_BAD_TAG;
+    }
+    return rc;
+}
+
 static void
 NV_HEADER_INIT(NV_HEADER *t, UINT16 version, UINT32 magic)
 {
@@ -176,6 +193,52 @@ NV_HEADER_SWAP(NV_HEADER *t, NV_HEADER *s)
 {
     t->version = htobe16(s->version);
     t->magic = htobe32(s->magic);
+}
+
+#define NV_INDEX_MAGIC 0x2547265a
+#define NV_INDEX_VERSION 1
+static UINT16
+NV_INDEX_Marshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                NV_INDEX_VERSION,
+                                NV_INDEX_MAGIC);
+
+    written += TPMS_NV_PUBLIC_Marshal(&data->publicArea, buffer, size);
+    written += TPM2B_AUTH_Marshal(&data->authValue, buffer, size);
+
+    return written;
+}
+
+static TPM_RC
+NV_INDEX_Unmarshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 NV_INDEX_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > NV_INDEX_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported NV_INDEX version. "
+                            "Expected <= %d, got %d\n",
+                            NV_INDEX_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPMS_NV_PUBLIC_Unmarshal(&data->publicArea, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_AUTH_Unmarshal(&data->authValue, buffer, size);
+    }
+    return rc;
 }
 
 #define DRBG_STATE_MAGIC 0x6fe83ea1
@@ -265,6 +328,78 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define PCR_POLICY_MAGIC 0x176be626
+#define PCR_POLICY_VERSION 1
+static UINT16
+PCR_POLICY_Marshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    unsigned i;
+    UINT16 array_size = ARRAY_SIZE(data->hashAlg);
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PCR_POLICY_VERSION,
+                                PCR_POLICY_MAGIC);
+
+    written += UINT16_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
+        /* TPMI_ALG_HASH_Unmarshal errors on algid 0 */
+        written += TPM_ALG_ID_Marshal(&data->hashAlg[i], buffer, size);
+        written += TPM2B_DIGEST_Marshal(&data->policy[i], buffer, size);
+    }
+
+    return written;
+}
+
+static TPM_RC
+PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc= TPM_RC_SUCCESS;
+    unsigned i;
+    UINT16 array_size;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PCR_POLICY_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS && hdr.version > PCR_POLICY_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PCR_POLICY version. "
+                            "Expected <= %d, got %d\n",
+                            PCR_POLICY_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        if (array_size != ARRAY_SIZE(data->hashAlg)) {
+            TPMLIB_LogTPM2Error("Non-matching PCR_POLICY array size. "
+                                "Expected %d, got %d\n",
+                                ARRAY_SIZE(data->hashAlg), array_size);
+            rc = TPM_RC_SIZE;
+        }
+    }
+
+    for (i = 0;
+         rc == TPM_RC_SUCCESS &&
+         i < ARRAY_SIZE(data->hashAlg);
+         i++) {
+        /* TPMI_ALG_HASH_Unmarshal errors on algid 0 */
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM_ALG_ID_Unmarshal(&data->hashAlg[i], buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM2B_DIGEST_Unmarshal(&data->policy[i], buffer, size);
+        }
+    }
+    return rc;
+}
+
 static void
 DRBG_STATE_SWAP(DRBG_STATE *t, DRBG_STATE *s)
 {
@@ -281,6 +416,7 @@ UINT16
 ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BOOL has_block;
 
     written =  NV_HEADER_Marshal(&data->nvHeader, buffer, size,
                                  ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
@@ -288,6 +424,13 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     written += UINT8_Marshal(&data->clockSafe, buffer, size);
 
     written += DRBG_STATE_Marshal(&data->drbgState, buffer, size);
+
+#ifdef ACCUMULATE_SELF_HEAL_TIMER
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
 
 #ifdef ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&data->selfHealTimer, buffer, size);
@@ -302,6 +445,7 @@ TPM_RC
 ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    BOOL needs_block, has_block;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
@@ -323,6 +467,19 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
         rc = DRBG_STATE_Unmarshal(&data->drbgState, buffer, size);
     }
 
+#ifdef ACCUMULATE_SELF_HEAL_TIMER
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("ORDERLY_DATA %s selfHealTimer\n",
+                             needs_block ? "needs missing" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
 #ifdef ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->selfHealTimer, buffer, size);
@@ -859,7 +1016,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("STATE_RESET_DATA %s commitCounter\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #ifdef TPM_ALG_ECC
@@ -1199,7 +1356,7 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
-                                 BN_PRIME_T_MAGIC);
+                                 HASH_STATE_SHA1_MAGIC);
     }
 
     if (rc == TPM_RC_SUCCESS &&
@@ -1269,7 +1426,7 @@ tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *siz
                                 HASH_STATE_SHA256_VERSION,
                                 HASH_STATE_SHA256_MAGIC);
 
-    array_size = sizeof(data->h);
+    array_size = ARRAY_SIZE(data->h);
     written += UINT16_Marshal(&array_size, buffer, size);
     for (i = 0; i < array_size; i++) {
         written += SHA_LONG_Marshal(&data->h[i], buffer, size);
@@ -1371,7 +1528,7 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
                                 HASH_STATE_SHA512_VERSION,
                                 HASH_STATE_SHA512_MAGIC);
 
-    array_size = sizeof(data->h);
+    array_size = ARRAY_SIZE(data->h);
     written += UINT16_Marshal(&array_size, buffer, size);
     for (i = 0; i < array_size; i++) {
         written += SHA_LONG64_Marshal(&data->h[i], buffer, size);
@@ -1470,22 +1627,22 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     switch (hashAlg) {
 #ifdef TPM_ALG_SHA1
     case ALG_SHA1_VALUE:
-        written = tpmHashStateSHA1_Marshal(&data->Sha1, buffer, size);
+        written += tpmHashStateSHA1_Marshal(&data->Sha1, buffer, size);
         break;
 #endif
 #ifdef TPM_ALG_SHA256
     case ALG_SHA256_VALUE:
-        written = tpmHashStateSHA256_Marshal(&data->Sha256, buffer, size);
+        written += tpmHashStateSHA256_Marshal(&data->Sha256, buffer, size);
         break;
 #endif
 #ifdef TPM_ALG_SHA384
     case ALG_SHA384_VALUE:
-        written = tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size);
+        written += tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size);
         break;
 #endif
 #ifdef TPM_ALG_SHA512
     case ALG_SHA512_VALUE:
-        written = tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size);
+        written += tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size);
         break;
 #endif
     default:
@@ -1740,6 +1897,7 @@ static UINT16
 OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BOOL has_block;
 
     written = NV_HEADER_Marshal(NULL, buffer, size,
                                 OBJECT_VERSION, OBJECT_MAGIC);
@@ -1749,6 +1907,13 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
      */
     written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
+
+#ifdef TPM_ALG_RSA
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
 #ifdef TPM_ALG_RSA
     written += privateExponent_t_Marshal(&data->privateExponent,
                                          buffer, size);
@@ -1765,6 +1930,7 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
+    BOOL needs_block, has_block;
 
     /*
      * attributes are read in ANY_OBJECT_Unmarshal
@@ -1785,6 +1951,21 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMT_SENSITIVE_Unmarshal(&data->sensitive, buffer, size);
     }
+
+#ifdef TPM_ALG_RSA
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("OBJECT %s privateExponent\n",
+                             needs_block ? "needs missing" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+
 #ifdef TPM_ALG_RSA
     if (rc == TPM_RC_SUCCESS) {
         rc = privateExponent_t_Unmarshal(&data->privateExponent,
@@ -1877,6 +2058,7 @@ static UINT16
 SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    UINT8 clocksize;
 
     written = NV_HEADER_Marshal(NULL, buffer, size,
                                 SESSION_VERSION, SESSION_MAGIC);
@@ -1884,11 +2066,17 @@ SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
     written += UINT32_Marshal(&data->pcrCounter, buffer, size);
     written += UINT64_Marshal(&data->startTime, buffer, size);
     written += UINT64_Marshal(&data->timeout, buffer, size);
+
 #ifdef CLOCK_STOPS
+    clocksize = sizeof(UINT64);
+    written += UINT8_Marshal(&clocksize, buffer, size);
     written += UINT64_Marshal(&data->epoch, buffer, size);
 #else
+    clocksize = sizeof(UINT32);
+    written += UINT8_Marshal(&clocksize, buffer, size);
     written += UINT32_Marshal(&data->epoch, buffer, size);
 #endif
+
     written += UINT32_Marshal(&data->commandCode, buffer, size);
     written += UINT16_Marshal(&data->authHashAlg, buffer, size);
     written += UINT8_Marshal(&data->commandLocality, buffer, size);
@@ -1907,6 +2095,7 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
+    UINT8 clocksize;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size, SESSION_MAGIC);
@@ -1930,10 +2119,29 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&data->timeout, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        rc = UINT8_Unmarshal(&clocksize, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
 #ifdef CLOCK_STOPS
-        rc = UINT64_Unmarshal(&data->epoch, buffer, size);
+        if (clocksize != sizeof(UINT64)) {
+            TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
+                                "Expected %u, got %u\n",
+                                sizeof(UINT64), clocksize);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT64_Unmarshal(&data->epoch, buffer, size);
+        }
 #else
-        rc = UINT32_Unmarshal(&data->epoch, buffer, size);
+        if (clocksize != sizeof(UINT32)) {
+            TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
+                                "Expected %u, got %u\n",
+                                sizeof(UINT32), clocksize);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT32_Unmarshal(&data->epoch, buffer, size);
+        }
 #endif
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -2144,7 +2352,10 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      * in NvUpdateIndexOrderlyData called by TPM2_Shutdown and initialized
      * in NvManufacture -- since we don't call TPM2_Shutdown we serialize it here
      */
-    written += Array_Marshal(s_indexOrderlyRam, sizeof(s_indexOrderlyRam), buffer, size);
+    array_size = sizeof(s_indexOrderlyRam);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(s_indexOrderlyRam, array_size, buffer, size);
+
     written += UINT64_Marshal(&s_maxCounter, buffer, size); /* line 992 */
     /* the following need not be written; NvIndexCacheInit initializes them partly
      * and NvIndexCacheInit() is alled during ExecuteCommand()
@@ -2338,7 +2549,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_sessionHandles\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
@@ -2390,7 +2601,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_cpHashForCommandAudit\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #ifdef  TPM_CC_GetCommandAuditDigest
@@ -2413,7 +2624,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_selfHealTimer\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
@@ -2435,7 +2646,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_evictNvEnd\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");;
          rc = TPM_RC_BAD_PARAMETER;
     }
 
@@ -2443,8 +2654,19 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&s_evictNvEnd, buffer, size); /* line 984 */
     }
+
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal(s_indexOrderlyRam, sizeof(s_indexOrderlyRam), buffer, size);
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(s_indexOrderlyRam)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_indexOrderlyRam; "
+                            "expected %u, got %u\n",
+                            ARRAY_SIZE(s_indexOrderlyRam), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal(s_indexOrderlyRam, array_size, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&s_maxCounter, buffer, size); /* line 992 */
@@ -2466,7 +2688,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_objects\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #if defined OBJECT_C || defined GLOBAL_C
@@ -2495,7 +2717,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_pcrs\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #if defined PCR_C || defined GLOBAL_C
@@ -2524,7 +2746,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
          TPMLIB_LogTPM2Error("Volatile state %s s_sessions\n",
-                             needs_block ? "needs" : "does not need");
+                             needs_block ? "needs missing" : "does not need");
          rc = TPM_RC_BAD_PARAMETER;
     }
 #if defined SESSION_C || defined GLOBAL_C
@@ -3191,6 +3413,7 @@ TPMT_PUBLIC_SWAP(TPMT_PUBLIC *t, TPMT_PUBLIC *s, bool to_native)
     TPMI_ALG_HASH_SWAP(&t->nameAlg, &s->nameAlg);
     TPMA_OBJECT_SWAP(&t->objectAttributes, &s->objectAttributes);
     TPM2B_SWAP(&t->authPolicy.b, &s->authPolicy.b, sizeof(t->authPolicy.t.buffer));
+
     TPMU_PUBLIC_PARMS_SWAP(&t->parameters, &s->parameters,
                            to_native ? t->type : s->type, to_native);
     TPMU_PUBLIC_ID_SWAP(&t->unique, &s->unique,
@@ -3848,4 +4071,945 @@ void
 NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data)
 {
     NvWrite(nvOffset, size, data);
+}
+
+/********************************************************************/
+
+static const struct _entry {
+    UINT32 constant;
+    char *name;
+    enum CompareOp { EQ, LE, GE, DONTCARE } cmp;
+} pa_compile_constants[] = {
+#define COMPILE_CONSTANT(CONST, CMP) \
+    .constant = CONST, .name = #CONST, .cmp = CMP
+    { COMPILE_CONSTANT(ALG_RSA, EQ) },
+    { COMPILE_CONSTANT(ALG_SHA1, EQ) },
+    { COMPILE_CONSTANT(ALG_HMAC, EQ) },
+    { COMPILE_CONSTANT(ALG_TDES, EQ) },
+    { COMPILE_CONSTANT(ALG_AES, EQ) },
+    { COMPILE_CONSTANT(ALG_MGF1, EQ) },
+    { COMPILE_CONSTANT(ALG_XOR, EQ) },
+    { COMPILE_CONSTANT(ALG_KEYEDHASH, EQ) },
+    { COMPILE_CONSTANT(ALG_SHA256, EQ) },
+    { COMPILE_CONSTANT(ALG_SHA384, EQ) },
+    { COMPILE_CONSTANT(ALG_SHA512, EQ) },
+    { COMPILE_CONSTANT(ALG_SM3_256, EQ) },
+    { COMPILE_CONSTANT(ALG_SM4, EQ) },
+    { COMPILE_CONSTANT(ALG_RSASSA, EQ) },
+    { COMPILE_CONSTANT(ALG_RSAES, EQ) },
+    { COMPILE_CONSTANT(ALG_RSAPSS, EQ) },
+    { COMPILE_CONSTANT(ALG_OAEP, EQ) },
+    { COMPILE_CONSTANT(ALG_ECC, EQ) },
+    { COMPILE_CONSTANT(ALG_ECDH, EQ) },
+    { COMPILE_CONSTANT(ALG_ECDSA, EQ) },
+    { COMPILE_CONSTANT(ALG_ECDAA, EQ) },
+    { COMPILE_CONSTANT(ALG_SM2, EQ) },
+    { COMPILE_CONSTANT(ALG_ECSCHNORR, EQ) },
+    { COMPILE_CONSTANT(ALG_ECMQV, EQ) },
+    { COMPILE_CONSTANT(ALG_SYMCIPHER, EQ) },
+    { COMPILE_CONSTANT(ALG_KDF1_SP800_56A, EQ) },
+    { COMPILE_CONSTANT(ALG_KDF2, EQ) },
+    { COMPILE_CONSTANT(ALG_KDF1_SP800_108, EQ) },
+    { COMPILE_CONSTANT(ALG_CMAC, EQ) },
+    { COMPILE_CONSTANT(ALG_CTR, EQ) },
+    { COMPILE_CONSTANT(ALG_OFB, EQ) },
+    { COMPILE_CONSTANT(ALG_CBC, EQ) },
+    { COMPILE_CONSTANT(ALG_CFB, EQ) },
+    { COMPILE_CONSTANT(ALG_ECB, EQ) },
+    { COMPILE_CONSTANT(MAX_RSA_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_TDES_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_AES_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_SM4_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_CAMELLIA_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(ECC_NIST_P192, LE) },
+    { COMPILE_CONSTANT(ECC_NIST_P224, LE) },
+    { COMPILE_CONSTANT(ECC_NIST_P256, LE) },
+    { COMPILE_CONSTANT(ECC_NIST_P384, LE) },
+    { COMPILE_CONSTANT(ECC_NIST_P521, LE) },
+    { COMPILE_CONSTANT(ECC_BN_P256, LE) },
+    { COMPILE_CONSTANT(ECC_BN_P638, LE) },
+    { COMPILE_CONSTANT(ECC_SM2_P256, LE) },
+    { COMPILE_CONSTANT(MAX_ECC_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(HASH_ALIGNMENT, EQ) },
+    { COMPILE_CONSTANT(SYMMETRIC_ALIGNMENT, EQ) },
+    { COMPILE_CONSTANT(IMPLEMENTATION_PCR, EQ) },
+    { COMPILE_CONSTANT(PLATFORM_PCR, EQ) },
+    { COMPILE_CONSTANT(DRTM_PCR, EQ) },
+    { COMPILE_CONSTANT(HCRTM_PCR, EQ) },
+    { COMPILE_CONSTANT(NUM_LOCALITIES, EQ) },
+    { COMPILE_CONSTANT(MAX_HANDLE_NUM, EQ) },
+    { COMPILE_CONSTANT(MAX_ACTIVE_SESSIONS, EQ) },
+    { COMPILE_CONSTANT(MAX_LOADED_SESSIONS, EQ) },
+    { COMPILE_CONSTANT(MAX_SESSION_NUM, EQ) },
+    { COMPILE_CONSTANT(MAX_LOADED_OBJECTS, EQ) },
+    { COMPILE_CONSTANT(MIN_EVICT_OBJECTS, EQ) },
+    { COMPILE_CONSTANT(NUM_POLICY_PCR_GROUP, EQ) },
+    { COMPILE_CONSTANT(NUM_AUTHVALUE_PCR_GROUP, EQ) },
+    { COMPILE_CONSTANT(MAX_CONTEXT_SIZE, LE) },
+    { COMPILE_CONSTANT(MAX_DIGEST_BUFFER, LE) },
+    { COMPILE_CONSTANT(MAX_NV_INDEX_SIZE, LE) },
+    { COMPILE_CONSTANT(MAX_NV_BUFFER_SIZE, LE) },
+    { COMPILE_CONSTANT(MAX_CAP_BUFFER, LE) },
+    { COMPILE_CONSTANT(NV_MEMORY_SIZE, LE) },
+    { COMPILE_CONSTANT(MIN_COUNTER_INDICES, EQ) },
+    { COMPILE_CONSTANT(NUM_STATIC_PCR, EQ) },
+    { COMPILE_CONSTANT(MAX_ALG_LIST_SIZE, EQ) },
+    { COMPILE_CONSTANT(PRIMARY_SEED_SIZE, EQ) },
+#if CONTEXT_ENCRYPT_ALGORITHM == AES
+#define CONTEXT_ENCRYPT_ALGORITHM_ TPM_ALG_AES
+#endif
+    { COMPILE_CONSTANT(CONTEXT_ENCRYPT_ALGORITHM_, EQ) },
+    { COMPILE_CONSTANT(NV_CLOCK_UPDATE_INTERVAL, EQ) },
+    { COMPILE_CONSTANT(NUM_POLICY_PCR, EQ) },
+    { COMPILE_CONSTANT(ORDERLY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_SYM_DATA, EQ) },
+    { COMPILE_CONSTANT(MAX_RNG_ENTROPY_SIZE, EQ) },
+    { COMPILE_CONSTANT(RAM_INDEX_SPACE, LE) },
+    { COMPILE_CONSTANT(RSA_DEFAULT_PUBLIC_EXPONENT, EQ) },
+    { COMPILE_CONSTANT(ENABLE_PCR_NO_INCREMENT, EQ) },
+    { COMPILE_CONSTANT(CRT_FORMAT_RSA, EQ) },
+    { COMPILE_CONSTANT(VENDOR_COMMAND_COUNT, EQ) },
+    { COMPILE_CONSTANT(MAX_VENDOR_BUFFER_SIZE, EQ) },
+    { COMPILE_CONSTANT(TPM_MAX_DERIVATION_BITS, EQ) },
+    { COMPILE_CONSTANT(PROOF_SIZE, EQ) },
+    { COMPILE_CONSTANT(HASH_COUNT, EQ) },
+};
+
+static TPM_RC
+UINT32_Unmarshal_CheckConstant(BYTE **buffer, INT32 *size, UINT32 constant,
+                               const char *name,
+                               enum CompareOp cmp, UINT16 struct_version)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT32 value;
+    const char *op = NULL;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&value, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        switch (cmp) {
+        case EQ:
+            if (!(constant == value))
+                op = "=";
+            break;
+        case LE:
+            if (!(value <= constant))
+                op = "<=";
+            break;
+        case GE:
+            if (!(value >= constant))
+                op = ">=";
+            break;
+        case DONTCARE:
+            break;
+        }
+        if (op) {
+            TPMLIB_LogTPM2Error("Unexpect value for %s; "
+                                "its value %d is not %s %d; "
+                                "(version: %u)\n",
+                                name, value, op, constant,
+                                struct_version);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+    }
+    return rc;
+}
+
+#define PA_COMPILE_CONSTANTS_MAGIC 0xc9ea6431
+#define PA_COMPILE_CONSTANTS_VERSION 1
+
+/* Marshal compile-time constants related to persistent-all state */
+static UINT32
+PACompileConstants_Marshal(BYTE **buffer, INT32 *size)
+{
+    unsigned i;
+    UINT32 written, tmp_uint32;
+    UINT32 array_size = ARRAY_SIZE(pa_compile_constants);
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PA_COMPILE_CONSTANTS_VERSION,
+                                PA_COMPILE_CONSTANTS_MAGIC);
+
+    written += UINT32_Marshal(&array_size, buffer, size);
+
+    for (i = 0; i < array_size; i++) {
+        tmp_uint32 = pa_compile_constants[i].constant;
+        written += UINT32_Marshal(&tmp_uint32, buffer, size);
+    }
+
+    return written;
+}
+
+static TPM_RC
+PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    unsigned i;
+    NV_HEADER hdr;
+    UINT32 array_size;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PA_COMPILE_CONSTANTS_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > PA_COMPILE_CONSTANTS_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported PA_COMPILE_CONSTANTS version. "
+                            "Expected <= %d, got %d\n",
+                            PA_COMPILE_CONSTANTS_VERSION,
+                            hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&array_size, buffer, size);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != ARRAY_SIZE(pa_compile_constants)) {
+        TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS has non-matching number of "
+                            "elements; found %u, expected %u\n",
+                            array_size, ARRAY_SIZE(pa_compile_constants));
+    }
+
+    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(pa_compile_constants); i++)
+        rc = UINT32_Unmarshal_CheckConstant(
+                                  buffer, size, pa_compile_constants[i].constant,
+                                  pa_compile_constants[i].name,
+                                  pa_compile_constants[i].cmp, hdr.version);
+
+    return rc;
+}
+
+static UINT16
+PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    UINT16 array_size;
+    UINT8 clocksize;
+    BOOL has_block;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                PERSISTENT_DATA_VERSION,
+                                PERSISTENT_DATA_MAGIC);
+    written += BOOL_Marshal(&data->disableClear, buffer, size);
+    written += TPM_ALG_ID_Marshal(&data->ownerAlg, buffer, size);
+    written += TPM_ALG_ID_Marshal(&data->endorsementAlg, buffer, size);
+    written += TPM_ALG_ID_Marshal(&data->lockoutAlg, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&data->ownerPolicy, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&data->endorsementPolicy, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&data->lockoutPolicy, buffer, size);
+    written += TPM2B_AUTH_Marshal(&data->ownerAuth, buffer, size);
+    written += TPM2B_AUTH_Marshal(&data->endorsementAuth, buffer, size);
+    written += TPM2B_AUTH_Marshal(&data->lockoutAuth, buffer, size);
+    written += TPM2B_Marshal(&data->EPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&data->SPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&data->PPSeed.b, buffer, size);
+    written += TPM2B_PROOF_Marshal(&data->phProof, buffer, size);
+    written += TPM2B_PROOF_Marshal(&data->shProof, buffer, size);
+    written += TPM2B_PROOF_Marshal(&data->ehProof, buffer, size);
+    written += UINT64_Marshal(&data->totalResetCount, buffer, size);
+    written += UINT32_Marshal(&data->resetCount, buffer, size);
+
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+    written += PCR_POLICY_Marshal(&data->pcrPolicies, buffer, size);
+#endif
+
+    written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
+
+    /* ppList may grow */
+    array_size = sizeof(data->ppList);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(&data->ppList[0], array_size, buffer, size);
+
+    written += UINT32_Marshal(&data->failedTries, buffer, size);
+    written += UINT32_Marshal(&data->maxTries, buffer, size);
+    written += UINT32_Marshal(&data->recoveryTime, buffer, size);
+    written += UINT32_Marshal(&data->lockoutRecovery, buffer, size);
+    written += BOOL_Marshal(&data->lockOutAuthEnabled, buffer, size);
+    written += UINT16_Marshal(&data->orderlyState, buffer, size);
+
+    /* auditCommands may grow */
+    array_size = sizeof(data->auditCommands);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(&data->auditCommands[0], array_size,
+                             buffer, size);
+
+    written += TPM_ALG_ID_Marshal(&data->auditHashAlg, buffer, size);
+    written += UINT64_Marshal(&data->auditCounter, buffer, size);
+    written += UINT32_Marshal(&data->algorithmSet, buffer, size);
+    written += UINT32_Marshal(&data->firmwareV1, buffer, size);
+    written += UINT32_Marshal(&data->firmwareV2, buffer, size);
+#ifdef CLOCK_STOPS
+    clocksize = sizeof(UINT64);
+    written += UINT8_Marshal(&clocksize, buffer, size);
+    written += UINT64_Marshal(&data->timeEpoch, buffer, size);
+#else
+    clocksize = sizeof(UINT32);
+    written += UINT8_Marshal(&clocksize, buffer, size);
+    written += UINT32_Marshal(&data->timeEpoch, buffer, size);
+#endif
+    return written;
+}
+
+static TPM_RC
+PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    UINT16 array_size;
+    UINT8 clocksize;
+    BOOL needs_block, has_block;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size, PERSISTENT_DATA_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > PERSISTENT_DATA_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported persistent data version. "
+                            "Expected <= %d, got %d\n",
+                            PERSISTENT_DATA_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&data->disableClear, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(&data->ownerAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(&data->endorsementAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(&data->lockoutAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_DIGEST_Unmarshal(&data->ownerPolicy, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_DIGEST_Unmarshal(&data->endorsementPolicy, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_DIGEST_Unmarshal(&data->lockoutPolicy, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_AUTH_Unmarshal(&data->ownerAuth, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_AUTH_Unmarshal(&data->endorsementAuth, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_AUTH_Unmarshal(&data->lockoutAuth, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&data->EPSeed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&data->SPSeed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&data->PPSeed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_PROOF_Unmarshal(&data->phProof, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_PROOF_Unmarshal(&data->shProof, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_PROOF_Unmarshal(&data->ehProof, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&data->totalResetCount, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->resetCount, buffer, size);
+    }
+
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("PERSISTENT_DATA %s pcrPolicies\n",
+                             needs_block ? "needs missing" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+    if (rc == TPM_RC_SUCCESS) {
+        rc = PCR_POLICY_Unmarshal(&data->pcrPolicies, buffer, size);
+    }
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPML_PCR_SELECTION_Unmarshal(&data->pcrAllocated, buffer, size);
+    }
+
+    /* ppList array may not be our size */
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        BYTE buf[array_size];
+        rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memcpy(data->ppList, buf, MIN(array_size, sizeof(data->ppList)));
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->failedTries, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->maxTries, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->recoveryTime, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->lockoutRecovery, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&data->lockOutAuthEnabled, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* TPM_SU_Unmarshal returns error if value is 0 */
+        rc = UINT16_Unmarshal(&data->orderlyState, buffer, size);
+    }
+
+    /* auditCommands array may not be our size */
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        BYTE buf[array_size];
+        rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memcpy(data->auditCommands, buf,
+               MIN(array_size, sizeof(data->auditCommands)));
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(&data->auditHashAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&data->auditCounter, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->algorithmSet, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->firmwareV1, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&data->firmwareV2, buffer, size);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT8_Unmarshal(&clocksize, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+#ifdef CLOCK_STOPS
+        if (clocksize != sizeof(UINT64)) {
+            TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
+                                "Expected %u, got %u\n",
+                                sizeof(UINT64), clocksize);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT64_Unmarshal(&data->timeEpoch, buffer, size);
+        }
+#else
+        if (clocksize != sizeof(UINT32)) {
+            TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
+                                "Expected %u, got %u\n",
+                                sizeof(UINT32), clocksize);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT32_Unmarshal(&data->timeEpoch, buffer, size);
+        }
+#endif
+    }
+    if (rc != TPM_RC_SUCCESS) {
+        TPMLIB_LogTPM2Error("Failed to unmarshal PERSISTENT_DATA version %u\n",
+                            data->nvHeader.version);
+    }
+    return rc;
+}
+
+#define INDEX_ORDERLY_RAM_VERSION 1
+#define INDEX_ORDERLY_RAM_MAGIC   0x5346feab
+UINT32
+INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
+                          BYTE **buffer, INT32 *size)
+{
+    UINT16 written;
+    NV_RAM_HEADER *nrh;
+    UINT16 offset = 0;
+    UINT16 datasize;
+    UINT32 sourceside_size = array_size;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                INDEX_ORDERLY_RAM_VERSION,
+                                INDEX_ORDERLY_RAM_MAGIC);
+
+    /* the size of the array we are using here */
+    written += UINT32_Marshal(&sourceside_size, buffer, size);
+
+    while (TRUE) {
+        nrh = array + offset;
+        /* write the NVRAM header;
+           nrh->size holds the complete size including data;
+           nrh->size = 0 indicates the end */
+        written += UINT32_Marshal(&nrh->size, buffer, size);
+        if (nrh->size == 0)
+            break;
+        written += TPM_HANDLE_Marshal(&nrh->handle, buffer, size);
+        written += TPMA_NV_Marshal(&nrh->attributes, buffer, size);
+
+        if (offset + nrh->size > array_size) {
+            TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: nrh->size corrupted: %d\n",
+                                nrh->size);
+            break;
+        }
+        /* write data size before array */
+        datasize = nrh->size - sizeof(NV_RAM_HEADER);
+        if ((int)datasize < 0) {
+            TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: datasize corrupted: %d\n",
+                                (int)datasize);
+            break;
+        }
+        written += UINT16_Marshal(&datasize, buffer, size);
+        if (datasize > 0) {
+            /* append the data */
+            written += Array_Marshal(array + offset + sizeof(NV_RAM_HEADER),
+                                     datasize, buffer, size);
+        }
+        offset += nrh->size;
+    }
+    return written;
+}
+
+TPM_RC
+INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
+                            BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    NV_RAM_HEADER *nrh;
+    UINT16 offset = 0;
+    UINT16 datasize;
+    UINT32 sourceside_size;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 INDEX_ORDERLY_RAM_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > INDEX_ORDERLY_RAM_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported index orderly ram data version. "
+                            "Expected <= %d, got %d\n",
+                            INDEX_ORDERLY_RAM_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        /* get the size of the array on the source side
+           we can accomodate different sizes when rebuilding
+           but if it doesn't fit we'll error out and report the sizes */
+        rc = UINT32_Unmarshal(&sourceside_size, buffer, size);
+    }
+
+    while (rc == TPM_RC_SUCCESS) {
+        nrh = array + offset;
+        /* write the NVRAM header;
+           nrh->size holds the complete size including data;
+           nrh->size = 0 indicates the end */
+        if (offset + sizeof(nrh->size) > array_size) {
+            offset += sizeof(nrh->size);
+            goto exit_size;
+        }
+
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT32_Unmarshal(&nrh->size, buffer, size);
+            if (nrh->size == 0)
+                break;
+        }
+        if (offset + sizeof(NV_RAM_HEADER) > array_size) {
+            offset += sizeof(NV_RAM_HEADER);
+            goto exit_size;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM_HANDLE_Unmarshal(&nrh->handle, buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPMA_NV_Unmarshal(&nrh->attributes, buffer, size);
+        }
+
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT16_Unmarshal(&datasize, buffer, size);
+        }
+        if (offset + sizeof(NV_RAM_HEADER) + datasize > array_size) {
+            offset += sizeof(NV_RAM_HEADER) + datasize;
+            goto exit_size;
+        }
+        if (rc == TPM_RC_SUCCESS && datasize > 0) {
+            /* append the data */
+            rc = Array_Unmarshal(array + offset + sizeof(NV_RAM_HEADER),
+                                 datasize, buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            /* fix up size in case it is architecture-dependent */
+            nrh->size = sizeof(*nrh) + datasize;
+            offset += nrh->size;
+        }
+    }
+    return rc;
+
+exit_size:
+    TPMLIB_LogTPM2Error("INDEX_ORDERLY_RAM:"
+                        "Insufficient space to write to offset %u;"
+                        "Source had %lu bytes, we have %lu bytes.\n",
+                        offset, sourceside_size, array_size);
+    return TPM_RC_SIZE;
+}
+
+#define USER_NVRAM_VERSION 1
+#define USER_NVRAM_MAGIC   0x094f22c3
+UINT32
+USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
+{
+    UINT32 written;
+    UINT32 entrysize;
+    UINT64 offset;
+    NV_REF entryRef = NV_USER_DYNAMIC;
+    NV_INDEX nvi;
+    UINT64 maxCount;
+    TPM_HANDLE handle;
+    OBJECT obj;
+    UINT32 datasize;
+    UINT64 sourceside_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
+
+    written = NV_HEADER_Marshal(NULL, buffer, size,
+                                USER_NVRAM_VERSION, USER_NVRAM_MAGIC);
+
+    written += UINT64_Marshal(&sourceside_size, buffer, size);
+
+    while (TRUE) {
+        /* 1st: entrysize */
+        NvRead_UINT32(&entrysize, entryRef, sizeof(entrysize));
+        offset = sizeof(UINT32);
+
+        /* entrysize is in native format now */
+        written += UINT32_Marshal(&entrysize, buffer, size);
+        if (entrysize == 0)
+            break;
+
+        /* 2nd: the handle -- it will tell us what datatype this is */
+        NvRead_UINT32(&handle, entryRef + offset, sizeof(handle));
+        written += TPM_HANDLE_Marshal(&handle, buffer, size);
+
+        switch (HandleGetType(handle)) {
+        case TPM_HT_NV_INDEX:
+            /* NV_INDEX has the index again at offset 0! */
+            NvReadNvIndexInfo(entryRef + offset, &nvi);
+            offset += sizeof(nvi);
+
+            written += NV_INDEX_Marshal(&nvi, buffer, size);
+            /* after that: bulk data */
+            datasize = entrysize - sizeof(UINT32) - sizeof(nvi);
+            written += UINT32_Marshal(&datasize, buffer, size);
+            if (datasize > 0) {
+                BYTE buf[datasize];
+                NvRead(buf, entryRef + offset, datasize);
+                written += Array_Marshal(buf, datasize, buffer, size);
+            }
+        break;
+        case TPM_HT_PERSISTENT:
+            offset += sizeof(handle);
+
+            NvRead_OBJECT(&obj, entryRef + offset, sizeof(obj));
+            offset += sizeof(obj);
+            written += ANY_OBJECT_Marshal(&obj, buffer, size);
+        break;
+        default:
+            TPMLIB_LogTPM2Error("USER NVRAM: Corrupted handle: %08x\n", handle);
+        }
+        /* advance to next entry */
+        entryRef += entrysize;
+    }
+    NvRead_UINT64(&maxCount, entryRef + offset, sizeof(maxCount));
+    written += UINT64_Marshal(&maxCount, buffer, size);
+
+    return written;
+}
+
+TPM_RC
+USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    NV_REF entryRef = NV_USER_DYNAMIC;
+    UINT32 entrysize;
+    UINT64 offset, o = 0;
+    NV_INDEX nvi;
+    UINT64 maxCount, be_maxCount;
+    TPM_HANDLE handle;
+    OBJECT obj, be_obj;
+    UINT32 datasize;
+    UINT64 sourceside_size;
+    UINT64 array_size = NV_USER_DYNAMIC - NV_USER_DYNAMIC_END;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 USER_NVRAM_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > USER_NVRAM_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported user nvram data version. "
+                            "Expected <= %d, got %d\n",
+                            USER_NVRAM_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&sourceside_size, buffer, size);
+    }
+
+    while (rc == TPM_RC_SUCCESS) {
+        /* 1st: entrysize */
+        if (o + sizeof(UINT32) > array_size) {
+            o += sizeof(UINT32);
+            goto exit_size;
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = UINT32_Unmarshal(&entrysize, buffer, size);
+
+            NvWrite_UINT32(entryRef + o, sizeof(entrysize), &entrysize);
+            offset = sizeof(UINT32);
+            if (entrysize == 0)
+                break;
+        }
+        /* 2nd: handle */
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPM_HANDLE_Unmarshal(&handle, buffer, size);
+        }
+
+        if (rc == TPM_RC_SUCCESS) {
+            switch (HandleGetType(handle)) {
+            case TPM_HT_NV_INDEX:
+                /* we need to read the handle again */
+                if (rc == TPM_RC_SUCCESS &&
+                    o + offset + sizeof(nvi) > array_size) {
+                     o += offset + sizeof(nvi);
+                     goto exit_size;
+                }
+                if (rc == TPM_RC_SUCCESS) {
+                    rc = NV_INDEX_Unmarshal(&nvi, buffer, size);
+                    NvWrite_NV_INDEX(entryRef + o + offset, sizeof(nvi), &nvi);
+                    offset += sizeof(nvi);
+                }
+                if (rc == TPM_RC_SUCCESS) {
+                    rc = UINT32_Unmarshal(&datasize, buffer, size);
+                }
+                if (rc == TPM_RC_SUCCESS &&
+                    o + offset + datasize > array_size) {
+                    o += offset + datasize;
+                    goto exit_size;
+                }
+                if (rc == TPM_RC_SUCCESS && datasize > 0) {
+                    BYTE buf[datasize];
+                    rc = Array_Unmarshal(buf, datasize, buffer, size);
+                    NvWrite(entryRef + o + offset, datasize, buf);
+                    offset += datasize;
+                }
+            break;
+            case TPM_HT_PERSISTENT:
+                if (rc == TPM_RC_SUCCESS &&
+                    o + offset + sizeof(TPM_HANDLE) + sizeof(obj) >
+                      array_size) {
+                    o += offset + sizeof(TPM_HANDLE) + sizeof(obj);
+                    goto exit_size;
+                }
+
+                if (rc == TPM_RC_SUCCESS) {
+                    NvWrite_UINT32(entryRef + o + offset, sizeof(handle), &handle);
+                    offset += sizeof(TPM_HANDLE);
+
+                    memset(&obj, 0, sizeof(obj));
+                    rc = ANY_OBJECT_Unmarshal(&obj, buffer, size);
+                    ANY_OBJECT_SWAP(&be_obj, &obj, FALSE);
+                    NvWrite(entryRef + o + offset, sizeof(be_obj), &be_obj);
+                    offset += sizeof(obj);
+                }
+            break;
+            default:
+                TPMLIB_LogTPM2Error("USER_NVRAM: "
+                                    "Read handle 0x%08x of unknown type\n",
+                                    handle);
+                rc = TPM_RC_HANDLE;
+            }
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            o += offset;
+        }
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        o + offset + sizeof(UINT64) > array_size) {
+        o += offset + sizeof(UINT64);
+        goto exit_size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&maxCount, buffer, size);
+        be_maxCount = htobe64(maxCount);
+        NvWrite(entryRef + o + offset, sizeof(maxCount), &be_maxCount);
+    }
+
+    return rc;
+
+exit_size:
+    TPMLIB_LogTPM2Error("USER_NVRAM:"
+                        "Insufficient space to write to offset %u;"
+                        "Source had %lu bytes, we have %lu bytes.\n",
+                        o, sourceside_size, array_size);
+    return TPM_RC_SIZE;
+}
+
+/*
+ * Write out all persistent data by reading them from the NVRAM
+ * and then writing them out.
+ *
+ * - PERSISTENT_DATA  (NV_PERSISTENT_DATA)
+ * - ORDERLY_DATA     (NV_STATE_RESET_DATA)
+ * - STATE_RESET_DATA (NV_STATE_RESET_DATA)
+ * - STATE_CLEAR_DATA (NV_STATE_CLEAR_DATA)
+ * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
+ * - NVRAM locations  (NV_USER_DYNAMIC)
+ */
+#define PERSISTENT_ALL_VERSION 1
+#define PERSISTENT_ALL_MAGIC   0xab364723
+UINT32
+PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size, TPM_RC *rc)
+{
+    NV_HEADER hdr;
+    PERSISTENT_DATA pd;
+    ORDERLY_DATA od;
+    STATE_RESET_DATA srd;
+    STATE_CLEAR_DATA scd;
+    UINT32 written = 0;
+    BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+
+    *rc = TPM_RC_SUCCESS;
+
+    if (*rc == TPM_RC_SUCCESS) {
+        *rc = NvRead_PERSISTENT_DATA(&pd);
+    }
+    if (*rc == TPM_RC_SUCCESS) {
+        *rc = NvRead_ORDERLY_DATA(&od);
+    }
+    if (*rc == TPM_RC_SUCCESS) {
+        *rc = NvRead_STATE_RESET_DATA(&srd);
+    }
+    if (*rc == TPM_RC_SUCCESS) {
+        *rc = NvRead_STATE_CLEAR_DATA(&scd);
+    }
+
+    /* indexOrderlyRam was never endianess-converted; so it's native */
+    NvRead(indexOrderlyRam, NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam));
+
+    written = NV_HEADER_Marshal(&hdr, buffer, size,
+                                PERSISTENT_ALL_VERSION,
+                                PERSISTENT_ALL_MAGIC);
+    written += PACompileConstants_Marshal(buffer, size);
+    written += PERSISTENT_DATA_Marshal(&pd, buffer, size);
+    written += ORDERLY_DATA_Marshal(&od, buffer, size);
+    written += STATE_RESET_DATA_Marshal(&srd, buffer, size);
+    written += STATE_CLEAR_DATA_Marshal(&scd, buffer, size);
+    written += INDEX_ORDERLY_RAM_Marshal(indexOrderlyRam, sizeof(indexOrderlyRam),
+                                         buffer, size);
+    written += USER_NVRAM_Marshal(buffer, size);
+    written += UINT32_Marshal(&hdr.magic, buffer, size);
+
+    return written;
+}
+
+TPM_RC
+PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+    PERSISTENT_DATA pd;
+    ORDERLY_DATA od;
+    STATE_RESET_DATA srd;
+    STATE_CLEAR_DATA scd;
+    BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+
+    memset(&pd, 0, sizeof(pd));
+    memset(&od, 0, sizeof(od));
+    memset(&srd, 0, sizeof(srd));
+    memset(&scd, 0, sizeof(scd));
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 PERSISTENT_ALL_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS &&
+        hdr.version > STATE_CLEAR_DATA_VERSION) {
+        TPMLIB_LogTPM2Error("Unsupported persistent_all data version. "
+                            "Expected <= %d, got %d\n",
+                            PERSISTENT_ALL_VERSION, hdr.version);
+        return TPM_RC_BAD_VERSION;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = PACompileConstants_Unmarshal(buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = ORDERLY_DATA_Unmarshal(&od, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = STATE_RESET_DATA_Unmarshal(&srd, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = STATE_CLEAR_DATA_Unmarshal(&scd, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = INDEX_ORDERLY_RAM_Unmarshal(indexOrderlyRam, sizeof(indexOrderlyRam),
+                                         buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* this will write it into NVRAM right away */
+        rc = USER_NVRAM_Unmarshal(buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal_Check(&hdr.magic,
+                               PERSISTENT_ALL_MAGIC, buffer, size,
+                               "PERSISTENT_ALL_MAGIC after USER_NVRAM");
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        NvWrite_PERSISTENT_DATA(&pd);
+        NvWrite_ORDERLY_DATA(&od);
+        NvWrite_STATE_RESET_DATA(&srd);
+        NvWrite_STATE_CLEAR_DATA(&scd);
+        NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
+    }
+
+    return rc;
 }
