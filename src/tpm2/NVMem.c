@@ -334,6 +334,12 @@ _plat__NvMemoryMove(
     assert(destOffset + size <= NV_MEMORY_SIZE);
     // Move data in RAM
     memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);
+#if 1
+    if (destOffset > sourceOffset)
+        memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
+    else
+        memset(&s_NV[destOffset+size], 0, sourceOffset-destOffset);
+#endif
     return;
 }
 /* C.6.3.10. _plat__NvCommit() */
@@ -348,6 +354,9 @@ _plat__NvCommit(
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+
+#include "Test.h"
+    Test_NvChip_UnMarshal();
 
     if (cbs->tpm_nvram_storedata) {
         uint32_t tpm_number = 0;
