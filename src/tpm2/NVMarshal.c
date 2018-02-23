@@ -155,8 +155,7 @@ NV_HEADER_INIT(NV_HEADER *t, UINT16 version, UINT32 magic)
 }
 
 static UINT16
-NV_HEADER_Marshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
-                  UINT16 version, UINT32 magic)
+NV_HEADER_Marshal(BYTE **buffer, INT32 *size, UINT16 version, UINT32 magic)
 {
     UINT16 written;
     NV_HEADER hdr;
@@ -165,9 +164,6 @@ NV_HEADER_Marshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
 
     written = UINT16_Marshal(&hdr.version, buffer, size);
     written += UINT32_Marshal(&hdr.magic, buffer, size);
-
-    if (data)
-        *data = hdr;
 
     return written;
 }
@@ -200,7 +196,7 @@ NV_INDEX_Marshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 NV_INDEX_VERSION,
                                 NV_INDEX_MAGIC);
 
@@ -248,7 +244,7 @@ DRBG_STATE_Marshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     size_t i;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 DRBG_STATE_VERSION, DRBG_STATE_MAGIC);
     written += UINT64_Marshal(&data->reseedCounter, buffer, size);
     written += UINT32_Marshal(&data->magic, buffer, size);
@@ -335,7 +331,7 @@ PCR_POLICY_Marshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
     unsigned i;
     UINT16 array_size = ARRAY_SIZE(data->hashAlg);
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PCR_POLICY_VERSION,
                                 PCR_POLICY_MAGIC);
 
@@ -407,7 +403,7 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     BOOL has_block;
 
-    written =  NV_HEADER_Marshal(NULL, buffer, size,
+    written =  NV_HEADER_Marshal(buffer, size,
                                  ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
     written += UINT64_Marshal(&data->clock, buffer, size);
     written += UINT8_Marshal(&data->clockSafe, buffer, size);
@@ -494,7 +490,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     TPM_ALG_ID algid;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PCR_SAVE_VERSION, PCR_SAVE_MAGIC);
 
     array_size = NUM_STATIC_PCR;
@@ -665,7 +661,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     TPM_ALG_ID algid;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PCR_VERSION, PCR_MAGIC);
 
 #ifdef TPM_ALG_SHA1
@@ -817,7 +813,7 @@ PCR_AUTHVALUE_Marshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
     size_t i;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PCR_AUTHVALUE_VERSION, PCR_AUTHVALUE_MAGIC);
 
     array_size = ARRAY_SIZE(data->auth);
@@ -875,7 +871,7 @@ STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
     written += BOOL_Marshal(&data->shEnable, buffer, size);
     written += BOOL_Marshal(&data->ehEnable, buffer, size);
@@ -1041,7 +1037,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     BOOL has_block;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
     written += TPM2B_PROOF_Marshal(&data->nullProof, buffer, size);
     written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
@@ -1086,7 +1082,7 @@ bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
     UINT16 written, numbytes;
     size_t i, idx;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 BN_PRIME_T_VERSION, BN_PRIME_T_MAGIC);
 
     /* we do not write 'allocated' */
@@ -1171,7 +1167,7 @@ privateExponent_t_Marshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PRIVATE_EXPONENT_T_VERSION,
                                 PRIVATE_EXPONENT_T_MAGIC);
 #if CRT_FORMAT_RSA == NO
@@ -1278,7 +1274,7 @@ tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size, 
+    written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA1_VERSION,
                                 HASH_STATE_SHA1_MAGIC);
     written += SHA_LONG_Marshal(&data->h0, buffer, size);
@@ -1375,7 +1371,7 @@ tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *siz
     UINT16 array_size;
     size_t i;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size, 
+    written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA256_VERSION,
                                 HASH_STATE_SHA256_MAGIC);
 
@@ -1477,7 +1473,7 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
     UINT16 array_size;
     size_t i;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA512_VERSION,
                                 HASH_STATE_SHA512_MAGIC);
 
@@ -1573,7 +1569,7 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 ANY_HASH_STATE_VERSION,
                                 ANY_HASH_STATE_MAGIC);
 
@@ -1657,7 +1653,7 @@ HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_VERSION,
                                 HASH_STATE_MAGIC);
 
@@ -1765,7 +1761,7 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     size_t i;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 HASH_OBJECT_VERSION, HASH_OBJECT_MAGIC);
     written += TPMI_ALG_PUBLIC_Marshal(&data->type, buffer, size);
     written += TPMI_ALG_HASH_Marshal(&data->nameAlg, buffer, size);
@@ -1852,7 +1848,7 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     BOOL has_block;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 OBJECT_VERSION, OBJECT_MAGIC);
 
     /*
@@ -1947,7 +1943,7 @@ ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     UINT32 *ptr = (UINT32 *)&data->attributes;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC);
 
     written += UINT32_Marshal(ptr, buffer, size);
@@ -2013,7 +2009,7 @@ SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     UINT8 clocksize;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 SESSION_VERSION, SESSION_MAGIC);
     written += UINT32_Marshal((UINT32 *)&data->attributes, buffer, size);
     written += UINT32_Marshal(&data->pcrCounter, buffer, size);
@@ -2133,7 +2129,7 @@ SESSION_SLOT_Marshal(SESSION_SLOT *data, BYTE **buffer, INT32* size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 SESSION_SLOT_VERSION,
                                 SESSION_SLOT_MAGIC);
 
@@ -2188,7 +2184,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     BOOL has_block;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC);
 
     /* skip g_rcIndex: these are 'constants' */
@@ -2993,7 +2989,7 @@ PACompileConstants_Marshal(BYTE **buffer, INT32 *size)
     UINT32 written, tmp_uint32;
     UINT32 array_size = ARRAY_SIZE(pa_compile_constants);
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PA_COMPILE_CONSTANTS_VERSION,
                                 PA_COMPILE_CONSTANTS_MAGIC);
 
@@ -3059,7 +3055,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     UINT8 clocksize;
     BOOL has_block;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_DATA_VERSION,
                                 PERSISTENT_DATA_MAGIC);
     written += BOOL_Marshal(&data->disableClear, buffer, size);
@@ -3330,7 +3326,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
     UINT16 datasize;
     UINT32 sourceside_size = array_size;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 INDEX_ORDERLY_RAM_VERSION,
                                 INDEX_ORDERLY_RAM_MAGIC);
 
@@ -3471,7 +3467,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
     UINT32 datasize;
     UINT64 sourceside_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
 
-    written = NV_HEADER_Marshal(NULL, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 USER_NVRAM_VERSION, USER_NVRAM_MAGIC);
 
     written += UINT64_Marshal(&sourceside_size, buffer, size);
@@ -3670,7 +3666,7 @@ exit_size:
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 {
-    NV_HEADER hdr;
+    UINT32 magic;
     PERSISTENT_DATA pd;
     ORDERLY_DATA od;
     STATE_RESET_DATA srd;
@@ -3686,7 +3682,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     /* indexOrderlyRam was never endianess-converted; so it's native */
     NvRead(indexOrderlyRam, NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam));
 
-    written = NV_HEADER_Marshal(&hdr, buffer, size,
+    written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_ALL_VERSION,
                                 PERSISTENT_ALL_MAGIC);
     written += PACompileConstants_Marshal(buffer, size);
@@ -3697,7 +3693,9 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     written += INDEX_ORDERLY_RAM_Marshal(indexOrderlyRam, sizeof(indexOrderlyRam),
                                          buffer, size);
     written += USER_NVRAM_Marshal(buffer, size);
-    written += UINT32_Marshal(&hdr.magic, buffer, size);
+
+    magic = PERSISTENT_ALL_MAGIC;
+    written += UINT32_Marshal(&magic, buffer, size);
 
     return written;
 }
