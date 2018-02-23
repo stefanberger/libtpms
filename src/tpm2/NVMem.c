@@ -70,6 +70,7 @@
 #include <assert.h>
 #include "PlatformData.h"
 #include "Platform_fp.h"
+#include "NVMarshal.h"
 
 #include "tpm_library_intern.h"
 #include "tpm_error.h"
@@ -115,11 +116,13 @@ _plat__NVEnable(
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
 
     if (cbs->tpm_nvram_loaddata) {
-        unsigned char *data = NULL;
+        unsigned char *data = NULL, *buffer;
         uint32_t length = 0;
         uint32_t tpm_number = 0;
         const char *name = TPM_PERMANENT_ALL_NAME;
         TPM_RESULT ret;
+        INT32 size;
+        TPM_RC rc;
 
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
         switch (ret) {
@@ -128,22 +131,17 @@ _plat__NVEnable(
                 return -1;
             }
             memset(s_NV, 0, NV_MEMORY_SIZE);
-            /* first time; no file exists */
-            ret = cbs->tpm_nvram_storedata(s_NV, NV_MEMORY_SIZE,
-                                           tpm_number, name);
-            if (ret == TPM_SUCCESS) {
-                return 0;
-            }
-            return -1;
+            return 0;
 
         case TPM_SUCCESS:
-            /* got the data -- copy them to final dest. */
-            if (length != NV_MEMORY_SIZE) {
-                TPM_Free(data);
-                return -1;
-            }
-            memcpy(s_NV, data, length);
+            /* got the data -- unmarshal them... */
+            buffer = data;
+            size = length;
+
+            rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
             TPM_Free(data);
+            if (rc != TPM_RC_SUCCESS)
+                return -1;
             return 0;
 
         case TPM_FAIL:
@@ -355,16 +353,37 @@ _plat__NvCommit(
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
 
-#include "Test.h"
+#if 0
+    #include "Test.h"
     Test_NvChip_UnMarshal();
+#endif
 
     if (cbs->tpm_nvram_storedata) {
         uint32_t tpm_number = 0;
         const char *name = TPM_PERMANENT_ALL_NAME;
         TPM_RESULT ret;
+        BYTE *buf = NULL;
+        size_t buf_size = NV_MEMORY_SIZE + 32 * 1024;
+        INT32 size;
+        BYTE *buffer;
+        UINT32 written;
 
-        ret = cbs->tpm_nvram_storedata(s_NV, NV_MEMORY_SIZE,
+        /* the marshal functions do not indicate insufficient
+           buffer; to make sure we didn't run out of buffer,
+           we check that enough room for the biggest type of
+           chunk (64k) is available and try again. */
+        do {
+            buf_size += 66 * 1024;
+            buf = realloc(buf, buf_size);
+
+            buffer = buf;
+            size = buf_size;
+            written = PERSISTENT_ALL_Marshal(&buffer, &size);
+        } while (size < 66 * 1024);
+
+        ret = cbs->tpm_nvram_storedata(buf, written,
                                        tpm_number, name);
+        free(buf);
         if (ret == TPM_SUCCESS)
             return 0;
 
