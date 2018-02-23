@@ -71,40 +71,8 @@
 UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
 TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
 
-UINT32 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size, TPM_RC *rc);
+UINT32 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size);
 TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size);
-
-void NvWrite_ORDERLY_DATA(ORDERLY_DATA *data);
-void NvWrite_STATE_RESET_DATA(STATE_RESET_DATA *data);
-void NvWrite_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data);
-void NvWrite_PERSISTENT_DATA(PERSISTENT_DATA *data);
-void NvWrite_NV_LIST_TERMINATOR(UINT32 nvOffset, UINT32 size, NV_LIST_TERMINATOR *data);
-void NvWrite_UINT32(UINT32 nvOffset, UINT32 size, UINT32 *data);
-void NvWrite_TPM_HANDLE(UINT32 nvOffset, UINT32 size, UINT32 *data);
-void NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data);
-
-void NvRead_UINT32(UINT32 *data, UINT32 nvOffset, UINT32 size);
-void NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size);
-TPM_RC NvRead_ORDERLY_DATA(ORDERLY_DATA *data);
-TPM_RC NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data);
-TPM_RC NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data);
-TPM_RC NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data);
-void NvRead_OBJECT_ATTRIBUTES(OBJECT_ATTRIBUTES *data, UINT32 nvOffset, UINT32 size);
-void NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size);
-void NvRead_TPMA_NV(TPMA_NV *data, UINT32 nvOffset, UINT32 size);
-void NvRead_NV_INDEX(NV_INDEX *data, UINT32 nvOffset, UINT32 size);
-void NvRead_NV_ENTRY_HEADER(NV_ENTRY_HEADER *data, UINT32 nvOffset, UINT32 size);
-
-void TPMA_NV_SWAP(TPMA_NV *t, TPMA_NV *s);
-void ANY_OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native);
-void NV_INDEX_SWAP(NV_INDEX *t, NV_INDEX *s);
-
-static inline void TPM2B_SWAP(TPM2B *t, TPM2B *s, size_t bufsize)
-{
-    t->size = htobe16(s->size);
-    memcpy(t->buffer, s->buffer, bufsize);
-}
-
 
 #endif /* NVMARSHAL_H */
 

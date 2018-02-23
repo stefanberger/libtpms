@@ -210,7 +210,6 @@ typedef struct OBJECT
     // handle of an object slot.
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
-    UINT32              _pad1;
 } OBJECT;
 /* This structure holds a hash sequence object or an event sequence object. */
 /* The first four components of this structure are manually set to be the same as the first four
@@ -588,28 +587,11 @@ extern TPM_RC           g_NvStatus;
 extern TPM2B_AUTH       g_platformUniqueAuthorities; // Reserved for RNG
 extern TPM2B_AUTH       g_platformUniqueDetails;   // referenced by VENDOR_PERMANENT
 
-typedef struct
-{
-    UINT16 version;
-    UINT32 magic;
-} NV_HEADER;
-
-#define PERSISTENT_DATA_MAGIC   0x12213443
-#define ORDERLY_DATA_MAGIC      0x56657887
-#define STATE_CLEAR_DATA_MAGIC  0x98897667
-#define STATE_RESET_DATA_MAGIC  0x01102332
-
-#define PERSISTENT_DATA_VERSION 1
-#define ORDERLY_DATA_VERSION 1
-#define STATE_CLEAR_DATA_VERSION 1
-#define STATE_RESET_DATA_VERSION 1
-
 /* This structure holds the persistent values that only change as a consequence of a specific
    Protected Capability and are not affected by TPM power events (TPM2_Startup() or
    TPM2_Shutdown(). */
 typedef struct
 {
-    NV_HEADER      nvHeader;
     //*********************************************************************************
     //          Hierarchy
     //*********************************************************************************
@@ -644,7 +626,6 @@ typedef struct
     // time of TPM.  The value of this counter is initialized to 1 during TPM
     // manufacture process. It is used to invalidate all saved contexts after a TPM
     // Reset.
-    UINT32              _pad1;
     UINT64              totalResetCount;
     // This counter increments on each TPM Reset. The counter is reset by
     // TPM2_Clear().
@@ -741,7 +722,6 @@ extern PERSISTENT_DATA  gp;
 /* The data in this structure is saved to NV on each TPM2_Shutdown(). */
 typedef struct orderly_data
 {
-    NV_HEADER      nvHeader;
     //*****************************************************************************
     //           TIME
     //*****************************************************************************
@@ -753,7 +733,6 @@ typedef struct orderly_data
     // attribute is clear.
     UINT64              clock;              // The orderly version of clock
     TPMI_YES_NO         clockSafe;          // Indicates if the clock value is
-    UINT8               _pad1[7];
     // safe.
     // In many implementations, the quality of the entropy available is not that
     // high. To compensate, the current value of the drbgState can be saved and
@@ -785,7 +764,6 @@ extern ORDERLY_DATA     go;
    on each Startup(CLEAR). */
 typedef struct state_clear_data
 {
-    NV_HEADER      nvHeader;
     //*****************************************************************************
     //           Hierarchy Control
     //*****************************************************************************
@@ -817,7 +795,6 @@ extern STATE_CLEAR_DATA gc;
 /* If a default value is specified in the comments this value is applied on TPM Reset. */
 typedef struct state_reset_data
 {
-    NV_HEADER      nvHeader;
     //*****************************************************************************
     //          Hierarchy Control
     //*****************************************************************************
@@ -867,7 +844,6 @@ typedef struct state_reset_data
     //*****************************************************************************
     //           Boot counter
     //*****************************************************************************
-    UINT8               _pad3[2];
     UINT32              restartCount;       // This counter counts TPM Restarts.
     // The default reset value is 0.
     //*********************************************************************************
@@ -882,7 +858,6 @@ typedef struct state_reset_data
     //       do not increment this counter to increment.
     UINT32              pcrCounter;         // The default reset value is 0.
 #ifdef TPM_ALG_ECC
-    UINT32              _pad2;
     //*****************************************************************************
     //         ECDAA
     //*****************************************************************************
@@ -897,7 +872,6 @@ typedef struct state_reset_data
     // power of 2 (8, 16, 32, 64, etc.) and no greater than 64K.
     BYTE                 commitArray[16];   // The default reset value is {0}.
 #endif //TPM_ALG_ECC
-    UINT32               _pad1;
 } STATE_RESET_DATA;
 extern STATE_RESET_DATA gr;
 /* 																			  5.10.12
@@ -909,22 +883,16 @@ extern STATE_RESET_DATA gr;
 /* c) a STATE_CLEAR_DATA structure */
 /* d) an ORDERLY_DATA structure */
 /* e) the user defined NV index space */
-
-#define NV_ROUNDUP(VAL, SIZE) \
-  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
-
-#define NV_PERSISTENT_DATA  (0L) /* long also on 32 bit platforms */
-#define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + NV_ROUNDUP(sizeof(PERSISTENT_DATA), 1536))
-#define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + NV_ROUNDUP(sizeof(STATE_RESET_DATA), 1024))
-#define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + NV_ROUNDUP(sizeof(STATE_CLEAR_DATA), 1024))
-#define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + NV_ROUNDUP(sizeof(ORDERLY_DATA), 512))
+#define NV_PERSISTENT_DATA  (0)
+#define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + sizeof(PERSISTENT_DATA))
+#define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + sizeof(STATE_RESET_DATA))
+#define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + sizeof(STATE_CLEAR_DATA))
+#define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + sizeof(ORDERLY_DATA))
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
 /* 5.10.13 Global Macro Definitions */
 /* The NV_READ_PERSISTENT and NV_WRITE_PERSISTENT macros are used to access members of the
    PERSISTENT_DATA structure in NV. */
-#if 0
-
 #define NV_READ_PERSISTENT(to, from)					\
     NvRead(&to, offsetof(PERSISTENT_DATA, from), sizeof(to))
 #define NV_WRITE_PERSISTENT(to, from)					\
@@ -932,20 +900,6 @@ extern STATE_RESET_DATA gr;
 #define CLEAR_PERSISTENT(item)						\
     NvClearPersistent(offsetof(PERSISTENT_DATA, item), sizeof(gp.item))
 #define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
-
-#else
-
-#define NV_WRITE_PERSISTENT(to, from)		\
-    do {					\
-        PERSISTENT_DATA mgp;			\
-        NvRead_PERSISTENT_DATA(&mgp);		\
-        memcpy(&mgp.to, &from, sizeof(mgp.to));	\
-        NvWrite_PERSISTENT_DATA(&mgp);		\
-    } while (0)
-
-#define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
-
-#endif
 /* At the start of command processing, the index of the command is determined. This index value is
    used to access the various data tables that contain per-command information. There are multiple
    options for how the per-command tables can be implemented. This is resolved in

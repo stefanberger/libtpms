@@ -91,7 +91,7 @@ NvNext(
     // Step over the size field and point to the handle
     currentAddr = *iter + sizeof(UINT32);
     // read the header of the next entry
-    NvRead_NV_ENTRY_HEADER(&header, *iter, sizeof(NV_ENTRY_HEADER));
+    NvRead(&header, *iter, sizeof(NV_ENTRY_HEADER));
     // if the size field is zero, then we have hit the end of the list
     if(header.size == 0)
 	// leave the *iter pointing at the end of the list
@@ -225,15 +225,16 @@ NvWriteNvListEnd(
 		 )
 {
     // Marker is initialized with zeros
-    NV_LIST_TERMINATOR listEndMarker = {0};
+    BYTE        listEndMarker[sizeof(NV_LIST_TERMINATOR)] = {0};
     UINT64      maxCount = NvReadMaxCount();
     //
     // This is a constant check that can be resolved at compile time.
     cAssert(sizeof(UINT64) <= sizeof(NV_LIST_TERMINATOR) - sizeof(UINT32));
     // Copy the maxCount value to the marker buffer
-    listEndMarker.maxCount = maxCount;
+    MemoryCopy(&listEndMarker[sizeof(UINT32)], &maxCount, sizeof(UINT64));
     pAssert(end + sizeof(NV_LIST_TERMINATOR) <= s_evictNvEnd);
-    NvWrite_NV_LIST_TERMINATOR(end, sizeof(NV_LIST_TERMINATOR), (NV_LIST_TERMINATOR *)&listEndMarker);
+    // Write it to memory
+    NvWrite(end, sizeof(NV_LIST_TERMINATOR), &listEndMarker);
     return end + sizeof(NV_LIST_TERMINATOR);
 }
 /* 8.4.3.9 NvAdd() */
@@ -264,18 +265,18 @@ NvAdd(
     // so that the handle in the nvIndex is used instead of writing this value
     if(handle != TPM_RH_UNASSIGNED)
 	{
-	    NvWrite_TPM_HANDLE((UINT32)nextAddr, sizeof(TPM_HANDLE), &handle);
+	    NvWrite((UINT32)nextAddr, sizeof(TPM_HANDLE), &handle);
 	    nextAddr += sizeof(TPM_HANDLE);
 	}
     // Write entity data
-    NvWrite_Array((UINT32)nextAddr, bufferSize, entity);
+    NvWrite((UINT32)nextAddr, bufferSize, entity);
     // Advance the pointer by the amount of the total
     nextAddr += totalSize;
     // Finish by writing the link value
     // Write the next offset (relative addressing)
     totalSize = nextAddr - newAddr;
     // Write link value
-    NvWrite_UINT32((UINT32)newAddr, sizeof(UINT32), &totalSize);
+    NvWrite((UINT32)newAddr, sizeof(UINT32), &totalSize);
     // Write the list terminator
     NvWriteNvListEnd(nextAddr);
     return TPM_RC_SUCCESS;
@@ -295,7 +296,7 @@ NvDelete(
     RETURN_IF_NV_IS_NOT_AVAILABLE;
     // Get the offset of the next entry. That is, back up and point to the size
     // field of the entry
-    NvRead_UINT32(&entrySize, entryRef, sizeof(UINT32));
+    NvRead(&entrySize, entryRef, sizeof(UINT32));
     // The next entry after the one being deleted is at a relative offset
     // from the current entry
     nextAddr = entryRef + entrySize;
@@ -418,7 +419,7 @@ NvUpdateIndexOrderlyData(
 			 )
 {
     // Write reserved RAM space to NV
-    NvWrite_Array(NV_INDEX_RAM_DATA, sizeof(s_indexOrderlyRam), s_indexOrderlyRam);
+    NvWrite(NV_INDEX_RAM_DATA, sizeof(s_indexOrderlyRam), s_indexOrderlyRam);
 }
 /* 8.4.4.6 NvAddRAM() */
 /* This function adds a new data area to RAM. */
@@ -492,7 +493,8 @@ NvReadNvIndexInfo(
 		  )
 {
     pAssert(nvIndex != NULL);
-    NvRead_NV_INDEX(nvIndex, ref, sizeof(NV_INDEX));
+    NvRead(nvIndex, ref, sizeof(NV_INDEX));
+    return;
 }
 /* 8.4.4.9 NvReadObject() */
 /* This function is used to read a persistent object. This is used so that the object information
@@ -503,7 +505,8 @@ NvReadObject(
 	     OBJECT          *object         // OUT: place to receive the object data
 	     )
 {
-    NvRead_OBJECT(object, (ref + sizeof(TPM_HANDLE)), sizeof(OBJECT));
+    NvRead(object, (ref + sizeof(TPM_HANDLE)), sizeof(OBJECT));
+    return;
 }
 /* 8.4.4.10 NvFindEvict() */
 /* This function will return the NV offset of an evict object */
@@ -549,7 +552,7 @@ NvConditionallyWrite(
 	    // Write the data if NV is available
 	    if(g_NvStatus == TPM_RC_SUCCESS)
 		{
-		    NvWrite_Array(entryAddr, size, data);
+		    NvWrite(entryAddr, size, data);
 		}
 	    return g_NvStatus;
 	}
@@ -563,7 +566,7 @@ NvReadNvIndexAttributes(
 			)
 {
     TPMA_NV                 attributes;
-    NvRead_TPMA_NV(&attributes,
+    NvRead(&attributes,
 	   locator + offsetof(NV_INDEX, publicArea.attributes),
 	   sizeof(TPMA_NV));
     return attributes;
@@ -592,13 +595,10 @@ NvWriteNvIndexAttributes(
 			 TPMA_NV          attributes     // IN: attributes to write
 			 )
 {
-    TPMA_NV be_attributes;
-    TPMA_NV_SWAP(&be_attributes, &attributes);
-
     return NvConditionallyWrite(
 				locator + offsetof(NV_INDEX, publicArea.attributes),
 				sizeof(TPMA_NV),
-				&be_attributes);
+				&attributes);
 }
 /* 8.4.4.16 NvWriteRamIndexAttributes() */
 /* This function is used to write the index attributes into an unaligned structure */
@@ -820,24 +820,23 @@ NvWriteIndexAuth(
 		 TPM2B_AUTH      *authValue      // IN: the authValue to write
 		 )
 {
-    TPM_RC              result;
-    TPM2B_AUTH          be_authValue;
-
-    TPM2B_SWAP(&be_authValue.b, &authValue->b, sizeof(authValue->t.buffer));
-    //
-    // If the locator is pointing to the cached index value...
-    if(locator == s_cachedNvRef)
     {
-	// copy the authValue to the cached index so it will be there if we
-	// look for it. This is a safety thing.
-	MemoryCopy2B(&s_cachedNvIndex.authValue.b, &authValue->b,
-		     sizeof(s_cachedNvIndex.authValue.t.buffer));
+	TPM_RC              result;
+	//
+	// If the locator is pointing to the cached index value...
+	if(locator == s_cachedNvRef)
+	    {
+		// copy the authValue to the cached index so it will be there if we
+		// look for it. This is a safety thing.
+		MemoryCopy2B(&s_cachedNvIndex.authValue.b, &authValue->b,
+			     sizeof(s_cachedNvIndex.authValue.t.buffer));
+	    }
+	result = NvConditionallyWrite(
+				      locator + offsetof(NV_INDEX, authValue),
+				      sizeof(UINT16) + authValue->t.size,
+				      authValue);
+	return result;
     }
-    result = NvConditionallyWrite(
-				  locator + offsetof(NV_INDEX, authValue),
-				  sizeof(UINT16) + authValue->t.size,
-				  &be_authValue);
-    return result;
 }
 /* 8.4.5.10 NvGetIndexInfo() */
 /* This function loads the nvIndex Info into the NV cache and returns a pointer to the NV_INDEX. If
@@ -1028,7 +1027,6 @@ NvDefineIndex(
  
     // The buffer to be written to NV memory
     NV_INDEX        nvIndex;            // the index data
-    NV_INDEX        be_nvIndex;
     UINT16          entrySize;          // size of entry
     TPM_RC          result;
     //
@@ -1053,8 +1051,8 @@ NvDefineIndex(
     // Copy the authValue
     nvIndex.authValue = *authValue;
     // Add index to NV memory
-    NV_INDEX_SWAP(&be_nvIndex, &nvIndex);
-    result = NvAdd(entrySize, sizeof(NV_INDEX), TPM_RH_UNASSIGNED, (BYTE *)&be_nvIndex);
+    result = NvAdd(entrySize, sizeof(NV_INDEX), TPM_RH_UNASSIGNED,
+		   (BYTE *)&nvIndex);
     if(result == TPM_RC_SUCCESS)
 	{
 	    // If the data of NV Index is RAM backed, add the data area in RAM as well
@@ -1076,7 +1074,6 @@ NvAddEvictObject(
 {
     TPM_HANDLE       temp = object->evictHandle;
     TPM_RC           result;
-    OBJECT           be_object;
     // Check if we have enough space to add the evict object
     // An evict object needs 8 bytes in index table + sizeof OBJECT
     // In this implementation, the only resource limitation is the available NV
@@ -1088,8 +1085,7 @@ NvAddEvictObject(
     object->attributes.evict = SET;
     object->evictHandle = evictHandle;
     // Now put this in NV
-    ANY_OBJECT_SWAP(&be_object, object, FALSE);
-    result = NvAdd(sizeof(OBJECT), sizeof(OBJECT), evictHandle, (BYTE *)&be_object);
+    result = NvAdd(sizeof(OBJECT), sizeof(OBJECT), evictHandle, (BYTE *)object);
     // Put things back the way they were
     object->attributes.evict = CLEAR;
     object->evictHandle = temp;
@@ -1183,7 +1179,7 @@ NvFlushHierarchy(
 		{
 		    OBJECT_ATTRIBUTES           attributes;
 		    //
-		    NvRead_OBJECT_ATTRIBUTES(&attributes,
+		    NvRead(&attributes,
 			   (UINT32)(currentAddr
 				    + sizeof(TPM_HANDLE)
 				    + offsetof(OBJECT, attributes)),
@@ -1642,6 +1638,6 @@ NvGetMaxCount(
     while((currentAddr = NvNext(&iter, NULL )) != 0);
     // 'iter' should be pointing at the end of list marker so read in the current
     // value of the s_maxCounter.
-    NvRead_UINT64(&maxCount, iter + sizeof(UINT32), sizeof(maxCount));
+    NvRead(&maxCount, iter + sizeof(UINT32), sizeof(maxCount));
     return maxCount;
 }

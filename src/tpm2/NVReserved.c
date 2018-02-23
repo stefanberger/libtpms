@@ -198,7 +198,7 @@ NvUpdatePersistent(
 {
     pAssert(offset + size <= sizeof(gp));
     MemoryCopy(&gp + offset, buffer, size);
-    NvWrite_PERSISTENT_DATA(&gp);
+    NvWrite(offset, size, buffer);
 }
 /* 8.5.3.8 NvClearPersistent() */
 /* This function is used to clear a persistent data entry and commit it to NV */
@@ -210,14 +210,15 @@ NvClearPersistent(
 		  )
 {
     MemorySet((&gp) + offset, 0, size);
-    NvWrite_PERSISTENT_DATA(&gp);
+    NvWrite(offset, size, (&gp) + offset);
 }
 /* 8.5.3.9 NvReadPersistent() */
 /* This function reads persistent data to the RAM copy of the gp structure. */
-TPM_RC
+void
 NvReadPersistent(
 		 void
 		 )
 {
-    return NvRead_PERSISTENT_DATA(&gp);
+    NvRead(&gp, NV_PERSISTENT_DATA, sizeof(gp));
+    return;
 }

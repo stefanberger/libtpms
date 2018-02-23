@@ -98,16 +98,10 @@ _TPM_Init(
     if(!g_inFailureMode)
 	{
 	    // Load the persistent data
-	    if (NvReadPersistent()) {
-	        g_inFailureMode = TRUE;
-	        return;
-	    }
+	    NvReadPersistent();
 	    // Load the orderly data (clock and DRBG state).
 	    // If this is not done here, things break
-	    if (NvRead_ORDERLY_DATA(&go)) {
-	        g_inFailureMode = TRUE;
-	        return;
-	    }
+	    NvRead(&go, NV_ORDERLY_DATA, sizeof(go));
 	    // Start clock. Need to do this after NV has been restored.
 	    TimePowerOn();
 
@@ -183,19 +177,13 @@ TPM2_Startup(
 	{
 	    // Always read the data that is only cleared on a Reset because this is not
 	    // a reset
-	    if (NvRead_STATE_RESET_DATA(&gr)) {
-	        g_inFailureMode = TRUE;
-	        return TPM_RC_FAILURE;
-	    }
+	    NvRead(&gr, NV_STATE_RESET_DATA, sizeof(gr));
 	    if(in->startupType == TPM_SU_STATE)
 	        {
 	            // If this is a startup STATE (a Resume) need to read the data
 	            // that is cleared on a startup CLEAR because this is not a Reset
 	            // or Restart.
-	            if (NvRead_STATE_CLEAR_DATA(&gc)) {
-	                g_inFailureMode = TRUE;
-	                return TPM_RC_FAILURE;
-	            }
+	            NvRead(&gc, NV_STATE_CLEAR_DATA, sizeof(gc));
 	            startup = SU_RESUME;
 	        }
 	    else
@@ -309,12 +297,12 @@ TPM2_Shutdown(
     go.time = g_time;
 #endif
     // Save all orderly data
-    NvWrite_ORDERLY_DATA(&go);
+    NvWrite(NV_ORDERLY_DATA, sizeof(ORDERLY_DATA), &go);
     if(in->shutdownType == TPM_SU_STATE)
 	{
 	    // Save STATE_RESET and STATE_CLEAR data
-	    NvWrite_STATE_CLEAR_DATA(&gc);
-	    NvWrite_STATE_RESET_DATA(&gr);
+	    NvWrite(NV_STATE_CLEAR_DATA, sizeof(STATE_CLEAR_DATA), &gc);
+	    NvWrite(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
 	    // Save the startup flags for resume
 	    if(g_DrtmPreStartup)
 		gp.orderlyState = TPM_SU_STATE | PRE_STARTUP_FLAG;
@@ -324,7 +312,7 @@ TPM2_Shutdown(
     else if(in->shutdownType == TPM_SU_CLEAR)
 	{
 	    // Save STATE_RESET data
-	    NvWrite_STATE_RESET_DATA(&gr);
+	    NvWrite(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
 	}
     else
 	FAIL(FATAL_ERROR_INTERNAL);

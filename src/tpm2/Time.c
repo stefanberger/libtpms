@@ -136,7 +136,7 @@ TimeClockUpdate(
 	    go.clockSafe = YES;
 	    // update the time
 	    go.clock = newTime;
-	    NvWrite_ORDERLY_DATA(&go);
+	    NvWrite(NV_ORDERLY_DATA, sizeof(go), &go);
 	}
     else
 	// No NV update needed so just update

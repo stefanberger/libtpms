@@ -61,6 +61,7 @@
 #include "tpm2/_TPM_Hash_Data_fp.h"
 #include "tpm2/_TPM_Init_fp.h"
 #include "tpm2/StateMarshal.h"
+#include "tpm2/PlatformData.h"
 
 extern BOOL      g_inFailureMode;
 
@@ -356,6 +357,14 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
 {
     TPM_RESULT ret = TPM_SUCCESS;
     TPM_RC rc = TPM_RC_SUCCESS;
+    unsigned char *data = NULL;
+    uint32_t length;
+    unsigned char bak_NV[NV_MEMORY_SIZE];
+    INT32 size;
+    BYTE *buffer;
+
+    /* make backup of current NvChip memory */
+    memcpy(bak_NV, s_NV, sizeof(bak_NV));
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -365,31 +374,33 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
         if (ret != TPM_SUCCESS)
             return ret;
     }
+
 #endif
 
     if ((rc == TPM_RC_SUCCESS) &&
-        (st & TPMLIB_STATE_PERMANENT)) {
-        PERSISTENT_DATA tmp_gp;
-        ORDERLY_DATA tmp_go;
+        (st & (TPMLIB_STATE_PERMANENT | TPMLIB_STATE_SAVE_STATE))) {
 
-        rc = NvRead_PERSISTENT_DATA(&tmp_gp);
-        if (rc == TPM_RC_SUCCESS)
-            rc = NvRead_ORDERLY_DATA(&tmp_go);
+#ifdef TPM_LIBTPMS_CALLBACKS
+        if (cbs->tpm_nvram_loaddata) {
+            ret = cbs->tpm_nvram_loaddata(&data, &length, 0,
+                                          TPM_PERMANENT_ALL_NAME);
+            if (ret != TPM_SUCCESS)
+                return ret;
+        }
+#endif
+
+        if (!data)
+            return TPM_FAIL;
+
+        buffer = data;
+        size = length;
+        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
+        TPM_Free(data);
     }
 
     if ((rc == TPM_RC_SUCCESS) &&
         (st & TPMLIB_STATE_VOLATILE)) {
         rc = VolatileLoad();
-    }
-
-    if ((rc == TPM_RC_SUCCESS) &&
-        (st & TPMLIB_STATE_SAVE_STATE)) {
-        STATE_RESET_DATA tmp_tr;
-        STATE_CLEAR_DATA tmp_gc;
-
-        rc = NvRead_STATE_RESET_DATA(&tmp_tr);
-        if (rc == TPM_RC_SUCCESS)
-            rc = NvRead_STATE_CLEAR_DATA(&tmp_gc);
     }
 
     ret = rc;
