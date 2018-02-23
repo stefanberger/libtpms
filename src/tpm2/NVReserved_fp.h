@@ -104,7 +104,7 @@ NvClearPersistent(
 		  //     structure to be cleared (zeroed)
 		  UINT32           size           // IN: number of bytes to clear
 		  );
-TPM_RC /* libtpms */
+void
 NvReadPersistent(
 		 void
 		 );

@@ -524,7 +524,7 @@ endif # LIBTPMS_USE_OPENSSL
 # we do not want to loose these modifications
 check:
 	n=`grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	exp=19; \
+	exp=20; \
 	if test $$n -ne $$exp; then \
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \
@@ -545,17 +545,6 @@ srccheck:
 	fi
 
 all: srccheck
-
-check_PROGRAMS = \
-	tpm2_nvram_offsetchecks
-
-TESTS = tpm2_nvram_offsetchecks
-
-tpm2_nvram_offsetchecks_SOURCES = \
-	tests/tpm2_nvram_offsetchecks.c
-
-tpm2_nvram_offsetchecks_CFLAGS = \
-	$(libtpms_tpm2_la_CFLAGS)
 
 endif # WITH_TPM2
 

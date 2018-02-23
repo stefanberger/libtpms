@@ -58,7 +58,6 @@
 /*										*/
 /********************************************************************************/
 
-#include <endian.h>
 #include <string.h>
 
 #include "assert.h"
@@ -78,6 +77,12 @@
 #include "Global.h"
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
+
+typedef struct
+{
+    UINT16 version;
+    UINT32 magic;
+} NV_HEADER;
 
 /* BOOL is 'int' but we store a single byte */
 static UINT8
@@ -186,13 +191,6 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
     }
 
     return rc;
-}
-
-static void
-NV_HEADER_SWAP(NV_HEADER *t, NV_HEADER *s)
-{
-    t->version = htobe16(s->version);
-    t->magic = htobe32(s->magic);
 }
 
 #define NV_INDEX_MAGIC 0x2547265a
@@ -400,17 +398,8 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-static void
-DRBG_STATE_SWAP(DRBG_STATE *t, DRBG_STATE *s)
-{
-    size_t i;
-
-    t->reseedCounter = htobe64(s->reseedCounter);
-    t->magic = htobe32(s->magic);
-    memcpy(t->seed.bytes, s->seed.bytes, sizeof(t->seed.bytes));
-    for (i = 0; i < ARRAY_SIZE(s->lastValue); i++)
-        t->lastValue[i] = htobe32(s->lastValue[i]);
-}
+#define ORDERLY_DATA_MAGIC      0x56657887
+#define ORDERLY_DATA_VERSION 1
 
 UINT16
 ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
@@ -418,7 +407,7 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     BOOL has_block;
 
-    written =  NV_HEADER_Marshal(&data->nvHeader, buffer, size,
+    written =  NV_HEADER_Marshal(NULL, buffer, size,
                                  ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
     written += UINT64_Marshal(&data->clock, buffer, size);
     written += UINT8_Marshal(&data->clockSafe, buffer, size);
@@ -446,14 +435,15 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     BOOL needs_block, has_block;
+    NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  ORDERLY_DATA_MAGIC);
     }
-    if (data->nvHeader.version > ORDERLY_DATA_VERSION) {
+    if (hdr.version > ORDERLY_DATA_VERSION) {
         TPMLIB_LogTPM2Error("Unsupported orderly data version. Expected <= %d, got %d\n",
-                          ORDERLY_DATA_VERSION, data->nvHeader.version);
+                          ORDERLY_DATA_VERSION, hdr.version);
         return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -877,22 +867,15 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-static void
-PCR_AUTHVALUE_SWAP(PCR_AUTHVALUE *t, PCR_AUTHVALUE *s)
-{
-    size_t i;
-
-    for (i = 0; i < ARRAY_SIZE(s->auth); i++) {
-        TPM2B_SWAP(&t->auth[i].b, &s->auth[i].b, sizeof(t->auth[i].t.buffer));
-    }
-}
+#define STATE_CLEAR_DATA_MAGIC  0x98897667
+#define STATE_CLEAR_DATA_VERSION 1
 
 UINT16
 STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = NV_HEADER_Marshal(&data->nvHeader, buffer, size,
+    written = NV_HEADER_Marshal(NULL, buffer, size,
                                 STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
     written += BOOL_Marshal(&data->shEnable, buffer, size);
     written += BOOL_Marshal(&data->ehEnable, buffer, size);
@@ -910,14 +893,15 @@ TPM_RC
 STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  STATE_CLEAR_DATA_MAGIC);
     }
-    if (data->nvHeader.version > STATE_CLEAR_DATA_VERSION) {
+    if (hdr.version > STATE_CLEAR_DATA_VERSION) {
         TPMLIB_LogTPM2Error("Unsupported state clear data version. Expected <= %d, got %d\n",
-                         STATE_CLEAR_DATA_VERSION, data->nvHeader.version);
+                         STATE_CLEAR_DATA_VERSION, hdr.version);
         return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -948,20 +932,24 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#define STATE_RESET_DATA_MAGIC  0x01102332
+#define STATE_RESET_DATA_VERSION 1
+
 TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     BOOL needs_block, has_block;
     UINT16 array_size;
+    NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = NV_HEADER_Unmarshal(&data->nvHeader, buffer, size,
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  STATE_RESET_DATA_MAGIC);
     }
-    if (data->nvHeader.version > STATE_RESET_DATA_VERSION) {
+    if (hdr.version > STATE_RESET_DATA_VERSION) {
         TPMLIB_LogTPM2Error("Unsupported state reset data version. Expected <= %d, got %d\n",
-                         STATE_RESET_DATA_VERSION, data->nvHeader.version);
+                         STATE_RESET_DATA_VERSION, hdr.version);
         return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -1053,7 +1041,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     BOOL has_block;
     UINT16 array_size;
 
-    written = NV_HEADER_Marshal(&data->nvHeader, buffer, size,
+    written = NV_HEADER_Marshal(NULL, buffer, size,
                                 STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
     written += TPM2B_PROOF_Marshal(&data->nullProof, buffer, size);
     written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
@@ -1176,28 +1164,6 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-static void
-bn_prime_t_SWAP(bn_prime_t *t, bn_prime_t *s)
-{
-    size_t i;
-
-#if RADIX_BITS == 64
-    t->allocated = htobe64(s->allocated);
-    t->size = htobe64(s->size);
-
-    for (i = 0; i < ARRAY_SIZE(t->d); i++) {
-        t->d[i] = htobe64(s->d[i]);
-    }
-#elif RADIX_BITS == 32
-    t->allocated = htobe32(s->allocated);
-    t->size = htobe32(s->size);
-
-    for (i = 0; i < ARRAY_SIZE(t->d); i++) {
-        t->d[i] = htobe32(s->d[i]);
-    }
-#endif
-}
-
 #define PRIVATE_EXPONENT_T_MAGIC 0x854eab2
 #define PRIVATE_EXPONENT_T_VERSION 1
 static UINT16
@@ -1257,19 +1223,6 @@ privateExponent_t_Unmarshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 #endif
 
     return rc;
-}
-
-static void
-privateExponent_t_SWAP(privateExponent_t *t, privateExponent_t *s)
-{
-#if CRT_FORMAT_RSA == NO
-#error Missing code
-#else
-    bn_prime_t_SWAP(&t->Q, &s->Q);
-    bn_prime_t_SWAP(&t->dP, &s->dP);
-    bn_prime_t_SWAP(&t->dQ, &s->dQ);
-    bn_prime_t_SWAP(&t->qInv, &s->qInv);
-#endif
 }
 
 static UINT16
@@ -2253,8 +2206,19 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += BOOL_Marshal(&g_DrtmPreStartup, buffer, size); /* line 453 */
     /* g_StartupLocality3: must write */
     written += BOOL_Marshal(&g_StartupLocality3, buffer, size); /* line 458 */
+
+#ifdef USE_DA_USED
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BOOL_Marshal(&has_block, buffer, size);
+
+#ifdef USE_DA_USED
     /* g_daUsed: must write */
     written += BOOL_Marshal(&g_daUsed, buffer, size); /* line 484 */
+#endif
+
     /* g_updateNV: can skip since it seems to only be valid during execution of a command*/
     /* g_powerWasLost: must write */
     written += BOOL_Marshal(&g_powerWasLost, buffer, size); /* line 504 */
@@ -2501,9 +2465,26 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_StartupLocality3, buffer, size); /* line 458 */
     }
+
+#ifdef USE_DA_USED
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
+         TPMLIB_LogTPM2Error("Volatile state %s g_daUsed\n",
+                             needs_block ? "needs missing" : "does not need");
+         rc = TPM_RC_BAD_PARAMETER;
+    }
+#ifdef USE_DA_USED
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_daUsed, buffer, size); /* line 484 */
     }
+#endif
+
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_powerWasLost, buffer, size); /* line 504 */
     }
@@ -2849,1232 +2830,17 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     return rc;
 }
 
-/*******************************************************************
-  Functions to write NVRAM in big endian byte order
-
-  Since the original TPM 2 code writes data structures into NVRAM
-  we do the same but we endianess-swap the data on the way.
-  Using endianess-swapping rather than marshalling avoids problems
-  when the code later on tries to access fields of data structure
-  using offsetof().
-*******************************************************************/
-
-/******** functions similar to those in Marshal.c *******/
-static void
-TPMU_SCHEME_KEYEDHASH_SWAP(TPMU_SCHEME_KEYEDHASH *t, TPMU_SCHEME_KEYEDHASH *s,
-                           TPMI_ALG_KEYEDHASH_SCHEME type);
-
-static inline void
-TPM_KEY_BITS_SWAP(TPM_KEY_BITS *t, TPM_KEY_BITS *s)
-{
-    *t = htobe16(*s);
-}
-
-static inline void
-TPM_ALG_ID_SWAP(TPM_ALG_ID *t, TPM_ALG_ID *s)
-{
-    *t = htobe16(*s);
-}
-
-static inline void
-TPM_ECC_CURVE_SWAP(TPM_ECC_CURVE *t, TPM_ECC_CURVE *s)
-{
-    *t = htobe16(*s);
-}
-
-static inline void
-TPMA_OBJECT_SWAP(TPMA_OBJECT *t, TPMA_OBJECT *s)
-{
-    UINT32 _t = htobe32(*(UINT32 *)s);
-    *( UINT32 *)t = _t;
-}
-
-static inline void
-TPMI_ALG_HASH_SWAP(TPMI_ALG_HASH *t, TPMI_ALG_HASH *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMI_ALG_SYM_OBJECT_SWAP(TPMI_ALG_SYM_OBJECT *t, TPMI_ALG_SYM_OBJECT *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMI_ALG_SYM_MODE_SWAP(TPMI_ALG_SYM_MODE *t, TPMI_ALG_SYM_MODE *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMI_ALG_KDF_SWAP(TPMI_ALG_KDF *t, TPMI_ALG_KDF *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static void
-TPMS_PCR_SELECTION_SWAP(TPMS_PCR_SELECTION *t, TPMS_PCR_SELECTION *s)
-{
-    TPMI_ALG_HASH_SWAP(&t->hash, &s->hash);
-    t->sizeofSelect = s->sizeofSelect;
-    memcpy(t->pcrSelect, s->pcrSelect, sizeof(t->pcrSelect));
-}
-
-static void
-TPML_PCR_SELECTION_SWAP(TPML_PCR_SELECTION *t, TPML_PCR_SELECTION *s)
-{
-    size_t i;
-
-    t->count = htobe32(s->count);
-    for (i = 0; i < ARRAY_SIZE(t->pcrSelections); i++)
-        TPMS_PCR_SELECTION_SWAP(&t->pcrSelections[i], &s->pcrSelections[i]);
-}
-
-static inline void
-TPMI_AES_KEY_BITS_SWAP(TPMI_AES_KEY_BITS *t, TPMI_AES_KEY_BITS *s)
-{
-    TPM_KEY_BITS_SWAP(t, s);
-}
-
-static void
-TPMU_SYM_KEY_BITS_SWAP(TPMU_SYM_KEY_BITS *t, TPMU_SYM_KEY_BITS *s,
-                       TPMI_ALG_SYM type)
-{
-    switch (type) {
-#ifdef TPM_ALG_AES
-      case TPM_ALG_AES:
-        TPMI_AES_KEY_BITS_SWAP(&t->aes, &s->aes);
-	break;
-#endif
-#ifdef TPM_ALG_SM4
-      case TPM_ALG_SM4:
-        TPMI_SM4_KEY_BITS_SWAP(&t->sm4, &s->sm4);
-	break;
-#endif
-#ifdef TPM_ALG_CAMELLIA
-      case TPM_ALG_CAMELLIA:
-        TPMI_CAMELLIA_KEY_BITS_SWAP(&t->camellia, &s->camellia);
-	break;
-#endif
-#ifdef TPM_ALG_XOR
-      case TPM_ALG_XOR:
-        TPMI_ALG_HASH_SWAP(&t->xorr, &s->xorr);
-	break;
-#endif
-      case TPM_ALG_NULL:
-        break;
-      default:
-        pAssert(FALSE);
-    }
-}
-
-static void
-TPMU_SYM_MODE_SWAP(TPMU_SYM_MODE *t, TPMU_SYM_MODE *s, TPMI_ALG_SYM type)
-{
-    switch (type) {
-#ifdef TPM_ALG_AES
-      case TPM_ALG_AES:
-        TPMI_ALG_SYM_MODE_SWAP(&t->aes, &s->aes);
-	break;
-#endif
-#ifdef TPM_ALG_SM4
-      case TPM_ALG_SM4:
-        TPMI_ALG_SYM_MODE_SWAP(&t->sm4, &s->sm4);
-	break;
-#endif
-#ifdef TPM_ALG_CAMELLIA
-      case TPM_ALG_CAMELLIA:
-        TPMI_ALG_SYM_MODE_SWAP(&t->camellia, &s->camellia);
-	break;
-#endif
-#ifdef TPM_ALG_XOR
-      case TPM_ALG_XOR:
-#endif
-      case TPM_ALG_NULL:
-	break;
-      default:
-        pAssert(FALSE);
-    }
-}
-
-static void
-TPMT_SYM_DEF_OBJECT_SWAP(TPMT_SYM_DEF_OBJECT *t, TPMT_SYM_DEF_OBJECT *s,
-                         bool to_native)
-{
-    TPMI_ALG_SYM_OBJECT_SWAP(&t->algorithm, &s->algorithm);
-    TPMU_SYM_KEY_BITS_SWAP(&t->keyBits, &s->keyBits,
-                           to_native ? t->algorithm : s->algorithm);
-    TPMU_SYM_MODE_SWAP(&t->mode, &s->mode,
-                       to_native ? t->algorithm : s->algorithm);
-}
-
-static inline void
-TPMS_SYMCIPHER_PARMS_SWAP(TPMS_SYMCIPHER_PARMS *t, TPMS_SYMCIPHER_PARMS *s,
-                          bool to_native)
-{
-    TPMT_SYM_DEF_OBJECT_SWAP(&t->sym, &s->sym, to_native);
-}
-
-static inline void
-TPMS_SCHEME_HASH_SWAP(TPMS_SCHEME_HASH *t, TPMS_SCHEME_HASH *s)
-{
-    TPMI_ALG_HASH_SWAP(&t->hashAlg, &s->hashAlg);
-}
-
-static inline void
-TPMS_SCHEME_ECDAA_SWAP(TPMS_SCHEME_ECDAA *t, TPMS_SCHEME_ECDAA *s)
-{
-    TPMI_ALG_HASH_SWAP(&t->hashAlg, &s->hashAlg);
-    t->count = htobe16(s->count);
-}
-
-static inline void
-TPMI_ALG_KEYEDHASH_SCHEME_SWAP(TPMI_ALG_KEYEDHASH_SCHEME *t, TPMI_ALG_KEYEDHASH_SCHEME *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMS_SCHEME_HMAC_SWAP(TPMS_SCHEME_HMAC *t, TPMS_SCHEME_HMAC *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_SCHEME_XOR_SWAP(TPMS_SCHEME_XOR *t, TPMS_SCHEME_XOR *s)
-{
-    TPMI_ALG_HASH_SWAP(&t->hashAlg, &s->hashAlg);
-    TPMI_ALG_KDF_SWAP(&t->kdf, &s->kdf);
-}
-
-static inline void
-TPMT_KEYEDHASH_SCHEME_SWAP(TPMT_KEYEDHASH_SCHEME *t, TPMT_KEYEDHASH_SCHEME *s,
-                           bool to_native)
-{
-    TPMI_ALG_KEYEDHASH_SCHEME_SWAP(&t->scheme, &s->scheme);
-    TPMU_SCHEME_KEYEDHASH_SWAP(&t->details, &s->details,
-                               to_native ? t->scheme : s->scheme);
-}
-
-static inline void
-TPMS_SIG_SCHEME_RSASSA_SWAP(TPMS_SIG_SCHEME_RSASSA *t, TPMS_SIG_SCHEME_RSASSA *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_SIG_SCHEME_RSAPSS_SWAP(TPMS_SIG_SCHEME_RSAPSS *t, TPMS_SIG_SCHEME_RSAPSS *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_SIG_SCHEME_ECDSA_SWAP(TPMS_SIG_SCHEME_ECDSA *t, TPMS_SIG_SCHEME_ECDSA *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_SIG_SCHEME_ECSCHNORR_SWAP(TPMS_SIG_SCHEME_ECSCHNORR *t, TPMS_SIG_SCHEME_ECSCHNORR *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_SIG_SCHEME_ECDAA_SWAP(TPMS_SIG_SCHEME_ECDAA *t, TPMS_SIG_SCHEME_ECDAA *s)
-{
-    TPMS_SCHEME_ECDAA_SWAP(t, s);
-}
-
-static inline void
-TPMS_ENC_SCHEME_OAEP_SWAP(TPMS_ENC_SCHEME_OAEP *t, TPMS_ENC_SCHEME_OAEP *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-static inline void
-TPMS_ENC_SCHEME_RSAES_SWAP(TPMS_ENC_SCHEME_RSAES *t, TPMS_ENC_SCHEME_RSAES *s)
-{
-    // nothing to do
-}
-
-static void
-TPMU_SCHEME_KEYEDHASH_SWAP(TPMU_SCHEME_KEYEDHASH *t, TPMU_SCHEME_KEYEDHASH *s,
-                           TPMI_ALG_KEYEDHASH_SCHEME type)
-{
-    switch (type) {
-#ifdef TPM_ALG_HMAC
-      case TPM_ALG_HMAC:
-	TPMS_SCHEME_HMAC_SWAP(&t->hmac, &s->hmac);
-	break;
-#endif
-#ifdef TPM_ALG_XOR
-      case TPM_ALG_XOR:
-        TPMS_SCHEME_XOR_SWAP(&t->xorr, &s->xorr);
-	break;
-#endif
-      case TPM_ALG_NULL:
-	break;
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static inline void
-TPMS_KEY_SCHEME_ECDH_SWAP(TPMS_KEY_SCHEME_ECDH *t, TPMS_KEY_SCHEME_ECDH *s)
-{
-    TPMS_SCHEME_HASH_SWAP(t, s);
-}
-
-#ifdef TPM_ALG_MGF1
-static inline void
-TPMS_SCHEME_MGF1_SWAP(TPMS_SCHEME_MGF1 *t, TPMS_SCHEME_MGF1 *s)
-{
-   TPMS_SCHEME_HASH_SWAP(t, s);
-}
-#endif
-
-#ifdef TPM_ALG_KDF1_SP800_56A
-static inline void
-TPMS_SCHEME_KDF1_SP800_56A_SWAP(TPMS_SCHEME_KDF1_SP800_56A *t, TPMS_SCHEME_KDF1_SP800_56A *s)
-{
-   TPMS_SCHEME_HASH_SWAP(t, s);
-}
-#endif
-
-#ifdef TPM_ALG_KDF2
-static inline void
-TPMS_SCHEME_KDF2_SWAP(TPMS_SCHEME_KDF2 *t, TPMS_SCHEME_KDF2 *s)
-{
-   TPMS_SCHEME_HASH_SWAP(t, s);
-}
-#endif
-
-#ifdef TPM_ALG_KDF1_SP800_108
-static inline void
-TPMS_SCHEME_KDF1_SP800_108_SWAP(TPMS_SCHEME_KDF1_SP800_108 *t,
-                                TPMS_SCHEME_KDF1_SP800_108 *s)
-{
-   TPMS_SCHEME_HASH_SWAP(t, s);
-}
-#endif
-
-static void
-TPMU_KDF_SCHEME_SWAP(TPMU_KDF_SCHEME *t, TPMU_KDF_SCHEME *s,
-                     TPMI_ALG_KDF type)
-{
-    switch (type) {
-#ifdef TPM_ALG_MGF1
-      case TPM_ALG_MGF1:
-	TPMS_SCHEME_MGF1_SWAP(&t->mgf1, &s->mgf1);
-	break;
-#endif
-#ifdef TPM_ALG_KDF1_SP800_56A
-      case TPM_ALG_KDF1_SP800_56A:
-	TPMS_SCHEME_KDF1_SP800_56A_SWAP(&t->kdf1_sp800_56a, &s->kdf1_sp800_56a);
-	break;
-#endif
-#ifdef TPM_ALG_KDF2
-      case TPM_ALG_KDF2:
-	TPMS_SCHEME_KDF2_SWAP(&t->kdf2, &s->kdf2);
-	break;
-#endif
-#ifdef TPM_ALG_KDF1_SP800_108
-      case TPM_ALG_KDF1_SP800_108:
-	TPMS_SCHEME_KDF1_SP800_108_SWAP(&t->kdf1_sp800_108, &s->kdf1_sp800_108);
-	break;
-#endif
-      case TPM_ALG_NULL:
-	break;
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static inline void
-TPMT_KDF_SCHEME_SWAP(TPMT_KDF_SCHEME *t, TPMT_KDF_SCHEME *s,
-                     bool to_native)
-{
-    TPMI_ALG_KDF_SWAP(&t->scheme, &s->scheme);
-    TPMU_KDF_SCHEME_SWAP(&t->details, &s->details,
-                         to_native ? t->scheme : s->scheme);
-}
-
-static void
-TPMU_ASYM_SCHEME_SWAP(TPMU_ASYM_SCHEME *t, TPMU_ASYM_SCHEME *s,
-                      TPMI_ALG_ASYM_SCHEME type)
-{
-    switch (type) {
-#ifdef TPM_ALG_ECDH
-      case TPM_ALG_ECDH:
-	TPMS_KEY_SCHEME_ECDH_SWAP(&t->ecdh, &s->ecdh);
-	break;
-#endif
-#ifdef TPM_ALG_ECMQV
-      case TPM_ALG_ECMQV:
-	TPMS_KEY_SCHEME_ECMQV_SWAP(&t->ecmqvh, &s->ecmqvh);
-	break;
-#endif
-#ifdef TPM_ALG_RSASSA
-      case TPM_ALG_RSASSA:
-	TPMS_SIG_SCHEME_RSASSA_SWAP(&t->rsassa, &s->rsassa);
-	break;
-#endif
-#ifdef TPM_ALG_RSAPSS
-      case TPM_ALG_RSAPSS:
-	TPMS_SIG_SCHEME_RSAPSS_SWAP(&t->rsapss, &s->rsapss);
-	break;
-#endif
-#ifdef TPM_ALG_ECDSA
-      case TPM_ALG_ECDSA:
-	TPMS_SIG_SCHEME_ECDSA_SWAP(&t->ecdsa, &s->ecdsa);
-	break;
-#endif
-#ifdef TPM_ALG_ECDAA
-      case TPM_ALG_ECDAA:
-	TPMS_SIG_SCHEME_ECDAA_SWAP(&t->ecdaa, &s->ecdaa);
-	break;
-#endif
-#ifdef TPM_ALG_SM2
-      case TPM_ALG_SM2:
-	TPMS_SIG_SCHEME_SM2_SWAP(&t->sm2, &s->sm2);
-	break;
-#endif
-#ifdef TPM_ALG_ECSCHNORR
-      case TPM_ALG_ECSCHNORR:
-	TPMS_SIG_SCHEME_ECSCHNORR_SWAP(&t->ecschnorr, &s->ecschnorr);
-	break;
-#endif
-#ifdef TPM_ALG_RSAES
-      case TPM_ALG_RSAES:
-	TPMS_ENC_SCHEME_RSAES_SWAP(&t->rsaes, &s->rsaes);
-	break;
-#endif
-#ifdef TPM_ALG_OAEP
-      case TPM_ALG_OAEP:
-	TPMS_ENC_SCHEME_OAEP_SWAP(&t->oaep, &s->oaep);
-	break;
-#endif
-      case TPM_ALG_NULL:
-	break;
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static inline void
-TPMI_ALG_RSA_SCHEME_SWAP(TPMI_ALG_RSA_SCHEME *t, TPMI_ALG_RSA_SCHEME *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMT_RSA_SCHEME_SWAP(TPMT_RSA_SCHEME *t, TPMT_RSA_SCHEME *s,
-                     bool to_native)
-{
-    TPMI_ALG_RSA_SCHEME_SWAP(&t->scheme, &s->scheme);
-    TPMU_ASYM_SCHEME_SWAP(&t->details, &s->details,
-                          to_native ? t->scheme : s->scheme);
-}
-
-static inline void
-TPMI_ALG_ECC_SCHEME_SWAP(TPMI_ALG_ECC_SCHEME *t, TPMI_ALG_ECC_SCHEME *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static inline void
-TPMI_RSA_KEY_BITS_SWAP(TPMI_RSA_KEY_BITS *t, TPMI_RSA_KEY_BITS *s)
-{
-    TPM_KEY_BITS_SWAP(t, s);
-}
-
-static inline void
-TPMS_ECC_POINT_SWAP(TPMS_ECC_POINT *t, TPMS_ECC_POINT *s)
-{
-    TPM2B_SWAP(&t->x.b, &s->x.b, sizeof(t->x.t.buffer));
-    TPM2B_SWAP(&t->y.b, &s->y.b, sizeof(t->y.t.buffer));
-}
-
-static inline void
-TPMI_ECC_CURVE_SWAP(TPMI_ECC_CURVE *t, TPMI_ECC_CURVE *s)
-{
-    TPM_ECC_CURVE_SWAP(t, s);
-}
-
-static inline void
-TPMI_ALG_PUBLIC_SWAP(TPMI_ALG_PUBLIC *t, TPMI_ALG_PUBLIC *s)
-{
-    TPM_ALG_ID_SWAP(t, s);
-}
-
-static void
-TPMU_PUBLIC_ID_SWAP(TPMU_PUBLIC_ID *t, TPMU_PUBLIC_ID *s,
-                    TPMI_ALG_PUBLIC type)
-{
-    switch (type) {
-#ifdef TPM_ALG_KEYEDHASH
-      case TPM_ALG_KEYEDHASH:
-	TPM2B_SWAP(&t->keyedHash.b, &s->keyedHash.b, sizeof(t->keyedHash.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_SYMCIPHER
-      case TPM_ALG_SYMCIPHER:
-	TPM2B_SWAP(&t->sym.b, &s->sym.b, sizeof(t->sym.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_RSA
-      case TPM_ALG_RSA:
-	TPM2B_SWAP(&t->rsa.b, &s->rsa.b, sizeof(t->rsa.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_ECC
-      case TPM_ALG_ECC:
-	TPMS_ECC_POINT_SWAP(&t->ecc, &s->ecc);
-	break;
-#endif
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static inline void
-TPMT_ECC_SCHEME_SWAP(TPMT_ECC_SCHEME *t, TPMT_ECC_SCHEME *s,
-                     bool to_native)
-{
-    TPMI_ALG_ECC_SCHEME_SWAP(&t->scheme, &s->scheme);
-    TPMU_ASYM_SCHEME_SWAP(&t->details, &s->details,
-                          to_native ? t->scheme : s->scheme);
-}
-
-static inline void
-TPMS_KEYEDHASH_PARMS_SWAP(TPMS_KEYEDHASH_PARMS *t, TPMS_KEYEDHASH_PARMS *s,
-                          bool to_native)
-{
-    TPMT_KEYEDHASH_SCHEME_SWAP(&t->scheme, &s->scheme, to_native);
-}
-
-static void
-TPMS_RSA_PARMS_SWAP(TPMS_RSA_PARMS *t, TPMS_RSA_PARMS *s, bool to_native)
-{
-    TPMT_SYM_DEF_OBJECT_SWAP(&t->symmetric, &s->symmetric, to_native);
-    TPMT_RSA_SCHEME_SWAP(&t->scheme, &s->scheme, to_native);
-    TPMI_RSA_KEY_BITS_SWAP(&t->keyBits, &s->keyBits);
-    t->exponent = htobe32(s->exponent);
-}
-
-#ifdef TPM_ALG_ECC
-static void
-TPMS_ECC_PARMS_SWAP(TPMS_ECC_PARMS *t, TPMS_ECC_PARMS *s, bool to_native)
-{
-    TPMT_SYM_DEF_OBJECT_SWAP(&t->symmetric, &s->symmetric, to_native);
-    TPMT_ECC_SCHEME_SWAP(&t->scheme, &s->scheme, to_native);
-    TPMI_ECC_CURVE_SWAP(&t->curveID, &s->curveID);
-    TPMT_KDF_SCHEME_SWAP(&t->kdf, &s->kdf, to_native);
-}
-#endif
-
-static void
-TPMU_PUBLIC_PARMS_SWAP(TPMU_PUBLIC_PARMS *t, TPMU_PUBLIC_PARMS *s,
-                       TPMI_ALG_PUBLIC type, bool to_native)
-{
-    switch (type) {
-#ifdef TPM_ALG_KEYEDHASH
-      case TPM_ALG_KEYEDHASH:
-        TPMS_KEYEDHASH_PARMS_SWAP(&t->keyedHashDetail, &s->keyedHashDetail,
-                                  to_native);
-	break;
-#endif
-#ifdef TPM_ALG_SYMCIPHER
-      case TPM_ALG_SYMCIPHER:
-	TPMS_SYMCIPHER_PARMS_SWAP(&t->symDetail, &s->symDetail, to_native);
-	break;
-#endif
-#ifdef TPM_ALG_RSA
-      case TPM_ALG_RSA:
-	TPMS_RSA_PARMS_SWAP(&t->rsaDetail, &s->rsaDetail, to_native);
-	break;
-#endif
-#ifdef TPM_ALG_ECC
-      case TPM_ALG_ECC:
-	TPMS_ECC_PARMS_SWAP(&t->eccDetail, &s->eccDetail, to_native);
-	break;
-#endif
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static void
-TPMT_PUBLIC_SWAP(TPMT_PUBLIC *t, TPMT_PUBLIC *s, bool to_native)
-{
-    TPMI_ALG_PUBLIC_SWAP(&t->type, &s->type);
-    TPMI_ALG_HASH_SWAP(&t->nameAlg, &s->nameAlg);
-    TPMA_OBJECT_SWAP(&t->objectAttributes, &s->objectAttributes);
-    TPM2B_SWAP(&t->authPolicy.b, &s->authPolicy.b, sizeof(t->authPolicy.t.buffer));
-
-    TPMU_PUBLIC_PARMS_SWAP(&t->parameters, &s->parameters,
-                           to_native ? t->type : s->type, to_native);
-    TPMU_PUBLIC_ID_SWAP(&t->unique, &s->unique,
-                        to_native ? t->type : s->type);
-}
-
-static void
-TPMU_SENSITIVE_COMPOSITE_SWAP(TPMU_SENSITIVE_COMPOSITE *t, TPMU_SENSITIVE_COMPOSITE *s,
-                              TPMI_ALG_PUBLIC type)
-{
-    switch (type) {
-#ifdef TPM_ALG_RSA
-      case TPM_ALG_RSA:
-	TPM2B_SWAP(&t->rsa.b, &s->rsa.b, sizeof(t->rsa.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_ECC
-      case TPM_ALG_ECC:
-	TPM2B_SWAP(&t->ecc.b, &s->ecc.b, sizeof(t->ecc.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_KEYEDHASH
-      case TPM_ALG_KEYEDHASH:
-	TPM2B_SWAP(&t->bits.b, &s->bits.b, sizeof(t->bits.t.buffer));
-	break;
-#endif
-#ifdef TPM_ALG_SYMCIPHER
-      case TPM_ALG_SYMCIPHER:
-	TPM2B_SWAP(&t->sym.b, &s->sym.b, sizeof(t->sym.t.buffer));
-	break;
-#endif
-      default:
-	pAssert(FALSE);
-    }
-}
-
-static void
-TPMT_SENSITIVE_SWAP(TPMT_SENSITIVE *t, TPMT_SENSITIVE *s, bool to_native)
-{
-    TPMI_ALG_PUBLIC_SWAP(&t->sensitiveType, &s->sensitiveType);
-    TPM2B_SWAP(&t->authValue.b, &s->authValue.b,
-               sizeof(t->authValue.t.buffer));
-    TPM2B_SWAP(&t->seedValue.b, &s->seedValue.b,
-               sizeof(t->seedValue.t.buffer));
-    TPMU_SENSITIVE_COMPOSITE_SWAP(&t->sensitive, &s->sensitive,
-                                  to_native ? t->sensitiveType
-                                            : s->sensitiveType);
-}
-
-/************** Functions related to Global.h **********/
-
-void
-OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native)
-{
-    TPMT_PUBLIC_SWAP(&t->publicArea, &s->publicArea, to_native);
-    TPMT_SENSITIVE_SWAP(&t->sensitive, &s->sensitive, to_native);
-
-#ifdef TPM_ALG_RSA
-    privateExponent_t_SWAP(&t->privateExponent, &s->privateExponent);
-#endif
-    TPM2B_SWAP(&t->qualifiedName.b, &s->qualifiedName.b,
-               sizeof(t->qualifiedName.t.name));
-    t->evictHandle = htobe32(s->evictHandle);
-    TPM2B_SWAP(&t->name.b, &s->name.b, sizeof(t->name.t.name));
-}
-
-void
-HASH_OBJECT_SWAP(HASH_OBJECT *t, HASH_OBJECT *s)
-{
-    TPMI_ALG_PUBLIC_SWAP(&t->type, &s->type);
-    TPMI_ALG_HASH_SWAP(&t->nameAlg, &s->nameAlg);
-    TPMA_OBJECT_SWAP(&t->objectAttributes, &s->objectAttributes);
-    TPM2B_SWAP(&t->auth.b, &s->auth.b, sizeof(t->auth.t.buffer));
-}
-
-void
-ANY_OBJECT_SWAP(OBJECT *t, OBJECT *s, bool to_native)
-{
-    UINT32 attributes, attributes_be;
-    OBJECT_ATTRIBUTES attrs;
-
-    memcpy(&attributes, &s->attributes, sizeof(attributes));
-    attributes_be = htobe32(attributes);
-
-    memcpy(&t->attributes, &attributes_be, sizeof(t->attributes));
-
-    attrs = to_native ? t->attributes
-                      : s->attributes;
-
-    if (attrs.eventSeq == SET ||
-        attrs.hashSeq == SET ||
-        attrs.hmacSeq == SET) {
-        HASH_OBJECT_SWAP((HASH_OBJECT *)t, (HASH_OBJECT *)s);
-    } else {
-        OBJECT_SWAP(t, s, to_native);
-    }
-}
-
-static void
-PCR_SAVE_SWAP(PCR_SAVE *t, PCR_SAVE *s)
-{
-#ifdef TPM_ALG_SHA1
-    memcpy(&t->sha1, s->sha1, sizeof(t->sha1));
-#endif
-#ifdef TPM_ALG_SHA256
-    memcpy(&t->sha256, s->sha256, sizeof(t->sha256));
-#endif
-#ifdef TPM_ALG_SHA384
-    memcpy(&t->sha384, s->sha384, sizeof(t->sha384));
-#endif
-#ifdef TPM_ALG_SHA512
-    memcpy(&t->sha512, s->sha512, sizeof(t->sha512));
-#endif
-#ifdef TPM_ALG_SM3_256
-    memcpy(&t->sm3_256, s->sm3_256, sizeof(t->sm3_256));
-#endif
-    t->pcrCounter = htobe32(s->pcrCounter);
-}
-
-static void
-PCR_POLICY_SWAP(PCR_POLICY *t, PCR_POLICY *s)
-{
-    size_t i;
-
-#if NUM_POLICY_PCR_GROUP > 0	/* kgold added to prevent zero size array */
-    for (i = 0; i < ARRAY_SIZE(t->hashAlg); i++) {
-        TPMI_ALG_HASH_SWAP(&t->hashAlg[i], &s->hashAlg[i]);
-    }
-#endif
-
-#if 0
-    // 'a' is not being used and not initialized anywhere ...
-    TPM2B_SWAP(&t->a.b, &s->a.b, sizeof(t->a.t.buffer))
-#endif
-
-#if NUM_POLICY_PCR_GROUP > 0	/* kgold added to prevent zero size array */
-    for (i = 0; i < ARRAY_SIZE(t->policy); i++) {
-        TPM2B_SWAP(&t->policy[i].b, &s->policy[i].b,
-                   sizeof(t->policy[i].t.buffer));
-    }
-#endif
-}
-
-static void
-TPMS_NV_PUBLIC_SWAP(TPMS_NV_PUBLIC *t, TPMS_NV_PUBLIC *s)
-{
-    UINT32 attributes_be;
-
-    t->nvIndex = htobe32(s->nvIndex);
-    TPM_ALG_ID_SWAP(&t->nameAlg, &s->nameAlg);
-
-    attributes_be = htobe32(*(UINT32 *)&s->attributes);
-    memcpy(&t->attributes, &attributes_be, sizeof(t->attributes));
-    TPM2B_SWAP(&t->authPolicy.b, &s->authPolicy.b,
-               sizeof(t->authPolicy.t.buffer));
-    t->dataSize = htobe16(s->dataSize);
-}
-
-void
-NV_INDEX_SWAP(NV_INDEX *t, NV_INDEX *s)
-{
-    TPMS_NV_PUBLIC_SWAP(&t->publicArea, &s->publicArea);
-    TPM2B_SWAP(&t->authValue.b, &s->authValue.b, sizeof(t->authValue.t.buffer));
-}
-
-static void
-PERSISTENT_DATA_SWAP(PERSISTENT_DATA *t, PERSISTENT_DATA *s)
-{
-    NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
-
-    t->disableClear = s->disableClear;
-
-    TPM_ALG_ID_SWAP(&t->ownerAlg, &s->ownerAlg);
-    TPM_ALG_ID_SWAP(&t->endorsementAlg, &s->endorsementAlg);
-    TPM_ALG_ID_SWAP(&t->lockoutAlg, &s->lockoutAlg);
-
-    TPM2B_SWAP(&t->ownerPolicy.b, &s->ownerPolicy.b,
-               sizeof(t->ownerPolicy.t.buffer));
-    TPM2B_SWAP(&t->endorsementPolicy.b, &s->endorsementPolicy.b,
-               sizeof(t->endorsementPolicy.t.buffer));
-    TPM2B_SWAP(&t->lockoutPolicy.b, &s->lockoutPolicy.b,
-               sizeof(t->lockoutPolicy.t.buffer));
-
-    TPM2B_SWAP(&t->ownerAuth.b, &s->ownerAuth.b, sizeof(t->ownerAuth.t.buffer));
-    TPM2B_SWAP(&t->endorsementAuth.b, &s->endorsementAuth.b, sizeof(t->endorsementAuth.t.buffer));
-    TPM2B_SWAP(&t->lockoutAuth.b, &s->lockoutAuth.b, sizeof(t->lockoutAuth.t.buffer));
-
-    TPM2B_SWAP(&t->EPSeed.b, &s->EPSeed.b, sizeof(t->EPSeed.t.buffer));
-    TPM2B_SWAP(&t->SPSeed.b, &s->SPSeed.b, sizeof(t->SPSeed.t.buffer));
-    TPM2B_SWAP(&t->PPSeed.b, &s->PPSeed.b, sizeof(t->PPSeed.t.buffer));
-
-    TPM2B_SWAP(&t->phProof.b, &s->phProof.b, sizeof(t->phProof.t.buffer));
-    TPM2B_SWAP(&t->shProof.b, &s->shProof.b, sizeof(t->shProof.t.buffer));
-    TPM2B_SWAP(&t->ehProof.b, &s->ehProof.b, sizeof(t->ehProof.t.buffer));
-
-    t->totalResetCount = htobe64(s->totalResetCount);
-
-    t->resetCount = htobe32(s->resetCount);
-
-#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
-    PCR_POLICY_SWAP(&t->pcrPolicies, &s->pcrPolicies);
-#endif
-
-    TPML_PCR_SELECTION_SWAP(&t->pcrAllocated, &s->pcrAllocated);
-
-    memcpy(t->ppList, s->ppList, sizeof(t->ppList));
-
-    t->failedTries = htobe32(s->failedTries);
-    t->maxTries = htobe32(s->maxTries);
-
-    t->recoveryTime = htobe32(s->recoveryTime);
-    t->lockoutRecovery = htobe32(s->lockoutRecovery);
-
-    t->lockOutAuthEnabled = s->lockOutAuthEnabled;
-
-    t->orderlyState = htobe16(s->orderlyState);
-
-    memcpy(t->auditCommands, s->auditCommands, sizeof(t->auditCommands));
-    TPM_ALG_ID_SWAP(&t->auditHashAlg, &s->auditHashAlg);
-    t->auditCounter = htobe64(s->auditCounter);
-
-    t->algorithmSet = htobe32(s->algorithmSet);
-
-    t->firmwareV1 = htobe32(s->firmwareV1);
-    t->firmwareV2 = htobe32(s->firmwareV2);
-
-#ifndef CLOCK_STOPS
-    t->timeEpoch = htobe32(s->timeEpoch);
-#endif
-}
-
-static void
-ORDERLY_DATA_SWAP(ORDERLY_DATA *t, ORDERLY_DATA *s)
-{
-    NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
-
-    t->clock = htobe64(s->clock);
-    t->clockSafe = s->clockSafe;
-
-    DRBG_STATE_SWAP(&t->drbgState, &s->drbgState);
-
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
-    t->selfHealTimer = htobe64(s->selfHealTimer);
-    t->lockoutTimer = htobe64(s->lockoutTimer);
-    t->time = htobe64(s->time);
-#endif
-}
-
-static void
-STATE_CLEAR_DATA_SWAP(STATE_CLEAR_DATA *t, STATE_CLEAR_DATA *s)
-{
-    NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
-
-    t->shEnable = s->shEnable;
-    t->ehEnable = s->ehEnable;
-    t->phEnableNV = s->phEnableNV;
-
-    TPM_ALG_ID_SWAP(&t->platformAlg, &s->platformAlg);
-
-    TPM2B_SWAP(&t->platformPolicy.b, &s->platformPolicy.b,
-               sizeof(t->platformPolicy.t.buffer));
-    TPM2B_SWAP(&t->platformAuth.b, &s->platformAuth.b,
-               sizeof(t->platformAuth.t.buffer));
-
-    PCR_SAVE_SWAP(&t->pcrSave, &s->pcrSave);
-
-    PCR_AUTHVALUE_SWAP(&t->pcrAuthValues, &s->pcrAuthValues);
-}
-
-static void
-STATE_RESET_DATA_SWAP(STATE_RESET_DATA *t, STATE_RESET_DATA *s)
-{
-    NV_HEADER_SWAP(&t->nvHeader, &s->nvHeader);
-
-    TPM2B_SWAP(&t->nullProof.b, &s->nullProof.b, sizeof(t->nullProof.t.buffer));
-
-    TPM2B_SWAP(&t->nullSeed.b, &s->nullSeed.b, sizeof(t->nullSeed.t.buffer));
-
-    t->clearCount = htobe32(s->clearCount);
-    t->objectContextID = htobe64(s->objectContextID);
-    memcpy(t->contextArray, s->contextArray, sizeof(t->contextArray));
-
-    t->contextCounter = htobe64(s->contextCounter);
-
-    TPM2B_SWAP(&t->commandAuditDigest.b, &s->commandAuditDigest.b,
-               sizeof(t->commandAuditDigest.t.buffer));
-
-    t->restartCount = htobe32(s->restartCount);
-    t->pcrCounter = htobe32(s->pcrCounter);
-
-#ifdef TPM_ALG_ECC
-    t->commitCounter = htobe64(s->commitCounter);
-    TPM2B_SWAP(&t->commitNonce.b, &s->commitNonce.b,
-               sizeof(t->commitNonce.t.buffer));
-    memcpy(t->commitArray, s->commitArray, sizeof(t->commitArray));
-#endif
-}
-
-/************** functions related to NV.h ********/
-
-static void
-NV_ENTRY_HEADER_SWAP(NV_ENTRY_HEADER *t, NV_ENTRY_HEADER *s)
-{
-    t->size = htobe32(s->size);
-    t->handle = htobe32(s->handle);
-}
-
-void
-TPMA_NV_SWAP(TPMA_NV *t, TPMA_NV *s)
-{
-    UINT32 _t = htobe32(*(UINT32 *)s);
-
-    *(UINT32 *)t = _t;
-}
-
-void
-NV_LIST_TERMINATOR_SWAP(NV_LIST_TERMINATOR *t, NV_LIST_TERMINATOR *s)
-{
-    t->reserved = htobe32(s->reserved);
-    t->maxCount = htobe64(s->maxCount);
-}
-
-/***** functions to write structs to NVRAM ******/
-
-void
-NvWrite_NV_LIST_TERMINATOR(UINT32 nvOffset, UINT32 size, NV_LIST_TERMINATOR *s)
-{
-    NV_LIST_TERMINATOR t;
-
-    NV_LIST_TERMINATOR_SWAP(&t, s);
-
-    NvWrite(nvOffset, size, &t);
-}
-
-void
-NvWrite_TPM_HANDLE(UINT32 nvOffset, UINT32 size, TPM_HANDLE *data)
-{
-    TPM_HANDLE t = htobe32(*data);
-
-    NvWrite(nvOffset, size, &t);
-}
-
-void
-NvWrite_UINT32(UINT32 nvOffset, UINT32 size, UINT32 *data)
-{
-    UINT32 t = htobe32(*data);
-
-    NvWrite(nvOffset, size, &t);
-}
-
-void
-NvRead_UINT32(UINT32 *data, UINT32 nvOffset, UINT32 size)
-{
-    UINT32 t;
-
-    NvRead(&t, nvOffset, size);
-
-    *data = be32toh(t);
-}
-
-void
-NvRead_UINT64(UINT64 *data, UINT32 nvOffset, UINT32 size)
-{
-    UINT64 t;
-
-    NvRead(&t, nvOffset, size);
-
-    *data = be64toh(t);
-}
-
-void
-NvWrite_PERSISTENT_DATA(PERSISTENT_DATA *data)
-{
-    PERSISTENT_DATA t;
-    UINT32 nvOffset = NV_PERSISTENT_DATA;
-
-    NV_HEADER_INIT(&data->nvHeader,
-                   PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
-    PERSISTENT_DATA_SWAP(&t, data);
-
-    NvWrite(nvOffset, sizeof(t), &t);
-}
-
-TPM_RC
-NvRead_PERSISTENT_DATA(PERSISTENT_DATA *data)
-{
-    NV_HEADER hdr;
-    PERSISTENT_DATA t;
-    UINT32 nvOffset = NV_PERSISTENT_DATA;
-
-    /* read header only */
-    NvRead(&hdr, nvOffset, sizeof(hdr));
-    NV_HEADER_SWAP(&t.nvHeader, &hdr);
-
-    /* newly initialized NVRAM has version and magic = 0 */
-    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
-        NV_HEADER_INIT(&t.nvHeader,
-                       PERSISTENT_DATA_VERSION, PERSISTENT_DATA_MAGIC);
-
-    if (t.nvHeader.magic != PERSISTENT_DATA_MAGIC) {
-        TPMLIB_LogTPM2Error("Invalid persistent data magic. Expected 0x%08x, got 0x%08x\n",
-                         PERSISTENT_DATA_MAGIC, t.nvHeader.magic);
-        return TPM_RC_BAD_TAG;
-    }
-    if (t.nvHeader.version > PERSISTENT_DATA_VERSION ||
-        t.nvHeader.version == 0) {
-        TPMLIB_LogTPM2Error("Unsupprted persistent data version. Expected <= %d, got %d\n",
-                         PERSISTENT_DATA_VERSION, t.nvHeader.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
-    switch (t.nvHeader.version) {
-    /* read data at given version and upgrade */
-    case PERSISTENT_DATA_VERSION:
-        /* current version */
-        break;
-    }
-
-    NvRead(&t, nvOffset, sizeof(t));
-
-    PERSISTENT_DATA_SWAP(data, &t);
-
-    return TPM_RC_SUCCESS;
-}
-
-void
-NvWrite_ORDERLY_DATA(ORDERLY_DATA *data)
-{
-    ORDERLY_DATA t;
-    UINT32 nvOffset = NV_ORDERLY_DATA;
-
-    NV_HEADER_INIT(&data->nvHeader, ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
-    ORDERLY_DATA_SWAP(&t, data);
-
-    NvWrite(nvOffset, sizeof(t), &t);
-}
-
-TPM_RC
-NvRead_ORDERLY_DATA(ORDERLY_DATA *data)
-{
-    NV_HEADER hdr;
-    ORDERLY_DATA t;
-    UINT32 nvOffset = NV_ORDERLY_DATA;
-
-    /* read header only */
-    NvRead(&hdr, nvOffset, sizeof(hdr));
-    NV_HEADER_SWAP(&t.nvHeader, &hdr);
-
-    /* newly initialized NVRAM has version and magic = 0 */
-    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
-        NV_HEADER_INIT(&t.nvHeader,
-                       ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
-
-    if (t.nvHeader.magic != ORDERLY_DATA_MAGIC) {
-        TPMLIB_LogTPM2Error("Invalid orderly data magic. Expected 0x%08x, got 0x%08x\n",
-                         ORDERLY_DATA_MAGIC, t.nvHeader.magic);
-        return TPM_RC_BAD_TAG;
-    }
-    if (t.nvHeader.version > ORDERLY_DATA_VERSION ||
-        t.nvHeader.version == 0) {
-        TPMLIB_LogTPM2Error("Unsupported orderly data version. Expected <= %d, got %d\n",
-                         ORDERLY_DATA_VERSION, t.nvHeader.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
-    switch (t.nvHeader.version) {
-    /* read data at given version and upgrade */
-    case ORDERLY_DATA_VERSION:
-        /* current version */
-        break;
-    }
-
-    NvRead(&t, nvOffset, sizeof(t));
-
-    ORDERLY_DATA_SWAP(data, &t);
-
-    return TPM_RC_SUCCESS;
-}
-
-void
-NvWrite_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data)
-{
-    STATE_CLEAR_DATA t;
-    UINT32 nvOffset = NV_STATE_CLEAR_DATA;
-
-    NV_HEADER_INIT(&data->nvHeader,
-                   STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
-    STATE_CLEAR_DATA_SWAP(&t, data);
-
-    NvWrite(nvOffset, sizeof(t), &t);
-}
-
-TPM_RC
-NvRead_STATE_CLEAR_DATA(STATE_CLEAR_DATA *data)
-{
-    NV_HEADER hdr;
-    STATE_CLEAR_DATA t;
-    UINT32 nvOffset = NV_STATE_CLEAR_DATA;
-
-    /* read header only */
-    NvRead(&hdr, nvOffset, sizeof(hdr));
-    NV_HEADER_SWAP(&t.nvHeader, &hdr);
-
-    /* newly initialized NVRAM has version and magic = 0 */
-    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
-        NV_HEADER_INIT(&t.nvHeader,
-                       STATE_CLEAR_DATA_VERSION, STATE_CLEAR_DATA_MAGIC);
-
-    if (t.nvHeader.magic != STATE_CLEAR_DATA_MAGIC) {
-        TPMLIB_LogTPM2Error("Invalid state clear data magic. Expected 0x%08x, got 0x%08x\n",
-                         STATE_CLEAR_DATA_MAGIC, t.nvHeader.magic);
-        return TPM_RC_BAD_TAG;
-    }
-    if (t.nvHeader.version > STATE_CLEAR_DATA_VERSION ||
-        t.nvHeader.version == 0) {
-        TPMLIB_LogTPM2Error("Unsupported state clear data version. Expected <= %d, got %d\n",
-                         STATE_CLEAR_DATA_VERSION, t.nvHeader.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
-    switch (t.nvHeader.version) {
-    /* read data at given version and upgrade */
-    case STATE_CLEAR_DATA_VERSION:
-        /* current version */
-        break;
-    }
-
-    NvRead(&t, nvOffset, sizeof(t));
-
-    STATE_CLEAR_DATA_SWAP(data, &t);
-
-    return TPM_RC_SUCCESS;
-}
-
-void
-NvWrite_STATE_RESET_DATA(STATE_RESET_DATA *data)
-{
-    STATE_RESET_DATA t;
-    UINT32 nvOffset = NV_STATE_RESET_DATA;
-
-    NV_HEADER_INIT(&data->nvHeader,
-                   STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
-    STATE_RESET_DATA_SWAP(&t, data);
-
-    NvWrite(nvOffset, sizeof(t), &t);
-}
-
-TPM_RC
-NvRead_STATE_RESET_DATA(STATE_RESET_DATA *data)
-{
-    NV_HEADER hdr;
-    STATE_RESET_DATA t;
-    UINT32 nvOffset = NV_STATE_RESET_DATA;
-
-    /* read header only */
-    NvRead(&hdr, nvOffset, sizeof(hdr));
-    NV_HEADER_SWAP(&t.nvHeader, &hdr);
-
-    /* newly initialized NVRAM has version and magic = 0 */
-    if (t.nvHeader.magic == 0 && t.nvHeader.version == 0)
-        NV_HEADER_INIT(&t.nvHeader,
-                       STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
-
-    if (t.nvHeader.magic != STATE_RESET_DATA_MAGIC) {
-        TPMLIB_LogTPM2Error("Invalid state reset data magic. Expected 0x%08x, got 0x%08x\n",
-                            STATE_RESET_DATA_MAGIC, t.nvHeader.magic);
-        return TPM_RC_BAD_TAG;
-    }
-    if (t.nvHeader.version > STATE_RESET_DATA_VERSION ||
-        t.nvHeader.version == 0) {
-        TPMLIB_LogTPM2Error("Unsupported state reset data version. Expected <= %d, got %d\n",
-                            STATE_RESET_DATA_VERSION, t.nvHeader.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
-    switch (t.nvHeader.version) {
-    /* read data at given version and upgrade */
-    case STATE_RESET_DATA_VERSION:
-        /* current version */
-        break;
-    }
-
-    NvRead(&t, nvOffset, sizeof(t));
-
-    STATE_RESET_DATA_SWAP(data, &t);
-
-    return TPM_RC_SUCCESS;
-}
-
-void
-NvRead_OBJECT_ATTRIBUTES(OBJECT_ATTRIBUTES *data, UINT32 nvOffset, UINT32 size)
-{
-    UINT32 t;
-
-    assert(sizeof(*data) == 4);
-
-    NvRead(&t, nvOffset, size);
-
-    *(UINT32 *)data = be32toh(t);
-}
-
-void
-NvRead_OBJECT(OBJECT *data, UINT32 nvOffset, UINT32 size)
-{
-    OBJECT t;
-
-    NvRead(&t, nvOffset, size);
-
-    ANY_OBJECT_SWAP(data, &t, TRUE);
-}
-
-void
-NvRead_TPMA_NV(TPMA_NV *data, UINT32 nvOffset, UINT32 size)
-{
-    TPMA_NV t;
-
-    assert(sizeof(*data) == 4);
-
-    NvRead(&t, nvOffset, size);
-
-    TPMA_NV_SWAP(data, &t);
-}
-
-void
-NvWrite_NV_INDEX(UINT32 nvOffset, UINT32 size, NV_INDEX *data)
-{
-    NV_INDEX t;
-
-    NV_INDEX_SWAP(&t, data);
-
-    NvWrite(nvOffset, size, &t);
-}
-
-void
-NvRead_NV_INDEX(NV_INDEX *data, UINT32 nvOffset, UINT32 size)
-{
-    NV_INDEX t;
-
-    NvRead(&t, nvOffset, size);
-
-    NV_INDEX_SWAP(data, &t);
-}
-
-void
-NvRead_NV_ENTRY_HEADER(NV_ENTRY_HEADER *data, UINT32 nvOffset, UINT32 size)
-{
-    NV_ENTRY_HEADER t;
-
-    NvRead(&t, nvOffset, size);
-
-    NV_ENTRY_HEADER_SWAP(data, &t);
-}
-
-void
-NvWrite_Array(UINT32 nvOffset, UINT32 size, BYTE *data)
-{
-    NvWrite(nvOffset, size, data);
-}
-
-/********************************************************************/
-
+/********************************************************************
+ * The following is a list of compile-time constants that we verify against
+ * when state is presented to us. Comparison operators allow us to verify
+ * compile time constants' values against what we would accept when reading
+ * state. So for example a value of 1024 for a buffer size that is read can
+ * be compared against the value that this implementation has been compiled
+ * with. In some case a 'less or equal' [LE] (1024 < 2048) may be acceptable
+ * but that depends on the purpose of the compile time constant. The most
+ * conservative approach is to force that the unmarshalled values are equal
+ * [EQ] to the ones of this implementation.
+ */
 static const struct _entry {
     UINT32 constant;
     char *name;
@@ -4121,14 +2887,14 @@ static const struct _entry {
     { COMPILE_CONSTANT(MAX_AES_KEY_BITS, EQ) },
     { COMPILE_CONSTANT(MAX_SM4_KEY_BITS, EQ) },
     { COMPILE_CONSTANT(MAX_CAMELLIA_KEY_BITS, EQ) },
-    { COMPILE_CONSTANT(ECC_NIST_P192, LE) },
-    { COMPILE_CONSTANT(ECC_NIST_P224, LE) },
-    { COMPILE_CONSTANT(ECC_NIST_P256, LE) },
-    { COMPILE_CONSTANT(ECC_NIST_P384, LE) },
-    { COMPILE_CONSTANT(ECC_NIST_P521, LE) },
-    { COMPILE_CONSTANT(ECC_BN_P256, LE) },
-    { COMPILE_CONSTANT(ECC_BN_P638, LE) },
-    { COMPILE_CONSTANT(ECC_SM2_P256, LE) },
+    { COMPILE_CONSTANT(ECC_NIST_P192, EQ) },
+    { COMPILE_CONSTANT(ECC_NIST_P224, EQ) },
+    { COMPILE_CONSTANT(ECC_NIST_P256, EQ) },
+    { COMPILE_CONSTANT(ECC_NIST_P384, EQ) },
+    { COMPILE_CONSTANT(ECC_NIST_P521, EQ) },
+    { COMPILE_CONSTANT(ECC_BN_P256, EQ) },
+    { COMPILE_CONSTANT(ECC_BN_P638, EQ) },
+    { COMPILE_CONSTANT(ECC_SM2_P256, EQ) },
     { COMPILE_CONSTANT(MAX_ECC_KEY_BITS, EQ) },
     { COMPILE_CONSTANT(HASH_ALIGNMENT, EQ) },
     { COMPILE_CONSTANT(SYMMETRIC_ALIGNMENT, EQ) },
@@ -4145,12 +2911,12 @@ static const struct _entry {
     { COMPILE_CONSTANT(MIN_EVICT_OBJECTS, EQ) },
     { COMPILE_CONSTANT(NUM_POLICY_PCR_GROUP, EQ) },
     { COMPILE_CONSTANT(NUM_AUTHVALUE_PCR_GROUP, EQ) },
-    { COMPILE_CONSTANT(MAX_CONTEXT_SIZE, LE) },
-    { COMPILE_CONSTANT(MAX_DIGEST_BUFFER, LE) },
-    { COMPILE_CONSTANT(MAX_NV_INDEX_SIZE, LE) },
-    { COMPILE_CONSTANT(MAX_NV_BUFFER_SIZE, LE) },
-    { COMPILE_CONSTANT(MAX_CAP_BUFFER, LE) },
-    { COMPILE_CONSTANT(NV_MEMORY_SIZE, LE) },
+    { COMPILE_CONSTANT(MAX_CONTEXT_SIZE, EQ) },
+    { COMPILE_CONSTANT(MAX_DIGEST_BUFFER, EQ) },
+    { COMPILE_CONSTANT(MAX_NV_INDEX_SIZE, EQ) },
+    { COMPILE_CONSTANT(MAX_NV_BUFFER_SIZE, EQ) },
+    { COMPILE_CONSTANT(MAX_CAP_BUFFER, EQ) },
+    { COMPILE_CONSTANT(NV_MEMORY_SIZE, EQ) },
     { COMPILE_CONSTANT(MIN_COUNTER_INDICES, EQ) },
     { COMPILE_CONSTANT(NUM_STATIC_PCR, EQ) },
     { COMPILE_CONSTANT(MAX_ALG_LIST_SIZE, EQ) },
@@ -4164,7 +2930,7 @@ static const struct _entry {
     { COMPILE_CONSTANT(ORDERLY_BITS, EQ) },
     { COMPILE_CONSTANT(MAX_SYM_DATA, EQ) },
     { COMPILE_CONSTANT(MAX_RNG_ENTROPY_SIZE, EQ) },
-    { COMPILE_CONSTANT(RAM_INDEX_SPACE, LE) },
+    { COMPILE_CONSTANT(RAM_INDEX_SPACE, EQ) },
     { COMPILE_CONSTANT(RSA_DEFAULT_PUBLIC_EXPONENT, EQ) },
     { COMPILE_CONSTANT(ENABLE_PCR_NO_INCREMENT, EQ) },
     { COMPILE_CONSTANT(CRT_FORMAT_RSA, EQ) },
@@ -4281,6 +3047,9 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
 
     return rc;
 }
+
+#define PERSISTENT_DATA_MAGIC   0x12213443
+#define PERSISTENT_DATA_VERSION 1
 
 static UINT16
 PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
@@ -4544,7 +3313,7 @@ PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     }
     if (rc != TPM_RC_SUCCESS) {
         TPMLIB_LogTPM2Error("Failed to unmarshal PERSISTENT_DATA version %u\n",
-                            data->nvHeader.version);
+                            hdr.version);
     }
     return rc;
 }
@@ -4709,7 +3478,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
 
     while (TRUE) {
         /* 1st: entrysize */
-        NvRead_UINT32(&entrysize, entryRef, sizeof(entrysize));
+        NvRead(&entrysize, entryRef, sizeof(entrysize));
         offset = sizeof(UINT32);
 
         /* entrysize is in native format now */
@@ -4718,7 +3487,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             break;
 
         /* 2nd: the handle -- it will tell us what datatype this is */
-        NvRead_UINT32(&handle, entryRef + offset, sizeof(handle));
+        NvRead(&handle, entryRef + offset, sizeof(handle));
         written += TPM_HANDLE_Marshal(&handle, buffer, size);
 
         switch (HandleGetType(handle)) {
@@ -4740,7 +3509,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
         case TPM_HT_PERSISTENT:
             offset += sizeof(handle);
 
-            NvRead_OBJECT(&obj, entryRef + offset, sizeof(obj));
+            NvRead(&obj, entryRef + offset, sizeof(obj));
             offset += sizeof(obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
         break;
@@ -4750,7 +3519,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
         /* advance to next entry */
         entryRef += entrysize;
     }
-    NvRead_UINT64(&maxCount, entryRef + offset, sizeof(maxCount));
+    NvRead(&maxCount, entryRef + offset, sizeof(maxCount));
     written += UINT64_Marshal(&maxCount, buffer, size);
 
     return written;
@@ -4765,9 +3534,9 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     UINT32 entrysize;
     UINT64 offset, o = 0;
     NV_INDEX nvi;
-    UINT64 maxCount, be_maxCount;
+    UINT64 maxCount;
     TPM_HANDLE handle;
-    OBJECT obj, be_obj;
+    OBJECT obj;
     UINT32 datasize;
     UINT64 sourceside_size;
     UINT64 array_size = NV_USER_DYNAMIC - NV_USER_DYNAMIC_END;
@@ -4797,7 +3566,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
         if (rc == TPM_RC_SUCCESS) {
             rc = UINT32_Unmarshal(&entrysize, buffer, size);
 
-            NvWrite_UINT32(entryRef + o, sizeof(entrysize), &entrysize);
+            NvWrite(entryRef + o, sizeof(entrysize), &entrysize);
             offset = sizeof(UINT32);
             if (entrysize == 0)
                 break;
@@ -4818,7 +3587,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 }
                 if (rc == TPM_RC_SUCCESS) {
                     rc = NV_INDEX_Unmarshal(&nvi, buffer, size);
-                    NvWrite_NV_INDEX(entryRef + o + offset, sizeof(nvi), &nvi);
+                    NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
                     offset += sizeof(nvi);
                 }
                 if (rc == TPM_RC_SUCCESS) {
@@ -4845,13 +3614,12 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 }
 
                 if (rc == TPM_RC_SUCCESS) {
-                    NvWrite_UINT32(entryRef + o + offset, sizeof(handle), &handle);
+                    NvWrite(entryRef + o + offset, sizeof(handle), &handle);
                     offset += sizeof(TPM_HANDLE);
 
                     memset(&obj, 0, sizeof(obj));
                     rc = ANY_OBJECT_Unmarshal(&obj, buffer, size);
-                    ANY_OBJECT_SWAP(&be_obj, &obj, FALSE);
-                    NvWrite(entryRef + o + offset, sizeof(be_obj), &be_obj);
+                    NvWrite(entryRef + o + offset, sizeof(obj), &obj);
                     offset += sizeof(obj);
                 }
             break;
@@ -4873,8 +3641,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&maxCount, buffer, size);
-        be_maxCount = htobe64(maxCount);
-        NvWrite(entryRef + o + offset, sizeof(maxCount), &be_maxCount);
+        NvWrite(entryRef + o + offset, sizeof(maxCount), &maxCount);
     }
 
     return rc;
@@ -4901,7 +3668,7 @@ exit_size:
 #define PERSISTENT_ALL_VERSION 1
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
-PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size, TPM_RC *rc)
+PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 {
     NV_HEADER hdr;
     PERSISTENT_DATA pd;
@@ -4911,20 +3678,10 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size, TPM_RC *rc)
     UINT32 written = 0;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
 
-    *rc = TPM_RC_SUCCESS;
-
-    if (*rc == TPM_RC_SUCCESS) {
-        *rc = NvRead_PERSISTENT_DATA(&pd);
-    }
-    if (*rc == TPM_RC_SUCCESS) {
-        *rc = NvRead_ORDERLY_DATA(&od);
-    }
-    if (*rc == TPM_RC_SUCCESS) {
-        *rc = NvRead_STATE_RESET_DATA(&srd);
-    }
-    if (*rc == TPM_RC_SUCCESS) {
-        *rc = NvRead_STATE_CLEAR_DATA(&scd);
-    }
+    NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
+    NvRead(&od, NV_ORDERLY_DATA, sizeof(od));
+    NvRead(&srd, NV_STATE_RESET_DATA, sizeof(srd));
+    NvRead(&scd, NV_STATE_CLEAR_DATA, sizeof(scd));
 
     /* indexOrderlyRam was never endianess-converted; so it's native */
     NvRead(indexOrderlyRam, NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam));
@@ -5004,10 +3761,10 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     }
 
     if (rc == TPM_RC_SUCCESS) {
-        NvWrite_PERSISTENT_DATA(&pd);
-        NvWrite_ORDERLY_DATA(&od);
-        NvWrite_STATE_RESET_DATA(&srd);
-        NvWrite_STATE_CLEAR_DATA(&scd);
+        NvWrite(NV_PERSISTENT_DATA, sizeof(pd), &pd);
+        NvWrite(NV_ORDERLY_DATA, sizeof(od), &od);
+        NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd);
+        NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
         NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
     }
 
