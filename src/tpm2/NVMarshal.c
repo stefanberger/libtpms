@@ -84,6 +84,128 @@ typedef struct
     UINT32 magic;
 } NV_HEADER;
 
+static UINT8 BOOL_Marshal(BOOL *boolean, BYTE **buffer, INT32 *size);
+static TPM_RC BOOL_Unmarshal(BOOL *boolean, BYTE **buffer, INT32 *size);
+
+/*
+ * There are compile-time optional variables that we marshal. To allow
+ * for some flexibility, we marshal them in such a way that these
+ * variables can be skipped if they are in the byte stream but are not
+ * needed by the implementation. The following block_skip data structure
+ * and related functions address this issue.
+ */
+typedef struct {
+    size_t idx;
+    size_t sz;
+    struct position {
+        BYTE *buffer;
+        INT32 size;
+    } pos[5]; /* more only needed for nested compile-time #ifdef's */
+} block_skip;
+
+/*
+ * This function is to be called when an optional block follows. It inserts
+ * a BOOL into the byte stream indicating whether the block is there or not.
+ * Then it leaves a 16bit zero in the byt stream and remembers the location
+ * of that zero. We will update the location with the number of optional
+ * bytes written when block_skip_write_pop() is called.
+ */
+static UINT16
+block_skip_write_push(block_skip *bs, BOOL has_block,
+                      BYTE **buffer, INT32 *size) {
+    UINT16 written , w;
+    UINT16 zero = 0;
+    written = BOOL_Marshal(&has_block, buffer, size);
+    bs->pos[bs->idx].buffer = *buffer;
+    bs->pos[bs->idx].size = *size;
+    w = UINT16_Marshal(&zero, buffer, size);
+    if (w) {
+        bs->idx++;
+        pAssert(bs->idx < bs->sz);
+        written += w;
+    }
+    return written;
+}
+
+/*
+ * This function must be called for every block_skip_write_push() call.
+ * It has to be called once a compile-time optional block has been
+ * processed. It must be called after the #endif.
+ * In this function we updated the previously remembered location with
+ * the numbers of bytes to skip in case a block is there but it is not
+ * needed.
+ */
+static void
+block_skip_write_pop(block_skip *bs, INT32 *size) {
+    UINT16 skip;
+    unsigned i = --bs->idx;
+    pAssert(bs->idx >= 0);
+    skip = bs->pos[i].size - *size - sizeof(UINT16);
+    UINT16_Marshal(&skip, &bs->pos[i].buffer, &bs->pos[i].size);
+}
+
+/*
+ * This function must be called when unmarshalling a byte stream and
+ * a compile-time optional block follows. In case the compile-time
+ * optinal block is there but not in the byte stream, we log an error.
+ * In case the bytes stream contains the block, but we don't need it
+ * we skip it. In the other cases we don't need to do anything since
+ * the code is 'in sync' with the byte stream.
+ */
+static TPM_RC
+block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
+                const char *name, const char *field,
+                BOOL *skip_code)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    BOOL has_block;
+    UINT16 blocksize;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = BOOL_Unmarshal(&has_block, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&blocksize, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (!has_block && needs_block) {
+            TPMLIB_LogTPM2Error("%s needs missing %s\n", name, field);
+            rc = TPM_RC_BAD_PARAMETER;
+        } else if (has_block && !needs_block) {
+            /* byte stream has the data but we don't need them */
+            *buffer += blocksize;
+            *size -= blocksize;
+            *skip_code = TRUE;
+        }
+    }
+    return rc;
+}
+
+#define BLOCK_SKIP_INIT				\
+    block_skip block_skip = {			\
+        .idx = 0,				\
+        .sz = ARRAY_SIZE(block_skip.pos),	\
+    }
+
+#define BLOCK_SKIP_WRITE_PUSH(HAS_BLOCK, BUFFER, POS) \
+    block_skip_write_push(&block_skip, HAS_BLOCK, BUFFER, POS)
+
+#define BLOCK_SKIP_WRITE_POP(SIZE) \
+    block_skip_write_pop(&block_skip, SIZE)
+
+#define BLOCK_SKIP_WRITE_CHECK \
+    pAssert(block_skip.idx == 0)
+
+#define BLOCK_SKIP_READ(SKIP_MARK, NEEDS_BLOCK, BUFFER, SIZE, NAME, FIELD) \
+    {									\
+        BOOL skip_code = FALSE;						\
+        rc = block_skip_read(NEEDS_BLOCK, buffer, size, 		\
+                             NAME, FIELD, &skip_code);			\
+        if (rc == TPM_RC_SUCCESS && skip_code)				\
+            goto SKIP_MARK;						\
+    }
+
+
 /* BOOL is 'int' but we store a single byte */
 static UINT8
 BOOL_Marshal(BOOL *boolean, BYTE **buffer, INT32 *size)
@@ -402,6 +524,7 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     BOOL has_block;
+    BLOCK_SKIP_INIT;
 
     written =  NV_HEADER_Marshal(buffer, size,
                                  ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
@@ -415,13 +538,16 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #ifdef ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&data->selfHealTimer, buffer, size);
     written += UINT64_Marshal(&data->lockoutTimer, buffer, size);
     written += UINT64_Marshal(&data->time, buffer, size);
 #endif // ACCUMULATE_SELF_HEAL_TIMER
+
+    BLOCK_SKIP_WRITE_POP(size);
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -430,7 +556,7 @@ TPM_RC
 ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    BOOL needs_block, has_block;
+    BOOL needs_block;
     NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -459,12 +585,8 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("ORDERLY_DATA %s selfHealTimer\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_self_heal_timer, needs_block, buffer, size,
+                        "ORDERLY DATA", "selfHealTimer");
     }
 #ifdef ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
@@ -477,6 +599,7 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&data->time, buffer, size);
     }
 #endif // ACCUMULATE_SELF_HEAL_TIMER
+skip_self_heal_timer:
 
     return rc;
 }
@@ -935,9 +1058,10 @@ TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    BOOL needs_block, has_block;
+    BOOL needs_block;
     UINT16 array_size;
     NV_HEADER hdr;
+    BLOCK_SKIP_INIT;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -996,12 +1120,8 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("STATE_RESET_DATA %s commitCounter\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_alg_ecc, needs_block, buffer, size,
+                        "STATE_RESET_DATA", "commitCounter");
     }
 #ifdef TPM_ALG_ECC
     if (rc == TPM_RC_SUCCESS) {
@@ -1026,7 +1146,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
                               buffer, size);
     }
 #endif
-
+skip_alg_ecc:
     return rc;
 }
 
@@ -1036,6 +1156,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     BOOL has_block;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 STATE_RESET_DATA_VERSION, STATE_RESET_DATA_MAGIC);
@@ -1059,7 +1180,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #ifdef TPM_ALG_ECC
     written += UINT64_Marshal(&data->commitCounter, buffer, size);
@@ -1070,6 +1191,8 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->commitArray, array_size,
                              buffer, size);
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1847,6 +1970,7 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     BOOL has_block;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 OBJECT_VERSION, OBJECT_MAGIC);
@@ -1862,14 +1986,18 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 #ifdef TPM_ALG_RSA
     written += privateExponent_t_Marshal(&data->privateExponent,
                                          buffer, size);
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
+
     written += TPM2B_NAME_Marshal(&data->qualifiedName, buffer, size);
     written += TPM_HANDLE_Marshal(&data->evictHandle, buffer, size);
     written += TPM2B_NAME_Marshal(&data->name, buffer, size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1879,7 +2007,7 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
-    BOOL needs_block, has_block;
+    BOOL needs_block;
 
     /*
      * attributes are read in ANY_OBJECT_Unmarshal
@@ -1907,20 +2035,17 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
+        BLOCK_SKIP_READ(skip_alg_rsa, needs_block, buffer, size,
+                        "OBJECT", "privateExponent");
     }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("OBJECT %s privateExponent\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
-    }
-
 #ifdef TPM_ALG_RSA
     if (rc == TPM_RC_SUCCESS) {
         rc = privateExponent_t_Unmarshal(&data->privateExponent,
                                          buffer, size);
     }
 #endif
+skip_alg_rsa:
+
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_NAME_Unmarshal(&data->qualifiedName, buffer, size);
     }
@@ -2183,6 +2308,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     UINT32 tmp_uint32;
     BOOL has_block;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC);
@@ -2208,12 +2334,13 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #ifdef USE_DA_USED
     /* g_daUsed: must write */
     written += BOOL_Marshal(&g_daUsed, buffer, size); /* line 484 */
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
     /* g_updateNV: can skip since it seems to only be valid during execution of a command*/
     /* g_powerWasLost: must write */
@@ -2247,8 +2374,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-    written += BOOL_Marshal(&has_block, buffer, size);
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     /*
      * The session related variables may only be valid during the execution
@@ -2274,35 +2401,49 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #ifdef  TPM_CC_GetCommandAuditDigest
     /* s_cpHashForCommandAudit: seems not used; better to write it */
     written += TPM2B_DIGEST_Marshal(&s_cpHashForCommandAudit, buffer, size);
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
     /* s_DAPendingOnNV: needs investigation ... */
     written += BOOL_Marshal(&s_DAPendingOnNV, buffer, size);
+#endif // SESSION_PROCESS_C
+    BLOCK_SKIP_WRITE_POP(size);
+
+#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+    has_block = TRUE;
+#else
+    has_block = FALSE;
 #endif
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
+
+#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
 
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&s_selfHealTimer, buffer, size); /* line 975 */
     written += UINT64_Marshal(&s_lockoutTimer, buffer, size); /* line 977 */
-#endif
+#endif // ACCUMULATE_SELF_HEAL_TIMER
+    BLOCK_SKIP_WRITE_POP(size);
+#endif // DA_C
+    BLOCK_SKIP_WRITE_POP(size);
 
 #if defined NV_C || defined GLOBAL_C
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
     /* s_evictNvEnd set in NvInitStatic called by NvPowerOn in case g_powerWasLost
      * Unless we set g_powerWasLost=TRUE and call NvPowerOn, we have to include it.
      */
@@ -2324,13 +2465,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      * - s_cachedNvRamRef
      */
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
 #if defined OBJECT_C || defined GLOBAL_C
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined OBJECT_C || defined GLOBAL_C
     /* used in many places; it doesn't look like TPM2_Shutdown writes this into
@@ -2343,13 +2485,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
         written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size);
     }
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
 #if defined PCR_C || defined GLOBAL_C
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined PCR_C || defined GLOBAL_C
     /* s_pcrs: Marshal *all* PCRs, even those for which stateSave bit is not set */
@@ -2360,13 +2503,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
         written += PCR_Marshal(&s_pcrs[i], buffer, size);
     }
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
 #if defined SESSION_C || defined GLOBAL_C
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined SESSION_C || defined GLOBAL_C
     /* s_sessions: */
@@ -2381,6 +2525,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     /* s_freeSessionSlots: */
     written += UINT32_Marshal((UINT32 *)&s_freeSessionSlots, buffer, size);
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
 #if defined IO_BUFFER_C || defined GLOBAL_C
     /* s_actionInputBuffer: skip; only used during a single command */
@@ -2392,15 +2537,35 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     tpmEst = _rpc__Signal_GetTPMEstablished();
     written += BOOL_Marshal(&tpmEst, buffer, size);
 
-    /* appended in v2 */
+#if defined TPM_FAIL_C || defined GLOBAL_C || 1
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
+
+#if defined TPM_FAIL_C || defined GLOBAL_C || 1
     written += UINT32_Marshal(&s_failFunction, buffer, size);
     written += UINT32_Marshal(&s_failLine, buffer, size);
     written += UINT32_Marshal(&s_failCode, buffer, size);
+#endif // TPM_FAIL_C
+    BLOCK_SKIP_WRITE_POP(size);
 
+#ifndef HARDWARE_CLOCK
+    has_block = TRUE;
+#else
+    has_block = FALSE;
+#endif
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
+
+#ifndef HARDWARE_CLOCK
     tmp_uint64 = s_realTimePrevious;
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
     tmp_uint64 = s_tpmTime;
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
+#endif
+    BLOCK_SKIP_WRITE_POP(size);
+
     written += BOOL_Marshal(&s_timerReset, buffer, size);
     written += BOOL_Marshal(&s_timerStopped, buffer, size);
     written += UINT32_Marshal(&s_adjustRate, buffer, size);
@@ -2414,6 +2579,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     tmp_uint32 = VOLATILE_STATE_MAGIC;
     written += UINT32_Marshal(&tmp_uint32, buffer, size);
 
+    BLOCK_SKIP_WRITE_CHECK;
+
     return written;
 }
 
@@ -2425,7 +2592,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     UINT64 tmp_uint64;
     UINT32 tmp_uint32;
     NV_HEADER hdr;
-    BOOL has_block, needs_block;
+    BOOL needs_block;
     UINT16 array_size;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2468,18 +2635,15 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s g_daUsed\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_da, needs_block, buffer, size,
+                        "Volatile state", "g_daUsed");
     }
 #ifdef USE_DA_USED
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_daUsed, buffer, size); /* line 484 */
     }
 #endif
+skip_da:
 
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_powerWasLost, buffer, size); /* line 504 */
@@ -2522,12 +2686,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_sessionHandles\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_session_process, needs_block, buffer, size,
+                        "Volatile state", "s_sessionHandles");
     }
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     if (rc == TPM_RC_SUCCESS) {
@@ -2574,35 +2734,41 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_cpHashForCommandAudit\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_cc_getcommandauditdigest, needs_block, buffer, size,
+                        "Volatile state", "s_cpHashForCommandAudit");
     }
 #ifdef  TPM_CC_GetCommandAuditDigest
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_DIGEST_Unmarshal(&s_cpHashForCommandAudit, buffer, size);
     }
 #endif
+skip_cc_getcommandauditdigest:
+
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&s_DAPendingOnNV, buffer, size);
     }
-#endif
+#endif /* SESSION_PROCESS_C */
+skip_session_process:
 
+#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        BLOCK_SKIP_READ(skip_accumulate_self_heal_timer_1, needs_block, buffer, size,
+                        "Volatile state", "s_selfHealTimer.1");
+    }
+
+#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     needs_block = TRUE;
 #else
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_selfHealTimer\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_accumulate_self_heal_timer_2, needs_block, buffer, size,
+                        "Volatile state", "s_selfHealTimer.2");
     }
 #ifndef ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
@@ -2612,6 +2778,9 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&s_lockoutTimer, buffer, size); /* line 977 */
     }
 #endif
+skip_accumulate_self_heal_timer_2:
+#endif
+skip_accumulate_self_heal_timer_1:
 
 #if defined NV_C || defined GLOBAL_C
     needs_block = TRUE;
@@ -2619,12 +2788,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_evictNvEnd\n",
-                             needs_block ? "needs missing" : "does not need");;
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_nv, needs_block, buffer, size,
+                        "Volatile state", "s_evictNvEnd");
     }
 
 #if defined NV_C || defined GLOBAL_C
@@ -2654,6 +2819,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
      * - s_cachedNvRamRef
      */
 #endif
+skip_nv:
 
 #if defined OBJECT_C || defined GLOBAL_C
     needs_block = TRUE;
@@ -2661,12 +2827,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_objects\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_object, needs_block, buffer, size,
+                        "Volatile state", "s_objects");
     }
 #if defined OBJECT_C || defined GLOBAL_C
     if (rc == TPM_RC_SUCCESS) {
@@ -2683,6 +2845,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size);
     }
 #endif
+skip_object:
 
 #if defined PCR_C || defined GLOBAL_C
     needs_block = TRUE;
@@ -2690,12 +2853,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_pcrs\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_pcr, needs_block, buffer, size,
+                        "Volatile state", "s_pcrs");
     }
 #if defined PCR_C || defined GLOBAL_C
     if (rc == TPM_RC_SUCCESS) {
@@ -2712,6 +2871,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = PCR_Unmarshal(&s_pcrs[i], buffer, size);
     }
 #endif
+skip_pcr:
 
 #if defined SESSION_C || defined GLOBAL_C
     needs_block = TRUE;
@@ -2719,12 +2879,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("Volatile state %s s_sessions\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
+        BLOCK_SKIP_READ(skip_session, needs_block, buffer, size,
+                        "Volatile state", "s_sessions");
     }
 #if defined SESSION_C || defined GLOBAL_C
     if (rc == TPM_RC_SUCCESS) {
@@ -2750,6 +2906,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal((UINT32 *)&s_freeSessionSlots, buffer, size);
     }
 #endif
+skip_session:
+
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_inFailureMode, buffer, size); /* line 1078 */
     }
@@ -2766,6 +2924,17 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         }
     }
 
+#if defined TPM_FAIL_C || defined GLOBAL_C || 1
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        BLOCK_SKIP_READ(skip_fail, needs_block, buffer, size,
+                        "Volatile state", "s_failFunction");
+    }
+
+#if defined TPM_FAIL_C || defined GLOBAL_C || 1
     /* appended in v2 */
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&s_failFunction, buffer, size);
@@ -2776,7 +2945,20 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&s_failCode, buffer, size);
     }
+#endif
+skip_fail:
 
+#ifndef HARDWARE_CLOCK
+    needs_block = TRUE;
+#else
+    needs_block = FALSE;
+#endif
+    if (rc == TPM_RC_SUCCESS) {
+        BLOCK_SKIP_READ(skip_hardware_clock, needs_block, buffer, size,
+                        "Volatile state", "s_realTimePrevious");
+    }
+
+#ifndef HARDWARE_CLOCK
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
         s_realTimePrevious = tmp_uint64;
@@ -2785,6 +2967,9 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
         s_tpmTime = tmp_uint64;
     }
+#endif
+skip_hardware_clock:
+
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&s_timerReset, buffer, size);
     }
@@ -3054,6 +3239,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     UINT16 array_size;
     UINT8 clocksize;
     BOOL has_block;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_DATA_VERSION,
@@ -3082,11 +3268,12 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 #else
     has_block = FALSE;
 #endif
-    written += BOOL_Marshal(&has_block, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     written += PCR_POLICY_Marshal(&data->pcrPolicies, buffer, size);
 #endif
+    BLOCK_SKIP_WRITE_POP(size);
 
     written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
 
@@ -3132,7 +3319,7 @@ PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     NV_HEADER hdr;
     UINT16 array_size;
     UINT8 clocksize;
-    BOOL needs_block, has_block;
+    BOOL needs_block;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size, PERSISTENT_DATA_MAGIC);
@@ -3207,19 +3394,16 @@ PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&has_block, buffer, size);
+        BLOCK_SKIP_READ(skip_num_policy_pcr_group, needs_block, buffer, size,
+                        "PERSISTENT_DATA", "pcrPolicies");
     }
-    if (rc == TPM_RC_SUCCESS && needs_block != has_block) {
-         TPMLIB_LogTPM2Error("PERSISTENT_DATA %s pcrPolicies\n",
-                             needs_block ? "needs missing" : "does not need");
-         rc = TPM_RC_BAD_PARAMETER;
-    }
-
 #if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     if (rc == TPM_RC_SUCCESS) {
         rc = PCR_POLICY_Unmarshal(&data->pcrPolicies, buffer, size);
     }
 #endif
+skip_num_policy_pcr_group:
+
     if (rc == TPM_RC_SUCCESS) {
         rc = TPML_PCR_SELECTION_Unmarshal(&data->pcrAllocated, buffer, size);
     }
