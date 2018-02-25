@@ -95,7 +95,7 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
         rc = Array_Unmarshal(hash, sizeof(hash), buffer, size);
         if (rc != TPM_RC_SUCCESS)
             TPMLIB_LogTPM2Error("Error unmarshalling volatile state hash: "
-                                "0x%02x", rc);
+                                "0x%02x\n", rc);
     }
 
     if (rc == TPM_RC_SUCCESS) {
