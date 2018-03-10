@@ -17,6 +17,7 @@ man3_PODS = \
 	TPMLIB_RegisterCallbacks.pod \
 	TPMLIB_SetBufferSize.pod \
 	TPMLIB_SetDebugFD.pod \
+	TPMLIB_SetState.pod \
 	TPMLIB_ValidateState.pod \
 	TPMLIB_VolatileAll_Store.pod \
 	TPM_Malloc.pod
@@ -25,6 +26,7 @@ man3_MANS = \
 	TPM_Free.3 \
 	TPM_IO_Hash_Data.3 \
 	TPM_IO_Hash_End.3 \
+	TPMLIB_GetState.3 \
 	TPMLIB_SetDebugPrefix.3 \
 	TPMLIB_SetDebugLevel.3 \
 	TPMLIB_Terminate.3 \
@@ -41,6 +43,7 @@ man3_MANS += \
 	TPMLIB_Process.3 \
 	TPMLIB_SetDebugFD.3 \
 	TPMLIB_SetBufferSize.3 \
+	TPMLIB_SetState.3 \
 	TPMLIB_RegisterCallbacks.3 \
 	TPMLIB_ValidateState.3 \
 	TPMLIB_VolatileAll_Store.3 \

@@ -39,6 +39,7 @@
 #ifndef TPM_LIBRARY_INTERN_H
 #define TPM_LIBRARY_INTERN_H
 
+#include <stdbool.h>
 #include "tpm_library.h"
 
 #define ROUNDUP(VAL, SIZE) \
@@ -68,6 +69,10 @@ struct tpm_interface {
     TPM_RESULT (*HashEnd)(void);
     TPM_RESULT (*ValidateState)(enum TPMLIB_StateType st,
                                 unsigned int flags);
+    TPM_RESULT (*SetState)(enum TPMLIB_StateType st,
+                           const unsigned char *buffer, uint32_t buflen);
+    TPM_RESULT (*GetState)(enum TPMLIB_StateType st,
+                           unsigned char **buffer, uint32_t *buflen);
 };
 
 extern const struct tpm_interface TPM12Interface;
@@ -87,5 +92,25 @@ void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...);
 
 #define TPMLIB_LogTPM12Error(format, ...) \
      TPMLIB_LogPrintfA(~0, "libtpms/tpm12: "format, __VA_ARGS__)
+
+struct sized_buffer {
+    unsigned char *buffer;
+    uint32_t buflen;
+#define BUFLEN_EMPTY_BUFFER 0xFFFFFFFF
+};
+
+void ClearCachedState(enum TPMLIB_StateType st);
+void SetCachedState(enum TPMLIB_StateType st,
+                    unsigned char *buffer, uint32_t buflen);
+void GetCachedState(enum TPMLIB_StateType st,
+                    unsigned char **buffer, uint32_t *buflen,
+                    bool *is_empty_buffer);
+bool HasCachedState(enum TPMLIB_StateType st);
+TPM_RESULT CopyCachedState(enum TPMLIB_StateType st,
+                           unsigned char **buffer, uint32_t *buflen,
+                           bool *is_empty_buffer);
+
+const char *TPMLIB_StateTypeToName(enum TPMLIB_StateType st);
+enum TPMLIB_StateType TPMLIB_NameToStateType(const char *name);
 
 #endif /* TPM_LIBRARY_INTERN_H */

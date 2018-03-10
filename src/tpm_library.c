@@ -46,6 +46,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #ifdef USE_FREEBL_CRYPTO_LIBRARY
 # include <plbase64.h>
@@ -61,6 +62,7 @@
 #include "tpm_library.h"
 #include "tpm_library_intern.h"
 #include "tpm_memory.h"
+#include "tpm_nvfilename.h"
 
 static const struct tags_and_indices {
     const char    *starttag;
@@ -80,6 +82,8 @@ static const struct tpm_interface *const tpm_iface[] = {
 static int debug_fd = -1;
 static unsigned debug_level = 0;
 static char *debug_prefix = NULL;
+
+static struct sized_buffer cached_blobs[TPMLIB_STATE_SAVE_STATE + 1];
 
 uint32_t TPMLIB_GetVersion(void)
 {
@@ -465,4 +469,87 @@ void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
     va_start(args, format);
     vdprintf(fd, format, args);
     va_end(args);
+}
+
+void ClearCachedState(enum TPMLIB_StateType st)
+{
+    free(cached_blobs[st].buffer);
+    cached_blobs[st].buffer = NULL;
+    cached_blobs[st].buflen = 0;
+}
+
+/*
+ * Set buffer for cached state; we allow setting an empty cached state
+ * by the caller passing a NULL pointer for the buffer.
+ */
+void SetCachedState(enum TPMLIB_StateType st,
+                    unsigned char *buffer, uint32_t buflen)
+{
+    free(cached_blobs[st].buffer);
+    cached_blobs[st].buffer = buffer;
+    cached_blobs[st].buflen = buffer ? buflen : BUFLEN_EMPTY_BUFFER;
+}
+
+void GetCachedState(enum TPMLIB_StateType st,
+                    unsigned char **buffer, uint32_t *buflen,
+                    bool *is_empty_buffer)
+{
+     /* caller owns blob now */
+    *buffer = cached_blobs[st].buffer;
+    *buflen = cached_blobs[st].buflen;
+    *is_empty_buffer = (*buflen == BUFLEN_EMPTY_BUFFER);
+    cached_blobs[st].buffer = NULL;
+    cached_blobs[st].buflen = 0;
+}
+
+bool HasCachedState(enum TPMLIB_StateType st)
+{
+    return (cached_blobs[st].buffer != NULL || cached_blobs[st].buflen != 0);
+}
+
+TPM_RESULT CopyCachedState(enum TPMLIB_StateType st,
+                           unsigned char **buffer, uint32_t *buflen,
+                           bool *is_empty_buffer)
+{
+    TPM_RESULT ret = TPM_SUCCESS;
+
+    /* buflen may indicate an empty buffer */
+    *buflen = cached_blobs[st].buflen;
+    *is_empty_buffer = (*buflen == BUFLEN_EMPTY_BUFFER);
+
+    if (cached_blobs[st].buffer) {
+        ret = TPM_Malloc(buffer, *buflen);
+        if (ret == TPM_SUCCESS)
+            memcpy(*buffer, cached_blobs[st].buffer, *buflen);
+    } else {
+        *buffer = NULL;
+    }
+
+    return ret;
+}
+
+const char *TPMLIB_StateTypeToName(enum TPMLIB_StateType st)
+{
+    switch (st) {
+    case TPMLIB_STATE_PERMANENT:
+        return TPM_PERMANENT_ALL_NAME;
+    case TPMLIB_STATE_VOLATILE:
+        return TPM_VOLATILESTATE_NAME;
+    case TPMLIB_STATE_SAVE_STATE:
+        return TPM_SAVESTATE_NAME;
+    }
+    return NULL;
+}
+
+enum TPMLIB_StateType TPMLIB_NameToStateType(const char *name)
+{
+    if (!name)
+        return 0;
+    if (!strcmp(name, TPM_PERMANENT_ALL_NAME))
+        return TPMLIB_STATE_PERMANENT;
+    if (!strcmp(name, TPM_VOLATILESTATE_NAME))
+        return TPMLIB_STATE_VOLATILE;
+    if (!strcmp(name, TPM_SAVESTATE_NAME))
+        return TPMLIB_STATE_SAVE_STATE;
+    return 0;
 }
