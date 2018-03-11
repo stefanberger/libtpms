@@ -265,6 +265,13 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
 {
     TPM_RESULT ret = TPM_SUCCESS;
     tpm_state_t tpm_state;
+    enum TPMLIB_StateType sts[] = {
+        TPMLIB_STATE_PERMANENT,
+        TPMLIB_STATE_VOLATILE,
+        TPMLIB_STATE_SAVE_STATE,
+        0,
+    };
+    unsigned i;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -279,17 +286,18 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
     ret = TPM_Global_Init(&tpm_state);
     tpm_state.tpm_number = 0;
 
-    if ((ret == TPM_SUCCESS)) {
-        /* permanent state needs to be there and loaded first */
-        ret = TPM_PermanentAll_NVLoad(&tpm_state);
-    }
-
-    if ((ret == TPM_SUCCESS) && (st & TPMLIB_STATE_VOLATILE)) {
-        ret = TPM_VolatileAll_NVLoad(&tpm_state);
-    }
-
-    if ((ret == TPM_SUCCESS) && (st & TPMLIB_STATE_SAVE_STATE)) {
-        ret = TPM_SaveState_NVLoad(&tpm_state);
+    for (i = 0; sts[i] && ret == TPM_SUCCESS; i++) {
+        switch (st & sts[i]) {
+        case TPMLIB_STATE_PERMANENT:
+            ret = TPM_PermanentAll_NVLoad(&tpm_state);
+            break;
+        case TPMLIB_STATE_VOLATILE:
+            ret = TPM_VolatileAll_NVLoad(&tpm_state);
+            break;
+        case TPMLIB_STATE_SAVE_STATE:
+            ret = TPM_SaveState_NVLoad(&tpm_state);
+            break;
+        }
     }
 
     TPM_Global_Delete(&tpm_state);
