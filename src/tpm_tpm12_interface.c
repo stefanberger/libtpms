@@ -273,6 +273,7 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
         TPMLIB_STATE_SAVE_STATE,
         0,
     };
+    enum TPMLIB_StateType c_st;
     unsigned i;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
@@ -289,7 +290,13 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
     tpm_state.tpm_number = 0;
 
     for (i = 0; sts[i] && ret == TPM_SUCCESS; i++) {
-        switch (st & sts[i]) {
+        c_st = st & sts[i];
+
+        /* 'cached' state is known to 'work', so skip it */
+        if (!c_st || !HasCachedState(c_st))
+            continue;
+
+        switch (c_st) {
         case TPMLIB_STATE_PERMANENT:
             ret = TPM_PermanentAll_NVLoad(&tpm_state);
             break;
