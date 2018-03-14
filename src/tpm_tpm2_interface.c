@@ -132,6 +132,8 @@ TPM_RESULT TPM2_MainInit(void)
 void TPM2_Terminate(void)
 {
     TPM_TearDown();
+
+    _rpc__Signal_PowerOff();
 }
 
 TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
