@@ -137,5 +137,6 @@ const char *TPMLIB_StateTypeToName(enum TPMLIB_StateType st);
 enum TPMLIB_StateType TPMLIB_NameToStateType(const char *name);
 
 uint32_t TPM2_GetBufferSize(void);
+TPM_RESULT TPM2_PersistentAllStore(unsigned char **buf, uint32_t *buflen);
 
 #endif /* TPM_LIBRARY_INTERN_H */

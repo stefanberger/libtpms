@@ -182,6 +182,44 @@ TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
     return TPM_SUCCESS;
 }
 
+TPM_RESULT TPM2_PersistentAllStore(unsigned char **buf,
+                                   uint32_t *buflen)
+{
+    BYTE *buffer;
+    INT32 size;
+    unsigned char *nbuffer;
+    TPM_RESULT ret = TPM_SUCCESS;
+    UINT32 written = 0;
+
+    *buflen = NV_MEMORY_SIZE + 32 * 1024;
+    *buf = NULL;
+
+    /* the marshal functions do not indicate insufficient
+       buffer; to make sure we didn't run out of buffer,
+       we check that enough room for the biggest type of
+       chunk (64k) is available and try again. */
+    do {
+        *buflen += 66 * 1024;
+
+        nbuffer = realloc(*buf, *buflen);
+        if (nbuffer == NULL) {
+            free(*buf);
+            *buf = NULL;
+            ret = TPM_SIZE;
+            written = 0;
+            break;
+        }
+
+        *buf = buffer = nbuffer;
+        size = *buflen;
+        written = PERSISTENT_ALL_Marshal(&buffer, &size);
+    } while (size < 66 * 1024);
+
+    *buflen = written;
+
+    return ret;
+}
+
 TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
                                  uint32_t *buflen)
 {
