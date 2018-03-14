@@ -62,6 +62,8 @@
 #include "tpm2/_TPM_Init_fp.h"
 #include "tpm2/StateMarshal.h"
 #include "tpm2/PlatformData.h"
+#include "tpm2/Volatile.h"
+#include "tpm12/tpm_nvfile.h" // TPM_NVRAM_Loaddata()
 
 extern BOOL      g_inFailureMode;
 
@@ -448,6 +450,132 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
     return ret;
 }
 
+/*
+ * Get the state blob of the given type. If the TPM is not running, we
+ * get the cached state blobs, if available, otherwise we try to read
+ * it from files. In case the TPM is running, we get it from the running
+ * TPM.
+ */
+TPM_RESULT TPM2_GetState(enum TPMLIB_StateType st,
+                         unsigned char **buffer, uint32_t *buflen)
+{
+    TPM_RESULT ret = TPM_FAIL;
+
+    if (!_rpc__Signal_IsPowerOn()) {
+        struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+        bool is_empty_buffer;
+
+        ret = CopyCachedState(st, buffer, buflen, &is_empty_buffer);
+        if (ret != TPM_SUCCESS || *buffer != NULL || is_empty_buffer)
+            return ret;
+
+        if (cbs->tpm_nvram_init) {
+            ret = cbs->tpm_nvram_init();
+            if (ret != TPM_SUCCESS)
+                return ret;
+
+            /* we can call the TPM 1.2 function here ... */
+            ret = TPM_NVRAM_LoadData(buffer, buflen, 0,
+                                     TPMLIB_StateTypeToName(st));
+        } else {
+            ret = TPM_FAIL;
+        }
+        return ret;
+    }
+
+    /* from the running TPM */
+    switch (st) {
+    case TPMLIB_STATE_PERMANENT:
+        ret = TPM2_PersistentAllStore(buffer, buflen);
+        break;
+    case TPMLIB_STATE_VOLATILE:
+        ret = TPM2_VolatileAllStore(buffer, buflen);
+        break;
+    case TPMLIB_STATE_SAVE_STATE:
+        *buffer = NULL;
+        *buflen = 0;
+        ret = 0;
+        break;
+    }
+
+    return ret;
+}
+
+/*
+ * Set the state the TPM 2 will use upon next TPM_MainInit(). The TPM 2
+ * must not have been started, yet, or it must have been terminated for this
+ * function to set the state.
+ *
+ * @st: The TPMLIB_StateType describing the type of blob in the buffer
+ * @buffer: pointer to the buffer containing the state blob; NULL pointer clears
+ *          previous state
+ * @buflen: length of the buffer
+ */
+TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
+                         const unsigned char *buffer, uint32_t buflen)
+{
+    TPM_RESULT ret = TPM_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
+    BYTE *stream = NULL, *orig_stream = NULL;
+    INT32 stream_size = buflen;
+    unsigned char *permanent = NULL, *ptr;
+    INT32 permanent_len;
+
+    if (buffer == NULL) {
+        SetCachedState(st, NULL, 0);
+        return TPM_SUCCESS;
+    }
+
+    if (_rpc__Signal_IsPowerOn())
+        return TPM_INVALID_POSTINIT;
+
+    if (ret == TPM_SUCCESS) {
+        ret = TPM_Malloc((unsigned char **)&stream, buflen);
+    }
+
+    if (ret == TPM_SUCCESS) {
+        orig_stream = stream;
+        memcpy(stream, buffer, buflen);
+    }
+
+    /* test whether we can accept the blob */
+    if (ret == TPM_SUCCESS) {
+        switch (st) {
+        case TPMLIB_STATE_PERMANENT:
+            rc = PERSISTENT_ALL_Unmarshal(&stream, &stream_size);
+            break;
+        case TPMLIB_STATE_VOLATILE:
+            /* load permanent state first */
+            rc = TPM2_GetState(TPMLIB_STATE_PERMANENT,
+                               &permanent, (uint32_t *)&permanent_len);
+            if (rc == TPM_RC_SUCCESS) {
+                ptr = permanent;
+                rc = PERSISTENT_ALL_Unmarshal(&ptr, &permanent_len);
+                if (rc == TPM_RC_SUCCESS)
+                    rc = VolatileState_Load(&stream, &stream_size);
+            }
+            break;
+        case TPMLIB_STATE_SAVE_STATE:
+            if (buffer != NULL)
+                rc = TPM_BAD_TYPE;
+            break;
+        }
+        ret = rc;
+        if (ret != TPM_SUCCESS)
+            ClearAllCachedState();
+    }
+
+    /* cache the blob for the TPM_MainInit() to pick it up */
+    if (ret == TPM_SUCCESS) {
+        SetCachedState(st, orig_stream, buflen);
+    } else {
+        TPM_Free(orig_stream);
+    }
+    TPM_Free(permanent);
+
+    return ret;
+}
+
 const struct tpm_interface TPM2Interface = {
     .MainInit = TPM2_MainInit,
     .Terminate = TPM2_Terminate,
@@ -463,4 +591,6 @@ const struct tpm_interface TPM2Interface = {
     .HashEnd = TPM2_IO_Hash_End,
     .SetBufferSize = TPM2_SetBufferSize,
     .ValidateState = TPM2_ValidateState,
+    .SetState = TPM2_SetState,
+    .GetState = TPM2_GetState,
 };
