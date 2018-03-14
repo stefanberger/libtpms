@@ -356,3 +356,9 @@ _rpc__Signal_GetTPMEstablished(void)
 {
     return tpmEstablished;
 }
+
+BOOL
+_rpc__Signal_IsPowerOn(void)
+{
+    return s_isPowerOn;
+}
