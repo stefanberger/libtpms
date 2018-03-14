@@ -362,26 +362,14 @@ _plat__NvCommit(
         uint32_t tpm_number = 0;
         const char *name = TPM_PERMANENT_ALL_NAME;
         TPM_RESULT ret;
-        BYTE *buf = NULL;
-        size_t buf_size = NV_MEMORY_SIZE + 32 * 1024;
-        INT32 size;
-        BYTE *buffer;
-        UINT32 written;
+        BYTE *buf;
+        uint32_t buflen;
 
-        /* the marshal functions do not indicate insufficient
-           buffer; to make sure we didn't run out of buffer,
-           we check that enough room for the biggest type of
-           chunk (64k) is available and try again. */
-        do {
-            buf_size += 66 * 1024;
-            buf = realloc(buf, buf_size);
+        ret = TPM2_PersistentAllStore(&buf, &buflen);
+        if (ret != TPM_SUCCESS)
+            return ret;
 
-            buffer = buf;
-            size = buf_size;
-            written = PERSISTENT_ALL_Marshal(&buffer, &size);
-        } while (size < 66 * 1024);
-
-        ret = cbs->tpm_nvram_storedata(buf, written,
+        ret = cbs->tpm_nvram_storedata(buf, buflen,
                                        tpm_number, name);
         free(buf);
         if (ret == TPM_SUCCESS)
