@@ -207,13 +207,13 @@ char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags)
 TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
                            const unsigned char *buffer, uint32_t buflen)
 {
-    return tpm_iface[0]->SetState(st, buffer, buflen);
+    return tpm_iface[tpmvers_choice]->SetState(st, buffer, buflen);
 }
 
 TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
                            unsigned char **buffer, uint32_t *buflen)
 {
-    return tpm_iface[0]->GetState(st, buffer, buflen);
+    return tpm_iface[tpmvers_choice]->GetState(st, buffer, buflen);
 }
 
 TPM_RESULT TPM_IO_Hash_Start(void)
