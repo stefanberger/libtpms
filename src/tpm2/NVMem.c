@@ -113,16 +113,23 @@ _plat__NVEnable(
     s_NV_recoverable = FALSE;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
+    unsigned char *data = NULL;
+    uint32_t length = 0;
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+    TPM_RC rc;
+    bool is_empty_state;
 
-    if (cbs->tpm_nvram_loaddata) {
-        unsigned char *data = NULL, *buffer;
-        uint32_t length = 0;
+    /* try to get state blob set via TPMLIB_SetState() */
+    GetCachedState(TPMLIB_STATE_PERMANENT, &data, &length, &is_empty_state);
+    if (is_empty_state) {
+        memset(s_NV, 0, NV_MEMORY_SIZE);
+        return 0;
+    }
+
+    if (data == NULL && cbs->tpm_nvram_loaddata) {
         uint32_t tpm_number = 0;
         const char *name = TPM_PERMANENT_ALL_NAME;
         TPM_RESULT ret;
-        INT32 size;
-        TPM_RC rc;
 
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
         switch (ret) {
@@ -135,19 +142,23 @@ _plat__NVEnable(
 
         case TPM_SUCCESS:
             /* got the data -- unmarshal them... */
-            buffer = data;
-            size = length;
-
-            rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
-            TPM_Free(data);
-            if (rc != TPM_RC_SUCCESS)
-                return -1;
-            return 0;
+            break;
 
         case TPM_FAIL:
         default:
             return -1;
         }
+    }
+
+    if (data) {
+        unsigned char *buffer = data;
+        INT32 size = length;
+
+        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
+        TPM_Free(data);
+        if (rc != TPM_RC_SUCCESS)
+            return -1;
+         return 0;
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
 

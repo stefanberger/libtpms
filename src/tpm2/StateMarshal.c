@@ -22,25 +22,32 @@ VolatileLoad(void)
     TPM_RC rc = TPM_RC_SUCCESS;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
+    unsigned char *data = NULL;
+    uint32_t length = 0;
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+    TPM_RESULT ret = TPM_SUCCESS;
+    bool is_empty_state;
 
-    if (cbs->tpm_nvram_loaddata) {
-        unsigned char *data = NULL, *p;
-        uint32_t length = 0;
+    /* try to get state blob set via TPMLIB_SetState() */
+    GetCachedState(TPMLIB_STATE_VOLATILE, &data, &length, &is_empty_state);
+    if (is_empty_state)
+        return rc;
+
+    if (!data && cbs->tpm_nvram_loaddata) {
         uint32_t tpm_number = 0;
         const char *name = TPM_VOLATILESTATE_NAME;
-        TPM_RESULT ret;
 
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
-        if (ret == TPM_SUCCESS) {
-            p = data;
-            rc = VolatileState_Load(&data, (INT32 *)&length);
-            /*
-             * if this failed, VolatileState_Load will have started
-             * failure mode.
-             */
-            TPM_Free(p);
-        }
+    }
+
+    if (data && ret == TPM_SUCCESS) {
+        unsigned char *p = data;
+        rc = VolatileState_Load(&data, (INT32 *)&length);
+        /*
+         * if this failed, VolatileState_Load will have started
+         * failure mode.
+         */
+        TPM_Free(p);
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
