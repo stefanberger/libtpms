@@ -1729,13 +1729,13 @@ void Test_NvChip_UnMarshal(void)
     if (memchk(&bak_NV[NV_INDEX_RAM_DATA],
         &s_NV[NV_INDEX_RAM_DATA], NvRamGetEnd() - &s_indexOrderlyRam[0])) {
         printf("NV INDEX ORDERLY RAM DATA IS DIFFERENT (size=%ld)\n",
-        NvRamGetEnd() - &s_indexOrderlyRam[0]);
+               (long int)(NvRamGetEnd() - &s_indexOrderlyRam[0]));
     }
     if (memchk(&bak_NV[NV_USER_DYNAMIC],
                &s_NV[NV_USER_DYNAMIC],
                NvGetEnd() - NV_USER_DYNAMIC)) {
         printf("NV USER RAM DATA IS DIFFERENT (size=%ld)\n",
-               NvGetEnd() - NV_USER_DYNAMIC);
+               (long int)(NvGetEnd() - NV_USER_DYNAMIC));
     }
 
     /* restore original NVChip */
