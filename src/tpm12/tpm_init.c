@@ -104,6 +104,7 @@ TPM_RESULT TPM_MainInit(void)
     TPM_RESULT  testRc = 0;     /* temporary place to hold common self tests failure before the tpm
                                    state is created */
     tpm_state_t *tpm_state;     /* TPM instance state */
+    bool        has_cached_state = false;
 
     tpm_state = NULL;           /* freed @1 */
     /* preliminary check that platform specific sizes are correct */
@@ -148,6 +149,8 @@ TPM_RESULT TPM_MainInit(void)
             }
         }
         if (rc == 0) {
+            has_cached_state = HasCachedState(TPMLIB_STATE_PERMANENT);
+
             /* record the TPM number in the state */
             tpm_state->tpm_number = i;
             /* If the instance exists in NVRAM, it it initialized and saved in the tpm_instances[]
@@ -170,6 +173,13 @@ TPM_RESULT TPM_MainInit(void)
 	    rc = TPM_VolatileAll_NVLoad(tpm_state);
 	}
 #endif	/* TPM_VOLATILE_LOAD */
+        /* libtpms: due to the SetState() API we have to write the permanent state back to
+           a file now */
+        if (rc == 0 && has_cached_state) {
+            rc = TPM_PermanentAll_NVStore(tpm_state,
+                                          TRUE,		/* write NV */
+                                          0);		/* no roll back */
+        }
         /* if permanent state was loaded successfully (or stored successfully for TPM 0 the first
            time) */
         if (rc == 0) {
