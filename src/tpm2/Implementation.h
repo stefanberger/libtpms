@@ -110,7 +110,7 @@
 #define  ALG_RSA               ALG_YES
 #define  ALG_SHA1              ALG_YES
 #define  ALG_HMAC              ALG_YES
-#define  ALG_TDES              ALG_NO
+#define  ALG_TDES              ALG_YES
 #define  ALG_AES               ALG_YES
 #define  ALG_MGF1              ALG_YES
 #define  ALG_XOR               ALG_YES
@@ -128,12 +128,12 @@
 #define  ALG_ECDH              (ALG_YES*ALG_ECC)
 #define  ALG_ECDSA             (ALG_YES*ALG_ECC)
 #define  ALG_ECDAA             (ALG_YES*ALG_ECC)
-#define  ALG_SM2               (ALG_NO*ALG_ECC)
+#define  ALG_SM2               (ALG_YES*ALG_ECC)
 #define  ALG_ECSCHNORR         (ALG_YES*ALG_ECC)
-#define  ALG_ECMQV             (ALG_NO*ALG_ECC)
+#define  ALG_ECMQV             (ALG_YES*ALG_ECC)
 #define  ALG_SYMCIPHER         ALG_YES
 #define  ALG_KDF1_SP800_56A    (ALG_YES*ALG_ECC)
-#define  ALG_KDF2              ALG_NO
+#define  ALG_KDF2              ALG_YES
 #define  ALG_KDF1_SP800_108    ALG_YES
 #define  ALG_CMAC              ALG_NO
 #define  ALG_CTR               ALG_YES
@@ -177,14 +177,14 @@
 #define MAX_CAMELLIA_BLOCK_SIZE_BYTES				\
     MAX(CAMELLIA_128_BLOCK_SIZE_BYTES, 0)
 /* From Vendor-Specific: Table 4 - Defines for Implemented Curves */
-#define  ECC_NIST_P192         NO
-#define  ECC_NIST_P224         NO
+#define  ECC_NIST_P192         YES
+#define  ECC_NIST_P224         YES
 #define  ECC_NIST_P256         YES
 #define  ECC_NIST_P384         YES
-#define  ECC_NIST_P521         NO
+#define  ECC_NIST_P521         YES
 #define  ECC_BN_P256           YES
-#define  ECC_BN_P638           NO
-#define  ECC_SM2_P256          NO
+#define  ECC_BN_P638           YES
+#define  ECC_SM2_P256          YES
 #define  ECC_CURVES							\
     {TPM_ECC_BN_P256, TPM_ECC_BN_P638, TPM_ECC_NIST_P192, TPM_ECC_NIST_P224, \
 	    TPM_ECC_NIST_P256, TPM_ECC_NIST_P384, TPM_ECC_NIST_P521, TPM_ECC_SM2_P256}
