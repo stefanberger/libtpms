@@ -103,7 +103,7 @@ C_2_2_MQV(
 	  )
 {
     CURVE_INITIALIZED(E, curveId);
-    ECC_CURVE_DATA          *C = AccessCurveData(E);
+    const ECC_CURVE_DATA          *C = AccessCurveData(E);
     POINT(pQeA);
     POINT_INITIALIZED(pQeB, QeB);
     POINT_INITIALIZED(pQsB, QsB);

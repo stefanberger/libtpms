@@ -3227,7 +3227,7 @@ TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size,
 #endif
 #ifdef TPM_ALG_ECMQV
       case TPM_ALG_ECMQV:
-	rc = TPMS_KEY_SCHEME_ECMQV_Unmarshal(&target->ecmqvh, buffer, size);
+	rc = TPMS_KEY_SCHEME_ECMQV_Unmarshal(&target->ecmqv, buffer, size);
 	break;
 #endif
 #ifdef TPM_ALG_RSASSA
