@@ -205,6 +205,16 @@ block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
             goto SKIP_MARK;						\
     }
 
+unsigned int _ffsll(long long bits)
+{
+    int i = 0;
+
+    for (i = 0; i < 8 * sizeof(bits); i++) {
+        if (bits & (1 << i))
+            return i + 1;
+    }
+    return 0;
+}
 
 /* BOOL is 'int' but we store a single byte */
 static UINT8
@@ -672,6 +682,27 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
+static UINT64 hash_algs_supported(void)
+{
+    UINT64 bits = 0;
+#ifdef TPM_ALG_SHA1
+    bits |= (1 << TPM_ALG_SHA1);
+#endif
+#ifdef TPM_ALG_SHA256
+    bits |= (1 << TPM_ALG_SHA256);
+#endif
+#ifdef TPM_ALG_SHA384
+    bits |= (1 << TPM_ALG_SHA384);
+#endif
+#ifdef TPM_ALG_SHA512
+    bits |= (1 << TPM_ALG_SHA512);
+#endif
+#ifdef TPM_ALG_SM3_256
+    bits |= (1 << TPM_ALG_SM3_256);
+#endif
+    return bits;
+}
+
 static TPM_RC
 PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
 {
@@ -681,6 +712,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     TPM_ALG_ID algid;
     BOOL end = FALSE;
     BYTE *t = NULL;
+    UINT64 algs_needed = hash_algs_supported();
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -755,6 +787,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
         }
         if (t) {
             if (rc == TPM_RC_SUCCESS) {
+                algs_needed &= ~(1 << algid);
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
@@ -767,6 +800,12 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
                 rc = Array_Unmarshal(t, array_size, buffer, size);
             }
         }
+    }
+
+    if (rc == TPM_RC_SUCCESS && algs_needed) {
+        TPMLIB_LogTPM2Error("PCR_SAVE: Missing data for hash algorithm %d.",
+                            _ffsll(algs_needed) - 1);
+        rc = TPM_RC_BAD_PARAMETER;
     }
 
     return rc;
@@ -849,6 +888,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
     BYTE *t = NULL;
     UINT16 needed_size, array_size;
     TPM_ALG_ID algid;
+    UINT64 algs_needed = hash_algs_supported();
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size, PCR_MAGIC);
@@ -909,6 +949,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
         }
         if (t) {
             if (rc == TPM_RC_SUCCESS) {
+                algs_needed &= ~(1 << algid);
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
@@ -921,6 +962,12 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
                 rc = Array_Unmarshal(t, array_size, buffer, size);
             }
         }
+    }
+
+    if (rc == TPM_RC_SUCCESS && algs_needed) {
+        TPMLIB_LogTPM2Error("PCR: Missing data for hash algorithm %d.",
+                            _ffsll(algs_needed) - 1);
+        rc = TPM_RC_BAD_PARAMETER;
     }
 
     return rc;
