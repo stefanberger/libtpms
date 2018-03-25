@@ -340,11 +340,12 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
 }
 
 #define NV_INDEX_MAGIC 0x2547265a
-#define NV_INDEX_VERSION 1
+#define NV_INDEX_VERSION 2
 static UINT16
 NV_INDEX_Marshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 NV_INDEX_VERSION,
@@ -352,6 +353,13 @@ NV_INDEX_Marshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
 
     written += TPMS_NV_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->authValue, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -382,17 +390,27 @@ NV_INDEX_Unmarshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_AUTH_Unmarshal(&data->authValue, buffer, size);
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "NV_INDEX", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
     return rc;
 }
 
 #define DRBG_STATE_MAGIC 0x6fe83ea1
-#define DRBG_STATE_VERSION 1
+#define DRBG_STATE_VERSION 2
 static UINT16
 DRBG_STATE_Marshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     size_t i;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 DRBG_STATE_VERSION, DRBG_STATE_MAGIC, 1);
@@ -408,6 +426,13 @@ DRBG_STATE_Marshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     for (i = 0; i < array_size; i++) {
         written += UINT32_Marshal(&data->lastValue[i], buffer, size);
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -469,17 +494,27 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal(&data->lastValue[i], buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "DRBG_STATE", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 
 #define PCR_POLICY_MAGIC 0x176be626
-#define PCR_POLICY_VERSION 1
+#define PCR_POLICY_VERSION 2
 static UINT16
 PCR_POLICY_Marshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     unsigned i;
     UINT16 array_size = ARRAY_SIZE(data->hashAlg);
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PCR_POLICY_VERSION,
@@ -492,6 +527,13 @@ PCR_POLICY_Marshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
         written += TPM_ALG_ID_Marshal(&data->hashAlg[i], buffer, size);
         written += TPM2B_DIGEST_Marshal(&data->policy[i], buffer, size);
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -541,11 +583,20 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
             rc = TPM2B_DIGEST_Unmarshal(&data->policy[i], buffer, size);
         }
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "ORDERLY DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
     return rc;
 }
 
 #define ORDERLY_DATA_MAGIC      0x56657887
-#define ORDERLY_DATA_VERSION 1
+#define ORDERLY_DATA_VERSION 2
 
 UINT16
 ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
@@ -575,6 +626,12 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 #endif // ACCUMULATE_SELF_HEAL_TIMER
 
     BLOCK_SKIP_WRITE_POP(size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
     BLOCK_SKIP_WRITE_CHECK;
 
     return written;
@@ -629,17 +686,27 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 #endif // ACCUMULATE_SELF_HEAL_TIMER
 skip_self_heal_timer:
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "ORDERLY DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 
 #define PCR_SAVE_MAGIC 0x7372eabc
-#define PCR_SAVE_VERSION 1
+#define PCR_SAVE_VERSION 2
 static UINT16
 PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     TPM_ALG_ID algid;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PCR_SAVE_VERSION, PCR_SAVE_MAGIC, 1);
@@ -696,6 +763,13 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     /* end marker */
     algid = TPM_ALG_NULL;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -826,6 +900,15 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
         rc = TPM_RC_BAD_PARAMETER;
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PCR_SAVE", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 
@@ -833,13 +916,14 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
 #ifdef PCR_C
 
 #define PCR_MAGIC 0xe95f0387
-#define PCR_VERSION 1
+#define PCR_VERSION 2
 static UINT16
 PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     TPM_ALG_ID algid;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PCR_VERSION, PCR_MAGIC, 1);
@@ -893,6 +977,13 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     /* end marker */
     algid = TPM_ALG_NULL;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -989,18 +1080,28 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
         rc = TPM_RC_BAD_PARAMETER;
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PCR", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 #endif
 
 #define PCR_AUTHVALUE_MAGIC 0x6be82eaf
-#define PCR_AUTHVALUE_VERSION 1
+#define PCR_AUTHVALUE_VERSION 2
 static UINT16
 PCR_AUTHVALUE_Marshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     size_t i;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PCR_AUTHVALUE_VERSION, PCR_AUTHVALUE_MAGIC, 1);
@@ -1010,6 +1111,13 @@ PCR_AUTHVALUE_Marshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
     for (i = 0; i < array_size; i++) {
         written += TPM2B_DIGEST_Marshal(&data->auth[i], buffer, size);
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1049,16 +1157,26 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
         rc = TPM2B_DIGEST_Unmarshal(&data->auth[i], buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PCR_AUTHVALUE", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 
 #define STATE_CLEAR_DATA_MAGIC  0x98897667
-#define STATE_CLEAR_DATA_VERSION 1
+#define STATE_CLEAR_DATA_VERSION 2
 
 UINT16
 STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 STATE_CLEAR_DATA_VERSION,
@@ -1071,6 +1189,13 @@ STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
     written += TPM2B_AUTH_Marshal(&data->platformAuth, buffer, size);
     written += PCR_SAVE_Marshal(&data->pcrSave, buffer, size);
     written += PCR_AUTHVALUE_Marshal(&data->pcrAuthValues, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1116,11 +1241,20 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
         rc = PCR_AUTHVALUE_Unmarshal(&data->pcrAuthValues, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "STATE_CLEAR_DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+skip_future_versions:
+
     return rc;
 }
 
 #define STATE_RESET_DATA_MAGIC  0x01102332
-#define STATE_RESET_DATA_VERSION 1
+#define STATE_RESET_DATA_VERSION 2
 
 TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
@@ -1129,7 +1263,6 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     BOOL needs_block;
     UINT16 array_size;
     NV_HEADER hdr;
-    BLOCK_SKIP_INIT;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -1216,6 +1349,17 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     }
 #endif
 skip_alg_ecc:
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "STATE_RESET_DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 
@@ -1262,18 +1406,25 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
                              buffer, size);
 #endif
     BLOCK_SKIP_WRITE_POP(size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
     BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
 
 #define BN_PRIME_T_MAGIC 0x2fe736ab
-#define BN_PRIME_T_VERSION 1
+#define BN_PRIME_T_VERSION 2
 static UINT16
 bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written, numbytes;
     size_t i, idx;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 BN_PRIME_T_VERSION, BN_PRIME_T_MAGIC, 1);
@@ -1293,6 +1444,13 @@ bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 #error RADIX_BYTES it no defined
 #endif
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1351,15 +1509,26 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
     }
 #endif
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "BN_PRIME_T", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 
 #define PRIVATE_EXPONENT_T_MAGIC 0x854eab2
-#define PRIVATE_EXPONENT_T_VERSION 1
+#define PRIVATE_EXPONENT_T_VERSION 2
 static UINT16
 privateExponent_t_Marshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PRIVATE_EXPONENT_T_VERSION,
@@ -1372,6 +1541,13 @@ privateExponent_t_Marshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
     written += bn_prime_t_Marshal(&data->dQ, buffer, size);
     written += bn_prime_t_Marshal(&data->qInv, buffer, size);
 #endif
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1412,6 +1588,16 @@ privateExponent_t_Unmarshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
         rc = bn_prime_t_Unmarshal(&data->qInv, buffer, size);
     }
 #endif
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PRIVATE_EXPONENT_T", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
 
     return rc;
 }
@@ -1461,13 +1647,14 @@ SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
 #ifdef TPM_ALG_SHA1
 
 #define HASH_STATE_SHA1_MAGIC   0x19d46f50
-#define HASH_STATE_SHA1_VERSION 1
+#define HASH_STATE_SHA1_VERSION 2
 
 static UINT16
 tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA1_VERSION,
@@ -1487,6 +1674,13 @@ tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
                              buffer, size);
 
     written += UINT32_Marshal(&data->num, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1552,13 +1746,23 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal(&data->num, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "HASH_STATE_SHA1", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 #endif
 
 #ifdef TPM_ALG_SHA256
 #define HASH_STATE_SHA256_MAGIC 0x6ea059d0
-#define HASH_STATE_SHA256_VERSION 1
+#define HASH_STATE_SHA256_VERSION 2
 
 static UINT16
 tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *size)
@@ -1566,6 +1770,7 @@ tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *siz
     UINT16 written = 0;
     UINT16 array_size;
     size_t i;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA256_VERSION,
@@ -1587,6 +1792,13 @@ tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *siz
 
     written += UINT32_Marshal(&data->num, buffer, size);
     written += UINT32_Marshal(&data->md_len, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1654,6 +1866,16 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
         rc = UINT32_Unmarshal(&data->md_len, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "HASH_STATE_SHA256", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 #endif
@@ -1661,7 +1883,7 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
 #if defined(TPM_ALG_SHA384) || defined(TPM_ALG_SHA512)
 
 #define HASH_STATE_SHA512_MAGIC 0x14814b08
-#define HASH_STATE_SHA512_VERSION 1
+#define HASH_STATE_SHA512_VERSION 2
 
 static UINT16
 tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
@@ -1669,6 +1891,7 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
     UINT16 written = 0;
     UINT16 array_size;
     size_t i;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SHA512_VERSION,
@@ -1688,6 +1911,13 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
 
     written += UINT32_Marshal(&data->num, buffer, size);
     written += UINT32_Marshal(&data->md_len, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1739,7 +1969,7 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->u.p)) {
-        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for u.p; "
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad array size for u.p; "
                             "expected %u, got %u\n",
                             sizeof(data->u.p), array_size);
         rc = TPM_RC_BAD_PARAMETER;
@@ -1754,18 +1984,29 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal(&data->md_len, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "HASH_STATE_SHA512", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 #endif
 
 #define ANY_HASH_STATE_MAGIC 0x349d494b
-#define ANY_HASH_STATE_VERSION 1
+#define ANY_HASH_STATE_VERSION 2
 
 static UINT16
 ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                        UINT16 hashAlg)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 ANY_HASH_STATE_VERSION,
@@ -1795,6 +2036,14 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     default:
         break;
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
     return written;
 }
 
@@ -1841,16 +2090,28 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
         break;
 #endif
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "ANY_HASH_STATE", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 
 #define HASH_STATE_MAGIC 0x562878a2
-#define HASH_STATE_VERSION 1
+#define HASH_STATE_VERSION 2
 
 static UINT16
 HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_VERSION,
@@ -1860,6 +2121,13 @@ HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
     written += TPM_ALG_ID_Marshal(&data->hashAlg, buffer, size);
     /* def does not need to be written */
     written += ANY_HASH_STATE_Marshal(&data->state, buffer, size, data->hashAlg);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -1901,6 +2169,15 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
         rc = ANY_HASH_STATE_Unmarshal(&data->state, buffer, size, data->hashAlg);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "STATE_RESET_DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     return rc;
 }
 
@@ -1951,7 +2228,7 @@ HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
 }
 
 #define HASH_OBJECT_MAGIC 0xb874fe38
-#define HASH_OBJECT_VERSION 1
+#define HASH_OBJECT_VERSION 2
 
 static UINT16
 HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
@@ -1959,6 +2236,7 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     UINT16 written;
     size_t i;
     UINT16 array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_OBJECT_VERSION, HASH_OBJECT_MAGIC, 1);
@@ -1976,6 +2254,13 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     } else if (data->attributes.hmacSeq == SET) {
         written += HMAC_STATE_Marshal(&data->state.hmacState, buffer, size);
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -2036,11 +2321,21 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
         }
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "HASH_OBJECT", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 }
 
 #define OBJECT_MAGIC 0x75be73af
-#define OBJECT_VERSION 1
+#define OBJECT_VERSION 2
 
 static UINT16
 OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
@@ -2073,6 +2368,11 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPM2B_NAME_Marshal(&data->qualifiedName, buffer, size);
     written += TPM_HANDLE_Marshal(&data->evictHandle, buffer, size);
     written += TPM2B_NAME_Marshal(&data->name, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
 
     BLOCK_SKIP_WRITE_CHECK;
 
@@ -2134,30 +2434,48 @@ skip_alg_rsa:
         rc = TPM2B_NAME_Unmarshal(&data->name, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "OBJECT", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     return rc;
 }
 
 #define ANY_OBJECT_MAGIC 0xfe9a3974
-#define ANY_OBJECT_VERSION 1
+#define ANY_OBJECT_VERSION 2
 
 static UINT16
 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     UINT32 *ptr = (UINT32 *)&data->attributes;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC, 1);
 
     written += UINT32_Marshal(ptr, buffer, size);
     /* the slot must be occupied, otherwise the rest may not be initialized */
-    if (!data->attributes.occupied)
-        return written;
+    if (data->attributes.occupied) {
+        if (ObjectIsSequence(data))
+            written += HASH_OBJECT_Marshal((HASH_OBJECT *)data, buffer, size);
+        else
+            written += OBJECT_Marshal(data, buffer, size);
+    }
 
-    if (ObjectIsSequence(data))
-        return written + HASH_OBJECT_Marshal((HASH_OBJECT *)data, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
 
-    return written + OBJECT_Marshal(data, buffer, size);
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
+    return written;
 }
 
 static TPM_RC
@@ -2181,15 +2499,24 @@ ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal(ptr, buffer, size);
     }
 
-    if (!data->attributes.occupied)
-        return rc;
-    if (rc != TPM_RC_SUCCESS)
-        return rc;
+    if (rc == TPM_RC_SUCCESS && data->attributes.occupied) {
+        if (ObjectIsSequence(data))
+            rc = HASH_OBJECT_Unmarshal((HASH_OBJECT *)data, buffer, size);
+        else
+            rc = OBJECT_Unmarshal(data, buffer, size);
+    }
 
-    if (ObjectIsSequence(data))
-        return HASH_OBJECT_Unmarshal((HASH_OBJECT *)data, buffer, size);
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "ANY_OBJECT", "version 3 or later");
+        /* future versions nest-append here */
+    }
 
-    return OBJECT_Unmarshal(data, buffer, size);
+skip_future_versions:
+
+    return rc;
 }
 
 static UINT16
@@ -2205,13 +2532,14 @@ TPMT_SYM_DEF_Marshal(TPMT_SYM_DEF *data, BYTE **buffer, INT32 *size)
 }
 
 #define SESSION_MAGIC 0x44be9f45
-#define SESSION_VERSION 1
+#define SESSION_VERSION 2
 
 static UINT16
 SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     UINT8 clocksize;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 SESSION_VERSION, SESSION_MAGIC, 1);
@@ -2239,6 +2567,13 @@ SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
     // TPM2B_NAME or TPM2B_DIGEST could be used for marshalling
     written += TPM2B_NAME_Marshal(&data->u1.boundEntity, buffer, size);
     written += TPM2B_DIGEST_Marshal(&data->u2.auditDigest, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -2323,16 +2658,26 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
         rc = TPM2B_DIGEST_Unmarshal(&data->u2.auditDigest, buffer, size);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "SESSION", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     return rc;
 }
 
 #define SESSION_SLOT_MAGIC 0x3664aebc
-#define SESSION_SLOT_VERSION 1
+#define SESSION_SLOT_VERSION 2
 
 static UINT16
 SESSION_SLOT_Marshal(SESSION_SLOT *data, BYTE **buffer, INT32* size)
 {
     UINT16 written;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 SESSION_SLOT_VERSION,
@@ -2343,6 +2688,13 @@ SESSION_SLOT_Marshal(SESSION_SLOT *data, BYTE **buffer, INT32* size)
         return written;
 
     written += SESSION_Marshal(&data->session, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -2373,10 +2725,20 @@ SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = SESSION_Unmarshal(&data->session, buffer, size);
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "SESSION_SLOT", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     return rc;
 }
 
-#define VOLATILE_STATE_VERSION 1
+#define VOLATILE_STATE_VERSION 2
 #define VOLATILE_STATE_MAGIC 0x45637889
 
 UINT16
@@ -2655,7 +3017,10 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     tmp_uint64 = tpmclock();
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
 
-    /* future extensions insert here: */
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
 
     /* keep marker at end */
     tmp_uint32 = VOLATILE_STATE_MAGIC;
@@ -3075,7 +3440,15 @@ skip_hardware_clock:
         s_tpmTime += timediff;
     }
 
-    /* future extensions parse here: */
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "Volatile State", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
 
     /* keep marker at end: */
     if (rc == TPM_RC_SUCCESS) {
@@ -3247,7 +3620,7 @@ UINT32_Unmarshal_CheckConstant(BYTE **buffer, INT32 *size, UINT32 constant,
 }
 
 #define PA_COMPILE_CONSTANTS_MAGIC 0xc9ea6431
-#define PA_COMPILE_CONSTANTS_VERSION 1
+#define PA_COMPILE_CONSTANTS_VERSION 2
 
 /* Marshal compile-time constants related to persistent-all state */
 static UINT32
@@ -3256,6 +3629,7 @@ PACompileConstants_Marshal(BYTE **buffer, INT32 *size)
     unsigned i;
     UINT32 written, tmp_uint32;
     UINT32 array_size = ARRAY_SIZE(pa_compile_constants);
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PA_COMPILE_CONSTANTS_VERSION,
@@ -3267,6 +3641,13 @@ PACompileConstants_Marshal(BYTE **buffer, INT32 *size)
         tmp_uint32 = pa_compile_constants[i].constant;
         written += UINT32_Marshal(&tmp_uint32, buffer, size);
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -3310,6 +3691,18 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
                                   pa_compile_constants[i].name,
                                   pa_compile_constants[i].cmp, hdr.version);
 
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PA_COMPILE_CONSTANTS", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
+    /* keep marker at end: */
     return rc;
 }
 
