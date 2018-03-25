@@ -61,6 +61,17 @@
 
 /* 10.2.11 CryptEccKeyExchange.c */
 #include "Tpm.h"
+
+LIB_EXPORT TPM_RC
+SM2KeyExchange(
+	       TPMS_ECC_POINT        *outZ,         // OUT: the computed point
+	       TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
+	       TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
+	       TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
+	       TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
+	       TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
+	       );
+
 #if CC_ZGen_2Phase == YES //%
 #ifdef TPM_ALG_ECMQV
 /*     10.2.11.1.1 avf1() */

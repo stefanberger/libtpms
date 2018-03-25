@@ -1359,6 +1359,13 @@ TPMS_SIG_SCHEME_ECDAA_Marshal(TPMS_SIG_SCHEME_ECDAA *source, BYTE **buffer, INT3
     written += TPMS_SCHEME_ECDAA_Marshal(source, buffer, size);
     return written;
 }
+UINT16
+TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2 *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
+    return written;
+}
 
 /* Table 2:153 - Definition of Types for Encryption Schemes (TypedefTable()) */
 
@@ -1774,6 +1781,14 @@ TPMS_SIGNATURE_ECDSA_Marshal(TPMS_SIGNATURE_ECDSA *source, BYTE **buffer, INT32 
 
 UINT16
 TPMS_SIGNATURE_ECDAA_Marshal(TPMS_SIGNATURE_ECDAA *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPMS_SIGNATURE_ECC_Marshal(source, buffer, size);
+    return written;
+}
+
+UINT16
+TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2 *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SIGNATURE_ECC_Marshal(source, buffer, size);
