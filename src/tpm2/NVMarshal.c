@@ -3320,6 +3320,23 @@ skip_future_versions:
  * but that depends on the purpose of the compile time constant. The most
  * conservative approach is to force that the unmarshalled values are equal
  * [EQ] to the ones of this implementation.
+ *
+ * Meanings of comparison operators:
+ * EQ: The read state must match the state the implementation would produce
+ *     The algorithm must have been enabled at the previously implementation
+ *     and at the current implementation; or it must have been disabled at
+ *     both
+ *
+ * LE: The read state may have been written by a version that did not
+ *     implement an algorithm ('0') but the current implementation does
+ *     implement it ('1'); this does NOT allow an implementation to accept
+ *     the state anymore if the state was written by an implementation that
+ *     implemented it ('1') but the current implementation does not im-
+ *     plement it
+ *
+ * DONTCARE: Implementation that wrote the state can either have implemented
+ *           an algorithm or not and implementation reading the state may
+ *           also either implement it or not
  */
 static const struct _entry {
     UINT32 constant;
