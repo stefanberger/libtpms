@@ -1417,6 +1417,16 @@ TPMS_KEY_SCHEME_ECDH_Marshal(TPMS_KEY_SCHEME_ECDH *source, BYTE **buffer, INT32 
     return written;
 }
 
+#ifdef TPM_ALG_ECMQV
+UINT16
+TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
+    return written;
+}
+#endif
+
 /* Table 2:155 - Definition of Types for KDF Schemes (TypedefTable()) */
 UINT16
 TPMS_SCHEME_MGF1_Marshal(TPMS_SCHEME_MGF1 *source, BYTE **buffer, INT32 *size)
@@ -1511,7 +1521,7 @@ TPMU_ASYM_SCHEME_Marshal(TPMU_ASYM_SCHEME  *source, BYTE **buffer, INT32 *size, 
 #endif
 #ifdef TPM_ALG_ECMQV
       case TPM_ALG_ECMQV:
-	written += TPMS_KEY_SCHEME_ECMQV_Marshal(&source->ecmqvh, buffer, size);
+	written += TPMS_KEY_SCHEME_ECMQV_Marshal(&source->ecmqv, buffer, size);
 	break;
 #endif
 #ifdef TPM_ALG_RSASSA
