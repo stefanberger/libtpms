@@ -4108,6 +4108,14 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 if (rc == TPM_RC_SUCCESS) {
                     rc = UINT32_Unmarshal(&datasize, buffer, size);
                 }
+                if (rc == TPM_RC_SUCCESS) {
+                    /* datasize cannot exceed 64k + a few bytes */
+                    if (datasize > (0x10000 + 0x100)) {
+                        TPMLIB_LogTPM2Error("datasize for NV_INDEX too "
+                                            "large: %u\n", datasize);
+                        rc = TPM_RC_SIZE;
+                    }
+                }
                 if (rc == TPM_RC_SUCCESS &&
                     o + offset + datasize > array_size) {
                     o += offset + datasize;
