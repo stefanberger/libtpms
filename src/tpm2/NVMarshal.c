@@ -140,7 +140,7 @@ static void
 block_skip_write_pop(block_skip *bs, INT32 *size) {
     UINT16 skip;
     unsigned i = --bs->idx;
-    pAssert(bs->idx >= 0);
+    pAssert((int)bs->idx >= 0);
     skip = bs->pos[i].size - *size - sizeof(UINT16);
     UINT16_Marshal(&skip, &bs->pos[i].buffer, &bs->pos[i].size);
 }
@@ -211,7 +211,7 @@ unsigned int _ffsll(long long bits)
     size_t i = 0;
 
     for (i = 0; i < 8 * sizeof(bits); i++) {
-        if (bits & (1 << i))
+        if (bits & (1ULL << i))
             return i + 1;
     }
     return 0;
