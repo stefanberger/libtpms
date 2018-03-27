@@ -208,7 +208,7 @@ block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
 
 unsigned int _ffsll(long long bits)
 {
-    int i = 0;
+    size_t i = 0;
 
     for (i = 0; i < 8 * sizeof(bits); i++) {
         if (bits & (1 << i))
