@@ -215,18 +215,15 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
     ret = TPM_Global_Init(&tpm_state);
     tpm_state.tpm_number = 0;
 
-    if ((ret == TPM_SUCCESS) &
-        (st & TPMLIB_STATE_PERMANENT)) {
+    if ((ret == TPM_SUCCESS) && (st & TPMLIB_STATE_PERMANENT)) {
         ret = TPM_PermanentAll_NVLoad(&tpm_state);
     }
 
-    if ((ret == TPM_SUCCESS) &
-        (st & TPMLIB_STATE_VOLATILE)) {
+    if ((ret == TPM_SUCCESS) && (st & TPMLIB_STATE_VOLATILE)) {
         ret = TPM_SaveState_NVLoad(&tpm_state);
     }
 
-    if ((ret == TPM_SUCCESS) &
-        (st & TPMLIB_STATE_SAVE_STATE)) {
+    if ((ret == TPM_SUCCESS) && (st & TPMLIB_STATE_SAVE_STATE)) {
         ret = TPM_VolatileAll_NVLoad(&tpm_state);
     }
 
