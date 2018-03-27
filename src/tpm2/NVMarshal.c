@@ -4051,7 +4051,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     OBJECT obj;
     UINT32 datasize;
     UINT64 sourceside_size;
-    UINT64 array_size = NV_USER_DYNAMIC - NV_USER_DYNAMIC_END;
+    UINT64 array_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
