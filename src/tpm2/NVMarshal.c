@@ -434,7 +434,7 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     TPM_RC rc= TPM_RC_SUCCESS;
     size_t i;
     NV_HEADER hdr;
-    UINT16 array_size;
+    UINT16 array_size = 0;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -1086,7 +1086,7 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
     size_t i;
     NV_HEADER hdr;
-    UINT16 array_size;
+    UINT16 array_size = 0;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -1400,7 +1400,7 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     size_t i, idx;
-    UINT16 numbytes;
+    UINT16 numbytes = 0;
     UINT32 word;
     NV_HEADER hdr;
 
@@ -2894,7 +2894,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     UINT32 tmp_uint32;
     NV_HEADER hdr;
     BOOL needs_block;
-    UINT16 array_size;
+    UINT16 array_size = 0;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3891,7 +3891,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
     NV_HEADER hdr;
     NV_RAM_HEADER *nrh;
     UINT16 offset = 0;
-    UINT16 datasize;
+    UINT16 datasize = 0;
     UINT32 sourceside_size;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -4051,7 +4051,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     UINT64 maxCount;
     TPM_HANDLE handle;
     OBJECT obj;
-    UINT32 datasize;
+    UINT32 datasize = 0;
     UINT64 sourceside_size;
     UINT64 array_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
 
