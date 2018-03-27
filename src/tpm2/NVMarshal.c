@@ -270,7 +270,7 @@ UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-        UINT32_Unmarshal(data, buffer, size);
+        rc = UINT32_Unmarshal(data, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS && exp != *data) {
         TPMLIB_LogTPM2Error("%s: Expected value: 0x%08x, found: 0x%08x\n",
@@ -1414,6 +1414,8 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&numbytes, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
         data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
         if (data->size > data->allocated) {
             TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %u than allocated %u\n",
