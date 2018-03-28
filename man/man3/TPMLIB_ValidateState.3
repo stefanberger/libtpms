@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "TPMLIB_ValidateState 3"
-.TH TPMLIB_ValidateState 3 "2018-02-17" "libtpms" ""
+.TH TPMLIB_ValidateState 3 "2018-03-27" "libtpms" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -166,6 +166,10 @@ The \fBtpmlib_state\fR parameter can be a logical 'or' of one or
 multiple of of the following: \fB\s-1TPMLIB_STATE_PERMANENT\s0\fR,
 \&\fB\s-1TPMLIB_STATE_VOLATILE\s0\fR, or \fB\s-1TPMLIB_STATE_SAVE_STATE\s0\fR.
 The \fBflags\fR parameter is curretnly not used and should be set to 0.
+.PP
+The first state blob that should be loaded is the permanent state,
+since for example the volatile state requires it to be available
+for validation.
 .PP
 This function should be called before \fB\f(BITPMLIB_MainInit()\fB\fR is invoked.
 .SH "SEE ALSO"
