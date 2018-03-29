@@ -82,11 +82,11 @@ BnFromBytes(
     crypt_uword_t    size;
     //
     size = (bytes != NULL) ? BYTES_TO_CRYPT_WORDS(nBytes) : 0;
-    // make sure things fit
-    pAssert(BnGetAllocated(bn) >= size);
     // If nothing in, nothing out
     if(bn == NULL)
 	return NULL;
+    // make sure things fit
+    pAssert(BnGetAllocated(bn) >= size);
     if(size > 0)
 	{
 	    // Clear the topmost word in case it is not filled with data
