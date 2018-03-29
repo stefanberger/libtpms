@@ -114,7 +114,7 @@ C_2_2_MQV(
 	  )
 {
     CURVE_INITIALIZED(E, curveId);
-    const ECC_CURVE_DATA          *C = AccessCurveData(E);
+    const ECC_CURVE_DATA          *C;
     POINT(pQeA);
     POINT_INITIALIZED(pQeB, QeB);
     POINT_INITIALIZED(pQsB, QsB);
@@ -128,6 +128,7 @@ C_2_2_MQV(
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_VALUE);
+    C = AccessCurveData(E);
     pAssert(outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL
 	    && dsA != NULL);
     // Process:
