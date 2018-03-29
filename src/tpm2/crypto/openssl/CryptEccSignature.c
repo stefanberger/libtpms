@@ -504,12 +504,13 @@ CryptEccSign(
     ECC_INITIALIZED(bnD, &signKey->sensitive.sensitive.ecc.b);
     ECC_NUM(bnR);
     ECC_NUM(bnS);
-    const ECC_CURVE_DATA   *C = AccessCurveData(E);
+    const ECC_CURVE_DATA   *C;
     TPM_RC                  retVal;
     //
     NOT_REFERENCED(scheme);
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_VALUE);
+    C = AccessCurveData(E);
     signature->signature.ecdaa.signatureR.t.size
 	= sizeof(signature->signature.ecdaa.signatureR.t.buffer);
     signature->signature.ecdaa.signatureS.t.size
