@@ -127,6 +127,8 @@ EncryptDecryptShared(
     keySize = symKey->publicArea.parameters.symDetail.sym.keyBits.sym;
     alg = symKey->publicArea.parameters.symDetail.sym.algorithm;
     blockSize = CryptGetSymmetricBlockSize(alg, keySize);
+    if (blockSize == 0)
+        return TPM_RC_FAILURE;
     // Note: When an algorithm is not supported by a TPM, the TPM_ALG_xxx for that
     // algorithm is not defined. However, it is assumed that the ALG_xxx_VALUE for
     // the algorithm is always defined. Both have the same numeric value.
