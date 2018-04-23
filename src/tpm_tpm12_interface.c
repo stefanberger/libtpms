@@ -38,9 +38,11 @@
 
 #include <config.h>
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tpm12/tpm_debug.h"
 #include "tpm_error.h"
@@ -167,6 +169,50 @@ TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
     return TPM_SUCCESS;
 }
 
+/*
+ * TPM12_GetInfo:
+ *
+ * @flags: logical or of flags that query for information
+ *
+ * Return a JSON document with contents queried for by the user's passed flags
+ */
+char *TPM12_GetInfo(enum TPMLIB_InfoFlags flags)
+{
+    const char *tpmspec =
+    "\"TPMSpecification\":{"
+        "\"family\":\"1.2\","
+        "\"level\":2,"
+        "\"revision\":116"
+    "}";
+    char *fmt = NULL, *buffer;
+
+    if (!(buffer = strdup("{%s%s}")))
+        return NULL;
+
+    if ((flags & TPMLIB_INFO_TPMSPECIFICATION)) {
+        fmt = buffer;
+        buffer = NULL;
+        if (asprintf(&buffer, fmt, tpmspec, "%s%s") < 0)
+            goto error;
+        free(fmt);
+    }
+
+    /* nothing else to add */
+    fmt = buffer;
+    buffer = NULL;
+    if (asprintf(&buffer, fmt, "","") < 0)
+        goto error;
+    free(fmt);
+
+    return buffer;
+
+error:
+    free(fmt);
+    free(buffer);
+
+    return NULL;
+}
+
 static uint32_t tpm12_buffersize = TPM_BUFFER_MAX;
 
 uint32_t TPM12_SetBufferSize(uint32_t wanted_size,
@@ -239,6 +285,7 @@ const struct tpm_interface TPM12Interface = {
     .Process = TPM12_Process,
     .VolatileAllStore = TPM12_VolatileAllStore,
     .GetTPMProperty = TPM12_GetTPMProperty,
+    .GetInfo = TPM12_GetInfo,
     .TpmEstablishedGet = TPM12_IO_TpmEstablished_Get,
     .HashStart = TPM12_IO_Hash_Start,
     .HashData = TPM12_IO_Hash_Data,

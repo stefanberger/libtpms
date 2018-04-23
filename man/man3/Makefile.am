@@ -9,6 +9,7 @@ man3_PODS = \
 	TPM_IO_Hash_Start.pod \
 	TPM_IO_TpmEstablished_Get.pod \
 	TPMLIB_DecodeBlob.pod \
+	TPMLIB_GetInfo.pod \
 	TPMLIB_GetTPMProperty.pod \
 	TPMLIB_GetVersion.pod \
 	TPMLIB_MainInit.pod \
@@ -33,6 +34,7 @@ man3_MANS += \
 	TPM_IO_Hash_Start.3 \
 	TPM_IO_TpmEstablished_Get.3 \
 	TPMLIB_DecodeBlob.3 \
+	TPMLIB_GetInfo.3 \
 	TPMLIB_GetTPMProperty.3 \
 	TPMLIB_GetVersion.3 \
 	TPMLIB_MainInit.3 \

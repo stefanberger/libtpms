@@ -23,7 +23,8 @@ LIBTPMS_0.5.1 {
 
 LIBTPMS_0.6.0 {
     global:
-        TPMLIB_SetBufferSize;
+	TPMLIB_GetInfo;
+	TPMLIB_SetBufferSize;
 	TPMLIB_SetDebugFD;
 	TPMLIB_SetDebugLevel;
 	TPMLIB_SetDebugPrefix;

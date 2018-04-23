@@ -145,6 +145,11 @@ TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop,
     return TPM_SUCCESS;
 }
 
+char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags)
+{
+    return tpm_iface[0]->GetInfo(flags);
+}
+
 TPM_RESULT TPM_IO_Hash_Start(void)
 {
     return tpm_iface[0]->HashStart();

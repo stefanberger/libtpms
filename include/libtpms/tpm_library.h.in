@@ -93,6 +93,12 @@ enum TPMLIB_TPMProperty {
 
 TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop, int *result);
 
+enum TPMLIB_InfoFlags {
+    TPMLIB_INFO_TPMSPECIFICATION = 1,
+};
+
+char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags);
+
 struct libtpms_callbacks {
     int sizeOfStruct;
     TPM_RESULT (*tpm_nvram_init)(void);

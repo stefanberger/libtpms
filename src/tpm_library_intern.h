@@ -60,6 +60,7 @@ struct tpm_interface {
     TPM_RESULT (*VolatileAllStore)(unsigned char **buffer, uint32_t *buflen);
     TPM_RESULT (*GetTPMProperty)(enum TPMLIB_TPMProperty prop,
                                  int *result);
+    char *(*GetInfo)(enum TPMLIB_InfoFlags flags);
     TPM_RESULT (*TpmEstablishedGet)(TPM_BOOL *tpmEstablished);
     TPM_RESULT (*HashStart)(void);
     TPM_RESULT (*HashData)(const unsigned char *data,
