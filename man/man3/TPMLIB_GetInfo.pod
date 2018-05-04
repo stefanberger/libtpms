@@ -28,6 +28,10 @@ The following flags are defined and return JSON objects as shown:
 
 {"TPMSpecification":{"family":"1.2","level":2,"revision":116}}
 
+=item B<TPMLIB_INFO_TPMATTRIBUTES>
+
+{"TPMAttributes":{"manufacturer":"id:00001014","version":"id:00740001","model":"swtpm"}}
+
 =back
 
 =head1 RETURN VALUE

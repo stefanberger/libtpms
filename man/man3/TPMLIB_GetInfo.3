@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "TPMLIB_GetInfo 3"
-.TH TPMLIB_GetInfo 3 "2018-04-23" "libtpms" ""
+.TH TPMLIB_GetInfo 3 "2018-05-04" "libtpms" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -160,6 +160,9 @@ The following flags are defined and return \s-1JSON\s0 objects as shown:
 .IP "\fB\s-1TPMLIB_INFO_TPMSPECIFICATION\s0\fR" 4
 .IX Item "TPMLIB_INFO_TPMSPECIFICATION"
 {\*(L"TPMSpecification\*(R":{\*(L"family\*(R":\*(L"1.2\*(R",\*(L"level\*(R":2,\*(L"revision\*(R":116}}
+.IP "\fB\s-1TPMLIB_INFO_TPMATTRIBUTES\s0\fR" 4
+.IX Item "TPMLIB_INFO_TPMATTRIBUTES"
+{\*(L"TPMAttributes\*(R":{\*(L"manufacturer\*(R":\*(L"id:00001014\*(R",\*(L"version\*(R":\*(L"id:00740001\*(R",\*(L"model\*(R":\*(L"swtpm\*(R"}}
 .SH "RETURN VALUE"
 .IX Header "RETURN VALUE"
 This function returns a \s-1JSON\s0 string on success and a \s-1NULL\s0 pointer if a memory

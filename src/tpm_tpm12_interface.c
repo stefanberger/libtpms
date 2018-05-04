@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "tpm12/tpm_debug.h"
 #include "tpm_error.h"
@@ -184,23 +185,40 @@ char *TPM12_GetInfo(enum TPMLIB_InfoFlags flags)
         "\"level\":2,"
         "\"revision\":116"
     "}";
+    const char *tpmattrs =
+    "\"TPMAttributes\":{"
+        "\"manufacturer\":\"id:00001014\","
+        "\"version\":\"id:00740001\"," /* 146.1 */
+        "\"model\":\"swtpm\""
+    "}";
     char *fmt = NULL, *buffer;
+    bool printed = false;
 
-    if (!(buffer = strdup("{%s%s}")))
+    if (!(buffer = strdup("{%s%s%s}")))
         return NULL;
 
     if ((flags & TPMLIB_INFO_TPMSPECIFICATION)) {
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&buffer, fmt, tpmspec, "%s%s") < 0)
+        if (asprintf(&buffer, fmt, "", tpmspec, "%s%s%s") < 0)
             goto error;
         free(fmt);
+        printed = true;
+    }
+    if ((flags & TPMLIB_INFO_TPMATTRIBUTES)) {
+        fmt = buffer;
+        buffer = NULL;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     tpmattrs, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
     }
 
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
-    if (asprintf(&buffer, fmt, "","") < 0)
+    if (asprintf(&buffer, fmt, "", "", "") < 0)
         goto error;
     free(fmt);
 
