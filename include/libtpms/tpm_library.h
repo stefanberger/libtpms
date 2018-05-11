@@ -154,7 +154,7 @@ TPM_RESULT TPMLIB_ValidateState(enum TPMLIB_StateType st,
 TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
                            const unsigned char *buffer, uint32_t buflen);
 TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
-                           const unsigned char **buffer, uint32_t *buflen);
+                           unsigned char **buffer, uint32_t *buflen);
 
 #ifdef __cplusplus
 }
