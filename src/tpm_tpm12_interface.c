@@ -289,16 +289,20 @@ TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
     ret = TPM_Global_Init(&tpm_state);
     tpm_state.tpm_number = 0;
 
+    if (ret == TPM_SUCCESS) {
+        /* permanent state needs to be there and loaded first */
+        ret = TPM_PermanentAll_NVLoad(&tpm_state);
+    }
+
     for (i = 0; sts[i] && ret == TPM_SUCCESS; i++) {
         c_st = st & sts[i];
 
         /* 'cached' state is known to 'work', so skip it */
-        if (!c_st || !HasCachedState(c_st))
+        if (!c_st || HasCachedState(c_st))
             continue;
 
         switch (c_st) {
         case TPMLIB_STATE_PERMANENT:
-            ret = TPM_PermanentAll_NVLoad(&tpm_state);
             break;
         case TPMLIB_STATE_VOLATILE:
             ret = TPM_VolatileAll_NVLoad(&tpm_state);
