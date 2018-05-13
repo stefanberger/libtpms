@@ -328,6 +328,35 @@ static TPM_RESULT _TPM_PermanentAll_Store(TPM_STORE_BUFFER *sbuffer,
 }
 
 /*
+ * TPM_PermanentAll_NVLoad_Preserve
+ *
+ * @tpm_state: The tpm_state to load the permanent state into
+ *
+ * Call TPM_PermanentAll_NVLoad and preserve any cached data that a call
+ * to TPM_PermanentAll_NVLoad (TPM_NVRAM_LoadData) may otherwise consume
+ * and remove if it was available.
+ */
+static TPM_RESULT TPM_PermanentAll_NVLoad_Preserve(tpm_state_t *tpm_state)
+{
+    TPM_RESULT ret;
+    unsigned char *buffer = NULL;
+    uint32_t buffer_len;
+    bool is_empty_buffer;
+
+    ret = CopyCachedState(TPMLIB_STATE_PERMANENT,
+                          &buffer, &buffer_len, &is_empty_buffer);
+    if (ret == TPM_SUCCESS) {
+        ret = TPM_PermanentAll_NVLoad(tpm_state);
+
+        /* restore a previous empty buffer or any valid buffer */
+        if (is_empty_buffer || buffer != NULL)
+            SetCachedState(TPMLIB_STATE_PERMANENT, buffer, buffer_len);
+    }
+
+    return ret;
+}
+
+/*
  * Get the state blob of the given type. If we TPM is not running, we
  * get the cached state blobs, if available, otherwise we try to read
  * it from files. In case the TPM is running, we get it from the running
@@ -432,15 +461,22 @@ TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
 
     /* test whether we can accept the blob */
     if (ret == TPM_SUCCESS) {
+        tpm_state->tpm_number = 0;
+
         switch (st) {
         case TPMLIB_STATE_PERMANENT:
             ret = TPM_PermanentAll_Load(tpm_state, &stream, &stream_size);
             break;
         case TPMLIB_STATE_VOLATILE:
-            ret = TPM_VolatileAll_Load(tpm_state, &stream, &stream_size);
+            /* permanent state needs to be there and loaded first */
+            ret = TPM_PermanentAll_NVLoad_Preserve(tpm_state);
+            if (ret == TPM_SUCCESS)
+                ret = TPM_VolatileAll_Load(tpm_state, &stream, &stream_size);
             break;
         case TPMLIB_STATE_SAVE_STATE:
-            ret = TPM_SaveState_Load(tpm_state, &stream, &stream_size);
+            ret = TPM_PermanentAll_NVLoad_Preserve(tpm_state);
+            if (ret == TPM_SUCCESS)
+                 ret = TPM_SaveState_Load(tpm_state, &stream, &stream_size);
             break;
         }
         if (ret)
