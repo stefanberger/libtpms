@@ -443,6 +443,8 @@ TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
             ret = TPM_SaveState_Load(tpm_state, &stream, &stream_size);
             break;
         }
+        if (ret)
+            ClearAllCachedState();
     }
 
     /* cache the blob for the TPM_MainInit() to pick it up */

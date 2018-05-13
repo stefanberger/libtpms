@@ -100,6 +100,7 @@ struct sized_buffer {
 };
 
 void ClearCachedState(enum TPMLIB_StateType st);
+void ClearAllCachedState(void);
 void SetCachedState(enum TPMLIB_StateType st,
                     unsigned char *buffer, uint32_t buflen);
 void GetCachedState(enum TPMLIB_StateType st,

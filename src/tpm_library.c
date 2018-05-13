@@ -490,6 +490,13 @@ void ClearCachedState(enum TPMLIB_StateType st)
     cached_blobs[st].buflen = 0;
 }
 
+void ClearAllCachedState(void)
+{
+    ClearCachedState(TPMLIB_STATE_VOLATILE);
+    ClearCachedState(TPMLIB_STATE_PERMANENT);
+    ClearCachedState(TPMLIB_STATE_SAVE_STATE);
+}
+
 /*
  * Set buffer for cached state; we allow setting an empty cached state
  * by the caller passing a NULL pointer for the buffer.

@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "TPMLIB_SetState 3"
-.TH TPMLIB_SetState 3 "2018-05-11" "libtpms" ""
+.TH TPMLIB_SetState 3 "2018-05-13" "libtpms" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -155,17 +155,23 @@ TPMLIB_GetState  \- Get the TPM's volatile, permanent, or save state
 The \fB\f(BITPMLIB_SetState()\fB\fR function allows to set either one of the state blobs of
 the \s-1TPM.\s0 The passed state blob is tested for whether it can be accepted and a \s-1TPM\s0
 error code is returned in case it cannot be accepted. In case of acceptance, the
-state blob will be passed to the \s-1TPM\s0 upon \fITPM_MainInit()\fR. Setting a state blob
+state blob will be passed to the \s-1TPM\s0 upon \fB\f(BITPM_MainInit()\fB\fR. Setting a state blob
 hides a file that may contain the same type of blob and would be read otherwise.
 It is required to call this function with a \s-1NULL\s0 pointer for the buffer parameter
 to hide a state blob in a file.
 .PP
-It is only possible to set the state blobs after \fITPMLIB_ChooseTPMVersion()\fR has been
-called. All state blobs are cleared when \fITPMLIB_Terminate()\fR is called.
+It is only possible to set the state blobs after \fB\f(BITPMLIB_ChooseTPMVersion()\fB\fR
+has been called. All state blobs are cleared when a different version of \s-1TPM\s0 is
+chosen using \fBTPMLIB_ChooseTPMVersion\fR or when a call to \fB\f(BITPMLIB_SetState()\fB\fR
+fails because a state blob could not be accepted.
+.PP
+The order in which state blobs are set is important. The first state blob has
+to be the one representing the \s-1TPM\s0's permanent state. Only after that either
+the volatile or save state blobs can be set.
 .PP
 The \fB\f(BITPMLIB_GetState()\fB\fR function allows to get the current state of the \s-1TPM.\s0
 For as long as the \s-1TPM\s0 has not been started, this function either returns the state
-blob previously set with \fB\f(BITPMLIB_GetState()\fB\fR or the state read from a file.
+blob previously set with \fB\f(BITPMLIB_SetState()\fB\fR or the state is read from a file.
 Once the \s-1TPM\s0 has been start the state of the running \s-1TPM\s0 is returned.
 .PP
 The \fB\s-1TPMLIB_STATE_SAVE_STATE\s0\fR (save state) type of \s-1TPM\s0 state can be set with this
