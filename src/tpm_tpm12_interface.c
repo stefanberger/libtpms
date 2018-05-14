@@ -376,7 +376,7 @@ TPM_RESULT TPM12_GetState(enum TPMLIB_StateType st,
 
         /* try cached blob before file */
         ret = CopyCachedState(st, buffer, buflen, &is_empty_buffer);
-        if (ret != TPM_SUCCESS || buffer != NULL || is_empty_buffer)
+        if (ret != TPM_SUCCESS || *buffer != NULL || is_empty_buffer)
             return ret;
 
         if (cbs->tpm_nvram_init) {
