@@ -107,10 +107,16 @@ TPM_RESULT TPMLIB_ChooseTPMVersion(TPMLIB_TPMVersion ver)
 
     switch (ver) {
     case TPMLIB_TPM_VERSION_1_2:
+        if (tpmvers_choice != 0)
+            ClearAllCachedState();
+
         tpmvers_choice = 0; // entry 0 in tpm_iface
         break;
     case TPMLIB_TPM_VERSION_2:
 #if WITH_TPM2
+        if (tpmvers_choice != 1)
+            ClearAllCachedState();
+
         tpmvers_choice = 1; // entry 1 in tpm_iface
         break;
 #endif
