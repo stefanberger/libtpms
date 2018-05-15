@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptHash.c 1218 2018-05-15 18:42:02Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -168,7 +168,7 @@ CryptHashIsValidAlg(
 	  case TPM_ALG_SHA512:
 #endif
 #ifdef TPM_ALG_SM3_256
-	  case TPM_ALG_SHA256:
+	  case TPM_ALG_SM3_256:
 #endif
 	    return TRUE;
 	    break;
