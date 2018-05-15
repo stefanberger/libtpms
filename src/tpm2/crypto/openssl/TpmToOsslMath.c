@@ -92,7 +92,7 @@ OsslToTpmBn(
 	    BIGNUM          *osslBn
 	    )
 {
-    unsigned char buffer[MAX_RSA_KEY_BYTES + 1];
+    unsigned char buffer[LARGEST_NUMBER + 1];
     int buffer_len;
 #ifdef OSSL_VERIFY
     int i;
@@ -102,9 +102,8 @@ OsslToTpmBn(
 	{
 	    pAssert(BN_num_bytes(osslBn) >= 0);
 	    pAssert(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
-
-	    buffer_len = BN_bn2bin(osslBn, buffer);
-	    BnFromBytes(bn, buffer, buffer_len);
+	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
+	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
 
 #ifdef OSSL_VERIFY
 	    for (i = 0; i < osslBn->top; i++)
@@ -119,8 +118,8 @@ BigInitialized(
 	       bigConst            initializer
 	       )
 {
-    unsigned char buffer[MAX_RSA_KEY_BYTES + 1];
-    size_t buffer_len = sizeof(buffer);
+    unsigned char buffer[LARGEST_NUMBER + 1];
+    NUMBYTES buffer_len = (NUMBYTES )sizeof(buffer);
     BIGNUM *toInit =  BN_new();
 #ifdef OSSL_VERIFY
     unsigned char buffer2[MAX_RSA_KEY_BYTES + 1];
@@ -151,6 +150,7 @@ BigInitialized(
 
     return toInit;
 }
+
 #ifndef OSSL_DEBUG
 #   define BIGNUM_PRINT(label, bn, eol)
 #   define DEBUG_PRINT(x)
@@ -255,7 +255,6 @@ BnModMult(
     BN_free(bnOp2);
     BN_free(bnOp1);
     BN_free(bnResult);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -283,11 +282,9 @@ BnMult(
 	    OsslToTpmBn(temp, bnTemp);
 	    BnCopy(result, temp);
 	}
-
     BN_free(bnB);
     BN_free(bnA);
     BN_free(bnTemp);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -336,12 +333,10 @@ BnDiv(
     BIGNUM_PRINT("    bnDivisor: ", bnSor, TRUE);
     BIGNUM_PRINT("   bnQuotient: ", bnQ, TRUE);
     BIGNUM_PRINT("  bnRemainder: ", bnR, TRUE);
-
     BN_free(bnSor);
     BN_free(bnDend);
     BN_free(bnR);
     BN_free(bnQ);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -370,11 +365,9 @@ BnGcd(
 	    pAssert(gcd->size == (size_t)bnGcd->top);
 #endif
 	}
-
     BN_free(bn2);
     BN_free(bn1);
     BN_free(bnGcd);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -405,7 +398,6 @@ BnModExp(
     BN_free(bnE);
     BN_free(bnN);
     BN_free(bnResult);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -431,7 +423,6 @@ BnModInverse(
     BN_free(bnM);
     BN_free(bnN);
     BN_free(bnResult);
-
     OSSL_LEAVE();
     return OK;
 }
@@ -483,10 +474,8 @@ EcPointInitialized(
     pAssert(E != NULL);
     if(P != NULL)
 	EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX);
-
     BN_free(bnY);
     BN_free(bnX);
-
     return P;
 }
 /* B.2.3.2.3.10. BnCurveInitialize() */
@@ -542,7 +531,6 @@ BnCurveInitialize(
     E->G = group;
     E->CTX = CTX;
     E->C = C;
-
     BN_free(bnH);
     BN_free(bnN);
     BN_free(bnY);
@@ -550,7 +538,6 @@ BnCurveInitialize(
     BN_free(bnB);
     BN_free(bnA);
     BN_free(bnP);
-
     return OK ? E : NULL;
 }
 /* B.2.3.2.3.11. BnEccModMult() */
@@ -613,10 +600,8 @@ BnEccModMult2(
     EC_POINT_free(pR);
     EC_POINT_free(pS);
     EC_POINT_free(pQ);
-
     BN_free(bnD);
     BN_free(bnU);
-
     return !BnEqualZero(R->z);
 }
 /* B.2.3.2.4. BnEccAdd() */
