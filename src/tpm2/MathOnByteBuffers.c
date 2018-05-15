@@ -3,7 +3,7 @@
 /*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: MathOnByteBuffers.c 1088 2017-10-26 19:41:33Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -218,15 +218,15 @@ AdjustNumberB(
 {
     BYTE            *from;
     UINT16           i;
-    // This is a request to shift the number to the left (remove leading zeros)
     if(num->size == requestedSize)
 	return requestedSize;
     from = num->buffer;
+    // This is a request to shift the number to the left (remove leading zeros)
     if (num->size > requestedSize)
 	{
 	    // Find the first non-zero byte. Don't look past the point where removing
 	    // more zeros would make the number smaller than requested.
-	    for(i = num->size; *from == 0 && i > requestedSize; from++, i++);
+	    for(i = num->size; *from == 0 && i > requestedSize; from++, i--);	// kgold
 	    if(i < num->size)
 		{
 		    num->size = i;
