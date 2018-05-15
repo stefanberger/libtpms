@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.h 1109 2017-12-12 21:00:57Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -75,10 +75,16 @@
 #include <openssl/bn.h>
 /* B.2.2.2.2. Macros and Defines */
 /* Make sure that the library is using the correct size for a crypt word */
+#if !(defined THIRTY_TWO_BIT || defined SIXTY_FOUR_BIT || defined SIXTY_FOUR_BIT_LONG)
+#error "No architecture found"
+#endif
+
 #if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)		\
-    || defined SIXTY_FOUR_BIT && (RADIX_BITS != 64)
+    || defined SIXTY_FOUR_BIT && (RADIX_BITS != 64)		\
+    || defined SIXTY_FOUR_BIT_LONG && (RADIX_BITS != 64)
 #  error "Ossl library is using different radix"
 #endif
+
 /*     Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a
        local BIGNUM. The bigNum is initialized and then the BIGNUM is set to reference the local
        value. */
@@ -86,10 +92,11 @@
     BN_VAR(name##Bn, (bits));						\
     BIGNUM          *name = BigInitialized(BnInit(name##Bn,		\
 						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
-/* 				    Allocate a BIGNUM and initialize with the values in a bigNum
- 				    initializer */
+
+/* Allocate a BIGNUM and initialize with the values in a bigNum initializer */
 #define BIG_INITIALIZED(name, initializer)				\
     BIGNUM          *name = BigInitialized(initializer)
+
 typedef struct
 {
     const ECC_CURVE_DATA    *C;     // the TPM curve values
