@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MAC_fp.h 1049 2017-07-20 21:00:18Z kgoldman $	*/
+/*            $Id: MAC_fp.h 1082 2017-10-09 18:51:46Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,7 +68,7 @@ typedef struct {
     TPMI_DH_OBJECT		handle;
     TPM2B_MAX_BUFFER		buffer;
     TPMI_ALG_MAC_SCHEME		inScheme;
-} Mac_In;
+} MAC_In;
 
 #define RC_Mac_handle 		(TPM_RC_H + TPM_RC_1)
 #define RC_Mac_buffer		(TPM_RC_P + TPM_RC_1)
@@ -76,12 +76,12 @@ typedef struct {
 
 typedef struct {
     TPM2B_MAX_BUFFER	outMac;
-} Mac_Out;
+} MAC_Out;
 
 TPM_RC
-TPM2_Mac(
-		    Mac_In   *in,            // IN: input parameter list
-		    Mac_Out  *out            // OUT: output parameter list
+TPM2_MAC(
+		    MAC_In   *in,            // IN: input parameter list
+		    MAC_Out  *out            // OUT: output parameter list
 		    );
 
 
