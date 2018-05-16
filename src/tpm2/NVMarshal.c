@@ -1792,20 +1792,30 @@ skip_future_versions:
 
 #if defined(TPM_ALG_SHA384) || defined(TPM_ALG_SHA512)
 
-#define HASH_STATE_SHA512_MAGIC 0x14814b08
+#define HASH_STATE_SHA384_MAGIC 0x14814b08
+#define HASH_STATE_SHA384_VERSION 2
+
+#define HASH_STATE_SHA512_MAGIC 0x269e8ae0
 #define HASH_STATE_SHA512_VERSION 2
 
 static UINT16
-tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
+tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
+                           UINT16 hashAlg)
 {
     UINT16 written = 0;
     UINT16 array_size;
     size_t i;
     BLOCK_SKIP_INIT;
+    UINT16 version = HASH_STATE_SHA512_VERSION;
+    UINT32 magic = HASH_STATE_SHA512_MAGIC;
+
+    if (hashAlg == ALG_SHA384_VALUE) {
+        version = HASH_STATE_SHA384_VERSION;
+        magic = HASH_STATE_SHA384_MAGIC;
+    }
 
     written = NV_HEADER_Marshal(buffer, size,
-                                HASH_STATE_SHA512_VERSION,
-                                HASH_STATE_SHA512_MAGIC, 1);
+                                version, magic, 1);
 
     array_size = ARRAY_SIZE(data->h);
     written += UINT16_Marshal(&array_size, buffer, size);
@@ -1833,17 +1843,24 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
 }
 
 static UINT16
-tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
+tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
+                             UINT16 hashAlg)
 {
     UINT16 rc = TPM_RC_SUCCESS;
     size_t i;
     UINT16 array_size;
     NV_HEADER hdr;
+    UINT16 version = HASH_STATE_SHA512_VERSION;
+    UINT32 magic = HASH_STATE_SHA512_MAGIC;
+
+    if (hashAlg == ALG_SHA384_VALUE) {
+        version = HASH_STATE_SHA384_VERSION;
+        magic = HASH_STATE_SHA384_MAGIC;
+    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
-                                 HASH_STATE_SHA512_VERSION,
-                                 HASH_STATE_SHA512_MAGIC);
+                                 version, magic);
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -1927,12 +1944,14 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
 #endif
 #ifdef TPM_ALG_SHA384
     case ALG_SHA384_VALUE:
-        written += tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size);
+        written += tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size,
+                                              ALG_SHA384_VALUE);
         break;
 #endif
 #ifdef TPM_ALG_SHA512
     case ALG_SHA512_VALUE:
-        written += tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size);
+        written += tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size,
+                                              ALG_SHA512_VALUE);
         break;
 #endif
     default:
@@ -1975,12 +1994,14 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
 #endif
 #ifdef TPM_ALG_SHA384
     case ALG_SHA384_VALUE:
-        rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size);
+        rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size,
+                                          ALG_SHA384_VALUE);
         break;
 #endif
 #ifdef TPM_ALG_SHA512
     case ALG_SHA512_VALUE:
-        rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size);
+        rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size,
+                                          ALG_SHA512_VALUE);
         break;
 #endif
     }
