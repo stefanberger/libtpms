@@ -375,15 +375,6 @@ NV_INDEX_Unmarshal(NV_INDEX *data, BYTE **buffer, INT32 *size)
                                  NV_INDEX_VERSION, NV_INDEX_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > NV_INDEX_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported NV_INDEX version. "
-                            "Expected <= %d, got %d\n",
-                            NV_INDEX_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
-
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMS_NV_PUBLIC_Unmarshal(&data->publicArea, buffer, size);
     }
@@ -448,13 +439,6 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  DRBG_STATE_VERSION, DRBG_STATE_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS && hdr.version > DRBG_STATE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported DRBG_STATE version. "
-                            "Expected <= %d, got %d\n",
-                            DRBG_STATE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -551,13 +535,6 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
                                  PCR_POLICY_VERSION, PCR_POLICY_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS && hdr.version > PCR_POLICY_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PCR_POLICY version. "
-                            "Expected <= %d, got %d\n",
-                            PCR_POLICY_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
     }
@@ -647,11 +624,6 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  ORDERLY_DATA_VERSION, ORDERLY_DATA_MAGIC);
-    }
-    if (hdr.version > ORDERLY_DATA_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported orderly data version. Expected <= %d, got %d\n",
-                          ORDERLY_DATA_VERSION, hdr.version);
-        return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->clock, buffer, size);
@@ -809,14 +781,6 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PCR_SAVE_VERSION, PCR_SAVE_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > PCR_SAVE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PCR_SAVE version. "
-                            "Expected <= %d, got %d\n",
-                            PCR_SAVE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -1003,12 +967,6 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PCR_VERSION, PCR_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS && hdr.version > PCR_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PCR version. "
-                            "Expected <= %d, got %d\n",
-                            PCR_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
 
     while (rc == TPM_RC_SUCCESS && !end) {
         if (rc == TPM_RC_SUCCESS) {
@@ -1135,14 +1093,6 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
                                  PCR_AUTHVALUE_VERSION, PCR_AUTHVALUE_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > PCR_AUTHVALUE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PCR_AUTHVALUE version. "
-                            "Expected <= %d, got %d\n",
-                            PCR_AUTHVALUE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
     }
@@ -1211,11 +1161,6 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
                                  STATE_CLEAR_DATA_VERSION,
                                  STATE_CLEAR_DATA_MAGIC);
     }
-    if (hdr.version > STATE_CLEAR_DATA_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported state clear data version. Expected <= %d, got %d\n",
-                         STATE_CLEAR_DATA_VERSION, hdr.version);
-        return TPM_RC_BAD_TAG;
-    }
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&data->shEnable, buffer, size);
     }
@@ -1268,11 +1213,6 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  STATE_RESET_DATA_VERSION,
                                  STATE_RESET_DATA_MAGIC);
-    }
-    if (hdr.version > STATE_RESET_DATA_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported state reset data version. Expected <= %d, got %d\n",
-                         STATE_RESET_DATA_VERSION, hdr.version);
-        return TPM_RC_BAD_TAG;
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_PROOF_Unmarshal(&data->nullProof, buffer, size);
@@ -1470,14 +1410,6 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
                                  BN_PRIME_T_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > BN_PRIME_T_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported BN_PRIME_T version. "
-                            "Expected <= %d, got %d\n",
-                            BN_PRIME_T_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     data->allocated = ARRAY_SIZE(data->d);
 
     if (rc == TPM_RC_SUCCESS) {
@@ -1562,14 +1494,6 @@ privateExponent_t_Unmarshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PRIVATE_EXPONENT_T_VERSION,
                                  PRIVATE_EXPONENT_T_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > PRIVATE_EXPONENT_T_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PRIVATE_EXPONENT_T version. "
-                            "Expected <= %d, got %d\n",
-                            PRIVATE_EXPONENT_T_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
 #if CRT_FORMAT_RSA == NO
@@ -1698,14 +1622,6 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
                                  HASH_STATE_SHA1_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > HASH_STATE_SHA1_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA1 version. "
-                            "Expected <= %d, got %d\n",
-                            HASH_STATE_SHA1_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = SHA_LONG_Unmarshal(&data->h0, buffer, size);
     }
@@ -1817,14 +1733,6 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
                                  HASH_STATE_SHA256_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > HASH_STATE_SHA256_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA256 version. "
-                            "Expected <= %d, got %d\n",
-                            HASH_STATE_SHA256_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
     }
@@ -1934,14 +1842,6 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  HASH_STATE_SHA512_VERSION,
                                  HASH_STATE_SHA512_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > HASH_STATE_SHA512_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported HASH_STATE_SHA512 version. "
-                            "Expected <= %d, got %d\n",
-                            HASH_STATE_SHA512_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2060,14 +1960,6 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                                  ANY_HASH_STATE_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > ANY_HASH_STATE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported ANY_HASH_STATE version. "
-                            "Expected <= %d, got %d\n",
-                            ANY_HASH_STATE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     switch (hashAlg) {
 #ifdef TPM_ALG_SHA1
     case ALG_SHA1_VALUE:
@@ -2141,14 +2033,6 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  HASH_STATE_VERSION, HASH_STATE_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > HASH_STATE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported HASH_STATE version. "
-                            "Expected <= %d, got %d\n",
-                            HASH_STATE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2277,13 +2161,6 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  HASH_OBJECT_VERSION, HASH_OBJECT_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS && hdr.version > HASH_OBJECT_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported HASH_OBJECT version. "
-                            "Expected <= %d, got %d\n",
-                            HASH_OBJECT_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMI_ALG_PUBLIC_Unmarshal(&data->type, buffer, size);
         if (rc == TPM_RC_TYPE)
@@ -2393,12 +2270,6 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  OBJECT_VERSION, OBJECT_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS && hdr.version > OBJECT_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported OBJECT version. "
-                            "Expected <= %d, got %d\n",
-                            OBJECT_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
 
     if (rc == TPM_RC_SUCCESS) {
         rc = TPMT_PUBLIC_Unmarshal(&data->publicArea, buffer, size, TRUE);
@@ -2488,12 +2359,6 @@ ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC);
-    }
-    if (rc == TPM_RC_SUCCESS && hdr.version > ANY_OBJECT_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported ANY_OBJECT version. "
-                            "Expected <= %d, got %d\n",
-                            ANY_OBJECT_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(ptr, buffer, size);
@@ -2588,12 +2453,6 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  SESSION_VERSION, SESSION_MAGIC);
-    }
-    if (rc == TPM_RC_SUCCESS && hdr.version > SESSION_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported SESSION version. "
-                            "Expected <= %d, got %d\n",
-                            SESSION_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal((UINT32 *)&data->attributes, buffer, size);
@@ -2709,13 +2568,6 @@ SESSION_SLOT_Unmarshal(SESSION_SLOT *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  SESSION_SLOT_VERSION, SESSION_SLOT_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS && hdr.version > SESSION_SLOT_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported SESSION_SLOT version. "
-                            "Expected <= %d, got %d\n",
-                            SESSION_SLOT_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&data->occupied, buffer, size);
     }
@@ -3046,15 +2898,6 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC);
     }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > VOLATILE_STATE_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported VOLATILE_STATE version. "
-                            "Expected <= %d, got %d\n",
-                            VOLATILE_STATE_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&g_exclusiveAuditSession, buffer, size); /* line 423 */
     }
@@ -3665,15 +3508,6 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
                                  PA_COMPILE_CONSTANTS_VERSION,
                                  PA_COMPILE_CONSTANTS_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > PA_COMPILE_CONSTANTS_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported PA_COMPILE_CONSTANTS version. "
-                            "Expected <= %d, got %d\n",
-                            PA_COMPILE_CONSTANTS_VERSION,
-                            hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&array_size, buffer, size);
     }
