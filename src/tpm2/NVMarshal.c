@@ -3637,7 +3637,7 @@ skip_future_versions:
 }
 
 #define PERSISTENT_DATA_MAGIC   0x12213443
-#define PERSISTENT_DATA_VERSION 1
+#define PERSISTENT_DATA_VERSION 2
 
 static UINT16
 PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
@@ -3716,6 +3716,14 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += UINT8_Marshal(&clocksize, buffer, size);
     written += UINT32_Marshal(&data->timeEpoch, buffer, size);
 #endif
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
     return written;
 }
 
@@ -3732,14 +3740,6 @@ PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PERSISTENT_DATA_VERSION,
                                  PERSISTENT_DATA_MAGIC);
-    }
-
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > PERSISTENT_DATA_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported persistent data version. "
-                            "Expected <= %d, got %d\n",
-                            PERSISTENT_DATA_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -3900,6 +3900,17 @@ skip_num_policy_pcr_group:
         }
 #endif
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PERSISTENT DATA", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     if (rc != TPM_RC_SUCCESS) {
         TPMLIB_LogTPM2Error("Failed to unmarshal PERSISTENT_DATA version %u\n",
                             hdr.version);
@@ -3907,7 +3918,7 @@ skip_num_policy_pcr_group:
     return rc;
 }
 
-#define INDEX_ORDERLY_RAM_VERSION 1
+#define INDEX_ORDERLY_RAM_VERSION 2
 #define INDEX_ORDERLY_RAM_MAGIC   0x5346feab
 UINT32
 INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
@@ -3918,6 +3929,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
     UINT16 offset = 0;
     UINT16 datasize;
     UINT32 sourceside_size = array_size;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 INDEX_ORDERLY_RAM_VERSION,
@@ -3957,6 +3969,14 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         }
         offset += nrh->size;
     }
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
     return written;
 }
 
@@ -3976,14 +3996,6 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
                                  INDEX_ORDERLY_RAM_VERSION,
                                  INDEX_ORDERLY_RAM_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > INDEX_ORDERLY_RAM_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported index orderly ram data version. "
-                            "Expected <= %d, got %d\n",
-                            INDEX_ORDERLY_RAM_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         /* get the size of the array on the source side
            we can accomodate different sizes when rebuilding
@@ -4035,6 +4047,16 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
             offset += nrh->size;
         }
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "INDEX ORDERLY RAM", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     return rc;
 
 exit_size:
@@ -4045,7 +4067,7 @@ exit_size:
     return TPM_RC_SIZE;
 }
 
-#define USER_NVRAM_VERSION 1
+#define USER_NVRAM_VERSION 2
 #define USER_NVRAM_MAGIC   0x094f22c3
 UINT32
 USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
@@ -4060,6 +4082,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
     OBJECT obj;
     UINT32 datasize;
     UINT64 sourceside_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
+    BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 USER_NVRAM_VERSION, USER_NVRAM_MAGIC,
@@ -4113,6 +4136,13 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
     NvRead(&maxCount, entryRef + offset, sizeof(maxCount));
     written += UINT64_Marshal(&maxCount, buffer, size);
 
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
     return written;
 }
 
@@ -4137,14 +4167,6 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                                  USER_NVRAM_VERSION,
                                  USER_NVRAM_MAGIC);
     }
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > USER_NVRAM_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported user nvram data version. "
-                            "Expected <= %d, got %d\n",
-                            USER_NVRAM_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&sourceside_size, buffer, size);
     }
@@ -4244,6 +4266,16 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
         NvWrite(entryRef + o + offset, sizeof(maxCount), &maxCount);
     }
 
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "USER NVRAM", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
     return rc;
 
 exit_size:
@@ -4265,7 +4297,7 @@ exit_size:
  * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
  * - NVRAM locations  (NV_USER_DYNAMIC)
  */
-#define PERSISTENT_ALL_VERSION 1
+#define PERSISTENT_ALL_VERSION 2
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
@@ -4277,6 +4309,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     STATE_CLEAR_DATA scd;
     UINT32 written = 0;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+    BLOCK_SKIP_INIT;
 
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
     NvRead(&od, NV_ORDERLY_DATA, sizeof(od));
@@ -4298,8 +4331,15 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
                                          buffer, size);
     written += USER_NVRAM_Marshal(buffer, size);
 
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
     magic = PERSISTENT_ALL_MAGIC;
     written += UINT32_Marshal(&magic, buffer, size);
+
+    BLOCK_SKIP_WRITE_CHECK;
 
     return written;
 }
@@ -4326,14 +4366,6 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
                                  PERSISTENT_ALL_MAGIC);
     }
 
-    if (rc == TPM_RC_SUCCESS &&
-        hdr.version > STATE_CLEAR_DATA_VERSION) {
-        TPMLIB_LogTPM2Error("Unsupported persistent_all data version. "
-                            "Expected <= %d, got %d\n",
-                            PERSISTENT_ALL_VERSION, hdr.version);
-        return TPM_RC_BAD_VERSION;
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = PACompileConstants_Unmarshal(buffer, size);
     }
@@ -4357,6 +4389,16 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
         /* this will write it into NVRAM right away */
         rc = USER_NVRAM_Unmarshal(buffer, size);
     }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "USER NVRAM", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal_Check(&hdr.magic,
                                PERSISTENT_ALL_MAGIC, buffer, size,
