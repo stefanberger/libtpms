@@ -360,7 +360,7 @@
 #define  MAX_LOADED_SESSIONS            3
 #define  MAX_SESSION_NUM                3
 #define  MAX_LOADED_OBJECTS             3
-#define  MIN_EVICT_OBJECTS              2
+#define  MIN_EVICT_OBJECTS              7
 #define  NUM_POLICY_PCR_GROUP           1
 #define  NUM_AUTHVALUE_PCR_GROUP        1
 #define  MAX_CONTEXT_SIZE               2474
