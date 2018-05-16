@@ -2613,7 +2613,7 @@ skip_future_versions:
     return rc;
 }
 
-#define VOLATILE_STATE_VERSION 2
+#define VOLATILE_STATE_VERSION 3
 #define VOLATILE_STATE_MAGIC 0x45637889
 
 UINT16
@@ -2627,6 +2627,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     BOOL has_block;
     UINT16 array_size;
     BLOCK_SKIP_INIT;
+    PERSISTENT_DATA pd;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC,
@@ -2892,10 +2893,19 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     tmp_uint64 = tpmclock();
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
 
-    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v3 */
+
+    /* tie the volatile state to the EP,SP, and PPSeed */
+    NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
+    written += TPM2B_Marshal(&pd.EPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&pd.SPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&pd.PPSeed.b, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v4 */
     /* future versions append below this line */
 
-    BLOCK_SKIP_WRITE_POP(size);
+    BLOCK_SKIP_WRITE_POP(size); /* v4 */
+    BLOCK_SKIP_WRITE_POP(size); /* v3 */
 
     /* keep marker at end */
     tmp_uint32 = VOLATILE_STATE_MAGIC;
@@ -2904,6 +2914,48 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     BLOCK_SKIP_WRITE_CHECK;
 
     return written;
+}
+
+TPM_RC
+VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    PERSISTENT_DATA pd;
+    TPM2B_SEED seed;
+    NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (memcmp(&seed.b, &pd.EPSeed.b, PRIMARY_SEED_SIZE)) {
+            TPMLIB_LogTPM2Error("%s: EPSeed does not match\n",
+                                __func__);
+            rc = TPM_RC_VALUE;
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (memcmp(&seed.b, &pd.SPSeed.b, PRIMARY_SEED_SIZE)) {
+            TPMLIB_LogTPM2Error("%s: SPSeed does not match\n",
+                                __func__);
+            rc = TPM_RC_VALUE;
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (memcmp(&seed.b, &pd.PPSeed.b, PRIMARY_SEED_SIZE)) {
+            TPMLIB_LogTPM2Error("%s: PPSeed does not match\n",
+                                __func__);
+            rc = TPM_RC_VALUE;
+        }
+    }
+
+    return rc;
 }
 
 TPM_RC
@@ -3309,8 +3361,12 @@ skip_hardware_clock:
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "Volatile State", "version 3 or later");
+        rc = VolatileState_TailV3_Unmarshal(buffer, size);
+
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
+                        "Volatile State", "version 4 or later");
         /* future versions nest-append here */
     }
 
