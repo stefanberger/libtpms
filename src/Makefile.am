@@ -10,6 +10,8 @@ common_CFLAGS = -include tpm_library_conf.h \
                 -I$(top_srcdir)/include/libtpms \
                 $(HARDENING_CFLAGS)
 
+LDFLAGS = $(HARDENING_LDFLAGS)
+
 #
 # TPM1.2
 #
