@@ -167,15 +167,16 @@ if test -z "$TMP1" && test -n "$TPM2"; then
 fi
 dnl Check ld for 'relro' and 'now'
 if $LD --help 2>&1 | $GREP '\-z relro ' > /dev/null; then
-  HARDENING_CFLAGS+="-Wl,-z,relro "
+  HARDENING_LDFLAGS+="-Wl,-z,relro "
 fi
 if $LD --help 2>&1 | $GREP '\-z now ' > /dev/null; then
-  HARDENING_CFLAGS+="-Wl,-z,now "
+  HARDENING_LDFLAGS+="-Wl,-z,now "
 fi
 AC_SUBST([HARDENING_CFLAGS])
+AC_SUBST([HARDENING_LDFLAGS])
 
 if test "$test_CFLAGS" != set; then
-  CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare"
+  CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
 fi
 
 AC_CONFIG_FILES(Makefile                   \
@@ -200,6 +201,7 @@ fi
 echo
 echo "CFLAGS=$CFLAGS"
 echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
+echo "HARDENING_LDFLAGS=$HARDENING_LDFLAGS"
 echo "LDFLAGS=$LDFLAGS"
 echo
 echo "Version to build  : $PACKAGE_VERSION"
