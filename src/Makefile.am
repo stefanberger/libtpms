@@ -173,8 +173,7 @@ libtpms_tpm2_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
                           -version-info $(LIBTPMS_VERSION_INFO) \
                           -no-undefined
 
-libtpms_tpm2_la_CFLAGS = $(common_CFLAGS) \
-                         -Wstrict-aliasing=3
+libtpms_tpm2_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_tpm2_la_CFLAGS += -D_POSIX_
 libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
