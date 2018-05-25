@@ -8,7 +8,12 @@ lib_LTLIBRARIES=libtpms.la
 
 common_CFLAGS = -include tpm_library_conf.h \
                 -I$(top_srcdir)/include/libtpms \
-                $(HARDENING_CFLAGS)
+                $(HARDENING_CFLAGS) \
+               $(SANITIZERS) \
+               $(FUZZER)
+
+
+LDFLAGS = $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
 
 #
 # TPM1.2
@@ -171,8 +176,7 @@ libtpms_tpm2_la_LDFLAGS = -Wl,--version-script=./libtpms.syms \
                           -version-info $(LIBTPMS_VERSION_INFO) \
                           -no-undefined
 
-libtpms_tpm2_la_CFLAGS = $(common_CFLAGS) \
-                         -Wstrict-aliasing=3
+libtpms_tpm2_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_tpm2_la_CFLAGS += -D_POSIX_
 libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
