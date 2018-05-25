@@ -74,6 +74,22 @@ For patch submissions, please use a Signed-off-by: <your email> to indicate
 agreement to the DCO1.1.txt.
 
 
+Fuzzing
+-------
+Initial fuzzing is possible with clang & libfuzzer.
+
+You have to configure the project with --enable-fuzzer
+(--enable-sanitizer can also help spot more issues). Then you can
+build fuzz and run it with the testing corpus.
+
+Fuzz testing is known to work with Fedora 28 or later. It requires that the
+'clang' package is installed.
+
+Ex:
+$ ./configure --with-openssl --with-tpm2 --enable-sanitizers --enable-fuzzer CC=clang
+$ make && make -C tests fuzz
+$ tests/fuzz tests/corpus-execute-command
+
 Maintainers
 -----------
 libtpms is currently being maintained by Stefan Berger <stefanb@us.ibm.com>.

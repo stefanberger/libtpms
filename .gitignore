@@ -30,6 +30,7 @@ Makefile
 /include/libtpms/tpm_library.h
 /m4/*
 /tests/base64decode
+/tests/fuzz
 /tests/freebl_sha1flattensize
 /debian/*debhelper*
 /debian/*substvars

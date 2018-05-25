@@ -4,11 +4,17 @@
 # For the license, see the LICENSE file in the root directory.
 #
 
+AM_CFLAGS = -I../include $(SANITIZERS)
+AM_LDFLAGS = -ltpms -L../src/.libs $(SANITIZERS)
+
 check_PROGRAMS = base64decode
 TESTS = base64decode.sh
 
-base64decode_CFLAGS = -I../include
-base64decode_LDFLAGS = -ltpms -L../src/.libs
+if WITH_FUZZER
+check_PROGRAMS += fuzz
+fuzz_CFLAGS = -fsanitize=fuzzer $(AM_CFLAGS)
+fuzz_LDFLAGS = -fsanitize=fuzzer $(AM_LDFLAGS)
+endif
 
 if LIBTPMS_USE_FREEBL
 

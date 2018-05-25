@@ -8,9 +8,12 @@ lib_LTLIBRARIES=libtpms.la
 
 common_CFLAGS = -include tpm_library_conf.h \
                 -I$(top_srcdir)/include/libtpms \
-                $(HARDENING_CFLAGS)
+                $(HARDENING_CFLAGS) \
+               $(SANITIZERS) \
+               $(FUZZER)
 
-LDFLAGS = $(HARDENING_LDFLAGS)
+
+LDFLAGS = $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
 
 #
 # TPM1.2
