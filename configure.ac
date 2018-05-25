@@ -136,6 +136,15 @@ AC_ARG_WITH([tpm2],
 	AM_CONDITIONAL(WITH_TPM2, false)
 )
 
+AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),
+    [SANITIZERS="-fsanitize=address,undefined"], [])
+AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
+    [FUZZER="$SANITIZERS -fsanitize=fuzzer"
+     AM_CONDITIONAL(WITH_FUZZER, true)],
+    [AM_CONDITIONAL(WITH_FUZZER, false)])
+AC_SUBST([SANITIZERS])
+AC_SUBST([FUZZER])
+
 LT_INIT
 AC_PROG_CC
 AC_PROG_INSTALL
