@@ -659,7 +659,7 @@ TPM_RESULT TPM_StclearData_Load(TPM_STCLEAR_DATA *tpm_stclear_data,
                                 TPM_PCR_ATTRIBUTES *pcrAttrib)
 {
     TPM_RESULT          rc = 0;
-    TPM_STRUCTURE_TAG   tag;
+    TPM_STRUCTURE_TAG   tag = 0;
 
     printf(" TPM_StclearData_Load:\n");
     /* get tag */
