@@ -6,6 +6,7 @@
 AC_INIT([libtpms], [0.6.0])
 AC_PREREQ(2.12)
 AC_CONFIG_SRCDIR(Makefile.am)
+AC_CONFIG_AUX_DIR([.])
 AM_CONFIG_HEADER(config.h)
 
 AC_CONFIG_MACRO_DIR([m4])
