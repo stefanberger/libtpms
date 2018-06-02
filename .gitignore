@@ -32,6 +32,7 @@ Makefile
 /tests/base64decode
 /tests/fuzz
 /tests/freebl_sha1flattensize
+/tests/nvram_offsets
 /debian/*debhelper*
 /debian/*substvars
 /debian/files

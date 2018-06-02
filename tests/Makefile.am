@@ -7,8 +7,18 @@
 AM_CFLAGS = -I../include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L../src/.libs $(SANITIZERS)
 
-check_PROGRAMS = base64decode
-TESTS = base64decode.sh
+check_PROGRAMS = base64decode nvram_offsets
+TESTS = base64decode.sh nvram_offsets
+
+nvram_offsets_SOURCES = nvram_offsets.c
+nvram_offsets_CFLAGS = $(AM_CFLAGS) \
+	-I$(top_srcdir)/include/libtpms \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/tpm2 \
+	-I$(top_srcdir)/src/tpm2/crypto \
+	-I$(top_srcdir)/src/tpm2/crypto/openssl \
+	-DTPM_POSIX
+nvram_offsets_LDFLAGS = $(AM_LDFLAGS)
 
 if WITH_FUZZER
 check_PROGRAMS += fuzz

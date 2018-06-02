@@ -210,6 +210,11 @@ typedef struct OBJECT
     // handle of an object slot.
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
+
+    // libtpms: OBJECT lies in NVRAM; to avoid that it needs different number
+    // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
+    // same size; simple padding at the end works here
+    UINT32              _pad;
 } OBJECT;
 /* This structure holds a hash sequence object or an event sequence object. */
 /* The first four components of this structure are manually set to be the same as the first four
@@ -883,11 +888,15 @@ extern STATE_RESET_DATA gr;
 /* c) a STATE_CLEAR_DATA structure */
 /* d) an ORDERLY_DATA structure */
 /* e) the user defined NV index space */
+#define NV_ROUNDUP(VAL, SIZE) \
+  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
+
 #define NV_PERSISTENT_DATA  (0)
 #define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + sizeof(PERSISTENT_DATA))
 #define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + sizeof(STATE_RESET_DATA))
 #define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + sizeof(STATE_CLEAR_DATA))
-#define NV_INDEX_RAM_DATA   (NV_ORDERLY_DATA + sizeof(ORDERLY_DATA))
+#define NV_INDEX_RAM_DATA   NV_ROUNDUP(NV_ORDERLY_DATA + sizeof(ORDERLY_DATA),\
+                                       1024)
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
 /* 5.10.13 Global Macro Definitions */
