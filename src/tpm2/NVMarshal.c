@@ -59,6 +59,7 @@
 /********************************************************************************/
 
 #include <string.h>
+#include <inttypes.h>
 
 #include "assert.h"
 
@@ -335,7 +336,8 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
         if (rc == TPM_RC_SUCCESS && data->min_version > cur_version) {
             TPMLIB_LogTPM2Error("%s: Minimum version %u higher than "
                                 "implementation version %u for type 0x%08x\n",
-                                data->min_version, cur_version);
+                                __func__, data->min_version, cur_version,
+                                exp_magic);
             rc = TPM_RC_BAD_VERSION;
         }
     }
@@ -458,7 +460,7 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         if (array_size != ARRAY_SIZE(data->seed.bytes)) {
             TPMLIB_LogTPM2Error("Non-matching DRBG_STATE seed array size. "
-                                "Expected %d, got %d\n",
+                                "Expected %zu, got %u\n",
                                 ARRAY_SIZE(data->seed.bytes), array_size);
             rc = TPM_RC_SIZE;
         }
@@ -473,7 +475,7 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         if (array_size != ARRAY_SIZE(data->lastValue)) {
             TPMLIB_LogTPM2Error("Non-matching DRBG_STATE lastValue array size. "
-                                "Expected %d, got %d\n",
+                                "Expected %zu, got %u\n",
                                 ARRAY_SIZE(data->lastValue), array_size);
             rc = TPM_RC_SIZE;
         }
@@ -546,7 +548,7 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         if (array_size != ARRAY_SIZE(data->hashAlg)) {
             TPMLIB_LogTPM2Error("Non-matching PCR_POLICY array size. "
-                                "Expected %d, got %d\n",
+                                "Expected %zu, got %u\n",
                                 ARRAY_SIZE(data->hashAlg), array_size);
             rc = TPM_RC_SIZE;
         }
@@ -793,7 +795,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != NUM_STATIC_PCR) {
         TPMLIB_LogTPM2Error("Non-matching PCR_SAVE NUM_STATIC_PCR. "
-                            "Expected %d, got %d\n",
+                            "Expected %zu, got %u\n",
                             sizeof(NUM_STATIC_PCR), array_size);
         rc = TPM_RC_SIZE;
     }
@@ -853,7 +855,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
                 TPMLIB_LogTPM2Error("PCR_SAVE: Bad size for PCRs for hash 0x%x; "
                                     "Expected %u, got %d\n",
-                                    needed_size, array_size);
+                                    algid, needed_size, array_size);
                 rc = TPM_RC_BAD_PARAMETER;
             }
             if (rc == TPM_RC_SUCCESS) {
@@ -1027,7 +1029,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
                 TPMLIB_LogTPM2Error("PCR: Bad size for PCR for hash 0x%x; "
                                     "Expected %u, got %d\n",
-                                    needed_size, array_size);
+                                    algid, needed_size, array_size);
                 rc = TPM_RC_BAD_PARAMETER;
             }
             if (rc == TPM_RC_SUCCESS) {
@@ -1103,7 +1105,7 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(data->auth)) {
         TPMLIB_LogTPM2Error("PCR_AUTHVALUE: Bad array size for auth; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(data->auth), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1238,7 +1240,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->contextArray)) {
         TPMLIB_LogTPM2Error("STATE_RESET_DATA: Bad array size for contextArray; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             sizeof(data->contextArray), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1283,7 +1285,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->commitArray)) {
         TPMLIB_LogTPM2Error("STATE_RESET_DATA: Bad array size for commitArray; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             sizeof(data->commitArray), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1422,7 +1424,8 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
         if (data->size > data->allocated) {
-            TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %u than allocated %u\n",
+            TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %zu than "
+                                "allocated %zu\n",
                                 data->size, data->allocated);
             rc = TPM_RC_SIZE;
         }
@@ -1656,7 +1659,7 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->data)) {
         TPMLIB_LogTPM2Error("HASH_STATE_SHA1: Bad array size for data; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             sizeof(data->data), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1745,7 +1748,7 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(data->h)) {
         TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for h; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(data->h), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1765,7 +1768,7 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->data)) {
         TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad array size for data; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             sizeof(data->data), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1873,7 +1876,7 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(data->h)) {
         TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad array size for h; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(data->h), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1893,7 +1896,7 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
     if (rc == TPM_RC_SUCCESS &&
         array_size != sizeof(data->u.p)) {
         TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad array size for u.p; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             sizeof(data->u.p), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -2210,7 +2213,7 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
             if (rc == TPM_RC_SUCCESS) {
                 if (array_size != ARRAY_SIZE(data->state.hashState)) {
                     TPMLIB_LogTPM2Error("HASH_OBJECT: Bad array size for state.hashState; "
-                                        "expected %u, got %u\n",
+                                        "expected %zu, got %u\n",
                                         ARRAY_SIZE(data->state.hashState),
                                         array_size);
                     rc = TPM_RC_SIZE;
@@ -2500,7 +2503,7 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
 #ifdef CLOCK_STOPS
         if (clocksize != sizeof(UINT64)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
-                                "Expected %u, got %u\n",
+                                "Expected %zu, got %u\n",
                                 sizeof(UINT64), clocksize);
             rc = TPM_RC_BAD_PARAMETER;
         }
@@ -2510,7 +2513,7 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
 #else
         if (clocksize != sizeof(UINT32)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
-                                "Expected %u, got %u\n",
+                                "Expected %zu, got %u\n",
                                 sizeof(UINT32), clocksize);
             rc = TPM_RC_BAD_PARAMETER;
         }
@@ -3066,7 +3069,7 @@ skip_da:
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(s_sessionHandles)) {
         TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_sessionHandles; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(s_sessionHandles), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -3173,7 +3176,7 @@ skip_accumulate_self_heal_timer_1:
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(s_indexOrderlyRam)) {
         TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_indexOrderlyRam; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(s_indexOrderlyRam), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -3207,7 +3210,7 @@ skip_nv:
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(s_objects)) {
         TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_objects; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(s_objects), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -3233,7 +3236,7 @@ skip_object:
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(s_pcrs)) {
         TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_pcrs; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(s_pcrs), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -3259,7 +3262,7 @@ skip_pcr:
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(s_sessions)) {
         TPMLIB_LogTPM2Error("Volatile state: Bad array size for s_sessions; "
-                            "expected %u, got %u\n",
+                            "expected %zu, got %u\n",
                             ARRAY_SIZE(s_sessions), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -3383,8 +3386,7 @@ skip_future_versions:
             if (tmp_uint32 != VOLATILE_STATE_MAGIC) {
                 TPMLIB_LogTPM2Error("Invalid volatile state magic. "
                                     "Expected 0x%08x, got 0x%08x\n",
-                                    __func__, VOLATILE_STATE_MAGIC,
-                                    tmp_uint32);
+                                    VOLATILE_STATE_MAGIC, tmp_uint32);
                 rc = TPM_RC_BAD_TAG;
             }
         }
@@ -3615,7 +3617,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS &&
         array_size != ARRAY_SIZE(pa_compile_constants)) {
         TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS has non-matching number of "
-                            "elements; found %u, expected %u\n",
+                            "elements; found %u, expected %zu\n",
                             array_size, ARRAY_SIZE(pa_compile_constants));
     }
 
@@ -3895,7 +3897,7 @@ skip_num_policy_pcr_group:
 #else
         if (clocksize != sizeof(UINT32)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
-                                "Expected %u, got %u\n",
+                                "Expected %zu, got %u\n",
                                 sizeof(UINT32), clocksize);
             rc = TPM_RC_BAD_PARAMETER;
         }
@@ -4066,7 +4068,7 @@ skip_future_versions:
 exit_size:
     TPMLIB_LogTPM2Error("INDEX_ORDERLY_RAM:"
                         "Insufficient space to write to offset %u;"
-                        "Source had %lu bytes, we have %lu bytes.\n",
+                        "Source had %u bytes, we have %zu bytes.\n",
                         offset, sourceside_size, array_size);
     return TPM_RC_SIZE;
 }
@@ -4293,8 +4295,9 @@ skip_future_versions:
 
 exit_size:
     TPMLIB_LogTPM2Error("USER_NVRAM:"
-                        "Insufficient space to write to offset %u;"
-                        "Source had %lu bytes, we have %lu bytes.\n",
+                        "Insufficient space to write to offset %"PRIu64";"
+                        "Source had %"PRIu64" bytes, we have %"PRIu64" "
+                        "bytes.\n",
                         o, sourceside_size, array_size);
     return TPM_RC_SIZE;
 }

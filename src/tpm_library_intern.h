@@ -40,6 +40,7 @@
 #define TPM_LIBRARY_INTERN_H
 
 #include <stdbool.h>
+#include "compiler.h"
 #include "tpm_library.h"
 
 #define ROUNDUP(VAL, SIZE) \
@@ -100,7 +101,9 @@ TPM_RESULT TPM12_IO_TpmEstablished_Reset(void);
 
 /* internal logging function */
 int TPMLIB_LogPrintf(const char *format, ...);
-void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...);
+void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...) \
+     ATTRIBUTE_FORMAT(2, 3);
+
 
 #define TPMLIB_LogError(format, ...) \
      TPMLIB_LogPrintfA(~0, "libtpms: "format, __VA_ARGS__)
