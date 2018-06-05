@@ -78,6 +78,10 @@
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
 
+/* prevent misconfiguration: */
+typedef char assertion_failed_nvram[
+    (NV_USER_DYNAMIC_END < NV_USER_DYNAMIC) ? -1 : 0];
+
 typedef struct
 {
     UINT16 version;
