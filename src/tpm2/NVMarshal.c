@@ -4150,6 +4150,15 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
     return written;
 }
 
+/*
+ * USER_NVRAM_Unmarshal:
+ *
+ * Unmarshal the byte stream directly into the NVRAM. Ensure that the
+ * the data fit into the user NVRAM before writing them.
+ *
+ * This function fails if there's not enough NVRAM to write the data into
+ * or if an unknown handle type was encountered.
+ */
 TPM_RC
 USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
 {
@@ -4392,6 +4401,8 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         /* this will write it into NVRAM right away */
         rc = USER_NVRAM_Unmarshal(buffer, size);
+        /* if rc == TPM_RC_SUCCESS, we know that there is enough
+           NVRAM to fit everything. */
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
