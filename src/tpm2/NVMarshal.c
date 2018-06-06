@@ -249,6 +249,18 @@ BOOL_Unmarshal(BOOL *boolean, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+static int
+TPM2B_Cmp(const TPM2B *t1, const TPM2B *t2)
+{
+    int ret;
+
+    ret = memcmp(&t1->size, &t2->size, sizeof(t1->size));
+    if (ret)
+        return ret;
+
+    return memcmp(t1->buffer, t2->buffer, t1->size);
+}
+
 UINT16
 TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
 {
@@ -2935,7 +2947,7 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (memcmp(&seed.b, &pd.EPSeed.b, PRIMARY_SEED_SIZE)) {
+        if (TPM2B_Cmp(&seed.b, &pd.EPSeed.b)) {
             TPMLIB_LogTPM2Error("%s: EPSeed does not match\n",
                                 __func__);
             rc = TPM_RC_VALUE;
@@ -2945,7 +2957,7 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (memcmp(&seed.b, &pd.SPSeed.b, PRIMARY_SEED_SIZE)) {
+        if (TPM2B_Cmp(&seed.b, &pd.SPSeed.b)) {
             TPMLIB_LogTPM2Error("%s: SPSeed does not match\n",
                                 __func__);
             rc = TPM_RC_VALUE;
@@ -2955,7 +2967,7 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (memcmp(&seed.b, &pd.PPSeed.b, PRIMARY_SEED_SIZE)) {
+        if (TPM2B_Cmp(&seed.b, &pd.PPSeed.b)) {
             TPMLIB_LogTPM2Error("%s: PPSeed does not match\n",
                                 __func__);
             rc = TPM_RC_VALUE;
