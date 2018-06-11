@@ -273,6 +273,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Volatile.c
 
 noinst_HEADERS += \
+	compiler.h \
 	tpm2/crypto/CryptDes_fp.h \
 	tpm2/crypto/CryptEcc.h \
 	tpm2/crypto/CryptEccKeyExchange_fp.h \
@@ -484,6 +485,7 @@ noinst_HEADERS += \
 	\
 	tpm2/NVMarshal.h \
 	tpm2/StateMarshal.h \
+	tpm2/Test.h \
 	tpm2/Volatile.h
 
 if LIBTPMS_USE_OPENSSL
