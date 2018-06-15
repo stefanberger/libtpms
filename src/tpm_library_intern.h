@@ -90,6 +90,8 @@ uint32_t TPM12_GetBufferSize(void);
 int TPMLIB_LogPrintf(const char *format, ...);
 void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...);
 
+#define TPMLIB_LogError(format, ...) \
+     TPMLIB_LogPrintfA(~0, "libtpms: "format, __VA_ARGS__)
 #define TPMLIB_LogTPM12Error(format, ...) \
      TPMLIB_LogPrintfA(~0, "libtpms/tpm12: "format, __VA_ARGS__)
 

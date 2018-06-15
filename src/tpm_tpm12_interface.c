@@ -445,14 +445,23 @@ TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
         return TPM_INVALID_POSTINIT;
 
     if (ret == TPM_SUCCESS) {
-        ret = TPM_Malloc((unsigned char **)&stream, buflen);
+        stream = malloc(buflen);
+        if (!stream) {
+            TPMLIB_LogError("Could not allocate %u bytes.\n", buflen);
+            ret = TPM_SIZE;
+        }
     }
 
     if (ret == TPM_SUCCESS) {
         orig_stream = stream;
         memcpy(stream, buffer, buflen);
 
-        ret = TPM_Malloc((unsigned char **)&tpm_state, sizeof(tpm_state_t));
+        tpm_state = malloc(sizeof(tpm_state_t));
+        if (!tpm_state) {
+            TPMLIB_LogError("Could not allocated %zu bytes.\n",
+                            sizeof(tpm_state_t));
+            ret = TPM_SIZE;
+        }
     }
 
     if (ret == TPM_SUCCESS) {

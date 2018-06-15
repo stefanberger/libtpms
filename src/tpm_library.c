@@ -240,7 +240,6 @@ static unsigned char *TPMLIB_OpenSSL_Base64Decode(char *input,
     BIO *b64, *bmem;
     unsigned char *res = NULL;
     int n;
-    TPM_RESULT rc;
 
     b64 = BIO_new(BIO_f_base64());
     if (!b64) {
@@ -255,14 +254,15 @@ static unsigned char *TPMLIB_OpenSSL_Base64Decode(char *input,
     bmem = BIO_push(b64, bmem);
     BIO_set_flags(bmem, BIO_FLAGS_BASE64_NO_NL);
 
-    rc = TPM_Malloc(&res, outputlen);
-    if (rc != TPM_SUCCESS) {
+    res = malloc(outputlen);
+    if (!res) {
+        TPMLIB_LogError("Could not allocate %u bytes.\n", outputlen);
         goto cleanup;
     }
 
     n = BIO_read(bmem, res, outputlen);
     if (n <= 0) {
-        TPM_Free(res);
+        free(res);
         res = NULL;
         goto cleanup;
     }
@@ -296,8 +296,12 @@ static unsigned char *TPMLIB_Base64Decode(const char *start, const char *end,
 
     end++;
 
-    if (TPM_Malloc((unsigned char **)&input, end - start + 1) != TPM_SUCCESS)
+    input = malloc(end - start + 1);
+    if (!input) {
+        TPMLIB_LogError("Could not allocate %u bytes.\n",
+                        (unsigned int)(end - start + 1));
         return NULL;
+    }
 
     /* copy from source string skipping '\n' and '\r' and using
        '=' to calculate the exact length */
@@ -537,9 +541,13 @@ TPM_RESULT CopyCachedState(enum TPMLIB_StateType st,
     *is_empty_buffer = (*buflen == BUFLEN_EMPTY_BUFFER);
 
     if (cached_blobs[st].buffer) {
-        ret = TPM_Malloc(buffer, *buflen);
-        if (ret == TPM_SUCCESS)
+        *buffer = malloc(*buflen);
+        if (!*buffer) {
+            TPMLIB_LogError("Could not allocate %u bytes.\n", *buflen);
+            ret = TPM_SIZE;
+        } else {
             memcpy(*buffer, cached_blobs[st].buffer, *buflen);
+        }
     } else {
         *buffer = NULL;
     }
