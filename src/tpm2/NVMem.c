@@ -155,7 +155,7 @@ _plat__NVEnable(
         INT32 size = length;
 
         rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
-        TPM_Free(data);
+        free(data);
         if (rc != TPM_RC_SUCCESS)
             return -1;
          return 0;

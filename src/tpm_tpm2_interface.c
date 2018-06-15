@@ -82,7 +82,7 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
 
     if (cbs->tpm_nvram_loaddata) {
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
-        TPM_Free(data);
+        free(data);
         if (ret == TPM_SUCCESS || ret == TPM_DECRYPT_ERROR)
             return TRUE;
     }
@@ -149,10 +149,10 @@ TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
                         uint32_t *respbufsize,
 		        unsigned char *command, uint32_t command_size)
 {
-    TPM_RESULT res = 0;
     uint8_t locality = 0;
     _IN_BUFFER req;
     _OUT_BUFFER resp;
+    unsigned char *tmp;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -171,9 +171,13 @@ TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
 
     /* have the TPM 2 write directly into the response buffer */
     if (*respbufsize < TPM_BUFFER_MAX || !*respbuffer) {
-        res = TPM_Realloc(respbuffer, TPM_BUFFER_MAX);
-        if (res)
-            return res;
+        tmp = realloc(*respbuffer, TPM_BUFFER_MAX);
+        if (!tmp) {
+            TPMLIB_LogTPM2Error("Could not allocated %u bytes.\n",
+                                TPM_BUFFER_MAX);
+            return TPM_SIZE;
+        }
+        *respbuffer = tmp;
         *respbufsize = TPM_BUFFER_MAX;
     }
     resp.BufferSize = *respbufsize;
@@ -232,22 +236,24 @@ TPM_RESULT TPM2_PersistentAllStore(unsigned char **buf,
 TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
                                  uint32_t *buflen)
 {
-    TPM_RESULT rc;
+    TPM_RESULT rc = 0;
     INT32 size = NV_MEMORY_SIZE;
     UINT16 written;
     unsigned char *statebuffer = NULL;
 
     *buffer = NULL;
-    rc = TPM_Realloc(&statebuffer, size);
-    if (rc)
-        return rc;
+    statebuffer = malloc(size);
+    if (!statebuffer) {
+        TPMLIB_LogTPM2Error("Could not allocate %u bytes.\n", size);
+        return TPM_SIZE;
+    }
 
     /* statebuffer will change */
     *buffer = statebuffer;
 
     written = VolatileSave(&statebuffer, &size);
     if (written >= size) {
-        TPM_Free(*buffer);
+        free(*buffer);
         *buffer = NULL;
         rc = TPM_FAIL;
     } else {
@@ -444,7 +450,7 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
         buffer = data;
         size = length;
         rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
-        TPM_Free(data);
+        free(data);
     }
 
     if ((rc == TPM_RC_SUCCESS) &&
@@ -537,7 +543,9 @@ TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
         return TPM_INVALID_POSTINIT;
 
     if (ret == TPM_SUCCESS) {
-        ret = TPM_Malloc((unsigned char **)&stream, buflen);
+        stream = malloc(buflen);
+        if (!stream)
+            ret = TPM_SIZE;
     }
 
     if (ret == TPM_SUCCESS) {
@@ -576,9 +584,9 @@ TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
     if (ret == TPM_SUCCESS) {
         SetCachedState(st, orig_stream, buflen);
     } else {
-        TPM_Free(orig_stream);
+        free(orig_stream);
     }
-    TPM_Free(permanent);
+    free(permanent);
 
     return ret;
 }

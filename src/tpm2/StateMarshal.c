@@ -47,7 +47,7 @@ VolatileLoad(void)
          * if this failed, VolatileState_Load will have started
          * failure mode.
          */
-        TPM_Free(p);
+        free(p);
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
