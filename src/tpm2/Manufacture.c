@@ -83,7 +83,7 @@ TPM_Manufacture(
 		)
 {
     TPM_SU          orderlyShutdown;
-#ifdef RUNTIME_SIZE_CHECKS
+#if RUNTIME_SIZE_CHECKS
     // Call the function to verify the sizes of values that result from different
     // compile options.
     TpmSizeChecks();
