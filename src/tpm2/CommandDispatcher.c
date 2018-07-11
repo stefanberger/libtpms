@@ -76,7 +76,7 @@
    unmarshaling so that the compare operation is valid in cases where some bytes are unused. */
 /* 6.3.1.1 Includes, Types, and Structures */
 #include "Tpm.h"
-#ifdef  TABLE_DRIVEN_DISPATCH  //%
+#if TABLE_DRIVEN_DISPATCH
 typedef TPM_RC(NoFlagFunction)(void *target, BYTE **buffer, INT32 *size);
 typedef TPM_RC(FlagFunction)(void *target, BYTE **buffer, INT32 *size, BOOL flag);
 typedef FlagFunction *UNMARSHAL_t;
@@ -121,7 +121,7 @@ ParseHandleBuffer(
 		  )
 {
     TPM_RC                   result;
-#if defined TABLE_DRIVEN_DISPATCH
+#if TABLE_DRIVEN_DISPATCH
     COMMAND_DESCRIPTOR_t    *desc;
     BYTE                    *types;
     BYTE                     type;
@@ -199,7 +199,7 @@ CommandDispatcher(
 		  COMMAND                 *command
 		  )
 {
-#if !defined TABLE_DRIVEN_DISPATCH
+#if !TABLE_DRIVEN_DISPATCH
     TPM_RC       result;
     BYTE        **paramBuffer = &command->parameterBuffer;
     INT32       *paramBufferSize = &command->parameterSize;

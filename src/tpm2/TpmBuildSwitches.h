@@ -92,11 +92,15 @@
 #   undef   USE_DA_USED
 #   define  USE_DA_USED     YES         // Default: Either YES or NO
 #endif
-/* Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements for command dispatch and
-   handle unmarshaling */
-#ifndef TABLE_DRIVEN_DISPATCH
-#  define TABLE_DRIVEN_DISPATCH
+
+// Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements for command dispatch and
+// handle unmarshaling
+#if !(defined TABLE_DRIVEN_DISPATCH)					\
+    || ((TABLE_DRIVEN_DISPATCH != NO) && (TABLE_DRIVEN_DISPATCH != YES))
+#   undef   TABLE_DRIVEN_DISPATCH
+#   define  TABLE_DRIVEN_DISPATCH   YES     // Default: Either YES or NO
 #endif
+
 /* This switch is used to enable the self-test capability in AlgorithmTests.c */
 #ifndef SELF_TEST
 #define SELF_TEST
