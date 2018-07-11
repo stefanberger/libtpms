@@ -312,8 +312,8 @@ IsAuthValueAvailable(
 		  object = HandleToObject(handle);
 		  attributes = object->publicArea.objectAttributes;
 		  // authValue is always available for a sequence object.
-		  // An alternative for this is to SET
-		  // object->publicArea.objectAttributes.userWithAuth when the
+		  // An alternative for this is to
+		  // SET_ATTRIBUTE(object->publicArea, TPMA_OBJECT, userWithAuth) when the
 		  // sequence is started.
 		  if(ObjectIsSequence(object))
 		      {
@@ -443,7 +443,7 @@ IsAuthPolicyAvailable(
 	    // An NV Index.
 	      {
 		  NV_INDEX         *nvIndex = NvGetIndexInfo(handle, NULL);
-		  TPMA_NV           attributes = nvIndex->publicArea.attributes;
+		  TPMA_NV           nvAttributes = nvIndex->publicArea.attributes;
 		  //
 		  // If the policy size is not zero, check if policy can be used.
 		  if(nvIndex->publicArea.authPolicy.t.size != 0)
@@ -456,12 +456,12 @@ IsAuthPolicyAvailable(
 			  // attributes.
 			  else if(IsWriteOperation(commandIndex))
 			      {
-				  if(IS_ATTRIBUTE(attributes, TPMA_NV, POLICYWRITE))
+				  if(IS_ATTRIBUTE(nvAttributes, TPMA_NV, POLICYWRITE))
 				      result = TRUE;
 			      }
 			  else
 			      {
-				  if(IS_ATTRIBUTE(attributes, TPMA_NV, POLICYREAD))
+				  if(IS_ATTRIBUTE(nvAttributes, TPMA_NV, POLICYREAD))
 				      result = TRUE;
 			      }
 		      }
@@ -1295,7 +1295,7 @@ CheckAuthSession(
     else
 	{
 	    // ... see if the entity has a policy, ...
-	    // Note: IsAutPolciyAvalable will return FALSE if the sensitive area of the
+	    // Note: IsAuthPolicyAvalable will return FALSE if the sensitive area of the
 	    // object is not loaded
 	    if(!IsAuthPolicyAvailable(associatedHandle, command->index, sessionIndex))
 		return TPM_RC_AUTH_UNAVAILABLE;
