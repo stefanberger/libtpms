@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     Command Attributes					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandAttributes.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CommandAttributes.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -69,21 +69,20 @@
    list, new code will be needed in CommandCodeAttributes.c to test it. */
 
 typedef  UINT16             COMMAND_ATTRIBUTES;
-#define  NOT_IMPLEMENTED   (COMMAND_ATTRIBUTES)(0)
-#define  ENCRYPT_2         (COMMAND_ATTRIBUTES)(1 <<  0)
-#define  ENCRYPT_4         (COMMAND_ATTRIBUTES)(1 <<  1)
-#define  DECRYPT_2         (COMMAND_ATTRIBUTES)(1 <<  2)
-#define  DECRYPT_4         (COMMAND_ATTRIBUTES)(1 <<  3)
-#define  HANDLE_1_USER     (COMMAND_ATTRIBUTES)(1 <<  4)
-#define  HANDLE_1_ADMIN    (COMMAND_ATTRIBUTES)(1 <<  5)
-#define  HANDLE_1_DUP      (COMMAND_ATTRIBUTES)(1 <<  6)
-#define  HANDLE_2_USER     (COMMAND_ATTRIBUTES)(1 <<  7)
-#define  PP_COMMAND        (COMMAND_ATTRIBUTES)(1 <<  8)
-#define  IS_IMPLEMENTED    (COMMAND_ATTRIBUTES)(1 <<  9)
-#define  NO_SESSIONS       (COMMAND_ATTRIBUTES)(1 << 10)
-#define  NV_COMMAND        (COMMAND_ATTRIBUTES)(1 << 11)
-#define  PP_REQUIRED       (COMMAND_ATTRIBUTES)(1 << 12)
-#define  R_HANDLE          (COMMAND_ATTRIBUTES)(1 << 13)
-#define  ALLOW_TRIAL       (COMMAND_ATTRIBUTES)(1 << 14)
-
-#endif
+#define NOT_IMPLEMENTED     (COMMAND_ATTRIBUTES)(0)
+#define ENCRYPT_2           ((COMMAND_ATTRIBUTES)1 << 0)
+#define ENCRYPT_4           ((COMMAND_ATTRIBUTES)1 << 1)
+#define DECRYPT_2           ((COMMAND_ATTRIBUTES)1 << 2)
+#define DECRYPT_4           ((COMMAND_ATTRIBUTES)1 << 3)
+#define HANDLE_1_USER       ((COMMAND_ATTRIBUTES)1 << 4)
+#define HANDLE_1_ADMIN      ((COMMAND_ATTRIBUTES)1 << 5)
+#define HANDLE_1_DUP        ((COMMAND_ATTRIBUTES)1 << 6)
+#define HANDLE_2_USER       ((COMMAND_ATTRIBUTES)1 << 7)
+#define PP_COMMAND          ((COMMAND_ATTRIBUTES)1 << 8)
+#define IS_IMPLEMENTED      ((COMMAND_ATTRIBUTES)1 << 9)
+#define NO_SESSIONS         ((COMMAND_ATTRIBUTES)1 << 10)
+#define NV_COMMAND          ((COMMAND_ATTRIBUTES)1 << 11)
+#define PP_REQUIRED         ((COMMAND_ATTRIBUTES)1 << 12)
+#define R_HANDLE            ((COMMAND_ATTRIBUTES)1 << 13)
+#define ALLOW_TRIAL         ((COMMAND_ATTRIBUTES)1 << 14)
+#endif // COMMAND_ATTRIBUTES_H
