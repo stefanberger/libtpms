@@ -3,7 +3,7 @@
 /*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers.c 1088 2017-10-26 19:41:33Z kgoldman $	*/
+/*            $Id: MathOnByteBuffers.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -218,15 +218,17 @@ AdjustNumberB(
 {
     BYTE            *from;
     UINT16           i;
+    // See if number is already the requested size
     if(num->size == requestedSize)
 	return requestedSize;
     from = num->buffer;
-    // This is a request to shift the number to the left (remove leading zeros)
     if (num->size > requestedSize)
 	{
+	    // This is a request to shift the number to the left (remove leading zeros)
 	    // Find the first non-zero byte. Don't look past the point where removing
-	    // more zeros would make the number smaller than requested.
-	    for(i = num->size; *from == 0 && i > requestedSize; from++, i--);	// kgold
+	    // more zeros would make the number smaller than requested, and don't throw
+	    // away any significant digits.
+	    for(i = num->size; *from == 0 && i > requestedSize; from++, i--);
 	    if(i < num->size)
 		{
 		    num->size = i;
@@ -262,4 +264,20 @@ ShiftLeft(
 	    *buffer <<= 1;
 	}
     return value;
+}
+
+/* 9.11.2.7	IsNumeric() */
+/* Verifies that all the characters are simple numeric (0-9) */
+BOOL
+IsNumeric(
+	  TPM2B       *value
+	  )
+{
+    UINT16      i;
+    for(i = 0; i < value->size; i++)
+	{
+	    if(value->buffer[i] < '0' || value->buffer[i] > '9')
+		return FALSE;
+	}
+    return TRUE;
 }
