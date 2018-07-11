@@ -747,13 +747,13 @@ typedef struct orderly_data
     DRBG_STATE          drbgState;
     // These values allow the accumulation of self-healing time across orderly shutdown
     // of the TPM.
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     UINT64              selfHealTimer;  // current value of s_selfHealTimer
     UINT64              lockoutTimer;   // current value of s_lockoutTimer
     UINT64              time;           // current value of g_time at shutdown
 #endif // ACCUMULATE_SELF_HEAL_TIMER
 } ORDERLY_DATA;
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
 #define     s_selfHealTimer     go.selfHealTimer
 #define     s_lockoutTimer      go.lockoutTimer
 #endif  // ACCUMULATE_SELF_HEAL_TIMER
@@ -1030,7 +1030,7 @@ extern BOOL             s_DAPendingOnNV;
 /* From DA.c */
 /* This variable holds the accumulated time since the last time that failedTries was
    decremented. This value is in millisecond. */
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
 extern UINT64       s_selfHealTimer;
 /* This variable holds the accumulated time that the lockoutAuth has been blocked. */
 extern UINT64       s_lockoutTimer;

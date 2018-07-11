@@ -3,7 +3,7 @@
 /*			   Dictionary Attack Logic.  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DA.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: DA.c 1259 2018-07-10 19:11:09Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -101,7 +101,7 @@ DAStartup(
 	  )
 {
     NOT_REFERENCED(type);
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
     _plat__TimerWasReset();
     s_selfHealTimer = 0;
     s_lockoutTimer = 0;
