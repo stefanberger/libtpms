@@ -737,7 +737,7 @@ CryptEccGenerateKey(
 	    BnPointTo2B(&publicArea->unique.ecc, ecQ, E);
 	    BnTo2B(bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
 	}
-#if defined FIPS_COMPLIANT || 1
+#if FIPS_COMPLIANT
     // See if PWCT is required
     if(OK && (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)))	// kgold
 		// if(OK && publicArea->objectAttributes.sign)
