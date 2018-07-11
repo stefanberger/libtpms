@@ -183,10 +183,6 @@
 #ifndef NOT_REFERENCED
 #   define NOT_REFERENCED(x = x)   ((void) (x))
 #endif
-/* Need an unambiguous definition for DEBUG. Don't change this */
-#if !defined NDEBUG && !defined DEBUG
-#  define DEBUG YES
-#endif
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
 #define JOIN(x,y) x##y
 #define CONCAT(x,y) JOIN(x, y)
