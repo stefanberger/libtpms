@@ -271,7 +271,7 @@ typedef  UINT16             TPM_EO;
 /* Table 2:19 - Definition of TPM_ST Constants */
 typedef  UINT16             TPM_ST;
 #define  TPM_ST_RSP_COMMAND             (TPM_ST)(0x00C4)
-#define  TPM_ST_NULL                    (TPM_ST)(0X8000)
+#define  TPM_ST_NULL                    (TPM_ST)(0x8000)
 #define  TPM_ST_NO_SESSIONS             (TPM_ST)(0x8001)
 #define  TPM_ST_SESSIONS                (TPM_ST)(0x8002)
 #define  TPM_ST_ATTEST_NV               (TPM_ST)(0x8014)
@@ -421,7 +421,7 @@ typedef  UINT32             TPM_PS;
 #define  TPM_PS_TNC               (TPM_PS)(0x0000000D)
 #define  TPM_PS_MULTI_TENANT      (TPM_PS)(0x0000000E)
 #define  TPM_PS_TC                (TPM_PS)(0x0000000F)
-/* Table 2:26 - Definition of Types for Handles (TypedefTable()) */
+/* Table 2:26 - Definition of Types for Handles */
 typedef  UINT32             TPM_HANDLE;
 /* Table 2:27 - Definition of TPM_HT Constants  */
 typedef  UINT8              TPM_HT;
@@ -470,13 +470,11 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  PCR_FIRST               (TPM_HC)((HR_PCR+0))
 #define  PCR_LAST                (TPM_HC)((PCR_FIRST+IMPLEMENTATION_PCR-1))
 #define  HMAC_SESSION_FIRST      (TPM_HC)((HR_HMAC_SESSION+0))
-#define  HMAC_SESSION_LAST						\
-    (TPM_HC)((HMAC_SESSION_FIRST + MAX_ACTIVE_SESSIONS-1))
+#define  HMAC_SESSION_LAST       (TPM_HC)((HMAC_SESSION_FIRST + MAX_ACTIVE_SESSIONS-1))
 #define  LOADED_SESSION_FIRST    (TPM_HC)(HMAC_SESSION_FIRST)
 #define  LOADED_SESSION_LAST     (TPM_HC)(HMAC_SESSION_LAST)
 #define  POLICY_SESSION_FIRST    (TPM_HC)((HR_POLICY_SESSION+0))
-#define  POLICY_SESSION_LAST						\
-    (TPM_HC)((POLICY_SESSION_FIRST + MAX_ACTIVE_SESSIONS-1))
+#define  POLICY_SESSION_LAST	 (TPM_HC)((POLICY_SESSION_FIRST + MAX_ACTIVE_SESSIONS-1))
 #define  TRANSIENT_FIRST         (TPM_HC)((HR_TRANSIENT+0))
 #define  ACTIVE_SESSION_FIRST    (TPM_HC)(POLICY_SESSION_FIRST)
 #define  ACTIVE_SESSION_LAST     (TPM_HC)(POLICY_SESSION_LAST)
@@ -933,11 +931,11 @@ typedef union {
     }            t;
     TPM2B        b;
 } TPM2B_DATA;
-/* Table 2:75 - Definition of Types for TPM2B_NONCE (TypedefTable()) */
+/* Table 2:75 - Definition of Types for TPM2B_NONCE */
 typedef  TPM2B_DIGEST       TPM2B_NONCE;
-/* Table 2:76 - Definition of Types for TPM2B_AUTH (TypedefTable()) */
+/* Table 2:76 - Definition of Types for TPM2B_AUTH */
 typedef  TPM2B_DIGEST       TPM2B_AUTH;
-/* Table 2:77 - Definition of Types for TPM2B_OPERAND (TypedefTable()) */
+/* Table 2:77 - Definition of Types for TPM2B_OPERAND */
 typedef  TPM2B_DIGEST       TPM2B_OPERAND;
 /* Table 2:78 - Definition of TPM2B_EVENT Structure  */
 typedef union {
@@ -1343,7 +1341,7 @@ typedef struct {
 } TPMS_SCHEME_ECDAA;
 /* Table 2:144 - Definition of TPMI_ALG_KEYEDHASH_SCHEME Type  */
 typedef  TPM_ALG_ID         TPMI_ALG_KEYEDHASH_SCHEME;
-/* Table 2:145 - Definition of Types for HMAC_SIG_SCHEME (TypedefTable()) */
+/* Table 2:145 - Definition of Types for HMAC_SIG_SCHEME */
 typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_HMAC;
 /* Table 2:146 - Definition of TPMS_SCHEME_XOR Structure  */
 typedef struct {
@@ -1364,10 +1362,10 @@ typedef struct {
     TPMI_ALG_KEYEDHASH_SCHEME     scheme;
     TPMU_SCHEME_KEYEDHASH         details;
 } TPMT_KEYEDHASH_SCHEME;
-/* Table 2:149 - Definition of Types for RSA Signature Schemes (TypedefTable()) */
+/* Table 2:149 - Definition of Types for RSA Signature Schemes */
 typedef  TPMS_SCHEME_HASH    TPMS_SIG_SCHEME_RSASSA;
 typedef  TPMS_SCHEME_HASH    TPMS_SIG_SCHEME_RSAPSS;
-/* Table 2:150 - Definition of Types for ECC Signature Schemes (TypedefTable()) */
+/* Table 2:150 - Definition of Types for ECC Signature Schemes */
 typedef  TPMS_SCHEME_HASH     TPMS_SIG_SCHEME_ECDSA;
 typedef  TPMS_SCHEME_HASH     TPMS_SIG_SCHEME_SM2;
 typedef  TPMS_SCHEME_HASH     TPMS_SIG_SCHEME_ECSCHNORR;
@@ -1402,13 +1400,13 @@ typedef struct {
     TPMI_ALG_SIG_SCHEME     scheme;
     TPMU_SIG_SCHEME         details;
 } TPMT_SIG_SCHEME;
-/* Table 2:153 - Definition of Types for Encryption Schemes (TypedefTable()) */
+/* Table 2:153 - Definition of Types for Encryption Schemes */
 typedef  TPMS_SCHEME_HASH    TPMS_ENC_SCHEME_OAEP;
 typedef  TPMS_EMPTY          TPMS_ENC_SCHEME_RSAES;
-/* Table 2:154 - Definition of Types for ECC Key Exchange (TypedefTable()) */
+/* Table 2:154 - Definition of Types for ECC Key Exchange */
 typedef  TPMS_SCHEME_HASH    TPMS_KEY_SCHEME_ECDH;
 typedef  TPMS_SCHEME_HASH    TPMS_KEY_SCHEME_ECMQV;
-/* Table 2:155 - Definition of Types for KDF Schemes (TypedefTable()) */
+/* Table 2:155 - Definition of Types for KDF Schemes */
 typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_MGF1;
 typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_KDF1_SP800_56A;
 typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_KDF2;
@@ -1552,7 +1550,7 @@ typedef struct {
     TPMI_ALG_HASH           hash;
     TPM2B_PUBLIC_KEY_RSA    sig;
 } TPMS_SIGNATURE_RSA;
-/* Table 2:176 - Definition of Types for Signature (TypedefTable()) */
+/* Table 2:176 - Definition of Types for Signature */
 typedef  TPMS_SIGNATURE_RSA    TPMS_SIGNATURE_RSASSA;
 typedef  TPMS_SIGNATURE_RSA    TPMS_SIGNATURE_RSAPSS;
 /* Table 2:177 - Definition of TPMS_SIGNATURE_ECC Structure  */
@@ -1561,7 +1559,7 @@ typedef struct {
     TPM2B_ECC_PARAMETER     signatureR;
     TPM2B_ECC_PARAMETER     signatureS;
 } TPMS_SIGNATURE_ECC;
-/* Table 2:178 - Definition of Types for TPMS_SIGNATURE_ECC (TypedefTable()) */
+/* Table 2:178 - Definition of Types for TPMS_SIGNATURE_ECC */
 typedef  TPMS_SIGNATURE_ECC    TPMS_SIGNATURE_ECDAA;
 typedef  TPMS_SIGNATURE_ECC    TPMS_SIGNATURE_ECDSA;
 typedef  TPMS_SIGNATURE_ECC    TPMS_SIGNATURE_SM2;
@@ -1753,12 +1751,12 @@ typedef union {
     }            t;
     TPM2B        b;
 } TPM2B_PRIVATE;
-/* Table 2:200 - Definition of TPMS_ID_OBJECT Structure  */
+/* Table 2:203 - Definition of TPMS_ID_OBJECT Structure  */
 typedef struct {
     TPM2B_DIGEST            integrityHMAC;
     TPM2B_DIGEST            encIdentity;
 } TPMS_ID_OBJECT;
-/* Table 192 - Definition of TPM2B_ID_OBJECT Structure <IN/OUT> */
+/* Table 204 - Definition of TPM2B_ID_OBJECT Structure <IN/OUT> */
 typedef union {
     struct {
 	UINT16                  size;
