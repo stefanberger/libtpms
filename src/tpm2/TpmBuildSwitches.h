@@ -188,8 +188,10 @@
 #endif // ACCUMULATE_SELF_HEAL_TIMER
 /* If the implementation is to compute the sizes of the proof and primary seed size values based on
    the implemented algorithms, then use this define. */
-#ifndef USE_SPEC_COMPLIANT_PROOFS
-#define  USE_SPEC_COMPLIANT_PROOFS
+#if !(defined USE_SPEC_COMPLIANT_PROOFS)				\
+    || ((USE_SPEC_COMPLIANT_PROOFS != NO) && (USE_SPEC_COMPLIANT_PROOFS != YES))
+#   undef   USE_SPEC_COMPLIANT_PROOFS
+#   define  USE_SPEC_COMPLIANT_PROOFS       YES       // Default: Either YES or NO
 #endif
 
 // Comment this out to allow compile to continue even though the chosen proof values do not match
