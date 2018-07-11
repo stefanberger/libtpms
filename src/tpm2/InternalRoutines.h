@@ -3,7 +3,7 @@
 /*			Include Headers for Internal Routines			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: InternalRoutines.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: InternalRoutines.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -121,18 +121,18 @@
 #include "MathOnByteBuffers_fp.h"
 #include "CryptSym_fp.h"
 #include "AlgorithmTests_fp.h"
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 #include "CryptRsa_fp.h"
 #include "CryptPrimeSieve_fp.h"
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 #include "CryptEccMain_fp.h"
 #include "CryptEccSignature_fp.h"
 #include "CryptEccKeyExchange_fp.h"
 #endif
 #if CC_MAC || CC_MAC_Start
 #   include "CryptSmac_fp.h"
-#   ifdef TPM_ALG_CMAC
+#   if ALG_CMAC
 #       include "CryptCmac_fp.h"
 #   endif
 #endif

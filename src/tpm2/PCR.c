@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: PCR.c 1262 2018-07-11 21:03:43Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -279,27 +279,27 @@ GetSavedPcrPointer(
 {
     switch(alg)
 	{
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
 	  case TPM_ALG_SHA1:
 	    return gc.pcrSave.sha1[pcrIndex];
 	    break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
 	  case TPM_ALG_SHA256:
 	    return gc.pcrSave.sha256[pcrIndex];
 	    break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
 	  case TPM_ALG_SHA384:
 	    return gc.pcrSave.sha384[pcrIndex];
 	    break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
 	  case TPM_ALG_SHA512:
 	    return gc.pcrSave.sha512[pcrIndex];
 	    break;
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
 	    return gc.pcrSave.sm3_256[pcrIndex];
 	    break;
@@ -355,27 +355,27 @@ GetPcrPointer(
 	return NULL;
     switch(alg)
 	{
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
 	  case TPM_ALG_SHA1:
 	    pcr = s_pcrs[pcrNumber].sha1Pcr;
 	    break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
 	  case TPM_ALG_SHA256:
 	    pcr = s_pcrs[pcrNumber].sha256Pcr;
 	    break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
 	  case TPM_ALG_SHA384:
 	    pcr = s_pcrs[pcrNumber].sha384Pcr;
 	    break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
 	  case TPM_ALG_SHA512:
 	    pcr = s_pcrs[pcrNumber].sha512Pcr;
 	    break;
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
 	    pcr = s_pcrs[pcrNumber].sm3_256Pcr;
 	    break;

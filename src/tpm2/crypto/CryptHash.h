@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptHash.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -102,7 +102,7 @@ typedef struct tpmCmacState {
     TPM2B_SYM_KEY           symKey;
 } tpmCmacState_t;
 typedef union SMAC_STATES {
-#ifdef TPM_ALG_CMAC
+#if ALG_CMAC
     tpmCmacState_t          cmac;
 #endif
     UINT64                  pad;
@@ -113,16 +113,16 @@ typedef struct SMAC_STATE {
 } SMAC_STATE;
 typedef union
 {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     tpmHashStateSHA1_t         Sha1;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     tpmHashStateSHA256_t       Sha256;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     tpmHashStateSHA384_t       Sha384;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     tpmHashStateSHA512_t       Sha512;
 #endif
     // Additions for symmetric block cipher MAC

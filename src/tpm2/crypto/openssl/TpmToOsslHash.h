@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -80,7 +80,7 @@
 #define tpmHashStateSHA256_t      SHA256_CTX
 #define tpmHashStateSHA384_t      SHA512_CTX
 #define tpmHashStateSHA512_t      SHA512_CTX
-#ifdef TPM_ALG_SM3
+#if ALG_SM3
 #   error "The version of OpenSSL used by this code does not support SM3"
 #endif
 /*     The defines below are only needed when compiling CryptHash.c or CryptSmac.c. This isolation

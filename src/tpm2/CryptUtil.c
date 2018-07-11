@@ -3,7 +3,7 @@
 /*			Interfaces to the CryptoEngine()			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -300,7 +300,7 @@ CryptGenerateKeySymmetric(
 		MemoryCopy2B(&sensitive->sensitive.sym.b, &sensitiveCreate->data.b,
 			     sizeof(sensitive->sensitive.sym.t.buffer));
 	}
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
     else if(publicArea->parameters.symDetail.sym.algorithm == TPM_ALG_TDES)
 	{
 	    sensitive->sensitive.sym.t.size = keyBits / 8;
@@ -378,10 +378,10 @@ CryptInit(
     ok = ok && CryptSymInit();
     ok = ok && CryptRandInit();
     ok = ok && CryptHashInit();
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     ok = ok && CryptRsaInit();
 #endif // TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     ok = ok && CryptEccInit();
 #endif // TPM_ALG_ECC
     return ok;
@@ -401,14 +401,14 @@ CryptStartup(
     BOOL            OK;
     NOT_REFERENCED(type);
     OK = CryptSymStartup() && CryptRandStartup() && CryptHashStartup()
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	 &&  CryptRsaStartup()
 #endif // TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	 &&  CryptEccStartup()
 #endif // TPM_ALG_ECC
 	 ;
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     // Don't directly check for SU_RESET because that is the default
     if(OK && (type != SU_RESTART) && (type != SU_RESUME))
 	{
@@ -441,10 +441,10 @@ CryptIsAsymAlgorithm(
 {
     switch(algID)
 	{
-#ifdef TPM_ALG_RSA
-	  case  TPM_ALG_RSA:
+#if ALG_RSA
+	  case TPM_ALG_RSA:
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 #endif
 	    return TRUE;
@@ -485,7 +485,7 @@ CryptSecretEncrypt(
 	return TPM_RC_ATTRIBUTES;
     switch(encryptKey->publicArea.type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	      {
 		  // Create secret data from RNG
@@ -496,7 +496,7 @@ CryptSecretEncrypt(
 	      }
 	      break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	      {
 		  TPMS_ECC_POINT      eccPublic;
@@ -590,7 +590,7 @@ CryptSecretDecrypt(
     // Decryption for secret
     switch(decryptKey->publicArea.type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	      {
 		  TPMT_RSA_DECRYPT        scheme;
@@ -627,7 +627,7 @@ CryptSecretDecrypt(
 	      }
 	      break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	      {
 		  TPMS_ECC_POINT       eccPublic;
@@ -670,7 +670,7 @@ CryptSecretDecrypt(
 	      }
 	      break;
 #endif //TPM_ALG_ECC
-#ifndef TPM_ALG_KEYEDHASH
+#if !ALG_KEYEDHASH
 #   error   "KEYEDHASH support is required"
 #endif
 	  case TPM_ALG_KEYEDHASH:
@@ -946,7 +946,7 @@ CryptCreateObject(
     // sensitive value for symmetric object
     switch(publicArea->type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	    // Create RSA key
 	  case TPM_ALG_RSA:
 	    // RSA uses full object so that it has a place to put the private
@@ -954,7 +954,7 @@ CryptCreateObject(
 	    result = CryptRsaGenerateKey(object, rand);
 	    break;
 #endif // TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    // Create ECC key
 	  case TPM_ALG_ECC:
 	    result = CryptEccGenerateKey(&object->publicArea, &object->sensitive,
@@ -1024,7 +1024,7 @@ CryptGetSignHashAlg(
     // Get authHash algorithm based on signing scheme
     switch(auth->sigAlg)
 	{
-#ifdef  TPM_ALG_RSA
+#if ALG_RSA
 	    // If RSA is supported, both RSASSA and RSAPSS are required
 #   if !defined TPM_ALG_RSASSA || !defined TPM_ALG_RSAPSS
 #       error "RSASSA and RSAPSS are required for RSA"
@@ -1034,22 +1034,22 @@ CryptGetSignHashAlg(
 	  case TPM_ALG_RSAPSS:
 	    return auth->signature.rsapss.hash;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    // If ECC is defined, ECDSA is mandatory
 #   ifndef  TPM_ALG_ECDSA
 #       error "ECDSA is requried for ECC"
 #   endif
 	  case TPM_ALG_ECDSA:
 	    // SM2 and ECSCHNORR are optional
-#   ifdef    TPM_ALG_SM2
+#   if ALG_SM2
 	  case TPM_ALG_SM2:
 #   endif
-#   ifdef    TPM_ALG_ECSCHNORR
+#   if ALG_ECSCHNORR
 	  case TPM_ALG_ECSCHNORR:
 #   endif
 	    //all ECC signatures look the same
 	    return auth->signature.ecdsa.hash;
-#   ifdef TPM_ALG_ECDAA
+#   if ALG_ECDAA
 	    // Don't know how to verify an ECDAA signature
 	  case TPM_ALG_ECDAA:
 	    break;
@@ -1072,7 +1072,7 @@ CryptIsSplitSign(
 {
     switch(scheme)
 	{
-#   ifdef   TPM_ALG_ECDAA
+#   if ALG_ECDAA
 	  case TPM_ALG_ECDAA:
 	    return TRUE;
 	    break;
@@ -1093,7 +1093,7 @@ CryptIsAsymSignScheme(
     BOOL            isSignScheme = TRUE;
     switch(publicType)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    switch(scheme)
 		{
@@ -1109,20 +1109,20 @@ CryptIsAsymSignScheme(
 		}
 	    break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    // If ECC is implemented ECDSA is required
 	  case TPM_ALG_ECC:
 	    switch(scheme)
 		{
 		    // Support for ECDSA is required for ECC
 		  case TPM_ALG_ECDSA:
-#ifdef  TPM_ALG_ECDAA // ECDAA is optional
+#if ALG_ECDAA // ECDAA is optional
 		  case TPM_ALG_ECDAA:
 #endif
-#ifdef   TPM_ALG_ECSCHNORR // Schnorr is also optional
+#if ALG_ECSCHNORR // Schnorr is also optional
 		  case TPM_ALG_ECSCHNORR:
 #endif
-#ifdef  TPM_ALG_SM2 // SM2 is optional
+#if ALG_SM2 // SM2 is optional
 		  case TPM_ALG_SM2:
 #endif
 		    break;
@@ -1149,7 +1149,7 @@ CryptIsAsymDecryptScheme(
     BOOL        isDecryptScheme = TRUE;
     switch(publicType)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    switch(scheme)
 		{
@@ -1162,19 +1162,19 @@ CryptIsAsymDecryptScheme(
 		}
 	    break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    // If ECC is implemented ECDH is required
 	  case TPM_ALG_ECC:
 	    switch(scheme)
 		{
-#ifndef TPM_ALG_ECDH
+#if !ALG_ECDH
 #   error "ECDH is required for ECC"
 #endif
 		  case TPM_ALG_ECDH:
-#ifdef TPM_ALG_SM2
+#if ALG_SM2
 		  case TPM_ALG_SM2:
 #endif
-#ifdef  TPM_ALG_ECMQV
+#if ALG_ECMQV
 		  case TPM_ALG_ECMQV:
 #endif
 		    break;
@@ -1304,12 +1304,12 @@ CryptSign(
     // perform sign operation based on different key type
     switch(signKey->publicArea.type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    result = CryptRsaSign(signature, signKey, digest, NULL);
 	    break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	    // The reason that signScheme is passed to CryptEccSign but not to the
 	    // other signing methods is that the signing for ECC may be split and
@@ -1358,7 +1358,7 @@ CryptValidateSignature(
 	return TPM_RC_SIGNATURE;
     switch(publicArea->type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	      {
 		  //
@@ -1367,7 +1367,7 @@ CryptValidateSignature(
 		  break;
 	      }
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	    result = CryptEccValidateSignature(signature, signObject, digest);
 	    break;
@@ -1411,14 +1411,14 @@ CryptIsUniqueSizeValid(
     UINT16          keySizeInBytes;
     switch(publicArea->type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    keySizeInBytes = BITS_TO_BYTES(
 					   publicArea->parameters.rsaDetail.keyBits);
 	    consistent = publicArea->unique.rsa.t.size == keySizeInBytes;
 	    break;
 #endif //TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	      {
 		  keySizeInBytes = BITS_TO_BYTES(CryptEccGetKeySizeForCurve(
@@ -1451,7 +1451,7 @@ CryptIsSensitiveSizeValid(
     UINT16                   keySizeInBytes;
     switch(publicArea->type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    // sensitive prime value has to be half the size of the public modulus
 	    keySizeInBytes = BITS_TO_BYTES(publicArea->parameters.rsaDetail.keyBits);
@@ -1459,7 +1459,7 @@ CryptIsSensitiveSizeValid(
 			  == keySizeInBytes);
 	    break;
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	    keySizeInBytes = BITS_TO_BYTES(CryptEccGetKeySizeForCurve(
 								      publicArea->parameters.eccDetail.curveID));
@@ -1530,7 +1530,7 @@ CryptValidateKeys(
 	}
     switch(publicArea->type)
 	{
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	  case TPM_ALG_RSA:
 	    keySizeInBytes = BITS_TO_BYTES(params->rsaDetail.keyBits);
 	    // Regardless of whether there is a sensitive area, the public modulus
@@ -1556,7 +1556,7 @@ CryptValidateKeys(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_ALG_ECC:
 	      {
 		  TPMI_ECC_CURVE      curveId;
@@ -1787,7 +1787,7 @@ CryptSmacIsValidAlg(
 {
     switch (alg)
 	{
-#ifdef TPM_ALG_CMAC
+#if ALG_CMAC
 	  case TPM_ALG_CMAC:
 	    return TRUE;
 	    break;

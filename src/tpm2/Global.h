@@ -199,7 +199,7 @@ typedef struct OBJECT
     OBJECT_ATTRIBUTES   attributes;         // object attributes
     TPMT_PUBLIC         publicArea;         // public area of an object
     TPMT_SENSITIVE      sensitive;          // sensitive area of an object
-#ifdef  TPM_ALG_RSA
+#if ALG_RSA
     privateExponent_t   privateExponent;    // Additional field for the private
 #endif
     TPM2B_NAME          qualifiedName;      // object qualified name
@@ -379,19 +379,19 @@ typedef BYTE        SESSION_BUF[sizeof(SESSION)];
    specification to which the TPM is built. */
 typedef struct PCR_SAVE
 {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     BYTE                sha1[NUM_STATIC_PCR][SHA1_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     BYTE                sha256[NUM_STATIC_PCR][SHA256_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     BYTE                sha384[NUM_STATIC_PCR][SHA384_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     BYTE                sha512[NUM_STATIC_PCR][SHA512_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
     BYTE                sm3_256[NUM_STATIC_PCR][SM3_256_DIGEST_SIZE];
 #endif
     // This counter increments whenever the PCR are updated.
@@ -465,7 +465,7 @@ typedef union
    array. The commit counter is a 64-bit value and the low order bits are used to index the
    commitArray. This mask value is applied to the commit counter to extract the bit number in the
    array. */
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 #define COMMIT_INDEX_MASK ((UINT16)((sizeof(gr.commitArray)*8)-1))
 #endif
 /* This array is used to contain the array of values that are added to a return code when it is a
@@ -858,7 +858,7 @@ typedef struct state_reset_data
     // NOTE: A platform-specific specification may designate that certain PCR changes
     //       do not increment this counter to increment.
     UINT32              pcrCounter;         // The default reset value is 0.
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     //*****************************************************************************
     //         ECDAA
     //*****************************************************************************
@@ -1074,23 +1074,23 @@ extern OBJECT           s_objects[MAX_LOADED_OBJECTS];
 /* From PCR.c */
 typedef struct
 {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     // SHA1 PCR
     BYTE    sha1Pcr[SHA1_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     // SHA256 PCR
     BYTE    sha256Pcr[SHA256_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     // SHA384 PCR
     BYTE    sha384Pcr[SHA384_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     // SHA512 PCR
     BYTE    sha512Pcr[SHA512_DIGEST_SIZE];
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
     // SHA256 PCR
     BYTE    sm3_256Pcr[SM3_256_DIGEST_SIZE];
 #endif

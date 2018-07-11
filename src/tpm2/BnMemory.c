@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnMemory.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: BnMemory.c 1262 2018-07-11 21:03:43Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -169,7 +169,7 @@ BnCopy(
 	}
     return TRUE;
 }
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 /* 10.2.5.3.6 BnPointCopy() */
 /* Function to copy a bn point. */
 LIB_EXPORT BOOL

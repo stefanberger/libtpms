@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -67,7 +67,7 @@
 /* Need this define to get the private defines for this function */
 #define CRYPT_RSA_C
 #include "Tpm.h"
-#ifdef  TPM_ALG_RSA
+#if ALG_RSA
 /* 10.2.19.3 Obligatory Initialization Functions */
 /* 10.2.19.3.1 CryptRsaInit() */
 /* Function called at _TPM_Init(). */

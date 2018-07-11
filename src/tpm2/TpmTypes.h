@@ -3,7 +3,7 @@
 /*			  TPM Part 2 Headers	   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTypes.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmTypes.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -67,7 +67,7 @@
 #include "GpMacros.h"
 #include "Capabilities.h"
 
-/* Table 2:5 - Definition of Types for Documentation Clarity (TypedefTable()) */
+/* Table 2:5 - Definition of Types for Documentation Clarity */
 typedef  UINT32             TPM_ALGORITHM_ID;
 typedef  UINT32             TPM_MODIFIER_INDICATOR;
 typedef  UINT32             TPM_AUTHORIZATION_SIZE;
@@ -896,21 +896,21 @@ typedef struct {
 } TPMS_ALGORITHM_DESCRIPTION;
 /* Table 2:71 - Definition of TPMU_HA Union  */
 typedef union {
-#ifdef      TPM_ALG_SHA1
+#if 	ALG_SHA1
     BYTE                    sha1[SHA1_DIGEST_SIZE];
-#endif   // TPM_ALG_SHA1
-#ifdef      TPM_ALG_SHA256
+#endif   // ALG_SHA1
+#if 	ALG_SHA256
     BYTE                    sha256[SHA256_DIGEST_SIZE];
-#endif   // TPM_ALG_SHA256
-#ifdef      TPM_ALG_SHA384
+#endif   // ALG_SHA256
+#if 	ALG_SHA384
     BYTE                    sha384[SHA384_DIGEST_SIZE];
-#endif   // TPM_ALG_SHA384
-#ifdef      TPM_ALG_SHA512
+#endif   // ALG_SHA384
+#if 	ALG_SHA512
     BYTE                    sha512[SHA512_DIGEST_SIZE];
-#endif   // TPM_ALG_SHA512
-#ifdef      TPM_ALG_SM3_256
+#endif   // ALG_SHA512
+#if 	ALG_SM3_256
     BYTE                    sm3_256[SM3_256_DIGEST_SIZE];
-#endif   // TPM_ALG_SM3_256
+#endif   // ALG_SM3_256
 } TPMU_HA;
 /* Table 2:72 - Definition of TPMT_HA Structure  */
 typedef struct {
@@ -1118,9 +1118,9 @@ typedef union {
     TPML_PCR_SELECTION          assignedPCR;
     TPML_TAGGED_TPM_PROPERTY    tpmProperties;
     TPML_TAGGED_PCR_PROPERTY    pcrProperties;
-#ifdef      TPM_ALG_ECC
+#if 	ALG_ECC
     TPML_ECC_CURVE              eccCurves;
-#endif   // TPM_ALG_ECC
+#endif   // ALG_ECC
     TPML_TAGGED_POLICY          authPolicies;
 } TPMU_CAPABILITIES;
 /* Table 2:111 - Definition of TPMS_CAPABILITY_DATA Structure  */
@@ -1231,37 +1231,37 @@ typedef  TPM_KEY_BITS       TPMI_SM4_KEY_BITS;
 typedef  TPM_KEY_BITS       TPMI_CAMELLIA_KEY_BITS;
 /* Table 2:128 - Definition of TPMU_SYM_KEY_BITS Union  */
 typedef union {
-#ifdef      TPM_ALG_TDES
+#if 	ALG_TDES
     TPMI_TDES_KEY_BITS        tdes;
-#endif   // TPM_ALG_TDES
-#ifdef      TPM_ALG_AES
+#endif   // ALG_TDES
+#if 	ALG_AES
     TPMI_AES_KEY_BITS         aes;
-#endif   // TPM_ALG_AES
-#ifdef      TPM_ALG_SM4
+#endif   // ALG_AES
+#if 	ALG_SM4
     TPMI_SM4_KEY_BITS         sm4;
-#endif   // TPM_ALG_SM4
-#ifdef      TPM_ALG_CAMELLIA
+#endif   // ALG_SM4
+#if 	ALG_CAMELLIA
     TPMI_CAMELLIA_KEY_BITS    camellia;
-#endif   // TPM_ALG_CAMELLIA
+#endif   // ALG_CAMELLIA
     TPM_KEY_BITS              sym;
-#ifdef      TPM_ALG_XOR
+#if 	ALG_XOR
     TPMI_ALG_HASH             xorr;
-#endif   // TPM_ALG_XOR
+#endif   // ALG_XOR
 } TPMU_SYM_KEY_BITS;
 /* Table 2:129 - Definition of TPMU_SYM_MODE Union  */
 typedef union {
-#ifdef      TPM_ALG_TDES
+#if 	ALG_TDES
     TPMI_ALG_SYM_MODE       tdes;
-#endif   // TPM_ALG_TDES
-#ifdef      TPM_ALG_AES
+#endif   // ALG_TDES
+#if 	ALG_AES
     TPMI_ALG_SYM_MODE       aes;
-#endif   // TPM_ALG_AES
-#ifdef      TPM_ALG_SM4
+#endif   // ALG_AES
+#if 	ALG_SM4
     TPMI_ALG_SYM_MODE       sm4;
-#endif   // TPM_ALG_SM4
-#ifdef      TPM_ALG_CAMELLIA
+#endif   // ALG_SM4
+#if 	ALG_CAMELLIA
     TPMI_ALG_SYM_MODE       camellia;
-#endif   // TPM_ALG_CAMELLIA
+#endif   // ALG_CAMELLIA
     TPMI_ALG_SYM_MODE       sym;
 } TPMU_SYM_MODE;
 /* Table 2:131 - Definition of TPMT_SYM_DEF Structure  */
@@ -1352,12 +1352,12 @@ typedef struct {
 } TPMS_SCHEME_XOR;
 /* Table 2:147 - Definition of TPMU_SCHEME_KEYEDHASH Union  */
 typedef union {
-#ifdef      TPM_ALG_HMAC
+#if 	ALG_HMAC
     TPMS_SCHEME_HMAC        hmac;
-#endif   // TPM_ALG_HMAC
-#ifdef      TPM_ALG_XOR
+#endif   // ALG_HMAC
+#if 	ALG_XOR
     TPMS_SCHEME_XOR         xorr;
-#endif   // TPM_ALG_XOR
+#endif   // ALG_XOR
 } TPMU_SCHEME_KEYEDHASH;
 /* Table 2:148 - Definition of TPMT_KEYEDHASH_SCHEME Structure  */
 typedef struct {
@@ -1374,27 +1374,27 @@ typedef  TPMS_SCHEME_HASH     TPMS_SIG_SCHEME_ECSCHNORR;
 typedef  TPMS_SCHEME_ECDAA    TPMS_SIG_SCHEME_ECDAA;
 /* Table 2:151 - Definition of TPMU_SIG_SCHEME Union  */
 typedef union {
-#ifdef      TPM_ALG_ECC
+#if 	ALG_ECC
     TPMS_SIG_SCHEME_ECDAA        ecdaa;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_RSASSA
+#endif   // ALG_ECC
+#if 	ALG_RSASSA
     TPMS_SIG_SCHEME_RSASSA       rsassa;
-#endif   // TPM_ALG_RSASSA
-#ifdef      TPM_ALG_RSAPSS
+#endif   // ALG_RSASSA
+#if 	ALG_RSAPSS
     TPMS_SIG_SCHEME_RSAPSS       rsapss;
-#endif   // TPM_ALG_RSAPSS
-#ifdef      TPM_ALG_ECDSA
+#endif   // ALG_RSAPSS
+#if 	ALG_ECDSA
     TPMS_SIG_SCHEME_ECDSA        ecdsa;
-#endif   // TPM_ALG_ECDSA
-#ifdef      TPM_ALG_SM2
+#endif   // ALG_ECDSA
+#if 	ALG_SM2
     TPMS_SIG_SCHEME_SM2          sm2;
-#endif   // TPM_ALG_SM2
-#ifdef      TPM_ALG_ECSCHNORR
+#endif   // ALG_SM2
+#if 	ALG_ECSCHNORR
     TPMS_SIG_SCHEME_ECSCHNORR    ecschnorr;
-#endif   // TPM_ALG_ECSCHNORR
-#ifdef      TPM_ALG_HMAC
+#endif   // ALG_ECSCHNORR
+#if 	ALG_HMAC
     TPMS_SCHEME_HMAC             hmac;
-#endif   // TPM_ALG_HMAC
+#endif   // ALG_HMAC
     TPMS_SCHEME_HASH             any;
 } TPMU_SIG_SCHEME;
 /* Table 2:152 - Definition of TPMT_SIG_SCHEME Structure  */
@@ -1415,18 +1415,18 @@ typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_KDF2;
 typedef  TPMS_SCHEME_HASH    TPMS_SCHEME_KDF1_SP800_108;
 /* Table 2:156 - Definition of TPMU_KDF_SCHEME Union  */
 typedef union {
-#ifdef      TPM_ALG_MGF1
+#if 	ALG_MGF1
     TPMS_SCHEME_MGF1              mgf1;
-#endif   // TPM_ALG_MGF1
-#ifdef      TPM_ALG_KDF1_SP800_56A
+#endif   // ALG_MGF1
+#if 	ALG_KDF1_SP800_56A
     TPMS_SCHEME_KDF1_SP800_56A    kdf1_sp800_56a;
-#endif   // TPM_ALG_KDF1_SP800_56A
-#ifdef      TPM_ALG_KDF2
+#endif   // ALG_KDF1_SP800_56A
+#if 	ALG_KDF2
     TPMS_SCHEME_KDF2              kdf2;
-#endif   // TPM_ALG_KDF2
-#ifdef      TPM_ALG_KDF1_SP800_108
+#endif   // ALG_KDF2
+#if 	ALG_KDF1_SP800_108
     TPMS_SCHEME_KDF1_SP800_108    kdf1_sp800_108;
-#endif   // TPM_ALG_KDF1_SP800_108
+#endif   // ALG_KDF1_SP800_108
 } TPMU_KDF_SCHEME;
 /* Table 2:157 - Definition of TPMT_KDF_SCHEME Structure  */
 typedef struct {
@@ -1437,36 +1437,36 @@ typedef struct {
 typedef  TPM_ALG_ID         TPMI_ALG_ASYM_SCHEME;
 /* Table 2:159 - Definition of TPMU_ASYM_SCHEME Union  */
 typedef union {
-#ifdef      TPM_ALG_ECDH
+#if 	ALG_ECDH
     TPMS_KEY_SCHEME_ECDH         ecdh;
-#endif   // TPM_ALG_ECDH
-#ifdef      TPM_ALG_ECMQV
+#endif   // ALG_ECDH
+#if 	ALG_ECMQV
     TPMS_KEY_SCHEME_ECMQV        ecmqv;
-#endif   // TPM_ALG_ECMQV
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_ECMQV
+#if 	ALG_ECC
     TPMS_SIG_SCHEME_ECDAA        ecdaa;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_RSASSA
+#endif   // ALG_ECC
+#if 	ALG_RSASSA
     TPMS_SIG_SCHEME_RSASSA       rsassa;
-#endif   // TPM_ALG_RSASSA
-#ifdef      TPM_ALG_RSAPSS
+#endif   // ALG_RSASSA
+#if 	ALG_RSAPSS
     TPMS_SIG_SCHEME_RSAPSS       rsapss;
-#endif   // TPM_ALG_RSAPSS
-#ifdef      TPM_ALG_ECDSA
+#endif   // ALG_RSAPSS
+#if 	ALG_ECDSA
     TPMS_SIG_SCHEME_ECDSA        ecdsa;
-#endif   // TPM_ALG_ECDSA
-#ifdef      TPM_ALG_SM2
+#endif   // ALG_ECDSA
+#if 	ALG_SM2
     TPMS_SIG_SCHEME_SM2          sm2;
-#endif   // TPM_ALG_SM2
-#ifdef      TPM_ALG_ECSCHNORR
+#endif   // ALG_SM2
+#if 	ALG_ECSCHNORR
     TPMS_SIG_SCHEME_ECSCHNORR    ecschnorr;
-#endif   // TPM_ALG_ECSCHNORR
-#ifdef      TPM_ALG_RSAES
+#endif   // ALG_ECSCHNORR
+#if 	ALG_RSAES
     TPMS_ENC_SCHEME_RSAES        rsaes;
-#endif   // TPM_ALG_RSAES
-#ifdef      TPM_ALG_OAEP
+#endif   // ALG_RSAES
+#if 	ALG_OAEP
     TPMS_ENC_SCHEME_OAEP         oaep;
-#endif   // TPM_ALG_OAEP
+#endif   // ALG_OAEP
     TPMS_SCHEME_HASH             anySig;
 } TPMU_ASYM_SCHEME;
 /* Table 2:160 - Definition of TPMT_ASYM_SCHEME Structure  */
@@ -1568,27 +1568,27 @@ typedef  TPMS_SIGNATURE_ECC    TPMS_SIGNATURE_SM2;
 typedef  TPMS_SIGNATURE_ECC    TPMS_SIGNATURE_ECSCHNORR;
 /* Table 2:179 - Definition of TPMU_SIGNATURE Union  */
 typedef union {
-#ifdef      TPM_ALG_ECC
+#if 	ALG_ECC
     TPMS_SIGNATURE_ECDAA        ecdaa;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_RSA
+#endif   // ALG_ECC
+#if 	ALG_RSA
     TPMS_SIGNATURE_RSASSA       rsassa;
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_RSA
+#endif   // ALG_RSA
+#if 	ALG_RSA
     TPMS_SIGNATURE_RSAPSS       rsapss;
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_RSA
+#if 	ALG_ECC
     TPMS_SIGNATURE_ECDSA        ecdsa;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_ECC
+#if 	ALG_ECC
     TPMS_SIGNATURE_SM2          sm2;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_ECC
+#if 	ALG_ECC
     TPMS_SIGNATURE_ECSCHNORR    ecschnorr;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_HMAC
+#endif   // ALG_ECC
+#if 	ALG_HMAC
     TPMT_HA                     hmac;
-#endif   // TPM_ALG_HMAC
+#endif   // ALG_HMAC
     TPMS_SCHEME_HASH            any;
 } TPMU_SIGNATURE;
 /* Table 2:180 - Definition of TPMT_SIGNATURE Structure  */
@@ -1598,18 +1598,18 @@ typedef struct {
 } TPMT_SIGNATURE;
 /* Table 2:181 - Definition of TPMU_ENCRYPTED_SECRET Union  */
 typedef union {
-#ifdef      TPM_ALG_ECC
+#if 	ALG_ECC
     BYTE                    ecc[sizeof(TPMS_ECC_POINT)];
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_RSA
+#endif   // ALG_ECC
+#if 	ALG_RSA
     BYTE                    rsa[MAX_RSA_KEY_BYTES];
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_SYMCIPHER
+#endif   // ALG_RSA
+#if 	ALG_SYMCIPHER
     BYTE                    symmetric[sizeof(TPM2B_DIGEST)];
-#endif   // TPM_ALG_SYMCIPHER
-#ifdef      TPM_ALG_KEYEDHASH
+#endif   // ALG_SYMCIPHER
+#if 	ALG_KEYEDHASH
     BYTE                    keyedHash[sizeof(TPM2B_DIGEST)];
-#endif   // TPM_ALG_KEYEDHASH
+#endif   // ALG_KEYEDHASH
 } TPMU_ENCRYPTED_SECRET;
 /* Table 2:182 - Definition of TPM2B_ENCRYPTED_SECRET Structure  */
 typedef union {
@@ -1623,18 +1623,18 @@ typedef union {
 typedef  TPM_ALG_ID         TPMI_ALG_PUBLIC;
 /* Table 2:184 - Definition of TPMU_PUBLIC_ID Union  */
 typedef union {
-#ifdef      TPM_ALG_KEYEDHASH
+#if 	ALG_KEYEDHASH
     TPM2B_DIGEST            keyedHash;
-#endif   // TPM_ALG_KEYEDHASH
-#ifdef      TPM_ALG_SYMCIPHER
+#endif   // ALG_KEYEDHASH
+#if 	ALG_SYMCIPHER
     TPM2B_DIGEST            sym;
-#endif   // TPM_ALG_SYMCIPHER
-#ifdef      TPM_ALG_RSA
+#endif   // ALG_SYMCIPHER
+#if 	ALG_RSA
     TPM2B_PUBLIC_KEY_RSA    rsa;
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_RSA
+#if 	ALG_ECC
     TPMS_ECC_POINT          ecc;
-#endif   // TPM_ALG_ECC
+#endif   // ALG_ECC
     TPMS_DERIVE             derive;
 } TPMU_PUBLIC_ID;
 /* Table 2:185 - Definition of TPMS_KEYEDHASH_PARMS Structure  */
@@ -1662,18 +1662,18 @@ typedef struct {
 } TPMS_ECC_PARMS;
 /* Table 2:189 - Definition of TPMU_PUBLIC_PARMS Union  */
 typedef union {
-#ifdef      TPM_ALG_KEYEDHASH
+#if 	ALG_KEYEDHASH
     TPMS_KEYEDHASH_PARMS    keyedHashDetail;
-#endif   // TPM_ALG_KEYEDHASH
-#ifdef      TPM_ALG_SYMCIPHER
+#endif   // ALG_KEYEDHASH
+#if 	ALG_SYMCIPHER
     TPMS_SYMCIPHER_PARMS    symDetail;
-#endif   // TPM_ALG_SYMCIPHER
-#ifdef      TPM_ALG_RSA
+#endif   // ALG_SYMCIPHER
+#if 	ALG_RSA
     TPMS_RSA_PARMS          rsaDetail;
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_RSA
+#if 	ALG_ECC
     TPMS_ECC_PARMS          eccDetail;
-#endif   // TPM_ALG_ECC
+#endif   // ALG_ECC
     TPMS_ASYM_PARMS         asymDetail;
 } TPMU_PUBLIC_PARMS;
 /* Table 2:190 - Definition of TPMT_PUBLIC_PARMS Structure  */
@@ -1713,18 +1713,18 @@ typedef union {
 } TPM2B_PRIVATE_VENDOR_SPECIFIC;
 /* Table 2:195 - Definition of TPMU_SENSITIVE_COMPOSITE Union  */
 typedef union {
-#ifdef      TPM_ALG_RSA
+#if 	ALG_RSA
     TPM2B_PRIVATE_KEY_RSA            rsa;
-#endif   // TPM_ALG_RSA
-#ifdef      TPM_ALG_ECC
+#endif   // ALG_RSA
+#if 	ALG_ECC
     TPM2B_ECC_PARAMETER              ecc;
-#endif   // TPM_ALG_ECC
-#ifdef      TPM_ALG_KEYEDHASH
+#endif   // ALG_ECC
+#if 	ALG_KEYEDHASH
     TPM2B_SENSITIVE_DATA             bits;
-#endif   // TPM_ALG_KEYEDHASH
-#ifdef      TPM_ALG_SYMCIPHER
+#endif   // ALG_KEYEDHASH
+#if 	ALG_SYMCIPHER
     TPM2B_SYM_KEY                    sym;
-#endif   // TPM_ALG_SYMCIPHER
+#endif   // ALG_SYMCIPHER
     TPM2B_PRIVATE_VENDOR_SPECIFIC    any;
 } TPMU_SENSITIVE_COMPOSITE;
 /* Table 2:196 - Definition of TPMT_SENSITIVE Structure  */

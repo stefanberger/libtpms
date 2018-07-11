@@ -3,7 +3,7 @@
 /*			   Functions Required for TDES  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDes.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptDes.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -64,7 +64,7 @@
 /* This file contains the extra functions required for TDES. */
 /* 10.2.9.2 Includes, Defines, and Typedefs */
 #include "Tpm.h"
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
 #define DES_NUM_WEAK 64
 const UINT64 DesWeakKeys[DES_NUM_WEAK] = {
     0x0101010101010101ULL, 0xFEFEFEFEFEFEFEFEULL, 0xE0E0E0E0F1F1F1F1ULL, 0x1F1F1F1F0E0E0E0EULL,

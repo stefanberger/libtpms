@@ -3,7 +3,7 @@
 /*	Message Authentication Codes Based on a Symmetric Block Cipher		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptCmac.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptCmac.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,7 +68,7 @@
 #define _CRYPT_HASH_C_
 #include "Tpm.h"
 #include "CryptSym.h"
-#ifdef TPM_ALG_CMAC
+#if ALG_CMAC
     /* 10.2.6.3	Functions */
     /* 10.2.6.3.1	CryptCmacStart() */
     /* This is the function to start the CMAC sequence operation. It initializes the dispatch

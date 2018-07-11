@@ -3,7 +3,7 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -63,7 +63,7 @@
 /* 10.2.13.1 Includes and Defines */
 #include "Tpm.h"
 #include "CryptEccSignature_fp.h"
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 /* 10.2.13.2 Utility Functions */
 /* 10.2.13.2.1 EcdsaDigest() */
 /* Function to adjust the digest so that it is no larger than the order of the curve. This is used

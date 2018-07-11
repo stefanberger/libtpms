@@ -3,7 +3,7 @@
 /*		For accessing the TPM_CAP_TPM_PROPERTY values	  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PropertyCap.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: PropertyCap.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -331,7 +331,7 @@ TPMPropertyIsDefined(
 	  case TPM_PT_SPLIT_MAX:
 	    // number of split signing operations supported by the TPM
 	    *value = 0;
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    *value = sizeof(gr.commitArray) * 8;
 #endif
 	    break;
@@ -498,7 +498,7 @@ TPMPropertyIsDefined(
 	    *value = gp.algorithmSet;
 	    break;
 	  case TPM_PT_LOADED_CURVES:
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    // number of loaded ECC curves
 	    *value = ECC_CURVE_COUNT;
 #else // TPM_ALG_ECC
