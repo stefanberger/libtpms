@@ -59,20 +59,41 @@
 /*										*/
 /********************************************************************************/
 
+/* This file contains the build switches. This contains switches for multiple versions of the
+   crypto-library so some may not apply to your environment. */
+/* The switches are guarded so that they can either be set on the command line or set here. If the
+   switch is listed on the command line (-DSOME_SWITCH) with no setting, then the switch will be set
+   to YES. If the switch setting is not on the command line or if the setting is other than YES or
+   NO, then the switch will be set to the default value. The default can either be YES or NO as
+   indicated on each line where the default is selected. */
+/* A caution. Do not try to test these macros by inserting #defines in this file. For some curious
+   reason, a variable set on the command line with no setting will have a value of 1. An #if
+   SOME_VARIABLE will work if the variable is not defined or is defined on the command line with no
+   initial setting. However, a #define SOME_VARIABLE is a null string and when used in #if
+   SOME_VARIABLE will not be a proper expression. */
+
 #ifndef TPMBUILDSWITCHES_H
 #define TPMBUILDSWITCHES_H
 
-/* This file contains the build switches. This contains switches for multiple versions of the
-   crypto-library so some may not apply to your environment. */
-/* The switches are guarded so that they can either be set on the command line or set here. */
-/* Many of the #defines are guarded so that they can be set on the command line without causing
-   consternation in the compiler. */
-#ifndef INLINE_FUNCTIONS
-//#  define INLINE_FUNCTIONS
+#undef YES
+#define YES 1
+#undef NO
+#define NO 0
+
+// Need an unambiguous definition for DEBUG. Don't change this
+#ifndef DEBUG
+#   ifdef NDEBUG
+#       define  DEBUG   NO
+#   else
+#       define  DEBUG   YES
+#   endif
+#elif (DEBUG != NO) && (DEBUG != YES)
+#   undef   DEBUG
+#   define  DEBUG       YES       // Default: Either YES or NO
 #endif
 #include "CompilerDependencies.h"
 
-/* This definition is required for the re-factored code */
+// This definition is required for the re-factored code
 #if (!defined USE_BN_ECC_DATA) || ((USE_BN_ECC_DATA != NO) && (USE_BN_ECC_DATA != YES))
 #   undef   USE_BN_ECC_DATA
 #   define  USE_BN_ECC_DATA     YES     // Default: Either YES or NO
