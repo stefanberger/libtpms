@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -147,10 +147,8 @@ typedef const BYTE    *PCBYTE;
      (hashStateTo)->def->contextSize)
 /* Function aliases. The code in CryptHash.c uses the internal designation for the functions. These
    need to be translated to the function names of the library. */
-/* Internal External */
-/* Designation Designation */
-#define tpmHashStart_SHA1           SHA1_Init   // external name of the
-// initialization method
+//      Internal Designation        External Designation
+#define tpmHashStart_SHA1           SHA1_Init   // external name of the initialization method
 #define tpmHashData_SHA1            SHA1_Update
 #define tpmHashEnd_SHA1             SHA1_Final
 #define tpmHashStateCopy_SHA1       memcpy

@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Simulator_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Simulator_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -142,13 +142,14 @@ void
 _rpc__Signal_HashEnd(
 		     void
 		     );
-/* Command interface Entry of a RPC call */
+/* rpc__Send_Command() This is the interface to the TPM code. */
 void
 _rpc__Send_Command(
 		   unsigned char    locality,
 		   _IN_BUFFER       request,
 		   _OUT_BUFFER     *response
 		   );
+
 /* D.2.2.10. _rpc__Signal_CancelOn() */
 /* This function is used to turn on the indication to cancel a command in process. An executing
    command is not interrupted. The command code may periodically check this indication to see if it

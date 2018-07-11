@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Miscellaneous Functions For Processing Response Codes		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ResponseCodeProcessing.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*      $Id: ResponseCodeProcessing.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,20 +55,19 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.15 ResponseCodeProcessing.c */
-/* 9.15.1 Description */
+/* 9.16 ResponseCodeProcessing.c */
+/* 9.16.1 Description */
 /* This file contains the miscellaneous functions for processing response codes. */
 /* NOTE: Currently, there is only one. */
-/* 9.15.2 Includes and Defines */
+/* 9.16.2 Includes and Defines */
 #include "Tpm.h"
-/* 9.15.3 RcSafeAddToResult() */
+/* 9.16.3 RcSafeAddToResult() */
 /* Adds a modifier to a response code as long as the response code allows a modifier and no modifier
    has already been added. */
-#ifndef INLINE_RcSafeAddToResult
 TPM_RC
 RcSafeAddToResult(
 		  TPM_RC          responseCode,
@@ -80,4 +79,3 @@ RcSafeAddToResult(
     else
 	return responseCode;
 }
-#endif // INLINE_RcSafeAddToResult
