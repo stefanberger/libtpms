@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     	Swap						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: swap.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: swap.h 1259 2018-07-10 19:11:09Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2108				*/
 /*										*/
 /********************************************************************************/
 
@@ -78,8 +78,8 @@
 #define FROM_BIG_ENDIAN_UINT64(i)   (i)
 #endif
 #if   AUTO_ALIGN == NO
-/*     The aggregation macros for machines that do not allow unaligned access or for little-endian
-       machines. Aggregate bytes into an UINT */
+/* These are aggregation macros for machines that do not allow unaligned access or for little-endian
+   machines. Aggregate bytes into an UINT */
 #define BYTE_ARRAY_TO_UINT8(b)  (uint8_t)((b)[0])
 #define BYTE_ARRAY_TO_UINT16(b) ByteArrayToUint16((BYTE *)(b))
 #define BYTE_ARRAY_TO_UINT32(b) ByteArrayToUint32((BYTE *)(b))
@@ -90,17 +90,17 @@
 #define UINT64_TO_BYTE_ARRAY(i, b)  Uint64ToByteArray((i), (BYTE *)(b))
 #else // AUTO_ALIGN
 #if BIG_ENDIAN_TPM
-/*     the big-endian macros for machines that allow unaligned memory access Aggregate a byte array
-       into a UINT */
+/* These are the big-endian macros for machines that allow unaligned memory access Aggregate a byte
+   array into a UINT */
 #define BYTE_ARRAY_TO_UINT8(b)        *((uint8_t  *)(b))
 #define BYTE_ARRAY_TO_UINT16(b)       *((uint16_t *)(b))
 #define BYTE_ARRAY_TO_UINT32(b)       *((uint32_t *)(b))
 #define BYTE_ARRAY_TO_UINT64(b)       *((uint64_t *)(b))
-/*     Disaggregate a UINT into a byte array */
-/* 33 #define UINT8_TO_BYTE_ARRAY(i, b) {*((uint8_t *)(b)) = (i);} */
-/* 34 #define UINT16_TO_BYTE_ARRAY(i, b) {*((uint16_t *)(b)) = (i);} */
-/* 35 #define UINT32_TO_BYTE_ARRAY(i, b) {*((uint32_t *)(b)) = (i);} */
-/* 36	#define UINT64_TO_BYTE_ARRAY(i, b)  {*((uint64_t *)(b)) = (i);} */
+/* Disaggregate a UINT into a byte array */
+#define UINT8_TO_BYTE_ARRAY(i, b) {*((uint8_t *)(b)) = (i);} */
+#define UINT16_TO_BYTE_ARRAY(i, b) {*((uint16_t *)(b)) = (i);} */
+#define UINT32_TO_BYTE_ARRAY(i, b) {*((uint32_t *)(b)) = (i);} */
+#define UINT64_TO_BYTE_ARRAY(i, b)  {*((uint64_t *)(b)) = (i);} */
 #else
 /* the little endian macros for machines that allow unaligned memory access the big-endian macros
    for machines that allow unaligned memory access Aggregate a byte array into a UINT */
