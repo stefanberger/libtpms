@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MAC_fp.h 1082 2017-10-09 18:51:46Z kgoldman $	*/
+/*            $Id: MAC_fp.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
+/*  (c) Copyright IBM Corp. and others, 2012-2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -70,12 +70,12 @@ typedef struct {
     TPMI_ALG_MAC_SCHEME		inScheme;
 } MAC_In;
 
-#define RC_Mac_handle 		(TPM_RC_H + TPM_RC_1)
-#define RC_Mac_buffer		(TPM_RC_P + TPM_RC_1)
-#define RC_Mac_inScheme		(TPM_RC_P + TPM_RC_2)
+#define RC_MAC_handle 		(TPM_RC_H + TPM_RC_1)
+#define RC_MAC_buffer		(TPM_RC_P + TPM_RC_1)
+#define RC_MAC_inScheme		(TPM_RC_P + TPM_RC_2)
 
 typedef struct {
-    TPM2B_MAX_BUFFER	outMac;
+    TPM2B_MAX_BUFFER	outMAC;
 } MAC_Out;
 
 TPM_RC
