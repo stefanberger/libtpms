@@ -76,7 +76,7 @@ const UINT16         g_rcIndex[15] = {TPM_RC_1, TPM_RC_2, TPM_RC_3, TPM_RC_4,
 };
 TPM_HANDLE           g_exclusiveAuditSession;
 UINT64               g_time;
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
 CLOCK_NONCE          g_timeEpoch;
 #endif
 BOOL                 g_pcrReConfig;
