@@ -121,9 +121,12 @@
 //# define RSA_INSTRUMENT
 #endif
 /* This switch enables the RNG state save and restore */
-#ifndef _DRBG_STATE_SAVE
-#  define _DRBG_STATE_SAVE        // Comment this out if no state save is wanted
+#if !(defined _DRBG_STATE_SAVE)						\
+    || ((_DRBG_STATE_SAVE != NO) && (_DRBG_STATE_SAVE != YES))
+#   undef   _DRBG_STATE_SAVE
+#   define  _DRBG_STATE_SAVE        YES     // Default: Either YES or NO
 #endif
+
 /* Switch added to support packed lists that leave out space associated with unimplemented
    commands. Comment this out to use linear lists. */
 /* NOTE: if vendor specific commands are present, the associated list is always in compressed

@@ -626,7 +626,7 @@ CryptRandStartup(
 		 void
 		 )
 {
-#ifndef _DRBG_STATE_SAVE
+#if !_DRBG_STATE_SAVE
     // If not saved in NV, re-instantiate on each startup
     DRBG_Instantiate(&drbgDefault, 0, NULL);
 #else
