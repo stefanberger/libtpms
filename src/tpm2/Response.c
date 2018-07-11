@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Response.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Response.c 1259 2018-07-10 19:11:09Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -66,7 +66,7 @@
 /* 9.15.2 Includes and Defines */
 #include "Tpm.h"
 /*     9.15.3 BuildResponseHeader() */
-/* Adds the reponse header to the response. It will update command->parameterSize to indicate the
+/* Adds the response header to the response. It will update command->parameterSize to indicate the
    total size of the response. */
 void
 BuildResponseHeader(

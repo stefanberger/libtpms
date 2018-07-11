@@ -3,7 +3,7 @@
 /*		Dynamic space for user defined NV      				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVDynamic.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: NVDynamic.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -1136,8 +1136,9 @@ NvDeleteEvict(
     return result;
 }
 /* 8.4.5.19 NvFlushHierarchy() */
-/* This function will delete persistent objects belonging to the indicated If the storage hierarchy
-   is selected, the function will also delete any NV Index defined using ownerAuth. */
+/* This function will delete persistent objects belonging to the indicated hierarchy.  If the
+   storage hierarchy is selected, the function will also delete any NV Index defined using
+   ownerAuth. */
 /* Error Returns Meaning */
 /* TPM_RC_NV_RATE NV is unavailable because of rate limit */
 /* TPM_RC_NV_UNAVAILABLE NV is inaccessible */

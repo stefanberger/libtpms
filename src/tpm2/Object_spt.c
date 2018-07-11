@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Object_spt.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -364,8 +364,9 @@ CreateChecks(
     return result;
 }
 /* 7.6.3.4 SchemeChecks */
-/* This function is called by TPM2_LoadExternal() and PublicAttributesValidation(). */
-/* Return Values Meaning This function TPM_RC */
+/* This function is called by TPM2_LoadExternal() and PublicAttributesValidation(). This function
+   validates the schemes in the public area of an object. */
+/* Error Returns Meaning */
 /* TPM_RC_ASYMMETRIC non-duplicable storage key and its parent have different public parameters */
 /* TPM_RC_HASH non-duplicable storage key and its parent have different name algorithm */
 /* TPM_RC_KDF incorrect KDF specified for decrypting keyed hash object */
@@ -531,7 +532,7 @@ SchemeChecks(
 #if 0       //??
 	    // This next check is under investigation. Need to see if it will break Windows
 	    // before it is enabled. If it does not, then it should be default because a
-	    // the mode used with a parent is always CFB and P2 indicates as much.
+	    // the mode used with a parent is always CFB and Part 2 indicates as much.
 	    if(symAlgs->mode.sym != TPM_ALG_CFB)
 		return TPM_RCS_MODE;
 #endif
@@ -1358,7 +1359,7 @@ SetLabelAndContext(
 }
 /* 7.6.3.19 UnmarshalToPublic() */
 /* Support function to unmarshal the template. This is used because the Input may be a TPMT_TEMPLATE
-   and that structure does not have the same size as a TPMT_PUBlIC() because of the difference
+   and that structure does not have the same size as a TPMT_PUBLIC() because of the difference
    between the unique and seed fields. If derive is not NULL, then the seed field is assumed to
    contain a label and context that are unmarshaled into derive. */
 TPM_RC
@@ -1393,7 +1394,7 @@ UnmarshalToPublic(
 					 tOut->type);
     if(result != TPM_RC_SUCCESS)
 	return result;
-    // No unmarshal a TPMS_DERIVE if this is for derivation
+    // Now unmarshal a TPMS_DERIVE if this is for derivation
     if(derivation)
 	result = TPMS_DERIVE_Unmarshal(labelContext, &buffer, &size);
     else
