@@ -360,6 +360,7 @@ noinst_HEADERS += \
 	tpm2/IncrementalSelfTest_fp.h \
 	tpm2/InternalRoutines.h \
 	tpm2/IoBuffers_fp.h \
+	tpm2/KdfTestData.h \
 	tpm2/LoadExternal_fp.h \
 	tpm2/Load_fp.h \
 	tpm2/Locality_fp.h \

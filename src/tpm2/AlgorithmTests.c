@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: AlgorithmTests.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -73,6 +73,7 @@
 #include    "RsaTestData.h"
 #include    "EccTestData.h"
 #include    "HashTestData.h"
+#include    "KdfTestData.h"
 #define TEST_DEFAULT_TEST_HASH(vector)					\
     if(TEST_BIT(DEFAULT_TEST_HASH, g_toTest))				\
 	TestHash(DEFAULT_TEST_HASH, vector);
@@ -101,10 +102,10 @@ TestHash(
 	 ALGORITHM_VECTOR    *toTest
 	 )
 {
-    TPM2B_DIGEST             computed;  // value computed
+    TPM2B_DIGEST      computed;  // value computed
+    HMAC_STATE        state;
     UINT16                   digestSize;
     const TPM2B             *testDigest = NULL;
-    HMAC_STATE               state;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
     pAssert(hashAlg != TPM_ALG_NULL);
     switch(hashAlg)
@@ -149,8 +150,7 @@ TestHash(
     CryptHmacEnd(&state, digestSize, computed.t.buffer);
     if((testDigest->size != computed.t.size)
        || (memcmp(testDigest->buffer, computed.t.buffer, computed.b.size) != 0)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     return TPM_RC_SUCCESS;
 }
@@ -200,8 +200,7 @@ TestSymmetricAlgorithm(
     // Check that it matches the expected value
     if(!MemoryEqual(encrypted, test->dataOut[mode - ALG_CTR_VALUE],
 		    test->dataInOutSize)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     // Reinitialize the iv for decryption
     MakeIv(mode, test->ivSize, iv.t.buffer);
@@ -210,8 +209,7 @@ TestSymmetricAlgorithm(
 			  test->dataOut[mode - ALG_CTR_VALUE]);
     // Make sure that it matches what we started with
     if(!MemoryEqual(decrypted, test->dataIn, test->dataInOutSize)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
 }
 /* 10.2.1.4.3 AllSymsAreDone() */
@@ -356,10 +354,10 @@ TestRsaEncryptDecrypt(
 {
     TPM2B_PUBLIC_KEY_RSA             testInput;
     TPM2B_PUBLIC_KEY_RSA             testOutput;
-    const TPM2B_RSA_TEST_KEY        *kvtValue = &c_RsaesKvt;
+    OBJECT                           testObject;
+    const TPM2B_RSA_TEST_KEY        *kvtValue = NULL;
     TPM_RC                           result = TPM_RC_SUCCESS;
     const TPM2B                     *testLabel = NULL;
-    OBJECT                           testObject;
     TPMT_RSA_DECRYPT                 rsaScheme;
     //
     // Don't need to initialize much of the test object but do need to initialize
@@ -377,23 +375,19 @@ TestRsaEncryptDecrypt(
 	    testInput.t.size = sizeof(c_RsaTestValue);
 	    if(TPM_RC_SUCCESS != CryptRsaEncrypt(&testOutput, &testInput.b,
 						 &testObject, &rsaScheme, NULL, NULL)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    if(!MemoryEqual(testOutput.t.buffer, c_RsaepKvt.buffer, c_RsaepKvt.size)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    MemoryCopy2B(&testInput.b, &testOutput.b, sizeof(testInput.t.buffer));
 	    if(TPM_RC_SUCCESS != CryptRsaDecrypt(&testOutput.b, &testInput.b,
 						 &testObject, &rsaScheme, NULL)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    if(!MemoryEqual(testOutput.t.buffer, c_RsaTestValue,
 			    sizeof(c_RsaTestValue))) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	}
     else
@@ -421,8 +415,7 @@ TestRsaEncryptDecrypt(
 		    testLabel = NULL;
 		}
 	    else {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    // Only use a digest-size portion of the test value
 	    memcpy(testInput.t.buffer, c_RsaTestValue, DEFAULT_TEST_DIGEST_SIZE);
@@ -431,36 +424,31 @@ TestRsaEncryptDecrypt(
 	    if(TPM_RC_SUCCESS != CryptRsaEncrypt(&testOutput, &testInput.b,
 						 &testObject, &rsaScheme, testLabel,
 						 NULL)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    MemoryCopy2B(&testInput.b, &testOutput.b, sizeof(testInput.t.buffer));
 	    // see if we can decrypt this value and get the original data back
 	    if(TPM_RC_SUCCESS != CryptRsaDecrypt(&testOutput.b, &testInput.b,
 						 &testObject, &rsaScheme, testLabel)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    // See if the results compare
 	    if(testOutput.t.size != DEFAULT_TEST_DIGEST_SIZE
 	       || !MemoryEqual(testOutput.t.buffer, c_RsaTestValue,
 			       DEFAULT_TEST_DIGEST_SIZE)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    // Now check that the decryption works on a known value
 	    MemoryCopy2B(&testInput.b, (P2B)kvtValue,
 			 sizeof(testInput.t.buffer));
 	    if(TPM_RC_SUCCESS != CryptRsaDecrypt(&testOutput.b, &testInput.b,
 						 &testObject, &rsaScheme, testLabel)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	    if(testOutput.t.size != DEFAULT_TEST_DIGEST_SIZE
 	       || !MemoryEqual(testOutput.t.buffer, c_RsaTestValue,
 			       DEFAULT_TEST_DIGEST_SIZE)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	}
     return result;
@@ -510,8 +498,7 @@ TestRsaSignAndVerify(
     // if testing RSAPSS, do a verify of a known good signature. This ensures that
     // the validation function works.
     if(TPM_RC_SUCCESS != CryptRsaSign(&testSig, &testObject, &testDigest, NULL)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     // For RSASSA, make sure the results is what we are looking for
     if(testSig.sigAlg == ALG_RSASSA_VALUE)
@@ -520,15 +507,13 @@ TestRsaSignAndVerify(
 	       || !MemoryEqual(c_RsassaKvt.buffer,
 			       testSig.signature.rsassa.sig.t.buffer,
 			       RSA_TEST_KEY_SIZE)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	}
     // See if the TPM will validate its own signatures
     if(TPM_RC_SUCCESS != CryptRsaValidateSignature(&testSig, &testObject,
 						   &testDigest)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     // If this is RSAPSS, check the verification with known signature
     // Have to copy because  CrytpRsaValidateSignature() eats the signature
@@ -538,8 +523,7 @@ TestRsaSignAndVerify(
 			 sizeof(testSig.signature.rsapss.sig.t.buffer));
 	    if(TPM_RC_SUCCESS != CryptRsaValidateSignature(&testSig, &testObject,
 							   &testDigest)) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
+		SELF_TEST_FAILURE;
 	    }
 	}
     return result;
@@ -583,8 +567,7 @@ TestRsa(
 	    result = TestRsaSignAndVerify(alg, toTest);
 	    break;
 	  default:
-	    FAIL(FATAL_ERROR_SELF_TEST);
-	    // kgold SELF_TEST_FAILURE;
+	    SELF_TEST_FAILURE;
 	}
     return result;
 }
@@ -631,13 +614,11 @@ TestECDH(
     LoadEccPoint(&Qe, &c_ecTestKey_QeX, &c_ecTestKey_QeY);
     if(TPM_RC_SUCCESS != CryptEccPointMultiply(&Z, c_testCurve, &Qe, &ds,
 					       NULL, NULL)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     if(!MemoryEqual2B(&c_ecTestEcdh_X.b, &Z.x.b)
        || !MemoryEqual2B(&c_ecTestEcdh_Y.b, &Z.y.b)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     return result;
 }
@@ -660,21 +641,20 @@ TestEccSignAndVerify(
     switch(scheme)
 	{
 	  case ALG_ECDSA_VALUE:
-	    LoadEccParameter(&testSig.signature.ecdaa.signatureR, &c_TestEcDsa_r);
-	    LoadEccParameter(&testSig.signature.ecdaa.signatureS, &c_TestEcDsa_s);
+	    LoadEccParameter(&testSig.signature.ecdsa.signatureR, &c_TestEcDsa_r);
+	    LoadEccParameter(&testSig.signature.ecdsa.signatureS, &c_TestEcDsa_s);
 	    break;
 	  case ALG_ECSCHNORR_VALUE:
-	    LoadEccParameter(&testSig.signature.ecdaa.signatureR,
+	    LoadEccParameter(&testSig.signature.ecschnorr.signatureR,
 			     &c_TestEcSchnorr_r);
-	    LoadEccParameter(&testSig.signature.ecdaa.signatureS,
+	    LoadEccParameter(&testSig.signature.ecschnorr.signatureS,
 			     &c_TestEcSchnorr_s);
 	    break;
 	  case ALG_SM2_VALUE:
 	    // don't have a test for SM2
 	    return TPM_RC_SUCCESS;
 	  default:
-	    FAIL(FATAL_ERROR_SELF_TEST);
-	    // kgold SELF_TEST_FAILURE;
+	    SELF_TEST_FAILURE;
 	    break;
 	}
     TEST_DEFAULT_TEST_HASH(toTest);
@@ -689,28 +669,40 @@ TestEccSignAndVerify(
     if(TPM_RC_SUCCESS != CryptEccValidateSignature(&testSig, &testObject,
 						   (TPM2B_DIGEST *)&c_ecTestValue.b))
 	{
-	    //??? Don't have a valid test for ECSCORR right now because the algorithm has
-	    //??? changed and the KVT has not been updated.
-	    if(scheme != ALG_ECSCHNORR_VALUE) {
-		FAIL(FATAL_ERROR_SELF_TEST);
-		// kgold SELF_TEST_FAILURE;
-	    }
+	    SELF_TEST_FAILURE;
 	}
     CHECK_CANCELED;
     // Now sign and verify some data
     if(TPM_RC_SUCCESS != CryptEccSign(&testSig, &testObject,
 				      (TPM2B_DIGEST *)&c_ecTestValue,
 				      &eccScheme, NULL)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     CHECK_CANCELED;
     if(TPM_RC_SUCCESS != CryptEccValidateSignature(&testSig, &testObject,
 						   (TPM2B_DIGEST *)&c_ecTestValue)) {
-	FAIL(FATAL_ERROR_SELF_TEST);
-	// kgold SELF_TEST_FAILURE;
+	SELF_TEST_FAILURE;
     }
     CHECK_CANCELED;
+    return TPM_RC_SUCCESS;
+}
+static TPM_RC
+TestKDFa(
+	 ALGORITHM_VECTOR        *toTest
+	 )
+{
+    static TPM2B_KDF_TEST_KEY   keyOut;
+    UINT32                      counter = 0;
+    //
+    CLEAR_BOTH(TPM_ALG_KDF1_SP800_108);
+    keyOut.t.size = CryptKDFa(KDF_TEST_ALG, &c_kdfTestKeyIn.b, &c_kdfTestLabel.b,
+			      &c_kdfTestContextU.b, &c_kdfTestContextV.b,
+			      TEST_KDF_KEY_SIZE * 8, keyOut.t.buffer,
+			      &counter, FALSE);
+    if (   keyOut.t.size != TEST_KDF_KEY_SIZE
+	   || !MemoryEqual(keyOut.t.buffer, c_kdfTestKeyOut.t.buffer,
+			   TEST_KDF_KEY_SIZE))
+	SELF_TEST_FAILURE;
     return TPM_RC_SUCCESS;
 }
 static TPM_RC
@@ -743,15 +735,14 @@ TestEcc(
 	    result = TestEccSignAndVerify(alg, toTest);
 	    break;
 	  default:
-	    FAIL(FATAL_ERROR_SELF_TEST);
-	    // kgold SELF_TEST_FAILURE;
+	    SELF_TEST_FAILURE;
 	    break;
 	}
     return result;
 }
 #endif // TPM_ALG_ECC
 /* 10.2.1.6.4 TestAlgorithm() */
-/* Dispatches to the correct test function for the algorithm or get a list of testable
+/* Dispatches to the correct test function for the algorithm or gets a list of testable
    algorithms. */
 /* If toTest is not NULL, then the test decisions are based on the algorithm selections in
    toTest. Otherwise, g_toTest is used. When bits are clear in g_toTest they will also be cleared
@@ -898,13 +889,18 @@ TestAlgorithm(
 			result = TestRsa(alg, toTest);
 		    break;
 #endif // TPM_ALG_RSA
+#ifdef TPM_ALG_KDF1_SP800_108
+		  case ALG_KDF1_SP800_108_VALUE:
+		    if(doTest)
+			result = TestKDFa(toTest);
+		    break;
+#endif // TPM_ALG_KDF1_SP800_108
 #ifdef TPM_ALG_ECC
 		    // ECC dependent but no tests
 		    //        case ALG_ECDAA_VALUE:
 		    //        case ALG_ECMQV_VALUE:
 		    //        case ALG_KDF1_SP800_56a_VALUE:
 		    //        case ALG_KDF2_VALUE:
-		    //        case ALG_KDF1_SP800_108_VALUE:
 		    //        case ALG_MGF1_VALUE:
 		  case ALG_ECC_VALUE:
 		    CLEAR_BOTH(alg);
