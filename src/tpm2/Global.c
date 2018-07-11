@@ -154,21 +154,21 @@ int                  s_freeSessionSlots;
 UINT64   s_actionIoBuffer[768];      // action I/O buffer
 UINT32   s_actionIoAllocation;       // number of UIN64 allocated for in
 #endif
-/* 9.5.4.10 TpmFail.c */
+/* 9.5.4.10 Used in TpmFail.c */
 UINT32               s_failFunction;
 UINT32               s_failLine;
 UINT32               s_failCode;
-/* 9.5.5.9 CryptRand.c */
+/* 9.5.5.9 Used in CryptRand.c */
 /* This is the state used when the library uses a random number generator. A special function is
    installed for the library to call. That function picks up the state from this location and uses
    it for the generation of the random number. */
 RAND_STATE           *s_random;
-/* 9.5.4.12 Manufacture.c */
+/* 9.5.4.12 Used in Manufacture.c */
 /* The values is here rather than in the simulator or platform files in order to make it easier to
    find the TPM state. This is significant when trying to do TPM virtualization when the TPM state
    has to be moved along with virtual machine with which it is associated. */
 BOOL                 g_manufactured = FALSE;
-/* 9.5.4.13 Power.c */
+/* 9.5.4.13 Used in Power.c */
 /* This is here for the same reason that g_manufactured is here. Both of these values can be
    provided by the actual platform-specific code or by hardware indications. */
 BOOL                 g_initialized;
