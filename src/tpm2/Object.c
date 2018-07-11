@@ -419,11 +419,9 @@ ObjectLoad(
 	{
 	    // For any sensitive area, make sure that the seedSize is no larger than the
 	    // digest size of nameAlg
-#if 1 //??
 	    if(sensitive->seedValue.t.size
 	       > CryptHashGetDigestSize(publicArea->nameAlg))
-		return TPM_RC_SENSITIVE;    // not a 'safe' return code so no add
-#endif
+		return TPM_RCS_KEY_SIZE + blameSensitive;
 	    // Check attributes and schemes for consistency
 	    result = PublicAttributesValidation(parent, publicArea);
 	}
@@ -498,6 +496,8 @@ AllocateSequenceSlot(
     if(object != NULL)
 	{
 	    // Set the common values that a sequence object shares with an ordinary object
+	    // First, clear all attributes
+	    MemorySet(&object->objectAttributes, 0, sizeof(TPMA_OBJECT));
 	    // The type is TPM_ALG_NULL
 	    object->type = TPM_ALG_NULL;
 	    // This has no name algorithm and the name is the Empty Buffer
@@ -835,9 +835,9 @@ ComputeQualifiedName(
 	}
     return;
 }
-/* 8.6.3.29 ObjectIsAsymParent() */
-/* This function determines if an object has the attributes associated with an asymmetric parent. An
-   asymmetric parent is an asymmetric key that has its restricted and decrypt attributes SET, and
+/* 8.6.3.29 ObjectIsStorage() */
+/* This function determines if an object has the attributes associated with a parent. A parent is an
+   asymmetric or symmetric block cipher key that has its restricted and decrypt attributes SET, and
    sign CLEAR. */
 /* Return Values Meaning */
 /* TRUE if the object is a storage key */
