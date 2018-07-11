@@ -1125,11 +1125,10 @@ extern UINT32            s_oldestSavedSession;
 extern int               s_freeSessionSlots;
 #endif // SESSION_C
 #if defined IO_BUFFER_C || defined GLOBAL_C
-/* The s_actionOutputBuffer should not be modifiable by the host system until the TPM has returned a
-   response code. The s_actionOutputBuffer should not be accessible until response parameter
-   encryption, if any, is complete. */
-extern UINT32   s_actionInputBuffer[1024];          // action input buffer
-extern UINT32   s_actionOutputBuffer[1024];         // action output buffer
+/* The value of s_actionIoAllocation is the number of UINT64 values allocated. It is used to set the
+   pointer for the response structure.  */
+extern UINT64   s_actionIoBuffer[768];      // action I/O buffer
+extern UINT32   s_actionIoAllocation;       // number of UIN64 allocated for in
 #endif // MEMORY_LIB_C
 /* 			       From TPMFail.c */
 /* This value holds the address of the string containing the name of the function in which the

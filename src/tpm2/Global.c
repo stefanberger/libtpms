@@ -148,13 +148,11 @@ PCR                  s_pcrs[IMPLEMENTATION_PCR];
 SESSION_SLOT         s_sessions[MAX_LOADED_SESSIONS];
 UINT32               s_oldestSavedSession;
 int                  s_freeSessionSlots;
-/* 9.5.4.7 MemoryLib.c */
-/* The s_actionOutputBuffer should not be modifiable by the host system until the TPM has returned a
-   response code. The s_actionOutputBuffer should not be accessible until response parameter
-   encryption, if any, is complete. This memory is not used between commands */
+
+/* 9.5.5.7	Used in MemoryLib.c */
 #ifndef __IGNORE_STATE__        // DO NOT DEFINE THIS VALUE
-UINT32   s_actionInputBuffer[1024];          // action input buffer
-UINT32   s_actionOutputBuffer[1024];         // action output buffer
+UINT64   s_actionIoBuffer[768];      // action I/O buffer
+UINT32   s_actionIoAllocation;       // number of UIN64 allocated for in
 #endif
 /* 9.5.4.10 TpmFail.c */
 UINT32               s_failFunction;

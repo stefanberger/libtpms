@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			    I/O Buffers		 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: IoBuffers_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: IoBuffers_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,26 +55,33 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef IOBUFFERS_FP_H
 #define IOBUFFERS_FP_H
 
+void
+MemoryIoBufferAllocationReset(
+			      void
+			      );
+void
+MemoryIoBufferZero(
+		   void
+		   );
 BYTE *
-MemoryGetActionInputBuffer(
-			   UINT32           size           // Size, in bytes, required for the input
-			   // unmarshaling
-			   );
-void *
-MemoryGetActionOutputBuffer(
-			    UINT32           size           // required size of the buffer
-			    );
+MemoryGetInBuffer(
+		  UINT32           size           // Size, in bytes, required for the input
+		  // unmarshaling
+		  );
+BYTE *
+MemoryGetOutBuffer(
+		   UINT32           size           // required size of the buffer
+		   );
 BOOL
 IsLabelProperlyFormatted(
 			 TPM2B           *x
 			 );
-
 
 #endif

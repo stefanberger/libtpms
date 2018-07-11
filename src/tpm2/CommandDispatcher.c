@@ -191,6 +191,9 @@ ParseHandleBuffer(
 #endif
     return TPM_RC_SUCCESS;
 }
+
+/* 6.3.4	CommandDispatcher() */
+
 TPM_RC
 CommandDispatcher(
 		  COMMAND                 *command
@@ -198,19 +201,18 @@ CommandDispatcher(
 {
 #if !defined TABLE_DRIVEN_DISPATCH
     TPM_RC       result;
-    BYTE        *parm_buffer = command->parameterBuffer;
+    BYTE        **paramBuffer = &command->parameterBuffer;
     INT32       *paramBufferSize = &command->parameterSize;
-    BYTE        *responseBuffer = command->responseBuffer;
-    INT32        resHandleSize = 0;
-    INT32       *responseHandleSize = &resHandleSize;
+    BYTE        **responseBuffer = &command->responseBuffer;
     INT32       *respParmSize = &command->parameterSize;
-    BYTE         rHandle[4];
-    BYTE        *responseHandle = &rHandle[0];
-    INT32        rSize = MAX_RESPONSE_SIZE; // used to make sure that the marshaling
-    // operation does not run away due to
-    // bad parameter in the function
-    // output.
+    INT32        rSize;
     TPM_HANDLE  *handles = &command->handles[0];
+    command->handleNum = 0;                 // The command-specific code knows how
+    // many handles there are. This is for
+    // cataloging the number of response
+    // handles
+    MemoryIoBufferAllocationReset();        // Initialize so that allocation will
+    // work properly
     switch(GetCommandCode(command->index))
 	{
 #include "CommandDispatcher.h"
@@ -218,15 +220,9 @@ CommandDispatcher(
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
 	}
-    command->responseBuffer = responseBuffer;
-    command->handleNum = 0;
-    // The response handle was marshaled into rHandle. 'Unmarshal' it into
-    // handles.
-    if(*responseHandleSize > 0)
-	{
-	    command->handles[command->handleNum++] = BYTE_ARRAY_TO_UINT32(rHandle);
-	}
-    return TPM_RC_SUCCESS;
+ Exit:
+    MemoryIoBufferZero();
+    return result;
 #else
     COMMAND_DESCRIPTOR_t    *desc;
     BYTE                    *types;
@@ -244,6 +240,7 @@ CommandDispatcher(
     UINT32                   pNum = 0;
     BYTE                     dType;     // dispatch type
     TPM_RC                   result;
+    //
     // Get the address of the descriptor for this command
     pAssert(command->index
 	    < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t *));
@@ -259,10 +256,11 @@ CommandDispatcher(
     maxInSize = desc->inSize;
     // and the size of the output parameter structure returned by this command
     maxOutSize = desc->outSize;
+    MemoryIoBufferAllocationReset();
     // Get a buffer for the input parameters
-    commandIn = MemoryGetActionInputBuffer(maxInSize);
+    commandIn = MemoryGetInBuffer(maxInSize);
     // And the output parameters
-    commandOut = (BYTE *)MemoryGetActionOutputBuffer((UINT32)maxOutSize);
+    commandOut = (BYTE *)MemoryGetOutBuffer((UINT32)maxOutSize);
     // Get the address of the action code dispatch
     cmd = desc->command;
     // Copy any handles into the input buffer
@@ -276,7 +274,7 @@ CommandDispatcher(
 	    // command parameter list.
 	    if(*types != 0xFF)
 		offset = *offsets++;
-	    maxInSize -= sizeof(TPM_HANDLE);
+	    //        maxInSize -= sizeof(TPM_HANDLE);
 	    hasInParameters++;
 	}
     // Exit loop with type containing the last value read from types
@@ -302,7 +300,10 @@ CommandDispatcher(
 			       (type & 0x80) != 0);
 		}
 	    if(result != TPM_RC_SUCCESS)
-		return result + TPM_RC_P + (TPM_RC_1 * pNum);
+		{
+		    result += TPM_RC_P + (TPM_RC_1 * pNum);
+		    goto Exit;
+		}
 	    // This check is used so that we don't have to add an additional offset
 	    // value to the offsets list to correspond to the stop value in the
 	    // command parameter list.
@@ -312,7 +313,10 @@ CommandDispatcher(
 	}
     // Should have used all the bytes in the input
     if(command->parameterSize != 0)
-	return TPM_RC_SIZE;
+	{
+	    result = TPM_RC_SIZE;
+	    goto Exit;
+	}
     // The command parameter unmarshaling stopped when it hit a value that was out
     // of range for unmarshaling values and left *types pointing to the first
     // marshaling type. If that type happens to be the STOP value, then there
@@ -336,7 +340,7 @@ CommandDispatcher(
 		result = cmd.noArgs();
 	}
     if(result != TPM_RC_SUCCESS)
-	return result;
+	goto Exit;
     // Offset in the marshaled output structure
     offset = 0;
     // Process the return handles, if any
@@ -367,6 +371,9 @@ CommandDispatcher(
 					&maxOutSize);
 	    offset = *offsets++;
 	}
-    return (maxOutSize < 0) ? TPM_RC_FAILURE : TPM_RC_SUCCESS;
+    result = (maxOutSize < 0) ? TPM_RC_FAILURE : TPM_RC_SUCCESS;
+ Exit:
+    MemoryIoBufferZero();
+    return result;
 #endif
 }
