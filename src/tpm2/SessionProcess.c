@@ -1193,7 +1193,7 @@ CheckLockedOut(
 	    // ... or if the number of failed tries has been maxed out.
 	    if(gp.failedTries >= gp.maxTries)
 		return TPM_RC_LOCKOUT;
-#ifdef USE_DA_USED
+#if USE_DA_USED
 	    // If the daUsed flag is not SET, then no DA validation until the
 	    // daUsed state is written to NV
 	    if(!g_daUsed)

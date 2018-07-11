@@ -83,7 +83,7 @@ BOOL                 g_pcrReConfig;
 TPMI_DH_OBJECT       g_DRTMHandle;
 BOOL                 g_DrtmPreStartup;
 BOOL                 g_StartupLocality3;
-#ifdef USE_DA_USED
+#if USE_DA_USED
 BOOL			g_daUsed;
 #endif
 BOOL                 g_powerWasLost;

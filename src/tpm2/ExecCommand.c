@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     ExecCommand					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ExecCommand.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: ExecCommand.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -280,7 +280,7 @@ ExecuteCommand(
     if(g_clearOrderly == TRUE
        && NV_IS_ORDERLY)
 	{
-#ifdef USE_DA_USED
+#if USE_DA_USED
 	    gp.orderlyState = g_daUsed ? SU_DA_USED_VALUE : SU_NONE_VALUE;
 #else
 	    gp.orderlyState = SU_NONE_VALUE;
