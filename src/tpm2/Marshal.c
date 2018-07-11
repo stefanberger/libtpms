@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -379,7 +379,17 @@ TPMI_DH_CONTEXT_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
-/* Table 2:49 - Definition of TPMI_RH_HIERARCHY Type (InterfaceTable()) */
+/* Table 2:49 - Definition of TPMI_DH_SAVED Type (InterfaceTable()) */
+
+UINT16
+TPMI_DH_SAVED_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM_HANDLE_Marshal(source, buffer, size);
+    return written;
+}
+
+//* Table 2:49 - Definition of TPMI_RH_HIERARCHY Type (InterfaceTable()) */
 
 UINT16
 TPMI_RH_HIERARCHY_Marshal(TPMI_RH_HIERARCHY *source, BYTE **buffer, INT32 *size)
@@ -2172,7 +2182,7 @@ TPMS_CONTEXT_Marshal(TPMS_CONTEXT *source, BYTE **buffer, INT32 *size)
     UINT16 written = 0;
 
     written += UINT64_Marshal(&source->sequence, buffer, size);
-    written += TPMI_DH_CONTEXT_Marshal(&source->savedHandle, buffer, size);
+    written += TPMI_DH_SAVED_Marshal(&source->savedHandle, buffer, size);
     written += TPMI_RH_HIERARCHY_Marshal(&source->hierarchy, buffer, size);
     written += TPM2B_CONTEXT_DATA_Marshal(&source->contextBlob, buffer, size);
     return written;

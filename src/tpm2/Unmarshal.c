@@ -3,9 +3,9 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
-/* (c) Copyright IBM Corporation 2015, 2016					*/
+/* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
 /* All rights reserved.								*/
 /* 										*/
@@ -779,6 +779,34 @@ TPMI_DH_CONTEXT_Unmarshal(TPMI_DH_CONTEXT *target, BYTE **buffer, INT32 *size, B
 	if (isNotHmacSession &&
 	    isNotPolicySession &&
 	    isNotTransient) {
+	    rc = TPM_RC_VALUE;
+	}
+    }
+    return rc;
+}
+
+/* Table 49 - Definition of (TPM_HANDLE) TPMI_DH_SAVED Type */
+
+TPM_RC
+TPMI_DH_SAVED_Unmarshal(TPMI_DH_SAVED *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    allowNull = allowNull;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotHmacSession = (*target < HMAC_SESSION_FIRST ) || (*target > HMAC_SESSION_LAST);
+	BOOL isNotPolicySession = (*target < POLICY_SESSION_FIRST) || (*target > POLICY_SESSION_LAST);
+	BOOL isNotTransientObject = (*target != 0x80000000);
+	BOOL isNotSequenceObject = (*target != 0x80000001);
+	BOOL isNotTransientStClear = (*target != 0x80000002);
+	if (isNotHmacSession &&
+	    isNotPolicySession &&
+	    isNotTransientObject &&
+	    isNotSequenceObject &&
+	    isNotTransientStClear) {
 	    rc = TPM_RC_VALUE;
 	}
     }
@@ -4335,7 +4363,7 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
 	rc = UINT64_Unmarshal(&target->sequence, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-	rc = TPMI_DH_CONTEXT_Unmarshal(&target->savedHandle, buffer, size, NO);
+	rc = TPMI_DH_SAVED_Unmarshal(&target->savedHandle, buffer, size, NO);
     }
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMI_RH_HIERARCHY_Unmarshal(&target->hierarchy, buffer, size, YES);
