@@ -117,6 +117,9 @@ TPM2_EncryptDecrypt(
     keySize = symKey->publicArea.parameters.symDetail.sym.keyBits.sym;
     alg = symKey->publicArea.parameters.symDetail.sym.algorithm;
     blockSize = CryptGetSymmetricBlockSize(alg, keySize);
+    // reverify the algorithm. This is mainly to keep static analysis tools happy
+    if(blockSize == 0)
+       return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
     // Note: When an algorithm is not supported by a TPM, the TPM_ALG_xxx for that
     // algorithm is not defined. However, it is assumed that the ALG_xxx_VALUE for
     // the algorithm is always defined. Both have the same numeric value.
