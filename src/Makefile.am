@@ -270,6 +270,7 @@ libtpms_tpm2_la_SOURCES = \
 
 noinst_HEADERS += \
 	compiler.h \
+	tpm2/crypto/CryptCmac_fp.h \
 	tpm2/crypto/CryptDes_fp.h \
 	tpm2/crypto/CryptEcc.h \
 	tpm2/crypto/CryptEccKeyExchange_fp.h \
@@ -285,6 +286,7 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptRsa_fp.h \
 	tpm2/crypto/CryptRsa.h \
 	tpm2/crypto/CryptSelfTest_fp.h \
+	tpm2/crypto/CryptSmac_fp.h \
 	tpm2/crypto/CryptSym.h \
 	tpm2/crypto/CryptSym_fp.h \
 	tpm2/crypto/CryptTest.h \
@@ -489,6 +491,7 @@ noinst_HEADERS += \
 if LIBTPMS_USE_OPENSSL
 
 libtpms_tpm2_la_SOURCES += \
+	tpm2/crypto/openssl/CryptCmac.c \
 	tpm2/crypto/openssl/CryptDes.c \
 	tpm2/crypto/openssl/CryptEccKeyExchange.c \
 	tpm2/crypto/openssl/CryptEccMain.c \
@@ -499,6 +502,7 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/CryptPrimeSieve.c \
 	tpm2/crypto/openssl/CryptRand.c \
 	tpm2/crypto/openssl/CryptRsa.c \
+	tpm2/crypto/openssl/CryptSmac.c \
 	tpm2/crypto/openssl/CryptSym.c \
 	tpm2/crypto/openssl/TpmToOsslDesSupport.c \
 	tpm2/crypto/openssl/TpmToOsslMath.c \
