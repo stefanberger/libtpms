@@ -65,7 +65,7 @@
 /* 10.2.1.2 Includes and Defines */
 #include    "Tpm.h"
 #define     SELF_TEST_DATA
-#ifdef SELF_TEST
+#if SELF_TEST
 /* These includes pull in the data structures. They contain data definitions for the various
    tests. */
 #include    "SelfTest.h"

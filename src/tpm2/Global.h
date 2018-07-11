@@ -68,7 +68,6 @@
 
 #ifndef         GLOBAL_H
 #define         GLOBAL_H
-//#define SELF_TEST
 _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
 #include <stddef.h>
@@ -984,7 +983,7 @@ extern const TPM2B      *DUPLICATE_STRING;
 extern const TPM2B      *OBFUSCATE_STRING;
 extern const TPM2B      *IDENTITY_STRING;
 extern const TPM2B      *COMMIT_STRING;
-#ifdef SELF_TEST
+#if SELF_TEST
 extern const TPM2B      *OAEP_TEST_STRING;
 #endif // SELF_TEST
 /* From Manufacture.c */

@@ -71,7 +71,7 @@
 #include "VendorString.h"
 /* 5.11.2	For Self-test */
 /* These macros are used in CryptUtil() to invoke the incremental self test. */
-#ifdef SELF_TEST
+#if SELF_TEST
 #   define     TEST(alg) if(TEST_BIT(alg, g_toTest)) CryptTestAlgorithm(alg, NULL)
 /* Use of TPM_ALG_NULL is reserved for RSAEP/RSADP testing. If someone is wanting to test a hash
    with that value, don't do it. */
