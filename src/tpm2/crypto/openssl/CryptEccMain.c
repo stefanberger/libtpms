@@ -68,13 +68,13 @@
 #error "Need to define USE_BN_ECC_DATA in Implementaion.h"
 #endif
 /* 10.2.12.2 Functions */
-#ifdef SIMULATION
+#if SIMULATION
 void
 EccSimulationEnd(
 		 void
 		 )
 {
-#ifdef SIMULATION
+#if SIMULATION
     // put things to be printed at the end of the simulation here
 #endif
 }

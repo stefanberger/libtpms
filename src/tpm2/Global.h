@@ -72,7 +72,7 @@ _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
 #include <stddef.h>
 _NORMAL_WARNING_LEVEL_
-#ifdef SIMULATION
+#if SIMULATION
 #undef CONTEXT_SLOT
 #  define CONTEXT_SLOT    UINT8
 #endif
@@ -1134,7 +1134,7 @@ extern UINT32   s_actionIoAllocation;       // number of UIN64 allocated for in
    failure occurred. This address value isn't useful for anything other than helping the vendor to
    know in which file the failure occurred. */
 extern BOOL      g_inFailureMode;       // Indicates that the TPM is in failure mode
-#ifdef SIMULATION
+#if SIMULATION
 extern BOOL      g_forceFailureMode;    // flag to force failure mode during test
 #endif
 typedef void(FailFunction)(const char *function, int line, int code);

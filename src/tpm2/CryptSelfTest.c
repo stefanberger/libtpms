@@ -110,7 +110,7 @@ CryptSelfTest(
 	      TPMI_YES_NO      fullTest       // IN: if full test is required
 	      )
 {
-#ifdef SIMULATION
+#if SIMULATION
     if(g_forceFailureMode)
 	FAIL(FATAL_ERROR_FORCED);
 #endif

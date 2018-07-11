@@ -70,21 +70,29 @@
 #ifndef INLINE_FUNCTIONS
 //#  define INLINE_FUNCTIONS
 #endif
-/* Don't move this include ahead of the INLINE_FUNCTIONS definition. */
 #include "CompilerDependencies.h"
+
 /* This definition is required for the re-factored code */
 #if (!defined USE_BN_ECC_DATA) || ((USE_BN_ECC_DATA != NO) && (USE_BN_ECC_DATA != YES))
 #   undef   USE_BN_ECC_DATA
 #   define  USE_BN_ECC_DATA     YES     // Default: Either YES or NO
 #endif
 
-/* Comment these out as needed */
-#ifndef SIMULATION
-//#  define SIMULATION
+/* The SIMULATION switch allows certain other macros to be enabled. The things that can be enabled
+   in a simulation include key caching, reproducible random sequences, instrumentation of the RSA
+   key generation process, and certain other debug code. SIMULATION Needs to be defined as either
+   YES or NO. This grouping of macros will make sure that it is set correctly. A simulated TPM would
+   include a Virtual TPM. The interfaces for a Virtual TPM should be modified from the standard ones
+   in the Simulator project. If SIMULATION is in the compile parameters without modifiers, make
+   SIMULATION == YES */
+#if !(defined SIMULATION) || ((SIMULATION != NO) && (SIMULATION != YES))
+#   undef   SIMULATION
+#   define  SIMULATION      NO     // Default: Either YES or NO
 #endif
+
 /* Define this to run the function that checks the format compatibility for the chosen big number
    math library. Not all ports use this. */
-#if !defined LIBRARY_COMPATIBILITY_CHECK && defined SIMULATION
+#if !defined LIBRARY_COMPATIBILITY_CHECK && SIMULATION
 #   define LIBRARY_COMPATABILITY_CHECK
 #endif
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
@@ -118,7 +126,7 @@
 #  define RSA_KEY_SIEVE
 #endif
 /* Enable the instrumentation of the sieve process. This is used to tune the sieve variables.*/
-#if !defined RSA_INSTRUMENT && defined RSA_KEY_SIEVE && defined SIMULATION
+#if !defined RSA_INSTRUMENT && defined RSA_KEY_SIEVE && SIMULATION
 //#define RSA_INSTRUMENT
 #endif
 #if defined RSA_KEY_SIEVE && !defined NDEBUG && !defined RSA_INSTRUMENT
@@ -164,7 +172,7 @@
 #endif
 
 /* The switches in this group can only be enabled when running a simulation */
-#ifdef SIMULATION
+#if SIMULATION
 /* Enables use of the key cache */
 #   ifndef USE_RSA_KEY_CACHE
 #       define USE_RSA_KEY_CACHE

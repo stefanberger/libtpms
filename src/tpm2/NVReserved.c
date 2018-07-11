@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		NV TPM persistent and state save data  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: NVReserved.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -137,7 +137,7 @@ NvManufacture(
 	      void
 	      )
 {
-#ifdef SIMULATION
+#if SIMULATION
     // Simulate the NV memory being in the erased state.
     _plat__NvMemoryClear(0, NV_MEMORY_SIZE);
 #endif
