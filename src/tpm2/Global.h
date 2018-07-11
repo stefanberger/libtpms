@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Global.h 1266 2018-07-16 20:58:40Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -723,8 +723,7 @@ typedef struct
 #endif
 } PERSISTENT_DATA;
 extern PERSISTENT_DATA  gp;
-/* 																			  5.10.11.3
- 																			  ORDERLY_DATA */
+/* 5.10.11.3 ORDERLY_DATA */
 /* The data in this structure is saved to NV on each TPM2_Shutdown(). */
 typedef struct orderly_data
 {
@@ -792,10 +791,7 @@ typedef struct state_clear_data
     PCR_AUTHVALUE       pcrAuthValues;
 } STATE_CLEAR_DATA;
 extern STATE_CLEAR_DATA gc;
-/* 																			  5.10.11.5
- 																			  State
- 																			  Reset
- 																			  Data */
+/* 5.10.11.5 State Reset Data */
 /* This structure contains data is that is saved on Shutdown(STATE) and restored on the subsequent
    Startup(ANY). That is, the data is preserved across TPM Resume and TPM Restart. */
 /* If a default value is specified in the comments this value is applied on TPM Reset. */
@@ -880,9 +876,7 @@ typedef struct state_reset_data
 #endif //TPM_ALG_ECC
 } STATE_RESET_DATA;
 extern STATE_RESET_DATA gr;
-/* 																			  5.10.12
- 																			  NV
- 																			  Layout */
+/* 5.10.12 NV Layout */
 /* The NV data organization is */
 /* a) a PERSISTENT_DATA structure */
 /* b) a STATE_RESET_DATA structure */
@@ -1031,9 +1025,6 @@ extern UINT32           s_auditSessionIndex;
 #ifdef  TPM_CC_GetCommandAuditDigest
 extern TPM2B_DIGEST    s_cpHashForCommandAudit;
 #endif
-/* Number of authorization sessions present in the command */
-/* extern UINT32 s_sessionNum; Flag indicating if NV update is pending for the lockOutAuthEnabled or
-   failedTries DA parameter */
 extern BOOL             s_DAPendingOnNV;
 #endif // SESSION_PROCESS_C
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C

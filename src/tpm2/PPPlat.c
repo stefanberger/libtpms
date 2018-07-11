@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Simulates the Physical Present Interface	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*            $Id: PPPlat.c 809 2016-11-16 18:31:54Z kgoldman $			*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 /* C.10 PPPlat.c */
 /* C.10.1. Description */
-/* This module simulates the physical present interface pins on the TPM. */
+/* This module simulates the physical presence interface pins on the TPM. */
 /* C.10.2. Includes */
 #include "PlatformData.h"
 #include "Platform_fp.h"
