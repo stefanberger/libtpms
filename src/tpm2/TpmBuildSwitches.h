@@ -173,13 +173,16 @@
 #ifndef COMPILER_CHECKS
 //#   define COMPILER_CHECKS
 #endif
-/* Some of the values (such as sizes) are the result of different options set in
-   Implementation.h. The combination might not be consistent. A function is defined
-   (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the function, define
-   this parameter. */
-#ifndef RUNTIME_SIZE_CHECKS
-#define RUNTIME_SIZE_CHECKS
-#endif
+// Some of the values (such as sizes) are the result of different options set in
+// Implementation.h. The combination might not be consistent. A function is defined
+// (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the function, define
+// this parameter.
+#   if !(defined RUNTIME_SIZE_CHECKS)					\
+    || ((RUNTIME_SIZE_CHECKS != NO) && (RUNTIME_SIZE_CHECKS != YES))
+#       undef RUNTIME_SIZE_CHECKS
+#       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO
+#   endif
+
 
 /* If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
    make sure that the dbgDumpMemBlock() function has been added someplace (preferably, somewhere in
