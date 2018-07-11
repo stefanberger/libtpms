@@ -128,9 +128,9 @@ C_2_2_MQV(
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_VALUE);
-    C = AccessCurveData(E);
     pAssert(outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL
 	    && dsA != NULL);
+    C = AccessCurveData(E);
     // Process:
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
     //  2. P = h(implicitsigA)(Qe,B + avf(Qe,B)Qs,B).
@@ -317,7 +317,7 @@ SM2KeyExchange(
 	       )
 {
     CURVE_INITIALIZED(E, curveId);
-    const ECC_CURVE_DATA      *C = (E != NULL) ? AccessCurveData(E) : NULL;
+    const ECC_CURVE_DATA      *C;
     ECC_INITIALIZED(dsA, dsAIn);
     ECC_INITIALIZED(deA, deAIn);
     POINT_INITIALIZED(QsB, QsBIn);
@@ -333,6 +333,7 @@ SM2KeyExchange(
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_CURVE);
+    C = AccessCurveData(E);
     pAssert(outZ != NULL && dsA != NULL && deA != NULL &&  QsB != NULL
 	    && QeB != NULL);
     // Compute the value for w
