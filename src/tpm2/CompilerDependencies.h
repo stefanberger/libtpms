@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   Compiler Dependencies  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CompilerDependencies.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: CompilerDependencies.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -124,7 +124,9 @@
 #endif 	// _MSC_VER
 
 #ifndef _MSC_VER
+#ifndef WINAPI
 #   define WINAPI
+#endif
 #   define __pragma(x)
 #   if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR >= 2)
 #     define REVERSE_ENDIAN_16(_Number) __builtin_bswap16(_Number)
@@ -152,22 +154,37 @@
 #   endif
 #   ifdef INLINE_FUNCTIONS
 #      define INLINE static inline
-#   endif
-#   if defined(__GNUC__)
+#   endif	// INLINE_FUNCTIONS
+#endif
+#if defined(__GNUC__)
 #      define NORETURN                     __attribute__((noreturn))
 #      include <stdint.h>
-#   else
-#      define NORETURN
-#   endif
-#   define LIB_EXPORT
-#   define LIB_IMPORT
-#   define _REDUCE_WARNING_LEVEL_(n)
-#   define _NORMAL_WARNING_LEVEL_
-#   define  NOT_REFERENCED(x) (x = x)
-#endif	// _MSC_VER
-
-#ifdef TPM_POSIX
-typedef int SOCKET;
 #endif
 
-#endif 	// COMPILERDEPEDENCIES_H
+// Things that are not defined should be defined as NULL
+#ifndef NORETURN
+#   define NORETURN
+#endif
+#ifndef LIB_EXPORT
+#   define LIB_EXPORT
+#endif
+#ifndef LIB_IMPORT
+#   define LIB_IMPORT
+#endif
+#ifndef _REDUCE_WARNING_LEVEL_
+#   define _REDUCE_WARNING_LEVEL_(n)
+#endif
+#ifndef _NORMAL_WARNING_LEVEL_
+#   define _NORMAL_WARNING_LEVEL_
+#endif
+#ifndef NOT_REFERENCED
+#   define  NOT_REFERENCED(x) (x = x)
+#endif
+#ifdef _POSIX_
+typedef int SOCKET;
+#endif
+// #ifdef TPM_POSIX
+// typedef int SOCKET;
+// #endif
+#endif // _COMPILER_DEPENDENCIES_H_
+
