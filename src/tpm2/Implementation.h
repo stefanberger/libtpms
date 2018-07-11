@@ -117,41 +117,6 @@
 #define  MOST_SIGNIFICANT_BIT_0     NO
 #define  LEAST_SIGNIFICANT_BIT_0    !MOST_SIGNIFICANT_BIT_0
 #define  AUTO_ALIGN                 NO
-/* From Vendor-Specific: Table 2 - Defines for Implemented Algorithms */
-#define  ALG_RSA               ALG_YES
-#define  ALG_SHA1              ALG_YES
-#define  ALG_HMAC              ALG_YES
-#define  ALG_TDES              ALG_YES
-#define  ALG_AES               ALG_YES
-#define  ALG_MGF1              ALG_YES
-#define  ALG_XOR               ALG_YES
-#define  ALG_KEYEDHASH         ALG_YES
-#define  ALG_SHA256            ALG_YES
-#define  ALG_SHA384            ALG_YES
-#define  ALG_SHA512            ALG_YES
-#define  ALG_SM3_256           ALG_NO
-#define  ALG_SM4               ALG_NO
-#define  ALG_RSASSA            (ALG_YES*ALG_RSA)
-#define  ALG_RSAES             (ALG_YES*ALG_RSA)
-#define  ALG_RSAPSS            (ALG_YES*ALG_RSA)
-#define  ALG_OAEP              (ALG_YES*ALG_RSA)
-#define  ALG_ECC               ALG_YES
-#define  ALG_ECDH              (ALG_YES*ALG_ECC)
-#define  ALG_ECDSA             (ALG_YES*ALG_ECC)
-#define  ALG_ECDAA             (ALG_YES*ALG_ECC)
-#define  ALG_SM2               (ALG_YES*ALG_ECC)
-#define  ALG_ECSCHNORR         (ALG_YES*ALG_ECC)
-#define  ALG_ECMQV             (ALG_YES*ALG_ECC)
-#define  ALG_SYMCIPHER         ALG_YES
-#define  ALG_KDF1_SP800_56A    (ALG_YES*ALG_ECC)
-#define  ALG_KDF2              ALG_YES
-#define  ALG_KDF1_SP800_108    ALG_YES
-#define  ALG_CMAC              ALG_NO
-#define  ALG_CTR               ALG_YES
-#define  ALG_OFB               ALG_YES
-#define  ALG_CBC               ALG_YES
-#define  ALG_CFB               ALG_YES
-#define  ALG_ECB               ALG_YES
 
 /* From Vendor-Specific: Table 3 - Defines for Key Size Constants */
 #define  RSA_KEY_SIZES_BITS         {1024,2048}
@@ -401,6 +366,46 @@
 #define  VENDOR_COMMAND_COUNT           0
 #define  MAX_VENDOR_BUFFER_SIZE         1024
 #define  TPM_MAX_DERIVATION_BITS        8192
+
+/* From Vendor-Specific: Table 2 - Defines for Implemented Algorithms */
+
+#define ALG_AES                         ALG_YES
+#define ALG_CAMELLIA                    ALG_NO      /* Not specified by vendor */
+#define ALG_CBC                         ALG_YES
+#define ALG_CFB                         ALG_YES
+#define ALG_CMAC                        ALG_NO
+#define ALG_CTR                         ALG_YES
+#define ALG_ECB                         ALG_YES
+#define ALG_ECC                         ALG_YES
+#define ALG_ECDAA                       (ALG_YES && ALG_ECC)
+#define ALG_ECDH                        (ALG_YES && ALG_ECC)
+#define ALG_ECDSA                       (ALG_YES && ALG_ECC)
+#define ALG_ECMQV                       (ALG_YES && ALG_ECC)
+#define ALG_ECSCHNORR                   (ALG_YES && ALG_ECC)
+#define ALG_HMAC                        ALG_YES
+#define ALG_KDF1_SP800_108              ALG_YES
+#define ALG_KDF1_SP800_56A              (ALG_YES && ALG_ECC)
+#define ALG_KDF2                        ALG_YES
+#define ALG_KEYEDHASH                   ALG_YES
+#define ALG_MGF1                        ALG_YES
+#define ALG_OAEP                        (ALG_YES && ALG_RSA)
+#define ALG_OFB                         ALG_YES
+#define ALG_RSA                         ALG_YES
+#define ALG_RSAES                       (ALG_YES && ALG_RSA)
+#define ALG_RSAPSS                      (ALG_YES && ALG_RSA)
+#define ALG_RSASSA                      (ALG_YES && ALG_RSA)
+#define ALG_SHA                         ALG_NO      /* Not specified by vendor */
+#define ALG_SHA1                        ALG_YES
+#define ALG_SHA256                      ALG_YES
+#define ALG_SHA384                      ALG_YES
+#define ALG_SHA512                      ALG_YES
+#define ALG_SM2                         (ALG_YES && ALG_ECC)
+#define ALG_SM3_256                     ALG_NO
+#define ALG_SM4                         ALG_NO
+#define ALG_SYMCIPHER                   ALG_YES
+#define ALG_TDES                        ALG_YES
+#define ALG_XOR                         ALG_YES
+
 /* From TCG Algorithm Registry: Table 2 - Definition of TPM_ALG_ID Constants */
 typedef  UINT16             TPM_ALG_ID;
 #define  ALG_ERROR_VALUE             0x0000
