@@ -89,7 +89,7 @@
 #else
 #   define FUNCTION_NAME        __FUNCTION__
 #endif
-#ifdef NO_FAIL_TRACE
+#if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
 #   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(errorCode)
 #else

@@ -70,7 +70,7 @@ SetForceFailureMode(
 		    );
 NORETURN void
 TpmFail(
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
 	const char      *function,
 	int              line,
 #endif
@@ -78,7 +78,7 @@ TpmFail(
 	);
 void
 TpmSetFailureMode(
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
 	const char      *function,
 	int              line,
 #endif

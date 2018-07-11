@@ -211,12 +211,14 @@
 #       define  DRBG_DEBUG_PRINT    NO      // Default: Either YES or NO
 #   endif
 
-/* If an assertion event it not going to produce any trace information (function and line number)
-   then define NO_FAIL_TRACE */
-#ifndef NO_FAIL_TRACE
-//#   define NO_FAIL_TRACE
-#endif
-#endif // NDEBUG
+// If an assertion event it not going to produce any trace information (function and line number)
+// then make FAIL_TRACE == NO
+#   if !(defined FAIL_TRACE) || ((FAIL_TRACE != NO) && (FAIL_TRACE != YES))
+#       undef   FAIL_TRACE
+#       define  FAIL_TRACE          YES      // Default: Either YES or NO
+#   endif
+
+#endif // DEBUG
 
 /* Indicate if the implementation is going to give lockout time credit for time up to the last
    orderly shutdown. */
