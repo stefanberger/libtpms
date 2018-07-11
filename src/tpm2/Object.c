@@ -536,7 +536,7 @@ ObjectCreateHMACSequence(
 	return TPM_RC_OBJECT_MEMORY;
     // Set HMAC sequence bit
     hmacObject->attributes.hmacSeq = SET;
-#ifndef SMAC_IMPLEMENTED
+#if !SMAC_IMPLEMENTED
     if(CryptHmacStart(&hmacObject->state.hmacState, hashAlg,
 		      keyObject->sensitive.sensitive.bits.b.size,
 		      keyObject->sensitive.sensitive.bits.b.buffer) == 0)

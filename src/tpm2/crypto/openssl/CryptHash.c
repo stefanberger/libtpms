@@ -450,7 +450,7 @@ CryptDigestUpdate(
 	    if((hashState->type == HASH_STATE_HASH)
 	       || (hashState->type == HASH_STATE_HMAC))
 		HASH_DATA(hashState, dataSize, (BYTE *)data);
-#ifdef SMAC_IMPLEMENTED
+#if SMAC_IMPLEMENTED
 	    else if(hashState->type == HASH_STATE_SMAC)
 		(hashState->state.smac.smacMethods.data)(&hashState->state.smac.state,
 							 dataSize, data);
@@ -621,7 +621,7 @@ CryptHmacEnd(
 {
     BYTE                 temp[MAX_DIGEST_SIZE];
     PHASH_STATE          hState = (PHASH_STATE)&state->hashState;
-#ifdef SMAC_IMPLEMENTED
+#if SMAC_IMPLEMENTED
     if(hState->type == HASH_STATE_SMAC)
 	return (state->hashState.state.smac.smacMethods.end)
 	    (&state->hashState.state.smac.state,

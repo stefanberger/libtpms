@@ -295,7 +295,7 @@ TPM2_SequenceComplete(
 	{
 	    //   Update last piece of data
 	    CryptDigestUpdate2B(&hashObject->state.hmacState.hashState, &in->buffer.b);
-#ifndef SMAC_IMPLEMENTED
+#if !SMAC_IMPLEMENTED
 	    // Complete HMAC
 	    out->result.t.size = CryptHmacEnd(&(hashObject->state.hmacState),
 					      sizeof(out->result.t.buffer),
