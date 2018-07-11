@@ -2450,7 +2450,7 @@ SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
     written += UINT64_Marshal(&data->startTime, buffer, size);
     written += UINT64_Marshal(&data->timeout, buffer, size);
 
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
     clocksize = sizeof(UINT64);
     written += UINT8_Marshal(&clocksize, buffer, size);
     written += UINT64_Marshal(&data->epoch, buffer, size);
@@ -2507,7 +2507,7 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
         rc = UINT8_Unmarshal(&clocksize, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
         if (clocksize != sizeof(UINT64)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
                                 "Expected %zu, got %u\n",
@@ -3723,7 +3723,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += UINT32_Marshal(&data->algorithmSet, buffer, size);
     written += UINT32_Marshal(&data->firmwareV1, buffer, size);
     written += UINT32_Marshal(&data->firmwareV2, buffer, size);
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
     clocksize = sizeof(UINT64);
     written += UINT8_Marshal(&clocksize, buffer, size);
     written += UINT64_Marshal(&data->timeEpoch, buffer, size);
@@ -3903,7 +3903,7 @@ skip_num_policy_pcr_group:
         rc = UINT8_Unmarshal(&clocksize, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
         if (clocksize != sizeof(UINT64)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
                                 "Expected %u, got %u\n",

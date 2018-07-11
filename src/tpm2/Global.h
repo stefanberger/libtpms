@@ -114,7 +114,7 @@ TPM2B_TYPE(SEED, PRIMARY_SEED_SIZE);
    computation so that the ticket expires when there is a time discontinuity. When the clock stops
    during normal operation, the nonce is 64-bit value kept in RAM but it is a 32-bit counter when
    the clock only stops during power events. */
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
 typedef UINT64          CLOCK_NONCE;
 #else
 typedef UINT32          CLOCK_NONCE;
@@ -485,7 +485,7 @@ extern  UINT64          g_time;
    may be necessary to place this in NV should the timer be able to run across a power down of the
    TPM but not in all cases (e.g. dead battery). If the nonce is placed in NV, it should go in gp
    because it should be changing slowly. */
-#ifdef CLOCK_STOPS
+#if CLOCK_STOPS
 extern CLOCK_NONCE       g_timeEpoch;
 #else
 #define g_timeEpoch      gp.timeEpoch
@@ -718,7 +718,7 @@ typedef struct
     // timeEpoch contains a nonce that has a vendor=specific size (should not be
     // less than 8 bytes. This nonce changes when the clock epoch changes. The clock
     // epoch changes when there is a discontinuity in the timing of the TPM.
-#ifndef CLOCK_STOPS
+#if !CLOCK_STOPS
     CLOCK_NONCE         timeEpoch;
 #endif
 } PERSISTENT_DATA;

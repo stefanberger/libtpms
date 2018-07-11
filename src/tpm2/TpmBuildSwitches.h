@@ -125,8 +125,9 @@
 /* This switch indicates where clock epoch value should be stored. If this value defined, then it is
    assumed that the timer will change at any time so the nonce should be a random number kept in
    RAM. When it is not defined, then the timer only stops during power outages. */
-#ifndef CLOCK_STOPS
-//#   define CLOCK_STOPS
+#if !(defined CLOCK_STOPS) || ((CLOCK_STOPS != NO) && (CLOCK_STOPS != YES))
+#   undef   CLOCK_STOPS
+#   define  CLOCK_STOPS             NO     // Default: Either YES or NO
 #endif
 /* The switches in this group can only be enabled when running a simulation */
 #ifdef SIMULATION
