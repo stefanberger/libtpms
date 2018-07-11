@@ -2663,14 +2663,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     /* g_StartupLocality3: must write */
     written += BOOL_Marshal(&g_StartupLocality3, buffer, size); /* line 458 */
 
-#ifdef USE_DA_USED
+#if USE_DA_USED
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#ifdef USE_DA_USED
+#if USE_DA_USED
     /* g_daUsed: must write */
     written += BOOL_Marshal(&g_daUsed, buffer, size); /* line 484 */
 #endif
@@ -3012,7 +3012,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         rc = BOOL_Unmarshal(&g_StartupLocality3, buffer, size); /* line 458 */
     }
 
-#ifdef USE_DA_USED
+#if USE_DA_USED
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -3021,7 +3021,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
         BLOCK_SKIP_READ(skip_da, needs_block, buffer, size,
                         "Volatile state", "g_daUsed");
     }
-#ifdef USE_DA_USED
+#if USE_DA_USED
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_daUsed, buffer, size); /* line 484 */
     }

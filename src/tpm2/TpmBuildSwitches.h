@@ -86,10 +86,11 @@
 #ifndef FIPS_COMPLIANT
 //#  define FIPS_COMPLIANT
 #endif
-/* Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
-   could not update failedTries */
-#ifndef USE_DA_USED
-#   define USE_DA_USED
+// Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
+// could not update failedTries
+#if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
+#   undef   USE_DA_USED
+#   define  USE_DA_USED     YES         // Default: Either YES or NO
 #endif
 /* Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements for command dispatch and
    handle unmarshaling */

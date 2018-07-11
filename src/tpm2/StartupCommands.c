@@ -143,7 +143,7 @@ TPM2_Startup(
     if(g_DrtmPreStartup)
 	locality = 0;
     g_StartupLocality3 = (locality == 3);
-#ifdef USE_DA_USED
+#if USE_DA_USED
     // If there was no orderly shutdown, then their might have been a write to
     // failedTries that didn't get recorded but only if g_daUsed was SET in the
     // shutdown state

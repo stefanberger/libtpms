@@ -139,7 +139,7 @@ DAStartup(
        && gp.failedTries < gp.maxTries
        && !IS_ORDERLY(g_prevOrderlyState))
 	{
-#ifdef USE_DA_USED
+#if USE_DA_USED
 	    gp.failedTries += g_daUsed;
 	    g_daUsed = FALSE;
 #else
