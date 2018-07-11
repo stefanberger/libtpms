@@ -341,7 +341,7 @@ TPMPropertyIsDefined(
 	    // vendor-defined commands, this will be the same as the
 	    // number of library commands.
 	      {
-#ifdef COMPRESSED_LISTS
+#if COMPRESSED_LISTS
 		  (*value) = COMMAND_COUNT;
 #else
 		  COMMAND_INDEX       commandIndex;
@@ -359,7 +359,7 @@ TPMPropertyIsDefined(
 	  case TPM_PT_LIBRARY_COMMANDS:
 	    // number of commands from the TPM library that are implemented
 	      {
-#ifdef  COMPRESSED_LISTS
+#if COMPRESSED_LISTS
 		  *value = LIBRARY_COMMAND_ARRAY_SIZE;
 #else
 		  COMMAND_INDEX       commandIndex;

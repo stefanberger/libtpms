@@ -1347,12 +1347,12 @@ typedef  UINT32             TPM_CC;
 #if CC_Vendor_TCG_Test == YES
 #define  TPM_CC_Vendor_TCG_Test               (TPM_CC)(0x20000000)
 #endif
-
-#ifndef  COMPRESSED_LISTS
-#define ADD_FILL    1
+#if COMPRESSED_LISTS
+#define ADD_FILL            0
 #else
-#define ADD_FILL   0
+#define ADD_FILL            1
 #endif
+
 /*     Size the array of library commands based on whether or not the array is packed (only defined
        commands) or dense (having entries for unimplemented commands) */
 #define LIBRARY_COMMAND_ARRAY_SIZE       (0				\

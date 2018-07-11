@@ -126,9 +126,13 @@
    commands. Comment this out to use linear lists. */
 /* NOTE: if vendor specific commands are present, the associated list is always in compressed
    form. */
-#ifndef COMPRESSED_LISTS
-#   define COMPRESSED_LISTS
+#if !(defined COMPRESSED_LISTS)						\
+    || ((COMPRESSED_LISTS != NO) && (COMPRESSED_LISTS != YES))
+#   undef   COMPRESSED_LISTS
+#   define  COMPRESSED_LISTS        YES     // Default: Either YES or NO
 #endif
+
+
 /* This switch indicates where clock epoch value should be stored. If this value defined, then it is
    assumed that the timer will change at any time so the nonce should be a random number kept in
    RAM. When it is not defined, then the timer only stops during power outages. */
