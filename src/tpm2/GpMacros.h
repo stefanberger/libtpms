@@ -279,11 +279,11 @@
    once every 292,471,208 years rather than once every 584,942,417 years. */
 #define EXPIRATION_BIT ((UINT64)1 << 63)
 /* Check for consistency of the bit ordering an bit fields */
-#if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && !defined NO_BIT_FIELD_STRUCTURES
+#if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && !USE_BIT_FIELD_STRUCTURES
 #   error "Settings not consistent"
 #endif
 /* These macros are used to handle the variation in handling of bit fields. If */
-#ifndef NO_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
+#if USE_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
 #   define IS_ATTRIBUTE(a, type, b)    ((a.b != 0))
 #   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
 #   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
