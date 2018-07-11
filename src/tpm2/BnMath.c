@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Simple Operations on Big Numbers     			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnMath.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: BnMath.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -362,7 +362,9 @@ BnSizeInBits(
 	     bigConst                 n
 	     )
 {
-    return BnMsb(n) + 1;
+    int     bits = BnMsb(n) + 1;
+    //
+    return bits < 0 ? 0 : (unsigned)bits;
 }
 /* 10.2.4.3.15 BnSetWord() */
 /* Change the value of a bignum_t to a word value. */

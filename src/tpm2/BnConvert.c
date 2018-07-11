@@ -3,7 +3,7 @@
 /*	conversion functions that will convert TPM2B to/from internal format	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnConvert.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: BnConvert.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -124,7 +124,7 @@ BnFrom2B(
 	return BnFromBytes(bn, a2B->buffer, a2B->size);
     // Make sure that the number has an initialized value rather than whatever
     // was there before
-    BnSetTop(bn, 0);
+    BnSetTop(bn, 0);    // Function accepts NULL
     return NULL;
 }
 /* 10.2.2.3.3 BnFromHex() */
@@ -141,6 +141,8 @@ BnFromHex(
     unsigned             wordCount;
     const char          *p;
     BYTE                *d = (BYTE *)&(bn->d[0]);
+    //
+    pAssert(bn && hex);
     i = strlen(hex);
     wordCount = BYTES_TO_CRYPT_WORDS((i + 1) / 2);
     if((i == 0) || (wordCount >= BnGetAllocated(bn)))
@@ -168,8 +170,7 @@ BnFromHex(
     return bn;
 }
 /* 10.2.2.3.4 BnToBytes() */
-/* This function converts a BIG_NUM to a byte array. If size is not large enough to hold the bigNum
-   value, then the function return FALSE. Otherwise, it converts the bigNum to a big-endian byte
+/* This function converts a BIG_NUM to a byte array. It converts the bigNum to a big-endian byte
    string and sets size to the normalized value. If size is an input 0, then the receiving buffer is
    guaranteed to be large enough for the result and the size will be set to the size required for
    bigNum (leading zeros suppressed). */
@@ -191,7 +192,7 @@ BnToBytes(
     crypt_uword_t        count;
     //
     // validate inputs
-    pAssert(bn != NULL && buffer != NULL && size != NULL);
+    pAssert(bn && buffer && size);
     requiredSize = (BnSizeInBits(bn) + 7) / 8;
     if(requiredSize == 0)
 	{
@@ -243,8 +244,12 @@ BnTo2B(
        )
 {
     // Set the output size
-    a2B->size = size;
-    return BnToBytes(bn, a2B->buffer, &a2B->size);
+    if(bn && a2B)
+	{
+	    a2B->size = size;
+	    return BnToBytes(bn, a2B->buffer, &a2B->size);
+	}
+    return FALSE;
 }
 #ifdef TPM_ALG_ECC
 /* 10.2.2.3.6 BnPointFrom2B() */
@@ -279,10 +284,12 @@ BnPointTo2B(
 	    bigCurve         E              // IN: curve descriptor for the point
 	    )
 {
-    UINT16           size = (UINT16)BITS_TO_BYTES(
-						  BnMsb(CurveGetOrder(AccessCurveData(E))));
+    UINT16           size;
+    //
     pAssert(p && ecP && E);
     pAssert(BnEqualWord(ecP->z, 1));
+    // BnMsb is the bit number of the MSB. This is one less than the number of bits
+    size = (UINT16)BITS_TO_BYTES(BnSizeInBits(CurveGetOrder(AccessCurveData(E))));
     BnTo2B(ecP->x, &p->x.b, size);
     BnTo2B(ecP->y, &p->y.b, size);
     return TRUE;
@@ -325,3 +332,4 @@ Bn2bin(bigConst       bn,
 
     return t;
 }
+
