@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     Failure Mode Handling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmFail.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmFail.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -170,7 +170,7 @@ UnmarshalHeader(
     return TRUE;
 }
 /* 9.17.4 Public Functions */
-#ifdef SIMULATION
+#if SIMULATION
 /* 9.17.4.1 SetForceFailureMode() */
 /* This function is called by the simulator to enable failure mode testing. */
 LIB_EXPORT void
@@ -212,7 +212,7 @@ TpmFail(
     g_inFailureMode = TRUE;
     // if asserts are enabled, then do an assert unless the failure mode code
     // is being tested.
-#ifdef SIMULATION
+#if SIMULATION
 #   ifndef NDEBUG
     assert(g_forceFailureMode);
 #   endif

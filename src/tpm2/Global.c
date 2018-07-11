@@ -97,7 +97,7 @@ ALGORITHM_VECTOR     g_implementedAlgorithms;
 ALGORITHM_VECTOR     g_toTest;
 CRYPTO_SELF_TEST_STATE    g_cryptoSelfTestState;    // This structure contains the
 // cryptographic self-test
-#ifdef SIMULATION
+#if SIMULATION
 BOOL                 g_forceFailureMode;
 #endif
 BOOL                 g_inFailureMode;
