@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Platform_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -102,7 +102,13 @@ LIB_EXPORT void
 _plat__TimerRestart(
 		    void
 		    );
-/* C.8.2.3. _plat__TimerRead() */
+// C.8.2.3. _plat__Time() This is another, probably futile, attempt to define a portable function
+// that will return a 64-bit clock value that has mSec resolution.
+uint64_t
+_plat__RealTime(
+		void
+		);
+/* C.8.2.4. _plat__TimerRead() */
 /* This function provides access to the tick timer of the platform. The TPM code uses this value to
    drive the TPM Clock. */
 /* The tick timer is supposed to run when power is applied to the device. This timer should not be
@@ -112,19 +118,18 @@ _plat__TimerRestart(
    TPM as long as the time provided by the environment is not allowed to go backwards. If the time
    provided by the system can go backwards during a power discontinuity, then the
    _plat__Signal_PowerOn() should call _plat__TimerReset(). */
-/* The code in this function should be replaced by a read of a hardware tick timer. */
 LIB_EXPORT uint64_t
 _plat__TimerRead(
 		 void
 		 );
-/* C.8.2.4. _plat__TimerWasReset() */
+/* C.8.2.5. _plat__TimerWasReset() */
 /* This function is used to interrogate the flag indicating if the tick timer has been reset. */
 /* If the resetFlag parameter is SET, then the flag will be CLEAR before the function returns. */
 LIB_EXPORT BOOL
 _plat__TimerWasReset(
 		     void
 		     );
-/* C.8.2.5. _plat__TimerWasStopped() */
+/* C.8.2.6. _plat__TimerWasStopped() */
 /* This function is used to interrogate the flag indicating if the tick timer has been stopped. If
    so, this is typically a reason to roll the nonce. */
 /* This function will CLEAR the s_timerStopped flag before returning. This provides functionality
@@ -136,7 +141,7 @@ LIB_EXPORT BOOL
 _plat__TimerWasStopped(
 		       void
 		       );
-/* C.8.2.6. _plat__ClockAdjustRate() */
+/* C.8.2.7. _plat__ClockAdjustRate() */
 /* Adjust the clock rate */
 LIB_EXPORT void
 _plat__ClockAdjustRate(
@@ -144,7 +149,9 @@ _plat__ClockAdjustRate(
 		       //     or negative
 		       );
 /* C.8.3. From Entropy.c */
-/* Return Values Meaning */
+// This function is used to get available hardware entropy. In a hardware implementation of this
+// function, there would be no call to the system to get entropy.
+    /* Return Values Meaning */
 /* < 0 hardware failure of the entropy generator, this is sticky */
 /* >= 0 the returned amount of entropy (bytes) */
 LIB_EXPORT int32_t
@@ -152,29 +159,29 @@ _plat__GetEntropy(
 		  unsigned char       *entropy,           // output buffer
 		  uint32_t             amount             // amount requested
 		  );
-/* C.8.5. From LocalityPlat.c */
-/* C.8.5.1. _plat__LocalityGet() */
+/* C.8.4. From LocalityPlat.c */
+/* C.8.4.1. _plat__LocalityGet() */
 /* Get the most recent command locality in locality value form. This is an integer value for
    locality and not a locality structure The locality can be 0-4 or 32-255. 5-31 is not allowed. */
 LIB_EXPORT unsigned char
 _plat__LocalityGet(
 		   void
 		   );
-/* C.8.5.2. _plat__LocalitySet() */
+/* C.8.4.2. _plat__LocalitySet() */
 /* Set the most recent command locality in locality value form */
 LIB_EXPORT void
 _plat__LocalitySet(
 		   unsigned char    locality
 		   );
-/* C.8.6. From NVMem.c */
-/* C.8.6.1. _plat__NvErrors() */
+/* C.8.5. From NVMem.c */
+/* C.8.5.1. _plat__NvErrors() */
 /* This function is used by the simulator to set the error flags in the NV subsystem to simulate an error in the NV loading process */
 LIB_EXPORT void
 _plat__NvErrors(
 		int              recoverable,
 		int            unrecoverable
 		);
-/* C.8.6.2. _plat__NVEnable() */
+/* C.8.5.2. _plat__NVEnable() */
 /* Enable NV memory. */
 /* This version just pulls in data from a file. In a real TPM, with NV on chip, this function would
    verify the integrity of the saved context. If the NV memory was not on chip but was in something
@@ -190,7 +197,7 @@ LIB_EXPORT int
 _plat__NVEnable(
 		void            *platParameter  // IN: platform specific parameters
 		);
-/* C.8.6.3. _plat__NVDisable() */
+/* C.8.5.3. _plat__NVDisable() */
 /* Disable NV memory */
 LIB_EXPORT void
 _plat__NVDisable(
@@ -206,7 +213,7 @@ LIB_EXPORT int
 _plat__IsNvAvailable(
 		     void
 		     );
-/* C.8.6.5. _plat__NvMemoryRead() */
+/* C.8.5.5. _plat__NvMemoryRead() */
 /* Function: Read a chunk of NV memory */
 LIB_EXPORT void
 _plat__NvMemoryRead(
@@ -214,7 +221,7 @@ _plat__NvMemoryRead(
 		    unsigned int     size,          // IN: size of bytes to read
 		    void            *data           // OUT: data buffer
 		    );
-/* C.8.6.6. _plat__NvIsDifferent() */
+/* C.8.5.6. _plat__NvIsDifferent() */
 /* This function checks to see if the NV is different from the test value. This is so that NV will
    not be written if it has not changed. */
 /* Return Values Meaning */
@@ -226,7 +233,7 @@ _plat__NvIsDifferent(
 		     unsigned int     size,          // IN: size of bytes to read
 		     void            *data           // IN: data buffer
 		     );
-/* C.8.6.7. _plat__NvMemoryWrite() */
+/* C.8.5.7. _plat__NvMemoryWrite() */
 /* This function is used to update NV memory. The write is to a memory copy of NV. At the end of the
    current command, any changes are written to the actual NV memory. */
 /* NOTE: A useful optimization would be for this code to compare the current contents of NV with the
@@ -246,7 +253,7 @@ _plat__NvMemoryClear(
 		     unsigned int     start,         // IN: clear start
 		     unsigned int     size           // IN: number of bytes to clear
 		     );
-/* C.8.6.9. _plat__NvMemoryMove() */
+/* C.8.5.9. _plat__NvMemoryMove() */
 /* Function: Move a chunk of NV memory from source to destination This function should ensure that
    if there overlap, the original data is copied before it is written */
 LIB_EXPORT void
@@ -255,7 +262,7 @@ _plat__NvMemoryMove(
 		    unsigned int     destOffset,    // IN: destination offset
 		    unsigned int     size           // IN: size of data being moved
 		    );
-/* C.8.6.10. _plat__NvCommit() */
+/* C.8.5.10. _plat__NvCommit() */
 /* Update NV chip */
 /* Return Values Meaning */
 /* 0 NV write success */
@@ -264,28 +271,28 @@ LIB_EXPORT int
 _plat__NvCommit(
 		void
 		);
-/* C.8.6.11. _plat__SetNvAvail() */
+/* C.8.5.11. _plat__SetNvAvail() */
 /* Set the current NV state to available.  This function is for testing purpose only.  It is not
    part of the platform NV logic */
 LIB_EXPORT void
 _plat__SetNvAvail(
 		  void
 		  );
-/* C.8.6.12. _plat__ClearNvAvail() */
+/* C.8.5.12. _plat__ClearNvAvail() */
 /* Set the current NV state to unavailable.  This function is for testing purpose only.  It is not
    part of the platform NV logic */
 LIB_EXPORT void
 _plat__ClearNvAvail(
 		    void
 		    );
-/* C.8.8. From PowerPlat.c */
-/* C.8.8.1. _plat__Signal_PowerOn() */
+/* C.8.6. From PowerPlat.c */
+/* C.8.6.1. _plat__Signal_PowerOn() */
 /* Signal platform power on */
 LIB_EXPORT int
 _plat__Signal_PowerOn(
 		      void
 		      );
-/* C.8.8.2. _plat__WasPowerLost() */
+/* C.8.6.2. _plat__WasPowerLost() */
 /* Test whether power was lost before a _TPM_Init(). */
 /* This function will clear the hardware indication of power loss before return. This means that
    there can only be one spot in the TPM code where this value gets read. This method is used here
@@ -299,21 +306,21 @@ LIB_EXPORT int
 _plat__WasPowerLost(
 		    void
 		    );
-/* C.8.8.3. _plat_Signal_Reset() */
+/* C.8.6.3. _plat_Signal_Reset() */
 /* This a TPM reset without a power loss. */
 LIB_EXPORT int
 _plat__Signal_Reset(
 		    void
 		    );
-/* C.8.8.4. _plat__Signal_PowerOff() */
+/* C.8.6.4. _plat__Signal_PowerOff() */
 /* Signal platform power off */
 LIB_EXPORT void
 _plat__Signal_PowerOff(
 		       void
 		       );
-/* C.8.9. From PPPlat.c */
-/* C.8.10. Functions */
-/* C.8.10.1. _plat__PhysicalPresenceAsserted() */
+
+/* C.8.7. From PPPlat.c */
+/* C.8.7.1. _plat__PhysicalPresenceAsserted() */
 /* Check if physical presence is signaled */
 /* Return Values Meaning */
 /* TRUE(1) if physical presence is signaled */
@@ -322,20 +329,21 @@ LIB_EXPORT int
 _plat__PhysicalPresenceAsserted(
 				void
 				);
-/* C.8.10.2. _plat__Signal_PhysicalPresenceOn() */
+/* C.8.7.2. _plat__Signal_PhysicalPresenceOn() */
 /* Signal physical presence on */
 LIB_EXPORT void
 _plat__Signal_PhysicalPresenceOn(
 				 void
 				 );
-/* C.8.10.3. _plat__Signal_PhysicalPresenceOff() */
+/* C.8.7.3. _plat__Signal_PhysicalPresenceOff() */
 /* Signal physical presence off */
 LIB_EXPORT void
 _plat__Signal_PhysicalPresenceOff(
 				  void
 				  );
-/* C.8.11. From RunCommand.c */
-/* C.8.11.1. _plat__RunCommand() */
+
+/* C.8.8. From RunCommand.c */
+/* C.8.8.1. _plat__RunCommand() */
 /* This version of RunCommand() will set up a jum_buf and call ExecuteCommand(). If the command
    executes without failing, it will return and RunCommand() will return. If there is a failure in
    the command, then _plat__Fail() is called and it will longjump back to RunCommand() which will
@@ -348,14 +356,15 @@ _plat__RunCommand(
 		  uint32_t        *responseSize,  // IN/OUT: response buffer size
 		  unsigned char   **response      // IN/OUT: response buffer
 		  );
-/* C.8.11.2. _plat__Fail() */
+/* C.8.8.2. _plat__Fail() */
 /* This is the platform depended failure exit for the TPM. */
 LIB_EXPORT NORETURN void
 _plat__Fail(
 	    void
 	    );
-/* C.8.12. From Unique.c */
-/* C.8.13. _plat__GetUnique() */
+
+/* C.8.9. From Unique.c */
+/* C.8.9.1 _plat__GetUnique() */
 /* This function is used to access the platform-specific unique value. This function places the
    unique value in the provided buffer (b) and returns the number of bytes transferred. The function
    will not copy more data than bSize. */
