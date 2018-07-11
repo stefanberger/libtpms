@@ -187,7 +187,7 @@ SetForceFailureMode(
    returned on TPM2_GetTestResult(). */
 NORETURN void
 TpmFail(
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
 	const char      *function,
 	int              line,
 #endif
@@ -195,7 +195,7 @@ TpmFail(
 	)
 {
 #if 0
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
     UINT32     *failFuncp;
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
@@ -223,7 +223,7 @@ TpmFail(
 #else
 
     TpmSetFailureMode(
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
                       function, line,
 #endif
                       code);
@@ -236,7 +236,7 @@ TpmFail(
 
 void
 TpmSetFailureMode(
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
 	const char      *function,
 	int              line,
 #endif
@@ -246,7 +246,7 @@ TpmSetFailureMode(
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
     s_failFunction = *(UINT32 *)function;
     s_failLine = line;
 #else
@@ -256,11 +256,11 @@ TpmSetFailureMode(
     s_failCode = code;
 
     TPMLIB_LogTPM2Error("Entering failure mode; code: %d"
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
     ", location: %s line %d"
 #endif
     "\n", s_failCode
-#ifndef NO_FAIL_TRACE
+#if FAIL_TRACE
     , function, s_failLine
 #endif
     );
