@@ -152,13 +152,13 @@ TPM2_Startup(
 	gp.orderlyState = SU_NONE_VALUE;
 #endif
     g_prevOrderlyState = gp.orderlyState;
+    // If there was a proper shutdown, then the startup modifiers are in the
+    // orderlyState. Turn them off in the copy.
+    if(IS_ORDERLY(g_prevOrderlyState))
+	g_prevOrderlyState &=  ~(PRE_STARTUP_FLAG | STARTUP_LOCALITY_3);
     // If this is a Resume,
     if(in->startupType == TPM_SU_STATE)
 	{
-	    // Turn of the startup modifiers in the recovered state. This will modify
-	    // the SU_NONE_VALUE but not make it anything that would be recognized as
-	    // a valid shutdown
-	    g_prevOrderlyState &= ~(PRE_STARTUP_FLAG | STARTUP_LOCALITY_3);
 	    // then there must have been a prior TPM2_ShutdownState(STATE)
 	    if(g_prevOrderlyState != TPM_SU_STATE)
 		return TPM_RCS_VALUE + RC_Startup_startupType;
@@ -174,8 +174,10 @@ TPM2_Startup(
 		return TPM_RCS_VALUE + RC_Startup_startupType;
 	    if(g_StartupLocality3 != ((gp.orderlyState & STARTUP_LOCALITY_3) != 0))
 		return TPM_RC_LOCALITY;
-	    gp.orderlyState = g_prevOrderlyState;
 	}
+    // Clean up the gp state
+    gp.orderlyState = g_prevOrderlyState;
+
     // Internal Date Update
     if((gp.orderlyState == TPM_SU_STATE) && (g_nvOk == TRUE))
 	{
@@ -260,7 +262,6 @@ TPM2_Startup(
 	    gr.restartCount = 0;
 	    break;
 	}
-    ////
     // Initialize session table
     SessionStartup(startup);
     // Initialize object table
