@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  For defining the internal BIGNUM structure   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnValues.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: BnValues.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +55,9 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
-
-#ifndef BNVALUES_H
-#define BNVALUES_H
 
 /* 10.1.1 BnValues.h */
 /* This file contains the definitions needed for defining the internal BIGNUM structure. A BIGNUM is
@@ -92,15 +89,19 @@
 #define SIZE_IN_CRYPT_WORDS(thing)      BYTES_TO_CRYPT_WORDS(sizeof(thing))
 #if RADIX_BITS == 64
 #define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_64(x)
-#define CRYPT_TO_BYTE_ARRAY UINT64_TO_BYTE_ARRAY
 typedef uint64_t    crypt_uword_t;
 typedef int64_t     crypt_word_t;
+#   define TO_CRYPT_WORD_64             BIG_ENDIAN_BYTES_TO_UINT64
+#   define TO_CRYPT_WORD_32(a, b, c, d) TO_CRYPT_WORD_64(0, 0, 0, 0, a, b, c, d)
 #define BN_PAD      0
 #elif RADIX_BITS == 32
 #define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_32((x))
-#define CRYPT_TO_BYTE_ARRAY UINT32_TO_BYTE_ARRAY
 typedef uint32_t    crypt_uword_t;
 typedef int32_t     crypt_word_t;
+#   define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h)			\
+    BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h),				\
+    BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
+#  define TO_CRYPT_WORD_32 		BIG_ENDIAN_BYTES_TO_UINT32
 #define BN_PAD      1
 #endif
 #define MAX_CRYPT_UWORD (~((crypt_uword_t)0))
@@ -248,10 +249,8 @@ typedef struct
 #define CurveGetG(C)        ((pointConst)&((C)->base))
 #define CurveGetGx(C)       ((C)->base.x)
 #define CurveGetGy(C)       ((C)->base.y)
-/* Convert bytes in initializers according to the endianess of the system This is used for
-   BnEccData.c. */
-/* NOTE: There is no reason to try to optimize this by doing byte at a time shifts because this is
-   handled at compile time. */
+/* Convert bytes in initializers according to the endianess of the system. This is used for
+   CryptEccData.c. */
 #define     BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)			\
     (    ((UINT32)(a) << 24)						\
 	 +    ((UINT32)(b) << 16)					\
@@ -268,16 +267,7 @@ typedef struct
 	 +    ((UINT64)(g) << 8)					\
 	 +    ((UINT64)(h))						\
 	 )
-#if RADIX_BITS > 32
-#  define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h)			\
-    BIG_ENDIAN_BYTES_TO_UINT64(a, b, c, d, e, f, g, h)
-#  define TO_CRYPT_WORD_32(a, b, c, d) TO_CRYPT_WORD_64(0, 0, 0, 0, a, b, c, d)
-#else
-#  define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h)			\
-    BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h),				\
-			      BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
-#  define TO_CRYPT_WORD_32 BIG_ENDIAN_BYTES_TO_UINT32
-#endif
+
 /* Add implementation dependent definitions for other ECC Values and for linkages. MATH_LIB_H is
    defined in LibSupport.h */
 #include MATHLIB_H
@@ -292,5 +282,3 @@ typedef struct
 #endif
 #endif // _BN_NUMBERS_H
 
-
-#endif
