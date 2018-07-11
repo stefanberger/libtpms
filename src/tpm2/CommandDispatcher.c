@@ -101,7 +101,7 @@ typedef struct
     UINT16          typesOffset;    // address of the types field
     UINT16          offsets[1];
 } COMMAND_DESCRIPTOR_t;
-#ifdef COMPRESSED_LISTS
+#if COMPRESSED_LISTS
 #   define PAD_LIST 0
 #else
 #   define PAD_LIST 1

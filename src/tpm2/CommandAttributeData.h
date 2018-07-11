@@ -64,7 +64,7 @@
 
 #ifdef _COMMAND_CODE_ATTRIBUTES_
 #include "CommandAttributes.h"
-#if defined COMPRESSED_LISTS
+#if COMPRESSED_LISTS
 #   define      PAD_LIST    0
 #else
 #   define      PAD_LIST    1
