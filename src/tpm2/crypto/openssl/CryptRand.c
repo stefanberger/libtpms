@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptRand.c 1260 2018-07-10 19:55:54Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -395,22 +395,19 @@ DRBG_Reseed(
 	    )
 {
     DRBG_SEED            seed;
-    BYTE                *pSeed = (BYTE *)&seed;
     pAssert((drbgState != NULL) && (drbgState->magic == DRBG_MAGIC));
     if(providedEntropy == NULL)
 	{
-	    if(!DRBG_GetEntropy(sizeof(DRBG_SEED), pSeed))
-		return FALSE;
 	    providedEntropy = &seed;
+	    if(!DRBG_GetEntropy(sizeof(DRBG_SEED), (BYTE *)providedEntropy))
+		return FALSE;
 	}
     if(additionalData != NULL)
 	{
-	    BYTE        *in1 = (BYTE *)providedEntropy; // This might be seed
-	    BYTE        *in2 = (BYTE *)additionalData;
-	    int          i;
-	    // XOR the provided data with the seed
-	    for(i = sizeof(DRBG_SEED); i > 0; i--)
-		*pSeed++ = *in1++ ^ *in2++;
+	    unsigned int          i;
+	    // XOR the provided data into the provided entropy
+	    for(i = 0; i < sizeof(DRBG_SEED); i++)
+		((BYTE *)providedEntropy)[i] ^= ((BYTE *)additionalData)[i];
 	}
     DRBG_Update(drbgState, NULL, providedEntropy);
     drbgState->reseedCounter = 1;
@@ -490,37 +487,43 @@ DRBG_SelfTest(
 /* This function is used to cause a reseed. A DRBG_SEED amount of entropy is collected from the
    hardware and then additional data is added. */
 /* Error Returns Meaning */
-/* TPM_RC_NO_RESULT S failure of the entropy generator */
+/* TPM_RC_NO_RESULT failure of the entropy generator */
 LIB_EXPORT TPM_RC
 CryptRandomStir(
-		UINT32            additionalDataSize,	/* kgold chaged from signed */
+		UINT32           additionalDataSize,
 		BYTE            *additionalData
 		)
 {
+#ifndef USE_DEBUG_RNG
     DRBG_SEED        tmpBuf;
     DRBG_SEED        dfResult;
     //
-#if defined USE_DEBUG_RNG && 1
-    // If doing debug, use the input data as the initial setting for the RNG state
-    // so that the test can be reset at any time.
-    NOT_REFERENCED(dfResult);
-    if(additionalDataSize < 0)
-	additionalDataSize = 0;
-    else if(additionalDataSize > sizeof(tmpBuf))
-	additionalDataSize = sizeof(tmpBuf);
-    else
-	memset(&tmpBuf.bytes[additionalDataSize], 0, sizeof(tmpBuf) - additionalDataSize);
-    memcpy(tmpBuf.bytes, additionalData, additionalDataSize);
-    memcpy(drbgDefault.seed.bytes, tmpBuf.bytes, sizeof(drbgDefault.seed.bytes));
-#else
     // All reseed with outside data starts with a buffer full of entropy
     if(!DRBG_GetEntropy(sizeof(tmpBuf), (BYTE *)&tmpBuf))
 	return TPM_RC_NO_RESULT;
     DRBG_Reseed(&drbgDefault, &tmpBuf,
 		DfBuffer(&dfResult, additionalDataSize, additionalData));
-#endif
     drbgDefault.reseedCounter = 1;
     return TPM_RC_SUCCESS;
+#else
+    // If doing debug, use the input data as the initial setting for the RNG state
+    // so that the test can be reset at any time.
+    // Note: If this is called with a data size of 0 or less, nothing happens. The
+    // presumption is that, in a debug environment, the caller will have specific
+    // values for initialization, so this check is just a simple way to prevent
+    // inadvertent programming errors from screwing things up. This doesn't use an
+    // pAssert() because the non-debug version of this function will accept these
+    // parameters as meaning that there is no additionalData and only hardware
+    // entropy is used.
+    if((additionalDataSize > 0) && (additionalData != NULL))
+	{
+	    memset(drbgDefault.seed.bytes, 0, sizeof(drbgDefault.seed.bytes));
+	    memcpy(drbgDefault.seed.bytes, additionalData,
+		   MIN(additionalDataSize, sizeof(drbgDefault.seed.bytes)));
+	}
+    drbgDefault.reseedCounter = 1;
+    return TPM_RC_SUCCESS;
+#endif
 }
 /* 10.2.18.4.3 CryptRandomGenerate() */
 /* Generate a randomSize number or random bytes. */
@@ -538,7 +541,7 @@ CryptRandomGenerate(
 /* Function used to instantiate a KDF-based RNG. This is used for derivations */
 LIB_EXPORT BOOL
 DRBG_InstantiateSeededKdf(
-			  KDF_STATE       *state,         // IN: buffer to hold the state
+			  KDF_STATE       *state,         // OUT: buffer to hold the state
 			  TPM_ALG_ID       hashAlg,       // IN: hash algorithm
 			  TPM_ALG_ID       kdf,           // IN: the KDF to use
 			  TPM2B           *seed,          // IN: the seed to use
@@ -643,6 +646,9 @@ CryptRandInit(
 	      void
 	      )
 {
+#ifndef USE_DEBUG_RNG
+    _plat__GetEntropy(NULL, 0);
+#endif
     return DRBG_SelfTest();
 }
 /* 10.2.18.5 DRBG_Generate() */
@@ -817,27 +823,4 @@ DRBG_Uninstantiate(
     memset(drbgState, 0, sizeof(DRBG_STATE));
     return TPM_RC_SUCCESS;
 }
-/* 10.2.18.8 CryptRandMinMax() */
-/* This function generates a value that as not larger than (2^max) - 1 and no smaller than 2^(min -
-   1). For example, if max == 4 and min == 2, then the number will be between 0x0010 and 0x1111
-   inclusively. If max == 4 and min == 4 then the number will be between 0x1000 and 0x1111. */
-#if 0
-LIB_EXPORT NUMBYTES
-CryptRandMinMax(
-		BYTE            *out,
-		UINT32           max,
-		UINT32           min,
-		RAND_STATE      *rand
-		)
-{
-    BN_VAR(bn, LARGEST_NUMBER_BITS);
-    NUMBYTES            size = (NUMBYTES)BITS_TO_BYTES(max);
-    pAssert(max <= LARGEST_NUMBER_BITS);
-    do
-	{
-	    BnGetRandomBits(bn, max, rand);
-	} while(BnSizeInBits(bn) < min);
-    BnToBytes(bn, out, &size);
-    return size;
-}
-#endif
+
