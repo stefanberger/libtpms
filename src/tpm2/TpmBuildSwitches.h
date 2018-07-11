@@ -183,13 +183,15 @@
 #       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO
 #   endif
 
+// If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
+// make sure that the dbgDumpMemBlock() function has been added someplace (preferably, somewhere in
+// CryptRand.c)
+#   if !(defined DRBG_DEBUG_PRINT)					\
+    || ((DRBG_DEBUG_PRINT != NO) && (DRBG_DEBUG_PRINT != YES))
+#       undef   DRBG_DEBUG_PRINT
+#       define  DRBG_DEBUG_PRINT    NO      // Default: Either YES or NO
+#   endif
 
-/* If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
-   make sure that the dbgDumpMemBlock() function has been added someplace (preferably, somewhere in
-   CryptRand.c) */
-#ifndef DRBG_DEBUG_PRINT
-//#  define DRBG_DEBUG_PRINT
-#endif
 /* If an assertion event it not going to produce any trace information (function and line number)
    then define NO_FAIL_TRACE */
 #ifndef NO_FAIL_TRACE

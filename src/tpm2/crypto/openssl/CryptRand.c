@@ -435,7 +435,7 @@ DRBG_SelfTest(
     // Do an instantiate
     if(!DRBG_Instantiate(&testState, 0, NULL))
 	return FALSE;
-#if defined DRBG_DEBUG_PRINT && defined DEBUG
+#if DRBG_DEBUG_PRINT
     dbgDumpMemBlock(pDRBG_KEY(&testState), DRBG_KEY_SIZE_BYTES,
 		    "Key after Instantiate");
     dbgDumpMemBlock(pDRBG_IV(&testState), DRBG_IV_SIZE_BYTES,
@@ -443,7 +443,7 @@ DRBG_SelfTest(
 #endif
     if(DRBG_Generate((RAND_STATE *)&testState, buf, sizeof(buf)) == 0)
 	return FALSE;
-#if defined DRBG_DEBUG_PRINT && defined DEBUG
+#if DRBG_DEBUG_PRINT
     dbgDumpMemBlock(pDRBG_KEY(&testState.seed), DRBG_KEY_SIZE_BYTES,
 		    "Key after 1st Generate");
     dbgDumpMemBlock(pDRBG_IV(&testState.seed), DRBG_IV_SIZE_BYTES,
@@ -453,7 +453,7 @@ DRBG_SelfTest(
 	return FALSE;
     memcpy(seed.bytes, DRBG_NistTestVector_EntropyReseed, sizeof(seed));
     DRBG_Reseed(&testState, &seed, NULL);
-#if defined DRBG_DEBUG_PRINT && defined DEBUG
+#if DRBG_DEBUG_PRINT
     dbgDumpMemBlock((BYTE *)pDRBG_KEY(&testState.seed), DRBG_KEY_SIZE_BYTES,
 		    "Key after 2nd Generate");
     dbgDumpMemBlock((BYTE *)pDRBG_IV(&testState.seed), DRBG_IV_SIZE_BYTES,
