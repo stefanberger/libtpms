@@ -252,14 +252,14 @@
 #   undef PRIMARY_SEED_SIZE
 #   define PRIMARY_SEED_SIZE    COMPLIANT_PRIMARY_SEED_SIZE
 #endif  // USE_SPEC_COMPLIANT_PROOFS || !defined PRIMARY_SEED_SIZE
-#ifndef SKIP_PROOF_ERRORS
+#if !SKIP_PROOF_ERRORS
 #   if PROOF_SIZE < COMPLIANT_PROOF_SIZE
 #       error "PROOF_SIZE is not compliant with TPM specification"
 #   endif
 #   if PRIMARY_SEED_SIZE < COMPLIANT_PRIMARY_SEED_SIZE
 #       error  "Implementation.h specifies a non-compliant PRIMARY_SEED_SIZE"
 #   endif
-#endif
+#endif	// !SKIP_PROOF_ERRORS
 /* If CONTEXT_ENCRYP_ALG is defined, then the vendor is using the old style table */
 #ifndef CONTEXT_ENCRYPT_ALG
 #define CONTEXT_ENCRYPT_ALG             CONCAT(TPM_ALG_, CONTEXT_ENCRYPT_ALGORITHM)
