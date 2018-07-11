@@ -191,10 +191,13 @@
 #ifndef USE_SPEC_COMPLIANT_PROOFS
 #define  USE_SPEC_COMPLIANT_PROOFS
 #endif
-/* Comment this out to allow compile to continue even though the chosen proof values do not match
-   the compliant values. This is written so that someone would have to proactively ignore errors. */
-#ifndef SKIP_PROOF_ERRORS
-//#define SKIP_PROOF_ERRORS
+
+// Comment this out to allow compile to continue even though the chosen proof values do not match
+// the compliant values. This is written so that someone would have to proactively ignore errors.
+#if !(defined SKIP_PROOF_ERRORS)					\
+    || ((SKIP_PROOF_ERRORS != NO) && (SKIP_PROOF_ERRORS != YES))
+#   undef   SKIP_PROOF_ERRORS
+#   define  SKIP_PROOF_ERRORS           NO       // Default: Either YES or NO
 #endif
 
 // This define is used to eliminate the use of bit-fields. It can be enabled for big- or
