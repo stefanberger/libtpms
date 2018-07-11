@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -144,7 +144,7 @@ BnSignEcdsa(
 {
     ECC_NUM(bnK);
     ECC_NUM(bnIk);
-    BN_VAR(bnE, MAX_DIGEST_SIZE * 8);
+    BN_VAR(bnE, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE) * 8);
     POINT(ecR);
     bigConst                order = CurveGetOrder(AccessCurveData(E));
     TPM_RC                  retVal = TPM_RC_SUCCESS;
@@ -284,7 +284,7 @@ BnSignEcdaa(
     return retVal;
 }
 #endif // ALG_ECDAA
-#if ALG_ECSCHNORR //%
+#if ALG_ECSCHNORR
 /* 10.2.13.3.3 SchnorrReduce() */
 /* Function to reduce a hash result if it's magnitude is to large. The size of number is set so that
    it has no more bytes of significance than the reference value. If the resulting number can have
@@ -372,7 +372,7 @@ BnSignEcSchnorr(
 }
 #endif // ALG_ECSCHNORR
 #if ALG_SM2
-#ifdef  _SM2_SIGN_DEBUG
+#ifdef _SM2_SIGN_DEBUG
 static BOOL
 BnHexEqual(
 	   bigNum           bn,        //IN: big number value
@@ -402,20 +402,19 @@ BnSignEcSm2(
 	    //     debug)
 	    )
 {
-    BN_MAX_INITIALIZED(bnE, digest);   // Don't know how big digest might be
+    BN_MAX_INITIALIZED(bnE, digest);    // Don't know how big digest might be
     ECC_NUM(bnN);
     ECC_NUM(bnK);
-    ECC_NUM(bnX1);
-    ECC_NUM(bnT);   // temp
+    ECC_NUM(bnT);                       // temp
     POINT(Q1);
     bigConst                  order = (E != NULL)
 				      ? CurveGetOrder(AccessCurveData(E)) : NULL;
     //
 #ifdef _SM2_SIGN_DEBUG
-    BnFromHex(bnE,
-	      "B524F552CD82B8B028476E005C377FB19A87E6FC682D48BB5D42E3D9B9EFFE76");
-    BnFromHex(bnD,
-	      "128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263");
+    BnFromHex(bnE, "B524F552CD82B8B028476E005C377FB1"
+	      "9A87E6FC682D48BB5D42E3D9B9EFFE76");
+    BnFromHex(bnD, "128B2FA8BD433C6C068C8D803DFF7979"
+	      "2A519A55171B1B650C23661D15897263");
 #endif
     // A3: Use random number generator to generate random number 1 <= k <= n-1;
     // NOTE: Ax: numbers are from the SM2 standard
@@ -424,20 +423,20 @@ BnSignEcSm2(
 	// Get a random number 0 < k < n
 	BnGenerateRandomInRange(bnK, order, rand);
 #ifdef _SM2_SIGN_DEBUG
-	BnFromHex(bnK,
-		  "6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F");
+	BnFromHex(bnK, "6CB28D99385C175C94F94E934817663F"
+		  "C176D925DD72B727260DBAAE1FB2F96F");
 #endif
 	// A4: Figure out the point of elliptic curve (x1, y1)=[k]G, and according
 	// to details specified in 4.2.7 in Part 1 of this document, transform the
 	// data type of x1 into an integer;
-	if(BnEccModMult(Q1, NULL, bnK, E) != TPM_RC_SUCCESS)
+	if(!BnEccModMult(Q1, NULL, bnK, E))
 	    goto loop;
 	// A5: Figure out r = (e + x1) mod n,
-	BnAdd(bnR, bnE, bnX1);
+	BnAdd(bnR, bnE, Q1->x);
 	BnMod(bnR, order);
 #ifdef _SM2_SIGN_DEBUG
-	pAssert(BnHexEqual(bnR,
-			   "40F1EC59F793D9F49E09DCEF49130D4194F79FB1EED2CAA55BACDB49C4E755D1"));
+	pAssert(BnHexEqual(bnR, "40F1EC59F793D9F49E09DCEF49130D41"
+			   "94F79FB1EED2CAA55BACDB49C4E755D1"));
 #endif
 	// if r=0 or r+k=n, return to A3;
 	if(BnEqualZero(bnR))
@@ -451,8 +450,8 @@ BnSignEcSm2(
 	BnAddWord(bnT, bnD, 1);
 	BnModInverse(bnT, bnT, order);
 #ifdef _SM2_SIGN_DEBUG
-	pAssert(BnHexEqual(bnT,
-			   "79BFCF3052C80DA7B939E0C6914A18CBB2D96D8555256E83122743A7D4F5F956"));
+	pAssert(BnHexEqual(bnT, "79BFCF3052C80DA7B939E0C6914A18CB"
+			   "B2D96D8555256E83122743A7D4F5F956"));
 #endif
 	// compute s = t * (k - r * dA) mod n
 	BnModMult(bnS, bnR, bnD, order);
@@ -461,8 +460,8 @@ BnSignEcSm2(
 	BnAdd(bnS, bnK, bnS);
 	BnModMult(bnS, bnS, bnT, order);
 #ifdef _SM2_SIGN_DEBUG
-	pAssert(BnHexEqual(bnS,
-			   "6FC6DAC32C5D5CF10C77DFB20F7C2EB667A457872FB09EC56327A67EC7DEEBE7"));
+	pAssert(BnHexEqual(bnS, "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+			   "67A457872FB09EC56327A67EC7DEEBE7"));
 #endif
 	if(BnEqualZero(bnS))
 	    goto loop;
@@ -472,10 +471,10 @@ BnSignEcSm2(
     // is (r, s).
     // This is handled by the common return code
 #ifdef _SM2_SIGN_DEBUG
-    pAssert(BnHexEqual(bnR,
-		       "40F1EC59F793D9F49E09DCEF49130D4194F79FB1EED2CAA55BACDB49C4E755D1"));
-    pAssert(BnHexEqual(bnS,
-		       "6FC6DAC32C5D5CF10C77DFB20F7C2EB667A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert(BnHexEqual(bnR, "40F1EC59F793D9F49E09DCEF49130D41"
+		       "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert(BnHexEqual(bnS, "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+		       "67A457872FB09EC56327A67EC7DEEBE7"));
 #endif
     return TPM_RC_SUCCESS;
 }
@@ -515,10 +514,6 @@ CryptEccSign(
 	= sizeof(signature->signature.ecdaa.signatureR.t.buffer);
     signature->signature.ecdaa.signatureS.t.size
 	= sizeof(signature->signature.ecdaa.signatureS.t.buffer);
-    // Prime order for this implementation needs to be a multiple of a byte
-    // so, no P521 for now.
-    pAssert((BnSizeInBits(CurveGetPrime(C)) & 7) == 0);
-    pAssert((BnSizeInBits(CurveGetOrder(C)) & 7) == 0);
     TEST(signature->sigAlg);
     switch(signature->sigAlg)
 	{
@@ -561,7 +556,7 @@ CryptEccSign(
     CURVE_FREE(E);
     return retVal;
 }
-#if ALG_ECDSA    //%
+#if ALG_ECDSA
 /* 10.2.13.3.7 BnValidateSignatureEcdsa() */
 /* This function validates an ECDSA signature. rIn and sIn should have been checked to make sure
    that they are in the range 0 < v < n */
@@ -579,7 +574,7 @@ BnValidateSignatureEcdsa(
 {
     // Make sure that the allocation for the digest is big enough for a maximum
     // digest
-    BN_VAR(bnE, MAX_DIGEST_SIZE * 8);
+    BN_VAR(bnE, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE) * 8);
     POINT(ecR);
     ECC_NUM(bnU1);
     ECC_NUM(bnU2);
@@ -616,7 +611,7 @@ BnValidateSignatureEcdsa(
  Exit:
     return retVal;
 }
-#endif      //% ALG_ECDSA
+#endif      // ALG_ECDSA
 #if ALG_SM2
 /* 10.2.13.3.8 BnValidateSignatureEcSm2() */
 /* This function is used to validate an SM2 signature. */
@@ -648,7 +643,7 @@ BnValidateSignatureEcSm2(
 		       "67A457872FB09EC56327A67EC7DEEBE7"));
 #endif
     // b)   compute t  := (r + s) mod n
-    BnAdd(bnT, bnT, bnS);
+    BnAdd(bnT, bnR, bnS);
     BnMod(bnT, order);
 #ifdef _SM2_SIGN_DEBUG
     pAssert(BnHexEqual(bnT,
@@ -669,16 +664,16 @@ BnValidateSignatureEcSm2(
 			     "23E6D9188B2AE47759514657CE25D112"));
 #endif
     // e)   compute r' := (e + x) mod n (the x coordinate is in bnT)
-    BnAdd(bnRp, bnE, P->x);
-    BnMod(bnRp, order);
+    OK = OK && BnAdd(bnRp, bnE, P->x);
+    OK = OK && BnMod(bnRp, order);
     // f)   verify that r' = r
-    OK = (BnUnsignedCmp(bnR, bnRp) != 0) & OK;
+    OK = OK && (BnUnsignedCmp(bnR, bnRp));
     if(!OK)
 	return TPM_RC_SIGNATURE;
     else
 	return TPM_RC_SUCCESS;
 }
-#endif  //% ALG_SM2
+#endif  // ALG_SM2
 #if ALG_ECSCHNORR
 /* 10.2.13.3.9 BnValidateSignatureEcSchnorr() */
 /* This function is used to validate an EC Schnorr signature. */
@@ -825,7 +820,8 @@ CryptEccCommitCompute(
 		      TPM2B_ECC_PARAMETER     *r              // IN: the computed r value (required)
 		      )
 {
-    CURVE_INITIALIZED(curve, curveId);
+    CURVE_INITIALIZED(curve, curveId);  	// Normally initialize E as the curve, but E means
+						// something else in this function
     ECC_INITIALIZED(bnR, r);
     TPM_RC               retVal = TPM_RC_SUCCESS;
     //
