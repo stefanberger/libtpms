@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1109 2017-12-12 21:00:57Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -67,8 +67,6 @@
 /* This file contains the structure definitions used for ECC in the LibTopCrypt() version of the
    code. These definitions would change, based on the library. The ECC-related structures that cross
    the TPM interface are defined in TpmTypes.h */
-#ifndef _TPM_TO_OSSL_MATH_H
-#define _TPM_TO_OSSL_MATH_H
 #if MATH_LIB == OSSL
 #include <openssl/evp.h>
 #include <openssl/ec.h>
@@ -79,9 +77,9 @@
 #error "No architecture found"
 #endif
 
-#if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)		\
-    || defined SIXTY_FOUR_BIT && (RADIX_BITS != 64)		\
-    || defined SIXTY_FOUR_BIT_LONG && (RADIX_BITS != 64)
+#if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
+    || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT)		\
+	&& (RADIX_BITS != 64))
 #  error "Ossl library is using different radix"
 #endif
 
@@ -122,7 +120,6 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 /* This definition would change if there were something to report */
 #define MathLibSimulationEnd()
 #endif // MATH_LIB == OSSL
-#endif
 
 
 #endif
