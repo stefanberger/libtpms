@@ -91,6 +91,8 @@ TPM_Manufacture(
     // If TPM has been manufactured, return indication.
     if(!firstTime && g_manufactured)
 	return 1;
+    // Do power on initializations of the cryptographic libraries.
+    CryptInit();
     s_DAPendingOnNV = FALSE;
     // initialize NV
     NvManufacture();
