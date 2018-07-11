@@ -597,14 +597,14 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 
     written += DRBG_STATE_Marshal(&data->drbgState, buffer, size);
 
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&data->selfHealTimer, buffer, size);
     written += UINT64_Marshal(&data->lockoutTimer, buffer, size);
     written += UINT64_Marshal(&data->time, buffer, size);
@@ -644,7 +644,7 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
         rc = DRBG_STATE_Unmarshal(&data->drbgState, buffer, size);
     }
 
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -653,7 +653,7 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
         BLOCK_SKIP_READ(skip_self_heal_timer, needs_block, buffer, size,
                         "ORDERLY DATA", "selfHealTimer");
     }
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->selfHealTimer, buffer, size);
     }
@@ -2757,14 +2757,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
 
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
     written += UINT64_Marshal(&s_selfHealTimer, buffer, size); /* line 975 */
     written += UINT64_Marshal(&s_lockoutTimer, buffer, size); /* line 977 */
 #endif // ACCUMULATE_SELF_HEAL_TIMER
@@ -3144,7 +3144,7 @@ skip_session_process:
     }
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -3153,7 +3153,7 @@ skip_session_process:
         BLOCK_SKIP_READ(skip_accumulate_self_heal_timer_2, needs_block, buffer, size,
                         "Volatile state", "s_selfHealTimer.2");
     }
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&s_selfHealTimer, buffer, size); /* line 975 */
     }

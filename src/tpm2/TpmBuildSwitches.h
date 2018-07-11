@@ -196,11 +196,15 @@
 //#   define NO_FAIL_TRACE
 #endif
 #endif // NDEBUG
-/* If the implementation is going to give lockout time credit for time up to the last orderly
-   shutdown, then uncomment this variable */
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
-#define ACCUMULATE_SELF_HEAL_TIMER
-#endif // ACCUMULATE_SELF_HEAL_TIMER
+
+/* Indicate if the implementation is going to give lockout time credit for time up to the last
+   orderly shutdown. */
+#if !(defined ACCUMULATE_SELF_HEAL_TIMER)				\
+    || ((ACCUMULATE_SELF_HEAL_TIMER != NO) && (ACCUMULATE_SELF_HEAL_TIMER != YES))
+#   undef   ACCUMULATE_SELF_HEAL_TIMER
+#   define  ACCUMULATE_SELF_HEAL_TIMER      YES       // Default: Either YES or NO
+#endif
+
 /* If the implementation is to compute the sizes of the proof and primary seed size values based on
    the implemented algorithms, then use this define. */
 #if !(defined USE_SPEC_COMPLIANT_PROOFS)				\

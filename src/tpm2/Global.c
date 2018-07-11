@@ -126,7 +126,7 @@ BOOL                 s_DAPendingOnNV;
 TPM2B_DIGEST         s_cpHashForCommandAudit;
 #endif
 /* 9.5.4.2 DA.c */
-#ifndef ACCUMULATE_SELF_HEAL_TIMER
+#if !ACCUMULATE_SELF_HEAL_TIMER
 UINT64               s_selfHealTimer;
 UINT64               s_lockoutTimer;
 #endif // !ACCUMULATE_SELF_HEAL_TIMER

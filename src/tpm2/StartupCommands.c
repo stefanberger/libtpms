@@ -300,7 +300,7 @@ TPM2_Shutdown(
     PCRStateSave(in->shutdownType);
     // Save RAM backed NV index data
     NvUpdateIndexOrderlyData();
-#ifdef ACCUMULATE_SELF_HEAL_TIMER
+#if ACCUMULATE_SELF_HEAL_TIMER
     // Save the current time value
     go.time = g_time;
 #endif
