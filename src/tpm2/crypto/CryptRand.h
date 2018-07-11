@@ -168,7 +168,7 @@ typedef union
    it for the generation of the random number. */
 extern RAND_STATE           *s_random;
 /* When instrumenting RSA key sieve */
-#ifdef  RSA_INSTRUMENT
+#if  RSA_INSTRUMENT
 #define PRIME_INDEX(x)  ((x) == 512 ? 0 : (x) == 1024 ? 1 : 2)
 #   define INSTRUMENT_SET(a, b) ((a) = (b))
 #   define INSTRUMENT_ADD(a, b) (a) = (a) + (b)

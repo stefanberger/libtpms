@@ -271,7 +271,7 @@ RsaCheckPrime(
 	      RAND_STATE      *rand
 	      )
 {
-#ifndef RSA_KEY_SIEVE
+#if !RSA_KEY_SIEVE
     TPM_RC          retVal = TPM_RC_SUCCESS;
     UINT32          modE = BnModWord(prime, exponent);
     NOT_REFERENCED(rand);

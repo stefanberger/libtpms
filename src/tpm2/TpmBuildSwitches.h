@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -145,16 +145,19 @@
 #endif
 
 /* Enable the generation of RSA primes using a sieve. */
-#ifndef RSA_KEY_SIEVE
-#  define RSA_KEY_SIEVE
+#if !(defined RSA_KEY_SIEVE) || ((RSA_KEY_SIEVE != NO) && (RSA_KEY_SIEVE != YES))
+#   undef   RSA_KEY_SIEVE
+#   define  RSA_KEY_SIEVE           YES         // Default: Either YES or NO
 #endif
+
 /* Enable the instrumentation of the sieve process. This is used to tune the sieve variables.*/
-#if !defined RSA_INSTRUMENT && defined RSA_KEY_SIEVE && SIMULATION
-//#define RSA_INSTRUMENT
+#if RSA_KEY_SIEVE && SIMULATION
+#   if !(defined RSA_INSTRUMENT) || ((RSA_INSTRUMENT != NO) && (RSA_INSTRUMENT != YES))
+#       undef   RSA_INSTRUMENT
+#       define  RSA_INSTRUMENT      NO         // Default: Either YES or NO
+#   endif
 #endif
-#if defined RSA_KEY_SIEVE && !defined NDEBUG && !defined RSA_INSTRUMENT
-//# define RSA_INSTRUMENT
-#endif
+
 /* This switch enables the RNG state save and restore */
 #if !(defined _DRBG_STATE_SAVE)						\
     || ((_DRBG_STATE_SAVE != NO) && (_DRBG_STATE_SAVE != YES))

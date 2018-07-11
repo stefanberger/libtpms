@@ -62,8 +62,7 @@
 /* 10.2.17 CryptPrimeSieve.c */
 /* 10.2.17.1 Includes and defines */
 #include "Tpm.h"
-#define RSA_KEY_SIEVE
-#if defined RSA_KEY_SIEVE   //%
+#if RSA_KEY_SIEVE
 #include "CryptPrimeSieve_fp.h"
 /* This determines the number of bits in the largest sieve field. */
 #define MAX_FIELD_SIZE  2048
@@ -439,7 +438,7 @@ PrimeSelectWithSieve(
     INSTRUMENT_INC(noPrimeFields[PrimeIndex]);
     return TPM_RC_NO_RESULT;
 }
-#ifdef RSA_INSTRUMENT
+#if RSA_INSTRUMENT
 static char            a[256];
 char *
 PrintTuple(
@@ -507,8 +506,8 @@ GetSieveStats(
     CLEAR_VALUE(bitsInFieldAfterSieve);
 }
 #endif
-#endif //% RSA_KEY_SIEVE
-#ifndef RSA_INSTRUMENT
+#endif // RSA_KEY_SIEVE
+#if !RSA_INSTRUMENT
 void
 RsaSimulationEnd(
 		 void
