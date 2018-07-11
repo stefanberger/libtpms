@@ -90,10 +90,12 @@
 #   define  SIMULATION      NO     // Default: Either YES or NO
 #endif
 
-/* Define this to run the function that checks the format compatibility for the chosen big number
-   math library. Not all ports use this. */
-#if !defined LIBRARY_COMPATIBILITY_CHECK && SIMULATION
-#   define LIBRARY_COMPATABILITY_CHECK
+// Define this to run the function that checks the compatibility between the chosen big number math
+// library and the TPM code. Not all ports use this.
+#if !(defined LIBRARY_COMPATABILITY_CHECK)				\
+    || ((LIBRARY_COMPATABILITY_CHECK != NO) && (LIBRARY_COMPATABILITY_CHECK != YES))
+#   undef   LIBRARY_COMPATABILITY_CHECK
+#   define  LIBRARY_COMPATABILITY_CHECK     YES     // Default: Either YES or NO
 #endif
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
 #   undef   FIPS_COMPLIANT
