@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			    I/O Buffers		 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: IoBuffers.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: IoBuffers.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,55 +55,83 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.7 IoBuffers.c */
-/* 9.7.1 Includes and Data Definitions */
+/* 9.7	IoBuffers.c */
+/* 9.7.1	Includes and Data Definitions */
 /* This definition allows this module to see the values that are private to this module but kept in
    Global.c for ease of state migration. */
 #define IO_BUFFER_C
 #include "Tpm.h"
 #include "IoBuffers_fp.h"
+/* 9.7.2	Buffers and Functions */
 /* These buffers are set aside to hold command and response values. In this implementation, it is
    not guaranteed that the code will stop accessing the s_actionInputBuffer before starting to put
    values in the s_actionOutputBuffer so different buffers are required. */
-/* 9.7.1.1 MemoryGetActionInputBuffer() */
+/*     9.7.2.1 MemoryIoBufferAllocationReset() */
+/*     This function is used to reset the allocation of buffers. */
+void
+MemoryIoBufferAllocationReset(
+			      void
+			      )
+{
+    s_actionIoAllocation = 0;
+}
+/* 9.7.2.2	MemoryIoBufferZero() */
+/* Function zeros the action I/O buffer at the end of a command. Calling this is not mandatory for
+   proper functionality. */
+void
+MemoryIoBufferZero(
+		   void
+		   )
+{
+    memset(s_actionIoBuffer, 0, s_actionIoAllocation);
+}
+/* 9.7.2.3	MemoryGetInBuffer() */
 /* This function returns the address of the buffer into which the command parameters will be
    unmarshaled in preparation for calling the command actions. */
 BYTE *
-MemoryGetActionInputBuffer(
-			   UINT32           size           // Size, in bytes, required for the input
-			   // unmarshaling
-			   )
+MemoryGetInBuffer(
+		  UINT32           size           // Size, in bytes, required for the input
+		  // unmarshaling
+		  )
 {
-    pAssert(size <= sizeof(s_actionInputBuffer));
+    pAssert(size <= sizeof(s_actionIoBuffer));
     // In this implementation, a static buffer is set aside for the command action
-    // input buffer.
-    memset(s_actionInputBuffer, 0, size);
-    return (BYTE *)&s_actionInputBuffer[0];
+    // buffers. The buffer is shared between input and output. This is because
+    // there is no need to allocate for the worst case input and worst case output
+    // at the same time.
+    // Round size up
+#define UoM  (sizeof(s_actionIoBuffer[0]))
+    size = (size + (UoM - 1)) & (UINT32_MAX - (UoM - 1));
+    memset(s_actionIoBuffer, 0, size);
+    s_actionIoAllocation = size;
+    return (BYTE *)&s_actionIoBuffer[0];
 }
-/* 9.7.1.2 MemoryGetActionOutputBuffer() */
+/* 9.7.2.4	MemoryGetOutBuffer() */
 /* This function returns the address of the buffer into which the command action code places its
    output values. */
-void *
-MemoryGetActionOutputBuffer(
-			    UINT32           size           // required size of the buffer
-			    )
+BYTE *
+MemoryGetOutBuffer(
+		   UINT32           size           // required size of the buffer
+		   )
 {
-    pAssert(size < sizeof(s_actionOutputBuffer));
+    BYTE        *retVal = (BYTE *)(&s_actionIoBuffer[s_actionIoAllocation / UoM]);
+    pAssert((size + s_actionIoAllocation) < (sizeof(s_actionIoBuffer)));
     // In this implementation, a static buffer is set aside for the command action
     // output buffer.
-    memset(s_actionOutputBuffer, 0, size);
-    return s_actionOutputBuffer;
+    memset(retVal, 0, size);
+    s_actionIoAllocation += size;
+    return retVal;
 }
-/* 9.7.1.3 IsLabelProperlyFormatted() */
+/* 9.7.2.5	IsLabelProperlyFormatted() */
 /* This function checks that a label is a null-terminated string. */
-/* NOTE: this function is here because there was no better place for it. */
-/* Return Values Meaning */
-/* FALSE string is not null terminated */
-/* TRUE string is null terminated */
+/* NOTE:	this function is here because there was no better place for it. */
+/* Return Value	Meaning */
+/* FALSE	string is not null terminated */
+/* TRUE	string is null terminated */
 #ifndef INLINE_FUNCTIONS
 BOOL
 IsLabelProperlyFormatted(
@@ -113,3 +141,5 @@ IsLabelProperlyFormatted(
     return (((x)->size == 0) || ((x)->buffer[(x)->size - 1] == 0));
 }
 #endif // INLINE_FUNCTIONS
+
+
