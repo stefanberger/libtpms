@@ -1028,7 +1028,7 @@ CryptRsaValidateSignature(
  Exit:
     return (retVal != TPM_RC_SUCCESS) ? TPM_RC_SIGNATURE : TPM_RC_SUCCESS;
 }
-#if SIMULATION && defined USE_RSA_KEY_CACHE
+#if SIMULATION && USE_RSA_KEY_CACHE
 extern int s_rsaKeyCacheEnabled;
 int GetCachedRsaKey(OBJECT *key, RAND_STATE *rand);
 #define GET_CACHED_KEY(key, rand)					\
@@ -1081,7 +1081,7 @@ CryptRsaGenerateKey(
 	ERROR_RETURN(TPM_RC_VALUE);
     // Set the prime size for instrumentation purposes
     INSTRUMENT_SET(PrimeIndex, PRIME_INDEX(keySizeInBits / 2));
-#if SIMULATION && defined USE_RSA_KEY_CACHE
+#if SIMULATION && USE_RSA_KEY_CACHE
     if(GET_CACHED_KEY(rsaKey, rand))
 	return TPM_RC_SUCCESS;
 #endif

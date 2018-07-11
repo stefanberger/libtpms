@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1260 2018-07-10 19:55:54Z kgoldman $		*/
+/*            $Id: CryptRand.c 1265 2018-07-15 18:29:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -224,7 +224,7 @@ DRBG_GetEntropy(
 		BYTE            *entropy            // OUT: buffer to return collected entropy
 		)
 {
-#ifndef USE_DEBUG_RNG
+#if !USE_DEBUG_RNG
     UINT32       obtainedEntropy;
     INT32        returnedEntropy;
     // If in debug mode, always use the self-test values for initialization
@@ -241,7 +241,7 @@ DRBG_GetEntropy(
 		    memcpy(entropy, DRBG_NistTestVector_Entropy,
 			   sizeof(DRBG_NistTestVector_Entropy));
 		}
-#ifndef USE_DEBUG_RNG
+#if !USE_DEBUG_RNG
 	}
     else if(!IsEntropyBad())
 	{
@@ -494,7 +494,7 @@ CryptRandomStir(
 		BYTE            *additionalData
 		)
 {
-#ifndef USE_DEBUG_RNG
+#if !USE_DEBUG_RNG
     DRBG_SEED        tmpBuf;
     DRBG_SEED        dfResult;
     //
@@ -646,7 +646,7 @@ CryptRandInit(
 	      void
 	      )
 {
-#ifndef USE_DEBUG_RNG
+#if !USE_DEBUG_RNG
     _plat__GetEntropy(NULL, 0);
 #endif
     return DRBG_SelfTest();

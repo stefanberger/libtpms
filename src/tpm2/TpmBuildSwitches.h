@@ -194,28 +194,48 @@
 #   define USE_MARSHALING_DEFINES   YES     // Default: Either YES or NO
 #endif
 
-/* The switches in this group can only be enabled when running a simulation */
-#if SIMULATION
-/* Enables use of the key cache */
-#   ifndef USE_RSA_KEY_CACHE
-#       define USE_RSA_KEY_CACHE
+// The switches in this group can only be enabled when doing debug during simulation
+#if SIMULATION && DEBUG
+
+// Enables use of the key cache. Default is YES
+#   if !(defined USE_RSA_KEY_CACHE)					\
+    || ((USE_RSA_KEY_CACHE != NO) && (USE_RSA_KEY_CACHE != YES))
+#       undef   USE_RSA_KEY_CACHE
+#       define  USE_RSA_KEY_CACHE   YES   // Default: Either YES or NO
 #   endif
-#   if defined USE_RSA_KEY_CACHE && !defined USE_KEY_CACHE_FILE
-#       define USE_KEY_CACHE_FILE
+
+// Enables use of a file to store the key cache values so that the TPM will start faster during
+// debug. Default for this is YES
+#   if USE_RSA_KEY_CACHE
+#       if !(defined USE_KEY_CACHE_FILE)				\
+    || ((USE_KEY_CACHE_FILE != NO) && (USE_KEY_CACHE_FILE != YES))
+#           undef   USE_KEY_CACHE_FILE
+#           define  USE_KEY_CACHE_FILE  YES     // Default: Either YES or NO
+#       endif
+#   else
+#       undef   USE_KEY_CACHE_FILE
+#       define  USE_KEY_CACHE_FILE      NO
+#   endif   // USE_RSA_KEY_CACHE
+
+// This provides fixed seeding of the RNG when doing debug on a simulator. This should allow
+// consistent results on test runs as long as the input parameters to the functions remains the
+// same. There is no default value.
+#   if !(defined USE_DEBUG_RNG) || ((USE_DEBUG_RNG != NO) && (USE_DEBUG_RNG != YES))
+#       undef   USE_DEBUG_RNG
+#       define  USE_DEBUG_RNG           YES      // Default: Either YES or NO
 #   endif
-#   if !defined NDEBUG && !defined USE_DEBUG_RNG
-/* This provides fixed seeding of the RNG when doing debug on a simulator. This should allow
-   consistent results on test runs as long as the input parameters to the functions remains the
-   same. */
-#       define USE_DEBUG_RNG
-#   endif
-#else
-#   undef USE_RSA_KEY_CACHE
-#   undef USE_KEY_CACHE_FILE
-#   undef USE_DEBUG_RNG
-#   undef RSA_INSTRUMENT
-#endif  // SIMULATION
-#ifndef NDEBUG
+
+// Don't change these. They are the settings needed when not doing a simulation and not doing
+// debug. Can't use the key cache except during debug. Otherwise, all of the key values end up being
+// the same
+#else	/* kgold */
+#   define USE_RSA_KEY_CACHE        NO
+#   define USE_RSA_KEY_CACHE_FILE   NO
+#   define USE_DEBUG_RNG            NO
+#endif  // DEBUG && SIMULATION
+
+#if DEBUG
+
 // In some cases, the relationship between two values may be dependent on things that change based
 // on various selections like the chosen cryptographic libraries. It is possible that these
 // selections will result in incompatible settings. These are often detectable by the compiler but
