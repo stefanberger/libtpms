@@ -865,6 +865,8 @@ typedef  TPM_HANDLE         TPMI_SH_HMAC;
 typedef  TPM_HANDLE         TPMI_SH_POLICY;
 /* Table 2:48 - Definition of TPMI_DH_CONTEXT Type  */
 typedef  TPM_HANDLE         TPMI_DH_CONTEXT;
+/* Table 49 - Definition of (TPM_HANDLE) TPMI_DH_SAVED Type  */
+typedef  TPM_HANDLE         TPMI_DH_SAVED;
 /* Table 2:49 - Definition of TPMI_RH_HIERARCHY Type  */
 typedef  TPM_HANDLE         TPMI_RH_HIERARCHY;
 /* Table 2:50 - Definition of TPMI_RH_ENABLES Type  */
@@ -1948,7 +1950,7 @@ typedef union {
 /* Table 2:211 - Definition of TPMS_CONTEXT Structure  */
 typedef struct {
     UINT64                  sequence;
-    TPMI_DH_CONTEXT         savedHandle;
+    TPMI_DH_SAVED           savedHandle;
     TPMI_RH_HIERARCHY       hierarchy;
     TPM2B_CONTEXT_DATA      contextBlob;
 } TPMS_CONTEXT;
