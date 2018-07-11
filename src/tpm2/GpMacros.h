@@ -140,7 +140,7 @@
    a special macro that, depending on the compiler will generate a warning to indicate if the check
    always passes or always fails because it involves fixed constants. To run these checks, define
    COMPILER_CHECKS in TpmBuildSwitches.h */
-#ifdef COMPILER_CHECKS
+#if COMPILER_CHECKS
 #   define  cAssert     pAssert
 #else
 #   define cAssert(value)
