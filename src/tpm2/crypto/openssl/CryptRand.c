@@ -284,7 +284,7 @@ EncryptDRBG(
 	    UINT32              *lastValue      // Points to the last output value
 	    )
 {
-#ifdef FIPS_COMPLIANT
+#if FIPS_COMPLIANT
     // For FIPS compliance, the DRBG has to do a continuous self-test to make sure that
     // no two consecutive values are the same. This overhead is not incurred if the TPM
     // is not required to be FIPS compliant

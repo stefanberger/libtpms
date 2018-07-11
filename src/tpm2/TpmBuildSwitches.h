@@ -83,9 +83,11 @@
 #if !defined LIBRARY_COMPATIBILITY_CHECK && defined SIMULATION
 #   define LIBRARY_COMPATABILITY_CHECK
 #endif
-#ifndef FIPS_COMPLIANT
-//#  define FIPS_COMPLIANT
+#if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
+#   undef   FIPS_COMPLIANT
+#   define  FIPS_COMPLIANT      NO     // Default: Either YES or NO
 #endif
+
 // Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
 // could not update failedTries
 #if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
