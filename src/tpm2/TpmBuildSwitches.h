@@ -196,15 +196,19 @@
 #ifndef SKIP_PROOF_ERRORS
 //#define SKIP_PROOF_ERRORS
 #endif
-/* This define is used to eliminate the use of bit-fields. It can be enable for big- or
-   little-endian machines but is required of big-endian system that number bits in registers from
-   left to right. Little-endian machines number from right to left with the least significant bit
-   having assigned a bit number of 0. These are LSb0() machines (they are also little-endian so they
-   are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
-   either direction (MSb0() or LSb0()). For an MSB0+MSb0() machine this value should be defined */
-#ifndef NO_BIT_FIELD_STRUCTURES
-#   define NO_BIT_FIELD_STRUCTURES
+
+// This define is used to eliminate the use of bit-fields. It can be enabled for big- or
+// little-endian machines but is required of big-endian system that number bits in registers from
+// left to right. Little-endian machines number from right to left with the least significant bit
+// having assigned a bit number of 0. These are LSb0() machines (they are also little-endian so they
+// are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
+// either direction (MSb0() or LSb0())234. For an MSB0+MSb0() machine this value should be NO
+#if !(defined USE_BIT_FIELD_STRUCTURES)					\
+    || ((USE_BIT_FIELD_STRUCTURES != NO) && (USE_BIT_FIELD_STRUCTURES != YES))
+#   undef   USE_BIT_FIELD_STRUCTURES
+#   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO
 #endif
+
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
 #define      ALG_YES      YES

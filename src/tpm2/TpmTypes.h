@@ -494,30 +494,28 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  HR_AC                   (TPM_HC)((TPM_HT_AC<<HR_SHIFT))
 #define  AC_FIRST                (TPM_HC)((HR_AC+0))
 #define  AC_LAST                 (TPM_HC)((HR_AC+0x0000FFFF))
+
 /* Table 2:30 - Definition of TPMA_ALGORITHM Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_ALGORITHM{
     unsigned    asymmetric           : 1 ;
     unsigned    symmetric            : 1 ;
     unsigned    hash                 : 1 ;
     unsigned    object               : 1 ;
-    unsigned    Reserved_at_bit_4    : 4 ;
+    unsigned    Reserved_bits_at_4   : 4 ;
     unsigned    signing              : 1 ;
     unsigned    encrypting           : 1 ;
     unsigned    method               : 1 ;
-    unsigned    Reserved_at_bit_11   : 21;
+    unsigned    Reserved_bits_at_11  : 21;
 } TPMA_ALGORITHM;
 /* This is the initializer for a TPMA_ALGORITHM structure. */
-#define TPMA_ALGORITHM_INITIALIZER(algorithm_asymmetric, algorithm_symmetric, \
-				   algorithm_hash, algorithm_object,	\
-				   algorithm_Reserved_at_bit_4,		\
-				   algorithm_signing, algorithm_encrypting, \
-				   algorithm_method,			\
-				   algorithm_Reserved_at_bit_11)	\
-    {algorithm_asymmetric, algorithm_symmetric, algorithm_hash,		\
-	    algorithm_object, algorithm_Reserved_at_bit_4, algorithm_signing, \
-	    algorithm_encrypting, algorithm_method, algorithm_Reserved_at_bit_11}
-#else // NO_BIT_FIELD_STRUCTURES
+#define TPMA_ALGORITHM_INITIALIZER(					\
+				   asymmetric, symmetric,  hash,       object,     bits_at_4, \
+				   signing,    encrypting, method,     bits_at_11) \
+    {asymmetric, symmetric,  hash,       object,     bits_at_4,		\
+	    signing,    encrypting, method,     bits_at_11}
+#else // USE_BIT_FIELD_STRUCTURES
+
 typedef UINT32 TPMA_ALGORITHM;
 #define TPMA_ALGORITHM_asymmetric        ((TPMA_ALGORITHM)1 << 0)
 #define TPMA_ALGORITHM_symmetric         ((TPMA_ALGORITHM)1 << 1)
@@ -527,290 +525,265 @@ typedef UINT32 TPMA_ALGORITHM;
 #define TPMA_ALGORITHM_encrypting        ((TPMA_ALGORITHM)1 << 9)
 #define TPMA_ALGORITHM_method            ((TPMA_ALGORITHM)1 << 10)
 #define TPMA_ALGORITHM_reserved		 0xfffff8f0
+#define TPMA_ALGORITHM_INITIALIZER(					\
+				   asymmetric, symmetric,  hash,       object,     bits_at_4, \
+				   signing,    encrypting, method,     bits_at_11) \
+    ((asymmetric << 0) + (symmetric << 1)  + (hash << 2)       +	\
+     (object << 3)     + (signing << 8)    + (encrypting << 9) +	\
+     (method << 10))
+#endif // USE_BIT_FIELD_STRUCTURES
 
-/* This is the initializer for a TPMA_ALGORITHM bit array. */
-#define TPMA_ALGORITHM_INITIALIZER(algorithm_asymmetric, algorithm_symmetric, \
-				   algorithm_hash, algorithm_object,	\
-				   algorithm_Reserved_at_bit_4,		\
-				   algorithm_signing, algorithm_encrypting, \
-				   algorithm_method,			\
-				   algorithm_Reserved_at_bit_11)	\
-    ((algorithm_asymmetric << 0) + (algorithm_symmetric << 1) +		\
-     (algorithm_hash << 2) + (algorithm_object << 3) +			\
-     (algorithm_signing << 8) + (algorithm_encrypting << 9) +		\
-     (algorithm_method << 10))
-#endif // NO_BIT_FIELD_STRUCTURES
-
-/* Table 2:31 - Definition of TPMA_OBJECT Bits (BitsTable()) */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_OBJECT{
-    unsigned    Reserved_at_bit_0              : 1 ;
-    unsigned    fixedTPM                       : 1 ;
-    unsigned    stClear                        : 1 ;
-    unsigned    Reserved_at_bit_3              : 1 ;
-    unsigned    fixedParent                    : 1 ;
-    unsigned    sensitiveDataOrigin            : 1 ;
-    unsigned    userWithAuth                   : 1 ;
-    unsigned    adminWithPolicy                : 1 ;
-    unsigned    Reserved_at_bit_8              : 2 ;
-    unsigned    noDA                           : 1 ;
-    unsigned    encryptedDuplication           : 1 ;
-    unsigned    Reserved_at_bit_12             : 4 ;
-    unsigned    restricted                     : 1 ;
-    unsigned    decrypt                        : 1 ;
-    unsigned    sign                           : 1 ;
-    unsigned    Reserved_at_bit_19             : 13;
-} TPMA_OBJECT;
 /* This is the initializer for a TPMA_OBJECT structure. */
-#define TPMA_OBJECT_INITIALIZER(object_Reserved_at_bit_0, object_fixedTPM, \
-				object_stClear, object_Reserved_at_bit_3, \
-				object_fixedParent, object_sensitiveDataOrigin,	\
-				object_userWithAuth, object_adminWithPolicy, \
-				object_Reserved_at_bit_8, object_noDA,	\
-				object_encryptedDuplication,		\
-				object_Reserved_at_bit_12, object_restricted, \
-				object_decrypt, object_sign,		\
-				object_Reserved_at_bit_19)		\
-    {object_Reserved_at_bit_0, object_fixedTPM, object_stClear,		\
-	    object_Reserved_at_bit_3, object_fixedParent,		\
-	    object_sensitiveDataOrigin, object_userWithAuth, object_adminWithPolicy, \
-	    object_Reserved_at_bit_8, object_noDA, object_encryptedDuplication, \
-	    object_Reserved_at_bit_12, object_restricted, object_decrypt, \
-	    object_sign, object_Reserved_at_bit_19}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_OBJECT;
-#define TPMA_OBJECT_fixedTPM                    ((TPMA_OBJECT)1 << 1)
-#define TPMA_OBJECT_stClear                     ((TPMA_OBJECT)1 << 2)
-#define TPMA_OBJECT_fixedParent                 ((TPMA_OBJECT)1 << 4)
-#define TPMA_OBJECT_sensitiveDataOrigin         ((TPMA_OBJECT)1 << 5)
-#define TPMA_OBJECT_userWithAuth                ((TPMA_OBJECT)1 << 6)
-#define TPMA_OBJECT_adminWithPolicy             ((TPMA_OBJECT)1 << 7)
-#define TPMA_OBJECT_noDA                        ((TPMA_OBJECT)1 << 10)
-#define TPMA_OBJECT_encryptedDuplication        ((TPMA_OBJECT)1 << 11)
-#define TPMA_OBJECT_restricted                  ((TPMA_OBJECT)1 << 16)
-#define TPMA_OBJECT_decrypt                     ((TPMA_OBJECT)1 << 17)
-#define TPMA_OBJECT_sign                        ((TPMA_OBJECT)1 << 18)
-#define TPMA_OBJECT_encrypt                     ((TPMA_OBJECT)1 << 18)
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_OBJECT {                        // Table 2:31
+    unsigned    Reserved_bit_at_0        : 1;
+    unsigned    fixedTPM                 : 1;
+    unsigned    stClear                  : 1;
+    unsigned    Reserved_bit_at_3        : 1;
+    unsigned    fixedParent              : 1;
+    unsigned    sensitiveDataOrigin      : 1;
+    unsigned    userWithAuth             : 1;
+    unsigned    adminWithPolicy          : 1;
+    unsigned    Reserved_bits_at_8       : 2;
+    unsigned    noDA                     : 1;
+    unsigned    encryptedDuplication     : 1;
+    unsigned    Reserved_bits_at_12      : 4;
+    unsigned    restricted               : 1;
+    unsigned    decrypt                  : 1;
+    unsigned    sign                     : 1;
+    unsigned    Reserved_bits_at_19      : 13;
+} TPMA_OBJECT;                                      /* Bits */
+// This is the initializer for a TPMA_OBJECT structure
+#define TPMA_OBJECT_INITIALIZER(					\
+				bit_at_0,             fixedtpm,             stclear, \
+				bit_at_3,             fixedparent,          sensitivedataorigin, \
+				userwithauth,         adminwithpolicy,      bits_at_8, \
+				noda,                 encryptedduplication, bits_at_12, \
+				restricted,           decrypt,              sign, \
+				bits_at_19)				\
+	   {bit_at_0,             fixedtpm,             stclear,		\
+	    bit_at_3,             fixedparent,          sensitivedataorigin, \
+	    userwithauth,         adminwithpolicy,      bits_at_8,	\
+	    noda,                 encryptedduplication, bits_at_12,	\
+	    restricted,           decrypt,              sign,		\
+	    bits_at_19}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:31 TPMA_OBJECT using bit masking
+typedef UINT32                              TPMA_OBJECT;
+#define TPMA_OBJECT_fixedTPM                ((TPMA_OBJECT)1 << 1)
+#define TPMA_OBJECT_stClear                 ((TPMA_OBJECT)1 << 2)
+#define TPMA_OBJECT_fixedParent             ((TPMA_OBJECT)1 << 4)
+#define TPMA_OBJECT_sensitiveDataOrigin     ((TPMA_OBJECT)1 << 5)
+#define TPMA_OBJECT_userWithAuth            ((TPMA_OBJECT)1 << 6)
+#define TPMA_OBJECT_adminWithPolicy         ((TPMA_OBJECT)1 << 7)
+#define TPMA_OBJECT_noDA                    ((TPMA_OBJECT)1 << 10)
+#define TPMA_OBJECT_encryptedDuplication    ((TPMA_OBJECT)1 << 11)
+#define TPMA_OBJECT_restricted              ((TPMA_OBJECT)1 << 16)
+#define TPMA_OBJECT_decrypt                 ((TPMA_OBJECT)1 << 17)
+#define TPMA_OBJECT_sign                    ((TPMA_OBJECT)1 << 18)
 #define TPMA_OBJECT_reserved			0xfff8f309
+// This is the initializer for a TPMA_OBJECT bit array.
+#define TPMA_OBJECT_INITIALIZER(					\
+				bit_at_0,             fixedtpm,             stclear, \
+				bit_at_3,             fixedparent,          sensitivedataorigin, \
+				userwithauth,         adminwithpolicy,      bits_at_8, \
+				noda,                 encryptedduplication, bits_at_12, \
+				restricted,           decrypt,              sign, \
+				bits_at_19)				\
+    ((fixedtpm << 1)              + (stclear << 2)               +	\
+     (fixedparent << 4)           + (sensitivedataorigin << 5)   +	\
+     (userwithauth << 6)          + (adminwithpolicy << 7)       +	\
+     (noda << 10)                 + (encryptedduplication << 11) +	\
+     (restricted << 16)           + (decrypt << 17)              +	\
+     (sign << 18))
+#endif // USE_BIT_FIELD_STRUCTURES
 
-/* This is the initializer for a TPMA_OBJECT bit array. */
-#define TPMA_OBJECT_INITIALIZER(object_Reserved_at_bit_0, object_fixedTPM, \
-				object_stClear, object_Reserved_at_bit_3, \
-				object_fixedParent, object_sensitiveDataOrigin,	\
-				object_userWithAuth, object_adminWithPolicy, \
-				object_Reserved_at_bit_8, object_noDA,	\
-				object_encryptedDuplication,		\
-				object_Reserved_at_bit_12, object_restricted, \
-				object_decrypt, object_sign,		\
-				object_Reserved_at_bit_19)		\
-    ((object_fixedTPM << 1) + (object_stClear << 2) +			\
-     (object_fixedParent << 4) + (object_sensitiveDataOrigin << 5) +	\
-     (object_userWithAuth << 6) + (object_adminWithPolicy << 7) +	\
-     (object_noDA << 10) + (object_encryptedDuplication << 11) +	\
-     (object_restricted << 16) + (object_decrypt << 17) +		\
-     (object_sign << 18))
-#endif // NO_BIT_FIELD_STRUCTURES
+
+
 /* Table 2:32 - Definition of TPMA_SESSION Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_SESSION{
-    unsigned    continueSession           : 1 ;
-    unsigned    auditExclusive            : 1 ;
-    unsigned    auditReset                : 1 ;
-    unsigned    Reserved_at_bit_3         : 2 ;
-    unsigned    decrypt                   : 1 ;
-    unsigned    encrypt                   : 1 ;
-    unsigned    audit                     : 1 ;
-} TPMA_SESSION;
-/* This is the initializer for a TPMA_SESSION structure. */
-#define TPMA_SESSION_INITIALIZER(session_continueSession, session_auditExclusive, \
-				 session_auditReset, session_Reserved_at_bit_3,	\
-				 session_decrypt, session_encrypt,	\
-				 session_audit)				\
-    {session_continueSession, session_auditExclusive, session_auditReset, \
-	    session_Reserved_at_bit_3, session_decrypt, session_encrypt, \
-	    session_audit}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT8 TPMA_SESSION;
-#define TPMA_SESSION_continueSession        ((TPMA_SESSION)1 << 0)
-#define TPMA_SESSION_auditExclusive         ((TPMA_SESSION)1 << 1)
-#define TPMA_SESSION_auditReset             ((TPMA_SESSION)1 << 2)
-#define TPMA_SESSION_decrypt                ((TPMA_SESSION)1 << 5)
-#define TPMA_SESSION_encrypt                ((TPMA_SESSION)1 << 6)
-#define TPMA_SESSION_audit                  ((TPMA_SESSION)1 << 7)
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_SESSION {                       // Table 2:32
+    unsigned    continueSession      : 1;
+    unsigned    auditExclusive       : 1;
+    unsigned    auditReset           : 1;
+    unsigned    Reserved_bits_at_3   : 2;
+    unsigned    decrypt              : 1;
+    unsigned    encrypt              : 1;
+    unsigned    audit                : 1;
+} TPMA_SESSION;                                     /* Bits */
+// This is the initializer for a TPMA_SESSION structure
+#define TPMA_SESSION_INITIALIZER(					\
+				 continuesession, auditexclusive,  auditreset,      bits_at_3, \
+				 decrypt,         encrypt,         audit) \
+    {continuesession, auditexclusive,  auditreset,      bits_at_3,	\
+	    decrypt,         encrypt,         audit}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:32 TPMA_SESSION using bit masking
+typedef UINT8                           TPMA_SESSION;
+#define TPMA_SESSION_continueSession    ((TPMA_SESSION)1 << 0)
+#define TPMA_SESSION_auditExclusive     ((TPMA_SESSION)1 << 1)
+#define TPMA_SESSION_auditReset         ((TPMA_SESSION)1 << 2)
+#define TPMA_SESSION_decrypt            ((TPMA_SESSION)1 << 5)
+#define TPMA_SESSION_encrypt            ((TPMA_SESSION)1 << 6)
+#define TPMA_SESSION_audit              ((TPMA_SESSION)1 << 7)
 #define TPMA_SESSION_reserved		    0x18
+// This is the initializer for a TPMA_SESSION bit array.
+#define TPMA_SESSION_INITIALIZER(					\
+				 continuesession, auditexclusive,  auditreset,      bits_at_3, \
+				 decrypt,         encrypt,         audit) \
+    ((continuesession << 0) + (auditexclusive << 1)  +			\
+     (auditreset << 2)      + (decrypt << 5)         +			\
+     (encrypt << 6)         + (audit << 7))
+#endif // USE_BIT_FIELD_STRUCTURES
 
-/* This is the initializer for a TPMA_SESSION bit array. */
-#define TPMA_SESSION_INITIALIZER(session_continueSession, session_auditExclusive, \
-				 session_auditReset, session_Reserved_at_bit_3,	\
-				 session_decrypt, session_encrypt,	\
-				 session_audit)				\
-    ((session_continueSession << 0) + (session_auditExclusive << 1) +	\
-     (session_auditReset << 2) + (session_decrypt << 5) +		\
-     (session_encrypt << 6) + (session_audit << 7))
-#endif // NO_BIT_FIELD_STRUCTURES
 /* Table 2:33 - Definition of TPMA_LOCALITY Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_LOCALITY{
-    unsigned    TPM_LOC_ZERO            : 1 ;
-    unsigned    TPM_LOC_ONE             : 1 ;
-    unsigned    TPM_LOC_TWO             : 1 ;
-    unsigned    TPM_LOC_THREE           : 1 ;
-    unsigned    TPM_LOC_FOUR            : 1 ;
-    unsigned    Extended                : 3 ;
-} TPMA_LOCALITY;
-/* This is the initializer for a TPMA_LOCALITY structure. */
-#define TPMA_LOCALITY_INITIALIZER(locality_TPM_LOC_ZERO, locality_TPM_LOC_ONE, \
-				  locality_TPM_LOC_TWO, locality_TPM_LOC_THREE,	\
-				  locality_TPM_LOC_FOUR, locality_Extended) \
-    {locality_TPM_LOC_ZERO, locality_TPM_LOC_ONE, locality_TPM_LOC_TWO, \
-	    locality_TPM_LOC_THREE, locality_TPM_LOC_FOUR, locality_Extended}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT8 TPMA_LOCALITY;
-#define TPMA_LOCALITY_TPM_LOC_ZERO         ((TPMA_LOCALITY)1 << 0)
-#define TPMA_LOCALITY_TPM_LOC_ONE          ((TPMA_LOCALITY)1 << 1)
-#define TPMA_LOCALITY_TPM_LOC_TWO          ((TPMA_LOCALITY)1 << 2)
-#define TPMA_LOCALITY_TPM_LOC_THREE        ((TPMA_LOCALITY)1 << 3)
-#define TPMA_LOCALITY_TPM_LOC_FOUR         ((TPMA_LOCALITY)1 << 4)
-#define TPMA_LOCALITY_Extended_SHIFT       5
-#define TPMA_LOCALITY_Extended             ((TPMA_LOCALITY)0x7 << 5)
-/* This is the initializer for a TPMA_LOCALITY bit array. */
-#define TPMA_LOCALITY_INITIALIZER(locality_TPM_LOC_ZERO, locality_TPM_LOC_ONE, \
-				  locality_TPM_LOC_TWO, locality_TPM_LOC_THREE,	\
-				  locality_TPM_LOC_FOUR, locality_Extended) \
-    ((locality_TPM_LOC_ZERO << 0) + (locality_TPM_LOC_ONE << 1) +	\
-     (locality_TPM_LOC_TWO << 2) + (locality_TPM_LOC_THREE << 3) +	\
-     (locality_TPM_LOC_FOUR << 4) + (locality_Extended << 5))
-#endif // NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_LOCALITY {                      // Table 2:33
+    unsigned    TPM_LOC_ZERO         : 1;
+    unsigned    TPM_LOC_ONE          : 1;
+    unsigned    TPM_LOC_TWO          : 1;
+    unsigned    TPM_LOC_THREE        : 1;
+    unsigned    TPM_LOC_FOUR         : 1;
+    unsigned    Extended             : 3;
+} TPMA_LOCALITY;                                    /* Bits */
+// This is the initializer for a TPMA_LOCALITY structure
+#define TPMA_LOCALITY_INITIALIZER(					\
+				  tpm_loc_zero,  tpm_loc_one,   tpm_loc_two,   tpm_loc_three, \
+				  tpm_loc_four,  extended)		\
+    {tpm_loc_zero,  tpm_loc_one,   tpm_loc_two,   tpm_loc_three,	\
+	    tpm_loc_four,  extended}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:33 TPMA_LOCALITY using bit masking
+typedef UINT8                           TPMA_LOCALITY;
+#define TPMA_LOCALITY_TPM_LOC_ZERO      ((TPMA_LOCALITY)1 << 0)
+#define TPMA_LOCALITY_TPM_LOC_ONE       ((TPMA_LOCALITY)1 << 1)
+#define TPMA_LOCALITY_TPM_LOC_TWO       ((TPMA_LOCALITY)1 << 2)
+#define TPMA_LOCALITY_TPM_LOC_THREE     ((TPMA_LOCALITY)1 << 3)
+#define TPMA_LOCALITY_TPM_LOC_FOUR      ((TPMA_LOCALITY)1 << 4)
+#define TPMA_LOCALITY_Extended_SHIFT    5
+#define TPMA_LOCALITY_Extended          ((TPMA_LOCALITY)0x7 << 5)
+// This is the initializer for a TPMA_LOCALITY bit array.
+#define TPMA_LOCALITY_INITIALIZER(					\
+				  tpm_loc_zero,  tpm_loc_one,   tpm_loc_two,   tpm_loc_three, \
+				  tpm_loc_four,  extended)		\
+    ((tpm_loc_zero << 0)  + (tpm_loc_one << 1)   + (tpm_loc_two << 2)   + \
+     (tpm_loc_three << 3) + (tpm_loc_four << 4)  + (extended << 5))
+#endif // USE_BIT_FIELD_STRUCTURES
 
 /* Table 2:34 - Definition of TPMA_PERMANENT Bits (BitsTable()) */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_PERMANENT{
-    unsigned    ownerAuthSet                 : 1 ;
-    unsigned    endorsementAuthSet           : 1 ;
-    unsigned    lockoutAuthSet               : 1 ;
-    unsigned    Reserved_at_bit_3            : 5 ;
-    unsigned    disableClear                 : 1 ;
-    unsigned    inLockout                    : 1 ;
-    unsigned    tpmGeneratedEPS              : 1 ;
-    unsigned    Reserved_at_bit_11           : 21;
-} TPMA_PERMANENT;
-/* This is the initializer for a TPMA_PERMANENT structure. */
-#define TPMA_PERMANENT_INITIALIZER(permanent_ownerAuthSet,		\
-				   permanent_endorsementAuthSet,	\
-				   permanent_lockoutAuthSet,		\
-				   permanent_Reserved_at_bit_3,		\
-				   permanent_disableClear, permanent_inLockout,	\
-				   permanent_tpmGeneratedEPS,		\
-				   permanent_Reserved_at_bit_11)	\
-    {permanent_ownerAuthSet, permanent_endorsementAuthSet,		\
-	    permanent_lockoutAuthSet, permanent_Reserved_at_bit_3,	\
-	    permanent_disableClear, permanent_inLockout, permanent_tpmGeneratedEPS, \
-	    permanent_Reserved_at_bit_11}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_PERMANENT;
-#define TPMA_PERMANENT_ownerAuthSet              ((TPMA_PERMANENT)1 << 0)
-#define TPMA_PERMANENT_endorsementAuthSet        ((TPMA_PERMANENT)1 << 1)
-#define TPMA_PERMANENT_lockoutAuthSet            ((TPMA_PERMANENT)1 << 2)
-#define TPMA_PERMANENT_disableClear              ((TPMA_PERMANENT)1 << 8)
-#define TPMA_PERMANENT_inLockout                 ((TPMA_PERMANENT)1 << 9)
-#define TPMA_PERMANENT_tpmGeneratedEPS           ((TPMA_PERMANENT)1 << 10)
-/* This is the initializer for a TPMA_PERMANENT bit array. */
-#define TPMA_PERMANENT_INITIALIZER(permanent_ownerAuthSet,		\
-				   permanent_endorsementAuthSet,	\
-				   permanent_lockoutAuthSet,		\
-				   permanent_Reserved_at_bit_3,		\
-				   permanent_disableClear, permanent_inLockout,	\
-				   permanent_tpmGeneratedEPS,		\
-				   permanent_Reserved_at_bit_11)	\
-    ((permanent_ownerAuthSet << 0) + (permanent_endorsementAuthSet << 1) + \
-     (permanent_lockoutAuthSet << 2) + (permanent_disableClear << 8) +	\
-     (permanent_inLockout << 9) + (permanent_tpmGeneratedEPS << 10))
-#endif // NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_PERMANENT {                     // Table 2:34
+    unsigned    ownerAuthSet         : 1;
+    unsigned    endorsementAuthSet   : 1;
+    unsigned    lockoutAuthSet       : 1;
+    unsigned    Reserved_bits_at_3   : 5;
+    unsigned    disableClear         : 1;
+    unsigned    inLockout            : 1;
+    unsigned    tpmGeneratedEPS      : 1;
+    unsigned    Reserved_bits_at_11  : 21;
+} TPMA_PERMANENT;                                   /* Bits */
+// This is the initializer for a TPMA_PERMANENT structure
+#define TPMA_PERMANENT_INITIALIZER(					\
+				   ownerauthset,       endorsementauthset, lockoutauthset, \
+				   bits_at_3,          disableclear,       inlockout, \
+				   tpmgeneratedeps,    bits_at_11)	\
+    {ownerauthset,       endorsementauthset, lockoutauthset,		\
+	    bits_at_3,          disableclear,       inlockout,		\
+	    tpmgeneratedeps,    bits_at_11}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:34 TPMA_PERMANENT using bit masking
+typedef UINT32                              TPMA_PERMANENT;
+#define TPMA_PERMANENT_ownerAuthSet         ((TPMA_PERMANENT)1 << 0)
+#define TPMA_PERMANENT_endorsementAuthSet   ((TPMA_PERMANENT)1 << 1)
+#define TPMA_PERMANENT_lockoutAuthSet       ((TPMA_PERMANENT)1 << 2)
+#define TPMA_PERMANENT_disableClear         ((TPMA_PERMANENT)1 << 8)
+#define TPMA_PERMANENT_inLockout            ((TPMA_PERMANENT)1 << 9)
+#define TPMA_PERMANENT_tpmGeneratedEPS      ((TPMA_PERMANENT)1 << 10)
+// This is the initializer for a TPMA_PERMANENT bit array.
+#define TPMA_PERMANENT_INITIALIZER(					\
+				   ownerauthset,       endorsementauthset, lockoutauthset, \
+				   bits_at_3,          disableclear,       inlockout, \
+				   tpmgeneratedeps,    bits_at_11)	\
+    ((ownerauthset << 0)       + (endorsementauthset << 1) +		\
+     (lockoutauthset << 2)     + (disableclear << 8)       +		\
+     (inlockout << 9)          + (tpmgeneratedeps << 10))
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:35 - Definition of TPMA_STARTUP_CLEAR Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_STARTUP_CLEAR{
-    unsigned    phEnable             : 1 ;
-    unsigned    shEnable             : 1 ;
-    unsigned    ehEnable             : 1 ;
-    unsigned    phEnableNV           : 1 ;
-    unsigned    Reserved_at_bit_4    : 27;
-    unsigned    orderly              : 1 ;
-} TPMA_STARTUP_CLEAR;
-/* This is the initializer for a TPMA_STARTUP_CLEAR structure. */
-#define TPMA_STARTUP_CLEAR_INITIALIZER(startup_clear_phEnable,		\
-				       startup_clear_shEnable,		\
-				       startup_clear_ehEnable,		\
-				       startup_clear_phEnableNV,	\
-				       startup_clear_Reserved_at_bit_4,	\
-				       startup_clear_orderly)		\
-    {startup_clear_phEnable, startup_clear_shEnable, startup_clear_ehEnable, \
-	    startup_clear_phEnableNV, startup_clear_Reserved_at_bit_4,	\
-	    startup_clear_orderly}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_STARTUP_CLEAR;
-#define TPMA_STARTUP_CLEAR_phEnable          ((TPMA_STARTUP_CLEAR)1 << 0)
-#define TPMA_STARTUP_CLEAR_shEnable          ((TPMA_STARTUP_CLEAR)1 << 1)
-#define TPMA_STARTUP_CLEAR_ehEnable          ((TPMA_STARTUP_CLEAR)1 << 2)
-#define TPMA_STARTUP_CLEAR_phEnableNV        ((TPMA_STARTUP_CLEAR)1 << 3)
-#define TPMA_STARTUP_CLEAR_orderly           ((TPMA_STARTUP_CLEAR)1 << 31)
-/* This is the initializer for a TPMA_STARTUP_CLEAR bit array. */
-#define TPMA_STARTUP_CLEAR_INITIALIZER(startup_clear_phEnable,		\
-				       startup_clear_shEnable,		\
-				       startup_clear_ehEnable,		\
-				       startup_clear_phEnableNV,	\
-				       startup_clear_Reserved_at_bit_4,	\
-				       startup_clear_orderly)		\
-    ((startup_clear_phEnable << 0) + (startup_clear_shEnable << 1) +	\
-     (startup_clear_ehEnable << 2) + (startup_clear_phEnableNV << 3) +	\
-     (startup_clear_orderly << 31))
-#endif // NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_STARTUP_CLEAR {                 // Table 2:35
+    unsigned    phEnable             : 1;
+    unsigned    shEnable             : 1;
+    unsigned    ehEnable             : 1;
+    unsigned    phEnableNV           : 1;
+    unsigned    Reserved_bits_at_4   : 27;
+    unsigned    orderly              : 1;
+} TPMA_STARTUP_CLEAR;                               /* Bits */
+// This is the initializer for a TPMA_STARTUP_CLEAR structure
+#define TPMA_STARTUP_CLEAR_INITIALIZER(					\
+				       phenable, shenable, ehenable, phenablenv, bits_at_4, orderly) \
+    {phenable, shenable, ehenable, phenablenv, bits_at_4, orderly}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:35 TPMA_STARTUP_CLEAR using bit masking
+typedef UINT32                          TPMA_STARTUP_CLEAR;
+#define TPMA_STARTUP_CLEAR_phEnable     ((TPMA_STARTUP_CLEAR)1 << 0)
+#define TPMA_STARTUP_CLEAR_shEnable     ((TPMA_STARTUP_CLEAR)1 << 1)
+#define TPMA_STARTUP_CLEAR_ehEnable     ((TPMA_STARTUP_CLEAR)1 << 2)
+#define TPMA_STARTUP_CLEAR_phEnableNV   ((TPMA_STARTUP_CLEAR)1 << 3)
+#define TPMA_STARTUP_CLEAR_orderly      ((TPMA_STARTUP_CLEAR)1 << 31)
+// This is the initializer for a TPMA_STARTUP_CLEAR bit array.
+#define TPMA_STARTUP_CLEAR_INITIALIZER(					\
+				       phenable, shenable, ehenable, phenablenv, bits_at_4, orderly) \
+    ((phenable << 0)   + (shenable << 1)   + (ehenable << 2)   +	\
+     (phenablenv << 3) + (orderly << 31))
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:36 - Definition of TPMA_MEMORY Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_MEMORY{
-    unsigned    sharedRAM                   : 1 ;
-    unsigned    sharedNV                    : 1 ;
-    unsigned    objectCopiedToRam           : 1 ;
-    unsigned    Reserved_at_bit_3           : 29;
-} TPMA_MEMORY;
-/* This is the initializer for a TPMA_MEMORY structure. */
-#define TPMA_MEMORY_INITIALIZER(memory_sharedRAM, memory_sharedNV,	\
-				memory_objectCopiedToRam,		\
-				memory_Reserved_at_bit_3)		\
-    {memory_sharedRAM, memory_sharedNV, memory_objectCopiedToRam,	\
-	    memory_Reserved_at_bit_3}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_MEMORY;
-#define TPMA_MEMORY_sharedRAM                ((TPMA_MEMORY)1 << 0)
-#define TPMA_MEMORY_sharedNV                 ((TPMA_MEMORY)1 << 1)
-#define TPMA_MEMORY_objectCopiedToRam        ((TPMA_MEMORY)1 << 2)
-/* This is the initializer for a TPMA_MEMORY bit array. */
-#define TPMA_MEMORY_INITIALIZER(memory_sharedRAM, memory_sharedNV,	\
-				memory_objectCopiedToRam,		\
-				memory_Reserved_at_bit_3)		\
-    ((memory_sharedRAM << 0) + (memory_sharedNV << 1) +			\
-     (memory_objectCopiedToRam << 2))
-#endif // NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_MEMORY {                        // Table 2:36
+    unsigned    sharedRAM            : 1;
+    unsigned    sharedNV             : 1;
+    unsigned    objectCopiedToRam    : 1;
+    unsigned    Reserved_bits_at_3   : 29;
+} TPMA_MEMORY;                                      /* Bits */
+// This is the initializer for a TPMA_MEMORY structure
+#define TPMA_MEMORY_INITIALIZER(					\
+				sharedram, sharednv, objectcopiedtoram, bits_at_3) \
+    {sharedram, sharednv, objectcopiedtoram, bits_at_3}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:36 TPMA_MEMORY using bit masking
+typedef UINT32                          TPMA_MEMORY;
+#define TPMA_MEMORY_sharedRAM           ((TPMA_MEMORY)1 << 0)
+#define TPMA_MEMORY_sharedNV            ((TPMA_MEMORY)1 << 1)
+#define TPMA_MEMORY_objectCopiedToRam   ((TPMA_MEMORY)1 << 2)
+// This is the initializer for a TPMA_MEMORY bit array.
+#define TPMA_MEMORY_INITIALIZER(					\
+				sharedram, sharednv, objectcopiedtoram, bits_at_3) \
+    ((sharedram << 0) + (sharednv << 1) + (objectcopiedtoram << 2))
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:37 - Definition of TPMA_CC Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_CC{
-    unsigned    commandIndex           : 16;
-    unsigned    Reserved_at_bit_16     : 6 ;
-    unsigned    nv                     : 1 ;
-    unsigned    extensive              : 1 ;
-    unsigned    flushed                : 1 ;
-    unsigned    cHandles               : 3 ;
-    unsigned    rHandle                : 1 ;
-    unsigned    V                      : 1 ;
-    unsigned    Reserved_at_bit_30     : 2 ;
-} TPMA_CC;
-/* This is the initializer for a TPMA_CC structure. */
-#define TPMA_CC_INITIALIZER(cc_commandIndex, cc_Reserved_at_bit_16, cc_nv, \
-			    cc_extensive, cc_flushed, cc_cHandles, cc_rHandle, \
-			    cc_V, cc_Reserved_at_bit_30)		\
-    {cc_commandIndex, cc_Reserved_at_bit_16, cc_nv, cc_extensive, cc_flushed, \
-	    cc_cHandles, cc_rHandle, cc_V, cc_Reserved_at_bit_30}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_CC;
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_CC {                            // Table 2:37
+    unsigned    commandIndex         : 16;
+    unsigned    Reserved_bits_at_16  : 6;
+    unsigned    nv                   : 1;
+    unsigned    extensive            : 1;
+    unsigned    flushed              : 1;
+    unsigned    cHandles             : 3;
+    unsigned    rHandle              : 1;
+    unsigned    V                    : 1;
+    unsigned    Reserved_bits_at_30  : 2;
+} TPMA_CC;                                          /* Bits */
+// This is the initializer for a TPMA_CC structure
+#define TPMA_CC_INITIALIZER(						\
+			    commandindex, bits_at_16,   nv,           extensive,    flushed, \
+			    chandles,     rhandle,      v,            bits_at_30) \
+    {commandindex, bits_at_16,   nv,           extensive,    flushed,	\
+	    chandles,     rhandle,      v,            bits_at_30}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:37 TPMA_CC using bit masking
+typedef UINT32                      TPMA_CC;
 #define TPMA_CC_commandIndex_SHIFT  0
 #define TPMA_CC_commandIndex        ((TPMA_CC)0xffff << 0)
 #define TPMA_CC_nv                  ((TPMA_CC)1 << 22)
@@ -821,30 +794,31 @@ typedef UINT32 TPMA_CC;
 #define TPMA_CC_rHandle             ((TPMA_CC)1 << 28)
 #define TPMA_CC_V                   ((TPMA_CC)1 << 29)
 #define TPMA_CC_reserved            0xc03f0000
-/* This is the initializer for a TPMA_CC bit array. */
-#define TPMA_CC_INITIALIZER(cc_commandIndex, cc_Reserved_at_bit_16, cc_nv, \
-			    cc_extensive, cc_flushed, cc_cHandles, cc_rHandle, \
-			    cc_V, cc_Reserved_at_bit_30)		\
-    ((cc_commandIndex << 0) + (cc_nv << 22) + (cc_extensive << 23) +	\
-     (cc_flushed << 24) + (cc_cHandles << 25) + (cc_rHandle << 28) +	\
-     (cc_V << 29))
-#endif // NO_BIT_FIELD_STRUCTURES
+// This is the initializer for a TPMA_CC bit array.
+#define TPMA_CC_INITIALIZER(						\
+			    commandindex, bits_at_16,   nv,           extensive,    flushed, \
+			    chandles,     rhandle,      v,            bits_at_30) \
+    ((commandindex << 0) + (nv << 22)          + (extensive << 23)   +	\
+     (flushed << 24)     + (chandles << 25)    + (rhandle << 28)     +	\
+     (v << 29))
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:38 - Definition of TPMA_MODES Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_MODES{
-    unsigned    FIPS_140_2           : 1 ;
-    unsigned    Reserved_at_bit_1    : 31;
-} TPMA_MODES;
-/* This is the initializer for a TPMA_MODES structure. */
-#define TPMA_MODES_INITIALIZER(modes_FIPS_140_2, modes_Reserved_at_bit_1) \
-    {modes_FIPS_140_2, modes_Reserved_at_bit_1}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_MODES;
-#define TPMA_MODES_FIPS_140_2        ((TPMA_MODES)1 << 0)
-/* This is the initializer for a TPMA_MODES bit array. */
-#define TPMA_MODES_INITIALIZER(modes_FIPS_140_2, modes_Reserved_at_bit_1) \
-    ((modes_FIPS_140_2 << 0))+        ((modes_FIPS_140_2 << 0))
-#endif // NO_BIT_FIELD_STRUCTURES
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_MODES {                         // Table 2:38
+    unsigned    FIPS_140_2           : 1;
+    unsigned    Reserved_bits_at_1   : 31;
+} TPMA_MODES;                                       /* Bits */
+// This is the initializer for a TPMA_MODES structure
+#define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) {fips_140_2, bits_at_1}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:38 TPMA_MODES using bit masking
+typedef UINT32                  TPMA_MODES;
+#define TPMA_MODES_FIPS_140_2   ((TPMA_MODES)1 << 0)
+// This is the initializer for a TPMA_MODES bit array.
+#define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) ((fips_140_2 << 0))
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:39 - Definition of TPMI_YES_NO Type  */
 typedef  BYTE               TPMI_YES_NO;
 /* Table 2:40 - Definition of TPMI_DH_OBJECT Type  */
@@ -1792,128 +1766,131 @@ typedef union {
     }            t;
     TPM2B        b;
 } TPM2B_ID_OBJECT;
-/* Table 2:202 - Definition of TPM_NV_INDEX Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-#if 0
-typedef struct TPM_NV_INDEX{
-    unsigned    index           : 24;
-    unsigned    RH_NV           : 8 ;
-} TPM_NV_INDEX;
-#endif
-/* This is the initializer for a TPMA_NV_INDEX structure. */
-#define TPM_NV_INDEX_INITIALIZER(tpm_nv_index_index, tpm_nv_index_RH_NV) \
-    {tpm_nv_index_index, tpm_nv_index_RH_NV}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPM_NV_INDEX;
-#define TPM_NV_INDEX_index_SHIFT  0
-#define TPM_NV_INDEX_index        ((TPM_NV_INDEX)0xffffff << 00)
-#define TPM_NV_INDEX_RH_NV_SHIFT  24
-#define TPM_NV_INDEX_RH_NV        ((TPM_NV_INDEX)0xff << 24)
-/* This is the initializer for a TPMA_NV_INDEX bit array. */
-#define TPM_NV_INDEX_INITIALIZER(tpm_nv_index_index, tpm_nv_index_RH_NV) \
-    ((tpm_nv_index_index << 00) + (tpm_nv_index_RH_NV << 24))
-#endif // NO_BIT_FIELD_STRUCTURES
-/* Table 2:203 - Definition of TPM_NT Constants  */
-typedef  UINT32             TPM_NT;
-#define  TPM_NT_ORDINARY    (TPM_NT)(0x0)
-#define  TPM_NT_COUNTER     (TPM_NT)(0x1)
-#define  TPM_NT_BITS        (TPM_NT)(0x2)
-#define  TPM_NT_EXTEND      (TPM_NT)(0x4)
-#define  TPM_NT_PIN_FAIL    (TPM_NT)(0x8)
-#define  TPM_NT_PIN_PASS    (TPM_NT)(0x9)
-/* Table 2:204 - Definition of TPMS_NV_PIN_COUNTER_PARAMETERS Structure  */
+
+/* Table 2:205 - Definition of TPM_NV_INDEX Bits */
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPM_NV_INDEX {                       // Table 2:205
+    unsigned    index                : 24;
+    unsigned    RH_NV                : 8;
+} TPM_NV_INDEX;                                     /* Bits */
+// This is the initializer for a TPM_NV_INDEX structure
+#define TPM_NV_INDEX_INITIALIZER(index, rh_nv) {index, rh_nv}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:205 TPM_NV_INDEX using bit masking
+typedef UINT32                      TPM_NV_INDEX;
+#define TPM_NV_INDEX_index_SHIFT    0
+#define TPM_NV_INDEX_index          ((TPM_NV_INDEX)0xffffff << 0)
+#define TPM_NV_INDEX_RH_NV_SHIFT    24
+#define TPM_NV_INDEX_RH_NV          ((TPM_NV_INDEX)0xff << 24)
+// This is the initializer for a TPM_NV_INDEX bit array.
+#define TPM_NV_INDEX_INITIALIZER(index, rh_nv) ((index << 0) + (rh_nv << 24))
+#endif // USE_BIT_FIELD_STRUCTURES
+
+// Table 2:206 - Definition of TPM_NT Constants
+typedef UINT32              TPM_NT;
+#define TPM_NT_ORDINARY     (TPM_NT)(0x0)
+#define TPM_NT_COUNTER      (TPM_NT)(0x1)
+#define TPM_NT_BITS         (TPM_NT)(0x2)
+#define TPM_NT_EXTEND       (TPM_NT)(0x4)
+#define TPM_NT_PIN_FAIL     (TPM_NT)(0x8)
+#define TPM_NT_PIN_PASS     (TPM_NT)(0x9)
+// Table 2:207
 typedef struct {
     UINT32                  pinCount;
     UINT32                  pinLimit;
-} TPMS_NV_PIN_COUNTER_PARAMETERS;
-/* Table 2:205 - Definition of TPMA_NV Bits */
-#ifndef NO_BIT_FIELD_STRUCTURES
-typedef struct TPMA_NV{
-    unsigned    PPWRITE                          : 1 ;
-    unsigned    OWNERWRITE                       : 1 ;
-    unsigned    AUTHWRITE                        : 1 ;
-    unsigned    POLICYWRITE                      : 1 ;
-    unsigned    TPM_NT                           : 4 ;
-    unsigned    Reserved_at_bit_8                : 2 ;
-    unsigned    POLICY_DELETE                    : 1 ;
-    unsigned    WRITELOCKED                      : 1 ;
-    unsigned    WRITEALL                         : 1 ;
-    unsigned    WRITEDEFINE                      : 1 ;
-    unsigned    WRITE_STCLEAR                    : 1 ;
-    unsigned    GLOBALLOCK                       : 1 ;
-    unsigned    PPREAD                           : 1 ;
-    unsigned    OWNERREAD                        : 1 ;
-    unsigned    AUTHREAD                         : 1 ;
-    unsigned    POLICYREAD                       : 1 ;
-    unsigned    Reserved_at_bit_20               : 5 ;
-    unsigned    NO_DA                            : 1 ;
-    unsigned    ORDERLY                          : 1 ;
-    unsigned    CLEAR_STCLEAR                    : 1 ;
-    unsigned    READLOCKED                       : 1 ;
-    unsigned    WRITTEN                          : 1 ;
-    unsigned    PLATFORMCREATE                   : 1 ;
-    unsigned    READ_STCLEAR                     : 1 ;
-} TPMA_NV;
-/* This is the initializer for a TPMA_NV structure. */
-#define TPMA_NV_INITIALIZER(nv_PPWRITE, nv_OWNERWRITE, nv_AUTHWRITE,	\
-			    nv_POLICYWRITE, nv_TPM_NT, nv_Reserved_at_bit_8, \
-			    nv_POLICY_DELETE, nv_WRITELOCKED, nv_WRITEALL, \
-			    nv_WRITEDEFINE, nv_WRITE_STCLEAR, nv_GLOBALLOCK, \
-			    nv_PPREAD, nv_OWNERREAD, nv_AUTHREAD, nv_POLICYREAD, \
-			    nv_Reserved_at_bit_20, nv_NO_DA, nv_ORDERLY, \
-			    nv_CLEAR_STCLEAR, nv_READLOCKED, nv_WRITTEN, \
-			    nv_PLATFORMCREATE, nv_READ_STCLEAR)		\
-    {nv_PPWRITE, nv_OWNERWRITE, nv_AUTHWRITE, nv_POLICYWRITE, nv_TPM_NT, \
-	    nv_Reserved_at_bit_8, nv_POLICY_DELETE, nv_WRITELOCKED, nv_WRITEALL, \
-	    nv_WRITEDEFINE, nv_WRITE_STCLEAR, nv_GLOBALLOCK, nv_PPREAD, \
-	    nv_OWNERREAD, nv_AUTHREAD, nv_POLICYREAD, nv_Reserved_at_bit_20, \
-	    nv_NO_DA, nv_ORDERLY, nv_CLEAR_STCLEAR, nv_READLOCKED, nv_WRITTEN, \
-	    nv_PLATFORMCREATE, nv_READ_STCLEAR}
-#else // NO_BIT_FIELD_STRUCTURES
-typedef UINT32 TPMA_NV;
-#define TPMA_NV_PPWRITE                       ((TPMA_NV)1 << 0)
-#define TPMA_NV_OWNERWRITE                    ((TPMA_NV)1 << 1)
-#define TPMA_NV_AUTHWRITE                     ((TPMA_NV)1 << 2)
-#define TPMA_NV_POLICYWRITE                   ((TPMA_NV)1 << 3)
-#define TPMA_NV_TPM_NT_SHIFT                  4
-#define TPMA_NV_TPM_NT                        ((TPMA_NV)0xf << 4)
-#define TPMA_NV_POLICY_DELETE                 ((TPMA_NV)1 << 10)
-#define TPMA_NV_WRITELOCKED                   ((TPMA_NV)1 << 11)
-#define TPMA_NV_WRITEALL                      ((TPMA_NV)1 << 12)
-#define TPMA_NV_WRITEDEFINE                   ((TPMA_NV)1 << 13)
-#define TPMA_NV_WRITE_STCLEAR                 ((TPMA_NV)1 << 14)
-#define TPMA_NV_GLOBALLOCK                    ((TPMA_NV)1 << 15)
-#define TPMA_NV_PPREAD                        ((TPMA_NV)1 << 16)
-#define TPMA_NV_OWNERREAD                     ((TPMA_NV)1 << 17)
-#define TPMA_NV_AUTHREAD                      ((TPMA_NV)1 << 18)
-#define TPMA_NV_POLICYREAD                    ((TPMA_NV)1 << 19)
-#define TPMA_NV_NO_DA                         ((TPMA_NV)1 << 25)
-#define TPMA_NV_ORDERLY                       ((TPMA_NV)1 << 26)
-#define TPMA_NV_CLEAR_STCLEAR                 ((TPMA_NV)1 << 27)
-#define TPMA_NV_READLOCKED                    ((TPMA_NV)1 << 28)
-#define TPMA_NV_WRITTEN                       ((TPMA_NV)1 << 29)
-#define TPMA_NV_PLATFORMCREATE                ((TPMA_NV)1 << 30)
-#define TPMA_NV_READ_STCLEAR                  ((TPMA_NV)1 << 31)
-#define TPMA_NV_RESERVED                      (0x00000300 | 0x01f00000)
-/* This is the initializer for a TPMA_NV bit array. */
-#define TPMA_NV_INITIALIZER(nv_PPWRITE, nv_OWNERWRITE, nv_AUTHWRITE,	\
-			    nv_POLICYWRITE, nv_TPM_NT, nv_Reserved_at_bit_8, \
-			    nv_POLICY_DELETE, nv_WRITELOCKED, nv_WRITEALL, \
-			    nv_WRITEDEFINE, nv_WRITE_STCLEAR, nv_GLOBALLOCK, \
-			    nv_PPREAD, nv_OWNERREAD, nv_AUTHREAD, nv_POLICYREAD, \
-			    nv_Reserved_at_bit_20, nv_NO_DA, nv_ORDERLY, \
-			    nv_CLEAR_STCLEAR, nv_READLOCKED, nv_WRITTEN, \
-			    nv_PLATFORMCREATE, nv_READ_STCLEAR)		\
-    ((nv_PPWRITE << 0) + (nv_OWNERWRITE << 1) + (nv_AUTHWRITE << 2) +	\
-     (nv_POLICYWRITE << 3) + (nv_TPM_NT << 4) + (nv_POLICY_DELETE << 10) + \
-     (nv_WRITELOCKED << 11) + (nv_WRITEALL << 12) + (nv_WRITEDEFINE << 13) + \
-     (nv_WRITE_STCLEAR << 14) + (nv_GLOBALLOCK << 15) + (nv_PPREAD << 16) + \
-     (nv_OWNERREAD << 17) + (nv_AUTHREAD << 18) + (nv_POLICYREAD << 19) + \
-     (nv_NO_DA << 25) + (nv_ORDERLY << 26) + (nv_CLEAR_STCLEAR << 27) + \
-     (nv_READLOCKED << 28) + (nv_WRITTEN << 29) + (nv_PLATFORMCREATE << 30) + \
-     (nv_READ_STCLEAR << 31))
-#endif // NO_BIT_FIELD_STRUCTURES
-/* Table 2:206 - Definition of TPMS_NV_PUBLIC Structure  */
+} TPMS_NV_PIN_COUNTER_PARAMETERS;                   /* Structure */
+
+/* Table 2:208 - Definition of TPMA_NV Bits */
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_NV {                            // Table 2:208
+    unsigned    PPWRITE              : 1;
+    unsigned    OWNERWRITE           : 1;
+    unsigned    AUTHWRITE            : 1;
+    unsigned    POLICYWRITE          : 1;
+    unsigned    TPM_NT               : 4;
+    unsigned    Reserved_bits_at_8   : 2;
+    unsigned    POLICY_DELETE        : 1;
+    unsigned    WRITELOCKED          : 1;
+    unsigned    WRITEALL             : 1;
+    unsigned    WRITEDEFINE          : 1;
+    unsigned    WRITE_STCLEAR        : 1;
+    unsigned    GLOBALLOCK           : 1;
+    unsigned    PPREAD               : 1;
+    unsigned    OWNERREAD            : 1;
+    unsigned    AUTHREAD             : 1;
+    unsigned    POLICYREAD           : 1;
+    unsigned    Reserved_bits_at_20  : 5;
+    unsigned    NO_DA                : 1;
+    unsigned    ORDERLY              : 1;
+    unsigned    CLEAR_STCLEAR        : 1;
+    unsigned    READLOCKED           : 1;
+    unsigned    WRITTEN              : 1;
+    unsigned    PLATFORMCREATE       : 1;
+    unsigned    READ_STCLEAR         : 1;
+} TPMA_NV;                                          /* Bits */
+// This is the initializer for a TPMA_NV structure
+#define TPMA_NV_INITIALIZER(						\
+			    ppwrite,        ownerwrite,     authwrite,      policywrite, \
+			    tpm_nt,         bits_at_8,      policy_delete,  writelocked, \
+			    writeall,       writedefine,    write_stclear,  globallock, \
+			    ppread,         ownerread,      authread,       policyread, \
+			    bits_at_20,     no_da,          orderly,        clear_stclear, \
+			    readlocked,     written,        platformcreate, read_stclear) \
+    {ppwrite,        ownerwrite,     authwrite,      policywrite,	\
+	    tpm_nt,         bits_at_8,      policy_delete,  writelocked, \
+	    writeall,       writedefine,    write_stclear,  globallock, \
+	    ppread,         ownerread,      authread,       policyread, \
+	    bits_at_20,     no_da,          orderly,        clear_stclear, \
+	    readlocked,     written,        platformcreate, read_stclear}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:208 TPMA_NV using bit masking
+typedef UINT32                  TPMA_NV;
+#define TPMA_NV_PPWRITE         ((TPMA_NV)1 << 0)
+#define TPMA_NV_OWNERWRITE      ((TPMA_NV)1 << 1)
+#define TPMA_NV_AUTHWRITE       ((TPMA_NV)1 << 2)
+#define TPMA_NV_POLICYWRITE     ((TPMA_NV)1 << 3)
+#define TPMA_NV_TPM_NT_SHIFT    4
+#define TPMA_NV_TPM_NT          ((TPMA_NV)0xf << 4)
+#define TPMA_NV_POLICY_DELETE   ((TPMA_NV)1 << 10)
+#define TPMA_NV_WRITELOCKED     ((TPMA_NV)1 << 11)
+#define TPMA_NV_WRITEALL        ((TPMA_NV)1 << 12)
+#define TPMA_NV_WRITEDEFINE     ((TPMA_NV)1 << 13)
+#define TPMA_NV_WRITE_STCLEAR   ((TPMA_NV)1 << 14)
+#define TPMA_NV_GLOBALLOCK      ((TPMA_NV)1 << 15)
+#define TPMA_NV_PPREAD          ((TPMA_NV)1 << 16)
+#define TPMA_NV_OWNERREAD       ((TPMA_NV)1 << 17)
+#define TPMA_NV_AUTHREAD        ((TPMA_NV)1 << 18)
+#define TPMA_NV_POLICYREAD      ((TPMA_NV)1 << 19)
+#define TPMA_NV_NO_DA           ((TPMA_NV)1 << 25)
+#define TPMA_NV_ORDERLY         ((TPMA_NV)1 << 26)
+#define TPMA_NV_CLEAR_STCLEAR   ((TPMA_NV)1 << 27)
+#define TPMA_NV_READLOCKED      ((TPMA_NV)1 << 28)
+#define TPMA_NV_WRITTEN         ((TPMA_NV)1 << 29)
+#define TPMA_NV_PLATFORMCREATE  ((TPMA_NV)1 << 30)
+#define TPMA_NV_READ_STCLEAR    ((TPMA_NV)1 << 31)
+#define TPMA_NV_RESERVED        (0x00000300 | 0x01f00000)
+// This is the initializer for a TPMA_NV bit array.
+#define TPMA_NV_INITIALIZER(						\
+			    ppwrite,        ownerwrite,     authwrite,      policywrite, \
+			    tpm_nt,         bits_at_8,      policy_delete,  writelocked, \
+			    writeall,       writedefine,    write_stclear,  globallock, \
+			    ppread,         ownerread,      authread,       policyread, \
+			    bits_at_20,     no_da,          orderly,        clear_stclear, \
+			    readlocked,     written,        platformcreate, read_stclear) \
+    ((ppwrite << 0)         + (ownerwrite << 1)      +			\
+     (authwrite << 2)       + (policywrite << 3)     +			\
+     (tpm_nt << 4)          + (policy_delete << 10)  +			\
+     (writelocked << 11)    + (writeall << 12)       +			\
+     (writedefine << 13)    + (write_stclear << 14)  +			\
+     (globallock << 15)     + (ppread << 16)         +			\
+     (ownerread << 17)      + (authread << 18)       +			\
+     (policyread << 19)     + (no_da << 25)          +			\
+     (orderly << 26)        + (clear_stclear << 27)  +			\
+     (readlocked << 28)     + (written << 29)        +			\
+     (platformcreate << 30) + (read_stclear << 31))
+#endif // USE_BIT_FIELD_STRUCTURES
+
+/* Table 2:209 - Definition of TPMS_NV_PUBLIC Structure  */
 typedef struct {
     TPMI_RH_NV_INDEX        nvIndex;
     TPMI_ALG_HASH           nameAlg;
