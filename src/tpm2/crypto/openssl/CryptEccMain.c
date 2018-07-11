@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -536,18 +536,13 @@ BnPointMult(
 	}
     return  (OK ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT);
 }
-/* 10.2.12.2.20 BnEccGetPrivate() */
-/* This function gets random values with no more bits than are in q (the curve order) until it finds
-   a value (d) such that 1 <= d < q. This is the method of FIPS 186-3 Section B.1.2 'Key Pair
-   Generation by Testing Candidates' with minor optimizations to reduce the need for a local
-   parameter to hold the value of q - 2. */
-/* The execution time of this function is non-deterministic. However, the probability that the
-   search will take more than one iteration is very small. As a consequence, the weighted-average
-   run time for this function is significantly less than the method of key pair generation with
-   extra random bits. */
-/* Return Value Meaning */
-/* TRUE value generated */
-/* FALSE failure generating private key */
+/* 10.2.12.2.20	BnEccGetPrivate() */
+/* This function gets random values that are the size of the key plus 64 bits. The value is reduced
+   (mod (q - 1)) and incremented by 1 (q is the order of the curve. This produces a value (d) such
+   that 1 <= d < q. This is the method of FIPS 186-4 Section B.4.1 'Key Pair Generation Using Extra
+   Random Value Meaning */
+/* TRUE		value generated */
+/* FALSE	failure generating private key */
 BOOL
 BnEccGetPrivate(
 		bigNum                   dOut,      // OUT: the qualified random value
@@ -559,7 +554,6 @@ BnEccGetPrivate(
     bigConst                 order = CurveGetOrder(C);
     BOOL                     OK;
     UINT32                   orderBits = BnSizeInBits(order);
-#if 1 // This is the "extra bits" method of key generation
     UINT32                   orderBytes = BITS_TO_BYTES(orderBits);
     BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
     BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
@@ -568,16 +562,9 @@ BnEccGetPrivate(
     OK = OK && BnSubWord(nMinus1, order, 1);
     OK = OK && BnMod(bnExtraBits, nMinus1);
     OK = OK && BnAddWord(dOut, bnExtraBits, 1);
-#else
-    // This is the "testing candidates" version of key generation
-    do
-	{
-	    OK = BnGetRandomBits(dOut, BnSizeInBits(order), rand);
-	    OK = OK && BnAddWord(dOut, dOut, 1);
-	} while(OK && BnUnsignedCmp(dOut, order) >= 0);
-#endif
     return OK;
 }
+
 /* 10.2.11.2.21 BnEccGenerateKeyPair() */
 /* This function gets a private scalar from the source of random bits and does the point multiply to
    get the public key. */
@@ -739,16 +726,13 @@ CryptEccGenerateKey(
 	}
 #if FIPS_COMPLIANT
     // See if PWCT is required
-    if(OK && (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)))	// kgold
-		// if(OK && publicArea->objectAttributes.sign)
+    if(OK && (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)))
 	{
 	    ECC_NUM(bnT);
 	    ECC_NUM(bnS);
 	    TPM2B_DIGEST    digest;
 	    TEST(TPM_ALG_ECDSA);
-	    digest.t.size =
-		(UINT16)BITS_TO_BYTES(BnSizeInBits(CurveGetPrime(
-								 AccessCurveData(E))));
+	    digest.t.size = MIN(sensitive->sensitive.ecc.t.size, sizeof(digest.t.buffer));
 	    // Get a random value to sign using the built in DRBG state
 	    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
 	    BnSignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
