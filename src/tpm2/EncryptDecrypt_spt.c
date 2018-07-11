@@ -3,7 +3,7 @@
 /*			 	Encrypt Decrypt Support 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EncryptDecrypt_spt.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: EncryptDecrypt_spt.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -63,7 +63,7 @@
 #include "Tpm.h"
 #include "EncryptDecrypt_fp.h"
 #include "EncryptDecrypt_spt.h"
-#ifdef TPM_CC_EncryptDecrypt2
+#if CC_EncryptDecrypt2
 /* Error Returns Meaning */
 /* TPM_RC_KEY is not a symmetric decryption key with both public and private portions loaded */
 /* TPM_RC_SIZE IvIn size is incompatible with the block cipher mode; or inData size is not an even

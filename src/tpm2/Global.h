@@ -1021,7 +1021,7 @@ extern UINT32           s_decryptSessionIndex;
 /* Index of a session used for audit */
 extern UINT32           s_auditSessionIndex;
 /* The cpHash for command audit */
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
 extern TPM2B_DIGEST    s_cpHashForCommandAudit;
 #endif
 extern BOOL             s_DAPendingOnNV;

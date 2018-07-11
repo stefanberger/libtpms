@@ -2730,14 +2730,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += TPM_HANDLE_Marshal(&s_decryptSessionIndex, buffer, size);
     written += TPM_HANDLE_Marshal(&s_auditSessionIndex, buffer, size);
 
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     /* s_cpHashForCommandAudit: seems not used; better to write it */
     written += TPM2B_DIGEST_Marshal(&s_cpHashForCommandAudit, buffer, size);
 #endif
@@ -3111,7 +3111,7 @@ skip_da:
         rc = TPM_HANDLE_Unmarshal(&s_auditSessionIndex, buffer, size);
     }
 
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -3120,7 +3120,7 @@ skip_da:
         BLOCK_SKIP_READ(skip_cc_getcommandauditdigest, needs_block, buffer, size,
                         "Volatile state", "s_cpHashForCommandAudit");
     }
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_DIGEST_Unmarshal(&s_cpHashForCommandAudit, buffer, size);
     }

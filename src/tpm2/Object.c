@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Object.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -519,7 +519,7 @@ AllocateSequenceSlot(
 /* This function creates an internal HMAC sequence object. */
 /* Error Returns Meaning */
 /* TPM_RC_OBJECT_MEMORY if there is no free slot for an object */
-#if defined TPM_CC_HMAC_Start || defined TPM_CC_MAC_Start
+#if CC_HMAC_Start || CC_MAC_Start
 TPM_RC
 ObjectCreateHMACSequence(
 			 TPMI_ALG_HASH    hashAlg,       // IN: hash algorithm

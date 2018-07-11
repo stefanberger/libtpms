@@ -3,7 +3,7 @@
 /*			 	Startup Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: StartupCommands.c 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: StartupCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -115,7 +115,7 @@ _TPM_Init(
 }
 #include "Tpm.h"
 #include "Startup_fp.h"
-#ifdef TPM_CC_Startup  // Conditional expansion of this file
+#if CC_Startup	 // Conditional expansion of this file
 TPM_RC
 TPM2_Startup(
 	     Startup_In      *in             // IN: input parameter list
@@ -280,7 +280,7 @@ TPM2_Startup(
 #endif // CC_Startup
 #include "Tpm.h"
 #include "Shutdown_fp.h"
-#ifdef TPM_CC_Shutdown  // Conditional expansion of this file
+#if CC_Shutdown  // Conditional expansion of this file
 TPM_RC
 TPM2_Shutdown(
 	      Shutdown_In     *in             // IN: input parameter list

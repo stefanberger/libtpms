@@ -3,7 +3,7 @@
 /*			    Clocks and Timers	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ClockCommands.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: ClockCommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "ReadClock_fp.h"
-#ifdef TPM_CC_ReadClock  // Conditional expansion of this file
+#if CC_ReadClock  // Conditional expansion of this file
 TPM_RC
 TPM2_ReadClock(
 	       ReadClock_Out   *out            // OUT: output parameter list
@@ -75,7 +75,7 @@ TPM2_ReadClock(
 #endif // CC_ReadClock
 #include "Tpm.h"
 #include "ClockSet_fp.h"
-#ifdef TPM_CC_ClockSet  // Conditional expansion of this file
+#if CC_ClockSet  // Conditional expansion of this file
 TPM_RC
 TPM2_ClockSet(
 	      ClockSet_In     *in             // IN: input parameter list
@@ -97,7 +97,7 @@ TPM2_ClockSet(
 #endif // CC_ClockSet
 #include "Tpm.h"
 #include "ClockRateAdjust_fp.h"
-#ifdef TPM_CC_ClockRateAdjust  // Conditional expansion of this file
+#if CC_ClockRateAdjust  // Conditional expansion of this file
 TPM_RC
 TPM2_ClockRateAdjust(
 		     ClockRateAdjust_In  *in             // IN: input parameter list

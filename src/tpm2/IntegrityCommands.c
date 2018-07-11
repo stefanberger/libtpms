@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Integrity Collection (PCR)   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: IntegrityCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: IntegrityCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "PCR_Extend_fp.h"
-#ifdef TPM_CC_PCR_Extend  // Conditional expansion of this file
+#if CC_PCR_Extend  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_Extend(
 		PCR_Extend_In   *in             // IN: input parameter list
@@ -99,7 +99,7 @@ TPM2_PCR_Extend(
 #endif // CC_PCR_Extend
 #include "Tpm.h"
 #include "PCR_Event_fp.h"
-#ifdef TPM_CC_PCR_Event  // Conditional expansion of this file
+#if CC_PCR_Event  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_Event(
 	       PCR_Event_In    *in,            // IN: input parameter list
@@ -141,7 +141,7 @@ TPM2_PCR_Event(
 #endif // CC_PCR_Event
 #include "Tpm.h"
 #include "PCR_Read_fp.h"
-#ifdef TPM_CC_PCR_Read  // Conditional expansion of this file
+#if CC_PCR_Read  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_Read(
 	      PCR_Read_In     *in,            // IN: input parameter list
@@ -158,7 +158,7 @@ TPM2_PCR_Read(
 #endif // CC_PCR_Read
 #include "Tpm.h"
 #include "PCR_Allocate_fp.h"
-#ifdef TPM_CC_PCR_Allocate  // Conditional expansion of this file
+#if CC_PCR_Allocate  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_Allocate(
 		  PCR_Allocate_In     *in,            // IN: input parameter list
@@ -191,7 +191,7 @@ TPM2_PCR_Allocate(
 #endif // CC_PCR_Allocate
 #include "Tpm.h"
 #include "PCR_SetAuthPolicy_fp.h"
-#ifdef TPM_CC_PCR_SetAuthPolicy  // Conditional expansion of this file
+#if CC_PCR_SetAuthPolicy  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_SetAuthPolicy(
 		       PCR_SetAuthPolicy_In    *in             // IN: input parameter list
@@ -220,7 +220,7 @@ TPM2_PCR_SetAuthPolicy(
 #endif // CC_PCR_SetAuthPolicy
 #include "Tpm.h"
 #include "PCR_SetAuthValue_fp.h"
-#ifdef TPM_CC_PCR_SetAuthValue  // Conditional expansion of this file
+#if CC_PCR_SetAuthValue  // Conditional expansion of this file
 // CC_PCR_SetAuthPolicy
 TPM_RC
 TPM2_PCR_SetAuthValue(
@@ -246,7 +246,7 @@ TPM2_PCR_SetAuthValue(
 #endif // CC_PCR_SetAuthValue
 #include "Tpm.h"
 #include "PCR_Reset_fp.h"
-#ifdef TPM_CC_PCR_Reset  // Conditional expansion of this file
+#if CC_PCR_Reset  // Conditional expansion of this file
 TPM_RC
 TPM2_PCR_Reset(
 	       PCR_Reset_In    *in             // IN: input parameter list

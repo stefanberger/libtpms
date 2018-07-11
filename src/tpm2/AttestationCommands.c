@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   Attestation Commands  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AttestationCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: AttestationCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "Certify_fp.h"
-#ifdef TPM_CC_Certify  // Conditional expansion of this file
+#if CC_Certify  // Conditional expansion of this file
 TPM_RC
 TPM2_Certify(
 	     Certify_In      *in,            // IN: input parameter list
@@ -99,7 +99,7 @@ TPM2_Certify(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "CertifyCreation_fp.h"
-#ifdef TPM_CC_CertifyCreation  // Conditional expansion of this file
+#if CC_CertifyCreation  // Conditional expansion of this file
 TPM_RC
 TPM2_CertifyCreation(
 		     CertifyCreation_In      *in,            // IN: input parameter list
@@ -144,7 +144,7 @@ TPM2_CertifyCreation(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "Quote_fp.h"
-#ifdef TPM_CC_Quote  // Conditional expansion of this file
+#if CC_Quote  // Conditional expansion of this file
 TPM_RC
 TPM2_Quote(
 	   Quote_In        *in,            // IN: input parameter list
@@ -188,7 +188,7 @@ TPM2_Quote(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "GetSessionAuditDigest_fp.h"
-#ifdef TPM_CC_GetSessionAuditDigest  // Conditional expansion of this file
+#if CC_GetSessionAuditDigest  // Conditional expansion of this file
 TPM_RC
 TPM2_GetSessionAuditDigest(
 			   GetSessionAuditDigest_In    *in,            // IN: input parameter list
@@ -226,7 +226,7 @@ TPM2_GetSessionAuditDigest(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "GetCommandAuditDigest_fp.h"
-#ifdef TPM_CC_GetCommandAuditDigest  // Conditional expansion of this file
+#if CC_GetCommandAuditDigest  // Conditional expansion of this file
 TPM_RC
 TPM2_GetCommandAuditDigest(
 			   GetCommandAuditDigest_In    *in,            // IN: input parameter list
@@ -269,7 +269,7 @@ TPM2_GetCommandAuditDigest(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "GetTime_fp.h"
-#ifdef TPM_CC_GetTime  // Conditional expansion of this file
+#if CC_GetTime  // Conditional expansion of this file
 TPM_RC
 TPM2_GetTime(
 	     GetTime_In      *in,            // IN: input parameter list

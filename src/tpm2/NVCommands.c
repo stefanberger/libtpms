@@ -3,7 +3,7 @@
 /*			    Non-Volatile Storage 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: NVCommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "NV_DefineSpace_fp.h"
-#ifdef TPM_CC_NV_DefineSpace  // Conditional expansion of this file
+#if CC_NV_DefineSpace  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_DefineSpace(
 		    NV_DefineSpace_In   *in             // IN: input parameter list
@@ -215,7 +215,7 @@ TPM2_NV_DefineSpace(
 #endif // CC_NV_DefineSpace
 #include "Tpm.h"
 #include "NV_UndefineSpace_fp.h"
-#ifdef TPM_CC_NV_UndefineSpace  // Conditional expansion of this file
+#if CC_NV_UndefineSpace  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_UndefineSpace(
 		      NV_UndefineSpace_In     *in             // IN: input parameter list
@@ -240,7 +240,7 @@ TPM2_NV_UndefineSpace(
 #include "Tpm.h"
 #include "NV_UndefineSpaceSpecial_fp.h"
 #include "SessionProcess_fp.h"
-#ifdef TPM_CC_NV_UndefineSpaceSpecial  // Conditional expansion of this file
+#if CC_NV_UndefineSpaceSpecial  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_UndefineSpaceSpecial(
 			     NV_UndefineSpaceSpecial_In  *in             // IN: input parameter list
@@ -266,7 +266,7 @@ TPM2_NV_UndefineSpaceSpecial(
 #endif // CC_NV_UndefineSpaceSpecial
 #include "Tpm.h"
 #include "NV_ReadPublic_fp.h"
-#ifdef TPM_CC_NV_ReadPublic  // Conditional expansion of this file
+#if CC_NV_ReadPublic  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_ReadPublic(
 		   NV_ReadPublic_In    *in,            // IN: input parameter list
@@ -284,7 +284,7 @@ TPM2_NV_ReadPublic(
 #endif // CC_NV_ReadPublic
 #include "Tpm.h"
 #include "NV_Write_fp.h"
-#ifdef TPM_CC_NV_Write  // Conditional expansion of this file
+#if CC_NV_Write  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_Write(
 	      NV_Write_In     *in             // IN: input parameter list
@@ -330,7 +330,7 @@ TPM2_NV_Write(
 #endif // CC_NV_Write
 #include "Tpm.h"
 #include "NV_Increment_fp.h"
-#ifdef TPM_CC_NV_Increment  // Conditional expansion of this file
+#if CC_NV_Increment  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_Increment(
 		  NV_Increment_In     *in             // IN: input parameter list
@@ -381,7 +381,7 @@ TPM2_NV_Increment(
 #endif // CC_NV_Increment
 #include "Tpm.h"
 #include "NV_Extend_fp.h"
-#ifdef TPM_CC_NV_Extend  // Conditional expansion of this file
+#if CC_NV_Extend  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_Extend(
 	       NV_Extend_In    *in             // IN: input parameter list
@@ -431,7 +431,7 @@ TPM2_NV_Extend(
 #endif // CC_NV_Extend
 #include "Tpm.h"
 #include "NV_SetBits_fp.h"
-#ifdef TPM_CC_NV_SetBits  // Conditional expansion of this file
+#if CC_NV_SetBits  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_SetBits(
 		NV_SetBits_In   *in             // IN: input parameter list
@@ -467,7 +467,7 @@ TPM2_NV_SetBits(
 #endif // CC_NV_SetBits
 #include "Tpm.h"
 #include "NV_WriteLock_fp.h"
-#ifdef TPM_CC_NV_WriteLock  // Conditional expansion of this file
+#if CC_NV_WriteLock  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_WriteLock(
 		  NV_WriteLock_In     *in             // IN: input parameter list
@@ -506,7 +506,7 @@ TPM2_NV_WriteLock(
 #endif // CC_NV_WriteLock
 #include "Tpm.h"
 #include "NV_GlobalWriteLock_fp.h"
-#ifdef TPM_CC_NV_GlobalWriteLock  // Conditional expansion of this file
+#if CC_NV_GlobalWriteLock  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_GlobalWriteLock(
 			NV_GlobalWriteLock_In   *in             // IN: input parameter list
@@ -521,7 +521,7 @@ TPM2_NV_GlobalWriteLock(
 #endif // CC_NV_GlobalWriteLock
 #include "Tpm.h"
 #include "NV_Read_fp.h"
-#ifdef TPM_CC_NV_Read  // Conditional expansion of this file
+#if CC_NV_Read  // Conditional expansion of this file
 /* TPM_RC_NV_AUTHORIZATION the authorization was valid but the authorizing entity (authHandle) is
    not allowed to read from the Index referenced by nvIndex */
 /* TPM_RC_NV_LOCKED the Index referenced by nvIndex is read locked */
@@ -564,7 +564,7 @@ TPM2_NV_Read(
 #endif // CC_NV_Read
 #include "Tpm.h"
 #include "NV_ReadLock_fp.h"
-#ifdef TPM_CC_NV_ReadLock  // Conditional expansion of this file
+#if CC_NV_ReadLock  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_ReadLock(
 		 NV_ReadLock_In  *in             // IN: input parameter list
@@ -603,7 +603,7 @@ TPM2_NV_ReadLock(
 #endif // CC_NV_ReadLock
 #include "Tpm.h"
 #include "NV_ChangeAuth_fp.h"
-#ifdef TPM_CC_NV_ChangeAuth  // Conditional expansion of this file
+#if CC_NV_ChangeAuth  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_ChangeAuth(
 		   NV_ChangeAuth_In    *in             // IN: input parameter list
@@ -625,7 +625,7 @@ TPM2_NV_ChangeAuth(
 #include "Tpm.h"
 #include "Attest_spt_fp.h"
 #include "NV_Certify_fp.h"
-#ifdef TPM_CC_NV_Certify  // Conditional expansion of this file
+#if CC_NV_Certify  // Conditional expansion of this file
 TPM_RC
 TPM2_NV_Certify(
 		NV_Certify_In   *in,            // IN: input parameter list

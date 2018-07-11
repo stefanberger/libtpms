@@ -61,17 +61,17 @@
 
 #include "Tpm.h"
 #include "EncryptDecrypt_fp.h"
-#ifdef TPM_CC_EncryptDecrypt2
+#if CC_EncryptDecrypt2
 #include  "EncryptDecrypt_spt_fp.h"
 #endif
-#ifdef TPM_CC_EncryptDecrypt  // Conditional expansion of this file
+#if CC_EncryptDecrypt  // Conditional expansion of this file
 TPM_RC
 TPM2_EncryptDecrypt(
 		    EncryptDecrypt_In   *in,            // IN: input parameter list
 		    EncryptDecrypt_Out  *out            // OUT: output parameter list
 		    )
 {
-#ifdef TPM_CC_EncryptDecrypt2
+#if CC_EncryptDecrypt2
     return EncryptDecryptShared(in->keyHandle, in->decrypt, in->mode,
 				&in->ivIn, &in->inData, out);
 #else
@@ -168,7 +168,7 @@ TPM2_EncryptDecrypt(
 #include "Tpm.h"
 #include "EncryptDecrypt2_fp.h"
 #include "EncryptDecrypt_spt_fp.h"
-#ifdef TPM_CC_EncryptDecrypt2  // Conditional expansion of this file
+#if CC_EncryptDecrypt2  // Conditional expansion of this file
 TPM_RC
 TPM2_EncryptDecrypt2(
 		     EncryptDecrypt2_In   *in,            // IN: input parameter list
@@ -201,7 +201,7 @@ TPM2_EncryptDecrypt2(
 #endif // CC_EncryptDecrypt2
 #include "Tpm.h"
 #include "Hash_fp.h"
-#ifdef TPM_CC_Hash  // Conditional expansion of this file
+#if CC_Hash  // Conditional expansion of this file
 TPM_RC
 TPM2_Hash(
 	  Hash_In         *in,            // IN: input parameter list
@@ -244,7 +244,7 @@ TPM2_Hash(
 #endif // CC_Hash
 #include "Tpm.h"
 #include "HMAC_fp.h"
-#ifdef TPM_CC_HMAC  // Conditional expansion of this file
+#if CC_HMAC  // Conditional expansion of this file
 TPM_RC
 TPM2_HMAC(
 	  HMAC_In         *in,            // IN: input parameter list
@@ -298,7 +298,7 @@ TPM2_HMAC(
 
 #include "Tpm.h"
 #include "MAC_fp.h"
-#if defined TPM_CC_MAC  // Conditional expansion of this file
+#if CC_MAC  // Conditional expansion of this file
 /* Error Returns Meaning */
 /* TPM_RC_ATTRIBUTES key referenced by handle is a restricted key */
 /* TPM_RC_KEY handle does not reference a signing key */

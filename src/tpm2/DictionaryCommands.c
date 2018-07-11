@@ -3,7 +3,7 @@
 /*			  Dictionary Attack Functions  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DictionaryCommands.c 953 2017-03-06 20:31:40Z kgoldman $	*/
+/*            $Id: DictionaryCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "DictionaryAttackLockReset_fp.h"
-#ifdef TPM_CC_DictionaryAttackLockReset  // Conditional expansion of this file
+#if CC_DictionaryAttackLockReset  // Conditional expansion of this file
 TPM_RC
 TPM2_DictionaryAttackLockReset(
 			       DictionaryAttackLockReset_In    *in             // IN: input parameter list
@@ -81,7 +81,7 @@ TPM2_DictionaryAttackLockReset(
 #endif // CC_DictionaryAttackLockReset
 #include "Tpm.h"
 #include "DictionaryAttackParameters_fp.h"
-#ifdef TPM_CC_DictionaryAttackParameters  // Conditional expansion of this file
+#if CC_DictionaryAttackParameters  // Conditional expansion of this file
 TPM_RC
 TPM2_DictionaryAttackParameters(
 				DictionaryAttackParameters_In   *in             // IN: input parameter list

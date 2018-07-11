@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Signing and Signature Verification	   			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SigningCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: SigningCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "VerifySignature_fp.h"
-#ifdef TPM_CC_VerifySignature  // Conditional expansion of this file
+#if CC_VerifySignature  // Conditional expansion of this file
 TPM_RC
 TPM2_VerifySignature(
 		     VerifySignature_In      *in,            // IN: input parameter list
@@ -102,7 +102,7 @@ TPM2_VerifySignature(
 #endif // CC_VerifySignature
 #include "Tpm.h"
 #include "Sign_fp.h"
-#ifdef TPM_CC_Sign  // Conditional expansion of this file
+#if CC_Sign  // Conditional expansion of this file
 #include "Attest_spt_fp.h"
 TPM_RC
 TPM2_Sign(

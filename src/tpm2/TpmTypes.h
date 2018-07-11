@@ -1960,7 +1960,7 @@ typedef struct {
     TPM_AT                  tag;
     UINT32                  data;
 } TPMS_AC_OUTPUT;
-#ifdef TPM_CC_AC_GetCapability
+#if CC_AC_GetCapability
 /* Table 2:218 - Definition of TPML_AC_CAPABILITIES Structure  */
 typedef struct {
     UINT32                  count;

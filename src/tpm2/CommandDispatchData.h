@@ -328,7 +328,7 @@ const MARSHAL_t MarshalArray[] = {
 #define TPMI_YES_NO_P_MARSHAL               UINT8_P_MARSHAL
 #define TPM_RC_P_MARSHAL                    UINT32_P_MARSHAL
 
-#if CC_Startup == YES
+#if CC_Startup
 #include "Startup_fp.h"
 typedef TPM_RC  (Startup_Entry)(
 				Startup_In *in
@@ -354,7 +354,7 @@ Startup_COMMAND_DESCRIPTOR_t _StartupData = {
 #else
 #define _StartupDataAddress 0
 #endif
-#if CC_Shutdown == YES
+#if CC_Shutdown
 #include "Shutdown_fp.h"
 typedef TPM_RC  (Shutdown_Entry)(
 				 Shutdown_In *in
@@ -380,7 +380,7 @@ Shutdown_COMMAND_DESCRIPTOR_t _ShutdownData = {
 #else
 #define _ShutdownDataAddress 0
 #endif
-#if CC_SelfTest == YES
+#if CC_SelfTest
 #include "SelfTest_fp.h"
 typedef TPM_RC  (SelfTest_Entry)(
 				 SelfTest_In *in
@@ -406,7 +406,7 @@ SelfTest_COMMAND_DESCRIPTOR_t _SelfTestData = {
 #else
 #define _SelfTestDataAddress 0
 #endif
-#if CC_IncrementalSelfTest == YES
+#if CC_IncrementalSelfTest
 #include "IncrementalSelfTest_fp.h"
 typedef TPM_RC  (IncrementalSelfTest_Entry)(
 					    IncrementalSelfTest_In *in,
@@ -434,7 +434,7 @@ IncrementalSelfTest_COMMAND_DESCRIPTOR_t _IncrementalSelfTestData = {
 #else
 #define _IncrementalSelfTestDataAddress 0
 #endif
-#if CC_GetTestResult == YES
+#if CC_GetTestResult
 #include "GetTestResult_fp.h"
 typedef TPM_RC  (GetTestResult_Entry)(
 				      GetTestResult_Out *out
@@ -462,7 +462,7 @@ GetTestResult_COMMAND_DESCRIPTOR_t _GetTestResultData = {
 #else
 #define _GetTestResultDataAddress 0
 #endif
-#if CC_StartAuthSession == YES
+#if CC_StartAuthSession
 #include "StartAuthSession_fp.h"
 typedef TPM_RC  (StartAuthSession_Entry)(
 					 StartAuthSession_In *in,
@@ -504,7 +504,7 @@ StartAuthSession_COMMAND_DESCRIPTOR_t _StartAuthSessionData = {
 #else
 #define _StartAuthSessionDataAddress 0
 #endif
-#if CC_PolicyRestart == YES
+#if CC_PolicyRestart
 #include "PolicyRestart_fp.h"
 typedef TPM_RC  (PolicyRestart_Entry)(
 				      PolicyRestart_In *in
@@ -530,7 +530,7 @@ PolicyRestart_COMMAND_DESCRIPTOR_t _PolicyRestartData = {
 #else
 #define _PolicyRestartDataAddress 0
 #endif
-#if CC_Create == YES
+#if CC_Create
 #include "Create_fp.h"
 typedef TPM_RC  (Create_Entry)(
 			       Create_In *in,
@@ -574,7 +574,7 @@ Create_COMMAND_DESCRIPTOR_t _CreateData = {
 #else
 #define _CreateDataAddress 0
 #endif
-#if CC_Load == YES
+#if CC_Load
 #include "Load_fp.h"
 typedef TPM_RC  (Load_Entry)(
 			     Load_In *in,
@@ -608,7 +608,7 @@ Load_COMMAND_DESCRIPTOR_t _LoadData = {
 #else
 #define _LoadDataAddress 0
 #endif
-#if CC_LoadExternal == YES
+#if CC_LoadExternal
 #include "LoadExternal_fp.h"
 typedef TPM_RC  (LoadExternal_Entry)(
 				     LoadExternal_In *in,
@@ -642,7 +642,7 @@ LoadExternal_COMMAND_DESCRIPTOR_t _LoadExternalData = {
 #else
 #define _LoadExternalDataAddress 0
 #endif
-#if CC_ReadPublic == YES
+#if CC_ReadPublic
 #include "ReadPublic_fp.h"
 typedef TPM_RC  (ReadPublic_Entry)(
 				   ReadPublic_In *in,
@@ -674,7 +674,7 @@ ReadPublic_COMMAND_DESCRIPTOR_t _ReadPublicData = {
 #else
 #define _ReadPublicDataAddress 0
 #endif
-#if CC_ActivateCredential == YES
+#if CC_ActivateCredential
 #include "ActivateCredential_fp.h"
 typedef TPM_RC  (ActivateCredential_Entry)(
 					   ActivateCredential_In *in,
@@ -708,7 +708,7 @@ ActivateCredential_COMMAND_DESCRIPTOR_t _ActivateCredentialData = {
 #else
 #define _ActivateCredentialDataAddress 0
 #endif
-#if CC_MakeCredential == YES
+#if CC_MakeCredential
 #include "MakeCredential_fp.h"
 typedef TPM_RC  (MakeCredential_Entry)(
 				       MakeCredential_In *in,
@@ -742,7 +742,7 @@ MakeCredential_COMMAND_DESCRIPTOR_t _MakeCredentialData = {
 #else
 #define _MakeCredentialDataAddress 0
 #endif
-#if CC_Unseal == YES
+#if CC_Unseal
 #include "Unseal_fp.h"
 typedef TPM_RC  (Unseal_Entry)(
 			       Unseal_In *in,
@@ -770,7 +770,7 @@ Unseal_COMMAND_DESCRIPTOR_t _UnsealData = {
 #else
 #define _UnsealDataAddress 0
 #endif
-#if CC_ObjectChangeAuth == YES
+#if CC_ObjectChangeAuth
 #include "ObjectChangeAuth_fp.h"
 typedef TPM_RC  (ObjectChangeAuth_Entry)(
 					 ObjectChangeAuth_In *in,
@@ -802,7 +802,7 @@ ObjectChangeAuth_COMMAND_DESCRIPTOR_t _ObjectChangeAuthData = {
 #else
 #define _ObjectChangeAuthDataAddress 0
 #endif
-#if CC_CreateLoaded == YES
+#if CC_CreateLoaded
 #include "CreateLoaded_fp.h"
 typedef TPM_RC  (CreateLoaded_Entry)(
 				     CreateLoaded_In *in,
@@ -840,7 +840,7 @@ CreateLoaded_COMMAND_DESCRIPTOR_t _CreateLoadedData = {
 #else
 #define _CreateLoadedDataAddress 0
 #endif
-#if CC_Duplicate == YES
+#if CC_Duplicate
 #include "Duplicate_fp.h"
 typedef TPM_RC  (Duplicate_Entry)(
 				  Duplicate_In *in,
@@ -878,7 +878,7 @@ Duplicate_COMMAND_DESCRIPTOR_t _DuplicateData = {
 #else
 #define _DuplicateDataAddress 0
 #endif
-#if CC_Rewrap == YES
+#if CC_Rewrap
 #include "Rewrap_fp.h"
 typedef TPM_RC  (Rewrap_Entry)(
 			       Rewrap_In *in,
@@ -916,7 +916,7 @@ Rewrap_COMMAND_DESCRIPTOR_t _RewrapData = {
 #else
 #define _RewrapDataAddress 0
 #endif
-#if CC_Import == YES
+#if CC_Import
 #include "Import_fp.h"
 typedef TPM_RC  (Import_Entry)(
 			       Import_In *in,
@@ -954,7 +954,7 @@ Import_COMMAND_DESCRIPTOR_t _ImportData = {
 #else
 #define _ImportDataAddress 0
 #endif
-#if CC_RSA_Encrypt == YES
+#if CC_RSA_Encrypt
 #include "RSA_Encrypt_fp.h"
 typedef TPM_RC  (RSA_Encrypt_Entry)(
 				    RSA_Encrypt_In *in,
@@ -988,7 +988,7 @@ RSA_Encrypt_COMMAND_DESCRIPTOR_t _RSA_EncryptData = {
 #else
 #define _RSA_EncryptDataAddress 0
 #endif
-#if CC_RSA_Decrypt == YES
+#if CC_RSA_Decrypt
 #include "RSA_Decrypt_fp.h"
 typedef TPM_RC  (RSA_Decrypt_Entry)(
 				    RSA_Decrypt_In *in,
@@ -1022,7 +1022,7 @@ RSA_Decrypt_COMMAND_DESCRIPTOR_t _RSA_DecryptData = {
 #else
 #define _RSA_DecryptDataAddress 0
 #endif
-#if CC_ECDH_KeyGen == YES
+#if CC_ECDH_KeyGen
 #include "ECDH_KeyGen_fp.h"
 typedef TPM_RC  (ECDH_KeyGen_Entry)(
 				    ECDH_KeyGen_In *in,
@@ -1052,7 +1052,7 @@ ECDH_KeyGen_COMMAND_DESCRIPTOR_t _ECDH_KeyGenData = {
 #else
 #define _ECDH_KeyGenDataAddress 0
 #endif
-#if CC_ECDH_ZGen == YES
+#if CC_ECDH_ZGen
 #include "ECDH_ZGen_fp.h"
 typedef TPM_RC  (ECDH_ZGen_Entry)(
 				  ECDH_ZGen_In *in,
@@ -1082,7 +1082,7 @@ ECDH_ZGen_COMMAND_DESCRIPTOR_t _ECDH_ZGenData = {
 #else
 #define _ECDH_ZGenDataAddress 0
 #endif
-#if CC_ECC_Parameters == YES
+#if CC_ECC_Parameters
 #include "ECC_Parameters_fp.h"
 typedef TPM_RC  (ECC_Parameters_Entry)(
 				       ECC_Parameters_In *in,
@@ -1110,7 +1110,7 @@ ECC_Parameters_COMMAND_DESCRIPTOR_t _ECC_ParametersData = {
 #else
 #define _ECC_ParametersDataAddress 0
 #endif
-#if CC_ZGen_2Phase == YES
+#if CC_ZGen_2Phase
 #include "ZGen_2Phase_fp.h"
 typedef TPM_RC  (ZGen_2Phase_Entry)(
 				    ZGen_2Phase_In *in,
@@ -1148,7 +1148,7 @@ ZGen_2Phase_COMMAND_DESCRIPTOR_t _ZGen_2PhaseData = {
 #else
 #define _ZGen_2PhaseDataAddress 0
 #endif
-#if CC_EncryptDecrypt == YES
+#if CC_EncryptDecrypt
 #include "EncryptDecrypt_fp.h"
 typedef TPM_RC  (EncryptDecrypt_Entry)(
 				       EncryptDecrypt_In *in,
@@ -1186,7 +1186,7 @@ EncryptDecrypt_COMMAND_DESCRIPTOR_t _EncryptDecryptData = {
 #else
 #define _EncryptDecryptDataAddress 0
 #endif
-#if CC_EncryptDecrypt2 == YES
+#if CC_EncryptDecrypt2
 #include "EncryptDecrypt2_fp.h"
 typedef TPM_RC  (EncryptDecrypt2_Entry)(
 					EncryptDecrypt2_In *in,
@@ -1224,7 +1224,7 @@ EncryptDecrypt2_COMMAND_DESCRIPTOR_t _EncryptDecrypt2Data = {
 #else
 #define _EncryptDecrypt2DataAddress 0
 #endif
-#if CC_Hash == YES
+#if CC_Hash
 #include "Hash_fp.h"
 typedef TPM_RC  (Hash_Entry)(
 			     Hash_In *in,
@@ -1258,7 +1258,7 @@ Hash_COMMAND_DESCRIPTOR_t _HashData = {
 #else
 #define _HashDataAddress 0
 #endif
-#if CC_HMAC == YES
+#if CC_HMAC
 #include "HMAC_fp.h"
 typedef TPM_RC  (HMAC_Entry)(
 			     HMAC_In *in,
@@ -1290,7 +1290,7 @@ HMAC_COMMAND_DESCRIPTOR_t _HMACData = {
 #else
 #define _HMACDataAddress 0
 #endif
-#if CC_MAC == YES
+#if CC_MAC
 #include "MAC_fp.h"
 typedef TPM_RC  (MAC_Entry)(
 			    MAC_In *in,
@@ -1322,7 +1322,7 @@ MAC_COMMAND_DESCRIPTOR_t _MACData = {
 #else
 #define _MACDataAddress 0
 #endif
-#if CC_GetRandom == YES
+#if CC_GetRandom
 #include "GetRandom_fp.h"
 typedef TPM_RC  (GetRandom_Entry)(
 				  GetRandom_In *in,
@@ -1350,7 +1350,7 @@ GetRandom_COMMAND_DESCRIPTOR_t _GetRandomData = {
 #else
 #define _GetRandomDataAddress 0
 #endif
-#if CC_StirRandom == YES
+#if CC_StirRandom
 #include "StirRandom_fp.h"
 typedef TPM_RC  (StirRandom_Entry)(
 				   StirRandom_In *in
@@ -1376,7 +1376,7 @@ StirRandom_COMMAND_DESCRIPTOR_t _StirRandomData = {
 #else
 #define _StirRandomDataAddress 0
 #endif
-#if CC_HMAC_Start == YES
+#if CC_HMAC_Start
 #include "HMAC_Start_fp.h"
 typedef TPM_RC  (HMAC_Start_Entry)(
 				   HMAC_Start_In *in,
@@ -1408,7 +1408,7 @@ HMAC_Start_COMMAND_DESCRIPTOR_t _HMAC_StartData = {
 #else
 #define _HMAC_StartDataAddress 0
 #endif
-#if CC_MAC_Start == YES
+#if CC_MAC_Start
 #include "MAC_Start_fp.h"
 typedef TPM_RC  (MAC_Start_Entry)(
 				  MAC_Start_In *in,
@@ -1440,7 +1440,7 @@ MAC_Start_COMMAND_DESCRIPTOR_t _MAC_StartData = {
 #else
 #define _MAC_StartDataAddress 0
 #endif
-#if CC_HashSequenceStart == YES
+#if CC_HashSequenceStart
 #include "HashSequenceStart_fp.h"
 typedef TPM_RC  (HashSequenceStart_Entry)(
 					  HashSequenceStart_In *in,
@@ -1470,7 +1470,7 @@ HashSequenceStart_COMMAND_DESCRIPTOR_t _HashSequenceStartData = {
 #else
 #define _HashSequenceStartDataAddress 0
 #endif
-#if CC_SequenceUpdate == YES
+#if CC_SequenceUpdate
 #include "SequenceUpdate_fp.h"
 typedef TPM_RC  (SequenceUpdate_Entry)(
 				       SequenceUpdate_In *in
@@ -1498,7 +1498,7 @@ SequenceUpdate_COMMAND_DESCRIPTOR_t _SequenceUpdateData = {
 #else
 #define _SequenceUpdateDataAddress 0
 #endif
-#if CC_SequenceComplete == YES
+#if CC_SequenceComplete
 #include "SequenceComplete_fp.h"
 typedef TPM_RC  (SequenceComplete_Entry)(
 					 SequenceComplete_In *in,
@@ -1532,7 +1532,7 @@ SequenceComplete_COMMAND_DESCRIPTOR_t _SequenceCompleteData = {
 #else
 #define _SequenceCompleteDataAddress 0
 #endif
-#if CC_EventSequenceComplete == YES
+#if CC_EventSequenceComplete
 #include "EventSequenceComplete_fp.h"
 typedef TPM_RC  (EventSequenceComplete_Entry)(
 					      EventSequenceComplete_In *in,
@@ -1564,7 +1564,7 @@ EventSequenceComplete_COMMAND_DESCRIPTOR_t _EventSequenceCompleteData = {
 #else
 #define _EventSequenceCompleteDataAddress 0
 #endif
-#if CC_Certify == YES
+#if CC_Certify
 #include "Certify_fp.h"
 typedef TPM_RC  (Certify_Entry)(
 				Certify_In *in,
@@ -1600,7 +1600,7 @@ Certify_COMMAND_DESCRIPTOR_t _CertifyData = {
 #else
 #define _CertifyDataAddress 0
 #endif
-#if CC_CertifyCreation == YES
+#if CC_CertifyCreation
 #include "CertifyCreation_fp.h"
 typedef TPM_RC  (CertifyCreation_Entry)(
 					CertifyCreation_In *in,
@@ -1640,7 +1640,7 @@ CertifyCreation_COMMAND_DESCRIPTOR_t _CertifyCreationData = {
 #else
 #define _CertifyCreationDataAddress 0
 #endif
-#if CC_Quote == YES
+#if CC_Quote
 #include "Quote_fp.h"
 typedef TPM_RC  (Quote_Entry)(
 			      Quote_In *in,
@@ -1676,7 +1676,7 @@ Quote_COMMAND_DESCRIPTOR_t _QuoteData = {
 #else
 #define _QuoteDataAddress 0
 #endif
-#if CC_GetSessionAuditDigest == YES
+#if CC_GetSessionAuditDigest
 #include "GetSessionAuditDigest_fp.h"
 typedef TPM_RC  (GetSessionAuditDigest_Entry)(
 					      GetSessionAuditDigest_In *in,
@@ -1714,7 +1714,7 @@ GetSessionAuditDigest_COMMAND_DESCRIPTOR_t _GetSessionAuditDigestData = {
 #else
 #define _GetSessionAuditDigestDataAddress 0
 #endif
-#if CC_GetCommandAuditDigest == YES
+#if CC_GetCommandAuditDigest
 #include "GetCommandAuditDigest_fp.h"
 typedef TPM_RC  (GetCommandAuditDigest_Entry)(
 					      GetCommandAuditDigest_In *in,
@@ -1750,7 +1750,7 @@ GetCommandAuditDigest_COMMAND_DESCRIPTOR_t _GetCommandAuditDigestData = {
 #else
 #define _GetCommandAuditDigestDataAddress 0
 #endif
-#if CC_GetTime == YES
+#if CC_GetTime
 #include "GetTime_fp.h"
 typedef TPM_RC  (GetTime_Entry)(
 				GetTime_In *in,
@@ -1786,7 +1786,7 @@ GetTime_COMMAND_DESCRIPTOR_t _GetTimeData = {
 #else
 #define _GetTimeDataAddress 0
 #endif
-#if CC_Commit == YES
+#if CC_Commit
 #include "Commit_fp.h"
 typedef TPM_RC  (Commit_Entry)(
 			       Commit_In *in,
@@ -1826,7 +1826,7 @@ Commit_COMMAND_DESCRIPTOR_t _CommitData = {
 #else
 #define _CommitDataAddress 0
 #endif
-#if CC_EC_Ephemeral == YES
+#if CC_EC_Ephemeral
 #include "EC_Ephemeral_fp.h"
 typedef TPM_RC  (EC_Ephemeral_Entry)(
 				     EC_Ephemeral_In *in,
@@ -1856,7 +1856,7 @@ EC_Ephemeral_COMMAND_DESCRIPTOR_t _EC_EphemeralData = {
 #else
 #define _EC_EphemeralDataAddress 0
 #endif
-#if CC_VerifySignature == YES
+#if CC_VerifySignature
 #include "VerifySignature_fp.h"
 typedef TPM_RC  (VerifySignature_Entry)(
 					VerifySignature_In *in,
@@ -1888,7 +1888,7 @@ VerifySignature_COMMAND_DESCRIPTOR_t _VerifySignatureData = {
 #else
 #define _VerifySignatureDataAddress 0
 #endif
-#if CC_Sign == YES
+#if CC_Sign
 #include "Sign_fp.h"
 typedef TPM_RC  (Sign_Entry)(
 			     Sign_In *in,
@@ -1922,7 +1922,7 @@ Sign_COMMAND_DESCRIPTOR_t _SignData = {
 #else
 #define _SignDataAddress 0
 #endif
-#if CC_SetCommandCodeAuditStatus == YES
+#if CC_SetCommandCodeAuditStatus
 #include "SetCommandCodeAuditStatus_fp.h"
 typedef TPM_RC  (SetCommandCodeAuditStatus_Entry)(
 						  SetCommandCodeAuditStatus_In *in
@@ -1954,7 +1954,7 @@ SetCommandCodeAuditStatus_COMMAND_DESCRIPTOR_t _SetCommandCodeAuditStatusData = 
 #else
 #define _SetCommandCodeAuditStatusDataAddress 0
 #endif
-#if CC_PCR_Extend == YES
+#if CC_PCR_Extend
 #include "PCR_Extend_fp.h"
 typedef TPM_RC  (PCR_Extend_Entry)(
 				   PCR_Extend_In *in
@@ -1982,7 +1982,7 @@ PCR_Extend_COMMAND_DESCRIPTOR_t _PCR_ExtendData = {
 #else
 #define _PCR_ExtendDataAddress 0
 #endif
-#if CC_PCR_Event == YES
+#if CC_PCR_Event
 #include "PCR_Event_fp.h"
 typedef TPM_RC  (PCR_Event_Entry)(
 				  PCR_Event_In *in,
@@ -2012,7 +2012,7 @@ PCR_Event_COMMAND_DESCRIPTOR_t _PCR_EventData = {
 #else
 #define _PCR_EventDataAddress 0
 #endif
-#if CC_PCR_Read == YES
+#if CC_PCR_Read
 #include "PCR_Read_fp.h"
 typedef TPM_RC  (PCR_Read_Entry)(
 				 PCR_Read_In *in,
@@ -2044,7 +2044,7 @@ PCR_Read_COMMAND_DESCRIPTOR_t _PCR_ReadData = {
 #else
 #define _PCR_ReadDataAddress 0
 #endif
-#if CC_PCR_Allocate == YES
+#if CC_PCR_Allocate
 #include "PCR_Allocate_fp.h"
 typedef TPM_RC  (PCR_Allocate_Entry)(
 				     PCR_Allocate_In *in,
@@ -2080,7 +2080,7 @@ PCR_Allocate_COMMAND_DESCRIPTOR_t _PCR_AllocateData = {
 #else
 #define _PCR_AllocateDataAddress 0
 #endif
-#if CC_PCR_SetAuthPolicy == YES
+#if CC_PCR_SetAuthPolicy
 #include "PCR_SetAuthPolicy_fp.h"
 typedef TPM_RC  (PCR_SetAuthPolicy_Entry)(
 					  PCR_SetAuthPolicy_In *in
@@ -2112,7 +2112,7 @@ PCR_SetAuthPolicy_COMMAND_DESCRIPTOR_t _PCR_SetAuthPolicyData = {
 #else
 #define _PCR_SetAuthPolicyDataAddress 0
 #endif
-#if CC_PCR_SetAuthValue == YES
+#if CC_PCR_SetAuthValue
 #include "PCR_SetAuthValue_fp.h"
 typedef TPM_RC  (PCR_SetAuthValue_Entry)(
 					 PCR_SetAuthValue_In *in
@@ -2140,7 +2140,7 @@ PCR_SetAuthValue_COMMAND_DESCRIPTOR_t _PCR_SetAuthValueData = {
 #else
 #define _PCR_SetAuthValueDataAddress 0
 #endif
-#if CC_PCR_Reset == YES
+#if CC_PCR_Reset
 #include "PCR_Reset_fp.h"
 typedef TPM_RC  (PCR_Reset_Entry)(
 				  PCR_Reset_In *in
@@ -2166,7 +2166,7 @@ PCR_Reset_COMMAND_DESCRIPTOR_t _PCR_ResetData = {
 #else
 #define _PCR_ResetDataAddress 0
 #endif
-#if CC_PolicySigned == YES
+#if CC_PolicySigned
 #include "PolicySigned_fp.h"
 typedef TPM_RC  (PolicySigned_Entry)(
 				     PolicySigned_In *in,
@@ -2208,7 +2208,7 @@ PolicySigned_COMMAND_DESCRIPTOR_t _PolicySignedData = {
 #else
 #define _PolicySignedDataAddress 0
 #endif
-#if CC_PolicySecret == YES
+#if CC_PolicySecret
 #include "PolicySecret_fp.h"
 typedef TPM_RC  (PolicySecret_Entry)(
 				     PolicySecret_In *in,
@@ -2248,7 +2248,7 @@ PolicySecret_COMMAND_DESCRIPTOR_t _PolicySecretData = {
 #else
 #define _PolicySecretDataAddress 0
 #endif
-#if CC_PolicyTicket == YES
+#if CC_PolicyTicket
 #include "PolicyTicket_fp.h"
 typedef TPM_RC  (PolicyTicket_Entry)(
 				     PolicyTicket_In *in
@@ -2284,7 +2284,7 @@ PolicyTicket_COMMAND_DESCRIPTOR_t _PolicyTicketData = {
 #else
 #define _PolicyTicketDataAddress 0
 #endif
-#if CC_PolicyOR == YES
+#if CC_PolicyOR
 #include "PolicyOR_fp.h"
 typedef TPM_RC  (PolicyOR_Entry)(
 				 PolicyOR_In *in
@@ -2312,7 +2312,7 @@ PolicyOR_COMMAND_DESCRIPTOR_t _PolicyORData = {
 #else
 #define _PolicyORDataAddress 0
 #endif
-#if CC_PolicyPCR == YES
+#if CC_PolicyPCR
 #include "PolicyPCR_fp.h"
 typedef TPM_RC  (PolicyPCR_Entry)(
 				  PolicyPCR_In *in
@@ -2342,7 +2342,7 @@ PolicyPCR_COMMAND_DESCRIPTOR_t _PolicyPCRData = {
 #else
 #define _PolicyPCRDataAddress 0
 #endif
-#if CC_PolicyLocality == YES
+#if CC_PolicyLocality
 #include "PolicyLocality_fp.h"
 typedef TPM_RC  (PolicyLocality_Entry)(
 				       PolicyLocality_In *in
@@ -2370,7 +2370,7 @@ PolicyLocality_COMMAND_DESCRIPTOR_t _PolicyLocalityData = {
 #else
 #define _PolicyLocalityDataAddress 0
 #endif
-#if CC_PolicyNV == YES
+#if CC_PolicyNV
 #include "PolicyNV_fp.h"
 typedef TPM_RC  (PolicyNV_Entry)(
 				 PolicyNV_In *in
@@ -2406,7 +2406,7 @@ PolicyNV_COMMAND_DESCRIPTOR_t _PolicyNVData = {
 #else
 #define _PolicyNVDataAddress 0
 #endif
-#if CC_PolicyCounterTimer == YES
+#if CC_PolicyCounterTimer
 #include "PolicyCounterTimer_fp.h"
 typedef TPM_RC  (PolicyCounterTimer_Entry)(
 					   PolicyCounterTimer_In *in
@@ -2438,7 +2438,7 @@ PolicyCounterTimer_COMMAND_DESCRIPTOR_t _PolicyCounterTimerData = {
 #else
 #define _PolicyCounterTimerDataAddress 0
 #endif
-#if CC_PolicyCommandCode == YES
+#if CC_PolicyCommandCode
 #include "PolicyCommandCode_fp.h"
 typedef TPM_RC  (PolicyCommandCode_Entry)(
 					  PolicyCommandCode_In *in
@@ -2466,7 +2466,7 @@ PolicyCommandCode_COMMAND_DESCRIPTOR_t _PolicyCommandCodeData = {
 #else
 #define _PolicyCommandCodeDataAddress 0
 #endif
-#if CC_PolicyPhysicalPresence == YES
+#if CC_PolicyPhysicalPresence
 #include "PolicyPhysicalPresence_fp.h"
 typedef TPM_RC  (PolicyPhysicalPresence_Entry)(
 					       PolicyPhysicalPresence_In *in
@@ -2492,7 +2492,7 @@ PolicyPhysicalPresence_COMMAND_DESCRIPTOR_t _PolicyPhysicalPresenceData = {
 #else
 #define _PolicyPhysicalPresenceDataAddress 0
 #endif
-#if CC_PolicyCpHash == YES
+#if CC_PolicyCpHash
 #include "PolicyCpHash_fp.h"
 typedef TPM_RC  (PolicyCpHash_Entry)(
 				     PolicyCpHash_In *in
@@ -2520,7 +2520,7 @@ PolicyCpHash_COMMAND_DESCRIPTOR_t _PolicyCpHashData = {
 #else
 #define _PolicyCpHashDataAddress 0
 #endif
-#if CC_PolicyNameHash == YES
+#if CC_PolicyNameHash
 #include "PolicyNameHash_fp.h"
 typedef TPM_RC  (PolicyNameHash_Entry)(
 				       PolicyNameHash_In *in
@@ -2548,7 +2548,7 @@ PolicyNameHash_COMMAND_DESCRIPTOR_t _PolicyNameHashData = {
 #else
 #define _PolicyNameHashDataAddress 0
 #endif
-#if CC_PolicyDuplicationSelect == YES
+#if CC_PolicyDuplicationSelect
 #include "PolicyDuplicationSelect_fp.h"
 typedef TPM_RC  (PolicyDuplicationSelect_Entry)(
 						PolicyDuplicationSelect_In *in
@@ -2580,7 +2580,7 @@ PolicyDuplicationSelect_COMMAND_DESCRIPTOR_t _PolicyDuplicationSelectData = {
 #else
 #define _PolicyDuplicationSelectDataAddress 0
 #endif
-#if CC_PolicyAuthorize == YES
+#if CC_PolicyAuthorize
 #include "PolicyAuthorize_fp.h"
 typedef TPM_RC  (PolicyAuthorize_Entry)(
 					PolicyAuthorize_In *in
@@ -2614,7 +2614,7 @@ PolicyAuthorize_COMMAND_DESCRIPTOR_t _PolicyAuthorizeData = {
 #else
 #define _PolicyAuthorizeDataAddress 0
 #endif
-#if CC_PolicyAuthValue == YES
+#if CC_PolicyAuthValue
 #include "PolicyAuthValue_fp.h"
 typedef TPM_RC  (PolicyAuthValue_Entry)(
 					PolicyAuthValue_In *in
@@ -2640,7 +2640,7 @@ PolicyAuthValue_COMMAND_DESCRIPTOR_t _PolicyAuthValueData = {
 #else
 #define _PolicyAuthValueDataAddress 0
 #endif
-#if CC_PolicyPassword == YES
+#if CC_PolicyPassword
 #include "PolicyPassword_fp.h"
 typedef TPM_RC  (PolicyPassword_Entry)(
 				       PolicyPassword_In *in
@@ -2666,7 +2666,7 @@ PolicyPassword_COMMAND_DESCRIPTOR_t _PolicyPasswordData = {
 #else
 #define _PolicyPasswordDataAddress 0
 #endif
-#if CC_PolicyGetDigest == YES
+#if CC_PolicyGetDigest
 #include "PolicyGetDigest_fp.h"
 typedef TPM_RC  (PolicyGetDigest_Entry)(
 					PolicyGetDigest_In *in,
@@ -2694,7 +2694,7 @@ PolicyGetDigest_COMMAND_DESCRIPTOR_t _PolicyGetDigestData = {
 #else
 #define _PolicyGetDigestDataAddress 0
 #endif
-#if CC_PolicyNvWritten == YES
+#if CC_PolicyNvWritten
 #include "PolicyNvWritten_fp.h"
 typedef TPM_RC  (PolicyNvWritten_Entry)(
 					PolicyNvWritten_In *in
@@ -2722,7 +2722,7 @@ PolicyNvWritten_COMMAND_DESCRIPTOR_t _PolicyNvWrittenData = {
 #else
 #define _PolicyNvWrittenDataAddress 0
 #endif
-#if CC_PolicyTemplate == YES
+#if CC_PolicyTemplate
 #include "PolicyTemplate_fp.h"
 typedef TPM_RC  (PolicyTemplate_Entry)(
 				       PolicyTemplate_In *in
@@ -2750,7 +2750,7 @@ PolicyTemplate_COMMAND_DESCRIPTOR_t _PolicyTemplateData = {
 #else
 #define _PolicyTemplateDataAddress 0
 #endif
-#if CC_PolicyAuthorizeNV == YES
+#if CC_PolicyAuthorizeNV
 #include "PolicyAuthorizeNV_fp.h"
 typedef TPM_RC  (PolicyAuthorizeNV_Entry)(
 					  PolicyAuthorizeNV_In *in
@@ -2780,7 +2780,7 @@ PolicyAuthorizeNV_COMMAND_DESCRIPTOR_t _PolicyAuthorizeNVData = {
 #else
 #define _PolicyAuthorizeNVDataAddress 0
 #endif
-#if CC_CreatePrimary == YES
+#if CC_CreatePrimary
 #include "CreatePrimary_fp.h"
 typedef TPM_RC  (CreatePrimary_Entry)(
 				      CreatePrimary_In *in,
@@ -2826,7 +2826,7 @@ CreatePrimary_COMMAND_DESCRIPTOR_t _CreatePrimaryData = {
 #else
 #define _CreatePrimaryDataAddress 0
 #endif
-#if CC_HierarchyControl == YES
+#if CC_HierarchyControl
 #include "HierarchyControl_fp.h"
 typedef TPM_RC  (HierarchyControl_Entry)(
 					 HierarchyControl_In *in
@@ -2856,7 +2856,7 @@ HierarchyControl_COMMAND_DESCRIPTOR_t _HierarchyControlData = {
 #else
 #define _HierarchyControlDataAddress 0
 #endif
-#if CC_SetPrimaryPolicy == YES
+#if CC_SetPrimaryPolicy
 #include "SetPrimaryPolicy_fp.h"
 typedef TPM_RC  (SetPrimaryPolicy_Entry)(
 					 SetPrimaryPolicy_In *in
@@ -2886,7 +2886,7 @@ SetPrimaryPolicy_COMMAND_DESCRIPTOR_t _SetPrimaryPolicyData = {
 #else
 #define _SetPrimaryPolicyDataAddress 0
 #endif
-#if CC_ChangePPS == YES
+#if CC_ChangePPS
 #include "ChangePPS_fp.h"
 typedef TPM_RC  (ChangePPS_Entry)(
 				  ChangePPS_In *in
@@ -2912,7 +2912,7 @@ ChangePPS_COMMAND_DESCRIPTOR_t _ChangePPSData = {
 #else
 #define _ChangePPSDataAddress 0
 #endif
-#if CC_ChangeEPS == YES
+#if CC_ChangeEPS
 #include "ChangeEPS_fp.h"
 typedef TPM_RC  (ChangeEPS_Entry)(
 				  ChangeEPS_In *in
@@ -2938,7 +2938,7 @@ ChangeEPS_COMMAND_DESCRIPTOR_t _ChangeEPSData = {
 #else
 #define _ChangeEPSDataAddress 0
 #endif
-#if CC_Clear == YES
+#if CC_Clear
 #include "Clear_fp.h"
 typedef TPM_RC  (Clear_Entry)(
 			      Clear_In *in
@@ -2964,7 +2964,7 @@ Clear_COMMAND_DESCRIPTOR_t _ClearData = {
 #else
 #define _ClearDataAddress 0
 #endif
-#if CC_ClearControl == YES
+#if CC_ClearControl
 #include "ClearControl_fp.h"
 typedef TPM_RC  (ClearControl_Entry)(
 				     ClearControl_In *in
@@ -2992,7 +2992,7 @@ ClearControl_COMMAND_DESCRIPTOR_t _ClearControlData = {
 #else
 #define _ClearControlDataAddress 0
 #endif
-#if CC_HierarchyChangeAuth == YES
+#if CC_HierarchyChangeAuth
 #include "HierarchyChangeAuth_fp.h"
 typedef TPM_RC  (HierarchyChangeAuth_Entry)(
 					    HierarchyChangeAuth_In *in
@@ -3020,7 +3020,7 @@ HierarchyChangeAuth_COMMAND_DESCRIPTOR_t _HierarchyChangeAuthData = {
 #else
 #define _HierarchyChangeAuthDataAddress 0
 #endif
-#if CC_DictionaryAttackLockReset == YES
+#if CC_DictionaryAttackLockReset
 #include "DictionaryAttackLockReset_fp.h"
 typedef TPM_RC  (DictionaryAttackLockReset_Entry)(
 						  DictionaryAttackLockReset_In *in
@@ -3046,7 +3046,7 @@ DictionaryAttackLockReset_COMMAND_DESCRIPTOR_t _DictionaryAttackLockResetData = 
 #else
 #define _DictionaryAttackLockResetDataAddress 0
 #endif
-#if CC_DictionaryAttackParameters == YES
+#if CC_DictionaryAttackParameters
 #include "DictionaryAttackParameters_fp.h"
 typedef TPM_RC  (DictionaryAttackParameters_Entry)(
 						   DictionaryAttackParameters_In *in
@@ -3078,7 +3078,7 @@ DictionaryAttackParameters_COMMAND_DESCRIPTOR_t _DictionaryAttackParametersData 
 #else
 #define _DictionaryAttackParametersDataAddress 0
 #endif
-#if CC_PP_Commands == YES
+#if CC_PP_Commands
 #include "PP_Commands_fp.h"
 typedef TPM_RC  (PP_Commands_Entry)(
 				    PP_Commands_In *in
@@ -3108,7 +3108,7 @@ PP_Commands_COMMAND_DESCRIPTOR_t _PP_CommandsData = {
 #else
 #define _PP_CommandsDataAddress 0
 #endif
-#if CC_SetAlgorithmSet == YES
+#if CC_SetAlgorithmSet
 #include "SetAlgorithmSet_fp.h"
 typedef TPM_RC  (SetAlgorithmSet_Entry)(
 					SetAlgorithmSet_In *in
@@ -3136,7 +3136,7 @@ SetAlgorithmSet_COMMAND_DESCRIPTOR_t _SetAlgorithmSetData = {
 #else
 #define _SetAlgorithmSetDataAddress 0
 #endif
-#if CC_FieldUpgradeStart == YES
+#if CC_FieldUpgradeStart
 #include "FieldUpgradeStart_fp.h"
 typedef TPM_RC  (FieldUpgradeStart_Entry)(
 					  FieldUpgradeStart_In *in
@@ -3168,7 +3168,7 @@ FieldUpgradeStart_COMMAND_DESCRIPTOR_t _FieldUpgradeStartData = {
 #else
 #define _FieldUpgradeStartDataAddress 0
 #endif
-#if CC_FieldUpgradeData == YES
+#if CC_FieldUpgradeData
 #include "FieldUpgradeData_fp.h"
 typedef TPM_RC  (FieldUpgradeData_Entry)(
 					 FieldUpgradeData_In *in,
@@ -3198,7 +3198,7 @@ FieldUpgradeData_COMMAND_DESCRIPTOR_t _FieldUpgradeDataData = {
 #else
 #define _FieldUpgradeDataDataAddress 0
 #endif
-#if CC_FirmwareRead == YES
+#if CC_FirmwareRead
 #include "FirmwareRead_fp.h"
 typedef TPM_RC  (FirmwareRead_Entry)(
 				     FirmwareRead_In *in,
@@ -3226,7 +3226,7 @@ FirmwareRead_COMMAND_DESCRIPTOR_t _FirmwareReadData = {
 #else
 #define _FirmwareReadDataAddress 0
 #endif
-#if CC_ContextSave == YES
+#if CC_ContextSave
 #include "ContextSave_fp.h"
 typedef TPM_RC  (ContextSave_Entry)(
 				    ContextSave_In *in,
@@ -3254,7 +3254,7 @@ ContextSave_COMMAND_DESCRIPTOR_t _ContextSaveData = {
 #else
 #define _ContextSaveDataAddress 0
 #endif
-#if CC_ContextLoad == YES
+#if CC_ContextLoad
 #include "ContextLoad_fp.h"
 typedef TPM_RC  (ContextLoad_Entry)(
 				    ContextLoad_In *in,
@@ -3282,7 +3282,7 @@ ContextLoad_COMMAND_DESCRIPTOR_t _ContextLoadData = {
 #else
 #define _ContextLoadDataAddress 0
 #endif
-#if CC_FlushContext == YES
+#if CC_FlushContext
 #include "FlushContext_fp.h"
 typedef TPM_RC  (FlushContext_Entry)(
 				     FlushContext_In *in
@@ -3308,7 +3308,7 @@ FlushContext_COMMAND_DESCRIPTOR_t _FlushContextData = {
 #else
 #define _FlushContextDataAddress 0
 #endif
-#if CC_EvictControl == YES
+#if CC_EvictControl
 #include "EvictControl_fp.h"
 typedef TPM_RC  (EvictControl_Entry)(
 				     EvictControl_In *in
@@ -3338,7 +3338,7 @@ EvictControl_COMMAND_DESCRIPTOR_t _EvictControlData = {
 #else
 #define _EvictControlDataAddress 0
 #endif
-#if CC_ReadClock == YES
+#if CC_ReadClock
 #include "ReadClock_fp.h"
 typedef TPM_RC  (ReadClock_Entry)(
 				  ReadClock_Out *out
@@ -3364,7 +3364,7 @@ ReadClock_COMMAND_DESCRIPTOR_t _ReadClockData = {
 #else
 #define _ReadClockDataAddress 0
 #endif
-#if CC_ClockSet == YES
+#if CC_ClockSet
 #include "ClockSet_fp.h"
 typedef TPM_RC  (ClockSet_Entry)(
 				 ClockSet_In *in
@@ -3392,7 +3392,7 @@ ClockSet_COMMAND_DESCRIPTOR_t _ClockSetData = {
 #else
 #define _ClockSetDataAddress 0
 #endif
-#if CC_ClockRateAdjust == YES
+#if CC_ClockRateAdjust
 #include "ClockRateAdjust_fp.h"
 typedef TPM_RC  (ClockRateAdjust_Entry)(
 					ClockRateAdjust_In *in
@@ -3420,7 +3420,7 @@ ClockRateAdjust_COMMAND_DESCRIPTOR_t _ClockRateAdjustData = {
 #else
 #define _ClockRateAdjustDataAddress 0
 #endif
-#if CC_GetCapability == YES
+#if CC_GetCapability
 #include "GetCapability_fp.h"
 typedef TPM_RC  (GetCapability_Entry)(
 				      GetCapability_In *in,
@@ -3454,7 +3454,7 @@ GetCapability_COMMAND_DESCRIPTOR_t _GetCapabilityData = {
 #else
 #define _GetCapabilityDataAddress 0
 #endif
-#if CC_TestParms == YES
+#if CC_TestParms
 #include "TestParms_fp.h"
 typedef TPM_RC  (TestParms_Entry)(
 				  TestParms_In *in
@@ -3480,7 +3480,7 @@ TestParms_COMMAND_DESCRIPTOR_t _TestParmsData = {
 #else
 #define _TestParmsDataAddress 0
 #endif
-#if CC_NV_DefineSpace == YES
+#if CC_NV_DefineSpace
 #include "NV_DefineSpace_fp.h"
 typedef TPM_RC  (NV_DefineSpace_Entry)(
 				       NV_DefineSpace_In *in
@@ -3510,7 +3510,7 @@ NV_DefineSpace_COMMAND_DESCRIPTOR_t _NV_DefineSpaceData = {
 #else
 #define _NV_DefineSpaceDataAddress 0
 #endif
-#if CC_NV_UndefineSpace == YES
+#if CC_NV_UndefineSpace
 #include "NV_UndefineSpace_fp.h"
 typedef TPM_RC  (NV_UndefineSpace_Entry)(
 					 NV_UndefineSpace_In *in
@@ -3538,7 +3538,7 @@ NV_UndefineSpace_COMMAND_DESCRIPTOR_t _NV_UndefineSpaceData = {
 #else
 #define _NV_UndefineSpaceDataAddress 0
 #endif
-#if CC_NV_UndefineSpaceSpecial == YES
+#if CC_NV_UndefineSpaceSpecial
 #include "NV_UndefineSpaceSpecial_fp.h"
 typedef TPM_RC  (NV_UndefineSpaceSpecial_Entry)(
 						NV_UndefineSpaceSpecial_In *in
@@ -3566,7 +3566,7 @@ NV_UndefineSpaceSpecial_COMMAND_DESCRIPTOR_t _NV_UndefineSpaceSpecialData = {
 #else
 #define _NV_UndefineSpaceSpecialDataAddress 0
 #endif
-#if CC_NV_ReadPublic == YES
+#if CC_NV_ReadPublic
 #include "NV_ReadPublic_fp.h"
 typedef TPM_RC  (NV_ReadPublic_Entry)(
 				      NV_ReadPublic_In *in,
@@ -3596,7 +3596,7 @@ NV_ReadPublic_COMMAND_DESCRIPTOR_t _NV_ReadPublicData = {
 #else
 #define _NV_ReadPublicDataAddress 0
 #endif
-#if CC_NV_Write == YES
+#if CC_NV_Write
 #include "NV_Write_fp.h"
 typedef TPM_RC  (NV_Write_Entry)(
 				 NV_Write_In *in
@@ -3628,7 +3628,7 @@ NV_Write_COMMAND_DESCRIPTOR_t _NV_WriteData = {
 #else
 #define _NV_WriteDataAddress 0
 #endif
-#if CC_NV_Increment == YES
+#if CC_NV_Increment
 #include "NV_Increment_fp.h"
 typedef TPM_RC  (NV_Increment_Entry)(
 				     NV_Increment_In *in
@@ -3656,7 +3656,7 @@ NV_Increment_COMMAND_DESCRIPTOR_t _NV_IncrementData = {
 #else
 #define _NV_IncrementDataAddress 0
 #endif
-#if CC_NV_Extend == YES
+#if CC_NV_Extend
 #include "NV_Extend_fp.h"
 typedef TPM_RC  (NV_Extend_Entry)(
 				  NV_Extend_In *in
@@ -3686,7 +3686,7 @@ NV_Extend_COMMAND_DESCRIPTOR_t _NV_ExtendData = {
 #else
 #define _NV_ExtendDataAddress 0
 #endif
-#if CC_NV_SetBits == YES
+#if CC_NV_SetBits
 #include "NV_SetBits_fp.h"
 typedef TPM_RC  (NV_SetBits_Entry)(
 				   NV_SetBits_In *in
@@ -3716,7 +3716,7 @@ NV_SetBits_COMMAND_DESCRIPTOR_t _NV_SetBitsData = {
 #else
 #define _NV_SetBitsDataAddress 0
 #endif
-#if CC_NV_WriteLock == YES
+#if CC_NV_WriteLock
 #include "NV_WriteLock_fp.h"
 typedef TPM_RC  (NV_WriteLock_Entry)(
 				     NV_WriteLock_In *in
@@ -3744,7 +3744,7 @@ NV_WriteLock_COMMAND_DESCRIPTOR_t _NV_WriteLockData = {
 #else
 #define _NV_WriteLockDataAddress 0
 #endif
-#if CC_NV_GlobalWriteLock == YES
+#if CC_NV_GlobalWriteLock
 #include "NV_GlobalWriteLock_fp.h"
 typedef TPM_RC  (NV_GlobalWriteLock_Entry)(
 					   NV_GlobalWriteLock_In *in
@@ -3770,7 +3770,7 @@ NV_GlobalWriteLock_COMMAND_DESCRIPTOR_t _NV_GlobalWriteLockData = {
 #else
 #define _NV_GlobalWriteLockDataAddress 0
 #endif
-#if CC_NV_Read == YES
+#if CC_NV_Read
 #include "NV_Read_fp.h"
 typedef TPM_RC  (NV_Read_Entry)(
 				NV_Read_In *in,
@@ -3804,7 +3804,7 @@ NV_Read_COMMAND_DESCRIPTOR_t _NV_ReadData = {
 #else
 #define _NV_ReadDataAddress 0
 #endif
-#if CC_NV_ReadLock == YES
+#if CC_NV_ReadLock
 #include "NV_ReadLock_fp.h"
 typedef TPM_RC  (NV_ReadLock_Entry)(
 				    NV_ReadLock_In *in
@@ -3832,7 +3832,7 @@ NV_ReadLock_COMMAND_DESCRIPTOR_t _NV_ReadLockData = {
 #else
 #define _NV_ReadLockDataAddress 0
 #endif
-#if CC_NV_ChangeAuth == YES
+#if CC_NV_ChangeAuth
 #include "NV_ChangeAuth_fp.h"
 typedef TPM_RC  (NV_ChangeAuth_Entry)(
 				      NV_ChangeAuth_In *in
@@ -3860,7 +3860,7 @@ NV_ChangeAuth_COMMAND_DESCRIPTOR_t _NV_ChangeAuthData = {
 #else
 #define _NV_ChangeAuthDataAddress 0
 #endif
-#if CC_NV_Certify == YES
+#if CC_NV_Certify
 #include "NV_Certify_fp.h"
 typedef TPM_RC  (NV_Certify_Entry)(
 				   NV_Certify_In *in,
@@ -3902,7 +3902,7 @@ NV_Certify_COMMAND_DESCRIPTOR_t _NV_CertifyData = {
 #else
 #define _NV_CertifyDataAddress 0
 #endif
-#if CC_AC_GetCapability == YES
+#if CC_AC_GetCapability
 #include "AC_GetCapability_fp.h"
 typedef TPM_RC  (AC_GetCapability_Entry)(
 					 AC_GetCapability_In *in,
@@ -3936,7 +3936,7 @@ AC_GetCapability_COMMAND_DESCRIPTOR_t _AC_GetCapabilityData = {
 #else
 #define _AC_GetCapabilityDataAddress 0
 #endif
-#if CC_AC_Send == YES
+#if CC_AC_Send
 #include "AC_Send_fp.h"
 typedef TPM_RC  (AC_Send_Entry)(
 				AC_Send_In *in,
@@ -3970,7 +3970,7 @@ AC_Send_COMMAND_DESCRIPTOR_t _AC_SendData = {
 #else
 #define _AC_SendDataAddress 0
 #endif
-#if CC_Policy_AC_SendSelect == YES
+#if CC_Policy_AC_SendSelect
 #include "Policy_AC_SendSelect_fp.h"
 typedef TPM_RC  (Policy_AC_SendSelect_Entry)(
 					     Policy_AC_SendSelect_In *in
@@ -4004,7 +4004,7 @@ Policy_AC_SendSelect_COMMAND_DESCRIPTOR_t _Policy_AC_SendSelectData = {
 #else
 #define _Policy_AC_SendSelectDataAddress 0
 #endif
-#if CC_Vendor_TCG_Test == YES
+#if CC_Vendor_TCG_Test
 #include "Vendor_TCG_Test_fp.h"
 typedef TPM_RC  (Vendor_TCG_Test_Entry)(
 					Vendor_TCG_Test_In *in,

@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Hash/HMAC/Event Sequences	     			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HashCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: HashCommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "HMAC_Start_fp.h"
-#ifdef TPM_CC_HMAC_Start  // Conditional expansion of this file
+#if CC_HMAC_Start  // Conditional expansion of this file
 TPM_RC
 TPM2_HMAC_Start(
 		HMAC_Start_In   *in,            // IN: input parameter list
@@ -111,7 +111,7 @@ TPM2_HMAC_Start(
 #endif // CC_HMAC_Start
 #include "Tpm.h"
 #include "MAC_Start_fp.h"
-#ifdef TPM_CC_MAC_Start  // Conditional expansion of this file
+#if CC_MAC_Start  // Conditional expansion of this file
 /* Error Returns Meaning */
 /* TPM_RC_ATTRIBUTES key referenced by handle is not a signing key or is restricted */
 /* TPM_RC_OBJECT_MEMORY no space to create an internal object */
@@ -158,7 +158,7 @@ TPM2_MAC_Start(
 #endif // CC_MAC_Start
 #include "Tpm.h"
 #include "HashSequenceStart_fp.h"
-#ifdef TPM_CC_HashSequenceStart  // Conditional expansion of this file
+#if CC_HashSequenceStart  // Conditional expansion of this file
 TPM_RC
 TPM2_HashSequenceStart(
 		       HashSequenceStart_In    *in,            // IN: input parameter list
@@ -177,7 +177,7 @@ TPM2_HashSequenceStart(
 #endif // CC_HashSequenceStart
 #include "Tpm.h"
 #include "SequenceUpdate_fp.h"
-#ifdef TPM_CC_SequenceUpdate  // Conditional expansion of this file
+#if CC_SequenceUpdate  // Conditional expansion of this file
 TPM_RC
 TPM2_SequenceUpdate(
 		    SequenceUpdate_In   *in             // IN: input parameter list
@@ -234,7 +234,7 @@ TPM2_SequenceUpdate(
 #endif // CC_SequenceUpdate
 #include "Tpm.h"
 #include "SequenceComplete_fp.h"
-#ifdef TPM_CC_SequenceComplete  // Conditional expansion of this file
+#if CC_SequenceComplete  // Conditional expansion of this file
 /* Error Returns Meaning */
 /* TPM_RC_MODE sequenceHandle does not reference a hash or HMAC sequence object */
 TPM_RC
@@ -319,7 +319,7 @@ TPM2_SequenceComplete(
 #endif // CC_SequenceComplete
 #include "Tpm.h"
 #include "EventSequenceComplete_fp.h"
-#ifdef TPM_CC_EventSequenceComplete  // Conditional expansion of this file
+#if CC_EventSequenceComplete  // Conditional expansion of this file
 TPM_RC
 TPM2_EventSequenceComplete(
 			   EventSequenceComplete_In    *in,            // IN: input parameter list
