@@ -216,17 +216,20 @@
 #   undef RSA_INSTRUMENT
 #endif  // SIMULATION
 #ifndef NDEBUG
-/* In some cases, the relationship between two values may be dependent on things that change based
-   on various selections like the chosen cryptographic libraries. It is possible that these
-   selections will result in incompatible settings. These are often detectable by the compiler but
-   it isn't always possible to do the check in the preprocessor code. For example, when the check
-   requires use of 'sizeof()' then the preprocessor can't do the comparison. For these cases, we
-   include a special macro that, depending on the compiler will generate a warning to indicate if
-   the check always passes or always fails because it involves fixed constants. To run these checks,
-   define COMPILER_CHECKS. */
-#ifndef COMPILER_CHECKS
-//#   define COMPILER_CHECKS
-#endif
+// In some cases, the relationship between two values may be dependent on things that change based
+// on various selections like the chosen cryptographic libraries. It is possible that these
+// selections will result in incompatible settings. These are often detectable by the compiler but
+// it isn't always possible to do the check in the preprocessor code. For example, when the check
+// requires use of 'sizeof()' then the preprocessor can't do the comparison. For these cases, we
+// include a special macro that, depending on the compiler will generate a warning to indicate if
+// the check always passes or always fails because it involves fixed constants. To run these checks,
+// define COMPILER_CHECKS.
+#   if !(defined COMPILER_CHECKS)					\
+    || ((COMPILER_CHECKS != NO) && (COMPILER_CHECKS != YES))
+#       undef   COMPILER_CHECKS
+#       define  COMPILER_CHECKS     NO      // Default: Either YES or NO
+#   endif
+
 // Some of the values (such as sizes) are the result of different options set in
 // Implementation.h. The combination might not be consistent. A function is defined
 // (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the function, define
