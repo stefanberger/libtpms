@@ -145,6 +145,20 @@
 #   undef   CLOCK_STOPS
 #   define  CLOCK_STOPS             NO     // Default: Either YES or NO
 #endif
+
+// This switch allows use of #defines in place of pass-through marshaling or unmarshaling code. A
+// pass-through function just calls another function to do the required function and does no
+// parameter checking of its own. The table-driven dispatcher calls directly to the lowest level
+// marshaling/unmarshaling code and by-passes any pass-through functions so, for that code. If
+// #defines are used in other code, then no code is generated for a pass-through
+// marshaling/unmarshaling function.
+#if (defined USE_MARSHALING_DEFINES) && (USE_MARSHALING_DEFINES != NO)
+#   undef   USE_MARSHALING_DEFINES
+#   define  USE_MARSHALING_DEFINES  YES
+#else
+#   define USE_MARSHALING_DEFINES   YES     // Default: Either YES or NO
+#endif
+
 /* The switches in this group can only be enabled when running a simulation */
 #ifdef SIMULATION
 /* Enables use of the key cache */
