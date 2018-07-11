@@ -3,7 +3,7 @@
 /*			Interfaces to the CryptoEngine()			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -1463,8 +1463,8 @@ CryptIsSensitiveSizeValid(
 	  case TPM_ALG_ECC:
 	    keySizeInBytes = BITS_TO_BYTES(CryptEccGetKeySizeForCurve(
 								      publicArea->parameters.eccDetail.curveID));
-	    consistent = keySizeInBytes > 0
-			 && sensitiveArea->sensitive.ecc.t.size == keySizeInBytes;
+	    consistent = (keySizeInBytes > 0)
+			 && (sensitiveArea->sensitive.ecc.t.size == keySizeInBytes);
 	    break;
 #endif
 	  case TPM_ALG_SYMCIPHER:
@@ -1639,31 +1639,32 @@ CryptValidateKeys(
 			    // that it does not exceed the block size of the hash.
 			    // by the hash algorithm of the scheme.
 			    TPMT_KEYEDHASH_SCHEME       *scheme;
-			    TPM_ALG_ID                   hashAlg;
+			    UINT16                       maxSize;
 			    scheme = &params->keyedHashDetail.scheme;
 			    if(scheme->scheme == TPM_ALG_XOR)
-				hashAlg = scheme->details.xorr.hashAlg;
+				{
+				    maxSize = CryptHashGetBlockSize(scheme->details.xorr.hashAlg);
+				}
 			    else if(scheme->scheme == TPM_ALG_HMAC)
-				hashAlg = scheme->details.hmac.hashAlg;
+				{
+				    maxSize = CryptHashGetBlockSize(scheme->details.hmac.hashAlg);
+				}
 			    else if(scheme->scheme == TPM_ALG_NULL)
-				hashAlg = publicArea->nameAlg;
+				{
+				    // Not signing or xor so must be a data block
+				    maxSize = 128;
+				}
 			    else
 				return TPM_RCS_SCHEME + blamePublic;
-			    if(sensitive->sensitive.bits.t.size
-			       > CryptHashGetBlockSize(hashAlg))
+			    if(sensitive->sensitive.bits.t.size > maxSize)
 				return TPM_RCS_KEY_SIZE + blameSensitive;
 			}
 		    // If there is a nameAlg, check the binding
 		    if(publicArea->nameAlg != TPM_ALG_NULL)
 			{
 			    TPM2B_DIGEST            compare;
-#if 1
 			    if(sensitive->seedValue.t.size != digestSize)
-#else
-				if((sensitive->seedValue.t.size > digestSize)
-				   || (sensitive->seedValue.t.size < digestSize/2))
-#endif
-				    return TPM_RCS_KEY_SIZE;
+				return TPM_RCS_KEY_SIZE + blameSensitive;
 			    CryptComputeSymmetricUnique(publicArea, sensitive, &compare);
 			    if(!MemoryEqual2B(&unique->sym.b, &compare.b))
 				return TPM_RC_BINDING;
