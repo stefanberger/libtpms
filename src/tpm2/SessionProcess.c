@@ -3,7 +3,7 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: SessionProcess.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -643,7 +643,7 @@ CompareTemplateHash(
     // Only try this for the three commands for which it is intended
     if(command->code != TPM_CC_Create
        && command->code != TPM_CC_CreatePrimary
-#ifdef TPM_CC_CreateLoaded
+#if CC_CreateLoaded
        && command->code != TPM_CC_CreateLoaded
 #endif
        )
@@ -1295,7 +1295,7 @@ CheckAuthSession(
     else
 	{
 	    // ... see if the entity has a policy, ...
-	    // Note: IsAuthPolicyAvalable will return FALSE if the sensitive area of the
+	    // Note: IsAuthPolicyAvailable will return FALSE if the sensitive area of the
 	    // object is not loaded
 	    if(!IsAuthPolicyAvailable(associatedHandle, command->index, sessionIndex))
 		return TPM_RC_AUTH_UNAVAILABLE;
@@ -1354,7 +1354,7 @@ CheckAuthSession(
 	}
     return result;
 }
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
 /* 6.4.4.15 CheckCommandAudit() */
 /* This function is called before the command is processed if audit is enabled for the command. It
    will check to see if the audit can be performed and will ensure that the cpHash is available for
@@ -1489,7 +1489,7 @@ ParseSessionBuffer(
 			return RcSafeAddToResult(result, errorIndex);
 		}
 	}
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     // Check if the command should be audited. Need to do this before any parameter
     // encryption so that the cpHash for the audit is correct
     if(CommandAuditIsRequired(command->index))
@@ -1548,7 +1548,7 @@ CheckAuthNoSession(
 	    if(CommandAuthRole(command->index, i) != AUTH_NONE)
 		return TPM_RC_AUTH_MISSING;
 	}
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     // Check if the command should be audited.
     if(CommandAuditIsRequired(command->index))
 	{
@@ -1648,7 +1648,7 @@ Audit(
 		      &auditSession->u2.auditDigest);
     return;
 }
-#ifdef  TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
 /* 6.4.5.6 CommandAudit() */
 /* This function updates the command audit digest. */
 static void
@@ -1923,7 +1923,7 @@ BuildResponseSession(
     // Audit sessions should be processed regardless of the tag because
     // a command with no session may cause a change of the exclusivity state.
     UpdateAuditSessionStatus(command);
-#ifdef TPM_CC_GetCommandAuditDigest
+#if CC_GetCommandAuditDigest
     // Command Audit
     if(CommandAuditIsRequired(command->index))
 	CommandAudit(command);

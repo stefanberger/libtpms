@@ -234,7 +234,7 @@ typedef BYTE    HASH_STATE_TYPE;
 #define HASH_STATE_EMPTY        ((HASH_STATE_TYPE) 0)
 #define HASH_STATE_HASH         ((HASH_STATE_TYPE) 1)
 #define HASH_STATE_HMAC         ((HASH_STATE_TYPE) 2)
-#if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
+#if CC_MAC || CC_MAC_Start
 #define HASH_STATE_SMAC         ((HASH_STATE_TYPE) 3)
 #endif
 /* This is the structure that is used for passing a context into the hashing functions. It should be

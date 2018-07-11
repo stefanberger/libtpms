@@ -3,7 +3,7 @@
 /*		Accessing properties for handles of various types		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entity.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Entity.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -181,7 +181,7 @@ EntityGetLoadStatus(
 		    // Any PCR handle that is unmarshaled successfully referenced
 		    // a PCR that is defined.
 		    break;
-#ifdef TPM_CC_AC_Send
+#if CC_AC_Send
 		  case TPM_HT_AC:
 		    // Use the TPM-specific routine to search for the AC
 		    result = AcIsAccessible(handle);

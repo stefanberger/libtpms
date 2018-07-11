@@ -3,7 +3,7 @@
 /*			     	Session Commands				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: SessionCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "StartAuthSession_fp.h"
-#ifdef TPM_CC_StartAuthSession  // Conditional expansion of this file
+#if CC_StartAuthSession  // Conditional expansion of this file
 TPM_RC
 TPM2_StartAuthSession(
 		      StartAuthSession_In     *in,            // IN: input parameter buffer
@@ -162,7 +162,7 @@ TPM2_StartAuthSession(
 #endif // CC_StartAuthSession
 #include "Tpm.h"
 #include "PolicyRestart_fp.h"
-#ifdef TPM_CC_PolicyRestart  // Conditional expansion of this file
+#if CC_PolicyRestart  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyRestart(
 		   PolicyRestart_In    *in             // IN: input parameter list

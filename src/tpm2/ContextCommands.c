@@ -3,7 +3,7 @@
 /*			   Context Management	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ContextCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: ContextCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "ContextSave_fp.h"
-#ifdef TPM_CC_ContextSave  // Conditional expansion of this file
+#if CC_ContextSave  // Conditional expansion of this file
 #include "Context_spt_fp.h"
 /* Error Returns Meaning */
 /* TPM_RC_CONTEXT_GAP a contextID could not be assigned for a session context save */
@@ -221,7 +221,7 @@ TPM2_ContextSave(
 #endif // CC_ContextSave
 #include "Tpm.h"
 #include "ContextLoad_fp.h"
-#ifdef TPM_CC_ContextLoad  // Conditional expansion of this file
+#if CC_ContextLoad  // Conditional expansion of this file
 #include "Context_spt_fp.h"
 TPM_RC
 TPM2_ContextLoad(
@@ -338,7 +338,7 @@ TPM2_ContextLoad(
 #endif // CC_ContextLoad
 #include "Tpm.h"
 #include "FlushContext_fp.h"
-#ifdef TPM_CC_FlushContext  // Conditional expansion of this file
+#if CC_FlushContext  // Conditional expansion of this file
 TPM_RC
 TPM2_FlushContext(
 		  FlushContext_In     *in             // IN: input parameter list
@@ -378,7 +378,7 @@ TPM2_FlushContext(
 #endif // CC_FlushContext
 #include "Tpm.h"
 #include "EvictControl_fp.h"
-#ifdef TPM_CC_EvictControl  // Conditional expansion of this file
+#if CC_EvictControl  // Conditional expansion of this file
 TPM_RC
 TPM2_EvictControl(
 		  EvictControl_In     *in             // IN: input parameter list

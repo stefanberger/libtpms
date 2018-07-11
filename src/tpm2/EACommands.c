@@ -3,7 +3,7 @@
 /*			    Enhanced Authorization Commands			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EACommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: EACommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Policy_spt_fp.h"
 #include "PolicySigned_fp.h"
-#ifdef TPM_CC_PolicySigned  // Conditional expansion of this file
+#if CC_PolicySigned  // Conditional expansion of this file
 /*TPM_RC_CPHASH cpHash was previously set to a different value */
 /*TPM_RC_EXPIRED expiration indicates a time in the past or expiration is non-zero but no nonceTPM
   is present */
@@ -188,7 +188,7 @@ TPM2_PolicySigned(
 #endif // CC_PolicySigned
 #include "Tpm.h"
 #include "PolicySecret_fp.h"
-#ifdef TPM_CC_PolicySecret  // Conditional expansion of this file
+#if CC_PolicySecret  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 #include "NV_spt_fp.h"
 /* TPM_RC_CPHASH cpHash for policy was previously set to a value that is not the same as cpHashA */
@@ -268,7 +268,7 @@ TPM2_PolicySecret(
 #endif // CC_PolicySecret
 #include "Tpm.h"
 #include "PolicyTicket_fp.h"
-#ifdef TPM_CC_PolicyTicket  // Conditional expansion of this file
+#if CC_PolicyTicket  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 /* TPM_RC_CPHASH policy's cpHash was previously set to a different value */
 /* TPM_RC_EXPIRED timeout value in the ticket is in the past and the ticket has expired */
@@ -343,7 +343,7 @@ TPM2_PolicyTicket(
 #endif // CC_PolicyTicket
 #include "Tpm.h"
 #include "PolicyOR_fp.h"
-#ifdef TPM_CC_PolicyOR  // Conditional expansion of this file
+#if CC_PolicyOR  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyOR(
@@ -391,7 +391,7 @@ TPM2_PolicyOR(
 #endif // CC_PolicyOR
 #include "Tpm.h"
 #include "PolicyPCR_fp.h"
-#ifdef TPM_CC_PolicyPCR  // Conditional expansion of this file
+#if CC_PolicyPCR  // Conditional expansion of this file
 /* TPM_RC_VALUE if provided, pcrDigest does not match the current PCR settings */
 /* TPM_RC_PCR_CHANGED a previous TPM2_PolicyPCR() set pcrCounter and it has changed */
 TPM_RC
@@ -461,7 +461,7 @@ TPM2_PolicyPCR(
 #endif // CC_PolicyPCR
 #include "Tpm.h"
 #include "PolicyLocality_fp.h"
-#ifdef TPM_CC_PolicyLocality  // Conditional expansion of this file
+#if CC_PolicyLocality  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyLocality(
 		    PolicyLocality_In   *in             // IN: input parameter list
@@ -539,7 +539,7 @@ TPM2_PolicyLocality(
 #endif // CC_PolicyLocality
 #include "Tpm.h"
 #include "PolicyNV_fp.h"
-#ifdef TPM_CC_PolicyNV  // Conditional expansion of this file
+#if CC_PolicyNV  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyNV(
@@ -612,7 +612,7 @@ TPM2_PolicyNV(
 #endif // CC_PolicyNV
 #include "Tpm.h"
 #include "PolicyCounterTimer_fp.h"
-#ifdef TPM_CC_PolicyCounterTimer  // Conditional expansion of this file
+#if CC_PolicyCounterTimer  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyCounterTimer(
@@ -686,7 +686,7 @@ TPM2_PolicyCounterTimer(
 #endif // CC_PolicyCounterTimer
 #include "Tpm.h"
 #include "PolicyCommandCode_fp.h"
-#ifdef TPM_CC_PolicyCommandCode  // Conditional expansion of this file
+#if CC_PolicyCommandCode  // Conditional expansion of this file
 /* Error Returns Meaning */
 /* TPM_RC_VALUE commandCode of policySession previously set to a different value */
 TPM_RC
@@ -724,7 +724,7 @@ TPM2_PolicyCommandCode(
 #endif // CC_PolicyCommandCode
 #include "Tpm.h"
 #include "PolicyPhysicalPresence_fp.h"
-#ifdef TPM_CC_PolicyPhysicalPresence  // Conditional expansion of this file
+#if CC_PolicyPhysicalPresence  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyPhysicalPresence(
 			    PolicyPhysicalPresence_In   *in             // IN: input parameter list
@@ -753,7 +753,7 @@ TPM2_PolicyPhysicalPresence(
 #endif // CC_PolicyPhysicalPresence
 #include "Tpm.h"
 #include "PolicyCpHash_fp.h"
-#ifdef TPM_CC_PolicyCpHash  // Conditional expansion of this file
+#if CC_PolicyCpHash  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyCpHash(
 		  PolicyCpHash_In     *in             // IN: input parameter list
@@ -797,7 +797,7 @@ TPM2_PolicyCpHash(
 #endif // CC_PolicyCpHash
 #include "Tpm.h"
 #include "PolicyNameHash_fp.h"
-#ifdef TPM_CC_PolicyNameHash  // Conditional expansion of this file
+#if CC_PolicyNameHash  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyNameHash(
 		    PolicyNameHash_In   *in             // IN: input parameter list
@@ -840,7 +840,7 @@ TPM2_PolicyNameHash(
 #endif // CC_PolicyNameHash
 #include "Tpm.h"
 #include "PolicyDuplicationSelect_fp.h"
-#ifdef TPM_CC_PolicyDuplicationSelect  // Conditional expansion of this file
+#if CC_PolicyDuplicationSelect  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyDuplicationSelect(
 			     PolicyDuplicationSelect_In  *in             // IN: input parameter list
@@ -892,7 +892,7 @@ TPM2_PolicyDuplicationSelect(
 #endif // CC_PolicyDuplicationSelect
 #include "Tpm.h"
 #include "PolicyAuthorize_fp.h"
-#ifdef TPM_CC_PolicyAuthorize  // Conditional expansion of this file
+#if CC_PolicyAuthorize  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyAuthorize(
@@ -954,7 +954,7 @@ TPM2_PolicyAuthorize(
 #endif // CC_PolicyAuthorize
 #include "Tpm.h"
 #include "PolicyAuthValue_fp.h"
-#ifdef TPM_CC_PolicyAuthValue  // Conditional expansion of this file
+#if CC_PolicyAuthValue  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyAuthValue(
@@ -985,7 +985,7 @@ TPM2_PolicyAuthValue(
 #endif // CC_PolicyAuthValue
 #include "Tpm.h"
 #include "PolicyPassword_fp.h"
-#ifdef TPM_CC_PolicyPassword  // Conditional expansion of this file
+#if CC_PolicyPassword  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
 TPM_RC
 TPM2_PolicyPassword(
@@ -1016,7 +1016,7 @@ TPM2_PolicyPassword(
 #endif // CC_PolicyPassword
 #include "Tpm.h"
 #include "PolicyGetDigest_fp.h"
-#ifdef TPM_CC_PolicyGetDigest  // Conditional expansion of this file
+#if CC_PolicyGetDigest  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyGetDigest(
 		     PolicyGetDigest_In      *in,            // IN: input parameter list
@@ -1033,7 +1033,7 @@ TPM2_PolicyGetDigest(
 #endif // CC_PolicyGetDigest
 #include "Tpm.h"
 #include "PolicyNvWritten_fp.h"
-#ifdef TPM_CC_PolicyNvWritten  // Conditional expansion of this file
+#if CC_PolicyNvWritten  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyNvWritten(
 		     PolicyNvWritten_In  *in             // IN: input parameter list
@@ -1075,7 +1075,7 @@ TPM2_PolicyNvWritten(
 #endif // CC_PolicyNvWritten
 #include "Tpm.h"
 #include "PolicyTemplate_fp.h"
-#ifdef TPM_CC_PolicyTemplate  // Conditional expansion of this file
+#if CC_PolicyTemplate  // Conditional expansion of this file
 TPM_RC
 TPM2_PolicyTemplate(
 		    PolicyTemplate_In     *in             // IN: input parameter list
@@ -1121,7 +1121,7 @@ TPM2_PolicyTemplate(
 #endif // CC_PolicyTemplateHash
 #include "Tpm.h"
 //#include "PolicyAuthorizeNV_fp.h"
-#ifdef TPM_CC_PolicyAuthorizeNV  // Conditional expansion of this file
+#if CC_PolicyAuthorizeNV  // Conditional expansion of this file
 #include "PolicyAuthorizeNV_fp.h"
 #include "Policy_spt_fp.h"
 TPM_RC

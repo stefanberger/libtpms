@@ -3,7 +3,7 @@
 /*			     Object Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ObjectCommands.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: ObjectCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Object_spt_fp.h"
 #include "Create_fp.h"
-#ifdef TPM_CC_Create  // Conditional expansion of this file
+#if CC_Create  // Conditional expansion of this file
 TPM_RC
 TPM2_Create(
 	    Create_In       *in,            // IN: input parameter list
@@ -122,7 +122,7 @@ TPM2_Create(
 #endif // CC_Create
 #include "Tpm.h"
 #include "Load_fp.h"
-#ifdef TPM_CC_Load  // Conditional expansion of this file
+#if CC_Load  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_Load(
@@ -173,7 +173,7 @@ TPM2_Load(
 #endif // CC_Load
 #include "Tpm.h"
 #include "LoadExternal_fp.h"
-#ifdef TPM_CC_LoadExternal  // Conditional expansion of this file
+#if CC_LoadExternal  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_LoadExternal(
@@ -231,7 +231,7 @@ TPM2_LoadExternal(
 #endif // CC_LoadExternal
 #include "Tpm.h"
 #include "ReadPublic_fp.h"
-#ifdef TPM_CC_ReadPublic  // Conditional expansion of this file
+#if CC_ReadPublic  // Conditional expansion of this file
 TPM_RC
 TPM2_ReadPublic(
 		ReadPublic_In   *in,            // IN: input parameter list
@@ -252,7 +252,7 @@ TPM2_ReadPublic(
 #endif // CC_ReadPublic
 #include "Tpm.h"
 #include "ActivateCredential_fp.h"
-#ifdef TPM_CC_ActivateCredential  // Conditional expansion of this file
+#if CC_ActivateCredential  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_ActivateCredential(
@@ -300,7 +300,7 @@ TPM2_ActivateCredential(
 #endif // CC_ActivateCredential
 #include "Tpm.h"
 #include "MakeCredential_fp.h"
-#ifdef TPM_CC_MakeCredential  // Conditional expansion of this file
+#if CC_MakeCredential  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_MakeCredential(
@@ -338,7 +338,7 @@ TPM2_MakeCredential(
 #endif // CC_MakeCredential
 #include "Tpm.h"
 #include "Unseal_fp.h"
-#ifdef TPM_CC_Unseal  // Conditional expansion of this file
+#if CC_Unseal  // Conditional expansion of this file
 TPM_RC
 TPM2_Unseal(
 	    Unseal_In           *in,
@@ -364,7 +364,7 @@ TPM2_Unseal(
 #endif // CC_Unseal
 #include "Tpm.h"
 #include "ObjectChangeAuth_fp.h"
-#ifdef TPM_CC_ObjectChangeAuth  // Conditional expansion of this file
+#if CC_ObjectChangeAuth  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_ObjectChangeAuth(
@@ -403,7 +403,7 @@ TPM2_ObjectChangeAuth(
 #endif // CC_ObjectChangeAuth
 #include "Tpm.h"
 #include "CreateLoaded_fp.h"
-#ifdef TPM_CC_CreateLoaded  // Conditional expansion of this file
+#if CC_CreateLoaded  // Conditional expansion of this file
 TPM_RC
 TPM2_CreateLoaded(
 		  CreateLoaded_In    *in,            // IN: input parameter list
@@ -535,4 +535,4 @@ TPM2_CreateLoaded(
     ObjectSetLoadedAttributes(newObject, in->parentHandle);
     return result;
 }
-#endif // CC_CreatePrimary
+#endif // CC_CreateLoaded

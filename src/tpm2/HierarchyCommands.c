@@ -3,7 +3,7 @@
 /*			     Hierarchy Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HierarchyCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: HierarchyCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "CreatePrimary_fp.h"
-#ifdef TPM_CC_CreatePrimary  // Conditional expansion of this file
+#if CC_CreatePrimary  // Conditional expansion of this file
 TPM_RC
 TPM2_CreatePrimary(
 		   CreatePrimary_In    *in,            // IN: input parameter list
@@ -129,7 +129,7 @@ TPM2_CreatePrimary(
 #endif // CC_CreatePrimary
 #include "Tpm.h"
 #include "HierarchyControl_fp.h"
-#ifdef TPM_CC_HierarchyControl  // Conditional expansion of this file
+#if CC_HierarchyControl  // Conditional expansion of this file
 TPM_RC
 TPM2_HierarchyControl(
 		      HierarchyControl_In     *in             // IN: input parameter list
@@ -223,7 +223,7 @@ TPM2_HierarchyControl(
 #endif // CC_HierarchyControl
 #include "Tpm.h"
 #include "SetPrimaryPolicy_fp.h"
-#ifdef TPM_CC_SetPrimaryPolicy  // Conditional expansion of this file
+#if CC_SetPrimaryPolicy  // Conditional expansion of this file
 TPM_RC
 TPM2_SetPrimaryPolicy(
 		      SetPrimaryPolicy_In     *in             // IN: input parameter list
@@ -276,7 +276,7 @@ TPM2_SetPrimaryPolicy(
 #endif // CC_SetPrimaryPolicy
 #include "Tpm.h"
 #include "ChangePPS_fp.h"
-#ifdef TPM_CC_ChangePPS  // Conditional expansion of this file
+#if CC_ChangePPS  // Conditional expansion of this file
 TPM_RC
 TPM2_ChangePPS(
 	       ChangePPS_In    *in             // IN: input parameter list
@@ -320,7 +320,7 @@ TPM2_ChangePPS(
 #endif // CC_ChangePPS
 #include "Tpm.h"
 #include "ChangeEPS_fp.h"
-#ifdef TPM_CC_ChangeEPS  // Conditional expansion of this file
+#if CC_ChangeEPS  // Conditional expansion of this file
 TPM_RC
 TPM2_ChangeEPS(
 	       ChangeEPS_In    *in             // IN: input parameter list
@@ -363,7 +363,7 @@ TPM2_ChangeEPS(
 #endif // CC_ChangeEPS
 #include "Tpm.h"
 #include "Clear_fp.h"
-#ifdef TPM_CC_Clear  // Conditional expansion of this file
+#if CC_Clear  // Conditional expansion of this file
 TPM_RC
 TPM2_Clear(
 	   Clear_In        *in             // IN: input parameter list
@@ -426,7 +426,7 @@ TPM2_Clear(
 #endif // CC_Clear
 #include "Tpm.h"
 #include "ClearControl_fp.h"
-#ifdef TPM_CC_ClearControl  // Conditional expansion of this file
+#if CC_ClearControl  // Conditional expansion of this file
 TPM_RC
 TPM2_ClearControl(
 		  ClearControl_In     *in             // IN: input parameter list
@@ -450,7 +450,7 @@ TPM2_ClearControl(
 #endif // CC_ClearControl
 #include "Tpm.h"
 #include "HierarchyChangeAuth_fp.h"
-#ifdef TPM_CC_HierarchyChangeAuth  // Conditional expansion of this file
+#if CC_HierarchyChangeAuth  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_HierarchyChangeAuth(

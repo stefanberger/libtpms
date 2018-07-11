@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   	Command Audit  					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AuditCommands.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: AuditCommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "SetCommandCodeAuditStatus_fp.h"
-#ifdef TPM_CC_SetCommandCodeAuditStatus  // Conditional expansion of this file
+#if CC_SetCommandCodeAuditStatus  // Conditional expansion of this file
 TPM_RC
 TPM2_SetCommandCodeAuditStatus(
 			       SetCommandCodeAuditStatus_In    *in             // IN: input parameter list

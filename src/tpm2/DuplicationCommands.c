@@ -3,7 +3,7 @@
 /*			    Duplication Commands 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DuplicationCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: DuplicationCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Duplicate_fp.h"
-#ifdef TPM_CC_Duplicate  // Conditional expansion of this file
+#if CC_Duplicate  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_Duplicate(
@@ -148,7 +148,7 @@ TPM2_Duplicate(
 #endif // CC_Duplicate
 #include "Tpm.h"
 #include "Rewrap_fp.h"
-#ifdef TPM_CC_Rewrap  // Conditional expansion of this file
+#if CC_Rewrap  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_Rewrap(
@@ -248,7 +248,7 @@ TPM2_Rewrap(
 #endif // CC_Rewrap
 #include "Tpm.h"
 #include "Import_fp.h"
-#ifdef TPM_CC_Import  // Conditional expansion of this file
+#if CC_Import  // Conditional expansion of this file
 #include "Object_spt_fp.h"
 TPM_RC
 TPM2_Import(

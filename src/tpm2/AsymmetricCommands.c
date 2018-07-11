@@ -3,7 +3,7 @@
 /*			  Asymmetric Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AsymmetricCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: AsymmetricCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "RSA_Encrypt_fp.h"
-#ifdef TPM_CC_RSA_Encrypt  // Conditional expansion of this file
+#if CC_RSA_Encrypt  // Conditional expansion of this file
 #ifdef TPM_ALG_RSA
 TPM_RC
 TPM2_RSA_Encrypt(
@@ -99,7 +99,7 @@ TPM2_RSA_Encrypt(
 #endif // CC_RSA_Encrypt
 #include "Tpm.h"
 #include "RSA_Decrypt_fp.h"
-#ifdef TPM_CC_RSA_Decrypt  // Conditional expansion of this file
+#if CC_RSA_Decrypt  // Conditional expansion of this file
 #ifdef TPM_ALG_RSA
 TPM_RC
 TPM2_RSA_Decrypt(
@@ -144,7 +144,7 @@ TPM2_RSA_Decrypt(
 #endif // CC_RSA_Decrypt
 #include "Tpm.h"
 #include "ECDH_KeyGen_fp.h"
-#ifdef TPM_CC_ECDH_KeyGen  // Conditional expansion of this file
+#if CC_ECDH_KeyGen  // Conditional expansion of this file
 #ifdef TPM_ALG_ECC
 TPM_RC
 TPM2_ECDH_KeyGen(
@@ -191,7 +191,7 @@ TPM2_ECDH_KeyGen(
 #endif // CC_ECDH_KeyGen
 #include "Tpm.h"
 #include "ECDH_ZGen_fp.h"
-#ifdef TPM_CC_ECDH_ZGen  // Conditional expansion of this file
+#if CC_ECDH_ZGen  // Conditional expansion of this file
 #ifdef TPM_ALG_ECC
 TPM_RC
 TPM2_ECDH_ZGen(
@@ -229,7 +229,7 @@ TPM2_ECDH_ZGen(
 #endif // CC_ECDH_ZGen
 #include "Tpm.h"
 #include "ECC_Parameters_fp.h"
-#ifdef TPM_CC_ECC_Parameters  // Conditional expansion of this file
+#if CC_ECC_Parameters  // Conditional expansion of this file
 #ifdef TPM_ALG_ECC
 TPM_RC
 TPM2_ECC_Parameters(
@@ -248,7 +248,7 @@ TPM2_ECC_Parameters(
 #endif // CC_ECC_Parameters
 #include "Tpm.h"
 #include "ZGen_2Phase_fp.h"
-#ifdef TPM_CC_ZGen_2Phase  // Conditional expansion of this file
+#if CC_ZGen_2Phase  // Conditional expansion of this file
 TPM_RC
 TPM2_ZGen_2Phase(
 		 ZGen_2Phase_In      *in,            // IN: input parameter list
