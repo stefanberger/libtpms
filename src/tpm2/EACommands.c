@@ -1095,7 +1095,7 @@ TPM2_PolicyTemplate(
 	}
     // error if cpHash contains something that is not a template
     else if(session->u1.templateHash.t.size != 0)
-	return TPM_RCS_VALUE + RC_PolicyTemplate_templateHash;
+	return TPM_RC_CPHASH;
     // A valid templateHash must have the same size as session hash digest
     if(in->templateHash.t.size != CryptHashGetDigestSize(session->authHashAlg))
 	return TPM_RCS_SIZE + RC_PolicyTemplate_templateHash;
