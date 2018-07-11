@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2017				*/
 /*										*/
 /********************************************************************************/
 
@@ -544,6 +544,7 @@ BnCurveInitialize(
 /* This function does a point multiply of the form R = [d]S */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
+/* TRUE success */
 LIB_EXPORT BOOL
 BnEccModMult(
 	     bigPoint             R,         // OUT: computed point
@@ -567,8 +568,6 @@ BnEccModMult(
 }
 /* B.2.3.2.3.12. BnEccModMult2() */
 /* This function does a point multiply of the form R = [d]G + [u]Q */
-/* Return Values Meaning */
-/* FALSE failure in operation; treat as result being point at infinity */
 LIB_EXPORT BOOL
 BnEccModMult2(
 	      bigPoint             R,         // OUT: computed point
@@ -584,7 +583,7 @@ BnEccModMult2(
     BIG_INITIALIZED(bnD, d);
     EC_POINT            *pQ = EcPointInitialized(Q, E);
     BIG_INITIALIZED(bnU, u);
-    if(S == NULL || S == (pointConst)&E->C->base)
+    if(S == NULL || S == (pointConst)&(AccessCurveData(E)->base))
 	EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
 	{
@@ -608,6 +607,7 @@ BnEccModMult2(
 /* This function does addition of two points. */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
+/* TRUE success */
 LIB_EXPORT BOOL
 BnEccAdd(
 	 bigPoint             R,         // OUT: computed point
