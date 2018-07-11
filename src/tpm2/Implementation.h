@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Implementation.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Implementation.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,24 +55,25 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 /* A.2 Implementation.h */
 #ifndef _IMPLEMENTATION_H_
 #define _IMPLEMENTATION_H_
+
 #include    "TpmBuildSwitches.h"
 #include    "BaseTypes.h"
 #include    "TPMB.h"
 #undef TRUE
 #undef FALSE
-/* This table is built in to TpmStructures() Change these definitions to turn all algorithms or
-   commands on or off */
-#define      ALG_YES      YES
-#define      ALG_NO       NO
-#define      CC_YES       YES
-#define      CC_NO        NO
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
 /* From TPM 2.0 Part 2: Table 4 - Defines for Logic Values */
 #define  TRUE     1
 #define  FALSE    0
@@ -163,29 +164,30 @@
 #define  TDES_KEY_SIZE_BITS_192     TDES_ALLOWED_KEY_SIZE_192
 #define  MAX_TDES_KEY_BITS          192
 #define  MAX_TDES_KEY_BYTES         24
-#define MAX_TDES_BLOCK_SIZE_BYTES				      \
-    MAX(TDES_128_BLOCK_SIZE_BYTES,					\
+#define MAX_TDES_BLOCK_SIZE_BYTES		\
+    MAX(TDES_128_BLOCK_SIZE_BYTES,		\
 	MAX(TDES_192_BLOCK_SIZE_BYTES, 0))
 #define  AES_KEY_SIZES_BITS         {128,256}
 #define  AES_KEY_SIZE_BITS_128      AES_ALLOWED_KEY_SIZE_128
 #define  AES_KEY_SIZE_BITS_256      AES_ALLOWED_KEY_SIZE_256
 #define  MAX_AES_KEY_BITS           256
 #define  MAX_AES_KEY_BYTES          32
-#define MAX_AES_BLOCK_SIZE_BYTES				      \
-    MAX(AES_128_BLOCK_SIZE_BYTES,					\
+#define MAX_AES_BLOCK_SIZE_BYTES		\
+    MAX(AES_128_BLOCK_SIZE_BYTES,		\
 	MAX(AES_256_BLOCK_SIZE_BYTES, 0))
 #define  SM4_KEY_SIZES_BITS         {128}
 #define  SM4_KEY_SIZE_BITS_128      SM4_ALLOWED_KEY_SIZE_128
 #define  MAX_SM4_KEY_BITS           128
 #define  MAX_SM4_KEY_BYTES          16
-#define MAX_SM4_BLOCK_SIZE_BYTES			\
+#define MAX_SM4_BLOCK_SIZE_BYTES		\
     MAX(SM4_128_BLOCK_SIZE_BYTES, 0)
 #define  CAMELLIA_KEY_SIZES_BITS    {128}
 #define  CAMELLIA_KEY_SIZE_BITS_128    CAMELLIA_ALLOWED_KEY_SIZE_128
 #define  MAX_CAMELLIA_KEY_BITS      128
 #define  MAX_CAMELLIA_KEY_BYTES     16
-#define MAX_CAMELLIA_BLOCK_SIZE_BYTES				\
+#define MAX_CAMELLIA_BLOCK_SIZE_BYTES		\
     MAX(CAMELLIA_128_BLOCK_SIZE_BYTES, 0)
+
 /* From Vendor-Specific: Table 4 - Defines for Implemented Curves */
 #define  ECC_NIST_P192         YES
 #define  ECC_NIST_P224         YES
@@ -197,16 +199,16 @@
 #define  ECC_SM2_P256          YES
 #define  ECC_CURVES							\
     {TPM_ECC_BN_P256, TPM_ECC_BN_P638, TPM_ECC_NIST_P192, TPM_ECC_NIST_P224, \
-	    TPM_ECC_NIST_P256, TPM_ECC_NIST_P384, TPM_ECC_NIST_P521, TPM_ECC_SM2_P256}
+     TPM_ECC_NIST_P256, TPM_ECC_NIST_P384, TPM_ECC_NIST_P521, TPM_ECC_SM2_P256}
 #define  ECC_CURVE_COUNT						\
     (ECC_BN_P256 + ECC_BN_P638 + ECC_NIST_P192 + ECC_NIST_P224 +	\
      ECC_NIST_P256 + ECC_NIST_P384 + ECC_NIST_P521 + ECC_SM2_P256)
-#define  MAX_ECC_KEY_BITS			      \
-    MAX(ECC_BN_P256*256, MAX(ECC_BN_P638*638,				\
-			     MAX(ECC_NIST_P192*192, MAX(ECC_NIST_P224*224, \
-							MAX(ECC_NIST_P256*256, MAX(ECC_NIST_P384*384, \
-										   MAX(ECC_NIST_P521*521, MAX(ECC_SM2_P256*256, \
-													      0))))))))
+#define  MAX_ECC_KEY_BITS						\
+    MAX(ECC_BN_P256*256,   MAX(ECC_BN_P638*638,				\
+    MAX(ECC_NIST_P192*192, MAX(ECC_NIST_P224*224, \
+    MAX(ECC_NIST_P256*256, MAX(ECC_NIST_P384*384, \
+    MAX(ECC_NIST_P521*521, MAX(ECC_SM2_P256*256, \
+    0))))))))
 #define  MAX_ECC_KEY_BYTES     BITS_TO_BYTES(MAX_ECC_KEY_BITS)
 /* From Vendor-Specific: Table 5 - Defines for Implemented Commands */
 #define  CC_ActivateCredential            CC_YES
@@ -335,6 +337,7 @@
 #define  PLATFORM_VERSION        TPM_SPEC_VERSION
 #define  PLATFORM_YEAR           TPM_SPEC_YEAR
 #define  PLATFORM_DAY_OF_YEAR    TPM_SPEC_DAY_OF_YEAR
+
 /* From Vendor-Specific: Table 7 - Defines for Implementation Values */
 #define  FIELD_UPGRADE_IMPLEMENTED      NO
 #ifdef TPM_POSIX
@@ -370,7 +373,7 @@
 #define  MAX_LOADED_SESSIONS            3
 #define  MAX_SESSION_NUM                3
 #define  MAX_LOADED_OBJECTS             3
-#define  MIN_EVICT_OBJECTS              7
+#define  MIN_EVICT_OBJECTS              7	/* for PC Client */
 #define  NUM_POLICY_PCR_GROUP           1
 #define  NUM_AUTHVALUE_PCR_GROUP        1
 #define  MAX_CONTEXT_SIZE               2474
@@ -564,53 +567,47 @@ typedef  UINT16             TPM_ECC_CURVE;
 #define  TPM_ECC_BN_P256      (TPM_ECC_CURVE)(0x0010)
 #define  TPM_ECC_BN_P638      (TPM_ECC_CURVE)(0x0011)
 #define  TPM_ECC_SM2_P256     (TPM_ECC_CURVE)(0x0020)
-/* From TCG Algorithm Registry: Table 4 - Defines for NIST_P192 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 5 - Defines for NIST_P224 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 6 - Defines for NIST_P256 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 7 - Defines for NIST_P384 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 8 - Defines for NIST_P521 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 9 - Defines for BN_P256 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 10 - Defines for BN_P638 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 11 - Defines for SM2_P256 ECC Values Data is in CryptEccData.c
-   From TCG Algorithm Registry: Table 12 - Defines for SHA1 Hash Values */
+
+// From TCG Algorithm Registry: Table 12 - Defines for SHA1 Hash Values
 #define  SHA1_DIGEST_SIZE    20
 #define  SHA1_BLOCK_SIZE     64
 #define  SHA1_DER_SIZE       15
-#define  SHA1_DER					    \
-    0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,	    \
+#define  SHA1_DER					\
+    0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,	\
 	0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14
 /*     From TCG Algorithm Registry: Table 13 - Defines for SHA256 Hash Values */
 #define  SHA256_DIGEST_SIZE    32
 #define  SHA256_BLOCK_SIZE     64
 #define  SHA256_DER_SIZE       19
-#define  SHA256_DER					    \
-    0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	    \
-	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,	    \
+#define  SHA256_DER					\
+    0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	\
+	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05,	\
 	0x00, 0x04, 0x20
 /*     From TCG Algorithm Registry: Table 14 - Defines for SHA384 Hash Values */
 #define  SHA384_DIGEST_SIZE    48
 #define  SHA384_BLOCK_SIZE     128
 #define  SHA384_DER_SIZE       19
-#define  SHA384_DER					    \
-    0x30, 0x41, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	    \
-	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05,	    \
+#define  SHA384_DER					\
+    0x30, 0x41, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	\
+	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02, 0x05,	\
 	0x00, 0x04, 0x30
 /*     From TCG Algorithm Registry: Table 15 - Defines for SHA512 Hash Values */
 #define  SHA512_DIGEST_SIZE    64
 #define  SHA512_BLOCK_SIZE     128
 #define  SHA512_DER_SIZE       19
-#define  SHA512_DER					    \
-    0x30, 0x51, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	    \
-	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,	    \
+#define  SHA512_DER					\
+    0x30, 0x51, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86,	\
+	0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03, 0x05,	\
 	0x00, 0x04, 0x40
 /*     From TCG Algorithm Registry: Table 16 - Defines for SM3_256 Hash Values */
 #define  SM3_256_DIGEST_SIZE    32
 #define  SM3_256_BLOCK_SIZE     64
 #define  SM3_256_DER_SIZE       18
-#define  SM3_256_DER					    \
-    0x30, 0x30, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x81,	    \
-	0x1C, 0x81, 0x45, 0x01, 0x83, 0x11, 0x05, 0x00,	    \
+#define  SM3_256_DER					\
+    0x30, 0x30, 0x30, 0x0C, 0x06, 0x08, 0x2A, 0x81,	\
+	0x1C, 0x81, 0x45, 0x01, 0x83, 0x11, 0x05, 0x00,	\
 	0x04, 0x20
+
 /*     From TCG Algorithm Registry: Table 17 - Defines for AES Symmetric Cipher Algorithm
        Constants */
 #define  AES_ALLOWED_KEY_SIZE_128    YES
@@ -619,9 +616,11 @@ typedef  UINT16             TPM_ECC_CURVE;
 #define  AES_128_BLOCK_SIZE_BYTES    16
 #define  AES_192_BLOCK_SIZE_BYTES    16
 #define  AES_256_BLOCK_SIZE_BYTES    16
+
 /* From TCG Algorithm Registry: Table 18 - Defines for SM4 Symmetric Cipher Algorithm Constants */
 #define  SM4_ALLOWED_KEY_SIZE_128    YES
 #define  SM4_128_BLOCK_SIZE_BYTES    16
+
 /*     From TCG Algorithm Registry: Table 19 - Defines for CAMELLIA Symmetric Cipher Algorithm
        Constants */
 #define  CAMELLIA_ALLOWED_KEY_SIZE_128    YES
@@ -630,6 +629,7 @@ typedef  UINT16             TPM_ECC_CURVE;
 #define  CAMELLIA_128_BLOCK_SIZE_BYTES    16
 #define  CAMELLIA_192_BLOCK_SIZE_BYTES    16
 #define  CAMELLIA_256_BLOCK_SIZE_BYTES    16
+
 /*     From TCG Algorithm Registry: Table 17 - Defines for TDES Symmetric Cipher Algorithm
        Constants */
 #define  TDES_ALLOWED_KEY_SIZE_128    YES
@@ -1356,162 +1356,162 @@ typedef  UINT32             TPM_CC;
 /*     Size the array of library commands based on whether or not the array is packed (only defined
        commands) or dense (having entries for unimplemented commands) */
 #define LIBRARY_COMMAND_ARRAY_SIZE       (0				\
-					  + (ADD_FILL || CC_NV_UndefineSpaceSpecial)    /* 0x0000011f */ \
-					  + (ADD_FILL || CC_EvictControl)               /* 0x00000120 */ \
-					  + (ADD_FILL || CC_HierarchyControl)           /* 0x00000121 */ \
-					  + (ADD_FILL || CC_NV_UndefineSpace)           /* 0x00000122 */ \
-					  + ADD_FILL                                             /* 0x00000123 */ \
-					  + (ADD_FILL || CC_ChangeEPS)                  /* 0x00000124 */ \
-					  + (ADD_FILL || CC_ChangePPS)                  /* 0x00000125 */ \
-					  + (ADD_FILL || CC_Clear)                      /* 0x00000126 */ \
-					  + (ADD_FILL || CC_ClearControl)               /* 0x00000127 */ \
-					  + (ADD_FILL || CC_ClockSet)                   /* 0x00000128 */ \
-					  + (ADD_FILL || CC_HierarchyChangeAuth)        /* 0x00000129 */ \
-					  + (ADD_FILL || CC_NV_DefineSpace)             /* 0x0000012a */ \
-					  + (ADD_FILL || CC_PCR_Allocate)               /* 0x0000012b */ \
-					  + (ADD_FILL || CC_PCR_SetAuthPolicy)          /* 0x0000012c */ \
-					  + (ADD_FILL || CC_PP_Commands)                /* 0x0000012d */ \
-					  + (ADD_FILL || CC_SetPrimaryPolicy)           /* 0x0000012e */ \
-					  + (ADD_FILL || CC_FieldUpgradeStart)          /* 0x0000012f */ \
-					  + (ADD_FILL || CC_ClockRateAdjust)            /* 0x00000130 */ \
-					  + (ADD_FILL || CC_CreatePrimary)              /* 0x00000131 */ \
-					  + (ADD_FILL || CC_NV_GlobalWriteLock)         /* 0x00000132 */ \
-					  + (ADD_FILL || CC_GetCommandAuditDigest)      /* 0x00000133 */ \
-					  + (ADD_FILL || CC_NV_Increment)               /* 0x00000134 */ \
-					  + (ADD_FILL || CC_NV_SetBits)                 /* 0x00000135 */ \
-					  + (ADD_FILL || CC_NV_Extend)                  /* 0x00000136 */ \
-					  + (ADD_FILL || CC_NV_Write)                   /* 0x00000137 */ \
-					  + (ADD_FILL || CC_NV_WriteLock)               /* 0x00000138 */ \
-					  + (ADD_FILL || CC_DictionaryAttackLockReset)  /* 0x00000139 */ \
-					  + (ADD_FILL || CC_DictionaryAttackParameters) /* 0x0000013a */ \
-					  + (ADD_FILL || CC_NV_ChangeAuth)              /* 0x0000013b */ \
-					  + (ADD_FILL || CC_PCR_Event)                  /* 0x0000013c */ \
-					  + (ADD_FILL || CC_PCR_Reset)                  /* 0x0000013d */ \
-					  + (ADD_FILL || CC_SequenceComplete)           /* 0x0000013e */ \
-					  + (ADD_FILL || CC_SetAlgorithmSet)            /* 0x0000013f */ \
-					  + (ADD_FILL || CC_SetCommandCodeAuditStatus)  /* 0x00000140 */ \
-					  + (ADD_FILL || CC_FieldUpgradeData)           /* 0x00000141 */ \
-					  + (ADD_FILL || CC_IncrementalSelfTest)        /* 0x00000142 */ \
-					  + (ADD_FILL || CC_SelfTest)                   /* 0x00000143 */ \
-					  + (ADD_FILL || CC_Startup)                    /* 0x00000144 */ \
-					  + (ADD_FILL || CC_Shutdown)                   /* 0x00000145 */ \
-					  + (ADD_FILL || CC_StirRandom)                 /* 0x00000146 */ \
-					  + (ADD_FILL || CC_ActivateCredential)         /* 0x00000147 */ \
-					  + (ADD_FILL || CC_Certify)                    /* 0x00000148 */ \
-					  + (ADD_FILL || CC_PolicyNV)                   /* 0x00000149 */ \
-					  + (ADD_FILL || CC_CertifyCreation)            /* 0x0000014a */ \
-					  + (ADD_FILL || CC_Duplicate)                  /* 0x0000014b */ \
-					  + (ADD_FILL || CC_GetTime)                    /* 0x0000014c */ \
-					  + (ADD_FILL || CC_GetSessionAuditDigest)      /* 0x0000014d */ \
-					  + (ADD_FILL || CC_NV_Read)                    /* 0x0000014e */ \
-					  + (ADD_FILL || CC_NV_ReadLock)                /* 0x0000014f */ \
-					  + (ADD_FILL || CC_ObjectChangeAuth)           /* 0x00000150 */ \
-					  + (ADD_FILL || CC_PolicySecret)               /* 0x00000151 */ \
-					  + (ADD_FILL || CC_Rewrap)                     /* 0x00000152 */ \
-					  + (ADD_FILL || CC_Create)                     /* 0x00000153 */ \
-					  + (ADD_FILL || CC_ECDH_ZGen)                  /* 0x00000154 */ \
-					  + (ADD_FILL   || CC_HMAC  || CC_MAC)          /* 0x00000155 */ \
-					  + (ADD_FILL || CC_Import)                     /* 0x00000156 */ \
-					  + (ADD_FILL || CC_Load)                       /* 0x00000157 */ \
-					  + (ADD_FILL || CC_Quote)                      /* 0x00000158 */ \
-					  + (ADD_FILL || CC_RSA_Decrypt)                /* 0x00000159 */ \
-					  + ADD_FILL                                             /* 0x0000015a */ \
-					  + (ADD_FILL   || CC_HMAC_Start  || CC_MAC_Start) /* 0x0000015b */ \
-					  + (ADD_FILL || CC_SequenceUpdate)             /* 0x0000015c */ \
-					  + (ADD_FILL || CC_Sign)                       /* 0x0000015d */ \
-					  + (ADD_FILL || CC_Unseal)                     /* 0x0000015e */ \
-					  + ADD_FILL                                             /* 0x0000015f */ \
-					  + (ADD_FILL || CC_PolicySigned)               /* 0x00000160 */ \
-					  + (ADD_FILL || CC_ContextLoad)                /* 0x00000161 */ \
-					  + (ADD_FILL || CC_ContextSave)                /* 0x00000162 */ \
-					  + (ADD_FILL || CC_ECDH_KeyGen)                /* 0x00000163 */ \
-					  + (ADD_FILL || CC_EncryptDecrypt)             /* 0x00000164 */ \
-					  + (ADD_FILL || CC_FlushContext)               /* 0x00000165 */ \
-					  + ADD_FILL                                             /* 0x00000166 */ \
-					  + (ADD_FILL || CC_LoadExternal)               /* 0x00000167 */ \
-					  + (ADD_FILL || CC_MakeCredential)             /* 0x00000168 */ \
-					  + (ADD_FILL || CC_NV_ReadPublic)              /* 0x00000169 */ \
-					  + (ADD_FILL || CC_PolicyAuthorize)            /* 0x0000016a */ \
-					  + (ADD_FILL || CC_PolicyAuthValue)            /* 0x0000016b */ \
-					  + (ADD_FILL || CC_PolicyCommandCode)          /* 0x0000016c */ \
-					  + (ADD_FILL || CC_PolicyCounterTimer)         /* 0x0000016d */ \
-					  + (ADD_FILL || CC_PolicyCpHash)               /* 0x0000016e */ \
-					  + (ADD_FILL || CC_PolicyLocality)             /* 0x0000016f */ \
-					  + (ADD_FILL || CC_PolicyNameHash)             /* 0x00000170 */ \
-					  + (ADD_FILL || CC_PolicyOR)                   /* 0x00000171 */ \
-					  + (ADD_FILL || CC_PolicyTicket)               /* 0x00000172 */ \
-					  + (ADD_FILL || CC_ReadPublic)                 /* 0x00000173 */ \
-					  + (ADD_FILL || CC_RSA_Encrypt)                /* 0x00000174 */ \
-					  + ADD_FILL                                    /* 0x00000175 */ \
-					  + (ADD_FILL || CC_StartAuthSession)           /* 0x00000176 */ \
-					  + (ADD_FILL || CC_VerifySignature)            /* 0x00000177 */ \
-					  + (ADD_FILL || CC_ECC_Parameters)             /* 0x00000178 */ \
-					  + (ADD_FILL || CC_FirmwareRead)               /* 0x00000179 */ \
-					  + (ADD_FILL || CC_GetCapability)              /* 0x0000017a */ \
-					  + (ADD_FILL || CC_GetRandom)                  /* 0x0000017b */ \
-					  + (ADD_FILL || CC_GetTestResult)              /* 0x0000017c */ \
-					  + (ADD_FILL || CC_Hash)                       /* 0x0000017d */ \
-					  + (ADD_FILL || CC_PCR_Read)                   /* 0x0000017e */ \
-					  + (ADD_FILL || CC_PolicyPCR)                  /* 0x0000017f */ \
-					  + (ADD_FILL || CC_PolicyRestart)              /* 0x00000180 */ \
-					  + (ADD_FILL || CC_ReadClock)                  /* 0x00000181 */ \
-					  + (ADD_FILL || CC_PCR_Extend)                 /* 0x00000182 */ \
-					  + (ADD_FILL || CC_PCR_SetAuthValue)           /* 0x00000183 */ \
-					  + (ADD_FILL || CC_NV_Certify)                 /* 0x00000184 */ \
-					  + (ADD_FILL || CC_EventSequenceComplete)      /* 0x00000185 */ \
-					  + (ADD_FILL || CC_HashSequenceStart)          /* 0x00000186 */ \
-					  + (ADD_FILL || CC_PolicyPhysicalPresence)     /* 0x00000187 */ \
-					  + (ADD_FILL || CC_PolicyDuplicationSelect)    /* 0x00000188 */ \
-					  + (ADD_FILL || CC_PolicyGetDigest)            /* 0x00000189 */ \
-					  + (ADD_FILL || CC_TestParms)                  /* 0x0000018a */ \
-					  + (ADD_FILL || CC_Commit)                     /* 0x0000018b */ \
-					  + (ADD_FILL || CC_PolicyPassword)             /* 0x0000018c */ \
-					  + (ADD_FILL || CC_ZGen_2Phase)                /* 0x0000018d */ \
-					  + (ADD_FILL || CC_EC_Ephemeral)               /* 0x0000018e */ \
-					  + (ADD_FILL || CC_PolicyNvWritten)            /* 0x0000018f */ \
-					  + (ADD_FILL || CC_PolicyTemplate)             /* 0x00000190 */ \
-					  + (ADD_FILL || CC_CreateLoaded)               /* 0x00000191 */ \
-					  + (ADD_FILL || CC_PolicyAuthorizeNV)          /* 0x00000192 */ \
-					  + (ADD_FILL || CC_EncryptDecrypt2)            /* 0x00000193 */ \
-					  + (ADD_FILL || CC_AC_GetCapability)           /* 0x00000194 */ \
-					  + (ADD_FILL || CC_AC_Send)                    /* 0x00000195 */ \
-					  + (ADD_FILL || CC_Policy_AC_SendSelect)       /* 0x00000196 */ \
-					  + ADD_FILL                                    /* 0x00000197 */ \
+					  + (ADD_FILL || CC_NV_UndefineSpaceSpecial)              /* 0x0000011F */ \
+					  + (ADD_FILL || CC_EvictControl)                         /* 0x00000120 */ \
+					  + (ADD_FILL || CC_HierarchyControl)                     /* 0x00000121 */ \
+					  + (ADD_FILL || CC_NV_UndefineSpace)                     /* 0x00000122 */ \
+					  +  ADD_FILL                                             /* 0x00000123 */ \
+					  + (ADD_FILL || CC_ChangeEPS)                            /* 0x00000124 */ \
+					  + (ADD_FILL || CC_ChangePPS)                            /* 0x00000125 */ \
+					  + (ADD_FILL || CC_Clear)                                /* 0x00000126 */ \
+					  + (ADD_FILL || CC_ClearControl)                         /* 0x00000127 */ \
+					  + (ADD_FILL || CC_ClockSet)                             /* 0x00000128 */ \
+					  + (ADD_FILL || CC_HierarchyChangeAuth)                  /* 0x00000129 */ \
+					  + (ADD_FILL || CC_NV_DefineSpace)                       /* 0x0000012A */ \
+					  + (ADD_FILL || CC_PCR_Allocate)                         /* 0x0000012B */ \
+					  + (ADD_FILL || CC_PCR_SetAuthPolicy)                    /* 0x0000012C */ \
+					  + (ADD_FILL || CC_PP_Commands)                          /* 0x0000012D */ \
+					  + (ADD_FILL || CC_SetPrimaryPolicy)                     /* 0x0000012E */ \
+					  + (ADD_FILL || CC_FieldUpgradeStart)                    /* 0x0000012F */ \
+					  + (ADD_FILL || CC_ClockRateAdjust)                      /* 0x00000130 */ \
+					  + (ADD_FILL || CC_CreatePrimary)                        /* 0x00000131 */ \
+					  + (ADD_FILL || CC_NV_GlobalWriteLock)                   /* 0x00000132 */ \
+					  + (ADD_FILL || CC_GetCommandAuditDigest)                /* 0x00000133 */ \
+					  + (ADD_FILL || CC_NV_Increment)                         /* 0x00000134 */ \
+					  + (ADD_FILL || CC_NV_SetBits)                           /* 0x00000135 */ \
+					  + (ADD_FILL || CC_NV_Extend)                            /* 0x00000136 */ \
+					  + (ADD_FILL || CC_NV_Write)                             /* 0x00000137 */ \
+					  + (ADD_FILL || CC_NV_WriteLock)                         /* 0x00000138 */ \
+					  + (ADD_FILL || CC_DictionaryAttackLockReset)            /* 0x00000139 */ \
+					  + (ADD_FILL || CC_DictionaryAttackParameters)           /* 0x0000013A */ \
+					  + (ADD_FILL || CC_NV_ChangeAuth)                        /* 0x0000013B */ \
+					  + (ADD_FILL || CC_PCR_Event)                            /* 0x0000013C */ \
+					  + (ADD_FILL || CC_PCR_Reset)                            /* 0x0000013D */ \
+					  + (ADD_FILL || CC_SequenceComplete)                     /* 0x0000013E */ \
+					  + (ADD_FILL || CC_SetAlgorithmSet)                      /* 0x0000013F */ \
+					  + (ADD_FILL || CC_SetCommandCodeAuditStatus)            /* 0x00000140 */ \
+					  + (ADD_FILL || CC_FieldUpgradeData)                     /* 0x00000141 */ \
+					  + (ADD_FILL || CC_IncrementalSelfTest)                  /* 0x00000142 */ \
+					  + (ADD_FILL || CC_SelfTest)                             /* 0x00000143 */ \
+					  + (ADD_FILL || CC_Startup)                              /* 0x00000144 */ \
+					  + (ADD_FILL || CC_Shutdown)                             /* 0x00000145 */ \
+					  + (ADD_FILL || CC_StirRandom)                           /* 0x00000146 */ \
+					  + (ADD_FILL || CC_ActivateCredential)                   /* 0x00000147 */ \
+					  + (ADD_FILL || CC_Certify)                              /* 0x00000148 */ \
+					  + (ADD_FILL || CC_PolicyNV)                             /* 0x00000149 */ \
+					  + (ADD_FILL || CC_CertifyCreation)                      /* 0x0000014A */ \
+					  + (ADD_FILL || CC_Duplicate)                            /* 0x0000014B */ \
+					  + (ADD_FILL || CC_GetTime)                              /* 0x0000014C */ \
+					  + (ADD_FILL || CC_GetSessionAuditDigest)                /* 0x0000014D */ \
+					  + (ADD_FILL || CC_NV_Read)                              /* 0x0000014E */ \
+					  + (ADD_FILL || CC_NV_ReadLock)                          /* 0x0000014F */ \
+					  + (ADD_FILL || CC_ObjectChangeAuth)                     /* 0x00000150 */ \
+					  + (ADD_FILL || CC_PolicySecret)                         /* 0x00000151 */ \
+					  + (ADD_FILL || CC_Rewrap)                               /* 0x00000152 */ \
+					  + (ADD_FILL || CC_Create)                               /* 0x00000153 */ \
+					  + (ADD_FILL || CC_ECDH_ZGen)                            /* 0x00000154 */ \
+					  + (ADD_FILL || CC_HMAC || CC_MAC)                       /* 0x00000155 */ \
+					  + (ADD_FILL || CC_Import)                               /* 0x00000156 */ \
+					  + (ADD_FILL || CC_Load)                                 /* 0x00000157 */ \
+					  + (ADD_FILL || CC_Quote)                                /* 0x00000158 */ \
+					  + (ADD_FILL || CC_RSA_Decrypt)                          /* 0x00000159 */ \
+					  +  ADD_FILL                                             /* 0x0000015A */ \
+					  + (ADD_FILL || CC_HMAC_Start || CC_MAC_Start)           /* 0x0000015B */ \
+					  + (ADD_FILL || CC_SequenceUpdate)                       /* 0x0000015C */ \
+					  + (ADD_FILL || CC_Sign)                                 /* 0x0000015D */ \
+					  + (ADD_FILL || CC_Unseal)                               /* 0x0000015E */ \
+					  +  ADD_FILL                                             /* 0x0000015F */ \
+					  + (ADD_FILL || CC_PolicySigned)                         /* 0x00000160 */ \
+					  + (ADD_FILL || CC_ContextLoad)                          /* 0x00000161 */ \
+					  + (ADD_FILL || CC_ContextSave)                          /* 0x00000162 */ \
+					  + (ADD_FILL || CC_ECDH_KeyGen)                          /* 0x00000163 */ \
+					  + (ADD_FILL || CC_EncryptDecrypt)                       /* 0x00000164 */ \
+					  + (ADD_FILL || CC_FlushContext)                         /* 0x00000165 */ \
+					  +  ADD_FILL                                             /* 0x00000166 */ \
+					  + (ADD_FILL || CC_LoadExternal)                         /* 0x00000167 */ \
+					  + (ADD_FILL || CC_MakeCredential)                       /* 0x00000168 */ \
+					  + (ADD_FILL || CC_NV_ReadPublic)                        /* 0x00000169 */ \
+					  + (ADD_FILL || CC_PolicyAuthorize)                      /* 0x0000016A */ \
+					  + (ADD_FILL || CC_PolicyAuthValue)                      /* 0x0000016B */ \
+					  + (ADD_FILL || CC_PolicyCommandCode)                    /* 0x0000016C */ \
+					  + (ADD_FILL || CC_PolicyCounterTimer)                   /* 0x0000016D */ \
+					  + (ADD_FILL || CC_PolicyCpHash)                         /* 0x0000016E */ \
+					  + (ADD_FILL || CC_PolicyLocality)                       /* 0x0000016F */ \
+					  + (ADD_FILL || CC_PolicyNameHash)                       /* 0x00000170 */ \
+					  + (ADD_FILL || CC_PolicyOR)                             /* 0x00000171 */ \
+					  + (ADD_FILL || CC_PolicyTicket)                         /* 0x00000172 */ \
+					  + (ADD_FILL || CC_ReadPublic)                           /* 0x00000173 */ \
+					  + (ADD_FILL || CC_RSA_Encrypt)                          /* 0x00000174 */ \
+					  +  ADD_FILL                                             /* 0x00000175 */ \
+					  + (ADD_FILL || CC_StartAuthSession)                     /* 0x00000176 */ \
+					  + (ADD_FILL || CC_VerifySignature)                      /* 0x00000177 */ \
+					  + (ADD_FILL || CC_ECC_Parameters)                       /* 0x00000178 */ \
+					  + (ADD_FILL || CC_FirmwareRead)                         /* 0x00000179 */ \
+					  + (ADD_FILL || CC_GetCapability)                        /* 0x0000017A */ \
+					  + (ADD_FILL || CC_GetRandom)                            /* 0x0000017B */ \
+					  + (ADD_FILL || CC_GetTestResult)                        /* 0x0000017C */ \
+					  + (ADD_FILL || CC_Hash)                                 /* 0x0000017D */ \
+					  + (ADD_FILL || CC_PCR_Read)                             /* 0x0000017E */ \
+					  + (ADD_FILL || CC_PolicyPCR)                            /* 0x0000017F */ \
+					  + (ADD_FILL || CC_PolicyRestart)                        /* 0x00000180 */ \
+					  + (ADD_FILL || CC_ReadClock)                            /* 0x00000181 */ \
+					  + (ADD_FILL || CC_PCR_Extend)                           /* 0x00000182 */ \
+					  + (ADD_FILL || CC_PCR_SetAuthValue)                     /* 0x00000183 */ \
+					  + (ADD_FILL || CC_NV_Certify)                           /* 0x00000184 */ \
+					  + (ADD_FILL || CC_EventSequenceComplete)                /* 0x00000185 */ \
+					  + (ADD_FILL || CC_HashSequenceStart)                    /* 0x00000186 */ \
+					  + (ADD_FILL || CC_PolicyPhysicalPresence)               /* 0x00000187 */ \
+					  + (ADD_FILL || CC_PolicyDuplicationSelect)              /* 0x00000188 */ \
+					  + (ADD_FILL || CC_PolicyGetDigest)                      /* 0x00000189 */ \
+					  + (ADD_FILL || CC_TestParms)                            /* 0x0000018A */ \
+					  + (ADD_FILL || CC_Commit)                               /* 0x0000018B */ \
+					  + (ADD_FILL || CC_PolicyPassword)                       /* 0x0000018C */ \
+					  + (ADD_FILL || CC_ZGen_2Phase)                          /* 0x0000018D */ \
+					  + (ADD_FILL || CC_EC_Ephemeral)                         /* 0x0000018E */ \
+					  + (ADD_FILL || CC_PolicyNvWritten)                      /* 0x0000018F */ \
+					  + (ADD_FILL || CC_PolicyTemplate)                       /* 0x00000190 */ \
+					  + (ADD_FILL || CC_CreateLoaded)                         /* 0x00000191 */ \
+					  + (ADD_FILL || CC_PolicyAuthorizeNV)                    /* 0x00000192 */ \
+					  + (ADD_FILL || CC_EncryptDecrypt2)                      /* 0x00000193 */ \
+					  + (ADD_FILL || CC_AC_GetCapability)                     /* 0x00000194 */ \
+					  + (ADD_FILL || CC_AC_Send)                              /* 0x00000195 */ \
+					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 /* 0x00000196 */ \
 					  )
+
 #define VENDOR_COMMAND_ARRAY_SIZE   ( 0				\
 				      + CC_Vendor_TCG_Test	\
 				      )
 
 #define COMMAND_COUNT							\
     (LIBRARY_COMMAND_ARRAY_SIZE + VENDOR_COMMAND_ARRAY_SIZE)
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
+#define HASH_COUNT							\
+    (ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512 + ALG_SM3_256)
+
 #define MAX_HASH_BLOCK_SIZE  (						\
-			      MAX(ALG_SHA1 * SHA1_BLOCK_SIZE,		\
-				  MAX(ALG_SHA256 * SHA256_BLOCK_SIZE,	\
-				      MAX(ALG_SHA384 * SHA384_BLOCK_SIZE, \
-					  MAX(ALG_SHA512 * SHA512_BLOCK_SIZE, \
-					      MAX(ALG_SM3_256 * SM3_256_BLOCK_SIZE, \
-						  0 ))))))
+			MAX(ALG_SHA1   * SHA1_BLOCK_SIZE,		\
+			MAX(ALG_SHA256 * SHA256_BLOCK_SIZE,		\
+			MAX(ALG_SHA384 * SHA384_BLOCK_SIZE, 		\
+			MAX(ALG_SHA512 * SHA512_BLOCK_SIZE, 		\
+			MAX(ALG_SM3_256 * SM3_256_BLOCK_SIZE, 		\
+			0 ))))))
 #define MAX_DIGEST_SIZE      (						\
-			      MAX(ALG_SHA1 * SHA1_DIGEST_SIZE,		\
-				  MAX(ALG_SHA256 * SHA256_DIGEST_SIZE,	\
-				      MAX(ALG_SHA384 * SHA384_DIGEST_SIZE, \
-					  MAX(ALG_SHA512 * SHA512_DIGEST_SIZE, \
-					      MAX(ALG_SM3_256 * SM3_256_DIGEST_SIZE, \
-						  0 ))))))
+			MAX(ALG_SHA1 * SHA1_DIGEST_SIZE,		\
+			MAX(ALG_SHA256 * SHA256_DIGEST_SIZE,		\
+			MAX(ALG_SHA384 * SHA384_DIGEST_SIZE, 		\
+			MAX(ALG_SHA512 * SHA512_DIGEST_SIZE,		\
+			MAX(ALG_SM3_256 * SM3_256_DIGEST_SIZE, 		\
+			0 ))))))
 #if MAX_DIGEST_SIZE == 0 || MAX_HASH_BLOCK_SIZE == 0
 #error "Hash data not valid"
 #endif
-#define HASH_COUNT (ALG_SHA1+ALG_SHA256+ALG_SHA384+ALG_SHA512+ALG_SM3_256)
+
 /*     Define the 2B structure that would hold any hash block */
 TPM2B_TYPE(MAX_HASH_BLOCK, MAX_HASH_BLOCK_SIZE);
+
 /* Following typedef is for some old code */
 typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
+
+
 #ifndef ALG_AES
 #   define ALG_AES         NO
 #endif
@@ -1540,19 +1540,23 @@ typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
 #   define      MAX_TDES_KEY_BITS  0
 #   define      MAX_TDES_BLOCK_SIZE_BYTES 0
 #endif
-#define MAX_SYM_KEY_BITS (						\
-			  MAX(MAX_AES_KEY_BITS * ALG_AES,		\
-			      MAX(MAX_CAMELLIA_KEY_BITS * ALG_CAMELLIA, \
-				  MAX(MAX_SM4_KEY_BITS * ALG_SM4,	\
-				      MAX(MAX_TDES_KEY_BITS * ALG_TDES, \
-					  0)))))
-#define  MAX_SYM_KEY_BYTES ((MAX_SYM_KEY_BITS + 7) / 8)
-#define MAX_SYM_BLOCK_SIZE  (						\
-			     MAX(MAX_AES_BLOCK_SIZE_BYTES * ALG_AES,	\
-				 MAX(MAX_CAMELLIA_BLOCK_SIZE_BYTES * ALG_CAMELLIA, \
-				     MAX(MAX_SM4_BLOCK_SIZE_BYTES * ALG_SM4, \
-					 MAX(MAX_TDES_BLOCK_SIZE_BYTES * ALG_TDES, \
-					     0)))))
+
+#define MAX_SYM_KEY_BITS					\
+    (MAX(ALG_AES      * MAX_AES_KEY_BITS,			\
+     MAX(ALG_CAMELLIA * MAX_CAMELLIA_KEY_BITS,			\
+     MAX(ALG_SM4      * MAX_SM4_KEY_BITS,			\
+     MAX(ALG_TDES     * MAX_TDES_KEY_BITS,			\
+     0)))))
+
+#define MAX_SYM_KEY_BYTES               ((MAX_SYM_KEY_BITS + 7) / 8)
+
+#define MAX_SYM_BLOCK_SIZE						\
+    (MAX(ALG_AES      * MAX_AES_BLOCK_SIZE_BYTES,			\
+     MAX(ALG_CAMELLIA * MAX_CAMELLIA_BLOCK_SIZE_BYTES,			\
+     MAX(ALG_SM4      * MAX_SM4_BLOCK_SIZE_BYTES,			\
+     MAX(ALG_TDES     * MAX_TDES_BLOCK_SIZE_BYTES,			\
+     0)))))
+
 #if MAX_SYM_KEY_BITS == 0 || MAX_SYM_BLOCK_SIZE == 0
 #   error Bad size for MAX_SYM_KEY_BITS or MAX_SYM_BLOCK_SIZE
 #endif
