@@ -3,7 +3,7 @@
 /*			     	Symmetric Commands				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricCommands.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: SymmetricCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -83,18 +83,20 @@ TPM2_EncryptDecrypt(
     TPM_ALG_ID           mode;
     TPM_RC               result;
     BOOL                 OK;
+    TPMA_OBJECT          attributes;
     // Input Validation
     symKey = HandleToObject(in->keyHandle);
     mode = symKey->publicArea.parameters.symDetail.sym.mode.sym;
+    attributes = symKey->publicArea.objectAttributes;
     // The input key should be a symmetric key
     if(symKey->publicArea.type != TPM_ALG_SYMCIPHER)
-	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
+	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;	
     // The key must be unrestricted and allow the selected operation
-    OK = symKey->publicArea.objectAttributes.restricted != SET;
-    if(YES == in->decrypt)
-	OK = OK && symKey->publicArea.objectAttributes.decrypt == SET;
-    else
-	OK = OK && symKey->publicArea.objectAttributes.sign == SET;
+    OK = IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted)
+     if(YES == in->decrypt)
+	 OK = OK && IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt);
+     else
+	 OK = OK && IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign);
     if(!OK)
 	return TPM_RCS_ATTRIBUTES + RC_EncryptDecrypt_keyHandle;
     // If the key mode is not TPM_ALG_NULL...
@@ -119,7 +121,7 @@ TPM2_EncryptDecrypt(
     blockSize = CryptGetSymmetricBlockSize(alg, keySize);
     // reverify the algorithm. This is mainly to keep static analysis tools happy
     if(blockSize == 0)
-       return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
+	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
     // Note: When an algorithm is not supported by a TPM, the TPM_ALG_xxx for that
     // algorithm is not defined. However, it is assumed that the ALG_xxx_VALUE for
     // the algorithm is always defined. Both have the same numeric value.
@@ -165,8 +167,7 @@ TPM2_EncryptDecrypt(
 #endif // CC_EncryptDecrypt
 #include "Tpm.h"
 #include "EncryptDecrypt2_fp.h"
-#include "EncryptDecrypt_fp.h"
-// #include "EncryptDecrypt_spt_fp.h" kgold
+#include "EncryptDecrypt_spt_fp.h"
 #ifdef TPM_CC_EncryptDecrypt2  // Conditional expansion of this file
 TPM_RC
 TPM2_EncryptDecrypt2(
@@ -263,11 +264,9 @@ TPM2_HMAC(
 	return TPM_RCS_TYPE + RC_HMAC_handle;
     // and that it is unrestricted
     if (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
-	// if(publicArea->objectAttributes.restricted == SET) kgold
 	return TPM_RCS_ATTRIBUTES + RC_HMAC_handle;
     // and that it is a signing key
     if (!IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
-	// if(publicArea->objectAttributes.sign != SET)	kgold
 	return TPM_RCS_KEY + RC_HMAC_handle;
     // See if the key has a default
     if(publicArea->parameters.keyedHashDetail.scheme.scheme == TPM_ALG_NULL)
