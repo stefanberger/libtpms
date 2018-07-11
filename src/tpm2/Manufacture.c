@@ -3,7 +3,7 @@
 /*			Performs the manufacturing of the TPM 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Manufacture.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Manufacture.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -168,10 +168,10 @@ TpmEndSimulation(
     HashLibSimulationEnd();
     SymLibSimulationEnd();
     MathLibSimulationEnd();
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     RsaSimulationEnd();
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     EccSimulationEnd();
 #endif
 #endif // SIMULATION

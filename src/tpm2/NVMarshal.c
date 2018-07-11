@@ -694,7 +694,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     array_size = NUM_STATIC_PCR;
     written += UINT16_Marshal(&array_size, buffer, size);
 
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     algid = TPM_ALG_SHA1;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -703,7 +703,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha1, array_size,
                             buffer, size);
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     algid = TPM_ALG_SHA256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -712,7 +712,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha256, array_size,
                               buffer, size);
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     algid = TPM_ALG_SHA384;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -721,7 +721,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha384, array_size,
                              buffer, size);
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     algid = TPM_ALG_SHA512;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -730,7 +730,7 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha512, array_size,
                              buffer, size);
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
     algid = TPM_ALG_SM3_256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -810,31 +810,31 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
         }
         if (rc == TPM_RC_SUCCESS) {
             switch (algid) {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
             case TPM_ALG_SHA1:
                 needed_size = sizeof(data->sha1);
                 t = (BYTE *)&data->sha1;
             break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
             case TPM_ALG_SHA256:
                 needed_size = sizeof(data->sha256);
                 t = (BYTE *)&data->sha256;
             break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
             case TPM_ALG_SHA384:
                 needed_size = sizeof(data->sha384);
                 t = (BYTE *)&data->sha384;
             break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
             case TPM_ALG_SHA512:
                 needed_size = sizeof(data->sha512);
                 t = (BYTE *)&data->sha512;
             break;
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
             case TPM_ALG_SM3_256:
                 needed_size = sizeof(data->sm3_256);
                 t = (BYTE *)&data->sm3_256;
@@ -903,7 +903,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written = NV_HEADER_Marshal(buffer, size,
                                 PCR_VERSION, PCR_MAGIC, 1);
 
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     algid = TPM_ALG_SHA1;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -912,7 +912,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha1Pcr, array_size,
                             buffer, size);
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     algid = TPM_ALG_SHA256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -921,7 +921,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha256Pcr, array_size,
                               buffer, size);
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     algid = TPM_ALG_SHA384;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -930,7 +930,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha384Pcr, array_size,
                              buffer, size);
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     algid = TPM_ALG_SHA512;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -939,7 +939,7 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sha512Pcr, array_size,
                              buffer, size);
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
     algid = TPM_ALG_SM3_256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
@@ -986,31 +986,31 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
         }
         if (rc == TPM_RC_SUCCESS) {
             switch (algid) {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
             case TPM_ALG_SHA1:
                 needed_size = sizeof(data->sha1Pcr);
                 t = (BYTE *)&data->sha1Pcr;
             break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
             case TPM_ALG_SHA256:
                 needed_size = sizeof(data->sha256Pcr);
                 t = (BYTE *)&data->sha256Pcr;
             break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
             case TPM_ALG_SHA384:
                 needed_size = sizeof(data->sha384Pcr);
                 t = (BYTE *)&data->sha384Pcr;
             break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
             case TPM_ALG_SHA512:
                 needed_size = sizeof(data->sha512Pcr);
                 t = (BYTE *)&data->sha512Pcr;
             break;
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
             case TPM_ALG_SM3_256:
                 needed_size = sizeof(data->sm3_256Pcr);
                 t = (BYTE *)&data->sm3_256Pcr;
@@ -1269,7 +1269,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         rc = UINT32_Unmarshal(&data->pcrCounter, buffer, size);
     }
 
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -1278,7 +1278,7 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         BLOCK_SKIP_READ(skip_alg_ecc, needs_block, buffer, size,
                         "STATE_RESET_DATA", "commitCounter");
     }
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->commitCounter, buffer, size);
     }
@@ -1342,14 +1342,14 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
                               buffer, size);
     written += UINT32_Marshal(&data->restartCount, buffer, size);
     written += UINT32_Marshal(&data->pcrCounter, buffer, size);
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
     written += UINT64_Marshal(&data->commitCounter, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->commitNonce, buffer, size);
 
@@ -1584,7 +1584,7 @@ SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
     return UINT64_Unmarshal((UINT64 *)data, buffer, size);
 }
 
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
 
 #define HASH_STATE_SHA1_MAGIC   0x19d46f50
 #define HASH_STATE_SHA1_VERSION 2
@@ -1692,7 +1692,7 @@ skip_future_versions:
 }
 #endif
 
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
 #define HASH_STATE_SHA256_MAGIC 0x6ea059d0
 #define HASH_STATE_SHA256_VERSION 2
 
@@ -1804,7 +1804,7 @@ skip_future_versions:
 }
 #endif
 
-#if defined(TPM_ALG_SHA384) || defined(TPM_ALG_SHA512)
+#if ALG_SHA384 || ALG_SHA512
 
 #define HASH_STATE_SHA384_MAGIC 0x14814b08
 #define HASH_STATE_SHA384_VERSION 2
@@ -1946,23 +1946,23 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                                 ANY_HASH_STATE_MAGIC, 1);
 
     switch (hashAlg) {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     case ALG_SHA1_VALUE:
         written += tpmHashStateSHA1_Marshal(&data->Sha1, buffer, size);
         break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     case ALG_SHA256_VALUE:
         written += tpmHashStateSHA256_Marshal(&data->Sha256, buffer, size);
         break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     case ALG_SHA384_VALUE:
         written += tpmHashStateSHA512_Marshal(&data->Sha384, buffer, size,
                                               ALG_SHA384_VALUE);
         break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     case ALG_SHA512_VALUE:
         written += tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size,
                                               ALG_SHA512_VALUE);
@@ -1996,23 +1996,23 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     }
 
     switch (hashAlg) {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
     case ALG_SHA1_VALUE:
         rc = tpmHashStateSHA1_Unmarshal(&data->Sha1, buffer, size);
         break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
     case ALG_SHA256_VALUE:
         rc = tpmHashStateSHA256_Unmarshal(&data->Sha256, buffer, size);
         break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
     case ALG_SHA384_VALUE:
         rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size,
                                           ALG_SHA384_VALUE);
         break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
     case ALG_SHA512_VALUE:
         rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size,
                                           ALG_SHA512_VALUE);
@@ -2267,13 +2267,13 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
 
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     has_block = TRUE;
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     written += privateExponent_t_Marshal(&data->privateExponent,
                                          buffer, size);
 #endif
@@ -2315,7 +2315,7 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         rc = TPMT_SENSITIVE_Unmarshal(&data->sensitive, buffer, size);
     }
 
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -2324,7 +2324,7 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         BLOCK_SKIP_READ(skip_alg_rsa, needs_block, buffer, size,
                         "OBJECT", "privateExponent");
     }
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
     if (rc == TPM_RC_SUCCESS) {
         rc = privateExponent_t_Unmarshal(&data->privateExponent,
                                          buffer, size);

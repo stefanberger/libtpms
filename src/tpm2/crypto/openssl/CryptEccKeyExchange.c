@@ -3,7 +3,7 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: CryptEccKeyExchange.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,25 +55,25 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 /* 10.2.11 CryptEccKeyExchange.c */
 #include "Tpm.h"
-
+/* libtpms added: */
 LIB_EXPORT TPM_RC
 SM2KeyExchange(
-	       TPMS_ECC_POINT        *outZ,         // OUT: the computed point
-	       TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
-	       TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
-	       TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
-	       TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
-	       TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
-	       );
+              TPMS_ECC_POINT        *outZ,         // OUT: the computed point
+              TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
+              TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
+              TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
+              TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
+              TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
+              );
 
-#if CC_ZGen_2Phase == YES //%
-#ifdef TPM_ALG_ECMQV
+#if CC_ZGen_2Phase == YES
+#if ALG_ECMQV
 /*     10.2.11.1.1 avf1() */
 /* This function does the associated value computation required by MQV key exchange. Process: */
 /* a) Convert xQ to an integer xqi using the convention specified in Appendix C.3. */
@@ -175,7 +175,7 @@ C_2_2_MQV(
     CURVE_FREE(E);
     return retVal;
 }
-#endif // TPM_ALG_ECMQV
+#endif // ALG_ECMQV
 /* 10.2.11.1.3 C_2_2_ECDH() */
 /* This function performs the two phase key exchange defined in SP800-56A, 6.1.1.2 Full Unified
    Model, C(2, 2, ECC CDH). */
@@ -252,12 +252,12 @@ CryptEcc2PhaseKeyExchange(
 	  case TPM_ALG_ECDH:
 	    return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
 	    break;
-#ifdef  TPM_ALG_ECMQV
+#if ALG_ECMQV
 	  case TPM_ALG_ECMQV:
 	    return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
 #endif
-#ifdef  TPM_ALG_SM2
+#if ALG_SM2
 	  case TPM_ALG_SM2:
 	    return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
@@ -266,7 +266,7 @@ CryptEcc2PhaseKeyExchange(
 	    return TPM_RC_SCHEME;
 	}
 }
-#ifdef TPM_ALG_SM2
+#if ALG_SM2
 /* 10.2.11.1.5 ComputeWForSM2() */
 /* Compute the value for w used by SM2 */
 static UINT32
@@ -371,4 +371,4 @@ SM2KeyExchange(
     return retVal;
 }
 #endif
-#endif //% CC_ZGen_2Phase
+#endif // CC_ZGen_2Phase

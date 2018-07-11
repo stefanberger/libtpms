@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDataEcc.c 1012 2017-05-23 21:45:57Z kgoldman $		*/
+/*            $Id: CryptDataEcc.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,7 +61,7 @@
 
 /* 10.2.8 CryptDataEcc.c */
 #include    "Tpm.h"
-#ifdef	TPM_ALG_ECC
+#if	ALG_ECC
 /* Defines for the sizes of ECC parameters */
 TPM2B_BYTE_VALUE(1);
 TPM2B_BYTE_VALUE(16);

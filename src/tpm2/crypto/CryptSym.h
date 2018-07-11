@@ -3,7 +3,7 @@
 /*		Implementation of the symmetric block cipher modes 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptSym.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,26 +55,25 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2017					*/
+/*  (c) Copyright IBM Corp. and others, 2017 - 2018				*/
 /*										*/
 /********************************************************************************/
 
-/* kgold - Missing in 146 code merge.  Taken from 142. */
 
 #ifndef CRYPTSYM_H
 #define CRYPTSYM_H
 
 union tpmCryptKeySchedule_t {
-#ifdef TPM_ALG_AES
+#if ALG_AES
     tpmKeyScheduleAES           AES;
 #endif
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
     tpmKeyScheduleSM4           SM4;
 #endif
-#ifdef TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
     tpmKeyScheduleCAMELLIA      CAMELLIA;
 #endif
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
     tpmKeyScheduleTDES          TDES[3];
 #endif
 #if SYMMETRIC_ALIGNMENT == 8
@@ -108,28 +107,28 @@ union tpmCryptKeySchedule_t {
     TpmCryptSetDecryptKey##ALG(key, keySizeInBits, &keySchedule.ALG);	\
     decrypt = (TpmCryptSetSymKeyCall_t)TpmCryptDecrypt##ALG;		\
     break;
-#ifdef TPM_ALG_AES
+#if ALG_AES
 #define ENCRYPT_CASE_AES    ENCRYPT_CASE(AES)
 #define DECRYPT_CASE_AES    DECRYPT_CASE(AES)
 #else
 #define ENCRYPT_CASE_AES
 #define DECRYPT_CASE_AES
 #endif
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
 #define ENCRYPT_CASE_SM4    ENCRYPT_CASE(SM4)
 #define DECRYPT_CASE_SM4    DECRYPT_CASE(SM4)
 #else
 #define ENCRYPT_CASE_SM4
 #define DECRYPT_CASE_SM4
 #endif
-#ifdef TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
 #define ENCRYPT_CASE_CAMELLIA    ENCRYPT_CASE(CAMELLIA)
 #define DECRYPT_CASE_CAMELLIA    DECRYPT_CASE(CAMELLIA)
 #else
 #define ENCRYPT_CASE_CAMELLIA
 #define DECRYPT_CASE_CAMELLIA
 #endif
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
 #define ENCRYPT_CASE_TDES    ENCRYPT_CASE(TDES)
 #define DECRYPT_CASE_TDES    DECRYPT_CASE(TDES)
 #else

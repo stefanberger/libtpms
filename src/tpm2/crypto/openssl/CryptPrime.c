@@ -3,7 +3,7 @@
 /*			    Code for prime validation. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrime.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: CryptPrime.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -256,7 +256,7 @@ MillerRabin(
  end:
     return ret;
 }
-#ifdef TPM_ALG_RSA  //%
+#if ALG_RSA
 /* 10.2.16.1.6 RsaCheckPrime() */
 /* This will check to see if a number is prime and appropriate for an RSA prime. */
 /* This has different functionality based on whether we are using key sieving or not. If not, the
@@ -340,4 +340,4 @@ BnGeneratePrimeForRSA(
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
 }
-#endif //% TPM_ALG_RSA
+#endif // TPM_ALG_RSA

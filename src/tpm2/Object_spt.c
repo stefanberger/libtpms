@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Object_spt.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -491,7 +491,7 @@ SchemeChecks(
 			return TPM_RCS_SYMMETRIC;
 		}
 	    // Special checks for an ECC key
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	    if(publicArea->type == TPM_ALG_ECC)
 		{
 		    TPM_ECC_CURVE            curveID;

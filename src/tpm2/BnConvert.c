@@ -3,7 +3,7 @@
 /*	conversion functions that will convert TPM2B to/from internal format	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnConvert.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: BnConvert.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -251,7 +251,7 @@ BnTo2B(
 	}
     return FALSE;
 }
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 /* 10.2.2.3.6 BnPointFrom2B() */
 /* Function to create a BIG_POINT structure from a 2B point. A point is going to be two ECC values
    in the same buffer. The values are going to be the size of the modulus.  They are in modular

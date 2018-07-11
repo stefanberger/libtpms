@@ -62,7 +62,7 @@
 /* 10.2.12 CryptEccMain.c */
 /* 10.2.12.1 Includes and Defines */
 #include "Tpm.h"
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 /* This version requires that the new format for ECC data be used */
 #if !USE_BN_ECC_DATA
 #error "Need to define USE_BN_ECC_DATA in Implementaion.h"

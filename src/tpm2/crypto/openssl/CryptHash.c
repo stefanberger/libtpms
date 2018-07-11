@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptHash.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -67,16 +67,16 @@
 #include "Tpm.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
 extern const HASH_INFO   g_hashData[HASH_COUNT + 1];
-#ifdef  TPM_ALG_SHA1
+#if ALG_SHA1
 HASH_DEF_TEMPLATE(SHA1);
 #endif
-#ifdef      TPM_ALG_SHA256
+#if ALG_SHA256
 HASH_DEF_TEMPLATE(SHA256);
 #endif
-#ifdef      TPM_ALG_SHA384
+#if ALG_SHA384
 HASH_DEF_TEMPLATE(SHA384);
 #endif
-#ifdef      TPM_ALG_SHA512
+#if ALG_SHA512
 HASH_DEF_TEMPLATE(SHA512);
 #endif
 HASH_DEF nullDef = {{0}};
@@ -115,22 +115,22 @@ CryptGetHashDef(
     PHASH_DEF       retVal;
     switch(hashAlg)
 	{
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
 	  case TPM_ALG_SHA1:
 	    return &SHA1_Def;
 	    break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
 	  case TPM_ALG_SHA256:
 	    retVal = &SHA256_Def;
 	    break;
 #endif
-#ifdef  TPM_ALG_SHA384
+#if ALG_SHA384
 	  case TPM_ALG_SHA384:
 	    retVal = &SHA384_Def;
 	    break;
 #endif
-#ifdef  TPM_ALG_SHA512
+#if ALG_SHA512
 	  case TPM_ALG_SHA512:
 	    retVal = &SHA512_Def;
 	    break;
@@ -155,19 +155,19 @@ CryptHashIsValidAlg(
 {
     switch(hashAlg)
 	{
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
 	  case TPM_ALG_SHA1:
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
 	  case TPM_ALG_SHA256:
 #endif
-#ifdef  TPM_ALG_SHA384
+#if ALG_SHA384
 	  case TPM_ALG_SHA384:
 #endif
-#ifdef  TPM_ALG_SHA512
+#if ALG_SHA512
 	  case TPM_ALG_SHA512:
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
 #endif
 	    return TRUE;

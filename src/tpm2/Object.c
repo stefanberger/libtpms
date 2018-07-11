@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Object.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -468,7 +468,7 @@ ObjectLoad(
     else
 	{
 	    object->sensitive = *sensitive;
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 	    // If this is an RSA key that is not a parent, complete the load by
 	    // computing the private exponent.
 	    if(publicArea->type == ALG_RSA_VALUE)

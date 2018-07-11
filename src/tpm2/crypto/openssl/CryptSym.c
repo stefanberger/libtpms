@@ -3,7 +3,7 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptSym.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -99,7 +99,7 @@ CryptGetSymmetricBlockSize(
 {
     switch(symmetricAlg)
 	{
-#ifdef TPM_ALG_AES
+#if ALG_AES
 	  case TPM_ALG_AES:
 	    switch(keySizeInBits)
 		{
@@ -114,7 +114,7 @@ CryptGetSymmetricBlockSize(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
 	  case TPM_ALG_SM4:
 	    switch(keySizeInBits)
 		{
@@ -124,7 +124,7 @@ CryptGetSymmetricBlockSize(
 		    break;
 		}
 #endif
-#ifdef TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
 	  case TPM_ALG_CAMELLIA:
 	    switch(keySizeInBits)
 		{
@@ -138,7 +138,7 @@ CryptGetSymmetricBlockSize(
 		    break;
 		}
 #endif
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
 	  case TPM_ALG_TDES:
 	    switch(keySizeInBits)
 		{
@@ -207,7 +207,7 @@ CryptSymmetricEncrypt(
     SELECT(ENCRYPT);
     switch(mode)
 	{
-#ifdef TPM_ALG_CTR
+#if ALG_CTR
 	  case TPM_ALG_CTR:
 	    for(; dSize > 0; dSize -= blockSize)
 		{
@@ -224,7 +224,7 @@ CryptSymmetricEncrypt(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_OFB
+#if ALG_OFB
 	  case TPM_ALG_OFB:
 	    // This is written so that dIn and dOut may be the same
 	    for(; dSize > 0; dSize -= blockSize)
@@ -238,7 +238,7 @@ CryptSymmetricEncrypt(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_CBC
+#if ALG_CBC
 	  case TPM_ALG_CBC:
 	    // For CBC the data size must be an even multiple of the
 	    // cipher block size
@@ -278,7 +278,7 @@ CryptSymmetricEncrypt(
 	    for(; dSize < 0; dSize++)
 		*pIv++ = 0;
 	    break;
-#ifdef TPM_ALG_ECB
+#if ALG_ECB
 	  case TPM_ALG_ECB:
 	    // For ECB the data size must be an even multiple of the
 	    // cipher block size
@@ -357,7 +357,7 @@ CryptSymmetricDecrypt(
     // the decryption or encryption schedule.
     switch(mode)
 	{
-#if defined TPM_ALG_CBC || defined TPM_ALG_ECB
+#if ALG_CBC || ALG_ECB
 	  case ALG_CBC_VALUE: // decrypt = decrypt
 	  case ALG_ECB_VALUE:
 	    // For ECB and CBC, the data size must be an even multiple of the
@@ -375,7 +375,7 @@ CryptSymmetricDecrypt(
     // Now do the mode-dependent decryption
     switch(mode)
 	{
-#ifdef TPM_ALG_CBC
+#if ALG_CBC
 	  case TPM_ALG_CBC:
 	    // Copy the input data to a temp buffer, decrypt the buffer into the
 	    // output, XOR in the IV, and copy the temp buffer to the IV and repeat.
@@ -414,7 +414,7 @@ CryptSymmetricDecrypt(
 	    for(; dSize < 0; dSize++)
 		*pIv++ = 0;
 	    break;
-#ifdef TPM_ALG_CTR
+#if ALG_CTR
 	  case TPM_ALG_CTR:
 	    for(; dSize > 0; dSize -= blockSize)
 		{
@@ -431,7 +431,7 @@ CryptSymmetricDecrypt(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_ECB
+#if ALG_ECB
 	  case TPM_ALG_ECB:
 	    for(; dSize > 0; dSize -= blockSize)
 		{
@@ -441,7 +441,7 @@ CryptSymmetricDecrypt(
 		}
 	    break;
 #endif
-#ifdef TPM_ALG_OFB
+#if ALG_OFB
 	  case TPM_ALG_OFB:
 	    // This is written so that dIn and dOut may be the same
 	    for(; dSize > 0; dSize -= blockSize)
@@ -473,7 +473,7 @@ CryptSymKeyValidate(
 {
     if(key->t.size != BITS_TO_BYTES(symDef->keyBits.sym))
 	return TPM_RCS_KEY_SIZE;
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
     if(symDef->algorithm == TPM_ALG_TDES && !CryptDesValidateKey(key))
 	return TPM_RCS_KEY;
 #endif // TPM_ALG_TDES

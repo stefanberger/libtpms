@@ -3,7 +3,7 @@
 /*			  	Capability Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CapabilityCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CapabilityCommands.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -166,7 +166,7 @@ TPM2_GetCapability(
 						in->propertyCount,
 						&data->tpmProperties);
 	    break;
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 	  case TPM_CAP_ECC_CURVES:
 	    out->moreData = CryptCapGetECCCurve((TPM_ECC_CURVE)in->property,
 						in->propertyCount,

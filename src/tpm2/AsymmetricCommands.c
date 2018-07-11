@@ -3,7 +3,7 @@
 /*			  Asymmetric Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AsymmetricCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: AsymmetricCommands.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,7 +62,7 @@
 #include "Tpm.h"
 #include "RSA_Encrypt_fp.h"
 #if CC_RSA_Encrypt  // Conditional expansion of this file
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 TPM_RC
 TPM2_RSA_Encrypt(
 		 RSA_Encrypt_In      *in,            // IN: input parameter list
@@ -100,7 +100,7 @@ TPM2_RSA_Encrypt(
 #include "Tpm.h"
 #include "RSA_Decrypt_fp.h"
 #if CC_RSA_Decrypt  // Conditional expansion of this file
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 TPM_RC
 TPM2_RSA_Decrypt(
 		 RSA_Decrypt_In      *in,            // IN: input parameter list
@@ -145,7 +145,7 @@ TPM2_RSA_Decrypt(
 #include "Tpm.h"
 #include "ECDH_KeyGen_fp.h"
 #if CC_ECDH_KeyGen  // Conditional expansion of this file
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 TPM_RC
 TPM2_ECDH_KeyGen(
 		 ECDH_KeyGen_In      *in,            // IN: input parameter list
@@ -192,7 +192,7 @@ TPM2_ECDH_KeyGen(
 #include "Tpm.h"
 #include "ECDH_ZGen_fp.h"
 #if CC_ECDH_ZGen  // Conditional expansion of this file
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 TPM_RC
 TPM2_ECDH_ZGen(
 	       ECDH_ZGen_In    *in,            // IN: input parameter list
@@ -230,7 +230,7 @@ TPM2_ECDH_ZGen(
 #include "Tpm.h"
 #include "ECC_Parameters_fp.h"
 #if CC_ECC_Parameters  // Conditional expansion of this file
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 TPM_RC
 TPM2_ECC_Parameters(
 		    ECC_Parameters_In   *in,            // IN: input parameter list

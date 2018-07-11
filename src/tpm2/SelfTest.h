@@ -122,7 +122,7 @@ typedef struct {
     const BYTE          *dataIn;                // data to encrypt
     const BYTE          *dataOut[NUM_SYM_MODES];// data to decrypt
 } SYMMETRIC_TEST_VECTOR;
-#ifdef  TPM_ALG_RSA
+#if ALG_RSA
 extern const RSA_KEY        c_rsaTestKey; // This is a constant structure
 #endif
 #define SYM_TEST_VALUE_REF(value, alg, keyBits, mode)		\

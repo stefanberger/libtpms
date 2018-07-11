@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Marshal.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -229,7 +229,7 @@ TPM_ALG_ID_Marshal(TPM_ALG_ID *source, BYTE **buffer, INT32 *size)
 
 /* Table 10 - Definition of (UINT16) {ECC} TPM_ECC_CURVE Constants <IN/OUT, S> */
 
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 UINT16
 TPM_ECC_CURVE_Marshal(TPM_ECC_CURVE *source, BYTE **buffer, INT32 *size)
 {
@@ -467,27 +467,27 @@ TPMU_HA_Marshal(TPMU_HA *source, BYTE **buffer, INT32 *size, UINT32 selector)
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_SHA1
+#if ALG_SHA1
       case TPM_ALG_SHA1:
 	written += Array_Marshal(&source->sha1[0], SHA1_DIGEST_SIZE, buffer, size); 
 	break;
 #endif
-#ifdef TPM_ALG_SHA256
+#if ALG_SHA256
       case TPM_ALG_SHA256:
 	written += Array_Marshal(&source->sha256[0], SHA256_DIGEST_SIZE, buffer, size); 
 	break;
 #endif
-#ifdef TPM_ALG_SHA384
+#if ALG_SHA384
       case TPM_ALG_SHA384:
 	written += Array_Marshal(&source->sha384[0], SHA384_DIGEST_SIZE, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SHA512
+#if ALG_SHA512
       case TPM_ALG_SHA512:
 	written += Array_Marshal(&source->sha512[0], SHA512_DIGEST_SIZE, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SM3_256
+#if ALG_SM3_256
       case TPM_ALG_SM3_256:
 	written += Array_Marshal(&source->sm3_256[0], SM3_256_DIGEST_SIZE, buffer, size);
 	break;
@@ -1155,22 +1155,22 @@ TPMU_SYM_KEY_BITS_Marshal(TPMU_SYM_KEY_BITS *source, BYTE **buffer, INT32 *size,
     UINT16 written = 0;
 
     switch(selector) {
-#ifdef TPM_ALG_AES
+#if ALG_AES
       case TPM_ALG_AES:
 	written += TPMI_AES_KEY_BITS_Marshal(&source->aes, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
       case TPM_ALG_SM4:
 	written += TPMI_SM4_KEY_BITS_Marshal(&source->sm4, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
       case TPM_ALG_CAMELLIA:
 	written += TPMI_CAMELLIA_KEY_BITS_Marshal(&source->camellia, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_XOR
+#if ALG_XOR
       case TPM_ALG_XOR:
 	written += TPMI_ALG_HASH_Marshal(&source->xorr, buffer, size);
 	break;
@@ -1191,22 +1191,22 @@ TPMU_SYM_MODE_Marshal(TPMU_SYM_MODE *source, BYTE **buffer, INT32 *size, UINT32 
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_AES
+#if ALG_AES
       case TPM_ALG_AES:
 	written += TPMI_ALG_SYM_MODE_Marshal(&source->aes, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
       case TPM_ALG_SM4:
 	written += TPMI_ALG_SYM_MODE_Marshal(&source->sm4, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
       case TPM_ALG_CAMELLIA:
 	written += TPMI_ALG_SYM_MODE_Marshal(&source->camellia, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_XOR
+#if ALG_XOR
       case TPM_ALG_XOR:
 #endif
       case TPM_ALG_NULL:
@@ -1406,12 +1406,12 @@ TPMU_SCHEME_KEYEDHASH_Marshal(TPMU_SCHEME_KEYEDHASH *source, BYTE **buffer, INT3
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_HMAC
+#if ALG_HMAC
       case TPM_ALG_HMAC:
 	written += TPMS_SCHEME_HMAC_Marshal(&source->hmac, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_XOR
+#if ALG_XOR
       case TPM_ALG_XOR:
 	written += TPMS_SCHEME_XOR_Marshal(&source->xorr, buffer, size);
 	break;
@@ -1434,7 +1434,6 @@ TPMS_KEY_SCHEME_ECDH_Marshal(TPMS_KEY_SCHEME_ECDH *source, BYTE **buffer, INT32 
     return written;
 }
 
-#ifdef TPM_ALG_ECMQV
 UINT16
 TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV *source, BYTE **buffer, INT32 *size)
 {
@@ -1442,7 +1441,6 @@ TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV *source, BYTE **buffer, INT3
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
     return written;
 }
-#endif
 
 /* Table 2:155 - Definition of Types for KDF Schemes (TypedefTable()) */
 UINT16
@@ -1483,22 +1481,22 @@ TPMU_KDF_SCHEME_Marshal(TPMU_KDF_SCHEME *source, BYTE **buffer, INT32 *size, UIN
 
 
     switch (selector) {
-#ifdef TPM_ALG_MGF1
+#if ALG_MGF1
       case TPM_ALG_MGF1:
 	written += TPMS_SCHEME_MGF1_Marshal(&source->mgf1, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_KDF1_SP800_56A
+#if ALG_KDF1_SP800_56A
       case TPM_ALG_KDF1_SP800_56A:
 	written += TPMS_SCHEME_KDF1_SP800_56A_Marshal(&source->kdf1_sp800_56a, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_KDF2
+#if ALG_KDF2
       case TPM_ALG_KDF2:
 	written += TPMS_SCHEME_KDF2_Marshal(&source->kdf2, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_KDF1_SP800_108
+#if ALG_KDF1_SP800_108
       case TPM_ALG_KDF1_SP800_108:
 	written += TPMS_SCHEME_KDF1_SP800_108_Marshal(&source->kdf1_sp800_108, buffer, size);
 	break;
@@ -1531,52 +1529,52 @@ TPMU_ASYM_SCHEME_Marshal(TPMU_ASYM_SCHEME  *source, BYTE **buffer, INT32 *size, 
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_ECDH
+#if ALG_ECDH
       case TPM_ALG_ECDH:
 	written += TPMS_KEY_SCHEME_ECDH_Marshal(&source->ecdh, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECMQV
+#if ALG_ECMQV
       case TPM_ALG_ECMQV:
 	written += TPMS_KEY_SCHEME_ECMQV_Marshal(&source->ecmqv, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSASSA
+#if ALG_RSASSA
       case TPM_ALG_RSASSA:
 	written += TPMS_SIG_SCHEME_RSASSA_Marshal(&source->rsassa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSAPSS
+#if ALG_RSAPSS
       case TPM_ALG_RSAPSS:
 	written += TPMS_SIG_SCHEME_RSAPSS_Marshal(&source->rsapss, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECDSA
+#if ALG_ECDSA
       case TPM_ALG_ECDSA:
 	written += TPMS_SIG_SCHEME_ECDSA_Marshal(&source->ecdsa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECDAA
+#if ALG_ECDAA
       case TPM_ALG_ECDAA:
 	written += TPMS_SIG_SCHEME_ECDAA_Marshal(&source->ecdaa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SM2
+#if ALG_SM2
       case TPM_ALG_SM2:
 	written += TPMS_SIG_SCHEME_SM2_Marshal(&source->sm2, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECSCHNORR
+#if ALG_ECSCHNORR
       case TPM_ALG_ECSCHNORR:
 	written += TPMS_SIG_SCHEME_ECSCHNORR_Marshal(&source->ecschnorr, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSAES
+#if ALG_RSAES
       case TPM_ALG_RSAES:
 	written += TPMS_ENC_SCHEME_RSAES_Marshal(&source->rsaes, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_OAEP
+#if ALG_OAEP
       case TPM_ALG_OAEP:
 	written += TPMS_ENC_SCHEME_OAEP_Marshal(&source->oaep, buffer, size);
 	break;
@@ -1820,37 +1818,37 @@ TPMU_SIGNATURE_Marshal(TPMU_SIGNATURE *source, BYTE **buffer, INT32 *size, UINT3
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_RSASSA
+#if ALG_RSASSA
       case TPM_ALG_RSASSA:
 	written += TPMS_SIGNATURE_RSASSA_Marshal(&source->rsassa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSAPSS
+#if ALG_RSAPSS
       case TPM_ALG_RSAPSS:
 	written += TPMS_SIGNATURE_RSAPSS_Marshal(&source->rsapss, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECDSA
+#if ALG_ECDSA
       case TPM_ALG_ECDSA:
 	written += TPMS_SIGNATURE_ECDSA_Marshal(&source->ecdsa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECDAA
+#if ALG_ECDAA
       case TPM_ALG_ECDAA:
 	written += TPMS_SIGNATURE_ECDAA_Marshal(&source->ecdaa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SM2
+#if ALG_SM2
       case TPM_ALG_SM2:
 	written += TPMS_SIGNATURE_SM2_Marshal(&source->sm2, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECSCHNORR
+#if ALG_ECSCHNORR
       case TPM_ALG_ECSCHNORR:
 	written += TPMS_SIGNATURE_ECSCHNORR_Marshal(&source->ecschnorr, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_HMAC
+#if ALG_HMAC
       case TPM_ALG_HMAC:
 	written += TPMT_HA_Marshal(&source->hmac, buffer, size);
 	break;
@@ -1903,22 +1901,22 @@ TPMU_PUBLIC_ID_Marshal(TPMU_PUBLIC_ID *source, BYTE **buffer, INT32 *size, UINT3
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_KEYEDHASH
+#if ALG_KEYEDHASH
       case TPM_ALG_KEYEDHASH:
 	written += TPM2B_DIGEST_Marshal(&source->keyedHash, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SYMCIPHER
+#if ALG_SYMCIPHER
       case TPM_ALG_SYMCIPHER:
 	written += TPM2B_DIGEST_Marshal(&source->sym, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
       case TPM_ALG_RSA:
 	written += TPM2B_PUBLIC_KEY_RSA_Marshal(&source->rsa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
       case TPM_ALG_ECC:
 	written += TPMS_ECC_POINT_Marshal(&source->ecc, buffer, size);
 	break;
@@ -1975,22 +1973,22 @@ TPMU_PUBLIC_PARMS_Marshal(TPMU_PUBLIC_PARMS *source, BYTE **buffer, INT32 *size,
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_KEYEDHASH
+#if ALG_KEYEDHASH
       case TPM_ALG_KEYEDHASH:
 	written += TPMS_KEYEDHASH_PARMS_Marshal(&source->keyedHashDetail, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SYMCIPHER
+#if ALG_SYMCIPHER
       case TPM_ALG_SYMCIPHER:
 	written += TPMS_SYMCIPHER_PARMS_Marshal(&source->symDetail, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
       case TPM_ALG_RSA:
 	written += TPMS_RSA_PARMS_Marshal(&source->rsaDetail, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
       case TPM_ALG_ECC:
 	written += TPMS_ECC_PARMS_Marshal(&source->eccDetail, buffer, size);
 	break;
@@ -2057,22 +2055,22 @@ TPMU_SENSITIVE_COMPOSITE_Marshal(TPMU_SENSITIVE_COMPOSITE *source, BYTE **buffer
     UINT16 written = 0;
 
     switch (selector) {
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
       case TPM_ALG_RSA:
 	written += TPM2B_PRIVATE_KEY_RSA_Marshal(&source->rsa, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
       case TPM_ALG_ECC:
 	written += TPM2B_ECC_PARAMETER_Marshal(&source->ecc, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_KEYEDHASH
+#if ALG_KEYEDHASH
       case TPM_ALG_KEYEDHASH:
 	written += TPM2B_SENSITIVE_DATA_Marshal(&source->bits, buffer, size);
 	break;
 #endif
-#ifdef TPM_ALG_SYMCIPHER
+#if ALG_SYMCIPHER
       case TPM_ALG_SYMCIPHER:
 	written += TPM2B_SYM_KEY_Marshal(&source->sym, buffer, size);
 	break;

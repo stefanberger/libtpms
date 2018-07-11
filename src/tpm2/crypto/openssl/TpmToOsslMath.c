@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -340,7 +340,7 @@ BnDiv(
     OSSL_LEAVE();
     return OK;
 }
-#ifdef TPM_ALG_RSA
+#if ALG_RSA
 /* B.2.3.2.3.5. BnGcd() */
 /* Get the greatest common divisor of two numbers */
 LIB_EXPORT BOOL
@@ -427,7 +427,7 @@ BnModInverse(
     return OK;
 }
 #endif // TPM_ALG_RSA
-#ifdef TPM_ALG_ECC
+#if ALG_ECC
 /* B.2.3.2.3.8. PointFromOssl() */
 /* Function to copy the point result from an OSSL function to a bigNum */
 static BOOL

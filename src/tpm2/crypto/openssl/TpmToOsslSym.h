@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -75,10 +75,10 @@
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
 /* B.2.2.3.2. Links to the OpenSSL AES code */
-#ifdef TPM_ALG_SM4
+#if ALG_SM4
 #error "SM4 is not available"
 #endif
-#ifdef  TPM_ALG_CAMELLIA
+#if ALG_CAMELLIA
 #error "Camellia is not available"
 #endif
 /*     Define the order of parameters to the library functions that do block encryption and
@@ -117,7 +117,7 @@ typedef void(*TpmCryptSetSymKeyCall_t)(
 #define TpmCryptDecryptTDES         TDES_decrypt
 #define tpmKeyScheduleTDES          DES_key_schedule
 typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
-#ifdef TPM_ALG_TDES
+#if ALG_TDES
 #include "TpmToOsslDesSupport_fp.h"
 #endif
 /* This definition would change if there were something to report */
