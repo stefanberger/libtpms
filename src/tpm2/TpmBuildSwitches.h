@@ -102,9 +102,11 @@
 #endif
 
 /* This switch is used to enable the self-test capability in AlgorithmTests.c */
-#ifndef SELF_TEST
-#define SELF_TEST
+#if !(defined SELF_TEST) || ((SELF_TEST != NO) && (SELF_TEST != YES))
+#   undef   SELF_TEST
+#   define  SELF_TEST       YES         // Default: Either YES or NO
 #endif
+
 /* Enable the generation of RSA primes using a sieve. */
 #ifndef RSA_KEY_SIEVE
 #  define RSA_KEY_SIEVE
