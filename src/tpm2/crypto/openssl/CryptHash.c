@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1218 2018-05-15 18:42:02Z kgoldman $		*/
+/*            $Id: CryptHash.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -220,8 +220,8 @@ CryptHashGetAlgByIndex(
     return g_hashData[index].alg;
 }
 /* 10.2.14.4.6 CryptHashGetDigestSize() */
-/* Returns the size of the digest produced by the hash. If hashAlg is not a hash algorithm, the TPM
-   will FAIL. */
+/* This function returns the size of the digest produced by the hash. If hashAlg is not a hash
+   algorithm, the TPM will FAIL. */
 /* Return Values Meaning */
 /* 0 TPM_ALG_NULL */
 /* > 0 the digest size */
@@ -435,7 +435,8 @@ CryptHashStart(
     hashState->type = HASH_STATE_HASH;
     return retVal;
 }
-/* 10.2.13.6.3 CryptDigestUpdate() */
+
+/* 10.2.14.6.3	CryptDigestUpdate() */
 /* Add data to a hash or HMAC, SMAC stack. */
 void
 CryptDigestUpdate(
@@ -446,24 +447,20 @@ CryptDigestUpdate(
 {
     if(hashState->hashAlg != TPM_ALG_NULL)
 	{
-#ifndef SMAC_IMPLEMENTED
-	    pAssert((hashState->type == HASH_STATE_HASH)
-		    || (hashState->type == HASH_STATE_HMAC));
-	    //??        hashState->def = CryptGetHashDef(hashState->hashAlg);
-	    HASH_DATA(hashState, dataSize, (BYTE *)data);
-#else
 	    if((hashState->type == HASH_STATE_HASH)
 	       || (hashState->type == HASH_STATE_HMAC))
 		HASH_DATA(hashState, dataSize, (BYTE *)data);
+#ifdef SMAC_IMPLEMENTED
 	    else if(hashState->type == HASH_STATE_SMAC)
 		(hashState->state.smac.smacMethods.data)(&hashState->state.smac.state,
 							 dataSize, data);
+#endif // SMAC_IMPLEMENTED
 	    else
 		FAIL(FATAL_ERROR_INTERNAL);
-#endif // SMAC_IMPLEMENTED
 	}
     return;
 }
+
 /* 10.2.14.6.4 CryptHashEnd() */
 /* Complete a hash or HMAC computation. This function will place the smaller of digestSize or the
    size of the digest in dOut. The number of bytes in the placed in the buffer is returned. If there
@@ -752,8 +749,7 @@ CryptKDFa(
 	  //     counter for incremental operations to
 	  //     avoid large intermediate buffers.
 	  UINT16           blocks         // IN: If non-zero, this is the maximum number
-	  //     of blocks to be returned, regardless
-	  //     of sizeInBit
+	  //     of blocks to be returned, regardless of sizeInBits
 	  )
 {
     UINT32                   counter = 0;       // counter value
@@ -763,6 +759,7 @@ CryptKDFa(
     HMAC_STATE               hState;
     UINT16                   digestSize = CryptHashGetDigestSize(hashAlg);
     pAssert(key != NULL && keyStream != NULL);
+    TEST(TPM_ALG_KDF1_SP800_108);
     if(digestSize == 0)
 	return 0;
     if(counterInOut != NULL)
@@ -809,15 +806,9 @@ CryptKDFa(
 	    CryptHmacEnd(&hState, bytes, stream);
 	    stream = &stream[digestSize];
 	}
-    // Mask off bits if the required bits is not a multiple of byte size. Only do
-    // this if this is a call that is returning all the blocks indicated in
-    // sizeInBits
-#if 0 //?? Masking in the KDF is disabled. If the calling function wants something
-    //?? less than even number of bytes, then the caller should do the masking
-    //?? because there is no universal way to do it here
-    if((blocks == 0) && (sizeInBits % 8) != 0)
-	keyStream[0] &= ((1 << (sizeInBits % 8)) - 1);
-#endif
+    // Masking in the KDF is disabled. If the calling function wants something
+    // less than even number of bytes, then the caller should do the masking
+    // because there is no universal way to do it here
     if(counterInOut != NULL)
 	*counterInOut = counter;
     return generated;
