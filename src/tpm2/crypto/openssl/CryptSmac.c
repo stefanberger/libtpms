@@ -67,7 +67,7 @@
 /* 10.2.20.2	Includes, Defines, and Typedefs */
 #define _CRYPT_HASH_C_
 #include "Tpm.h"
-#ifdef SMAC_IMPLEMENTED
+#if SMAC_IMPLEMENTED
     /* 10.2.20.2.1	CryptSmacStart() */
     /* Function to start an SMAC. */
 UINT16

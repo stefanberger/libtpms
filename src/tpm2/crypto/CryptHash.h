@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptHash.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -90,10 +90,10 @@ typedef struct sequenceMethods {
     SMAC_DATA_METHOD          data;
     SMAC_END_METHOD           end;
 } SMAC_METHODS;
-#if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
-#   define      SMAC_IMPLEMENTED
-#endif
+#define SMAC_IMPLEMENTED (defined TPM_CC_MAC || defined TPM_CC_MAC_Start)
+
 /* These definitions are here because the SMAC state is in the union of hash states. */
+
 typedef struct tpmCmacState {
     TPM_ALG_ID              symAlg;
     UINT16                  keySizeBits;
@@ -126,7 +126,7 @@ typedef union
     tpmHashStateSHA512_t       Sha512;
 #endif
     // Additions for symmetric block cipher MAC
-#ifdef SMAC_IMPLEMENTED
+#if SMAC_IMPLEMENTED
     SMAC_STATE                 smac;
 #endif
     // to force structure alignment to be no worse than HASH_ALIGNMENT
