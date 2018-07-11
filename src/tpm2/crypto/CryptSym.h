@@ -136,17 +136,14 @@ union tpmCryptKeySchedule_t {
 #define DECRYPT_CASE_TDES
 #endif
 /* For each algorithm the case will either be defined or null. */
-#define     SELECT(direction)			\
-    switch(algorithm)				\
-	{					\
-	    direction##_CASE_AES		\
-		direction##_CASE_SM4		\
-		direction##_CASE_CAMELLIA	\
-		direction##_CASE_TDES		\
-	  default:				\
-	    return TPM_RC_FAILURE;		\
+#define     SELECT(direction)					    \
+    switch(algorithm)						    \
+	{								\
+	    direction##_CASE_AES					\
+	    direction##_CASE_SM4					\
+            direction##_CASE_CAMELLIA					\
+	    direction##_CASE_TDES					\
+	  default:							\
+		FAIL(FATAL_ERROR_INTERNAL);				\
 	}
-
-
-
 #endif
