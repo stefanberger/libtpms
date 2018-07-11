@@ -80,11 +80,9 @@ TPM2_HMAC_Start(
 	return TPM_RCS_TYPE + RC_HMAC_Start_handle;
     // and that it is unrestricted
     if (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
-	//if(publicArea->objectAttributes.restricted == SET)	kgold
 	return TPM_RCS_ATTRIBUTES + RC_HMAC_Start_handle;
     // and that it is a signing key
     if (!IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
-	// if(publicArea->objectAttributes.sign != SET)		kgold
 	return TPM_RCS_KEY + RC_HMAC_Start_handle;
     // See if the key has a default
     if(publicArea->parameters.keyedHashDetail.scheme.scheme == TPM_ALG_NULL)
