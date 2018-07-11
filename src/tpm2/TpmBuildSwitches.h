@@ -73,7 +73,11 @@
 /* Don't move this include ahead of the INLINE_FUNCTIONS definition. */
 #include "CompilerDependencies.h"
 /* This definition is required for the re-factored code */
-#define USE_BN_ECC_DATA
+#if (!defined USE_BN_ECC_DATA) || ((USE_BN_ECC_DATA != NO) && (USE_BN_ECC_DATA != YES))
+#   undef   USE_BN_ECC_DATA
+#   define  USE_BN_ECC_DATA     YES     // Default: Either YES or NO
+#endif
+
 /* Comment these out as needed */
 #ifndef SIMULATION
 //#  define SIMULATION
