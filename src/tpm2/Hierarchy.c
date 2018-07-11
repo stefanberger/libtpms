@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Managing and accessing the hierarchy-related values   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Hierarchy.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 /* 8.3 Hierarchy.c */
@@ -81,7 +81,7 @@ HierarchyPreInstall_Init(
     gp.PPSeed.t.size = sizeof(gp.PPSeed.t.buffer);
     CryptRandomGenerate(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
     CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
-#ifdef USE_PLATFORM_EPS
+#if (defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
     _plat__GetEPS(gp.PPSeed.t.size, gp.EPSeed.t.buffer);
 #else
     CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
