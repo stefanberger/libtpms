@@ -265,7 +265,7 @@
 #endif
 /* This is updated to follow the requirement of P2 that the label not be larger than 32 bytes. */
 #ifndef LABEL_MAX_BUFFER
-#define LABEL_MAX_BUFFER MIN(32, MIN(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
+#define LABEL_MAX_BUFFER MIN(32, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
 #endif
 /* This bit is used to indicate that an authorization ticket expires on TPM Reset and TPM Restart.It
    is added to the timeout value returned by TPM2_PoliySigned() and TPM2_PolicySecret() and used by
