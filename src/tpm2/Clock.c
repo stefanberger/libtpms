@@ -65,41 +65,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "Tpm.h"
-#include "Platform_fp.h"
-
-#ifdef TPM_WINDOWS
-
-/* Windows returns result in units of CLOCKS_PER_SEC.  seconds = clock() / CLOCKS_PER_SEC */
-
-uint64_t tpmclock(void)
-{
-    clock_t clocktime = clock();
-    uint64_t tpmtime = ((uint64_t)clocktime * 1000) / (uint64_t)CLOCKS_PER_SEC;
-    return tpmtime;
-}
-
-#endif
-
-#ifdef TPM_POSIX
-
-
-#include <sys/time.h>
-
-/* return time in milliseconds */
-
-uint64_t tpmclock(void)
-{
-    struct timeval      tval;
-    uint64_t		tpmtime;
-
-    gettimeofday(&tval, NULL);   /* get the time */
-    tpmtime = ((uint64_t)tval.tv_sec * 1000) + ((uint64_t)tval.tv_usec / 1000);
-    return tpmtime;
-}
-
-#endif
-
 /* C.3 Clock.c */
 /* C.3.1. Introduction */
 /* This file contains the routines that are used by the simulator to mimic a hardware clock on a
@@ -110,6 +75,27 @@ uint64_t tpmclock(void)
 #include "Platform_fp.h"
 #include "TpmFail_fp.h"
 #include <assert.h>
+
+/* ClockGetTime -- get time given a specified clock type */
+uint64_t
+ClockGetTime(
+               clockid_t clk_id
+               )
+{
+    uint64_t           time;
+#ifdef TPM_WINDOWS
+#error Not supported for TPM_WINDOWS
+#else
+    struct timespec     systime;
+
+    clock_gettime(clk_id, &systime);
+    time = (uint64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
+#endif
+
+    return time;
+}
+
+
 /* C.3.3. Simulator Functions */
 /* C.3.3.1. Introduction */
 /* This set of functions is intended to be called by the simulator environment in order to simulate
@@ -123,7 +109,7 @@ _plat__TimerReset(
 		  void
 		  )
 {
-    s_realTimePrevious = (clock_t) tpmclock();	/* kgold, FIXME, something wrong here */
+    s_realTimePrevious = (clock_t) ClockGetTime(CLOCK_REALTIME);	/* kgold, FIXME, something wrong here */
     s_tpmTime = 0;
     s_adjustRate = CLOCK_NOMINAL;
     s_timerReset = TRUE;
@@ -173,7 +159,7 @@ _plat__TimerRead(
     // Save the value previously read from the system clock
     timeDiff = s_realTimePrevious;
     // update with the current value of the system clock
-    s_realTimePrevious = tpmclock();
+    s_realTimePrevious = ClockGetTime(CLOCK_REALTIME);
     // In the place below when we "put back" the unused part of the timeDiff
     // it is possible that we can put back more than we take out. That is, we could
     // take out 1000 mSec, rate adjust it and put back 1001 mS. This means that

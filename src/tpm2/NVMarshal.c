@@ -2904,7 +2904,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += BOOL_Marshal(&s_timerStopped, buffer, size);
     written += UINT32_Marshal(&s_adjustRate, buffer, size);
 
-    tmp_uint64 = tpmclock();
+    tmp_uint64 = ClockGetTime(CLOCK_REALTIME);
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v3 */
@@ -3367,7 +3367,7 @@ skip_hardware_clock:
         INT64 timediff;
 
         rc = UINT64_Unmarshal(&backthen, buffer, size);
-        now = tpmclock();
+        now = ClockGetTime(CLOCK_REALTIME);
 
         timediff = now - backthen;
         g_time += timediff;
