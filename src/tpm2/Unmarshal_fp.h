@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Unmarshal_fp.h 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -64,11 +64,7 @@
 #ifndef UNMARSHAL_FP_H
 #define UNMARSHAL_FP_H
 
-#ifndef TPM_TSS
 #include "TpmTypes.h"
-#else
-#include "TPM_Types.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -247,11 +243,7 @@ extern "C" {
     LIB_EXPORT TPM_RC
     TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
-    TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size
-#ifdef TPM_TSS
-			  ,uint32_t minCount
-#endif
-			  );
+    TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPML_DIGEST_VALUES_Unmarshal(TPML_DIGEST_VALUES *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC

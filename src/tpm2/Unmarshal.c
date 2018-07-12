@@ -41,7 +41,6 @@
 
 #include <string.h>
 
-/* TSS needs TPM_TSS for TSS side structures */
 #include "Unmarshal_fp.h"
 
 TPM_RC
@@ -1919,11 +1918,7 @@ TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size)
 */
 
 TPM_RC
-TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size
-#ifdef TPM_TSS
-		      , uint32_t minCount
-#endif
-		      )
+TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     
@@ -1932,17 +1927,10 @@ TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size
 	rc = UINT32_Unmarshal(&target->count, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-#ifdef TPM_TSS
-	/* TSS side permits the caller to specify the minimum */
-	if (target->count < minCount) {
-	    rc = TPM_RC_SIZE;
-	}
-#else
 	/* TPM side is hard coded to 2 minimum */
 	if (target->count < 2) {
 	    rc = TPM_RC_SIZE;
 	}
-#endif
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > 8) {
