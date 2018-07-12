@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Implementation.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: Implementation.h 1262 2018-07-11 21:03:43Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -92,21 +92,17 @@
 #if defined __linux__ || defined __CYGWIN__
  #if __BYTE_ORDER == __LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
-  #define  LITTLE_ENDIAN_TPM    YES
  #endif
  #if __BYTE_ORDER == __BIG_ENDIAN
   #define  BIG_ENDIAN_TPM       YES
-  #define  LITTLE_ENDIAN_TPM    NO
  #endif
 #elif defined __OpenBSD__ || defined __FreeBSD__ || defined __NetBSD__ \
    || defined __DragonFly__
  #if _BYTE_ORDER == _LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
-  #define  LITTLE_ENDIAN_TPM    YES
  #endif
  #if _BYTE_ORDER == _BIG_ENDIAN
   #define  BIG_ENDIAN_TPM       YES
-  #define  LITTLE_ENDIAN_TPM    NO
  #endif
 #elif defined __APPLE__
  #define  BIG_ENDIAN_TPM       NO
@@ -114,6 +110,10 @@
 #else
  #error Unsupported OS
 #endif
+#ifndef  BIG_ENDIAN_TPM       
+#define  BIG_ENDIAN_TPM       NO
+#endif
+#define  LITTLE_ENDIAN_TPM          !BIG_ENDIAN_TPM
 #define  MOST_SIGNIFICANT_BIT_0     NO
 #define  LEAST_SIGNIFICANT_BIT_0    !MOST_SIGNIFICANT_BIT_0
 #define  AUTO_ALIGN                 NO
