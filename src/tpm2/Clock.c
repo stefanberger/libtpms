@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Clock.c 1259 2018-07-10 19:11:09Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -98,14 +98,22 @@ ClockGetTime(
 /* ClockAdjustPostResume -- adjust time parameters post resume */
 #include "Tpm.h"
 void
-ClockAdjustPostResume(UINT64 backthen)
+ClockAdjustPostResume(UINT64 backthen, BOOL timesAreRealtime)
 {
     UINT64 now = ClockGetTime(CLOCK_REALTIME);
     INT64 timediff = now - backthen;
 
-    g_time += timediff;
-    s_realTimePrevious += timediff;
-    s_tpmTime += timediff;
+    if (timesAreRealtime) {
+        /* g_time, s_realTimePrevious, s_tpmTime are all in real time */
+        s_suspendedElapsedTime = now;
+        s_hostMonotonicAdjustTime = -ClockGetTime(CLOCK_MONOTONIC);
+
+        /* s_lastSystemTime & s_lastReportTime need to be set as well */
+        s_lastSystemTime = now;
+        s_lastReportedTime = now;
+    } else if (timediff >= 0) {
+        s_suspendedElapsedTime += timediff;
+    }
 }
 
 /* C.3.3. Simulator Functions */
@@ -121,11 +129,13 @@ _plat__TimerReset(
 		  void
 		  )
 {
-    s_realTimePrevious = (clock_t) ClockGetTime(CLOCK_REALTIME);	/* kgold, FIXME, something wrong here */
+    s_lastSystemTime = 0;
     s_tpmTime = 0;
     s_adjustRate = CLOCK_NOMINAL;
     s_timerReset = TRUE;
     s_timerStopped = TRUE;
+    s_hostMonotonicAdjustTime = 0; /* libtpms */
+    s_suspendedElapsedTime = 0; /* libtpms */
     return;
 }
 /* C.3.3.3. _plat__TimerRestart() */
@@ -139,11 +149,55 @@ _plat__TimerRestart(
     s_timerStopped = TRUE;
     return;
 }
+
 /* C.3.4. Functions Used by TPM */
 /* C.3.4.1. Introduction */
 /* These functions are called by the TPM code. They should be replaced by appropriated hardware
    functions. */
-/* C.3.4.2. _plat__TimerRead() */
+
+clock_t     debugTime;
+/* C.3.4.2.	_plat__Time() */
+/* This is another, probably futile, attempt to define a portable function that will return a 64-bit
+   clock value that has mSec resolution. */
+uint64_t
+_plat__RealTime(
+		void
+		)
+{
+    clock64_t           time;
+    //#ifdef _MSC_VER	kgold
+#ifdef TPM_WINDOWS
+    #include <SYS/Timeb.h>
+    struct _timeb       sysTime;
+    //
+    _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
+    time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
+    // set the time back by one hour if daylight savings
+    if(sysTime.dstflag)
+	time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
+#else
+    // hopefully, this will work with most UNIX systems
+    struct timespec     systime;
+    //
+    clock_gettime(CLOCK_MONOTONIC, &systime);
+    time = (clock64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
+#endif
+    /* We have to make sure that this function returns monotonically increasing time
+       also when a vTPM has been suspended and the host has been rebooted.
+       Example:
+         - The vTPM is suspended at systime '5'
+         - The vTPM is resumed   at systime '1' after a host reboot
+         -> we now need to add '4' to the time
+         Besides this we want to account for the time a vTPM was suspended.
+         If it was suspended for 10 time units, we need to add '10' here.
+     */
+    time += s_hostMonotonicAdjustTime + s_suspendedElapsedTime;
+    return time;
+}
+
+
+
+/* C.3.4.3. _plat__TimerRead() */
 /* This function provides access to the tick timer of the platform. The TPM code uses this value to
    drive the TPM Clock. */
 /* The tick timer is supposed to run when power is applied to the device. This timer should not be
@@ -153,7 +207,6 @@ _plat__TimerRestart(
    TPM as long as the time provided by the environment is not allowed to go backwards. If the time
    provided by the system can go backwards during a power discontinuity, then the
    _plat__Signal_PowerOn() should call _plat__TimerReset(). */
-/* The code in this function should be replaced by a read of a hardware tick timer. */
 LIB_EXPORT uint64_t
 _plat__TimerRead(
 		 void
@@ -163,49 +216,50 @@ _plat__TimerRead(
 #error      "need a defintion for reading the hardware clock"
     return HARDWARE_CLOCK
 #else
-#define BILLION     1000000000
-#define MILLION     1000000
-#define THOUSAND    1000
-	clock_t         timeDiff;
-    uint64_t        adjusted;
-    // Save the value previously read from the system clock
-    timeDiff = s_realTimePrevious;
-    // update with the current value of the system clock
-    s_realTimePrevious = ClockGetTime(CLOCK_REALTIME);
-    // In the place below when we "put back" the unused part of the timeDiff
-    // it is possible that we can put back more than we take out. That is, we could
-    // take out 1000 mSec, rate adjust it and put back 1001 mS. This means that
-    // on a subsequent call, time may not have caught up. Rather than trying
-    // to rate adjust this, just stop time. This only occurs in a simulation so
-    // time for more than one command being the same should not be an issue.
-    if(timeDiff >= s_realTimePrevious)
+    clock64_t         timeDiff;
+    clock64_t         adjustedTimeDiff;
+    clock64_t         timeNow;
+    clock64_t         readjustedTimeDiff;
+    // This produces a timeNow that is basically locked to the system clock.
+    timeNow = _plat__RealTime();
+    // if this hasn't been initialized, initialize it
+    if(s_lastSystemTime == 0)
 	{
-	    s_realTimePrevious = timeDiff;
-	    return s_tpmTime;
+	    s_lastSystemTime = timeNow;
+	    debugTime = clock();
+	    s_lastReportedTime = 0;
+	    s_realTimePrevious = 0;
 	}
-    // Compute the amount of time since the last call to the system clock
-    timeDiff = s_realTimePrevious - timeDiff;
+    // The system time can bounce around and that's OK as long as we don't allow
+    // time to go backwards. When the time does appear to go backwards, set
+    // lastSystemTime to be the new value and then update the reported time.
+    if(timeNow < s_lastReportedTime)
+	s_lastSystemTime = timeNow;
+    s_lastReportedTime = s_lastReportedTime + timeNow - s_lastSystemTime;
+    s_lastSystemTime = timeNow;
+    timeNow = s_lastReportedTime;
+    // The code above produces a timeNow that is similar to the value returned
+    // by Clock(). The difference is that timeNow does not max out, and it is
+    // at a ms. rate rather than at a CLOCKS_PER_SEC rate. The code below
+    // uses that value and does the rate adjustment on the time value.
+    // If there is no difference in time, then skip all the computations
+    if(s_realTimePrevious >= timeNow)
+	return s_tpmTime;
+    // Compute the amount of time since the last update of the system clock
+    timeDiff = timeNow - s_realTimePrevious;
     // Do the time rate adjustment and conversion from CLOCKS_PER_SEC to mSec
-#if 0
-    adjusted = (((uint64_t)timeDiff * (THOUSAND * CLOCK_NOMINAL))
-		/ ((uint64_t)s_adjustRate * CLOCKS_PER_SEC));
-#endif
-    /* kgold */
-    adjusted = (timeDiff * (uint64_t)(s_adjustRate)) / (uint64_t)CLOCK_NOMINAL;
-    s_tpmTime += (clock_t)adjusted;
+    adjustedTimeDiff = (timeDiff * CLOCK_NOMINAL) / ((uint64_t)s_adjustRate);
+    // update the TPM time with the adjusted timeDiff
+    s_tpmTime += (clock64_t)adjustedTimeDiff;
     // Might have some rounding error that would loose CLOCKS. See what is not
     // being used. As mentioned above, this could result in putting back more than
-    // is taken out
-#if 0
-    adjusted = (adjusted * ((uint64_t)s_adjustRate * CLOCKS_PER_SEC))
-	       / (THOUSAND * CLOCK_NOMINAL);
-#endif
-    // If adjusted is not the same as timeDiff, then there is some rounding
-    // error that needs to be pushed back into the previous sample.
-    // NOTE: the following is so that the fact that everything is signed will not
-    // matter.
-    s_realTimePrevious = (clock_t)((int64_t)s_realTimePrevious - adjusted);
-    s_realTimePrevious += timeDiff;
+    // is taken out. Here, we are trying to recreate timeDiff.
+    readjustedTimeDiff = (adjustedTimeDiff * (uint64_t)s_adjustRate )
+			 / CLOCK_NOMINAL;
+    // adjusted is now converted back to being the amount we should advance the
+    // previous sampled time. It should always be less than or equal to timeDiff.
+    // That is, we could not have use more time than we started with.
+    s_realTimePrevious = s_realTimePrevious + readjustedTimeDiff;
 #ifdef  DEBUGGING_TIME
     // Put this in so that TPM time will pass much faster than real time when
     // doing debug.
@@ -216,6 +270,8 @@ _plat__TimerRead(
     return s_tpmTime;
 #endif
 }
+
+
 /* C.3.4.3. _plat__TimerWasReset() */
 /* This function is used to interrogate the flag indicating if the tick timer has been reset. */
 /* If the resetFlag parameter is SET, then the flag will be CLEAR before the function returns. */

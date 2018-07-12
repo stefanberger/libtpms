@@ -2627,7 +2627,7 @@ skip_future_versions:
     return rc;
 }
 
-#define VOLATILE_STATE_VERSION 3
+#define VOLATILE_STATE_VERSION 4
 #define VOLATILE_STATE_MAGIC 0x45637889
 
 UINT16
@@ -2916,8 +2916,18 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += TPM2B_Marshal(&pd.PPSeed.b, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v4 */
+
+    tmp_uint64 = ClockGetTime(CLOCK_MONOTONIC) + s_hostMonotonicAdjustTime;
+    written += UINT64_Marshal(&tmp_uint64, buffer, size);
+
+    written += UINT64_Marshal(&s_suspendedElapsedTime, buffer, size);
+    written += UINT64_Marshal(&s_lastSystemTime, buffer, size);
+    written += UINT64_Marshal(&s_lastReportedTime, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v5 */
     /* future versions append below this line */
 
+    BLOCK_SKIP_WRITE_POP(size); /* v5 */
     BLOCK_SKIP_WRITE_POP(size); /* v4 */
     BLOCK_SKIP_WRITE_POP(size); /* v3 */
 
@@ -2928,6 +2938,29 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     BLOCK_SKIP_WRITE_CHECK;
 
     return written;
+}
+
+TPM_RC
+VolatileState_TailV4_Unmarshal(BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT64 tmp_uint64;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
+        s_hostMonotonicAdjustTime = tmp_uint64 - ClockGetTime(CLOCK_MONOTONIC);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&s_suspendedElapsedTime, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&s_lastSystemTime, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT64_Unmarshal(&s_lastReportedTime, buffer, size);
+    }
+
+    return rc;
 }
 
 TPM_RC
@@ -3374,9 +3407,15 @@ skip_hardware_clock:
                         "Volatile State", "version 3 or later");
         rc = VolatileState_TailV3_Unmarshal(buffer, size);
 
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
                         "Volatile State", "version 4 or later");
-        /* future versions nest-append here */
+        if (rc == TPM_RC_SUCCESS) {
+            rc = VolatileState_TailV4_Unmarshal(buffer, size);
+        }
+
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "Volatile State", "version 5 or later");
+        /* future versions append here */
     }
 
 skip_future_versions:
@@ -3395,7 +3434,10 @@ skip_future_versions:
     }
 
     if (rc == TPM_RC_SUCCESS) {
-        ClockAdjustPostResume(backthen);
+        BOOL timesAreRealtime = hdr.version <= 3;
+        /* Before Rev148 (header version <= 3), times were reported in
+           realtime; we need to account for this now */
+        ClockAdjustPostResume(backthen, timesAreRealtime);
     }
     return rc;
 }

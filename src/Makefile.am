@@ -169,7 +169,7 @@ noinst_LTLIBRARIES += libtpms_tpm2.la
 
 libtpms_la_LIBADD += libtpms_tpm2.la
 
-libtpms_tpm2_la_LIBADD =
+libtpms_tpm2_la_LIBADD = $(LIBRT_LIBS)
 
 libtpms_tpm2_la_CFLAGS = $(common_CFLAGS)
 

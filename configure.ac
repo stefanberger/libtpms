@@ -176,6 +176,9 @@ AC_C_INLINE
 
 AC_TYPE_SIZE_T
 
+AC_CHECK_LIB(c, clock_gettime, LIBRT_LIBS="", LIBRT_LIBS="-lrt")
+AC_SUBST([LIBRT_LIBS])
+
 AC_ARG_ENABLE([hardening],
   AS_HELP_STRING([--disable-hardening], [Disable hardening flags]))
 

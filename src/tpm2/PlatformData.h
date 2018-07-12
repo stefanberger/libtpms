@@ -3,7 +3,7 @@
 /*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: PlatformData.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +55,9 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017.				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018.				*/
 /*										*/
 /********************************************************************************/
-
-#ifndef PLATFORMDATA_H
-#define PLATFORMDATA_H
 
 /* A.1 PlatformData.h */
 /* This file contains the instance data for the Platform module. It is collected in this file so
@@ -71,21 +68,31 @@
 /* From Cancel.c Cancel flag.  It is initialized as FALSE, which indicate the command is not being
    canceled */
 extern int     s_isCanceled;
-#include    <time.h>
-#ifndef __CYGWIN__
-typedef struct {
-    time_t tv_sec;  // Seconds - >= 0
-    long   tv_nsec; // Nanoseconds - [0, 999999999]
-} timespec_t;
+
+#ifdef _MSC_VER
+#include <sys/types.h>
+#include <sys/timeb.h>
+#else
+#include <sys/time.h>
+#include <time.h>
 #endif
+
 #ifndef HARDWARE_CLOCK
-/* This is the value returned the last time that the system clock was read. This is only relevant
-   for a simulator or virtual TPM. */
-extern clock_t        s_realTimePrevious;
-/* This is the rate adjusted value that is the equivalent of what would be read from a hardware
-   register that produced rate adjusted time. */
-extern clock_t        s_tpmTime;
+typedef uint64_t     clock64_t;
+// This is the value returned the last time that the system clock was read. This is only relevant
+// for a simulator or virtual TPM.
+extern clock64_t       s_realTimePrevious;
+// These values are uses to try to synthesize a long lived version of clock().
+extern clock64_t        s_lastSystemTime;
+extern clock64_t        s_lastReportedTime;
+// This is the rate adjusted value that is the equivalent of what would be read from a hardware
+// register that produced rate adjusted time.
+extern clock64_t        s_tpmTime;
+/* libtpms added: */
+extern int64_t          s_hostMonotonicAdjustTime;
+extern uint64_t         s_suspendedElapsedTime;
 #endif // HARDWARE_CLOCK
+
 /* This value indicates that the timer was reset */
 extern BOOL              s_timerReset;
 /* This value indicates that the timer was stopped. It causes a clock discontinuity. */
@@ -133,6 +140,3 @@ extern BOOL        s_powerLost;
 /* From Entropy.c */
 extern uint32_t        lastEntropy;
 #endif // _PLATFORM_DATA_H_
-
-
-#endif
