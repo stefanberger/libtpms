@@ -213,11 +213,9 @@ MathLibraryCompatibilityCheck(
     // Convert the test TPM2B to an OpenSSL BIGNUM
     BN_bin2bn(test.t.buffer, test.t.size, osslTemp);
     // Make sure the values are consistent
-#ifdef OSSL_VERIFY
     cAssert(osslTemp->top == (int)tpmTemp->size);
     for(i = 0; i < tpmTemp->size; i++)
 	cAssert(osslTemp->d[0] == tpmTemp->d[0]);
-#endif
     OSSL_LEAVE();
 }
 #endif
