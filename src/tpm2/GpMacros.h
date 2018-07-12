@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: GpMacros.h 1262 2018-07-11 21:03:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -119,7 +119,7 @@
     }
 #define PARAMETER_CHECK(condition, returnCode)		\
     REQUIRE((condition), PARAMETER, returnCode)
-#if defined EMPTY_ASSERT
+#if defined EMPTY_ASSERT && (EMPTY_ASSERT != NO)
 #   define pAssert(a)  ((void)0)
 #else
 #   define pAssert(a) {if(!(a)) FAIL(FATAL_ERROR_PARAMETER);}
