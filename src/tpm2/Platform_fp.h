@@ -377,8 +377,9 @@ _plat__GetUnique(
 		 unsigned char       *b              // output buffer
 		 );
 
-/* libtpms: ClockGetTime() needs to be public */
+/* libtpms: */
 #include <time.h>
+void ClockAdjustPostResume(UINT64 backthen);
 uint64_t ClockGetTime(clockid_t clk_id);
 
 #endif  // _PLATFORM_FP_H_
