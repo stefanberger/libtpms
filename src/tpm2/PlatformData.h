@@ -132,7 +132,6 @@ extern BOOL     s_physicalPresence;
 extern BOOL        s_powerLost;
 /* From Entropy.c */
 extern uint32_t        lastEntropy;
-extern int             firstValue;
 #endif // _PLATFORM_DATA_H_
 
 
