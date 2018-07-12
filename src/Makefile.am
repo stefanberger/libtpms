@@ -333,7 +333,6 @@ noinst_HEADERS += \
 	tpm2/EC_Ephemeral_fp.h \
 	tpm2/EncryptDecrypt2_fp.h \
 	tpm2/EncryptDecrypt_fp.h \
-	tpm2/EncryptDecrypt_spt.h \
 	tpm2/EncryptDecrypt_spt_fp.h \
 	tpm2/Entity_fp.h \
 	tpm2/EventSequenceComplete_fp.h \
