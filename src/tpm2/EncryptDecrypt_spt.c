@@ -3,7 +3,7 @@
 /*			 	Encrypt Decrypt Support 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EncryptDecrypt_spt.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: EncryptDecrypt_spt.c 1264 2018-07-12 14:21:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,7 +62,7 @@
 /* 7.7 Encrypt Decrypt Support (EncryptDecrypt_spt.c) */
 #include "Tpm.h"
 #include "EncryptDecrypt_fp.h"
-#include "EncryptDecrypt_spt.h"
+#include "EncryptDecrypt_spt_fp.h"
 #if CC_EncryptDecrypt2
 /* Error Returns Meaning */
 /* TPM_RC_KEY is not a symmetric decryption key with both public and private portions loaded */
