@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: PlatformData.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,15 +55,15 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
-/* C.9 PlatformData.c */
-/* C.9.1. Description */
+/* C.10 PlatformData.c */
+/* C.10.1. Description */
 /* This file will instance the TPM variables that are not stack allocated. The descriptions for
    these variables are in Global.h for this project. */
-/* C.9.2. Includes */
+/* C.10.2. Includes */
 #include    "Implementation.h"
 #include    "PlatformData.h"
 /* From Cancel.c */
@@ -73,9 +73,14 @@ unsigned int         s_adjustRate;
 BOOL                 s_timerReset;
 BOOL                 s_timerStopped;
 #ifndef HARDWARE_CLOCK
-#include    <time.h>
-clock_t             s_realTimePrevious;
-clock_t             s_tpmTime;
+clock64_t            s_realTimePrevious;
+clock64_t            s_tpmTime;
+clock64_t            s_lastSystemTime;
+clock64_t            s_lastReportedTime;
+
+/* libtpms added: */
+int64_t              s_hostMonotonicAdjustTime; /* can be negative */
+uint64_t             s_suspendedElapsedTime;
 #endif
 /* From LocalityPlat.c */
 unsigned char        s_locality;
