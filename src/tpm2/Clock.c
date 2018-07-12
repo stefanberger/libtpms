@@ -95,6 +95,18 @@ ClockGetTime(
     return time;
 }
 
+/* ClockAdjustPostResume -- adjust time parameters post resume */
+#include "Tpm.h"
+void
+ClockAdjustPostResume(UINT64 backthen)
+{
+    UINT64 now = ClockGetTime(CLOCK_REALTIME);
+    INT64 timediff = now - backthen;
+
+    g_time += timediff;
+    s_realTimePrevious += timediff;
+    s_tpmTime += timediff;
+}
 
 /* C.3.3. Simulator Functions */
 /* C.3.3.1. Introduction */

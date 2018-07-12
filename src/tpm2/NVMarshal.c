@@ -2985,6 +2985,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     NV_HEADER hdr;
     BOOL needs_block;
     UINT16 array_size = 0;
+    UINT64 backthen;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3363,16 +3364,7 @@ skip_hardware_clock:
        rc = UINT32_Unmarshal(&s_adjustRate, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        UINT64 backthen, now;
-        INT64 timediff;
-
         rc = UINT64_Unmarshal(&backthen, buffer, size);
-        now = ClockGetTime(CLOCK_REALTIME);
-
-        timediff = now - backthen;
-        g_time += timediff;
-        s_realTimePrevious += timediff;
-        s_tpmTime += timediff;
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
@@ -3402,6 +3394,9 @@ skip_future_versions:
         }
     }
 
+    if (rc == TPM_RC_SUCCESS) {
+        ClockAdjustPostResume(backthen);
+    }
     return rc;
 }
 
