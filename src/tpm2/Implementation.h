@@ -253,7 +253,7 @@
 #define ALG_CAMELLIA                    ALG_NO      /* Not specified by vendor */
 #define ALG_CBC                         ALG_YES
 #define ALG_CFB                         ALG_YES
-#define ALG_CMAC                        ALG_NO
+#define ALG_CMAC                        ALG_YES
 #define ALG_CTR                         ALG_YES
 #define ALG_ECB                         ALG_YES
 #define ALG_ECC                         ALG_YES
