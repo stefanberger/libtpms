@@ -3384,7 +3384,7 @@ skip_hardware_clock:
                         "Volatile State", "version 3 or later");
         rc = VolatileState_TailV3_Unmarshal(buffer, size);
 
-        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
                         "Volatile State", "version 4 or later");
         /* future versions nest-append here */
     }
