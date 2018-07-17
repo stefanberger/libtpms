@@ -4085,6 +4085,65 @@ exit_size:
     return TPM_RC_SIZE;
 }
 
+static void
+USER_NVRAM_Display(const char *msg)
+{
+    NV_REF entryRef = NV_USER_DYNAMIC;
+    UINT32 entrysize;
+    UINT64 offset = 0;
+    TPM_HANDLE handle;
+    UINT32 datasize;
+    NV_INDEX nvi;
+    OBJECT obj;
+    UINT64 maxCount;
+
+    fprintf(stderr, "USER_NVRAM contents %s:\n", msg);
+
+    while (TRUE) {
+        /* 1st: entrysize */
+        NvRead(&entrysize, entryRef, sizeof(entrysize));
+        fprintf(stderr, " offset: %5lu   entry size: %5u ",
+                entryRef - NV_USER_DYNAMIC, entrysize);
+        offset = sizeof(UINT32);
+
+        if (entrysize == 0)
+            break;
+
+        /* 2nd: the handle -- it will tell us what datatype this is */
+        NvRead(&handle, entryRef + offset, sizeof(handle));
+        fprintf(stderr, "handle: 0x%08x ", handle);
+
+        switch (HandleGetType(handle)) {
+        case TPM_HT_NV_INDEX:
+            fprintf(stderr, " (NV_INDEX)  ");
+            /* NV_INDEX has the index again at offset 0! */
+            NvReadNvIndexInfo(entryRef + offset, &nvi);
+            offset += sizeof(nvi);
+            datasize = entrysize - sizeof(UINT32) - sizeof(nvi);
+            fprintf(stderr, " datasize: %u\n",datasize);
+            break;
+        break;
+        case TPM_HT_PERSISTENT:
+            fprintf(stderr, " (PERSISTENT)");
+            offset += sizeof(handle);
+
+            NvRead(&obj, entryRef + offset, sizeof(obj));
+            offset += sizeof(obj);
+            fprintf(stderr, " sizeof(obj): %zu\n", sizeof(obj));
+        break;
+        default:
+            TPMLIB_LogTPM2Error("USER NVRAM: Corrupted handle: %08x\n", handle);
+        }
+        /* advance to next entry */
+        entryRef += entrysize;
+    }
+    fprintf(stderr, "\n");
+
+    NvRead(&maxCount, entryRef + offset, sizeof(maxCount));
+    fprintf(stderr, " maxCount:   %ld\n", maxCount);
+    fprintf(stderr, "-----------------------------\n");
+}
+
 #define USER_NVRAM_VERSION 2
 #define USER_NVRAM_MAGIC   0x094f22c3
 UINT32
@@ -4101,6 +4160,9 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
     UINT32 datasize;
     UINT64 sourceside_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
     BLOCK_SKIP_INIT;
+
+    if (FALSE)
+        USER_NVRAM_Display("before marshalling");
 
     written = NV_HEADER_Marshal(buffer, size,
                                 USER_NVRAM_VERSION, USER_NVRAM_MAGIC,
@@ -4302,6 +4364,9 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     }
 
 skip_future_versions:
+
+    if (FALSE)
+        USER_NVRAM_Display("after unmarshalling");
 
     return rc;
 
