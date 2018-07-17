@@ -4250,6 +4250,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     UINT32 datasize = 0;
     UINT64 sourceside_size;
     UINT64 array_size = NV_USER_DYNAMIC_END - NV_USER_DYNAMIC;
+    UINT64 entrysize_offset;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -4269,6 +4270,9 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
         if (rc == TPM_RC_SUCCESS) {
             rc = UINT32_Unmarshal(&entrysize, buffer, size);
 
+            /* the entrysize also depends on the sizeof(nvi); we may have to
+               update it if sizeof(nvi) changed between versions */
+            entrysize_offset = o;
             NvWrite(entryRef + o, sizeof(entrysize), &entrysize);
             offset = sizeof(UINT32);
             if (entrysize == 0)
@@ -4314,6 +4318,9 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     rc = Array_Unmarshal(buf, datasize, buffer, size);
                     NvWrite(entryRef + o + offset, datasize, buf);
                     offset += datasize;
+
+                    /* update the entry size; account for expanding nvi */
+                    entrysize = sizeof(UINT32) + sizeof(nvi) + datasize;
                 }
             break;
             case TPM_HT_PERSISTENT:
@@ -4333,12 +4340,17 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     NvWrite(entryRef + o + offset, sizeof(obj), &obj);
                     offset += sizeof(obj);
                 }
+                entrysize = sizeof(UINT32) + sizeof(obj);
             break;
             default:
                 TPMLIB_LogTPM2Error("USER_NVRAM: "
                                     "Read handle 0x%08x of unknown type\n",
                                     handle);
                 rc = TPM_RC_HANDLE;
+            }
+
+            if (rc == TPM_RC_SUCCESS) {
+                NvWrite(entryRef + entrysize_offset, sizeof(entrysize), &entrysize);
             }
         }
         if (rc == TPM_RC_SUCCESS) {
