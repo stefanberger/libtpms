@@ -17,7 +17,7 @@ VolatileSave(BYTE **buffer, INT32 *size)
 }
 
 TPM_RC
-VolatileLoad(void)
+VolatileLoad(BOOL *restored)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -27,6 +27,8 @@ VolatileLoad(void)
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
     TPM_RESULT ret = TPM_SUCCESS;
     bool is_empty_state;
+
+    *restored = FALSE;
 
     /* try to get state blob set via TPMLIB_SetState() */
     GetCachedState(TPMLIB_STATE_VOLATILE, &data, &length, &is_empty_state);
@@ -48,6 +50,8 @@ VolatileLoad(void)
          * failure mode.
          */
         free(p);
+
+        *restored = (rc == 0);
     }
 #endif /* TPM_LIBTPMS_CALLBACKS */
 

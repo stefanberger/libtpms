@@ -74,5 +74,7 @@ TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
 UINT32 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size);
 TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size);
 
+void NVShadowRestore(void);
+
 #endif /* NVMARSHAL_H */
 

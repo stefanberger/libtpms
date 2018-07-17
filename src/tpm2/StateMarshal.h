@@ -68,7 +68,7 @@
  * we keep these in a separate file to avoid symbol clashes when
  * included from the interface code.
  */
-TPM_RC VolatileLoad(void);
+TPM_RC VolatileLoad(BOOL *restored);
 UINT16 VolatileSave(BYTE **buffer, INT32 *size);
 
 #endif /* STATE_MARSHAL_H */

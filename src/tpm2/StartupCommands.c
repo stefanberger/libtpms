@@ -69,6 +69,8 @@ _TPM_Init(
 	  void
 	  )
 {
+    BOOL restored = FALSE;
+
     g_powerWasLost = g_powerWasLost | _plat__WasPowerLost();
 #if defined SIMULATION && !defined NDEBUG
     // If power was lost and this was a simulation, put canary in RAM used by NV
@@ -105,7 +107,9 @@ _TPM_Init(
 	    // Start clock. Need to do this after NV has been restored.
 	    TimePowerOn();
 
-            VolatileLoad();
+            VolatileLoad(&restored);
+            if (restored)
+                NVShadowRestore();
 	}
     return;
 }

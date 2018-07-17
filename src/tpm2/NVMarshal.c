@@ -79,6 +79,20 @@
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
 
+/*
+ * The TPM2 maintains a pcrAllocated shadow variable; the current active one is
+ * in gp.pcrAllocated and the one to be active after reboot is in NVRAM. So,
+ * this means we have to restore two of these variables when we resume. The
+ * tricky part is that the global gp will be restored by reading from NVRAM.
+ * Once that has been done the gp.pcrAllocated needs to be restored with the
+ * one that is supposed to be active. All of this is only supposed to happen
+ * when we resume a VM's volatile state.
+ */
+static struct shadow {
+    TPML_PCR_SELECTION  pcrAllocated;
+    BOOL                pcrAllocatedIsNew;
+} shadow;
+
 /* prevent misconfiguration: */
 typedef char assertion_failed_nvram[
     (NV_USER_DYNAMIC_END < NV_USER_DYNAMIC) ? -1 : 0];
@@ -764,29 +778,31 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT64 hash_algs_supported(void)
+/*
+ * Get the PCR banks that are active so that we know what PCRs need to be
+ * restored. Only data for active PCR banks needs to restored, inactive PCR
+ * banks need no data restored.
+ */
+UINT64 pcrbanks_algs_active(const TPML_PCR_SELECTION *pcrAllocated)
 {
-    UINT64 bits = 0;
-#ifdef TPM_ALG_SHA1
-    bits |= (1 << TPM_ALG_SHA1);
-#endif
-#ifdef TPM_ALG_SHA256
-    bits |= (1 << TPM_ALG_SHA256);
-#endif
-#ifdef TPM_ALG_SHA384
-    bits |= (1 << TPM_ALG_SHA384);
-#endif
-#ifdef TPM_ALG_SHA512
-    bits |= (1 << TPM_ALG_SHA512);
-#endif
-#ifdef TPM_ALG_SM3_256
-    bits |= (1 << TPM_ALG_SM3_256);
-#endif
-    return bits;
+    UINT64 algs_active = 0;
+    unsigned i, j;
+
+    for(i = 0; i < pcrAllocated->count; i++) {
+        for (j = 0; j < pcrAllocated->pcrSelections[i].sizeofSelect; j++) {
+            if (pcrAllocated->pcrSelections[i].pcrSelect[j]) {
+                algs_active |= 1 << pcrAllocated->pcrSelections[i].hash;
+                break;
+            }
+        }
+    }
+
+    return algs_active;
 }
 
 static TPM_RC
-PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
+PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
+                   const TPML_PCR_SELECTION *pcrAllocated)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     UINT16 array_size, needed_size;
@@ -794,7 +810,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     TPM_ALG_ID algid;
     BOOL end = FALSE;
     BYTE *t = NULL;
-    UINT64 algs_needed = hash_algs_supported();
+    UINT64 algs_needed = pcrbanks_algs_active(pcrAllocated);
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -877,7 +893,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     }
 
     if (rc == TPM_RC_SUCCESS && algs_needed) {
-        TPMLIB_LogTPM2Error("PCR_SAVE: Missing data for hash algorithm %d.",
+        TPMLIB_LogTPM2Error("PCR_SAVE: Missing data for hash algorithm %d.\n",
                             _ffsll(algs_needed) - 1);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -971,7 +987,8 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
 }
 
 static TPM_RC
-PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
+PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
+              const TPML_PCR_SELECTION *pcrAllocated)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
@@ -979,7 +996,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
     BYTE *t = NULL;
     UINT16 needed_size, array_size;
     TPM_ALG_ID algid;
-    UINT64 algs_needed = hash_algs_supported();
+    UINT64 algs_needed = pcrbanks_algs_active(pcrAllocated);
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -1051,7 +1068,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size)
     }
 
     if (rc == TPM_RC_SUCCESS && algs_needed) {
-        TPMLIB_LogTPM2Error("PCR: Missing data for hash algorithm %d.",
+        TPMLIB_LogTPM2Error("PCR: Missing data for hash algorithm %d.\n",
                             _ffsll(algs_needed) - 1);
         rc = TPM_RC_BAD_PARAMETER;
     }
@@ -1198,7 +1215,7 @@ STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
         rc = TPM2B_AUTH_Unmarshal(&data->platformAuth, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = PCR_SAVE_Unmarshal(&data->pcrSave, buffer, size);
+        rc = PCR_SAVE_Unmarshal(&data->pcrSave, buffer, size, &shadow.pcrAllocated);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = PCR_AUTHVALUE_Unmarshal(&data->pcrAuthValues, buffer, size);
@@ -3253,7 +3270,7 @@ skip_object:
         rc = TPM_RC_BAD_PARAMETER;
     }
     for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
-        rc = PCR_Unmarshal(&s_pcrs[i], buffer, size);
+        rc = PCR_Unmarshal(&s_pcrs[i], buffer, size, &shadow.pcrAllocated);
     }
 #endif
 skip_pcr:
@@ -3655,7 +3672,7 @@ skip_future_versions:
 }
 
 #define PERSISTENT_DATA_MAGIC   0x12213443
-#define PERSISTENT_DATA_VERSION 2
+#define PERSISTENT_DATA_VERSION 3
 
 static UINT16
 PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
@@ -3736,8 +3753,14 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 #endif
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+
+    /* there's a 'shadow' pcrAllocated as well */
+    written += TPML_PCR_SELECTION_Marshal(&gp.pcrAllocated, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
 
+    BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
 
     BLOCK_SKIP_WRITE_CHECK;
@@ -3833,6 +3856,9 @@ skip_num_policy_pcr_group:
 
     if (rc == TPM_RC_SUCCESS) {
         rc = TPML_PCR_SELECTION_Unmarshal(&data->pcrAllocated, buffer, size);
+
+        shadow.pcrAllocated = data->pcrAllocated;
+        shadow.pcrAllocatedIsNew = TRUE;
     }
 
     /* ppList array may not be our size */
@@ -3922,8 +3948,12 @@ skip_num_policy_pcr_group:
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
+                        "Volatile State", "version 3 or later");
+        rc = TPML_PCR_SELECTION_Unmarshal(&shadow.pcrAllocated, buffer, size);
+
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "PERSISTENT DATA", "version 3 or later");
+                        "PERSISTENT DATA", "version 4 or later");
         /* future versions nest-append here */
     }
 
@@ -4521,4 +4551,13 @@ skip_future_versions:
     }
 
     return rc;
+}
+
+void
+NVShadowRestore(void)
+{
+    if (shadow.pcrAllocatedIsNew) {
+        gp.pcrAllocated = shadow.pcrAllocated;
+        shadow.pcrAllocatedIsNew = FALSE;
+    }
 }

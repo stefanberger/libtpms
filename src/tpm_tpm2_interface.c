@@ -417,6 +417,7 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
     unsigned char bak_NV[NV_MEMORY_SIZE];
     INT32 size;
     BYTE *buffer;
+    BOOL restored;
 
     /* make backup of current NvChip memory */
     memcpy(bak_NV, s_NV, sizeof(bak_NV));
@@ -455,7 +456,7 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
 
     if ((rc == TPM_RC_SUCCESS) &&
         (st & TPMLIB_STATE_VOLATILE)) {
-        rc = VolatileLoad();
+        rc = VolatileLoad(&restored);
     }
 
     ret = rc;
