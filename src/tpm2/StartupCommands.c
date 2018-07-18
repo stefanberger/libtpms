@@ -245,8 +245,11 @@ TPM2_Startup(
 	    // the NV totalResetCount when incrementing would make it 0. When the
 	    // TPM starts up again, the old value of totalResetCount will be read
 	    // and we will get right back to here with the increment failing.
+#if 0
+	    // libtpms: disable this
 	    if(gp.totalResetCount == 0)
 		FAIL(FATAL_ERROR_INTERNAL);
+#endif
 	    // Write total reset counter to NV
 	    NV_SYNC_PERSISTENT(totalResetCount);
 	    // Reset restartCount
