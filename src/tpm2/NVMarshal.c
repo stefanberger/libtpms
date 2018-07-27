@@ -4370,7 +4370,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     NvWrite(entryRef + o + offset, sizeof(obj), &obj);
                     offset += sizeof(obj);
                 }
-                entrysize = sizeof(UINT32) + sizeof(obj);
+                entrysize = sizeof(UINT32) + sizeof(TPM_HANDLE) + sizeof(obj);
             break;
             default:
                 TPMLIB_LogTPM2Error("USER_NVRAM: "
