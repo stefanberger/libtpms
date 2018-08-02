@@ -40,3 +40,4 @@ EXTRA_DIST = \
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libtpms.pc
 
+DISTCHECK_CONFIGURE_FLAGS = --with-openssl --with-tpm2

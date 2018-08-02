@@ -134,7 +134,6 @@ noinst_HEADERS = \
 	tpm12/tpm_time.h \
 	tpm12/tpm_transport.h \
 	tpm12/tpm_ver.h
-	
 
 if LIBTPMS_USE_FREEBL
 
@@ -520,22 +519,22 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/TpmToOsslSym.h
 
 libtpms_tpm2_la_CFLAGS += \
-	-I tpm2 \
-	-I tpm2/crypto \
-	-I tpm2/crypto/openssl
+	-I $(srcdir)/tpm2 \
+	-I $(srcdir)/tpm2/crypto \
+	-I $(srcdir)/tpm2/crypto/openssl
 
 endif # LIBTPMS_USE_OPENSSL
 
 # some of the original TPM2 files have been modified; in case of an update
 # we do not want to loose these modifications
 check:
-	n=`grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
+	n=`cd $(srcdir) && grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
 	exp=20; \
 	if test $$n -ne $$exp; then \
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \
 	fi; \
-	n=`grep TPM2_GetBufferSize tpm2/Implementation.h | grep -E "^#define" | wc -l`; \
+	n=`cd $(srcdir) && grep TPM2_GetBufferSize tpm2/Implementation.h | grep -E "^#define" | wc -l`; \
 	exp=2; \
 	if test $$n -ne $$exp; then \
 		echo "Lost patches to tpm2/Implementation.h ?"; \
@@ -586,8 +585,11 @@ check-local:
 	  *) ADDLIBS="" ;; \
 	esac; \
 	$(CC) $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null
+	rm a.out
 
 EXTRA_DIST = \
 	tpm12/tpm_crypto_freebl.c \
 	tpm12/tpm_crypto.c \
 	libtpms.syms
+
+CLEANFILES = a.out

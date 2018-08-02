@@ -4,8 +4,8 @@
 # For the license, see the LICENSE file in the root directory.
 #
 
-AM_CFLAGS = -I../include $(SANITIZERS)
-AM_LDFLAGS = -ltpms -L../src/.libs $(SANITIZERS)
+AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
+AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
 check_PROGRAMS = base64decode nvram_offsets
 TESTS = base64decode.sh nvram_offsets
