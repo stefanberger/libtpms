@@ -60,6 +60,7 @@ fi
 AC_SUBST(DEBUG_DEFINES, $debug_defines)
 
 cryptolib=freebl
+AC_SUBST(cryptolib, $cryptolib)
 
 AC_ARG_WITH([openssl],
             AC_HELP_STRING([--with-openssl],
