@@ -35,7 +35,7 @@ man3_MANS = \
 	TPMLIB_Terminate.3 \
 	TPM_Realloc.3
 
-man3_MANS += \
+man3_MANS_generated = \
 	TPM_IO_Hash_Start.3 \
 	TPM_IO_TpmEstablished_Get.3 \
 	TPMLIB_CancelCommand.3 \
@@ -54,6 +54,7 @@ man3_MANS += \
 	TPMLIB_VolatileAll_Store.3 \
 	TPM_Malloc.3
 
+man3_MANS += $(man3_MANs_generated)
 
 %.3 : %.pod
 	@pod2man -r "libtpms" \
@@ -63,4 +64,4 @@ man3_MANS += \
 
 EXTRA_DIST = $(man3_MANS) $(man3_PODS)
 
-CLEANFILES = *.3
+CLEANFILES = $(man3_MANs_generated)
