@@ -95,13 +95,13 @@
 #define CRYPT_TO_BYTE_ARRAY UINT64_TO_BYTE_ARRAY
 typedef uint64_t    crypt_uword_t;
 typedef int64_t     crypt_word_t;
-#define PAD_T(name) /* nothing */
+#define BN_PAD      0
 #elif RADIX_BITS == 32
 #define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_32((x))
 #define CRYPT_TO_BYTE_ARRAY UINT32_TO_BYTE_ARRAY
 typedef uint32_t    crypt_uword_t;
 typedef int32_t     crypt_word_t;
-#define PAD_T(name) crypt_uword_t name;
+#define BN_PAD      1
 #endif
 #define MAX_CRYPT_UWORD (~((crypt_uword_t)0))
 #define MAX_CRYPT_WORD  ((crypt_word_t)(MAX_CRYPT_UWORD >> 1))
@@ -116,8 +116,7 @@ typedef int32_t     crypt_word_t;
 #define BN_STRUCT_DEF(count) struct {			    \
 	crypt_uword_t       allocated;			    \
 	crypt_uword_t       size;			    \
-	crypt_uword_t       d[count];			    \
-	PAD_T(pad1); PAD_T(pad2); PAD_T(pad3);              \
+	crypt_uword_t       d[count + BN_PAD + BN_PAD + BN_PAD]; \
     }
 typedef BN_STRUCT_DEF(1) bignum_t;
 #ifndef bigNum
