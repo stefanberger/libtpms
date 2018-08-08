@@ -4132,8 +4132,8 @@ USER_NVRAM_Display(const char *msg)
     while (TRUE) {
         /* 1st: entrysize */
         NvRead(&entrysize, entryRef, sizeof(entrysize));
-        fprintf(stderr, " offset: %5lu   entry size: %5u ",
-                entryRef - NV_USER_DYNAMIC, entrysize);
+        fprintf(stderr, " offset: %5"PRIu32"   entry size: %5u ",
+                (UINT32)(entryRef - NV_USER_DYNAMIC), entrysize);
         offset = sizeof(UINT32);
 
         if (entrysize == 0)
@@ -4170,7 +4170,7 @@ USER_NVRAM_Display(const char *msg)
     fprintf(stderr, "\n");
 
     NvRead(&maxCount, entryRef + offset, sizeof(maxCount));
-    fprintf(stderr, " maxCount:   %ld\n", maxCount);
+    fprintf(stderr, " maxCount:   %"PRIu64"\n", maxCount);
     fprintf(stderr, "-----------------------------\n");
 }
 
