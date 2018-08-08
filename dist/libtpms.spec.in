@@ -82,11 +82,10 @@ Libtpms header files and documentation.
 %define _enable_debug --enable-debug
 %endif
 
-./bootstrap.sh
 %if %{build_type} == debug
 CFLAGS=-O0
 %endif
-%configure \
+./autogen.sh \
 	--with-tpm2 \
         --disable-static \
         --prefix=/usr \

@@ -35,7 +35,8 @@ EXTRA_DIST = \
 	LICENSE \
 	README \
 	bootstrap.sh \
-	libtpms.pc.in
+	libtpms.pc.in \
+	autogen.sh
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libtpms.pc
