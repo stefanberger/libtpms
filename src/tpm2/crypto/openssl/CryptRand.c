@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1265 2018-07-15 18:29:22Z kgoldman $		*/
+/*            $Id: CryptRand.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -490,7 +490,7 @@ DRBG_SelfTest(
 /* TPM_RC_NO_RESULT failure of the entropy generator */
 LIB_EXPORT TPM_RC
 CryptRandomStir(
-		UINT32           additionalDataSize,
+		UINT16           additionalDataSize,
 		BYTE            *additionalData
 		)
 {
