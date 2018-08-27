@@ -3,7 +3,7 @@
 /*			     Failure Mode Handling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmFail.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: TpmFail.c 1263 2018-07-12 13:56:36Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -170,7 +170,6 @@ UnmarshalHeader(
     return TRUE;
 }
 /* 9.17.4 Public Functions */
-#if SIMULATION
 /* 9.17.4.1 SetForceFailureMode() */
 /* This function is called by the simulator to enable failure mode testing. */
 LIB_EXPORT void
@@ -178,10 +177,11 @@ SetForceFailureMode(
 		    void
 		    )
 {
+#if SIMULATION
     g_forceFailureMode = TRUE;
+#endif
     return;
 }
-#endif
 /* 9.17.4.2 TpmFail() */
 /* This function is called by TPM.lib when a failure occurs. It will set up the failure values to be
    returned on TPM2_GetTestResult(). */
@@ -195,16 +195,14 @@ TpmFail(
 	)
 {
 #if 0
-#if FAIL_TRACE
-    UINT32     *failFuncp;
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
-    failFuncp = (UINT32 *)&function;
-    s_failFunction = *failFuncp;
+#if FAIL_TRACE
+    s_failFunction = *(UINT32 *)&function;
     s_failLine = line;
 #else
-    s_failFunction = (UINT32)0;
+    s_failFunction = (UINT32)NULL;
     s_failLine = 0;
 #endif
     s_failCode = code;
