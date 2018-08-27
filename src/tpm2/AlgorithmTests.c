@@ -107,7 +107,7 @@ TestHash(
     UINT16                   digestSize;
     const TPM2B             *testDigest = NULL;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
-    pAssert(hashAlg != TPM_ALG_NULL);
+    pAssert(hashAlg != ALG_NULL_VALUE);
     switch(hashAlg)
 	{
 #if ALG_SHA1
@@ -368,7 +368,7 @@ TestRsaEncryptDecrypt(
     rsaScheme.details.anySig.hashAlg = DEFAULT_TEST_HASH;
     CLEAR_BOTH(scheme);
     CLEAR_BOTH(ALG_NULL_VALUE);
-    if(scheme == TPM_ALG_NULL)
+    if(scheme == ALG_NULL_VALUE)
 	{
 	    // This is an encryption scheme using the private key without any encoding.
 	    memcpy(testInput.t.buffer, c_RsaTestValue, sizeof(c_RsaTestValue));
@@ -694,7 +694,7 @@ TestKDFa(
     static TPM2B_KDF_TEST_KEY   keyOut;
     UINT32                      counter = 0;
     //
-    CLEAR_BOTH(TPM_ALG_KDF1_SP800_108);
+    CLEAR_BOTH(ALG_KDF1_SP800_108_VALUE);
     keyOut.t.size = CryptKDFa(KDF_TEST_ALG, &c_kdfTestKeyIn.b, &c_kdfTestLabel.b,
 			      &c_kdfTestContextU.b, &c_kdfTestContextV.b,
 			      TEST_KDF_KEY_SIZE * 8, keyOut.t.buffer,
@@ -762,9 +762,9 @@ TestAlgorithm(
 	      ALGORITHM_VECTOR        *toTest
 	      )
 {
-    TPM_ALG_ID              first = (alg == TPM_ALG_ERROR) ? TPM_ALG_FIRST : alg;
-    TPM_ALG_ID              last = (alg == TPM_ALG_ERROR) ? TPM_ALG_LAST : alg;
-    BOOL                    doTest = (alg != TPM_ALG_ERROR);
+    TPM_ALG_ID              first = (alg == ALG_ERROR_VALUE) ? ALG_FIRST_VALUE : alg;
+    TPM_ALG_ID              last = (alg == ALG_ERROR_VALUE) ? ALG_LAST_VALUE : alg;
+    BOOL                    doTest = (alg != ALG_ERROR_VALUE);
     TPM_RC                  result = TPM_RC_SUCCESS;
     if(toTest == NULL)
 	toTest = &g_toTest;
@@ -876,9 +876,9 @@ TestAlgorithm(
 		  case ALG_RSA_VALUE:
 		    CLEAR_BOTH(alg);
 		    if(doTest)
-			result = TestRsa(TPM_ALG_NULL, toTest);
+			result = TestRsa(ALG_NULL_VALUE, toTest);
 		    else
-			SET_BOTH(TPM_ALG_NULL);
+			SET_BOTH(ALG_NULL_VALUE);
 		    break;
 		  case ALG_RSASSA_VALUE:
 		  case ALG_RSAES_VALUE:
@@ -888,13 +888,13 @@ TestAlgorithm(
 		    if(doTest)
 			result = TestRsa(alg, toTest);
 		    break;
-#endif // TPM_ALG_RSA
+#endif // ALG_RSA_VALUE
 #if ALG_KDF1_SP800_108
 		  case ALG_KDF1_SP800_108_VALUE:
 		    if(doTest)
 			result = TestKDFa(toTest);
 		    break;
-#endif // TPM_ALG_KDF1_SP800_108
+#endif // ALG_KDF1_SP800_108_VALUE
 #if ALG_ECC
 		    // ECC dependent but no tests
 		    //        case ALG_ECDAA_VALUE:
@@ -916,7 +916,7 @@ TestAlgorithm(
 		    if(doTest)
 			result = TestEcc(alg, toTest);
 		    break;
-#endif // TPM_ALG_ECC
+#endif // ALG_ECC_VALUE
 		  default:
 		    CLEAR_BIT(alg, *toTest);
 		    break;

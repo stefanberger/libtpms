@@ -3,7 +3,7 @@
 /*		Message Authentication Codes Based on a Symmetric Block Cipher	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSmac.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptSmac.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -87,7 +87,7 @@ CryptSmacStart(
 	    switch(macAlg)
 		{
 #if ALG_CMAC
-		  case TPM_ALG_CMAC:
+		  case ALG_CMAC_VALUE:
 		    retVal = CryptCmacStart(&state->state.smac, keyParameters,
 					    macAlg, key);
 		    break;

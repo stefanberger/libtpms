@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptHash.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -116,22 +116,22 @@ CryptGetHashDef(
     switch(hashAlg)
 	{
 #if ALG_SHA1
-	  case TPM_ALG_SHA1:
+	  case ALG_SHA1_VALUE:
 	    return &SHA1_Def;
 	    break;
 #endif
 #if ALG_SHA256
-	  case TPM_ALG_SHA256:
+	  case ALG_SHA256_VALUE:
 	    retVal = &SHA256_Def;
 	    break;
 #endif
 #if ALG_SHA384
-	  case TPM_ALG_SHA384:
+	  case ALG_SHA384_VALUE:
 	    retVal = &SHA384_Def;
 	    break;
 #endif
 #if ALG_SHA512
-	  case TPM_ALG_SHA512:
+	  case ALG_SHA512_VALUE:
 	    retVal = &SHA512_Def;
 	    break;
 #endif
@@ -156,23 +156,23 @@ CryptHashIsValidAlg(
     switch(hashAlg)
 	{
 #if ALG_SHA1
-	  case TPM_ALG_SHA1:
+	  case ALG_SHA1_VALUE:
 #endif
 #if ALG_SHA256
-	  case TPM_ALG_SHA256:
+	  case ALG_SHA256_VALUE:
 #endif
 #if ALG_SHA384
-	  case TPM_ALG_SHA384:
+	  case ALG_SHA384_VALUE:
 #endif
 #if ALG_SHA512
-	  case TPM_ALG_SHA512:
+	  case ALG_SHA512_VALUE:
 #endif
 #if ALG_SM3_256
-	  case TPM_ALG_SM3_256:
+	  case ALG_SM3_256_VALUE:
 #endif
 	    return TRUE;
 	    break;
-	  case TPM_ALG_NULL:
+	  case ALG_NULL_VALUE:
 	    return flag;
 	    break;
 	  default:

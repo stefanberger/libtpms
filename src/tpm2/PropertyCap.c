@@ -501,9 +501,9 @@ TPMPropertyIsDefined(
 #if ALG_ECC
 	    // number of loaded ECC curves
 	    *value = ECC_CURVE_COUNT;
-#else // TPM_ALG_ECC
+#else // ALG_ECC
 	    *value = 0;
-#endif // TPM_ALG_ECC
+#endif // ALG_ECC
 	    break;
 	  case TPM_PT_LOCKOUT_COUNTER:
 	    // current value of the lockout counter

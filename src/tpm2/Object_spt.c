@@ -332,7 +332,7 @@ CreateChecks(
 	return TPM_RCS_ATTRIBUTES;
     switch(publicArea->type)
 	{
-	  case TPM_ALG_KEYEDHASH:
+	  case ALG_KEYEDHASH_VALUE:
 	    // if this is a data object (sign == decrypt == CLEAR) then the
 	    // TPM cannot be the data source.
 	    if(!IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign)
@@ -342,7 +342,7 @@ CreateChecks(
 	    // comment out the next line in order to prevent a fixedTPM derivation
 	    // parent
 	    //            break;
-	  case TPM_ALG_SYMCIPHER:
+	  case ALG_SYMCIPHER_VALUE:
 	    // A restricted key symmetric key (SYMCIPHER and KEYEDHASH)
 	    // must have sensitiveDataOrigin SET unless it has fixedParent and
 	    // fixedTPM CLEAR.
@@ -388,7 +388,7 @@ SchemeChecks(
     //
     switch(publicArea->type)
 	{
-	  case TPM_ALG_SYMCIPHER:
+	  case ALG_SYMCIPHER_VALUE:
 	    symAlgs = &parms->symDetail.sym;
 	    // If this is a decrypt key, then only the block cipher modes (not
 	    // SMAC) are valid. TPM_ALG_NULL is OK too. If this is a 'sign' key,
@@ -397,7 +397,7 @@ SchemeChecks(
 	       && !CryptSymModeIsValid(symAlgs->mode.sym, TRUE))
 		return TPM_RCS_SCHEME;
 	    break;
-	  case TPM_ALG_KEYEDHASH:
+	  case ALG_KEYEDHASH_VALUE:
 	    scheme = parms->keyedHashDetail.scheme.scheme;
 	    // if both sign and decrypt
 	    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign)
