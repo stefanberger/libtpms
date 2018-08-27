@@ -206,7 +206,7 @@ CryptTestAlgorithm(
 		   )
 {
     TPM_RC                   result;
-#if SELF_TEST
+#if defined SELF_TEST
     result = TestAlgorithm(alg, toTest);
 #else
     // If this is an attempt to determine the algorithms for which there is a
