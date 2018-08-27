@@ -79,7 +79,7 @@
 #define tpmHashStateSHA256_t      SHA256_CTX
 #define tpmHashStateSHA384_t      SHA512_CTX
 #define tpmHashStateSHA512_t      SHA512_CTX
-#if ALG_SM3
+#if ALG_SM3_256
 #   error "The version of OpenSSL used by this code does not support SM3"
 #endif
 /*     The defines below are only needed when compiling CryptHash.c or CryptSmac.c. This isolation
