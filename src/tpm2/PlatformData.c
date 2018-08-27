@@ -3,7 +3,7 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: PlatformData.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -90,12 +90,6 @@ BOOL                 s_powerLost;
    consecutive values are the same, then the entropy generator is considered to be broken.*/
 uint32_t             lastEntropy;
 /* From NVMem.c */
-#ifdef  VTPM
-#   undef FILE_BACKED_NV
-#endif
-#ifdef FILE_BACKED_NV
-FILE                *s_NVFile = NULL;
-#endif
 unsigned char        s_NV[NV_MEMORY_SIZE];
 BOOL                 s_NvIsAvailable;
 BOOL                 s_NV_unrecoverable;
