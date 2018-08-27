@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand_fp.h 1260 2018-07-10 19:55:54Z kgoldman $		*/
+/*            $Id: CryptRand_fp.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -98,7 +98,7 @@ DRBG_SelfTest(
 	      );
 LIB_EXPORT TPM_RC
 CryptRandomStir(
-		UINT32            additionalDataSize,
+		UINT16           additionalDataSize,
 		BYTE            *additionalData
 		);
 LIB_EXPORT UINT16
