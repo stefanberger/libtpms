@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Bit Manipulation Routines   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Bits.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Bits.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -67,13 +67,13 @@
    of the range of bArray. How the assert is handled is implementation dependent. */
 /* 9.2.2 Includes */
 #include "Tpm.h"
-/*     9.2.3 Functions */
+/* 9.2.3 Functions */
 /* 9.2.3.1 TestBit() */
 /* This function is used to check the setting of a bit in an array of bits. */
 /* Return Values Meaning */
 /* TRUE bit is set */
 /* FALSE bit is not set */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 TestBit(
 	unsigned int     bitNum,        // IN: number of the bit in 'bArray'
@@ -84,10 +84,10 @@ TestBit(
     pAssert(bytesInArray > (bitNum >> 3));
     return((bArray[bitNum >> 3] & (1 << (bitNum & 7))) != 0);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.2.3.2 SetBit() */
 /* This function will set the indicated bit in bArray. */
-#ifndef INLINE_FUNCTIONS
+
 void
 SetBit(
        unsigned int     bitNum,        // IN: number of the bit in 'bArray'
@@ -98,10 +98,10 @@ SetBit(
     pAssert(bytesInArray > (bitNum >> 3));
     bArray[bitNum >> 3] |= (1 << (bitNum & 7));
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.2.3.3 ClearBit() */
 /* This function will clear the indicated bit in bArray. */
-#ifndef INLINE_FUNCTIONS
+
 void
 ClearBit(
 	 unsigned int     bitNum,        // IN: number of the bit in 'bArray'.
@@ -112,4 +112,3 @@ ClearBit(
     pAssert(bytesInArray > (bitNum >> 3));
     bArray[bitNum >> 3] &= ~(1 << (bitNum & 7));
 }
-#endif // INLINE_FUNCTIONS

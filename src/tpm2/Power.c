@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Simulated Power State Transitions of the TPM			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Power.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Power.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -68,7 +68,7 @@
 /* 9.13.3 Functions */
 /* 9.13.3.1 TPMInit() */
 /* This function is used to process a power on event. */
-#ifndef INLINE_FUNCTIONS
+
 void
 TPMInit(
 	void
@@ -78,11 +78,11 @@ TPMInit(
     g_initialized = FALSE;
     return;
 }
-#endif  // INLINE_FUNCTIONS
+
 /* 9.13.3.2 TPMRegisterStartup() */
 /* This function registers the fact that the TPM has been initialized (a TPM2_Startup() has
    completed successfully). */
-#ifndef INLINE_FUNCTIONS
+
 void
 TPMRegisterStartup(
 		   void
@@ -91,14 +91,14 @@ TPMRegisterStartup(
     g_initialized = TRUE;
     return;
 }
-#endif  // INLINE_FUNCTIONS
+
 /* 9.13.3.3 TPMIsStarted() */
 /* Indicates if the TPM has been initialized (a TPM2_Startup() has completed successfully after a
    _TPM_Init()). */
 /* Return Values Meaning */
 /* TRUE TPM has been initialized */
 /* FALSE TPM has not been initialized */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 TPMIsStarted(
 	     void
@@ -106,4 +106,4 @@ TPMIsStarted(
 {
     return g_initialized;
 }
-#endif // INLINE_FUNCTIONS
+

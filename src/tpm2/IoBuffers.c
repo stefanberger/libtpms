@@ -3,7 +3,7 @@
 /*			    I/O Buffers		 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: IoBuffers.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: IoBuffers.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -132,7 +132,7 @@ MemoryGetOutBuffer(
 /* Return Value	Meaning */
 /* FALSE	string is not null terminated */
 /* TRUE	string is null terminated */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 IsLabelProperlyFormatted(
 			 TPM2B           *x
@@ -140,6 +140,6 @@ IsLabelProperlyFormatted(
 {
     return (((x)->size == 0) || ((x)->buffer[(x)->size - 1] == 0));
 }
-#endif // INLINE_FUNCTIONS
+
 
 

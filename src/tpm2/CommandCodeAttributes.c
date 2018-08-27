@@ -3,7 +3,7 @@
 /*		Functions for testing various command properties		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandCodeAttributes.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CommandCodeAttributes.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -374,7 +374,7 @@ CommandAuthRole(
 /* 0 encryption not allowed */
 /* 2 size field is two bytes */
 /* 4 size field is four bytes */
-#ifndef INLINE_FUNCTIONS
+
 int
 EncryptSize(
 	    COMMAND_INDEX    commandIndex   // IN: command index
@@ -383,7 +383,7 @@ EncryptSize(
     return ((s_commandAttributes[commandIndex] & ENCRYPT_2) ? 2 :
 	    (s_commandAttributes[commandIndex] & ENCRYPT_4) ? 4 : 0);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.3.3.8 DecryptSize() */
 /* This function returns the size of the decrypt size field. This function returns 0 if decryption
    is not allowed */
@@ -391,7 +391,7 @@ EncryptSize(
 /* 0 encryption not allowed */
 /* 2 size field is two bytes */
 /* 4 size field is four bytes */
-#ifndef INLINE_FUNCTIONS
+
 int
 DecryptSize(
 	    COMMAND_INDEX    commandIndex   // IN: command index
@@ -400,14 +400,14 @@ DecryptSize(
     return ((s_commandAttributes[commandIndex] & DECRYPT_2) ? 2 :
 	    (s_commandAttributes[commandIndex] & DECRYPT_4) ? 4 : 0);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.3.3.9 IsSessionAllowed() */
 /* This function indicates if the command is allowed to have sessions. */
 /* This function must not be called if the command is not known to be implemented. */
 /* Return Values Meaning */
 /* TRUE session is allowed with this command */
 /* FALSE session is not allowed with this command */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 IsSessionAllowed(
 		 COMMAND_INDEX    commandIndex   // IN: the command to be checked
@@ -415,10 +415,10 @@ IsSessionAllowed(
 {
     return ((s_commandAttributes[commandIndex] & NO_SESSIONS) == 0);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.3.3.10 IsHandleInResponse() */
 /* This function determines if a command has a handle in the response */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 IsHandleInResponse(
 		   COMMAND_INDEX    commandIndex
@@ -426,7 +426,7 @@ IsHandleInResponse(
 {
     return ((s_commandAttributes[commandIndex] & R_HANDLE) != 0);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.3.3.11 IsWriteOperation() */
 /* Checks to see if an operation will write to an NV Index and is subject to being blocked by
    read-lock */
@@ -546,7 +546,7 @@ CommandCapGetCCList(
 /* Return Values Meaning */
 /* TRUE command is a vendor command */
 /* FALSE command is not a vendor command */
-#ifndef INLINE_FUNCTIONS
+
 BOOL
 IsVendorCommand(
 		COMMAND_INDEX    commandIndex   // IN: command index to check
@@ -554,4 +554,4 @@ IsVendorCommand(
 {
     return (IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V));
 }
-#endif // INLINE_FUNCTIONS
+
