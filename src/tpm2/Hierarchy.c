@@ -3,7 +3,7 @@
 /*			Managing and accessing the hierarchy-related values   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Hierarchy.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -79,14 +79,14 @@ HierarchyPreInstall_Init(
     gp.EPSeed.t.size = sizeof(gp.EPSeed.t.buffer);
     gp.SPSeed.t.size = sizeof(gp.SPSeed.t.buffer);
     gp.PPSeed.t.size = sizeof(gp.PPSeed.t.buffer);
-    CryptRandomGenerate(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
-    CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
 #if (defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
-    _plat__GetEPS(gp.PPSeed.t.size, gp.EPSeed.t.buffer);
+    _plat__GetEPS(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
 #else
-    CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
+    CryptRandomGenerate(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
 #endif
-    // Initialize owner, endorsement and lockout auth
+    CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
+    CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
+    // Initialize owner, endorsement and lockout authorization
     gp.ownerAuth.t.size = 0;
     gp.endorsementAuth.t.size = 0;
     gp.lockoutAuth.t.size = 0;
