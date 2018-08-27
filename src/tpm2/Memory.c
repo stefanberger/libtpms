@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		 Miscellaneous Memory Manipulation Routines    			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Memory.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Memory.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -74,9 +74,8 @@
 /* 9.12.3.1 MemoryCopy() */
 /* This is an alias for memmove. This is used in place of memcpy because some of the moves may
    overlap and rather than try to make sure that memmove is used when necessary, it is always
-   used. The #if 0 is used to prevent instantiation of the MemoryCopy() function so that the #define
-   is always used */
-#ifndef INLINE_FUNCTIONS
+   used. */
+
 void
 MemoryCopy(
 	   void        *dest,
@@ -86,7 +85,7 @@ MemoryCopy(
 {
     memmove(dest, src, sSize);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.2 MemoryEqual() */
 /* This function indicates if two buffers have the same values in the indicated number of bytes. */
 /* Return Values Meaning */
@@ -168,7 +167,7 @@ MemoryEqual2B(
 /* NOTE: A previous version had an additional parameter (dSize) that was intended to make sure that
    the destination would not be overrun. The problem is that, in use, all that was happening was
    that the value of size was used for dSize so there was no benefit in the extra parameter. */
-#ifndef INLINE_FUNCTIONS
+
 void
 MemorySet(
 	  void            *dest,
@@ -178,10 +177,10 @@ MemorySet(
 {
     memset(dest, value, size);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.7 MemoryPad2B() */
 /* Function to pad a TPM2B with zeros and adjust the size. */
-#ifndef INLINE_FUNCTIONS
+
 void
 MemoryPad2B(
 	    TPM2B           *b,
@@ -191,10 +190,10 @@ MemoryPad2B(
     MemorySet(&b->buffer[b->size], 0, newSize - b->size);
     b->size = newSize;
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.8 Uint16ToByteArray() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 void
 Uint16ToByteArray(
 		  UINT16              i,
@@ -204,10 +203,10 @@ Uint16ToByteArray(
     a[1] = (BYTE)(i); i >>= 8;
     a[0] = (BYTE)(i);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.9 Uint32ToByteArray() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 void
 Uint32ToByteArray(
 		  UINT32              i,
@@ -219,10 +218,10 @@ Uint32ToByteArray(
     a[1] = (BYTE)(i); i >>= 8;
     a[0] = (BYTE)(i);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.10 Uint64ToByteArray() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 void
 Uint64ToByteArray(
 		  UINT64               i,
@@ -238,10 +237,10 @@ Uint64ToByteArray(
     a[1] = (BYTE)(i); i >>= 8;
     a[0] = (BYTE)(i);
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.11 ByteArrayToUint16() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 UINT16
 ByteArrayToUint16(
 		  BYTE                *a
@@ -252,10 +251,10 @@ ByteArrayToUint16(
     retVal += a[1];
     return retVal;
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.12 ByteArrayToUint32() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 UINT32
 ByteArrayToUint32(
 		  BYTE                *a
@@ -268,10 +267,10 @@ ByteArrayToUint32(
     retVal += a[3];
     return retVal;
 }
-#endif // INLINE_FUNCTIONS
+
 /* 9.12.3.13 ByteArrayToUint64() */
 /* Function to write an integer to a byte array */
-#ifndef INLINE_FUNCTIONS
+
 UINT64
 ByteArrayToUint64(
 		  BYTE                *a
@@ -288,4 +287,4 @@ ByteArrayToUint64(
     retVal += a[7];
     return retVal;
 }
-#endif // INLINE_FUNCTIONS
+

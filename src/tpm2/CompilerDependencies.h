@@ -3,7 +3,7 @@
 /*			   Compiler Dependencies  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CompilerDependencies.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CompilerDependencies.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,22 +68,12 @@
 #   undef WIN32
 #endif
 
-// If in-line functions are not being used, define INLINE as null. If INLINE_FUNCTIONS is defined,
-// then need to define INLINE for each compiler.
-#ifndef INLINE_FUNCTIONS
-#   define INLINE
-#endif
-
 #ifdef _MSC_VER
 
 // These definitions are for the Microsoft compiler Endian conversion for aligned structures
 #   define REVERSE_ENDIAN_16(_Number) _byteswap_ushort(_Number)
 #   define REVERSE_ENDIAN_32(_Number) _byteswap_ulong(_Number)
 #   define REVERSE_ENDIAN_64(_Number) _byteswap_uint64(_Number)
-//    Handling of INLINE macro
-#   ifdef INLINE_FUNCTIONS
-#      define INLINE   static __inline
-#   endif
 
 // Avoid compiler warning for in line of stdio (or not)
 
@@ -152,9 +142,6 @@
 #       error Unsupported OS
 #     endif
 #   endif
-#   ifdef INLINE_FUNCTIONS
-#      define INLINE static inline
-#   endif	// INLINE_FUNCTIONS
 #endif
 #if defined(__GNUC__)
 #      define NORETURN                     __attribute__((noreturn))

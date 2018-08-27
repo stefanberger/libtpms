@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Bit Handling		  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Bits_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Bits_fp.h 803 2016-11-15 20:19:26Z kgoldman 			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -68,66 +68,31 @@
 /* TRUE bit is set */
 /* FALSE bit is not set */
 
-#ifndef INLINE_FUNCTIONS
 BOOL
 TestBit(
 	unsigned int     bitNum,        // IN: number of the bit in 'bArray'
 	BYTE            *bArray,        // IN: array containing the bits
 	unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
 	);
-#else
-INLINE BOOL
-TestBit(
-	unsigned int     bitNum,        // IN: number of the bit in 'bArray'
-	BYTE            *bArray,        // IN: array containing the bits
-	unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
-	)
-{
-    pAssert(bytesInArray > (bitNum >> 3));
-    return((bArray[bitNum >> 3] & (1 << (bitNum & 7))) != 0);
-}
-#endif // INLINE_FUNCTIONS
+
 /* 5.3.2 SetBit() */
 /* This function will set the indicated bit in bArray. */
-#ifndef INLINE_FUNCTIONS
+
 void
 SetBit(
        unsigned int     bitNum,        // IN: number of the bit in 'bArray'
        BYTE            *bArray,        // IN: array containing the bits
        unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
        );
-#else
-INLINE void
-SetBit(
-       unsigned int     bitNum,        // IN: number of the bit in 'bArray'
-       BYTE            *bArray,        // IN: array containing the bits
-       unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
-       )
-{
-    pAssert(bytesInArray > (bitNum >> 3));
-    bArray[bitNum >> 3] |= (1 << (bitNum & 7));
-}
-#endif // INLINE_FUNCTIONS
+
 /* 5.3.3 ClearBit() */
 /* This function will clear the indicated bit in bArray. */
-#ifndef INLINE_FUNCTIONS
+
 void
 ClearBit(
 	 unsigned int     bitNum,        // IN: number of the bit in 'bArray'.
 	 BYTE            *bArray,        // IN: array containing the bits
 	 unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
 	 );
-#else
-INLINE void
-ClearBit(
-	 unsigned int     bitNum,        // IN: number of the bit in 'bArray'.
-	 BYTE            *bArray,        // IN: array containing the bits
-	 unsigned int     bytesInArray   // IN: size in bytes of 'bArray'
-	 )
-{
-    pAssert(bytesInArray > (bitNum >> 3));
-    bArray[bitNum >> 3] &= ~(1 << (bitNum & 7));
-}
-#endif // INLINE_FUNCTIONS
 
 #endif
