@@ -3,7 +3,7 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -504,7 +504,7 @@ CryptEccSign(
     ECC_NUM(bnR);
     ECC_NUM(bnS);
     const ECC_CURVE_DATA   *C;
-    TPM_RC                  retVal;
+    TPM_RC                  retVal = TPM_RC_SCHEME;
     //
     NOT_REFERENCED(scheme);
     if(E == NULL)
@@ -540,7 +540,7 @@ CryptEccSign(
 	    break;
 #endif
 	  default:
-	    return TPM_RC_SCHEME;
+	    break;
 	}
     // If signature generation worked, convert the results.
     if(retVal == TPM_RC_SUCCESS)
