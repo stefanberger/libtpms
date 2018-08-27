@@ -3,7 +3,7 @@
 /*			   Command Dispatcher	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatcher.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CommandDispatcher.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -74,7 +74,7 @@
 /* NOTE 2 The reference implementation is permitted to do compare operations over a union as a byte
    array.  Therefore, the command parameter in structure must be initialized (e.g., zeroed) before
    unmarshaling so that the compare operation is valid in cases where some bytes are unused. */
-/* 6.3.1.1 Includes, Types, and Structures */
+/* 6.3.1.1 Includes and Typedefs */
 #include "Tpm.h"
 #if TABLE_DRIVEN_DISPATCH
 typedef TPM_RC(NoFlagFunction)(void *target, BYTE **buffer, INT32 *size);
@@ -113,8 +113,11 @@ typedef struct
 #else
 #include "Commands.h"
 #endif
-/* 6.3.3 ParseHandleBuffer() */
+
+/* 6.3.1.2   Marshal/Unmarshal Functions */
+/* 6.3.1.2.1 ParseHandleBuffer() */
 /* This is the table-driven version of the handle buffer unmarshaling code */
+
 TPM_RC
 ParseHandleBuffer(
 		  COMMAND                 *command
@@ -192,7 +195,9 @@ ParseHandleBuffer(
     return TPM_RC_SUCCESS;
 }
 
-/* 6.3.4	CommandDispatcher() */
+/* 6.3.1.2.2	CommandDispatcher() */
+/* Function to unmarshal the command parameters, call the selected action code, and marshal the
+   response parameters. */
 
 TPM_RC
 CommandDispatcher(
@@ -207,12 +212,10 @@ CommandDispatcher(
     INT32       *respParmSize = &command->parameterSize;
     INT32        rSize;
     TPM_HANDLE  *handles = &command->handles[0];
-    command->handleNum = 0;                 // The command-specific code knows how
-    // many handles there are. This is for
-    // cataloging the number of response
-    // handles
-    MemoryIoBufferAllocationReset();        // Initialize so that allocation will
-    // work properly
+
+    command->handleNum = 0;	/* The command-specific code knows how many handles there are. This
+				   is for cataloging the number of response handles */
+    MemoryIoBufferAllocationReset();        /* Initialize so that allocation will work properly */
     switch(GetCommandCode(command->index))
 	{
 #include "CommandDispatcher.h"

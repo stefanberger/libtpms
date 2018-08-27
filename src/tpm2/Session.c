@@ -3,7 +3,7 @@
 /*			    Manage the session context counter 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Session.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Session.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -275,12 +275,11 @@ SessionGet(
    session context */
 static TPM_RC
 ContextIdSessionCreate(
-		       TPM_HANDLE      *handle,        // OUT: receives the assigned handle. This will
-		       //     be an index that must be adjusted by the
-		       //     caller according to the type of the
-		       //     session created
-		       UINT32           sessionIndex   // IN: The session context array entry that will
-		       //     be occupied by the created session
+		       TPM_HANDLE      *handle, /* OUT: receives the assigned handle. This will be
+						   an index that must be adjusted by the caller
+						   according to the type of the session created */
+		       UINT32           sessionIndex   /* IN: The session context array entry that
+							  will be occupied by the created session */
 		       )
 {
     pAssert(sessionIndex < MAX_LOADED_SESSIONS);

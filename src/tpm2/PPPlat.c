@@ -3,7 +3,7 @@
 /*		Simulates the Physical Present Interface	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PPPlat.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: PPPlat.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

@@ -3,7 +3,7 @@
 /*			    Enhanced Authorization Commands			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EACommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: EACommands.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -97,24 +97,6 @@ TPM2_PolicySigned(
 	    if(result != TPM_RC_SUCCESS)
 		return result;
 	    // Re-compute the digest being signed
-	    /*(See part 3 specification)
-	    // The digest is computed as:
-	    //     aHash := hash ( nonceTPM | expiration | cpHashA | policyRef)
-	    //  where:
-	    //      hash()      the hash associated with the signed authorization
-	    //      nonceTPM    the nonceTPM value from the TPM2_StartAuthSession .
-	    //                  response If the authorization is not limited to this
-	    //                  session, the size of this value is zero.
-	    //      expiration  time limit on authorization set by authorizing object.
-	    //                  This 32-bit value is set to zero if the expiration
-	    //                  time is not being set.
-	    //      cpHashA     hash of the command parameters for the command being
-	    //                  approved using the hash algorithm of the PSAP session.
-	    //                  Set to NULLauth if the authorization is not limited
-	    //                  to a specific command.
-	    //      policyRef   hash of an opaque value determined by the authorizing
-	    //                  object.  Set to the NULLdigest if no hash is present.
-	    */
 	    // Start hash
 	    authHash.t.size = CryptHashStart(&hashState,
 					     CryptGetSignHashAlg(&in->auth));

@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -338,6 +338,7 @@ BnDiv(
     OSSL_LEAVE();
     return OK;
 }
+
 #if ALG_RSA
 /* B.2.3.2.3.5. BnGcd() */
 /* Get the greatest common divisor of two numbers */
@@ -425,6 +426,7 @@ BnModInverse(
     return OK;
 }
 #endif // TPM_ALG_RSA
+
 #if ALG_ECC
 /* B.2.3.2.3.8. PointFromOssl() */
 /* Function to copy the point result from an OSSL function to a bigNum */
@@ -542,7 +544,6 @@ BnCurveInitialize(
 /* This function does a point multiply of the form R = [d]S */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
-/* TRUE success */
 LIB_EXPORT BOOL
 BnEccModMult(
 	     bigPoint             R,         // OUT: computed point
@@ -566,6 +567,7 @@ BnEccModMult(
 }
 /* B.2.3.2.3.12. BnEccModMult2() */
 /* This function does a point multiply of the form R = [d]G + [u]Q */
+/* FALSE	failure in operation; treat as result being point at infinity */
 LIB_EXPORT BOOL
 BnEccModMult2(
 	      bigPoint             R,         // OUT: computed point
@@ -605,7 +607,6 @@ BnEccModMult2(
 /* This function does addition of two points. */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
-/* TRUE success */
 LIB_EXPORT BOOL
 BnEccAdd(
 	 bigPoint             R,         // OUT: computed point

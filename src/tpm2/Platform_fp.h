@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Platform_fp.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -149,9 +149,10 @@ _plat__ClockAdjustRate(
 		       //     or negative
 		       );
 /* C.8.3. From Entropy.c */
+// C.8.4. _plat__GetEntropy()
 // This function is used to get available hardware entropy. In a hardware implementation of this
 // function, there would be no call to the system to get entropy.
-    /* Return Values Meaning */
+/* Return Values Meaning */
 /* < 0 hardware failure of the entropy generator, this is sticky */
 /* >= 0 the returned amount of entropy (bytes) */
 LIB_EXPORT int32_t
@@ -263,7 +264,8 @@ _plat__NvMemoryMove(
 		    unsigned int     size           // IN: size of data being moved
 		    );
 /* C.8.5.10. _plat__NvCommit() */
-/* Update NV chip */
+// This function writes the local copy of NV to NV for permanent store. It will write NV_MEMORY_SIZE
+// bytes to NV. If a file is use, the entire file is written.
 /* Return Values Meaning */
 /* 0 NV write success */
 /* non-0 NV write fail */

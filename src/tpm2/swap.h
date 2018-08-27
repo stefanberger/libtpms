@@ -3,7 +3,7 @@
 /*			     	Swap						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: swap.h 1259 2018-07-10 19:11:09Z kgoldman $			*/
+/*            $Id: swap.h 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2108				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -78,7 +78,7 @@
 #define FROM_BIG_ENDIAN_UINT64(i)   (i)
 #endif
 #if   AUTO_ALIGN == NO
-/* These are aggregation macros for machines that do not allow unaligned access or for little-endian
+/* The aggregation macros for machines that do not allow unaligned access or for little-endian
    machines. Aggregate bytes into an UINT */
 #define BYTE_ARRAY_TO_UINT8(b)  (uint8_t)((b)[0])
 #define BYTE_ARRAY_TO_UINT16(b) ByteArrayToUint16((BYTE *)(b))
@@ -90,7 +90,7 @@
 #define UINT64_TO_BYTE_ARRAY(i, b)  Uint64ToByteArray((i), (BYTE *)(b))
 #else // AUTO_ALIGN
 #if BIG_ENDIAN_TPM
-/* These are the big-endian macros for machines that allow unaligned memory access Aggregate a byte
+/* The big-endian macros for machines that allow unaligned memory access Aggregate a byte
    array into a UINT */
 #define BYTE_ARRAY_TO_UINT8(b)        *((uint8_t  *)(b))
 #define BYTE_ARRAY_TO_UINT16(b)       *((uint16_t *)(b))

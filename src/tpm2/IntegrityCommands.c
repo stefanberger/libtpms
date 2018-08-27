@@ -3,7 +3,7 @@
 /*			  Integrity Collection (PCR)   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: IntegrityCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: IntegrityCommands.c 1272 2018-07-20 17:46:57Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

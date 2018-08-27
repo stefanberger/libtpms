@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1262 2018-07-11 21:03:43Z kgoldman $			*/
+/*            $Id: PCR.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
@@ -848,7 +848,7 @@ PcrWrite(
 /* This function is used to change the PCR allocation. */
 /* Error Returns Meaning */
 /* TPM_RC_SUCCESS allocate success */
-/* TPM_RC_NO_RESULTS allocate failed */
+/* TPM_RC_NO_RESULT allocate failed */
 /* TPM_RC_PCR improper allocation */
 TPM_RC
 PCRAllocate(

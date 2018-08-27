@@ -84,6 +84,10 @@ typedef UINT16          ATTRIBUTE_TYPE;
    implemented. This function checks to see if the input commandIndex points to an implemented
    command and, if not, it searches upwards until it finds one. When the list is compressed, this
    function gets defined as a no-op. */
+/* Return Value	Meaning */
+/* UNIMPLEMENTED_COMMAND_INDEX	command is not implemented */
+/* other	index of the command */
+
 #if !COMPRESSED_LISTS
 static COMMAND_INDEX
 NextImplementedIndex(
@@ -103,6 +107,10 @@ NextImplementedIndex(
 /* 9.3.3.2 GetClosestCommandIndex() */
 /* This function returns the command index for the command with a value that is equal to or greater
    than the input value */
+/* Return Value	Meaning */
+/* UNIMPLEMENTED_COMMAND_INDEX	command is not implemented */
+/* other	index of the command */
+
 COMMAND_INDEX
 GetClosestCommandIndex(
 		       TPM_CC           commandCode    // IN: the command code to start at
@@ -166,12 +174,12 @@ GetClosestCommandIndex(
 			min = commandIndex + 1;
 		}
 	    // didn't find and exact match. commandIndex will be pointing at the last
-	    // item tested. If diff is positive, then the last item tested was
+	    // item tested. If 'diff' is positive, then the last item tested was
 	    // larger index of the command code so it is the smallest value
 	    // larger than the requested value.
 	    if(diff > 0)
 		return commandIndex;
-	    // if diff is negative, then the value tested was smaller than
+	    // if 'diff' is negative, then the value tested was smaller than
 	    // the commandCode index and the next higher value is the correct one.
 	    // Note: this will necessarily be in range because of the earlier check
 	    // that the index was within range.
@@ -257,7 +265,7 @@ GetClosestCommandIndex(
 /* 9.3.3.3 CommandCodeToComandIndex() */
 /* This function returns the index in the various attributes arrays of the command. */
 /* Return Values Meaning */
-/* UNIMPLEMNED_COMMAND_INDEX command is not implemented */
+/* UNIMPLEMENTED_COMMAND_INDEX command is not implemented */
 /* other index of the command */
 COMMAND_INDEX
 CommandCodeToCommandIndex(

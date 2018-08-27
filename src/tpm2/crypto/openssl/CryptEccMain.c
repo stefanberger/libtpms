@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -65,7 +65,7 @@
 #if ALG_ECC
 /* This version requires that the new format for ECC data be used */
 #if !USE_BN_ECC_DATA
-#error "Need to define USE_BN_ECC_DATA in Implementaion.h"
+#error "Need to SET USE_BN_ECC_DATA to YES in Implementaion.h"
 #endif
 /* 10.2.12.2 Functions */
 #if SIMULATION
@@ -487,9 +487,9 @@ CryptEccIsValidPrivateKey(
    values. If S is NULL and d is not NULL, then it computes R = [d]G + [u]Q or just R = [d]G if u
    and Q are NULL. If skipChecks is TRUE, then the function will not verify that the inputs are
    correct for the domain. This would be the case when the values were created by the CryptoEngine()
-   code. It will return TPM_RC_NO_RESULTS if the resulting point is the point at infinity. */
+   code. It will return TPM_RC_NO_RESULT if the resulting point is the point at infinity. */
 /* Error Returns Meaning */
-/* TPM_RC_NO_RESULTS result of multiplication is a point at infinity */
+/* TPM_RC_NO_RESULT result of multiplication is a point at infinity */
 /* TPM_RC_ECC_POINT S or Q is not on the curve */
 /* TPM_RC_VALUE d or u is not < n */
 TPM_RC
@@ -623,7 +623,7 @@ CryptEccNewKeyPair(
 /* The xOut and yOut parameters are optional and may be set to NULL if not used. */
 /* It is not necessary to provide uIn if QIn is specified but one of uIn and dIn must be
    provided. If dIn and QIn are specified but uIn is not provided, then R = [dIn]QIn. */
-/* If the multiply produces the point at infinity, the TPM_RC_NO_RESULTS is returned. */
+/* If the multiply produces the point at infinity, the TPM_RC_NO_RESULT is returned. */
 /* The sizes of xOut and yOut' will be set to be the size of the degree of the curve */
 /* It is a fatal error if dIn and uIn are both unspecified (NULL) or if Qin or Rout is
    unspecified. */

@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     Entropy						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entropy.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Entropy.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -60,7 +60,7 @@
 /********************************************************************************/
 
 /* C.4 Entropy.c */
-/* C.4.1. Includes */
+/* C.4.1. Includes and Local values*/
 #define _CRT_RAND_S
 #include <stdlib.h>
 #include <memory.h>
@@ -69,7 +69,6 @@
 
 #include "PlatformData.h"
 #include "Platform_fp.h"
-
 #include <time.h>
 #ifdef _MSC_VER
 #include <process.h>
@@ -77,7 +76,6 @@
 #include <unistd.h>
 #endif
 
-/* C.4.2. Local values */
 /* This is the last 32-bits of hardware entropy produced. We have to check to see that two
    consecutive 32-bit values are not the same because (according to FIPS 140-2, annex C */
 /* "If each call to a RNG produces blocks of n bits (where n > 15), the first n-bit block generated
@@ -87,8 +85,10 @@
    blocks are equal." */
 extern uint32_t        lastEntropy;
 
-/* C.4.3.1.	rand64() */
+/* C.4.2.	Functions */
+/* C.4.2.1.	rand32() */
 /* Local function to get a 32-bit random number */
+
 static uint32_t
 rand32(
        void
@@ -111,7 +111,7 @@ rand32(
     return rndNum;
 }
 
-/* C.4.3.2 _plat__GetEntropy() */
+/* C.4.2.2 _plat__GetEntropy() */
 /* This function is used to get available hardware entropy. In a hardware implementation of this
    function, there would be no call to the system to get entropy. */
 /* Return Values Meaning */
@@ -181,3 +181,4 @@ _plat__GetEntropy(
 	}
     return ret;
 }
+

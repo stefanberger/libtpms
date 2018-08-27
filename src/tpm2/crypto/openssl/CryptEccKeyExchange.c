@@ -3,7 +3,7 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: CryptEccKeyExchange.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -102,7 +102,7 @@ avf1(
    catastrophically, if this is not the case. */
 /* Error Returns Meaning */
 /* TPM_RC_SUCCESS results is valid */
-/* TPM_RC_NO_RESULTS the value for dsA does not give a valid point on the curve */
+/* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
 static TPM_RC
 C_2_2_MQV(
 	  TPMS_ECC_POINT        *outZ,         // OUT: the computed point
@@ -227,7 +227,7 @@ LIB_EXPORT TPM_RC
 CryptEcc2PhaseKeyExchange(
 			  TPMS_ECC_POINT          *outZ1,         // OUT: a computed point
 			  TPMS_ECC_POINT          *outZ2,         // OUT: and optional second point
-			  TPM_ECC_CURVE            curveId,       // IN: the curve for the computations
+			  TPM_ECC_CURVE            curveId,   // IN: the curve for the computations
 			  TPM_ALG_ID               scheme,        // IN: the key exchange scheme
 			  TPM2B_ECC_PARAMETER     *dsA,           // IN: static private TPM key
 			  TPM2B_ECC_PARAMETER     *deA,           // IN: ephemeral private TPM key
@@ -305,7 +305,7 @@ avfSm2(
    catastrophically if this is not the case */
 /* Error Returns Meaning */
 /* TPM_RC_SUCCESS results is valid */
-/* TPM_RC_NO_RESULTS the value for dsA does not give a valid point on the curve */
+/* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
 LIB_EXPORT TPM_RC
 SM2KeyExchange(
 	       TPMS_ECC_POINT        *outZ,         // OUT: the computed point

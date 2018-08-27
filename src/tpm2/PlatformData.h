@@ -3,7 +3,7 @@
 /*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: PlatformData.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -82,7 +82,7 @@ typedef uint64_t     clock64_t;
 // This is the value returned the last time that the system clock was read. This is only relevant
 // for a simulator or virtual TPM.
 extern clock64_t       s_realTimePrevious;
-// These values are uses to try to synthesize a long lived version of clock().
+// These values are used to try to synthesize a long lived version of clock().
 extern clock64_t        s_lastSystemTime;
 extern clock64_t        s_lastReportedTime;
 // This is the rate adjusted value that is the equivalent of what would be read from a hardware

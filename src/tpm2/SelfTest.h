@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Structure definitions for the self-test				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SelfTest.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: SelfTest.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,17 +55,17 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef SELFTEST_H
 #define SELFTEST_H
 
-/* 5.18.1 Introduction */
+/* 5.16.1 Introduction */
 /* This file contains the structure definitions for the self-test. It also contains macros for use
    when the self-test is implemented. */
-/* 5.18.2 Defines */
+/* 5.16.2 Defines */
 /* Was typing this a lot */
 #define SELF_TEST_FAILURE   FAIL(FATAL_ERROR_SELF_TEST)
 /* Use the definition of key sizes to set algorithm values for key size. Need to do this to avoid a

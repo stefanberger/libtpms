@@ -3,7 +3,7 @@
 /*			     	Vendor String					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: VendorString.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: VendorString.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -87,8 +87,7 @@
 /*     The following #if macro may be deleted after a proper VENDOR_STRING_1 is provided. */
 #ifndef VENDOR_STRING_1
 #error VENDOR_STRING_1 is not provided.					\
-    Please modify include\VendorString.h to provide a vendor specific	\
-    string.
+    Please modify include\VendorString.h to provide a vendor specific string.
 #endif
 
 /* the more significant 32-bits of a vendor-specific value indicating the version of the firmware

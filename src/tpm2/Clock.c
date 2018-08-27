@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1259 2018-07-10 19:11:09Z kgoldman $			*/
+/*            $Id: Clock.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -66,7 +66,7 @@
 #include <time.h>
 
 /* C.3 Clock.c */
-/* C.3.1. Introduction */
+/* C.3.1. Description */
 /* This file contains the routines that are used by the simulator to mimic a hardware clock on a
    TPM. In this implementation, all the time values are measured in millisecond. However, the
    precision of the clock functions may be implementation dependent. */
@@ -305,7 +305,7 @@ _plat__TimerWasStopped(
 /* Adjust the clock rate */
 LIB_EXPORT void
 _plat__ClockAdjustRate(
-		       int              adjust         // IN: the adjust number.  It could be positive
+		       int	adjust         // IN: the adjust number.  It could be positive
 		       //     or negative
 		       )
 {
