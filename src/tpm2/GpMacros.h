@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: GpMacros.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -274,8 +274,8 @@
    expressing time in ms. Sealing the MSb() for a flag means that the TPM needs to be reset at least
    once every 292,471,208 years rather than once every 584,942,417 years. */
 #define EXPIRATION_BIT ((UINT64)1 << 63)
-/* Check for consistency of the bit ordering an bit fields */
-#if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && !USE_BIT_FIELD_STRUCTURES
+/* Check for consistency of the bit ordering of bit fields */
+#if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && USE_BIT_FIELD_STRUCTURES
 #   error "Settings not consistent"
 #endif
 /* These macros are used to handle the variation in handling of bit fields. If */
