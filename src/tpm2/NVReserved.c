@@ -3,7 +3,7 @@
 /*		NV TPM persistent and state save data  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: NVReserved.c 1265 2018-07-15 18:29:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -209,6 +209,7 @@ NvClearPersistent(
 		  UINT32           size           // IN: number of bytes to clear
 		  )
 {
+    pAssert(offset + size <= sizeof(gp));
     MemorySet((&gp) + offset, 0, size);
     NvWrite(offset, size, (&gp) + offset);
 }
