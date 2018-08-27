@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: AlgorithmTests.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -622,6 +622,7 @@ TestECDH(
     }
     return result;
 }
+/* 10.2.1.6.4	TestEccSignAndVerify() */
 static TPM_RC
 TestEccSignAndVerify(
 		     TPM_ALG_ID                   scheme,
@@ -686,6 +687,8 @@ TestEccSignAndVerify(
     CHECK_CANCELED;
     return TPM_RC_SUCCESS;
 }
+/* 10.2.1.6.5	TestKDFa() */
+
 static TPM_RC
 TestKDFa(
 	 ALGORITHM_VECTOR        *toTest
@@ -705,6 +708,7 @@ TestKDFa(
 	SELF_TEST_FAILURE;
     return TPM_RC_SUCCESS;
 }
+/* 10.2.1.6.6	TestEcc() */
 static TPM_RC
 TestEcc(
 	TPM_ALG_ID              alg,
@@ -747,8 +751,7 @@ TestEcc(
 /* If toTest is not NULL, then the test decisions are based on the algorithm selections in
    toTest. Otherwise, g_toTest is used. When bits are clear in g_toTest they will also be cleared
    toTest. */
-/*     If there doesn't happen to be a test for the algorithm, its associated bit is quietly
-       cleared. */
+/* If there doesn't happen to be a test for the algorithm, its associated bit is quietly cleared. */
 /* If alg is zero (TPM_ALG_ERROR), then the toTest vector is cleared of any bits for which there is
    no test (i.e. no tests are actually run but the vector is cleared). */
 /* NOTE: toTest will only ever have bits set for implemented algorithms but alg can be anything. */

@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			 NV read and write access methods			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*            $Id: NVMem.c 809 2016-11-16 18:31:54Z kgoldman $			*/
@@ -60,11 +60,11 @@
 /********************************************************************************/
 
 /* C.6 NVMem.c */
-/* C.6.1. Introduction */
+/* C.6.1. Description */
 /* This file contains the NV read and write access methods.  This implementation uses RAM/file and
    does not manage the RAM/file as NV blocks. The implementation may become more sophisticated over
    time. */
-/* C.6.2. Includes */
+/* C.6.2. Includes and Local */
 #include <memory.h>
 #include <string.h>
 #include <assert.h>
@@ -74,8 +74,7 @@
 
 #include "LibtpmsCallbacks.h"
 
-/* C.6.3. Functions */
-/* C.6.3.1. _plat__NvErrors() */
+/* C.6.3.4. _plat__NvErrors() */
 /* This function is used by the simulator to set the error flags in the NV subsystem to simulate an
    error in the NV loading process */
 LIB_EXPORT void
@@ -87,7 +86,7 @@ _plat__NvErrors(
     s_NV_unrecoverable = unrecoverable;
     s_NV_recoverable = recoverable;
 }
-/* C.6.3.2. _plat__NVEnable() */
+/* C.6.3.5. _plat__NVEnable() */
 /* Enable NV memory. */
 /* This version just pulls in data from a file. In a real TPM, with NV on chip, this function would
    verify the integrity of the saved context. If the NV memory was not on chip but was in something
@@ -108,6 +107,7 @@ _plat__NVEnable(
     int ret;
 #endif
     NOT_REFERENCED(platParameter);          // to keep compiler quiet
+    //
     // Start assuming everything is OK
     s_NV_unrecoverable = FALSE;
     s_NV_recoverable = FALSE;
@@ -173,7 +173,8 @@ _plat__NVEnable(
 	return -1;
     return s_NV_recoverable;
 }
-/* C.6.3.3. _plat__NVDisable() */
+
+/* C.6.3.6. _plat__NVDisable() */
 /* Disable NV memory */
 LIB_EXPORT void
 _plat__NVDisable(
@@ -195,7 +196,8 @@ _plat__NVDisable(
 #endif
     return;
 }
-/* C.6.3.4. _plat__IsNvAvailable() */
+
+/* C.6.3.7. _plat__IsNvAvailable() */
 /* Check if NV is available */
 /* Return Values Meaning */
 /* 0 NV is available */
@@ -221,7 +223,8 @@ _plat__IsNvAvailable(
 #endif
     return 0;
 }
-/* C.6.3.5. _plat__NvMemoryRead() */
+
+/* C.6.3.8. _plat__NvMemoryRead() */
 /* Function: Read a chunk of NV memory */
 LIB_EXPORT void
 _plat__NvMemoryRead(
@@ -231,11 +234,10 @@ _plat__NvMemoryRead(
 		    )
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
-    // Copy data from RAM
-    memcpy(data, &s_NV[startOffset], size);
+    memcpy(data, &s_NV[startOffset], size);	// Copy data from RAM
     return;
 }
-/* C.6.3.6. _plat__NvIsDifferent() */
+/* C.6.3.9. _plat__NvIsDifferent() */
 /* This function checks to see if the NV is different from the test value. This is so that NV will
    not be written if it has not changed. */
 /* Return Values Meaning */
@@ -250,7 +252,7 @@ _plat__NvIsDifferent(
 {
     return (memcmp(&s_NV[startOffset], data, size) != 0);
 }
-/* C.6.3.7. _plat__NvMemoryWrite() */
+/* C.6.3.10. _plat__NvMemoryWrite() */
 /* This function is used to update NV memory. The write is to a memory copy of NV. At the end of the
    current command, any changes are written to the actual NV memory. */
 /* NOTE: A useful optimization would be for this code to compare the current contents of NV with the
@@ -264,10 +266,9 @@ _plat__NvMemoryWrite(
 		     )
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
-    // Copy the data to the NV image
-    memcpy(&s_NV[startOffset], data, size);
+    memcpy(&s_NV[startOffset], data, size);    // Copy the data to the NV image
 }
-/* C.6.3.8. _plat__NvMemoryClear() */
+/* C.6.3.11. _plat__NvMemoryClear() */
 /* Function is used to set a range of NV memory bytes to an implementation-dependent value. The
    value represents the erase state of the memory. */
 LIB_EXPORT void
@@ -277,10 +278,10 @@ _plat__NvMemoryClear(
 		     )
 {
     assert(start + size <= NV_MEMORY_SIZE);
-    // In this implementation, assume that the errase value for NV is all 1s
+    // In this implementation, assume that the erase value for NV is all 1s
     memset(&s_NV[start], 0xff, size);
 }
-/* C.6.3.9. _plat__NvMemoryMove() */
+/* C.6.3.12. _plat__NvMemoryMove() */
 /* Function: Move a chunk of NV memory from source to destination This function should ensure that
    if there overlap, the original data is copied before it is written */
 LIB_EXPORT void
@@ -292,8 +293,7 @@ _plat__NvMemoryMove(
 {
     assert(sourceOffset + size <= NV_MEMORY_SIZE);
     assert(destOffset + size <= NV_MEMORY_SIZE);
-    // Move data in RAM
-    memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);
+    memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);	// Move data in RAM
 #if 1
     if (destOffset > sourceOffset)
         memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
@@ -302,8 +302,9 @@ _plat__NvMemoryMove(
 #endif
     return;
 }
-/* C.6.3.10. _plat__NvCommit() */
-/* Update NV chip */
+/* C.6.3.13. _plat__NvCommit() */
+/* This function writes the local copy of NV to NV for permanent store. It will write NV_MEMORY_SIZE
+   bytes to NV. If a file is use, the entire file is written. */
 /* Return Values Meaning */
 /* 0 NV write success */
 /* non-0 NV write fail */
@@ -330,7 +331,8 @@ _plat__NvCommit(
     return 0;
 #endif
 }
-/* C.6.3.11. _plat__SetNvAvail() */
+
+/* C.6.3.14. _plat__SetNvAvail() */
 /* Set the current NV state to available.  This function is for testing purpose only.  It is not
    part of the platform NV logic */
 LIB_EXPORT void
@@ -341,7 +343,7 @@ _plat__SetNvAvail(
     s_NvIsAvailable = TRUE;
     return;
 }
-/* C.6.3.12. _plat__ClearNvAvail() */
+/* C.6.3.15. _plat__ClearNvAvail() */
 /* Set the current NV state to unavailable.  This function is for testing purpose only.  It is not
    part of the platform NV logic */
 LIB_EXPORT void

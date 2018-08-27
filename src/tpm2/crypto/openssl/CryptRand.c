@@ -583,7 +583,7 @@ DRBG_AdditionalData(
    of this generator is to create sequences of pseudo-random numbers from a seed value. */
 LIB_EXPORT BOOL
 DRBG_InstantiateSeeded(
-		       DRBG_STATE      *drbgState,     // IN: buffer to hold the state
+		       DRBG_STATE      *drbgState,     // IN/OUT: buffer to hold the state
 		       const TPM2B     *seed,          // IN: the seed to use
 		       const TPM2B     *purpose,       // IN: a label for the generation process.
 		       const TPM2B     *name,          // IN: name of the object
@@ -626,7 +626,7 @@ CryptRandStartup(
 		 void
 		 )
 {
-#if !_DRBG_STATE_SAVE
+#if ! _DRBG_STATE_SAVE
     // If not saved in NV, re-instantiate on each startup
     DRBG_Instantiate(&drbgDefault, 0, NULL);
 #else

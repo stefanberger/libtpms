@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1266 2018-07-16 20:58:40Z kgoldman $		*/
+/*            $Id: Global.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -872,7 +872,7 @@ typedef struct state_reset_data
     // This implementation relies on the number of bits in g_commitArray being a
     // power of 2 (8, 16, 32, 64, etc.) and no greater than 64K.
     BYTE                 commitArray[16];   // The default reset value is {0}.
-#endif //TPM_ALG_ECC
+#endif // ALG_ECC
 } STATE_RESET_DATA;
 extern STATE_RESET_DATA gr;
 /* 5.10.12 NV Layout */
@@ -937,16 +937,11 @@ typedef struct _COMMAND_
     TPM_HANDLE       handles[MAX_HANDLE_NUM]; // the parsed handle values
     UINT32           sessionNum;        // the number of sessions found
     INT32            parameterSize;     // starts out with the parsed command size
-    // and is reduced and values are
-    // unmarshaled. Just before calling the
-    // command actions, this should be zero.
-    // After the command actions, this number
-    // should grow as values are marshaled
+    // and is reduced and values are unmarshaled. Just before calling the command actions, this
+    // should be zero.  After the command actions, this number should grow as values are marshaled
     // in to the response buffer.
     INT32            authSize;          // this is initialized with the parsed size
-    // of authorizationSize field and should
-    // be zero when the authorizations are
-    // parsed.
+    // of authorizationSize field and should be zero when the authorizations are parsed.
     BYTE            *parameterBuffer;   // input to ExecuteCommand
     BYTE            *responseBuffer;    // input to ExecuteCommand
 #if ALG_SHA1
@@ -1024,6 +1019,7 @@ extern UINT32           s_auditSessionIndex;
 #if CC_GetCommandAuditDigest
 extern TPM2B_DIGEST    s_cpHashForCommandAudit;
 #endif
+/* Flag indicating if NV update is pending for the lockOutAuthEnabled or failedTries DA parameter */
 extern BOOL             s_DAPendingOnNV;
 #endif // SESSION_PROCESS_C
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
@@ -1127,7 +1123,8 @@ extern int               s_freeSessionSlots;
 /* The value of s_actionIoAllocation is the number of UINT64 values allocated. It is used to set the
    pointer for the response structure.  */
 extern UINT64   s_actionIoBuffer[768];      // action I/O buffer
-extern UINT32   s_actionIoAllocation;       // number of UIN64 allocated for in
+extern UINT32   s_actionIoAllocation;       // number of UIN64 allocated for the action input
+					    // structure
 #endif // MEMORY_LIB_C
 /* 			       From TPMFail.c */
 /* This value holds the address of the string containing the name of the function in which the

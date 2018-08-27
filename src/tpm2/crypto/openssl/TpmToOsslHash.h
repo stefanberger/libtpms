@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,12 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/ 
 /*										*/
 /********************************************************************************/
 
 #ifndef TPMTOOSSLHASH_H
 #define TPMTOOSSLHASH_H
-
 
 /* B.2.2.1. TpmToOsslHash.h */
 /* B.2.2.1.1. Introduction */

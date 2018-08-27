@@ -3,7 +3,7 @@
 /*		Product of all of the Primes up to 1000	     			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PrimeData.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: PrimeData.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,8 +61,8 @@
 
 #include "Tpm.h"
 /* This table is the product of all of the primes up to 1000. Checking to see if there is a GCD
-   between the prime candidate and this number will eliminate many prime candidates from
-   consideration before running Miller-Rabin on the result. */
+   between a prime candidate and this number will eliminate many prime candidates from consideration
+   before running Miller-Rabin on the result. */
 const BN_STRUCT(43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
 {44, 44,
  { 0x2ED42696, 0x2BBFA177, 0x4820594F, 0xF73F4841,

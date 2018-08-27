@@ -550,7 +550,7 @@ typedef struct TPMA_OBJECT {                        // Table 2:31
     unsigned    decrypt                  : 1;
     unsigned    sign                     : 1;
     unsigned    Reserved_bits_at_19      : 13;
-} TPMA_OBJECT;                                      /* Bits */
+} TPMA_OBJECT;
 // This is the initializer for a TPMA_OBJECT structure
 #define TPMA_OBJECT_INITIALIZER(					\
 				bit_at_0,             fixedtpm,             stclear, \
@@ -608,7 +608,7 @@ typedef struct TPMA_SESSION {                       // Table 2:32
     unsigned    decrypt              : 1;
     unsigned    encrypt              : 1;
     unsigned    audit                : 1;
-} TPMA_SESSION;                                     /* Bits */
+} TPMA_SESSION;
 // This is the initializer for a TPMA_SESSION structure
 #define TPMA_SESSION_INITIALIZER(					\
 				 continuesession, auditexclusive,  auditreset,      bits_at_3, \
@@ -643,7 +643,7 @@ typedef struct TPMA_LOCALITY {                      // Table 2:33
     unsigned    TPM_LOC_THREE        : 1;
     unsigned    TPM_LOC_FOUR         : 1;
     unsigned    Extended             : 3;
-} TPMA_LOCALITY;                                    /* Bits */
+} TPMA_LOCALITY;
 // This is the initializer for a TPMA_LOCALITY structure
 #define TPMA_LOCALITY_INITIALIZER(					\
 				  tpm_loc_zero,  tpm_loc_one,   tpm_loc_two,   tpm_loc_three, \
@@ -679,7 +679,7 @@ typedef struct TPMA_PERMANENT {                     // Table 2:34
     unsigned    inLockout            : 1;
     unsigned    tpmGeneratedEPS      : 1;
     unsigned    Reserved_bits_at_11  : 21;
-} TPMA_PERMANENT;                                   /* Bits */
+} TPMA_PERMANENT;
 // This is the initializer for a TPMA_PERMANENT structure
 #define TPMA_PERMANENT_INITIALIZER(					\
 				   ownerauthset,       endorsementauthset, lockoutauthset, \
@@ -716,7 +716,7 @@ typedef struct TPMA_STARTUP_CLEAR {                 // Table 2:35
     unsigned    phEnableNV           : 1;
     unsigned    Reserved_bits_at_4   : 27;
     unsigned    orderly              : 1;
-} TPMA_STARTUP_CLEAR;                               /* Bits */
+} TPMA_STARTUP_CLEAR;
 // This is the initializer for a TPMA_STARTUP_CLEAR structure
 #define TPMA_STARTUP_CLEAR_INITIALIZER(					\
 				       phenable, shenable, ehenable, phenablenv, bits_at_4, orderly) \
@@ -743,7 +743,7 @@ typedef struct TPMA_MEMORY {                        // Table 2:36
     unsigned    sharedNV             : 1;
     unsigned    objectCopiedToRam    : 1;
     unsigned    Reserved_bits_at_3   : 29;
-} TPMA_MEMORY;                                      /* Bits */
+} TPMA_MEMORY;
 // This is the initializer for a TPMA_MEMORY structure
 #define TPMA_MEMORY_INITIALIZER(					\
 				sharedram, sharednv, objectcopiedtoram, bits_at_3) \
@@ -772,7 +772,7 @@ typedef struct TPMA_CC {                            // Table 2:37
     unsigned    rHandle              : 1;
     unsigned    V                    : 1;
     unsigned    Reserved_bits_at_30  : 2;
-} TPMA_CC;                                          /* Bits */
+} TPMA_CC;
 // This is the initializer for a TPMA_CC structure
 #define TPMA_CC_INITIALIZER(						\
 			    commandindex, bits_at_16,   nv,           extensive,    flushed, \
@@ -806,7 +806,7 @@ typedef UINT32                      TPMA_CC;
 typedef struct TPMA_MODES {                         // Table 2:38
     unsigned    FIPS_140_2           : 1;
     unsigned    Reserved_bits_at_1   : 31;
-} TPMA_MODES;                                       /* Bits */
+} TPMA_MODES;
 // This is the initializer for a TPMA_MODES structure
 #define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) {fips_140_2, bits_at_1}
 #else // USE_BIT_FIELD_STRUCTURES
@@ -1770,7 +1770,7 @@ typedef union {
 typedef struct TPM_NV_INDEX {                       // Table 2:205
     unsigned    index                : 24;
     unsigned    RH_NV                : 8;
-} TPM_NV_INDEX;                                     /* Bits */
+} TPM_NV_INDEX;
 // This is the initializer for a TPM_NV_INDEX structure
 #define TPM_NV_INDEX_INITIALIZER(index, rh_nv) {index, rh_nv}
 #else // USE_BIT_FIELD_STRUCTURES
@@ -1796,7 +1796,7 @@ typedef UINT32              TPM_NT;
 typedef struct {
     UINT32                  pinCount;
     UINT32                  pinLimit;
-} TPMS_NV_PIN_COUNTER_PARAMETERS;                   /* Structure */
+} TPMS_NV_PIN_COUNTER_PARAMETERS;
 
 /* Table 2:208 - Definition of TPMA_NV Bits */
 #if USE_BIT_FIELD_STRUCTURES
@@ -1825,7 +1825,7 @@ typedef struct TPMA_NV {                            // Table 2:208
     unsigned    WRITTEN              : 1;
     unsigned    PLATFORMCREATE       : 1;
     unsigned    READ_STCLEAR         : 1;
-} TPMA_NV;                                          /* Bits */
+} TPMA_NV;
 // This is the initializer for a TPMA_NV structure
 #define TPMA_NV_INITIALIZER(						\
 			    ppwrite,        ownerwrite,     authwrite,      policywrite, \

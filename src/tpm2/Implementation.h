@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Implementation.h 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: Implementation.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -250,7 +250,7 @@
 /* From Vendor-Specific: Table 2 - Defines for Implemented Algorithms */
 
 #define ALG_AES                         ALG_YES
-#define ALG_CAMELLIA                    ALG_NO      /* Not specified by vendor */
+#define ALG_CAMELLIA                    ALG_NO
 #define ALG_CBC                         ALG_YES
 #define ALG_CFB                         ALG_YES
 #define ALG_CMAC                        ALG_YES
@@ -274,7 +274,7 @@
 #define ALG_RSAES                       (ALG_YES && ALG_RSA)
 #define ALG_RSAPSS                      (ALG_YES && ALG_RSA)
 #define ALG_RSASSA                      (ALG_YES && ALG_RSA)
-#define ALG_SHA                         ALG_NO      /* Not specified by vendor */
+#define ALG_SHA                         ALG_NO
 #define ALG_SHA1                        ALG_YES
 #define ALG_SHA256                      ALG_YES
 #define ALG_SHA384                      ALG_YES
@@ -1013,126 +1013,126 @@ typedef UINT32                              TPM_CC;
 /*     Size the array of library commands based on whether or not the array is packed (only defined
        commands) or dense (having entries for unimplemented commands) */
 #define LIBRARY_COMMAND_ARRAY_SIZE       (0				\
-					  + (ADD_FILL || CC_NV_UndefineSpaceSpecial)              /* 0x0000011F */ \
-					  + (ADD_FILL || CC_EvictControl)                         /* 0x00000120 */ \
-					  + (ADD_FILL || CC_HierarchyControl)                     /* 0x00000121 */ \
-					  + (ADD_FILL || CC_NV_UndefineSpace)                     /* 0x00000122 */ \
-					  +  ADD_FILL                                             /* 0x00000123 */ \
-					  + (ADD_FILL || CC_ChangeEPS)                            /* 0x00000124 */ \
-					  + (ADD_FILL || CC_ChangePPS)                            /* 0x00000125 */ \
-					  + (ADD_FILL || CC_Clear)                                /* 0x00000126 */ \
-					  + (ADD_FILL || CC_ClearControl)                         /* 0x00000127 */ \
-					  + (ADD_FILL || CC_ClockSet)                             /* 0x00000128 */ \
-					  + (ADD_FILL || CC_HierarchyChangeAuth)                  /* 0x00000129 */ \
-					  + (ADD_FILL || CC_NV_DefineSpace)                       /* 0x0000012A */ \
-					  + (ADD_FILL || CC_PCR_Allocate)                         /* 0x0000012B */ \
-					  + (ADD_FILL || CC_PCR_SetAuthPolicy)                    /* 0x0000012C */ \
-					  + (ADD_FILL || CC_PP_Commands)                          /* 0x0000012D */ \
-					  + (ADD_FILL || CC_SetPrimaryPolicy)                     /* 0x0000012E */ \
-					  + (ADD_FILL || CC_FieldUpgradeStart)                    /* 0x0000012F */ \
-					  + (ADD_FILL || CC_ClockRateAdjust)                      /* 0x00000130 */ \
-					  + (ADD_FILL || CC_CreatePrimary)                        /* 0x00000131 */ \
-					  + (ADD_FILL || CC_NV_GlobalWriteLock)                   /* 0x00000132 */ \
-					  + (ADD_FILL || CC_GetCommandAuditDigest)                /* 0x00000133 */ \
-					  + (ADD_FILL || CC_NV_Increment)                         /* 0x00000134 */ \
-					  + (ADD_FILL || CC_NV_SetBits)                           /* 0x00000135 */ \
-					  + (ADD_FILL || CC_NV_Extend)                            /* 0x00000136 */ \
-					  + (ADD_FILL || CC_NV_Write)                             /* 0x00000137 */ \
-					  + (ADD_FILL || CC_NV_WriteLock)                         /* 0x00000138 */ \
-					  + (ADD_FILL || CC_DictionaryAttackLockReset)            /* 0x00000139 */ \
-					  + (ADD_FILL || CC_DictionaryAttackParameters)           /* 0x0000013A */ \
-					  + (ADD_FILL || CC_NV_ChangeAuth)                        /* 0x0000013B */ \
-					  + (ADD_FILL || CC_PCR_Event)                            /* 0x0000013C */ \
-					  + (ADD_FILL || CC_PCR_Reset)                            /* 0x0000013D */ \
-					  + (ADD_FILL || CC_SequenceComplete)                     /* 0x0000013E */ \
-					  + (ADD_FILL || CC_SetAlgorithmSet)                      /* 0x0000013F */ \
-					  + (ADD_FILL || CC_SetCommandCodeAuditStatus)            /* 0x00000140 */ \
-					  + (ADD_FILL || CC_FieldUpgradeData)                     /* 0x00000141 */ \
-					  + (ADD_FILL || CC_IncrementalSelfTest)                  /* 0x00000142 */ \
-					  + (ADD_FILL || CC_SelfTest)                             /* 0x00000143 */ \
-					  + (ADD_FILL || CC_Startup)                              /* 0x00000144 */ \
-					  + (ADD_FILL || CC_Shutdown)                             /* 0x00000145 */ \
-					  + (ADD_FILL || CC_StirRandom)                           /* 0x00000146 */ \
-					  + (ADD_FILL || CC_ActivateCredential)                   /* 0x00000147 */ \
-					  + (ADD_FILL || CC_Certify)                              /* 0x00000148 */ \
-					  + (ADD_FILL || CC_PolicyNV)                             /* 0x00000149 */ \
-					  + (ADD_FILL || CC_CertifyCreation)                      /* 0x0000014A */ \
-					  + (ADD_FILL || CC_Duplicate)                            /* 0x0000014B */ \
-					  + (ADD_FILL || CC_GetTime)                              /* 0x0000014C */ \
-					  + (ADD_FILL || CC_GetSessionAuditDigest)                /* 0x0000014D */ \
-					  + (ADD_FILL || CC_NV_Read)                              /* 0x0000014E */ \
-					  + (ADD_FILL || CC_NV_ReadLock)                          /* 0x0000014F */ \
-					  + (ADD_FILL || CC_ObjectChangeAuth)                     /* 0x00000150 */ \
-					  + (ADD_FILL || CC_PolicySecret)                         /* 0x00000151 */ \
-					  + (ADD_FILL || CC_Rewrap)                               /* 0x00000152 */ \
-					  + (ADD_FILL || CC_Create)                               /* 0x00000153 */ \
-					  + (ADD_FILL || CC_ECDH_ZGen)                            /* 0x00000154 */ \
-					  + (ADD_FILL || CC_HMAC || CC_MAC)                       /* 0x00000155 */ \
-					  + (ADD_FILL || CC_Import)                               /* 0x00000156 */ \
-					  + (ADD_FILL || CC_Load)                                 /* 0x00000157 */ \
-					  + (ADD_FILL || CC_Quote)                                /* 0x00000158 */ \
-					  + (ADD_FILL || CC_RSA_Decrypt)                          /* 0x00000159 */ \
-					  +  ADD_FILL                                             /* 0x0000015A */ \
-					  + (ADD_FILL || CC_HMAC_Start || CC_MAC_Start)           /* 0x0000015B */ \
-					  + (ADD_FILL || CC_SequenceUpdate)                       /* 0x0000015C */ \
-					  + (ADD_FILL || CC_Sign)                                 /* 0x0000015D */ \
-					  + (ADD_FILL || CC_Unseal)                               /* 0x0000015E */ \
-					  +  ADD_FILL                                             /* 0x0000015F */ \
-					  + (ADD_FILL || CC_PolicySigned)                         /* 0x00000160 */ \
-					  + (ADD_FILL || CC_ContextLoad)                          /* 0x00000161 */ \
-					  + (ADD_FILL || CC_ContextSave)                          /* 0x00000162 */ \
-					  + (ADD_FILL || CC_ECDH_KeyGen)                          /* 0x00000163 */ \
-					  + (ADD_FILL || CC_EncryptDecrypt)                       /* 0x00000164 */ \
-					  + (ADD_FILL || CC_FlushContext)                         /* 0x00000165 */ \
-					  +  ADD_FILL                                             /* 0x00000166 */ \
-					  + (ADD_FILL || CC_LoadExternal)                         /* 0x00000167 */ \
-					  + (ADD_FILL || CC_MakeCredential)                       /* 0x00000168 */ \
-					  + (ADD_FILL || CC_NV_ReadPublic)                        /* 0x00000169 */ \
-					  + (ADD_FILL || CC_PolicyAuthorize)                      /* 0x0000016A */ \
-					  + (ADD_FILL || CC_PolicyAuthValue)                      /* 0x0000016B */ \
-					  + (ADD_FILL || CC_PolicyCommandCode)                    /* 0x0000016C */ \
-					  + (ADD_FILL || CC_PolicyCounterTimer)                   /* 0x0000016D */ \
-					  + (ADD_FILL || CC_PolicyCpHash)                         /* 0x0000016E */ \
-					  + (ADD_FILL || CC_PolicyLocality)                       /* 0x0000016F */ \
-					  + (ADD_FILL || CC_PolicyNameHash)                       /* 0x00000170 */ \
-					  + (ADD_FILL || CC_PolicyOR)                             /* 0x00000171 */ \
-					  + (ADD_FILL || CC_PolicyTicket)                         /* 0x00000172 */ \
-					  + (ADD_FILL || CC_ReadPublic)                           /* 0x00000173 */ \
-					  + (ADD_FILL || CC_RSA_Encrypt)                          /* 0x00000174 */ \
-					  +  ADD_FILL                                             /* 0x00000175 */ \
-					  + (ADD_FILL || CC_StartAuthSession)                     /* 0x00000176 */ \
-					  + (ADD_FILL || CC_VerifySignature)                      /* 0x00000177 */ \
-					  + (ADD_FILL || CC_ECC_Parameters)                       /* 0x00000178 */ \
-					  + (ADD_FILL || CC_FirmwareRead)                         /* 0x00000179 */ \
-					  + (ADD_FILL || CC_GetCapability)                        /* 0x0000017A */ \
-					  + (ADD_FILL || CC_GetRandom)                            /* 0x0000017B */ \
-					  + (ADD_FILL || CC_GetTestResult)                        /* 0x0000017C */ \
-					  + (ADD_FILL || CC_Hash)                                 /* 0x0000017D */ \
-					  + (ADD_FILL || CC_PCR_Read)                             /* 0x0000017E */ \
-					  + (ADD_FILL || CC_PolicyPCR)                            /* 0x0000017F */ \
-					  + (ADD_FILL || CC_PolicyRestart)                        /* 0x00000180 */ \
-					  + (ADD_FILL || CC_ReadClock)                            /* 0x00000181 */ \
-					  + (ADD_FILL || CC_PCR_Extend)                           /* 0x00000182 */ \
-					  + (ADD_FILL || CC_PCR_SetAuthValue)                     /* 0x00000183 */ \
-					  + (ADD_FILL || CC_NV_Certify)                           /* 0x00000184 */ \
-					  + (ADD_FILL || CC_EventSequenceComplete)                /* 0x00000185 */ \
-					  + (ADD_FILL || CC_HashSequenceStart)                    /* 0x00000186 */ \
-					  + (ADD_FILL || CC_PolicyPhysicalPresence)               /* 0x00000187 */ \
-					  + (ADD_FILL || CC_PolicyDuplicationSelect)              /* 0x00000188 */ \
-					  + (ADD_FILL || CC_PolicyGetDigest)                      /* 0x00000189 */ \
-					  + (ADD_FILL || CC_TestParms)                            /* 0x0000018A */ \
-					  + (ADD_FILL || CC_Commit)                               /* 0x0000018B */ \
-					  + (ADD_FILL || CC_PolicyPassword)                       /* 0x0000018C */ \
-					  + (ADD_FILL || CC_ZGen_2Phase)                          /* 0x0000018D */ \
-					  + (ADD_FILL || CC_EC_Ephemeral)                         /* 0x0000018E */ \
-					  + (ADD_FILL || CC_PolicyNvWritten)                      /* 0x0000018F */ \
-					  + (ADD_FILL || CC_PolicyTemplate)                       /* 0x00000190 */ \
-					  + (ADD_FILL || CC_CreateLoaded)                         /* 0x00000191 */ \
-					  + (ADD_FILL || CC_PolicyAuthorizeNV)                    /* 0x00000192 */ \
-					  + (ADD_FILL || CC_EncryptDecrypt2)                      /* 0x00000193 */ \
-					  + (ADD_FILL || CC_AC_GetCapability)                     /* 0x00000194 */ \
-					  + (ADD_FILL || CC_AC_Send)                              /* 0x00000195 */ \
-					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 /* 0x00000196 */ \
+					  + (ADD_FILL || CC_NV_UndefineSpaceSpecial)              \
+					  + (ADD_FILL || CC_EvictControl)                         \
+					  + (ADD_FILL || CC_HierarchyControl)                     \
+					  + (ADD_FILL || CC_NV_UndefineSpace)                     \
+					  +  ADD_FILL                                             \
+					  + (ADD_FILL || CC_ChangeEPS)                            \
+					  + (ADD_FILL || CC_ChangePPS)                            \
+					  + (ADD_FILL || CC_Clear)                                \
+					  + (ADD_FILL || CC_ClearControl)                         \
+					  + (ADD_FILL || CC_ClockSet)                             \
+					  + (ADD_FILL || CC_HierarchyChangeAuth)                  \
+					  + (ADD_FILL || CC_NV_DefineSpace)                       \
+					  + (ADD_FILL || CC_PCR_Allocate)                         \
+					  + (ADD_FILL || CC_PCR_SetAuthPolicy)                    \
+					  + (ADD_FILL || CC_PP_Commands)                          \
+					  + (ADD_FILL || CC_SetPrimaryPolicy)                     \
+					  + (ADD_FILL || CC_FieldUpgradeStart)                    \
+					  + (ADD_FILL || CC_ClockRateAdjust)                      \
+					  + (ADD_FILL || CC_CreatePrimary)                        \
+					  + (ADD_FILL || CC_NV_GlobalWriteLock)                   \
+					  + (ADD_FILL || CC_GetCommandAuditDigest)                \
+					  + (ADD_FILL || CC_NV_Increment)                         \
+					  + (ADD_FILL || CC_NV_SetBits)                           \
+					  + (ADD_FILL || CC_NV_Extend)                            \
+					  + (ADD_FILL || CC_NV_Write)                             \
+					  + (ADD_FILL || CC_NV_WriteLock)                         \
+					  + (ADD_FILL || CC_DictionaryAttackLockReset)            \
+					  + (ADD_FILL || CC_DictionaryAttackParameters)           \
+					  + (ADD_FILL || CC_NV_ChangeAuth)                        \
+					  + (ADD_FILL || CC_PCR_Event)                            \
+					  + (ADD_FILL || CC_PCR_Reset)                            \
+					  + (ADD_FILL || CC_SequenceComplete)                     \
+					  + (ADD_FILL || CC_SetAlgorithmSet)                      \
+					  + (ADD_FILL || CC_SetCommandCodeAuditStatus)            \
+					  + (ADD_FILL || CC_FieldUpgradeData)                     \
+					  + (ADD_FILL || CC_IncrementalSelfTest)                  \
+					  + (ADD_FILL || CC_SelfTest)                             \
+					  + (ADD_FILL || CC_Startup)                              \
+					  + (ADD_FILL || CC_Shutdown)                             \
+					  + (ADD_FILL || CC_StirRandom)                           \
+					  + (ADD_FILL || CC_ActivateCredential)                   \
+					  + (ADD_FILL || CC_Certify)                              \
+					  + (ADD_FILL || CC_PolicyNV)                             \
+					  + (ADD_FILL || CC_CertifyCreation)                      \
+					  + (ADD_FILL || CC_Duplicate)                            \
+					  + (ADD_FILL || CC_GetTime)                              \
+					  + (ADD_FILL || CC_GetSessionAuditDigest)                \
+					  + (ADD_FILL || CC_NV_Read)                              \
+					  + (ADD_FILL || CC_NV_ReadLock)                          \
+					  + (ADD_FILL || CC_ObjectChangeAuth)                     \
+					  + (ADD_FILL || CC_PolicySecret)                         \
+					  + (ADD_FILL || CC_Rewrap)                               \
+					  + (ADD_FILL || CC_Create)                               \
+					  + (ADD_FILL || CC_ECDH_ZGen)                            \
+					  + (ADD_FILL || CC_HMAC || CC_MAC)                       \
+					  + (ADD_FILL || CC_Import)                               \
+					  + (ADD_FILL || CC_Load)                                 \
+					  + (ADD_FILL || CC_Quote)                                \
+					  + (ADD_FILL || CC_RSA_Decrypt)                          \
+					  +  ADD_FILL                                             \
+					  + (ADD_FILL || CC_HMAC_Start || CC_MAC_Start)           \
+					  + (ADD_FILL || CC_SequenceUpdate)                       \
+					  + (ADD_FILL || CC_Sign)                                 \
+					  + (ADD_FILL || CC_Unseal)                               \
+					  +  ADD_FILL                                             \
+					  + (ADD_FILL || CC_PolicySigned)                         \
+					  + (ADD_FILL || CC_ContextLoad)                          \
+					  + (ADD_FILL || CC_ContextSave)                          \
+					  + (ADD_FILL || CC_ECDH_KeyGen)                          \
+					  + (ADD_FILL || CC_EncryptDecrypt)                       \
+					  + (ADD_FILL || CC_FlushContext)                         \
+					  +  ADD_FILL                                             \
+					  + (ADD_FILL || CC_LoadExternal)                         \
+					  + (ADD_FILL || CC_MakeCredential)                       \
+					  + (ADD_FILL || CC_NV_ReadPublic)                        \
+					  + (ADD_FILL || CC_PolicyAuthorize)                      \
+					  + (ADD_FILL || CC_PolicyAuthValue)                      \
+					  + (ADD_FILL || CC_PolicyCommandCode)                    \
+					  + (ADD_FILL || CC_PolicyCounterTimer)                   \
+					  + (ADD_FILL || CC_PolicyCpHash)                         \
+					  + (ADD_FILL || CC_PolicyLocality)                       \
+					  + (ADD_FILL || CC_PolicyNameHash)                       \
+					  + (ADD_FILL || CC_PolicyOR)                             \
+					  + (ADD_FILL || CC_PolicyTicket)                         \
+					  + (ADD_FILL || CC_ReadPublic)                           \
+					  + (ADD_FILL || CC_RSA_Encrypt)                          \
+					  +  ADD_FILL                                             \
+					  + (ADD_FILL || CC_StartAuthSession)                     \
+					  + (ADD_FILL || CC_VerifySignature)                      \
+					  + (ADD_FILL || CC_ECC_Parameters)                       \
+					  + (ADD_FILL || CC_FirmwareRead)                         \
+					  + (ADD_FILL || CC_GetCapability)                        \
+					  + (ADD_FILL || CC_GetRandom)                            \
+					  + (ADD_FILL || CC_GetTestResult)                        \
+					  + (ADD_FILL || CC_Hash)                                 \
+					  + (ADD_FILL || CC_PCR_Read)                             \
+					  + (ADD_FILL || CC_PolicyPCR)                            \
+					  + (ADD_FILL || CC_PolicyRestart)                        \
+					  + (ADD_FILL || CC_ReadClock)                            \
+					  + (ADD_FILL || CC_PCR_Extend)                           \
+					  + (ADD_FILL || CC_PCR_SetAuthValue)                     \
+					  + (ADD_FILL || CC_NV_Certify)                           \
+					  + (ADD_FILL || CC_EventSequenceComplete)                \
+					  + (ADD_FILL || CC_HashSequenceStart)                    \
+					  + (ADD_FILL || CC_PolicyPhysicalPresence)               \
+					  + (ADD_FILL || CC_PolicyDuplicationSelect)              \
+					  + (ADD_FILL || CC_PolicyGetDigest)                      \
+					  + (ADD_FILL || CC_TestParms)                            \
+					  + (ADD_FILL || CC_Commit)                               \
+					  + (ADD_FILL || CC_PolicyPassword)                       \
+					  + (ADD_FILL || CC_ZGen_2Phase)                          \
+					  + (ADD_FILL || CC_EC_Ephemeral)                         \
+					  + (ADD_FILL || CC_PolicyNvWritten)                      \
+					  + (ADD_FILL || CC_PolicyTemplate)                       \
+					  + (ADD_FILL || CC_CreateLoaded)                         \
+					  + (ADD_FILL || CC_PolicyAuthorizeNV)                    \
+					  + (ADD_FILL || CC_EncryptDecrypt2)                      \
+					  + (ADD_FILL || CC_AC_GetCapability)                     \
+					  + (ADD_FILL || CC_AC_Send)                              \
+					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   ( 0				\

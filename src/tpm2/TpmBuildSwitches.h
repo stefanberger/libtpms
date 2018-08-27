@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -70,7 +70,8 @@
    reason, a variable set on the command line with no setting will have a value of 1. An #if
    SOME_VARIABLE will work if the variable is not defined or is defined on the command line with no
    initial setting. However, a #define SOME_VARIABLE is a null string and when used in #if
-   SOME_VARIABLE will not be a proper expression. */
+   SOME_VARIABLE will not be a proper expression. If you want to test various switches, either use
+   the command line or change the default. */
 
 #ifndef TPMBUILDSWITCHES_H
 #define TPMBUILDSWITCHES_H
@@ -187,9 +188,7 @@
 // This switch allows use of #defines in place of pass-through marshaling or unmarshaling code. A
 // pass-through function just calls another function to do the required function and does no
 // parameter checking of its own. The table-driven dispatcher calls directly to the lowest level
-// marshaling/unmarshaling code and by-passes any pass-through functions so, for that code. If
-// #defines are used in other code, then no code is generated for a pass-through
-// marshaling/unmarshaling function.
+// marshaling/unmarshaling code and by-passes any pass-through functions.
 #if (defined USE_MARSHALING_DEFINES) && (USE_MARSHALING_DEFINES != NO)
 #   undef   USE_MARSHALING_DEFINES
 #   define  USE_MARSHALING_DEFINES  YES
@@ -231,7 +230,7 @@
 // Don't change these. They are the settings needed when not doing a simulation and not doing
 // debug. Can't use the key cache except during debug. Otherwise, all of the key values end up being
 // the same
-#else	/* kgold */
+#else
 #   define USE_RSA_KEY_CACHE        NO
 #   define USE_RSA_KEY_CACHE_FILE   NO
 #   define USE_DEBUG_RNG            NO
@@ -306,11 +305,13 @@
 #endif
 
 // This define is used to eliminate the use of bit-fields. It can be enabled for big- or
-// little-endian machines but is required of big-endian system that number bits in registers from
-// left to right. Little-endian machines number from right to left with the least significant bit
-// having assigned a bit number of 0. These are LSb0() machines (they are also little-endian so they
-// are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
-// either direction (MSb0() or LSb0())234. For an MSB0+MSb0() machine this value should be NO
+// little-endian machines. For big-endian architectures that number bits in registers from left to
+// right (MSb0()) this must be enabled.  Little-endian machines number from right to left with the
+// least significant bit having assigned a bit number of 0. These are LSb0() machines (they are also
+// little-endian so they are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0)
+// machines may number in either direction (MSb0() or LSb0()). For an MSB0+MSb0() machine this
+// value is required to be NO
+
 #if !(defined USE_BIT_FIELD_STRUCTURES)					\
     || ((USE_BIT_FIELD_STRUCTURES != NO) && (USE_BIT_FIELD_STRUCTURES != YES))
 #   undef   USE_BIT_FIELD_STRUCTURES

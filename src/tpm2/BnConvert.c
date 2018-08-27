@@ -3,7 +3,7 @@
 /*	conversion functions that will convert TPM2B to/from internal format	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnConvert.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: BnConvert.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -175,7 +175,7 @@ BnFromHex(
    guaranteed to be large enough for the result and the size will be set to the size required for
    bigNum (leading zeros suppressed). */
 /* The conversion for a little-endian machine simply requires that all significant bytes of the
-   bigNum be reversed. For a big-endian machine, rather than process unpack each word individually,
+   bigNum be reversed. For a big-endian machine, rather than unpack each word individually,
    the bigNum is converted to little-endian words, copied, and then converted back to big-endian. */
 LIB_EXPORT BOOL
 BnToBytes(

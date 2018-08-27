@@ -3,7 +3,7 @@
 /*		For accessing the TPM_CAP_TPM_PROPERTY values	  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PropertyCap.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: PropertyCap.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -210,8 +210,8 @@ TPMPropertyIsDefined(
 		  SET_ATTRIBUTE(attributes.att, TPMA_MEMORY, objectCopiedToRam);
 		  // Note: For a LSb0 machine, the bits in a bit field are in the correct
 		  // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-		  // be an integer manipulated by masking (NO_BIT_FIELD_STRUCTURES will
-		  // be defined) so the bits are manipulated correctly.
+		  // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
+		  // NO) so the bits are manipulated correctly.
 		  *value = attributes.u32;
 		  break;
 	      }
@@ -414,8 +414,8 @@ TPMPropertyIsDefined(
 		  SET_ATTRIBUTE(flags.attr, TPMA_PERMANENT, tpmGeneratedEPS);
 		  // Note: For a LSb0 machine, the bits in a bit field are in the correct
 		  // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-		  // be an integer manipulated by masking (NO_BIT_FIELD_STRUCTURES will
-		  // be defined) so the bits are manipulate correctly.
+		  // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
+		  // be NO ) so the bits are manipulate correctly.
 		  *value = flags.u32;
 		  break;
 	      }
@@ -439,8 +439,8 @@ TPMPropertyIsDefined(
 		      SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, orderly);
 		  // Note: For a LSb0 machine, the bits in a bit field are in the correct
 		  // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-		  // be an integer manipulated by masking (NO_BIT_FIELD_STRUCTURES will
-		  // be defined) so the bits are manipulate correctly.
+		  // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
+		  // be NO) so the bits are manipulate correctly.
 		  *value = flags.u32;
 		  break;
 	      }

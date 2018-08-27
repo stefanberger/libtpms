@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: Object_spt.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -102,9 +102,9 @@ ComputeProtectionKeyParms(
 			  OBJECT          *protector,         // IN: the protector object
 			  TPM_ALG_ID       hashAlg,           // IN: hash algorithm for KDFa
 			  TPM2B           *name,              // IN: name of the object
-			  TPM2B           *seedIn,            // IN: optional seed for duplication blob.
-			  //     For non duplication blob, this
-			  //     parameter should be NULL
+			  TPM2B           *seedIn,            /* IN: optional seed for duplication
+								 blob. */
+			  // For non duplication blob, this parameter should be NULL
 			  TPM_ALG_ID      *symAlg,            // OUT: the symmetric algorithm
 			  UINT16          *keyBits,           // OUT: the symmetric key size in bits
 			  TPM2B_SYM_KEY   *symKey             // OUT: the symmetric key
@@ -213,8 +213,8 @@ static UINT16
 ProduceInnerIntegrity(
 		      TPM2B           *name,          // IN: the name of the object
 		      TPM_ALG_ID       hashAlg,       // IN: hash algorithm for inner wrap
-		      UINT16           dataSize,      // IN: the size of sensitive data, excluding the
-		      //     leading integrity buffer size
+		      UINT16           dataSize,      /* IN: the size of sensitive data, excluding
+							 the leading integrity buffer size */
 		      BYTE            *innerBuffer    // IN/OUT: inner buffer with sensitive data in
 		      //     it.  At input, the leading bytes of this
 		      //     buffer is reserved for integrity
@@ -367,7 +367,6 @@ CreateChecks(
 /* This function is called by TPM2_LoadExternal() and PublicAttributesValidation(). This function
    validates the schemes in the public area of an object. */
 /* Error Returns Meaning */
-/* TPM_RC_ASYMMETRIC non-duplicable storage key and its parent have different public parameters */
 /* TPM_RC_HASH non-duplicable storage key and its parent have different name algorithm */
 /* TPM_RC_KDF incorrect KDF specified for decrypting keyed hash object */
 /* TPM_RC_KEY invalid key size values in an asymmetric key public area */
@@ -425,8 +424,8 @@ SchemeChecks(
 			       != TPM_ALG_KDF1_SP800_108)
 				return TPM_RCS_SCHEME;
 			    // Must select a digest.
-			    if(CryptHashGetDigestSize(
-						      parms->keyedHashDetail.scheme.details.xorr.hashAlg) == 0)
+			    if(CryptHashGetDigestSize
+			       (parms->keyedHashDetail.scheme.details.xorr.hashAlg) == 0)
 				return TPM_RCS_HASH;
 			}
 		}

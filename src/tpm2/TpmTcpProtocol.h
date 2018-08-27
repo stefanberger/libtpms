@@ -3,7 +3,7 @@
 /*	TPM commands are communicated as BYTE streams on a TCP connection	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTcpProtocol.h 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: TpmTcpProtocol.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,21 +59,22 @@
 /*										*/
 /********************************************************************************/
 
-/* D.2 TpmTcpProtocol.h */
-/* D.2.1. Introduction */
+/* D.3 TpmTcpProtocol.h */
+/* D.3.1. Introduction */
 /* TPM commands are communicated as BYTE streams on a TCP connection.  The TPM command protocol is
    enveloped with the interface protocol described in this file. The command is indicated by a
    UINT32 with one of the values below.  Most commands take no parameters return no TPM errors.  In
-   these cases the TPM interface protocol acknowledges that command processing is complete by
+   these cases the TPM interface protocol acknowledges that command processing is completed by
    returning a UINT32=0. The command TPM_SIGNAL_HASH_DATA takes a UINT32-prepended variable length
    BYTE array and the interface protocol acknowledges command completion with a UINT32=0. Most TPM
    commands are enveloped using the TPM_SEND_COMMAND interface command. The parameters are as
    indicated below.  The interface layer also appends a UIN32=0 to the TPM response for
    regularity. */
-/* D.2.2. Typedefs and Defines */
+/* D.3.2. Typedefs and Defines */
 #ifndef     TCP_TPM_PROTOCOL_H
 #define     TCP_TPM_PROTOCOL_H
-/* TPM Commands. All commands acknowledge processing by returning a UINT32 == 0 except where noted */
+/* D.3.3. TPM Commands All commands acknowledge processing by returning a UINT32 == 0 except where
+   noted */
 #define TPM_SIGNAL_POWER_ON         1
 #define TPM_SIGNAL_POWER_OFF        2
 #define TPM_SIGNAL_PHYS_PRES_ON     3
@@ -99,7 +100,10 @@
 #define TPM_STOP                    21
 #define TPM_GET_COMMAND_RESPONSE_SIZES  25
 #define TPM_TEST_FAILURE_MODE       30
-    enum TpmEndPointInfo
+
+// D.3.4.	Enumerations and Structures
+
+enum TpmEndPointInfo
     {
 	tpmPlatformAvailable = 0x01,
 	tpmUsesTbs = 0x02,

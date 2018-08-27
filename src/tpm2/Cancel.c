@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Simulates the cancel pins on the TPM.	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Cancel.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Cancel.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,17 +55,17 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 
 /* C.2 Cancel.c */
-/* C.2.1. Introduction */
+/* C.2.1. Description */
 /* This module simulates the cancel pins on the TPM. */
 /* C.2.2. Includes, Typedefs, Structures, and Defines */
 #include "PlatformData.h"
 #include "Platform_fp.h"
-/*     C.2.3. Functions */
+/* C.2.3. Functions */
 /* C.2.3.1. _plat__IsCanceled() */
 /* Check if the cancel flag is set */
 /* Return Values Meaning */
