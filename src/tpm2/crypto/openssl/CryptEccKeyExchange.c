@@ -249,16 +249,16 @@ CryptEcc2PhaseKeyExchange(
 	}
     switch(scheme)
 	{
-	  case TPM_ALG_ECDH:
+	  case ALG_ECDH_VALUE:
 	    return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
 	    break;
 #if ALG_ECMQV
-	  case TPM_ALG_ECMQV:
+	  case ALG_ECMQV_VALUE:
 	    return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
 #endif
 #if ALG_SM2
-	  case TPM_ALG_SM2:
+	  case ALG_SM2_VALUE:
 	    return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
 #endif

@@ -213,14 +213,14 @@
 				      (MAX_RSA_KEY_BITS >=  1024 ?  80 :  0)))))
 #else
 #define     RSA_SECURITY_STRENGTH   0
-#endif
+#endif // ALG_RSA
 #if ALG_ECC
 #define     ECC_SECURITY_STRENGTH (MAX_ECC_KEY_BITS >= 521 ? 256 :	\
 				   (MAX_ECC_KEY_BITS >= 384 ? 192 :	\
 				    (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
 #else
 #define     ECC_SECURITY_STRENGTH   0
-#endif // TPM_AGL_ECC
+#endif // ALG_ECC
 #define     MAX_ASYM_SECURITY_STRENGTH					\
     MAX(RSA_SECURITY_STRENGTH, ECC_SECURITY_STRENGTH)
 #define     MAX_HASH_SECURITY_STRENGTH  ((CONTEXT_INTEGRITY_HASH_SIZE * 8) / 2)

@@ -843,7 +843,7 @@ CryptRsaEncrypt(
     TEST(scheme->scheme);
     switch(scheme->scheme)
 	{
-	  case TPM_ALG_NULL:  // 'raw' encryption
+	  case ALG_NULL_VALUE:  // 'raw' encryption
 	      {
 		  INT32            i;
 		  INT32            dSize = dIn->size;
@@ -862,10 +862,10 @@ CryptRsaEncrypt(
 		  // the modulus. If it is, then RSAEP() will catch it.
 	      }
 	      break;
-	  case TPM_ALG_RSAES:
+	  case ALG_RSAES_VALUE:
 	    retVal = RSAES_PKCS1v1_5Encode(&cOut->b, dIn, rand);
 	    break;
-	  case TPM_ALG_OAEP:
+	  case ALG_OAEP_VALUE:
 	    retVal = OaepEncode(&cOut->b, scheme->details.oaep.hashAlg, label, dIn,
 				rand);
 	    break;
@@ -913,15 +913,15 @@ CryptRsaDecrypt(
 	    // Remove padding
 	    switch(scheme->scheme)
 		{
-		  case TPM_ALG_NULL:
+		  case ALG_NULL_VALUE:
 		    if(dOut->size < cIn->size)
 			return TPM_RC_VALUE;
 		    MemoryCopy2B(dOut, cIn, dOut->size);
 		    break;
-		  case TPM_ALG_RSAES:
+		  case ALG_RSAES_VALUE:
 		    retVal = RSAES_Decode(dOut, cIn);
 		    break;
-		  case TPM_ALG_OAEP:
+		  case ALG_OAEP_VALUE:
 		    retVal = OaepDecode(dOut, scheme->details.oaep.hashAlg, label, cIn);
 		    break;
 		  default:
@@ -956,14 +956,14 @@ CryptRsaSign(
     TEST(sigOut->sigAlg);
     switch(sigOut->sigAlg)
 	{
-	  case TPM_ALG_NULL:
+	  case ALG_NULL_VALUE:
 	    sigOut->signature.rsapss.sig.t.size = 0;
 	    return TPM_RC_SUCCESS;
-	  case TPM_ALG_RSAPSS:
+	  case ALG_RSAPSS_VALUE:
 	    retVal = PssEncode(&sigOut->signature.rsapss.sig.b,
 			       sigOut->signature.rsapss.hash, &hIn->b, rand);
 	    break;
-	  case TPM_ALG_RSASSA:
+	  case ALG_RSASSA_VALUE:
 	    retVal = RSASSA_Encode(&sigOut->signature.rsassa.sig.b,
 				   sigOut->signature.rsassa.hash, &hIn->b);
 	    break;
@@ -997,8 +997,8 @@ CryptRsaValidateSignature(
     pAssert(key != NULL && sig != NULL && digest != NULL);
     switch(sig->sigAlg)
 	{
-	  case TPM_ALG_RSAPSS:
-	  case TPM_ALG_RSASSA:
+	  case ALG_RSAPSS_VALUE:
+	  case ALG_RSASSA_VALUE:
 	    break;
 	  default:
 	    return TPM_RC_SCHEME;
@@ -1013,11 +1013,11 @@ CryptRsaValidateSignature(
 	{
 	    switch(sig->sigAlg)
 		{
-		  case TPM_ALG_RSAPSS:
+		  case ALG_RSAPSS_VALUE:
 		    retVal = PssDecode(sig->signature.any.hashAlg, &digest->b,
 				       &sig->signature.rsassa.sig.b);
 		    break;
-		  case TPM_ALG_RSASSA:
+		  case ALG_RSASSA_VALUE:
 		    retVal = RSASSA_Decode(sig->signature.any.hashAlg, &digest->b,
 					   &sig->signature.rsassa.sig.b);
 		    break;
