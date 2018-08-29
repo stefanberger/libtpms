@@ -41,17 +41,17 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [create a debug build]),
 # If the user has not set CFLAGS, do something appropriate
 test_CFLAGS=${CFLAGS+set}
 if test "$test_CFLAGS" != set; then
-	if test "$DEBUG" == "yes"; then
+	if test "$DEBUG" = "yes"; then
 		CFLAGS="-O0 -g -DDEBUG"
 	else
 		CFLAGS="-g -O2"
 	fi
-elif test "$DEBUG" == "yes"; then
+elif test "$DEBUG" = "yes"; then
 	CFLAGS="$CFLAGS -O0 -g -DDEBUG"
 fi
 
 debug_defines=
-if test "$DEBUG" == "yes"; then
+if test "$DEBUG" = "yes"; then
 	debug_defines="-DTPM_DEBUG"
 	# Enable the following only if ABSOLUTELY necessary
 	# volatile state will be written and behavior changes
