@@ -95,7 +95,7 @@
   #define  BIG_ENDIAN_TPM       YES
   #define  LITTLE_ENDIAN_TPM    NO
  #endif
-#elif defined __OpenBSD__ || defined __FreeBSD__
+#elif defined __OpenBSD__ || defined __FreeBSD__ || defined __NetBSD__
  #if _BYTE_ORDER == _LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
   #define  LITTLE_ENDIAN_TPM    YES
