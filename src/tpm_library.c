@@ -41,6 +41,9 @@
 
 #include <assert.h>
 #include <string.h>
+#if defined __FreeBSD__
+# define _WITH_DPRINTF
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

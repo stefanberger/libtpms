@@ -58,7 +58,11 @@
 /*										*/
 /********************************************************************************/
 
-#include <endian.h>
+#if defined __FreeBSD__
+# include <sys/endian.h>
+#else
+# include <endian.h>
+#endif
 #include <string.h>
 
 #include "config.h"

@@ -81,7 +81,11 @@
 #define  SET      1
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
-#include <endian.h>
+#if defined __FreeBSD__
+# include <sys/endian.h>
+#else
+# include <endian.h>
+#endif
 #if defined __linux__ || defined __CYGWIN__
  #if __BYTE_ORDER == __LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
@@ -91,7 +95,7 @@
   #define  BIG_ENDIAN_TPM       YES
   #define  LITTLE_ENDIAN_TPM    NO
  #endif
-#elif defined __OpenBSD__
+#elif defined __OpenBSD__ || defined __FreeBSD__
  #if _BYTE_ORDER == _LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
   #define  LITTLE_ENDIAN_TPM    YES
