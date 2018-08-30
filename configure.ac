@@ -59,6 +59,11 @@ if test "$DEBUG" = "yes"; then
 fi
 AC_SUBST(DEBUG_DEFINES, $debug_defines)
 
+AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/libtpms.syms],
+                   [have_version_script="yes"],
+                   [have_version_script="no"])
+AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
+
 cryptolib=freebl
 AC_SUBST(cryptolib, $cryptolib)
 
@@ -214,9 +219,10 @@ echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
 echo "HARDENING_LDFLAGS=$HARDENING_LDFLAGS"
 echo "LDFLAGS=$LDFLAGS"
 echo
-echo "Version to build  : $PACKAGE_VERSION"
-echo "Crypto library    : $cryptolib"
-echo "Debug build       : $enable_debug"
-echo "With TPM2 support : $with_tpm2"
+echo "Version to build    : $PACKAGE_VERSION"
+echo "Crypto library      : $cryptolib"
+echo "Debug build         : $enable_debug"
+echo "With TPM2 support   : $with_tpm2"
+echo "HAVE_VERSION_SCRIPT : $have_version_script"
 echo
 echo
