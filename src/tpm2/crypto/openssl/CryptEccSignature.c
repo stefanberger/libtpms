@@ -3,7 +3,7 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1319 2018-08-30 13:35:27Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -667,8 +667,9 @@ BnValidateSignatureEcSm2(
     OK = OK && BnAdd(bnRp, bnE, P->x);
     OK = OK && BnMod(bnRp, order);
     // f)   verify that r' = r
-    OK = OK && (BnUnsignedCmp(bnR, bnRp));
-    if(!OK)
+    OK = OK && (BnUnsignedCmp(bnR, bnRp) == 0);
+    
+    if(!OK)    
 	return TPM_RC_SIGNATURE;
     else
 	return TPM_RC_SUCCESS;
