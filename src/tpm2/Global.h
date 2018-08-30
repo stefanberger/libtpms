@@ -406,7 +406,7 @@ typedef struct PCR_SAVE
 typedef struct PCR_POLICY
 {
     TPMI_ALG_HASH       hashAlg[NUM_POLICY_PCR_GROUP];
-//    TPM2B_DIGEST        a;
+    TPM2B_DIGEST        a_unused; /* libtpms: renamed field since not used and not initialized */
     TPM2B_DIGEST        policy[NUM_POLICY_PCR_GROUP];
 } PCR_POLICY;
 #endif
