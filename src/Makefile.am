@@ -171,13 +171,6 @@ libtpms_la_LIBADD += libtpms_tpm2.la
 
 libtpms_tpm2_la_LIBADD =
 
-libtpms_tpm2_la_LDFLAGS = -version-info $(LIBTPMS_VERSION_INFO) \
-                          -no-undefined
-if HAVE_VERSION_SCRIPT
-libtpms_tpm2_la_LDFLAGS += -Wl,--version-script=./libtpms.syms
-endif
-
-
 libtpms_tpm2_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_tpm2_la_CFLAGS += -D_POSIX_
