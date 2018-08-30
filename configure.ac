@@ -59,7 +59,7 @@ if test "$DEBUG" = "yes"; then
 fi
 AC_SUBST(DEBUG_DEFINES, $debug_defines)
 
-AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/libtpms.syms],
+AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/test.syms],
                    [have_version_script="yes"],
                    [have_version_script="no"])
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])

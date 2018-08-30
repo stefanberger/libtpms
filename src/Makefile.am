@@ -588,6 +588,7 @@ check-local:
 EXTRA_DIST = \
 	tpm12/tpm_crypto_freebl.c \
 	tpm12/tpm_crypto.c \
-	libtpms.syms
+	libtpms.syms \
+	test.syms
 
 CLEANFILES = a.out
