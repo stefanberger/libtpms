@@ -141,6 +141,11 @@
 #       define REVERSE_ENDIAN_16(_Number) swap16(_Number)
 #       define REVERSE_ENDIAN_32(_Number) swap32(_Number)
 #       define REVERSE_ENDIAN_64(_Number) swap64(_Number)
+#     elif defined __APPLE__
+#       include <libkern/OSByteOrder.h>
+#       define REVERSE_ENDIAN_16(_Number) _OSSwapInt16(_Number)
+#       define REVERSE_ENDIAN_32(_Number) _OSSwapInt32(_Number)
+#       define REVERSE_ENDIAN_64(_Number) _OSSwapInt64(_Number)
 #     else
 #       error Unsupported OS
 #     endif

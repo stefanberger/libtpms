@@ -83,6 +83,8 @@
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
 #if defined __FreeBSD__
 # include <sys/endian.h>
+#elif defined __APPLE__
+# include <libkern/OSByteOrder.h>
 #else
 # include <endian.h>
 #endif
@@ -104,6 +106,9 @@
   #define  BIG_ENDIAN_TPM       YES
   #define  LITTLE_ENDIAN_TPM    NO
  #endif
+#elif defined __APPLE__
+ #define  BIG_ENDIAN_TPM       NO
+ #define  LITTLE_ENDIAN_TPM    YES
 #else
  #error Unsupported OS
 #endif
