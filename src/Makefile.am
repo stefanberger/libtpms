@@ -570,10 +570,11 @@ LDFLAGS_ARCH += $(findstring -m64, $(CFLAGS))
 LDFLAGS_ARCH += $(findstring -m32, $(LDFLAGS))
 LDFLAGS_ARCH += $(findstring -m64, $(LDFLAGS))
 
+check-local: SHELL?=/bin/bash
 check-local:
 	@case $(host_os) in \
 	  openbsd*) ADDLIBS="-lc" ;; \
-	  darwin*) LDFLAGS_OS="-shared" ;; \
+	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
 	 ($(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null || \
@@ -581,7 +582,7 @@ check-local:
 	  $(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>&1 | grep libtpms))
 	@case $(host_os) in \
 	  openbsd*) ADDLIBS="-lc" ;; \
-	  darwin*) LDFLAGS_OS="-shared" ;; \
+	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
 	$(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null
