@@ -81,7 +81,7 @@
 #define  SET      1
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
-#if defined __FreeBSD__
+#if defined __FreeBSD__ || defined __DragonFly__
 # include <sys/endian.h>
 #elif defined __APPLE__
 # include <libkern/OSByteOrder.h>
@@ -97,7 +97,8 @@
   #define  BIG_ENDIAN_TPM       YES
   #define  LITTLE_ENDIAN_TPM    NO
  #endif
-#elif defined __OpenBSD__ || defined __FreeBSD__ || defined __NetBSD__
+#elif defined __OpenBSD__ || defined __FreeBSD__ || defined __NetBSD__ \
+   || defined __DragonFly__
  #if _BYTE_ORDER == _LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
   #define  LITTLE_ENDIAN_TPM    YES
