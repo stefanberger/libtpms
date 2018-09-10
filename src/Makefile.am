@@ -13,7 +13,7 @@ common_CFLAGS = -include tpm_library_conf.h \
                $(FUZZER)
 
 
-LDFLAGS = $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
+LDFLAGS += $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
 
 #
 # TPM1.2
