@@ -18,9 +18,9 @@ Version:        %{version}
 Release:        %{release}%{?dist}
 License:        BSD
 Group:          Development/Libraries
-Url:            http://sourceforge.net/projects/ibmswtpm
-Source:         http://bergerstefan.users.sourceforge.net/libtpms/%{name}-%{version}.tar.gz
-Provides:       libtpms-%{crypto_subsystem}
+Url:            http://github.com/stefanberger/libtpms
+Source:         http://github.com/stefanberger/libtpms/archive/v%{version}.tar.gz
+Provides:       libtpms-%{crypto_subsystem} = %{version}-%{release}
 
 %if "%{crypto_subsystem}" == "openssl"
 BuildRequires:  openssl-devel
@@ -86,7 +86,7 @@ Libtpms header files and documentation.
 CFLAGS=-O0
 %endif
 ./autogen.sh \
-	--with-tpm2 \
+        --with-tpm2 \
         --disable-static \
         --prefix=/usr \
         --libdir=%{_libdir} \
