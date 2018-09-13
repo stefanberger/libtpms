@@ -6,7 +6,7 @@ DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 	dh $@ --parallel 
 
 override_dh_auto_configure:
-	./bootstrap.sh
-	dh_auto_configure -- --with-openssl
+	NOCONFIGURE=1 ./autogen.sh
+	dh_auto_configure -- --with-openssl --with-tpm2
 
 override_dh_usrlocal:
