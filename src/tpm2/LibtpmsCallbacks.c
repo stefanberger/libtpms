@@ -134,11 +134,6 @@ libtpms_plat__NvCommit(
 {
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
 
-#if 0
-    #include "Test.h"
-    Test_NvChip_UnMarshal();
-#endif
-
     if (cbs->tpm_nvram_storedata) {
         uint32_t tpm_number = 0;
         const char *name = TPM_PERMANENT_ALL_NAME;

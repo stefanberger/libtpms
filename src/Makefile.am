@@ -484,7 +484,6 @@ noinst_HEADERS += \
 	tpm2/LibtpmsCallbacks.h \
 	tpm2/NVMarshal.h \
 	tpm2/StateMarshal.h \
-	tpm2/Test.h \
 	tpm2/Volatile.h
 
 if LIBTPMS_USE_OPENSSL
