@@ -59,13 +59,6 @@
 /*										*/
 /********************************************************************************/
 
-/* Temporary:
- * Define OSSL_VERIFY on OpenSSL < 1.1 to verify that the code conversions
- * to OpenSSL 1.1 are correct by comparing OpenSSL 1.1 API call results
- * with previous results.
- */
-//#define OSSL_VERIFY
-
 /* B.2.3.2. TpmToOsslMath.c */
 /* B.2.3.2.1. Introduction */
 /* This file contains the math functions that are not implemented in the BnMath() library
@@ -94,9 +87,6 @@ OsslToTpmBn(
 {
     unsigned char buffer[LARGEST_NUMBER + 1];
     int buffer_len;
-#ifdef OSSL_VERIFY
-    int i;
-#endif
 
     if(bn != NULL)
 	{
@@ -104,11 +94,6 @@ OsslToTpmBn(
 	    pAssert(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
 	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
 	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
-
-#ifdef OSSL_VERIFY
-	    for (i = 0; i < osslBn->top; i++)
-	        pAssert(bn->d[i] == osslBn->d[i])
-#endif
 	}
 }
 /* B.2.3.2.3.2.	BigInitialized() */
@@ -121,11 +106,6 @@ BigInitialized(
     unsigned char buffer[LARGEST_NUMBER + 1];
     NUMBYTES buffer_len = (NUMBYTES )sizeof(buffer);
     BIGNUM *toInit =  BN_new();
-#ifdef OSSL_VERIFY
-    unsigned char buffer2[MAX_RSA_KEY_BYTES + 1];
-    BIGNUM _toInit2, *toInit2 = &_toInit2;
-    int buffer2_len;
-#endif
 
     if(toInit == NULL || initializer == NULL) {
         BN_free(toInit);
@@ -134,19 +114,6 @@ BigInitialized(
 
     buffer_len = Bn2bin(initializer, buffer, buffer_len);
     BN_bin2bn(buffer, buffer_len, toInit);
-
-#ifdef OSSL_VERIFY
-    toInit2->d = (BN_ULONG *)&initializer->d[0];
-    toInit2->dmax = initializer->allocated;
-    toInit2->top = initializer->size;
-    toInit2->neg = 0;
-    toInit2->flags = 0;
-
-    buffer2_len = BN_bn2bin(toInit2, buffer2);
-    (void)buffer2_len;
-
-    pAssert(BN_cmp(toInit, toInit2) == 0);
-#endif
 
     return toInit;
 }
@@ -243,9 +210,6 @@ BnModMult(
 	{
 	    result->size = DIV_UP(BN_num_bytes(bnResult),
                                   sizeof(crypt_uword_t));
-#ifdef OSSL_VERIFY
-            pAssert(result->size == (size_t)bnResult->top);
-#endif
 	    OsslToTpmBn(result, bnResult);
 	}
     BN_free(bnTemp);
@@ -360,9 +324,6 @@ BnGcd(
 	{
 	    OsslToTpmBn(gcd, bnGcd);
 	    gcd->size = DIV_UP(BN_num_bytes(bnGcd), sizeof(crypt_uword_t));
-#ifdef OSSL_VERIFY
-	    pAssert(gcd->size == (size_t)bnGcd->top);
-#endif
 	}
     BN_free(bn2);
     BN_free(bn1);
