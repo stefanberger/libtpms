@@ -194,7 +194,7 @@ TpmFail(
 	int              code
 	)
 {
-#if 0
+#if 0    /* libtpms added */
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
@@ -218,7 +218,7 @@ TpmFail(
     g_forceFailureMode = FALSE;
 #endif
 
-#else
+#else  /* libtpms added begin */
 
     TpmSetFailureMode(
 #if FAIL_TRACE
@@ -226,12 +226,13 @@ TpmFail(
 #endif
                       code);
 
-#endif
+#endif /* libtpms added end */
     // Jump to the failure mode code.
     // Note: only get here if asserts are off or if we are testing failure mode
     _plat__Fail();
 }
 
+/* libtpms added begin */
 void
 TpmSetFailureMode(
 #if FAIL_TRACE
@@ -266,6 +267,7 @@ TpmSetFailureMode(
     // We are in failure mode
     g_inFailureMode = TRUE;
 }
+/* libtpms added end */
 /* 9.17.5 TpmFailureMode */
 /* This function is called by the interface code when the platform is in failure mode. */
 void

@@ -66,7 +66,7 @@
 #include "PlatformData.h"
 #include "Platform_fp.h"
 
-#include "LibtpmsCallbacks.h"
+#include "LibtpmsCallbacks.h" /* libtpms added */
 
 /* C.10.3. Functions */
 /* C.10.3.1. _plat__PhysicalPresenceAsserted() */

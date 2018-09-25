@@ -197,11 +197,12 @@ main(
      int              argc,
      char            *argv[]
      );
-// Extensions:
+/* libtpms added begin */
 void _rpc__Signal_SetTPMEstablished(void);
 BOOL _rpc__Signal_GetTPMEstablished(void);
 void _rpc__Signal_ResetTPMEstablished(void);
 BOOL _rpc__Signal_IsPowerOn(void);
+/* libtpms added end */
 
 #endif  // _SIMULATOR_FP_H_
 

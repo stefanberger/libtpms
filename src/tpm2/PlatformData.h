@@ -88,9 +88,10 @@ extern clock64_t        s_lastReportedTime;
 // This is the rate adjusted value that is the equivalent of what would be read from a hardware
 // register that produced rate adjusted time.
 extern clock64_t        s_tpmTime;
-/* libtpms added: */
+/* libtpms added begin */
 extern int64_t          s_hostMonotonicAdjustTime;
 extern uint64_t         s_suspendedElapsedTime;
+/* libtpms added end */
 #endif // HARDWARE_CLOCK
 
 /* This value indicates that the timer was reset */
@@ -125,7 +126,7 @@ extern unsigned char s_locality;
    memory. Comment out to use RAM. */
 #if (!defined VTPM) || ((VTPM != NO) && (VTPM != YES))
 #   undef VTPM
-#   define      VTPM            NO                 // Default: Either YES or NO
+#   define      VTPM            NO                 // Default: Either YES or NO   libtpms: NO
 #endif
 
 // For a simulation, use a file to back up the NV

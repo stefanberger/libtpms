@@ -61,7 +61,7 @@
 
 /* 10.2.11 CryptEccKeyExchange.c */
 #include "Tpm.h"
-/* libtpms added: */
+/* libtpms added begin */
 LIB_EXPORT TPM_RC
 SM2KeyExchange(
               TPMS_ECC_POINT        *outZ,         // OUT: the computed point
@@ -71,6 +71,7 @@ SM2KeyExchange(
               TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
               TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
               );
+/* libtpms added end */
 
 #if CC_ZGen_2Phase == YES
 #if ALG_ECMQV

@@ -109,7 +109,7 @@
    SIMULATION == YES */
 #if !(defined SIMULATION) || ((SIMULATION != NO) && (SIMULATION != YES))
 #   undef   SIMULATION
-#   define  SIMULATION      NO     // Default: Either YES or NO
+#   define  SIMULATION      NO     // Default: Either YES or NO    libtpms: NO
 #endif
 
 // Define this to run the function that checks the compatibility between the chosen big number math
@@ -121,7 +121,7 @@
 #endif
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
 #   undef   FIPS_COMPLIANT
-#   define  FIPS_COMPLIANT      NO     // Default: Either YES or NO
+#   define  FIPS_COMPLIANT      NO     // Default: Either YES or NO    libtpms: NO
 #endif
 
 // Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
@@ -315,7 +315,7 @@
 #if !(defined USE_BIT_FIELD_STRUCTURES)					\
     || ((USE_BIT_FIELD_STRUCTURES != NO) && (USE_BIT_FIELD_STRUCTURES != YES))
 #   undef   USE_BIT_FIELD_STRUCTURES
-#   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO
+#   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO   libtpms: NO
 #endif
 
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all

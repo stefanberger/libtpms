@@ -62,7 +62,7 @@
 #ifndef NVRESERVED_FP_H
 #define NVRESERVED_FP_H
 
-#include "NVMarshal.h"
+#include "NVMarshal.h" /* libtpms added */
 
 void
 NvCheckState(

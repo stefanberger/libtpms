@@ -76,6 +76,7 @@
 #include "TpmFail_fp.h"
 #include <assert.h>
 
+/* libtpms added begin */
 /* ClockGetTime -- get time given a specified clock type */
 uint64_t
 ClockGetTime(
@@ -115,6 +116,7 @@ ClockAdjustPostResume(UINT64 backthen, BOOL timesAreRealtime)
         s_suspendedElapsedTime += timediff;
     }
 }
+/* libtpms added end */
 
 /* C.3.3. Simulator Functions */
 /* C.3.3.1. Introduction */
@@ -134,8 +136,8 @@ _plat__TimerReset(
     s_adjustRate = CLOCK_NOMINAL;
     s_timerReset = TRUE;
     s_timerStopped = TRUE;
-    s_hostMonotonicAdjustTime = 0; /* libtpms */
-    s_suspendedElapsedTime = 0; /* libtpms */
+    s_hostMonotonicAdjustTime = 0; /* libtpms added */
+    s_suspendedElapsedTime = 0; /* libtpms added */
     return;
 }
 /* C.3.3.3. _plat__TimerRestart() */
@@ -182,6 +184,7 @@ _plat__RealTime(
     clock_gettime(CLOCK_MONOTONIC, &systime);
     time = (clock64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
 #endif
+    /* libtpms added begin */
     /* We have to make sure that this function returns monotonically increasing time
        also when a vTPM has been suspended and the host has been rebooted.
        Example:
@@ -192,6 +195,7 @@ _plat__RealTime(
          If it was suspended for 10 time units, we need to add '10' here.
      */
     time += s_hostMonotonicAdjustTime + s_suspendedElapsedTime;
+    /* libtpms added end */
     return time;
 }
 

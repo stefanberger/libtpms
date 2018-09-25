@@ -70,7 +70,7 @@ SetForceFailureMode(
 		    );
 NORETURN void
 TpmFail(
-#if FAIL_TRACE
+#if FAIL_TRACE   /* libtpms added begin */
 	const char      *function,
 	int              line,
 #endif
@@ -78,7 +78,7 @@ TpmFail(
 	);
 void
 TpmSetFailureMode(
-#if FAIL_TRACE
+#if FAIL_TRACE   /* libtpms added end */
 	const char      *function,
 	int              line,
 #endif

@@ -85,16 +85,16 @@
 #endif // SELF_TEST
 /* 5.11.3	For Failures */
 #if defined _POSIX_
-#   define FUNCTION_NAME        __func__
+#   define FUNCTION_NAME        __func__     /* libtpms changed */
 #else
 #   define FUNCTION_NAME        __FUNCTION__
 #endif
 #if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
-#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(errorCode)
+#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(errorCode) /* libtpms added */
 #else
 #   define FAIL(errorCode) (TpmFail(FUNCTION_NAME, __LINE__, errorCode))
-#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(FUNCTION_NAME, __LINE__, errorCode))
+#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(FUNCTION_NAME, __LINE__, errorCode)) /* libtpms added */
 #endif
 /* If implementation is using longjmp, then the call to TpmFail() does not return and the compiler
    will complain about unreachable code that comes after. To allow for not having longjmp, TpmFail()
