@@ -323,7 +323,7 @@ CryptGenerateR(
 		return FALSE;
 	    // set the counter to the value that was
 	    // present when the commitment was made
-	    currentCount = (currentCount & 0xffffffffffff0000ULL) | *c;
+	    currentCount = (currentCount & 0xffffffffffff0000ULL) | *c; /* libtpms changed */
 	}
     // Marshal the count value to a TPM2B buffer for the KDF
     cntr.t.size = sizeof(currentCount);

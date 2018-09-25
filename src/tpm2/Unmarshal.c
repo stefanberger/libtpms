@@ -469,7 +469,7 @@ TPMA_ALGORITHM_Unmarshal(TPMA_ALGORITHM *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size); /* libtpms changed */
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (*target & TPMA_ALGORITHM_reserved) {
@@ -487,7 +487,7 @@ TPMA_OBJECT_Unmarshal(TPMA_OBJECT *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size); /* libtpms changed */
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (*target & TPMA_OBJECT_reserved) {
@@ -505,7 +505,7 @@ TPMA_SESSION_Unmarshal(TPMA_SESSION *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT8_Unmarshal((UINT8 *)target, buffer, size);  
+	rc = UINT8_Unmarshal((UINT8 *)target, buffer, size);  /* libtpms changed */
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (*target & TPMA_SESSION_reserved) {
@@ -523,7 +523,7 @@ TPMA_LOCALITY_Unmarshal(TPMA_LOCALITY *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT8_Unmarshal((UINT8 *)target, buffer, size);  
+	rc = UINT8_Unmarshal((UINT8 *)target, buffer, size);  /* libtpms changed */
     }
     return rc;
 }
@@ -536,7 +536,7 @@ TPMA_CC_Unmarshal(TPMA_CC *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size); /* libtpms changed */
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (*target & TPMA_CC_reserved) {
@@ -4228,7 +4228,7 @@ TPMA_NV_Unmarshal(TPMA_NV *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  
+	rc = UINT32_Unmarshal((UINT32 *)target, buffer, size);  /* libtpms changed */
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (*target & TPMA_NV_RESERVED) {

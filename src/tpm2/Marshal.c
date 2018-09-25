@@ -335,7 +335,7 @@ UINT16
 TPMA_SESSION_Marshal(TPMA_SESSION *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal((UINT8 *)source, buffer, size);
+    written += UINT8_Marshal((UINT8 *)source, buffer, size); /* libtpms changed */
     return written;
 }
 
@@ -345,7 +345,7 @@ UINT16
 TPMA_LOCALITY_Marshal(TPMA_LOCALITY *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT8_Marshal((UINT8 *)source, buffer, size);
+    written += UINT8_Marshal((UINT8 *)source, buffer, size); /* libtpms changed */
     return written;
 }
 
@@ -1369,6 +1369,7 @@ TPMS_SIG_SCHEME_ECDAA_Marshal(TPMS_SIG_SCHEME_ECDAA *source, BYTE **buffer, INT3
     written += TPMS_SCHEME_ECDAA_Marshal(source, buffer, size);
     return written;
 }
+/* libtpms added begin */
 UINT16
 TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2 *source, BYTE **buffer, INT32 *size)
 {
@@ -1376,6 +1377,7 @@ TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2 *source, BYTE **buffer, INT32 *s
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
     return written;
 }
+/* libtpms added end */
 
 /* Table 2:153 - Definition of Types for Encryption Schemes (TypedefTable()) */
 
@@ -1795,6 +1797,7 @@ TPMS_SIGNATURE_ECDAA_Marshal(TPMS_SIGNATURE_ECDAA *source, BYTE **buffer, INT32 
     return written;
 }
 
+/* libtpms added begin */
 UINT16
 TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2 *source, BYTE **buffer, INT32 *size)
 {
@@ -1802,6 +1805,7 @@ TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2 *source, BYTE **buffer, INT32 *siz
     written += TPMS_SIGNATURE_ECC_Marshal(source, buffer, size);
     return written;
 }
+/* libtpms added end */
 
 UINT16
 TPMS_SIGNATURE_ECSCHNORR_Marshal(TPMS_SIGNATURE_ECSCHNORR *source, BYTE **buffer, INT32 *size)
@@ -2121,7 +2125,7 @@ UINT16
 TPMA_NV_Marshal(TPMA_NV *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += UINT32_Marshal((UINT32 *)source, buffer, size);
+    written += UINT32_Marshal((UINT32 *)source, buffer, size); /* libtpms changed */
     return written;
 }
 

@@ -62,17 +62,17 @@
 /* 9.2	_TPM_Init */
 #include "Tpm.h"
 #include "_TPM_Init_fp.h"
-#include "StateMarshal.h"
+#include "StateMarshal.h"   /* libtpms added */
 // This function is used to process a _TPM_Init indication.
 LIB_EXPORT void
 _TPM_Init(
 	  void
 	  )
 {
-    BOOL restored = FALSE;
+    BOOL restored = FALSE;  /* libtpms added */
 
     g_powerWasLost = g_powerWasLost | _plat__WasPowerLost();
-#if SIMULATION && !defined NDEBUG
+#if SIMULATION && !defined NDEBUG  /* libtpms changed */
     // If power was lost and this was a simulation, put canary in RAM used by NV
     // so that uninitialized memory can be detected more easily
     if(g_powerWasLost)
@@ -96,7 +96,7 @@ _TPM_Init(
     // Initialize the NvEnvironment.
     g_nvOk = NvPowerOn();
     // Initialize cryptographic functions
-    g_inFailureMode |= (CryptInit() == FALSE); // stefanb
+    g_inFailureMode |= (CryptInit() == FALSE); /* libtpms changed */
     if(!g_inFailureMode)
 	{
 	    // Load the persistent data
@@ -107,9 +107,11 @@ _TPM_Init(
 	    // Start clock. Need to do this after NV has been restored.
 	    TimePowerOn();
 
+            /* libtpms added begin */
             VolatileLoad(&restored);
             if (restored)
                 NVShadowRestore();
+	    /* libtpms added end */
 	}
     return;
 }
@@ -251,11 +253,10 @@ TPM2_Startup(
 	    // the NV totalResetCount when incrementing would make it 0. When the
 	    // TPM starts up again, the old value of totalResetCount will be read
 	    // and we will get right back to here with the increment failing.
-#if 0
-	    // libtpms: disable this
+#if 0   /* libtpms added */
 	    if(gp.totalResetCount == 0)
 		FAIL(FATAL_ERROR_INTERNAL);
-#endif
+#endif  /* libtpms added */
 	    // Write total reset counter to NV
 	    NV_SYNC_PERSISTENT(totalResetCount);
 	    // Reset restartCount

@@ -82,7 +82,7 @@
 #define  SET      1
 #define  CLEAR    0
 /* From Vendor-Specific: Table 1 - Defines for Processor Values */
-#if defined __FreeBSD__ || defined __DragonFly__
+#if defined __FreeBSD__ || defined __DragonFly__   /* libtpms added begin */
 # include <sys/endian.h>
 #elif defined __APPLE__
 # include <libkern/OSByteOrder.h>
@@ -109,7 +109,7 @@
  #define  LITTLE_ENDIAN_TPM    YES
 #else
  #error Unsupported OS
-#endif
+#endif                                             /* libtpms added end */
 #ifndef  BIG_ENDIAN_TPM       
 #define  BIG_ENDIAN_TPM       NO
 #endif
@@ -154,14 +154,14 @@
     MAX(CAMELLIA_128_BLOCK_SIZE_BYTES, 0)
 
 /* From Vendor-Specific: Table 4 - Defines for Implemented Curves */
-#define  ECC_NIST_P192         YES
-#define  ECC_NIST_P224         YES
+#define  ECC_NIST_P192         YES  /* libtpms enabled */
+#define  ECC_NIST_P224         YES  /* libtpms enabled */
 #define  ECC_NIST_P256         YES
 #define  ECC_NIST_P384         YES
-#define  ECC_NIST_P521         YES
+#define  ECC_NIST_P521         YES  /* libtpms enabled */
 #define  ECC_BN_P256           YES
-#define  ECC_BN_P638           YES
-#define  ECC_SM2_P256          YES
+#define  ECC_BN_P638           YES  /* libtpms enabled */
+#define  ECC_SM2_P256          YES  /* libtpms enabled */
 #define  ECC_CURVES							\
     {TPM_ECC_BN_P256, TPM_ECC_BN_P638, TPM_ECC_NIST_P192, TPM_ECC_NIST_P224, \
      TPM_ECC_NIST_P256, TPM_ECC_NIST_P384, TPM_ECC_NIST_P521, TPM_ECC_SM2_P256}
@@ -185,7 +185,7 @@
 
 /* From Vendor-Specific: Table 7 - Defines for Implementation Values */
 #define  FIELD_UPGRADE_IMPLEMENTED      NO
-#ifdef TPM_POSIX
+#ifdef TPM_POSIX                                            /* libtpms added begin */
 # include <openssl/bn.h>
 # ifdef THIRTY_TWO_BIT
 #  define RADIX_BITS                     32
@@ -198,8 +198,9 @@
 # endif
 #endif
 #ifdef TPM_WINDOWS
-#define  RADIX_BITS                     32	/* kgold */
+#define  RADIX_BITS                     32	/* kgold */ /* libtpms added end */
 #endif
+
 #define  HASH_ALIGNMENT                 4
 #define  SYMMETRIC_ALIGNMENT            4
 #define  HASH_LIB                       OSSL
@@ -226,7 +227,7 @@
 #define  MAX_NV_INDEX_SIZE              2048
 #define  MAX_NV_BUFFER_SIZE             1024
 #define  MAX_CAP_BUFFER                 1024
-#define  NV_MEMORY_SIZE                 (128 * 1024)
+#define  NV_MEMORY_SIZE                 (128 * 1024) /* libtpms changed */
 #define  MIN_COUNTER_INDICES            8
 #define  NUM_STATIC_PCR                 16
 #define  MAX_ALG_LIST_SIZE              64
@@ -234,8 +235,8 @@
 #define  CONTEXT_ENCRYPT_ALGORITHM      AES
 #define  NV_CLOCK_UPDATE_INTERVAL       12
 #define  NUM_POLICY_PCR                 1
-#define  MAX_COMMAND_SIZE               TPM2_GetBufferSize()
-#define  MAX_RESPONSE_SIZE              TPM2_GetBufferSize()
+#define  MAX_COMMAND_SIZE               TPM2_GetBufferSize() /* libtpms changed */
+#define  MAX_RESPONSE_SIZE              TPM2_GetBufferSize() /* libtpms changed */
 #define  ORDERLY_BITS                   8
 #define  MAX_SYM_DATA                   128
 #define  MAX_RNG_ENTROPY_SIZE           64
@@ -260,12 +261,12 @@
 #define ALG_ECDAA                       (ALG_YES && ALG_ECC)
 #define ALG_ECDH                        (ALG_YES && ALG_ECC)
 #define ALG_ECDSA                       (ALG_YES && ALG_ECC)
-#define ALG_ECMQV                       (ALG_YES && ALG_ECC)
+#define ALG_ECMQV                       (ALG_YES && ALG_ECC) /* libtpms enabled */
 #define ALG_ECSCHNORR                   (ALG_YES && ALG_ECC)
 #define ALG_HMAC                        ALG_YES
 #define ALG_KDF1_SP800_108              ALG_YES
 #define ALG_KDF1_SP800_56A              (ALG_YES && ALG_ECC)
-#define ALG_KDF2                        ALG_YES
+#define ALG_KDF2                        ALG_YES              /* libtpms enabled */
 #define ALG_KEYEDHASH                   ALG_YES
 #define ALG_MGF1                        ALG_YES
 #define ALG_OAEP                        (ALG_YES && ALG_RSA)
@@ -279,11 +280,11 @@
 #define ALG_SHA256                      ALG_YES
 #define ALG_SHA384                      ALG_YES
 #define ALG_SHA512                      ALG_YES
-#define ALG_SM2                         (ALG_YES && ALG_ECC)
+#define ALG_SM2                         (ALG_YES && ALG_ECC) /* libtpms enabled */
 #define ALG_SM3_256                     ALG_NO
 #define ALG_SM4                         ALG_NO
 #define ALG_SYMCIPHER                   ALG_YES
-#define ALG_TDES                        ALG_YES
+#define ALG_TDES                        ALG_YES              /* libtpms enabled */
 #define ALG_XOR                         ALG_YES
 
 /* From TCG Algorithm Registry: Table 2 - Definition of TPM_ALG_ID Constants */

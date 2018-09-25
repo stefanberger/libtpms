@@ -296,6 +296,7 @@ BnPointTo2B(
 }
 #endif // TPM_ALG_ECC
 
+/* libtpms added begin */
 LIB_EXPORT int
 Bn2bin(bigConst       bn,
        unsigned char *buffer,
@@ -332,4 +333,4 @@ Bn2bin(bigConst       bn,
 
     return t;
 }
-
+/* libtpms added end */

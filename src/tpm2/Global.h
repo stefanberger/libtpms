@@ -123,7 +123,7 @@ typedef UINT32          CLOCK_NONCE;
    OBJECT_ATTRIBUTES is used in the definition of the OBJECT data type. */
 typedef struct
 {
-#if LITTLE_ENDIAN_TPM == YES
+#if LITTLE_ENDIAN_TPM == YES                          /* libtpms added */
     unsigned            publicOnly : 1;     //0) SET if only the public portion of
     //   an object is loaded
     unsigned            epsHierarchy : 1;   //1) SET if the object belongs to EPS
@@ -161,9 +161,9 @@ typedef struct
     //        parent
     unsigned            external : 1;       //17) SET when the object is loaded with
     //    TPM2_LoadExternal();
-    unsigned            reserved : 14;      //18-31)
-#endif
-#if BIG_ENDIAN_TPM == YES
+    unsigned            reserved : 14;      //18-31)  /* libtpms added */
+#endif                                                /* libtpms added */
+#if BIG_ENDIAN_TPM == YES                             /* libtpms added begin */
     unsigned            reserved : 14;      //18-31)
     unsigned            external : 1;       //17) SET when the object is loaded with
     unsigned            derivation : 1;     //16) SET when the key is a derivation
@@ -184,7 +184,7 @@ typedef struct
     unsigned            ppsHierarchy : 1;   //2) SET if the object belongs to PPS
     unsigned            epsHierarchy : 1;   //1) SET if the object belongs to EPS
     unsigned            publicOnly : 1;     //0) SET if only the public portion of
-#endif
+#endif                                                /* libtpms added end */
 } OBJECT_ATTRIBUTES;
 /* An OBJECT structure holds the object public, sensitive, and meta-data associated. This structure
    is implementation dependent. For this implementation, the structure is not optimized for space
@@ -210,7 +210,7 @@ typedef struct OBJECT
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
 
-    // libtpms: OBJECT lies in NVRAM; to avoid that it needs different number
+    // libtpms added: OBJECT lies in NVRAM; to avoid that it needs different number
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
     // same size; simple padding at the end works here
     UINT32              _pad;
@@ -255,7 +255,7 @@ typedef UINT32          AUTH_ROLE;
    within the SESSION structure. */
 typedef struct SESSION_ATTRIBUTES
 {
-#if LITTLE_ENDIAN_TPM == YES
+#if LITTLE_ENDIAN_TPM == YES                     /* libtpms added */
     unsigned    isPolicy : 1;           //1) SET if the session may only be used
     //   for policy
     unsigned    isAudit : 1;            //2) SET if the session is used for audit
@@ -303,9 +303,9 @@ typedef struct SESSION_ATTRIBUTES
     unsigned    isTemplateSet : 1;      //14) SET if the templateHash needs to be
     //    checked for Create, CreatePrimary, or
     //    CreateLoaded.
-    unsigned    _reserved : 18;         //15-32
-#endif
-#if BIG_ENDIAN_TPM == YES
+    unsigned    _reserved : 18;         //15-32  /* libtpms added */
+#endif                                           /* libtpms added */
+#if BIG_ENDIAN_TPM == YES                        /* libtpms added begin */
     unsigned    _reserved : 18;         //15-32
     unsigned    isTemplateSet : 1;      //14) SET if the templateHash needs to be
     unsigned    nvWrittenState : 1;     //13) SET if TPMA_NV_WRITTEN is required to
@@ -321,7 +321,7 @@ typedef struct SESSION_ATTRIBUTES
     unsigned    isBound : 1;            //3) SET if the session is bound to with an
     unsigned    isAudit : 1;            //2) SET if the session is used for audit
     unsigned    isPolicy : 1;           //1) SET if the session may only be used
-#endif
+#endif                                           /* libtpms added end */
 } SESSION_ATTRIBUTES;
 /* The SESSION structure contains all the context of a session except for the associated
    contextID. */
@@ -882,6 +882,10 @@ extern STATE_RESET_DATA gr;
 /* c) a STATE_CLEAR_DATA structure */
 /* d) an ORDERLY_DATA structure */
 /* e) the user defined NV index space */
+
+/* libtpms added: to put certain data structure at fixed offsets
+ *                to give the ones below some room to expand
+ */
 #define NV_ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
 
@@ -890,7 +894,7 @@ extern STATE_RESET_DATA gr;
 #define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + sizeof(STATE_RESET_DATA))
 #define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + sizeof(STATE_CLEAR_DATA))
 #define NV_INDEX_RAM_DATA   NV_ROUNDUP(NV_ORDERLY_DATA + sizeof(ORDERLY_DATA),\
-                                       1024)
+                                       1024) /* libtpms added */
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
 /* 5.10.13 Global Macro Definitions */
@@ -909,22 +913,22 @@ extern STATE_RESET_DATA gr;
    GetClosestCommandIndex(). */
 typedef UINT16      COMMAND_INDEX;
 #define UNIMPLEMENTED_COMMAND_INDEX     ((COMMAND_INDEX)(~0))
-#if 0
+#if 0                                      /* libtpms added */
 typedef struct _COMMAND_FLAGS_
 {
-#if LITTLE_ENDIAN_TPM == YES
+#if LITTLE_ENDIAN_TPM == YES               /* libtpms added */
     unsigned    trialPolicy : 1;    //1) If SET, one of the handles references a
     //   trial policy and authorization may be
     //   skipped. This is only allowed for a policy
     //   command.
-    unsigned    reserved : 31;     //2-31)
+    unsigned    reserved : 31;     //2-31) /* libtpms added begin */
 #endif
 #if BIG_ENDIAN_TPM == YES
     unsigned    reserved : 31;     //2-31)
     unsigned    trialPolicy : 1;    //1) If SET, one of the handles references a
-#endif
+#endif                                     /* libtpms added end */
 } COMMAND_FLAGS;
-#endif
+#endif                                     /* libtpms added */
 /* This structure is used to avoid having to manage a large number of parameters being passed
    through various levels of the command input processing. */
 typedef struct _COMMAND_

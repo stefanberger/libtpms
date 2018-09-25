@@ -65,7 +65,7 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include <openssl/rand.h> 			
+#include <openssl/rand.h>   /* libtpms added */
 
 #include "PlatformData.h"
 #include "Platform_fp.h"
@@ -126,10 +126,11 @@ _plat__GetEntropy(
     uint32_t            rndNum;
     int32_t             ret;
     //
-    // libtpms added:
+    // libtpms added begin
     if (amount > 0 && RAND_bytes(entropy, amount) == 1)
         return amount;
     // fall back to 'original' method
+    // libtpms added end
 
     if(amount == 0)
 	{

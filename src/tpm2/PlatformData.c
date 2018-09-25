@@ -78,9 +78,10 @@ clock64_t            s_tpmTime;
 clock64_t            s_lastSystemTime;
 clock64_t            s_lastReportedTime;
 
-/* libtpms added: */
+/* libtpms added begin */
 int64_t              s_hostMonotonicAdjustTime; /* can be negative */
 uint64_t             s_suspendedElapsedTime;
+/* libtpms added end */
 #endif
 /* From LocalityPlat.c */
 unsigned char        s_locality;

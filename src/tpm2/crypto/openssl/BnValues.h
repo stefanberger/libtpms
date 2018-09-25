@@ -93,7 +93,7 @@ typedef uint64_t    crypt_uword_t;
 typedef int64_t     crypt_word_t;
 #   define TO_CRYPT_WORD_64             BIG_ENDIAN_BYTES_TO_UINT64
 #   define TO_CRYPT_WORD_32(a, b, c, d) TO_CRYPT_WORD_64(0, 0, 0, 0, a, b, c, d)
-#define BN_PAD      0
+#define BN_PAD      0    /* libtpms added */
 #elif RADIX_BITS == 32
 #define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_32((x))
 typedef uint32_t    crypt_uword_t;
@@ -102,7 +102,7 @@ typedef int32_t     crypt_word_t;
     BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h),				\
     BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
 #  define TO_CRYPT_WORD_32 		BIG_ENDIAN_BYTES_TO_UINT32
-#define BN_PAD      1
+#define BN_PAD      1    /* libtpms added */
 #endif
 #define MAX_CRYPT_UWORD (~((crypt_uword_t)0))
 #define MAX_CRYPT_WORD  ((crypt_word_t)(MAX_CRYPT_UWORD >> 1))
@@ -117,7 +117,7 @@ typedef int32_t     crypt_word_t;
 #define BN_STRUCT_DEF(count) struct {			    \
 	crypt_uword_t       allocated;			    \
 	crypt_uword_t       size;			    \
-	crypt_uword_t       d[count + BN_PAD + BN_PAD + BN_PAD]; \
+	crypt_uword_t       d[count + BN_PAD + BN_PAD + BN_PAD]; /* libtpms changed */ \
     }
 typedef BN_STRUCT_DEF(1) bignum_t;
 #ifndef bigNum

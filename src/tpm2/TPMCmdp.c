@@ -332,8 +332,7 @@ _rpc__Shutdown(
     return;
 }
 
-
-// Extensions
+/* libtpms added begin */
 static BOOL tpmEstablished;
 
 void
@@ -360,3 +359,4 @@ _rpc__Signal_IsPowerOn(void)
 {
     return s_isPowerOn;
 }
+/* libtpms added end */

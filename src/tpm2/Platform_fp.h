@@ -379,9 +379,10 @@ _plat__GetUnique(
 		 unsigned char       *b              // output buffer
 		 );
 
-/* libtpms: */
+/* libtpms added begin */
 #include <time.h>
 void ClockAdjustPostResume(UINT64 backthen, BOOL timesAreRealtime);
 uint64_t ClockGetTime(clockid_t clk_id);
+/* libtpms added end */
 
 #endif  // _PLATFORM_FP_H_
