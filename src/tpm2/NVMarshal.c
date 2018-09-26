@@ -1455,7 +1455,7 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
         if (data->size > data->allocated) {
             TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %zu than "
                                 "allocated %zu\n",
-                                data->size, data->allocated);
+                                (size_t)data->size, (size_t)data->allocated);
             rc = TPM_RC_SIZE;
         }
     }
@@ -4003,12 +4003,12 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
             break;
         }
         /* write data size before array */
-        datasize = nrh->size - sizeof(NV_RAM_HEADER);
-        if ((int)datasize < 0) {
+        if (nrh->size < sizeof(NV_RAM_HEADER)) {
             TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: datasize corrupted: %d\n",
                                 (int)datasize);
             break;
         }
+        datasize = nrh->size - sizeof(NV_RAM_HEADER);
         written += UINT16_Marshal(&datasize, buffer, size);
         if (datasize > 0) {
             /* append the data */
