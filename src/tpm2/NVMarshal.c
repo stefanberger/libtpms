@@ -805,7 +805,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
                    const TPML_PCR_SELECTION *pcrAllocated)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    UINT16 array_size, needed_size;
+    UINT16 array_size, needed_size = 0;
     NV_HEADER hdr;
     TPM_ALG_ID algid;
     BOOL end = FALSE;
@@ -873,6 +873,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
                 TPMLIB_LogTPM2Error("PCR_SAVE: Unsupported algid %d.",
                                     algid);
                 rc = TPM_RC_BAD_PARAMETER;
+                t = NULL;
             }
         }
         if (t) {
@@ -994,7 +995,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
     NV_HEADER hdr;
     BOOL end = FALSE;
     BYTE *t = NULL;
-    UINT16 needed_size, array_size;
+    UINT16 needed_size = 0, array_size;
     TPM_ALG_ID algid;
     UINT64 algs_needed = pcrbanks_algs_active(pcrAllocated);
 
@@ -1048,6 +1049,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
                 TPMLIB_LogTPM2Error("PCR: Unsupported algid %d.",
                                     algid);
                 rc = TPM_RC_BAD_PARAMETER;
+                t = NULL;
             }
         }
         if (t) {
