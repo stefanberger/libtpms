@@ -2001,7 +2001,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
     TPM_DELEGATE_SENSITIVE	s1DelegateSensitive;
     uint32_t			delegateRowIndex;
     TPM_DELEGATE_TABLE_ROW	*d1DelegateTableRow;
-    TPM_SECRET			*a1AuthValue;
+    TPM_SECRET			*a1AuthValue = NULL;
     TPM_FAMILY_TABLE_ENTRY	*familyRow;		/* family table row containing familyID */
 
     TPM_BOOL		got_handle = FALSE;
@@ -3042,12 +3042,12 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     TPM_BOOL			auditStatus;		/* audit the ordinal */
     TPM_BOOL			transportEncrypt;	/* wrapped in encrypted transport session */
     TPM_STORE_BUFFER		b1_sbuffer;		/* serialization of b1 */
-    TPM_STCLEAR_DATA		*v1StClearData;
+    TPM_STCLEAR_DATA		*v1StClearData = NULL;
     TPM_KEY_HANDLE_ENTRY	*tpm_key_handle_entry;	/* key table entry for the handle */
     TPM_AUTH_SESSION_DATA	*tpm_auth_session_data; /* session table entry for the handle */
     TPM_TRANSPORT_INTERNAL	*tpm_transport_internal; /* transport table entry for the handle */
     TPM_DAA_SESSION_DATA	*tpm_daa_session_data;	/* daa session table entry for the handle */
-    TPM_NONCE			*n1ContextNonce;
+    TPM_NONCE			*n1ContextNonce = NULL;
     TPM_SYMMETRIC_KEY_TOKEN 	k1ContextKey = NULL;
     TPM_STORE_BUFFER		r1ContextSensitive; /* serialization of sensitive data clear text */
     TPM_CONTEXT_SENSITIVE	c1ContextSensitive;
@@ -4930,7 +4930,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     TPM_BOOL			transportEncrypt;	/* wrapped in encrypted transport session */
     TPM_AUTH_SESSION_DATA	*tpm_auth_session_data; /* session table entry for the handle */
     TPM_BOOL			isZero;			/* contextNonceSession not set yet */
-    TPM_STCLEAR_DATA		*v1StClearData;
+    TPM_STCLEAR_DATA		*v1StClearData = NULL;
     uint32_t			contextIndex;		/* free index in context list */
     uint32_t			space;			/* free space in context list */
     TPM_CONTEXT_SENSITIVE	contextSensitive;

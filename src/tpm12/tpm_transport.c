@@ -1329,7 +1329,7 @@ TPM_RESULT TPM_Process_EstablishTransport(tpm_state_t *tpm_state,
     TPM_KEY			*encKey = NULL;		/* the key specified by encHandle */
     TPM_BOOL			parentPCRStatus;
     TPM_SECRET			*encKeyUsageAuth;
-    TPM_AUTHDATA		*a1AuthData;
+    TPM_AUTHDATA		*a1AuthData = NULL;
     TPM_TRANSPORT_INTERNAL	*t1TpmTransportInternal;
     TPM_TRANSPORT_AUTH		k1TransportAuth;
     uint32_t			blockSize;		/* symmetric key block size, not used */
