@@ -4494,6 +4494,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     memset(&od, 0, sizeof(od));
     memset(&srd, 0, sizeof(srd));
     memset(&scd, 0, sizeof(scd));
+    memset(indexOrderlyRam, 0, sizeof(indexOrderlyRam));
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
