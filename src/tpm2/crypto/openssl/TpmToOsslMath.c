@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1314 2018-08-28 14:25:12Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -72,7 +72,6 @@
 #include "Tpm.h"
 #if MATH_LIB == OSSL
 #include "TpmToOsslMath_fp.h"
-#include "BnConvert_fp.h"
 /* B.2.3.2.3.1. OsslToTpmBn() */
 /* This function converts an OpenSSL() BIGNUM to a TPM bignum. In this implementation it is assumed
    that OpenSSL() used the same format for a big number as does the TPM -- an array of native-endian
@@ -103,18 +102,15 @@ BigInitialized(
 	       bigConst            initializer
 	       )
 {
+    BIGNUM *toInit = NULL;
     unsigned char buffer[LARGEST_NUMBER + 1];
     NUMBYTES buffer_len = (NUMBYTES )sizeof(buffer);
-    BIGNUM *toInit =  BN_new();
-
-    if(toInit == NULL || initializer == NULL) {
-        BN_free(toInit);
+    
+    if (initializer == NULL) {
 	return NULL;
     }
-
-    buffer_len = Bn2bin(initializer, buffer, buffer_len);
-    BN_bin2bn(buffer, buffer_len, toInit);
-
+    BnToBytes(initializer, buffer, &buffer_len);	/* TPM to bin */
+    toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */
     return toInit;
 }
 
@@ -131,10 +127,9 @@ void BIGNUM_print(
 		  BOOL             eol
 		  )
 {
+    BN_ULONG        *d;
     int              i;
     int              notZero = FALSE;
-    unsigned char    buffer[MAX_RSA_KEY_BYTES + 1];
-    int              buffer_len;
     if(label != NULL)
 	printf("%s", label);
     if(a == NULL)
@@ -142,17 +137,21 @@ void BIGNUM_print(
 	    printf("NULL");
 	    goto done;
 	}
-    if (BN_is_negative(a))
+    if (a->neg)
 	printf("-");
-
-    buffer_len = BN_bn2bin(a, buffer);
-    for (i = 0; i < buffer_len; i++)
+    for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
 	{
-	    notZero = notZero || (buffer[i] != 0);
-	    if(notZero)
-	        printf("%02x", buffer[i]);
-	    if (!notZero)
-	        printf("0");
+	    int         j;
+	    BN_ULONG    l = *d--;
+	    for(j = BN_BITS2 - 8; j >= 0; j -= 8)
+		{
+		    BYTE    b = (BYTE)((l >> j) & 0xFF);
+		    notZero = notZero || (b != 0);
+		    if(notZero)
+			printf("%02x", b);
+		}
+	    if(!notZero)
+		printf("0");
 	}
  done:
     if(eol)

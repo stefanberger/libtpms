@@ -103,11 +103,6 @@ BnPointTo2B(
 	    bigPoint         ecP,           // IN: the values to be converted
 	    bigCurve         E              // IN: curve descriptor for the point
 	    );
-/* libtpms added begin */
-LIB_EXPORT int
-Bn2bin(bigConst    initializer,
-       unsigned char *buffer,
-       size_t         buffer_len);
-/* libtpms added end */
+
 
 #endif
