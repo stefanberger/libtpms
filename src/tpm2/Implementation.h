@@ -386,7 +386,6 @@
 #define  CONTEXT_ENCRYPT_ALGORITHM      AES
 #define  NV_CLOCK_UPDATE_INTERVAL       12
 #define  NUM_POLICY_PCR                 1
-#include "tpm_library_intern.h"
 #define  MAX_COMMAND_SIZE               TPM2_GetBufferSize()
 #define  MAX_RESPONSE_SIZE              TPM2_GetBufferSize()
 #define  ORDERLY_BITS                   8

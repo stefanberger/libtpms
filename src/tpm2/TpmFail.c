@@ -70,6 +70,10 @@
        does not use any of the structures in TpmTypes.h and only include it for the #defines of the
        capabilities, properties, and command code values. */
 #include "TpmTypes.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
+#include "tpm_library_intern.h"
+
 /*     9.17.2 Typedefs */
 /* These defines are used primarily for sizing of the local response buffer. */
 typedef struct

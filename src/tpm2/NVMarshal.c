@@ -63,8 +63,6 @@
 
 #include "assert.h"
 
-#include "tpm_library_intern.h"
-
 #define SESSION_PROCESS_C
 #define NV_C
 #define OBJECT_C
@@ -78,6 +76,9 @@
 #include "Global.h"
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
+#include "tpm_library_intern.h"
 
 /*
  * The TPM2 maintains a pcrAllocated shadow variable; the current active one is

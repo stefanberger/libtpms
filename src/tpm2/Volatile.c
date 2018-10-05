@@ -73,6 +73,7 @@
 #include "NVMarshal.h"
 #include "Volatile.h"
 
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
 
 TPM_RC

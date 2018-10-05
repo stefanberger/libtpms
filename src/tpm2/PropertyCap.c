@@ -64,6 +64,9 @@
 /* This file contains the functions that are used for accessing the TPM_CAP_TPM_PROPERTY values. */
 /* 9.14.2 Includes */
 #include "Tpm.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
+#include "tpm_library_intern.h"
 /* 9.14.3 Functions */
 /* 9.14.3.1 TPMPropertyIsDefined() */
 /* This function accepts a property selection and, if so, sets value to the value of the

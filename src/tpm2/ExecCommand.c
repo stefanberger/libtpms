@@ -64,6 +64,10 @@
    TPM command execution. */
 #include "Tpm.h"
 #include "ExecCommand_fp.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
+#include "tpm_library_intern.h"
+
 /* Uncomment this next #include if doing static command/response buffer sizing */
 // #include "CommandResponseSizes_fp.h"
 // The function performs the following steps.
