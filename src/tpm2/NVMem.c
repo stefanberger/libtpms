@@ -72,10 +72,7 @@
 #include "Platform_fp.h"
 #include "NVMarshal.h"
 
-#include "tpm_library_intern.h"
-#include "tpm_error.h"
-#include "tpm_nvfilename.h"
-#include "tpm_memory.h"
+#include "LibtpmsCallbacks.h"
 
 /* C.6.3. Functions */
 /* C.6.3.1. _plat__NvErrors() */
@@ -107,59 +104,18 @@ _plat__NVEnable(
 		void            *platParameter  // IN: platform specific parameters
 		)
 {
+#ifdef TPM_LIBTPMS_CALLBACKS
+    int ret;
+#endif
     NOT_REFERENCED(platParameter);          // to keep compiler quiet
     // Start assuming everything is OK
     s_NV_unrecoverable = FALSE;
     s_NV_recoverable = FALSE;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
-    unsigned char *data = NULL;
-    uint32_t length = 0;
-    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
-    TPM_RC rc;
-    bool is_empty_state;
-
-    /* try to get state blob set via TPMLIB_SetState() */
-    GetCachedState(TPMLIB_STATE_PERMANENT, &data, &length, &is_empty_state);
-    if (is_empty_state) {
-        memset(s_NV, 0, NV_MEMORY_SIZE);
-        return 0;
-    }
-
-    if (data == NULL && cbs->tpm_nvram_loaddata) {
-        uint32_t tpm_number = 0;
-        const char *name = TPM_PERMANENT_ALL_NAME;
-        TPM_RESULT ret;
-
-        ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
-        switch (ret) {
-        case TPM_RETRY:
-            if (!cbs->tpm_nvram_storedata) {
-                return -1;
-            }
-            memset(s_NV, 0, NV_MEMORY_SIZE);
-            return 0;
-
-        case TPM_SUCCESS:
-            /* got the data -- unmarshal them... */
-            break;
-
-        case TPM_FAIL:
-        default:
-            return -1;
-        }
-    }
-
-    if (data) {
-        unsigned char *buffer = data;
-        INT32 size = length;
-
-        rc = PERSISTENT_ALL_Unmarshal(&buffer, &size);
-        free(data);
-        if (rc != TPM_RC_SUCCESS)
-            return -1;
-         return 0;
-    }
+    ret = libtpms_plat__NVEnable();
+    if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
+        return ret;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
 #ifdef FILE_BACKED_NV
@@ -225,9 +181,8 @@ _plat__NVDisable(
 		 )
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
-    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
-
-    if (cbs->tpm_nvram_loaddata)
+    int ret = libtpms_plat__NVDisable();
+    if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
         return;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
@@ -256,12 +211,8 @@ _plat__IsNvAvailable(
 	return 1;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
-    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
-
-    if (cbs->tpm_nvram_loaddata &&
-        cbs->tpm_nvram_storedata) {
+    if (libtpms_plat__IsNvAvailable() == 1)
         return 0;
-    }
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
 #ifdef FILE_BACKED_NV
@@ -362,32 +313,9 @@ _plat__NvCommit(
 		)
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
-    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
-
-#if 0
-    #include "Test.h"
-    Test_NvChip_UnMarshal();
-#endif
-
-    if (cbs->tpm_nvram_storedata) {
-        uint32_t tpm_number = 0;
-        const char *name = TPM_PERMANENT_ALL_NAME;
-        TPM_RESULT ret;
-        BYTE *buf;
-        uint32_t buflen;
-
-        ret = TPM2_PersistentAllStore(&buf, &buflen);
-        if (ret != TPM_SUCCESS)
-            return ret;
-
-        ret = cbs->tpm_nvram_storedata(buf, buflen,
-                                       tpm_number, name);
-        free(buf);
-        if (ret == TPM_SUCCESS)
-            return 0;
-
-        return -1;
-    }
+    int ret = libtpms_plat__NvCommit();
+    if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
+        return ret;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
 #ifdef FILE_BACKED_NV

@@ -263,6 +263,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm_tpm2_interface.c \
 	tpm_tpm2_tis.c \
 	\
+	tpm2/LibtpmsCallbacks.c \
 	tpm2/NVMarshal.c \
 	tpm2/StateMarshal.c \
 	tpm2/Volatile.c
@@ -478,6 +479,7 @@ noinst_HEADERS += \
 	tpm2/VerifySignature_fp.h \
 	tpm2/ZGen_2Phase_fp.h \
 	\
+	tpm2/LibtpmsCallbacks.h \
 	tpm2/NVMarshal.h \
 	tpm2/StateMarshal.h \
 	tpm2/Test.h \
@@ -525,7 +527,7 @@ endif # LIBTPMS_USE_OPENSSL
 # we do not want to loose these modifications
 check:
 	n=`cd $(srcdir) && grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	exp=20; \
+	exp=21; \
 	if test $$n -ne $$exp; then \
 		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
 		exit 1; \
