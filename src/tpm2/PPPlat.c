@@ -66,8 +66,7 @@
 #include "PlatformData.h"
 #include "Platform_fp.h"
 
-#include "tpm_library_intern.h"
-#include "tpm_error.h"
+#include "LibtpmsCallbacks.h"
 
 /* C.10.3. Functions */
 /* C.10.3.1. _plat__PhysicalPresenceAsserted() */
@@ -81,18 +80,11 @@ _plat__PhysicalPresenceAsserted(
 				)
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
-    struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
+    BOOL pp;
+    int ret = libtpms_plat__PhysicalPresenceAsserted(&pp);
 
-    if (cbs->tpm_io_getphysicalpresence) {
-        TPM_BOOL pp = 0;
-        uint32_t tpm_number = 0;
-        TPM_RESULT res;
-
-        res = cbs->tpm_io_getphysicalpresence(&pp, tpm_number);
-        if (res == TPM_SUCCESS) {
-            return pp;
-        }
-    }
+    if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
+        return pp;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
     // Do not know how to check physical presence without real hardware.
