@@ -64,7 +64,6 @@
 #include "tpm_error.h"
 #include "tpm_library.h"
 #include "tpm_library_intern.h"
-#include "tpm_memory.h"
 #include "tpm_nvfilename.h"
 
 static const struct tags_and_indices {

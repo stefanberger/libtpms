@@ -2,13 +2,14 @@
 
 #include "config.h"
 
+#include "StateMarshal.h"
+#include "Volatile.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
 #include "tpm_nvfilename.h"
 #include "tpm_error.h"
 #include "tpm_memory.h"
-
-#include "StateMarshal.h"
-#include "Volatile.h"
 
 UINT16
 VolatileSave(BYTE **buffer, INT32 *size)

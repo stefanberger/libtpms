@@ -40,11 +40,7 @@
 
 #include <stdint.h>
 
-/* tpm2/TPM_Types.h gives type definition clashes with TPM 1.2 headers */
-typedef uint32_t UINT32;
-
-#include "tpm_library_intern.h"
-#include "tpm_error.h"
+#include "tpm2/TpmTypes.h"
 #include "tpm2/TpmBuildSwitches.h"
 #include "tpm2/_TPM_Hash_Start_fp.h"
 #include "tpm2/_TPM_Hash_Data_fp.h"
@@ -52,6 +48,10 @@ typedef uint32_t UINT32;
 #include "tpm2/TpmTcpProtocol.h"
 #include "tpm2/Platform_fp.h"
 #include "tpm2/Simulator_fp.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
+#include "tpm_library_intern.h"
+#include "tpm_error.h"
 
 TPM_RESULT TPM2_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
 {

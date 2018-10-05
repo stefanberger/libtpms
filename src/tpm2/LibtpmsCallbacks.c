@@ -43,6 +43,7 @@
 #include "LibtpmsCallbacks.h"
 #include "NVMarshal.h"
 
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
 #include "tpm_error.h"
 #include "tpm_nvfilename.h"

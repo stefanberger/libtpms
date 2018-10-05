@@ -44,11 +44,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "tpm_error.h"
-#include "tpm_memory.h"
-#include "tpm_library_intern.h"
-#include "tpm_nvfilename.h"
-
 #ifndef LIB_EXPORT
 #define LIB_EXPORT
 #endif
@@ -63,7 +58,12 @@
 #include "tpm2/StateMarshal.h"
 #include "tpm2/PlatformData.h"
 #include "tpm2/Volatile.h"
+
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm12/tpm_nvfile.h" // TPM_NVRAM_Loaddata()
+#include "tpm_error.h"
+#include "tpm_library_intern.h"
+#include "tpm_nvfilename.h"
 
 extern BOOL      g_inFailureMode;
 

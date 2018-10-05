@@ -51,7 +51,9 @@ extern "C" {
 #endif
 
 /* 2.2.1 Basic data types rev 87 */
+#if !defined(TPM_HAVE_TPM2_DECLARATIONS)
 typedef unsigned char  BYTE;            /* Basic byte used to transmit all character fields.  */
+#endif
 typedef unsigned char  TPM_BOOL;        /* TRUE/FALSE field. TRUE = 0x01, FALSE = 0x00 Use TPM_BOOL
                                            because MS VC++ defines BOOL on Windows */
 
@@ -97,8 +99,10 @@ typedef uint16_t  TPM_PLATFORM_SPECIFIC; /* The platform specific spec to which 
 typedef uint32_t  TPM_COMMAND_CODE;	/* The command ordinal. */
 typedef uint32_t  TPM_CAPABILITY_AREA;	/* Identifies a TPM capability area. */
 typedef uint32_t  TPM_KEY_FLAGS;	/* Indicates information regarding a key. */
+#if !defined(TPM_HAVE_TPM2_DECLARATIONS)
 typedef uint32_t  TPM_ALGORITHM_ID;	/* Indicates the type of algorithm.  */
 typedef uint32_t  TPM_MODIFIER_INDICATOR; /* The locality modifier  */
+#endif
 typedef uint32_t  TPM_ACTUAL_COUNT;	/* The actual number of a counter.  */
 typedef uint32_t  TPM_TRANSPORT_ATTRIBUTES;	/* Attributes that define what options are in use
                                                    for a transport session */
@@ -111,7 +115,9 @@ typedef uint32_t  TPM_RESOURCE_TYPE;	/* The types of resources that a TPM may ha
                                            resources */
 typedef uint32_t  TPM_KEY_CONTROL;	/* Allows for controlling of the key when loaded and how to
                                            handle TPM_Startup issues  */
+#if !defined(TPM_HAVE_TPM2_DECLARATIONS)
 typedef uint32_t  TPM_NV_INDEX;		/* The index into the NV storage area  */
+#endif
 typedef uint32_t  TPM_FAMILY_ID;	/* The family ID. Families ID's are automatically assigned a
                                            sequence number by the TPM. A trusted process can set the
                                            FamilyID value in an individual row to zero, which
@@ -129,7 +135,9 @@ typedef uint32_t  TPM_CMK_DELEGATE;	/* The restrictions placed on delegation of 
 typedef uint32_t  TPM_COUNT_ID;		/* The ID value of a monotonic counter  */
 typedef uint32_t  TPM_REDIT_COMMAND;	/* A command to execute  */
 typedef uint32_t  TPM_TRANSHANDLE;	/* A transport session handle  */
+#if !defined(TPM_HAVE_TPM2_DECLARATIONS)
 typedef uint32_t  TPM_HANDLE;		/* A generic handle could be key, transport etc.  */
+#endif
 typedef uint32_t  TPM_FAMILY_OPERATION;	/* What operation is happening  */
 
 /* Not in specification */

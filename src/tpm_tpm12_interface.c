@@ -54,7 +54,6 @@
 #include "tpm12/tpm_global.h"
 #include "tpm12/tpm_permanent.h"
 #include "tpm12/tpm_nvfile.h"
-#include "tpm_memory.h"
 
 TPM_RESULT TPM12_MainInit(void)
 {
