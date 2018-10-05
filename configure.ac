@@ -167,7 +167,7 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 
 # Some version of gcc fail with -Wstack-protector enabled
-TMP="$($CC -fstack-protector-strong 2>&1)"
+TMP="$($CC -fstack-protector-strong $srcdir/include/libtpms/tpm_error.h 2>&1)"
 if echo $TMP | $GREP 'unrecognized command line option' >/dev/null; then
   HARDENING_CFLAGS="-fstack-protector "
 else
