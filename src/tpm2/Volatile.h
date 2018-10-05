@@ -63,7 +63,6 @@
 
 #include "BaseTypes.h"
 
-typedef UINT32 TPM_RC;
 TPM_RC VolatileState_Load(BYTE **buffer, INT32 *size);
 UINT16 VolatileState_Save(BYTE **buffer, INT32 *size);
 
