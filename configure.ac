@@ -59,9 +59,19 @@ if test "$DEBUG" = "yes"; then
 fi
 AC_SUBST(DEBUG_DEFINES, $debug_defines)
 
-AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/test.syms],
-                   [have_version_script="yes"],
-                   [have_version_script="no"])
+# AX_CHECK_LINK_FLAG needs autoconf 2.64 or later
+have_version_script="no"
+m4_if(
+      m4_version_compare(
+                         m4_defn([AC_AUTOCONF_VERSION]),
+                         [2.64]),
+      -1,
+      [],
+      [AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/test.syms],
+                          [have_version_script="yes"],
+                          [])]
+)
+
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 
 cryptolib=freebl
