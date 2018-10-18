@@ -4413,7 +4413,7 @@ exit_size:
  * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
  * - NVRAM locations  (NV_USER_DYNAMIC)
  */
-#define PERSISTENT_ALL_VERSION 2
+#define PERSISTENT_ALL_VERSION 3
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
@@ -4426,6 +4426,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     UINT32 written = 0;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
     BLOCK_SKIP_INIT;
+    BOOL writeSuState;
 
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
     NvRead(&od, NV_ORDERLY_DATA, sizeof(od));
@@ -4437,12 +4438,16 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_ALL_VERSION,
-                                PERSISTENT_ALL_MAGIC, 1);
+                                PERSISTENT_ALL_MAGIC, 3);
     written += PACompileConstants_Marshal(buffer, size);
     written += PERSISTENT_DATA_Marshal(&pd, buffer, size);
     written += ORDERLY_DATA_Marshal(&od, buffer, size);
-    written += STATE_RESET_DATA_Marshal(&srd, buffer, size);
-    written += STATE_CLEAR_DATA_Marshal(&scd, buffer, size);
+    writeSuState = (pd.orderlyState & TPM_SU_STATE_MASK) == TPM_SU_STATE;
+    /* starting with v3 we only write STATE_RESET and STATE_CLEAR if needed */
+    if (writeSuState) {
+        written += STATE_RESET_DATA_Marshal(&srd, buffer, size);
+        written += STATE_CLEAR_DATA_Marshal(&scd, buffer, size);
+    }
     written += INDEX_ORDERLY_RAM_Marshal(indexOrderlyRam, sizeof(indexOrderlyRam),
                                          buffer, size);
     written += USER_NVRAM_Marshal(buffer, size);
@@ -4470,6 +4475,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     STATE_RESET_DATA srd;
     STATE_CLEAR_DATA scd;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+    BOOL readSuState = false;
 
     memset(&pd, 0, sizeof(pd));
     memset(&od, 0, sizeof(od));
@@ -4490,12 +4496,18 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
         rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        if (hdr.version < 3) {
+            /* STATE_RESET and STATE_CLEAR were always written before version 3 */
+            readSuState = true;
+        } else {
+            readSuState = (pd.orderlyState & TPM_SU_STATE_MASK) == TPM_SU_STATE;
+        }
         rc = ORDERLY_DATA_Unmarshal(&od, buffer, size);
     }
-    if (rc == TPM_RC_SUCCESS) {
+    if (rc == TPM_RC_SUCCESS && readSuState) {
         rc = STATE_RESET_DATA_Unmarshal(&srd, buffer, size);
     }
-    if (rc == TPM_RC_SUCCESS) {
+    if (rc == TPM_RC_SUCCESS && readSuState) {
         rc = STATE_CLEAR_DATA_Unmarshal(&scd, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {

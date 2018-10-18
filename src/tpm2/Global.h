@@ -533,6 +533,7 @@ extern  BOOL            g_StartupLocality3;
    locality 3. These flags are only relevant if after a TPM2_Shutdown(STATE). */
 #define PRE_STARTUP_FLAG	 0x8000
 #define STARTUP_LOCALITY_3   0x4000
+#define TPM_SU_STATE_MASK ~(PRE_STARTUP_FLAG | STARTUP_LOCALITY_3) // libtpms added
 #ifdef USE_DA_USED
 /*     5.10.10.15 g_daUsed */
 /* This location indicates if a DA-protected value is accessed during a boot cycle. If none has,
