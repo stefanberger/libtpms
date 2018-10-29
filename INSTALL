@@ -10,11 +10,12 @@ This document contains the following sections:
 Quick start:
 ------------
 
-The libtpms library can be built using the steps:
+The libtpms library can be built using the steps (after installing
+dependencies):
 
-    # ./bootstrap.sh
-    # ./configure
+    # ./autogen.sh --with-tpm2 --with-openssl --prefix=/usr
     # make
+    # make check
     # sudo make install
 
 Building libtpms:
@@ -22,19 +23,20 @@ Building libtpms:
 
 The configure script needs to be run first, and can be done using:
 
-./configure
+./autogen.sh --with-tpm2 --with-openssl
 
 By default, files will be installed in '/usr/local/lib', etc.  If you
 would like to have these files installed in '/usr/lib', etc, then run
-configure using:
+configure using the following command line. On some distributions it may
+be necessary to also pass --libdir=/lib64 (for 64 bit systems).
 
-./configure --prefix=/usr
+./autogen.sh --prefix=/usr --with-tpm2 --with-openssl
 
 For more details on configure options, run "./configure -h".
 
 Building libtpms can be done using:
 
-make clean all
+make all
 
 The library is known to build on Linux and Cygwin systems and possible
 other Operating Systems that use .so as library extensions.
@@ -43,7 +45,7 @@ On Linux systems, libtpms can be built with either one of the following
 crypto backends:
 
 - openssl
-- freebl
+- freebl (TPM 1.2 support only)
 
 On Cygwin only openssl is available and therefore can only be built with
 openssl.
@@ -52,15 +54,25 @@ To build for openssl, the following development packages must have been
 installed:
 
 Fedora/RedHat:
+- automake
+- autoconf
+- libtool
+- make
+- gcc
 - glibc-headers
 - openssl-devel
 
 Ubuntu:
-- libc6-dev
+- automake
+- autoconf
+- libtool
+- make
+- gcc
+- libc-dev
 - libssl-dev
 
-To build for freebl, the following development packages must have been
-installed prior to compilation:
+To build for freebl (TPM 1.2 support only), the following development
+packages must have been installed prior to compilation:
 
 Fedora/RedHat:
 - glibc-headers
@@ -76,14 +88,15 @@ Ubuntu:
 
 By default, libtpms is built with the openssl crypto library, which was
 shown above. To build with the freebl crypto library the following command
-line can be used:
+line can be used (TPM 1.2 support only):
 
-make CRYPTO_SUBSYSTEM=freebl clean all
+./autogen.sh --prefix=/usr
+make all install
 
 To verify that libtpms was built with freebl as the crypto backend, one
 can run:
 
-ldd /usr/lib/libtpms.so
+ldd /usr/lib/libtpms.so   or  ldd /usr/lib64/libtpms.so
 
 	linux-vdso.so.1 =>  (0x00007fff8d5ff000)
 	libgmp.so.3 => /usr/lib64/libgmp.so.3 (0x00007f5352a13000)
@@ -109,12 +122,6 @@ In case of openssl's libcrypto the output would be the following:
 	libdl.so.2 => /lib64/libdl.so.2 (0x00007fdb1ca65000)
 	libz.so.1 => /lib64/libz.so.1 (0x00007fdb1c84e000)
 	/lib64/ld-linux-x86-64.so.2 (0x0000003a1c000000)
-
-
-A debug build that prints out __lots__ of debugging information on the
-TPM level can be built by invoking make as follows:
-
-make CRYPTO_SUBSYSTEM=freebl BUILD_TYPE=debug
 
 
 Installing libtpms, include files and man pages:
