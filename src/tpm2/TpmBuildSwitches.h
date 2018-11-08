@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -317,6 +317,16 @@
 #   undef   USE_BIT_FIELD_STRUCTURES
 #   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO   libtpms: NO
 #endif
+
+//This define is used to enable any runtime checks of the interface between the cryptographic
+//library (e.g., OpenSSL()) and the thunking layer.
+
+#if !(defined LIBRARY_COMPATIBILITY_CHECK)				\
+    || ((LIBRARY_COMPATIBILITY_CHECK != NO) && (LIBRARY_COMPATIBILITY_CHECK != YES))
+#   undef   LIBRARY_COMPATIBILITY_CHECK
+#   define  LIBRARY_COMPATIBILITY_CHECK    NO        // Default: Either YES or NO
+#endif
+
 
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
