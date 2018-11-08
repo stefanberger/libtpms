@@ -276,7 +276,6 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptEccKeyExchange_fp.h \
 	tpm2/crypto/CryptEccMain_fp.h \
 	tpm2/crypto/CryptEccSignature_fp.h \
-	tpm2/crypto/CryptHashData.h \
 	tpm2/crypto/CryptHash_fp.h \
 	tpm2/crypto/CryptHash.h \
 	tpm2/crypto/CryptPrime_fp.h \
