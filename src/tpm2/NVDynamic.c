@@ -756,7 +756,8 @@ NvGetIndexData(
 	    // Get data from RAM buffer
 	    NV_RAM_REF           ramAddr = NvRamGetIndex(nvIndex->publicArea.nvIndex);
 	    pAssert(ramAddr != 0 && (size <=
-				     ((NV_RAM_HEADER *)ramAddr)->size - sizeof(NV_RAM_HEADER) - offset));
+				     ((NV_RAM_HEADER *)ramAddr)->size -
+				     sizeof(NV_RAM_HEADER) - offset));
 	    MemoryCopy(data, ramAddr + sizeof(NV_RAM_HEADER) + offset, size);
 	}
     else
