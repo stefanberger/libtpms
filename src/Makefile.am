@@ -187,7 +187,6 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/AuditCommands.c \
 	tpm2/Bits.c \
 	tpm2/BnConvert.c \
-	tpm2/BnEccData.c \
 	tpm2/BnMath.c \
 	tpm2/BnMemory.c \
 	tpm2/Cancel.c \
@@ -199,6 +198,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/CommandDispatcher.c \
 	tpm2/ContextCommands.c \
 	tpm2/Context_spt.c \
+	tpm2/CryptEccData.c \
 	tpm2/CryptSelfTest.c \
 	tpm2/CryptUtil.c \
 	tpm2/DA.c \
