@@ -3,7 +3,7 @@
 /*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: PlatformData.h 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -138,6 +138,8 @@ extern unsigned char s_locality;
 #if !SIMULATION
 #   undef       FILE_BACKED_NV
 #   define      FILE_BACKED_NV          YES          // libtpms: write NvChip file if no callbacks are set
+#else
+#error Do not define SIMULATION for libtpms!
 #endif // SIMULATION
 
 extern unsigned char     s_NV[NV_MEMORY_SIZE];
