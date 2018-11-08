@@ -3,7 +3,7 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: CryptSym.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -158,7 +158,6 @@ CryptGetSymmetricBlockSize(
 /* 10.2.20.5 Symmetric Encryption */
 /* This function performs symmetric encryption based on the mode. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS if success */
 /* TPM_RC_SIZE dSize is not a multiple of the block size for an algorithm that requires it */
 /* TPM_RC_FAILURE Fatal error */
 LIB_EXPORT TPM_RC
@@ -302,7 +301,6 @@ CryptSymmetricEncrypt(
 /* This function performs symmetric decryption based on the mode. */
 /* Error Returns Meaning */
 /* TPM_RC_FAILURE A fatal error */
-/* TPM_RC_SUCCESS if success */
 /* TPM_RCS_SIZE dSize is not a multiple of the block size for an algorithm that requires it */
 LIB_EXPORT TPM_RC
 CryptSymmetricDecrypt(

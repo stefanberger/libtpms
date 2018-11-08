@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -115,7 +115,7 @@ ClearPoint2B(
    curveId. If there is no curve with the indicated ID, the function returns NULL. This function is
    in this module so that it can be called by GetCurve() data. */
 /* Return Values Meaning */
-/* NULL curve with the indicated TPM_ECC_CURVE value is not implemented */
+/* NULL curve with the indicated TPM_ECC_CURVE is not implemented */
 /* non-NULL pointer to the curve data */
 LIB_EXPORT const ECC_CURVE *
 CryptEccGetParametersByCurveId(
@@ -380,8 +380,8 @@ CryptEndCommit(
 /* 10.2.12.2.14 CryptEccGetParameters() */
 /* This function returns the ECC parameter details of the given curve */
 /* Return Values Meaning */
-/* TRUE Get parameters success */
-/* FALSE Unsupported ECC curve ID */
+/* TRUE success */
+/* FALSE unsupported ECC curve ID */
 BOOL
 CryptEccGetParameters(
 		      TPM_ECC_CURVE                curveId,       // IN: ECC curve ID
@@ -541,7 +541,7 @@ BnPointMult(
    (mod (q - 1)) and incremented by 1 (q is the order of the curve. This produces a value (d) such
    that 1 <= d < q. This is the method of FIPS 186-4 Section B.4.1 'Key Pair Generation Using Extra
    Random Value Meaning */
-/* TRUE		value generated */
+/* TRUE		success */
 /* FALSE	failure generating private key */
 BOOL
 BnEccGetPrivate(

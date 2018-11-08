@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Implementation.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: Implementation.h 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -1169,6 +1169,7 @@ TPM2B_TYPE(MAX_HASH_BLOCK, MAX_HASH_BLOCK_SIZE);
 /* Following typedef is for some old code */
 typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
 
+/* Additional symmetric constants */
 
 #ifndef ALG_AES
 #   define ALG_AES         NO

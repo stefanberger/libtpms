@@ -3,7 +3,7 @@
 /*			 NV read and write access methods			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVMem.c 1313 2018-08-27 16:43:31Z kgoldman $			*/
+/*            $Id: NVMem.c 1370 2018-11-02 19:39:07Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -84,7 +84,7 @@ FILE                *s_NvFile = NULL;
 
 /* C.6.3. Functions */
 /* C.6.3.1.	NvFileOpen() */
-/* Function to open the NV file */
+/* This function opens the file used to hold the NV image. */
 #if FILE_BACKED_NV
 /* Return Value	Meaning */
 /* 0	success */
@@ -106,8 +106,8 @@ NvFileOpen(
 /* C.6.3.2.	NvFileCommit() */
 /* Write all of the contents of the NV image to a file. */
 /* Return Value	Meaning */
-/* 0	failure */
-/* 1	success */
+/* TRUE	success */
+/* FALSE failure */
 static int
 NvFileCommit(
 	     	)

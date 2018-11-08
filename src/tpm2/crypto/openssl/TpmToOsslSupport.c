@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: TpmToOsslSupport.c 1314 2018-08-28 14:25:12Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

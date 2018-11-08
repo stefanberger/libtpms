@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: CryptHash.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,10 +59,10 @@
 /*										*/
 /********************************************************************************/
 
-/* 10.2.14 CryptHash.c */
-/* 10.2.14.1 Description */
+/* 10.2.13 CryptHash.c */
+/* 10.2.13.1 Description */
 /* This file contains implementation of cryptographic functions for hashing. */
-/* 10.2.14.2 Includes, Defines, and Types */
+/* 10.2.13.2 Includes, Defines, and Types */
 #define _CRYPT_HASH_C_
 #include "Tpm.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
@@ -80,7 +80,7 @@ HASH_DEF_TEMPLATE(SHA384);
 HASH_DEF_TEMPLATE(SHA512);
 #endif
 HASH_DEF nullDef = {{0}};
-/* 10.2.14.3 Obligatory Initialization Functions */
+/* 10.2.13.3 Obligatory Initialization Functions */
 /* This function is called by _TPM_Init() do perform the initialization operations for the
    library. */
 BOOL
@@ -101,10 +101,10 @@ CryptHashStartup(
 {
     return TRUE;
 }
-/* 10.2.14.4 Hash Information Access Functions */
-/* 10.2.14.4.1 Introduction */
+/* 10.2.13.4 Hash Information Access Functions */
+/* 10.2.13.4.1 Introduction */
 /* These functions provide access to the hash algorithm description information. */
-/* 10.2.14.4.2 CryptGetHashDef() */
+/* 10.2.13.4.2 CryptGetHashDef() */
 /* This function accesses the hash descriptor associated with a hash a algorithm. The function
    returns NULL for TPM_ALG_NULL and fails if hashAlg is not a hash algorithm. */
 PHASH_DEF
@@ -146,7 +146,7 @@ CryptGetHashDef(
    TPM_ALG_NULL is a valid hash. */
 /*     Return Value Meaning */
 /*     TRUE hashAlg is a valid, implemented hash on this TPM. */
-/*     FALSE	not valid */
+/*     FALSE hashAlg is not valid for this TPM */
 BOOL
 CryptHashIsValidAlg(
 		    TPM_ALG_ID       hashAlg,
@@ -180,7 +180,7 @@ CryptHashIsValidAlg(
 	}
     return FALSE;
 }
-/* 10.2.14.4.4 GetHashInfoPointer() */
+/* 10.2.13.4.4 GetHashInfoPointer() */
 /* This function returns a pointer to the hash info for the algorithm. If the algorithm is not
    supported, function returns a pointer to the data block associated with TPM_ALG_NULL. */
 /* NOTE: The data structure must have a digest size of 0 for TPM_ALG_NULL. */
@@ -202,7 +202,7 @@ GetHashInfoPointer(
     // in either case return a pointer to the TPM_ALG_NULL "hash" descriptor
     return &g_hashData[HASH_COUNT];
 }
-/* 10.2.14.4.5 CryptHashGetAlgByIndex() */
+/* 10.2.13.4.5 CryptHashGetAlgByIndex() */
 /* This function is used to iterate through the hashes. TPM_ALG_NULL is returned for all indexes
    that are not valid hashes. If the TPM implements 3 hashes, then an index value of 0 will return
    the first implemented hash and an index of 2 will return the last. All other index values will
@@ -219,7 +219,7 @@ CryptHashGetAlgByIndex(
 	return TPM_ALG_NULL;
     return g_hashData[index].alg;
 }
-/* 10.2.14.4.6 CryptHashGetDigestSize() */
+/* 10.2.13.4.6 CryptHashGetDigestSize() */
 /* This function returns the size of the digest produced by the hash. If hashAlg is not a hash
    algorithm, the TPM will FAIL. */
 /* Return Values Meaning */
@@ -232,7 +232,7 @@ CryptHashGetDigestSize(
 {
     return CryptGetHashDef(hashAlg)->digestSize;
 }
-/* 10.2.14.4.7 CryptHashGetBlockSize() */
+/* 10.2.13.4.7 CryptHashGetBlockSize() */
 /* Returns the size of the block used by the hash. If hashAlg is not a hash algorithm, the TPM will
    FAIL. */
 /* Return Values Meaning */
@@ -245,7 +245,7 @@ CryptHashGetBlockSize(
 {
     return CryptGetHashDef(hashAlg)->blockSize;
 }
-/* 10.2.14.4.8 CryptHashGetDer */
+/* 10.2.13.4.8 CryptHashGetDer */
 /* This function returns a pointer to the DER string for the algorithm and indicates its size. */
 LIB_EXPORT UINT16
 CryptHashGetDer(
@@ -258,7 +258,7 @@ CryptHashGetDer(
     *p = &q->der[0];
     return q->derSize;
 }
-/* 10.2.14.4.9 CryptHashGetContextAlg() */
+/* 10.2.13.4.9 CryptHashGetContextAlg() */
 /* This function returns the hash algorithm associated with a hash context. */
 TPM_ALG_ID
 CryptHashGetContextAlg(
@@ -267,8 +267,8 @@ CryptHashGetContextAlg(
 {
     return state->hashAlg;
 }
-/* 10.2.14.5 State Import and Export */
-/* 10.2.14.5.1 CryptHashCopyState */
+/* 10.2.13.5 State Import and Export */
+/* 10.2.13.5.1 CryptHashCopyState */
 /* This function is used to clone a HASH_STATE. */
 LIB_EXPORT void
 CryptHashCopyState(
@@ -294,7 +294,7 @@ CryptHashCopyState(
 	}
     return;
 }
-/* 10.2.14.5.2 CryptHashExportState() */
+/* 10.2.13.5.2 CryptHashExportState() */
 /* This function is used to export a hash or HMAC hash state. This function would be called when
    preparing to context save a sequence object. */
 void
@@ -331,7 +331,7 @@ CryptHashExportState(
     if(internalFmt->hashAlg != TPM_ALG_NULL)
 	HASH_STATE_EXPORT(externalFmt, internalFmt);
 }
-/* 10.2.14.5.3 CryptHashImportState() */
+/* 10.2.13.5.3 CryptHashImportState() */
 /* This function is used to import the hash state. This function would be called to import a hash
    state when the context of a sequence object was being loaded. */
 void
@@ -369,8 +369,8 @@ CryptHashImportState(
 		}
 	}
 }
-/* 10.2.14.6 State Modification Functions */
-/* 10.2.14.6.1 HashEnd() */
+/* 10.2.13.6 State Modification Functions */
+/* 10.2.13.6.1 HashEnd() */
 /* Local function to complete a hash that uses the hashDef instead of an algorithm ID. This function
    is used to complete the hash and only return a partial digest. The return value is the size of
    the data copied. */
@@ -400,7 +400,7 @@ HashEnd(
     hashState->type = HASH_STATE_EMPTY;
     return (UINT16)dOutSize;
 }
-/* 10.2.14.6.2 CryptHashStart() */
+/* 10.2.13.6.2 CryptHashStart() */
 /* Functions starts a hash stack Start a hash stack and returns the digest size. As a side effect,
    the value of stateSize in hashState is updated to indicate the number of bytes of state that were
    saved. This function calls GetHashServer() and that function will put the TPM into failure mode
@@ -436,7 +436,7 @@ CryptHashStart(
     return retVal;
 }
 
-/* 10.2.14.6.3	CryptDigestUpdate() */
+/* 10.2.13.6.3	CryptDigestUpdate() */
 /* Add data to a hash or HMAC, SMAC stack. */
 void
 CryptDigestUpdate(
@@ -461,7 +461,7 @@ CryptDigestUpdate(
     return;
 }
 
-/* 10.2.14.6.4 CryptHashEnd() */
+/* 10.2.13.6.4 CryptHashEnd() */
 /* Complete a hash or HMAC computation. This function will place the smaller of digestSize or the
    size of the digest in dOut. The number of bytes in the placed in the buffer is returned. If there
    is a failure, the returned value is <= 0. */
@@ -478,7 +478,7 @@ CryptHashEnd(
     pAssert(hashState->type == HASH_STATE_HASH);
     return HashEnd(hashState, dOutSize, dOut);
 }
-/* 10.2.14.6.5 CryptHashBlock() */
+/* 10.2.13.6.5 CryptHashBlock() */
 /* Start a hash, hash a single block, update digest and return the size of the results. */
 /* The digestSize parameter can be smaller than the digest. If so, only the more significant bytes
    are returned. */
@@ -498,7 +498,7 @@ CryptHashBlock(
     CryptDigestUpdate(&state, dataSize, data);
     return HashEnd(&state, dOutSize, dOut);
 }
-/* 10.2.14.6.6 CryptDigestUpdate2B() */
+/* 10.2.13.6.6 CryptDigestUpdate2B() */
 /* This function updates a digest (hash or HMAC) with a TPM2B. */
 /* This function can be used for both HMAC and hash functions so the digestState is void so that
    either state type can be passed. */
@@ -516,7 +516,7 @@ CryptDigestUpdate2B(
     CryptDigestUpdate(state, bIn->size, bIn->buffer);
     return;
 }
-/* 10.2.14.6.7 CryptHashEnd2B() */
+/* 10.2.13.6.7 CryptHashEnd2B() */
 /* This function is the same as CryptCompleteHash() but the digest is placed in a TPM2B. This is the
    most common use and this is provided for specification clarity. 'digest.size' should be set to
    indicate the number of bytes to place in the buffer */
@@ -531,7 +531,7 @@ CryptHashEnd2B(
 {
     return CryptHashEnd(state, digest->size, digest->buffer);
 }
-/* 10.2.14.6.8 CryptDigestUpdateInt() */
+/* 10.2.13.6.8 CryptDigestUpdateInt() */
 /* This function is used to include an integer value to a hash stack. The function marshals the
    integer into its canonical form before calling CryptDigestUpdate(). */
 LIB_EXPORT void
@@ -546,8 +546,8 @@ CryptDigestUpdateInt(
 #endif
     CryptDigestUpdate(state, intSize, &((BYTE *)&intValue)[8 - intSize]);
 }
-/* 10.2.14.7 HMAC Functions */
-/* 10.2.14.7.1 CryptHmacStart */
+/* 10.2.13.7 HMAC Functions */
+/* 10.2.13.7.1 CryptHmacStart */
 /* This function is used to start an HMAC using a temp hash context. The function does the
    initialization of the hash with the HMAC key XOR iPad and updates the HMAC key XOR oPad. */
 /* The function returns the number of bytes in a digest produced by hashAlg. */
@@ -606,7 +606,7 @@ CryptHmacStart(
     state->hashState.type = HASH_STATE_HMAC;
     return hashDef->digestSize;
 }
-/* 10.2.14.7.2 CryptHmacEnd() */
+/* 10.2.13.7.2 CryptHmacEnd() */
 /* This function is called to complete an HMAC. It will finish the current digest, and start a new
    digest. It will then add the oPadKey and the completed digest and return the results in dOut. It
    will not return more than dOutSize bytes. */
@@ -645,7 +645,7 @@ CryptHmacEnd(
 	}
     return HashEnd(hState, dOutSize, dOut);
 }
-/* 10.2.14.7.3 CryptHmacStart2B() */
+/* 10.2.13.7.3 CryptHmacStart2B() */
 /* This function starts an HMAC and returns the size of the digest that will be produced. */
 /* This function is provided to support the most common use of starting an HMAC with a TPM2B key. */
 /* The caller must provide a block of memory in which the hash sequence state is kept.  The caller
@@ -664,7 +664,7 @@ CryptHmacStart2B(
 {
     return CryptHmacStart(hmacState, hashAlg, key->size, key->buffer);
 }
-/*     10.2.14.7.4 CryptHmacEnd2B() */
+/* 10.2.13.7.4 CryptHmacEnd2B() */
 /* This function is the same as CryptHmacEnd() but the HMAC result is returned in a TPM2B which is
    the most common use. */
 /* Return Values Meaning */
@@ -677,8 +677,8 @@ CryptHmacEnd2B(
 {
     return CryptHmacEnd(hmacState, digest->size, digest->buffer);
 }
-/* 10.2.14.8 Mask and Key Generation Functions */
-/* 10.2.14.8.1 _crypi_MGF1() */
+/* 10.2.13.8 Mask and Key Generation Functions */
+/* 10.2.13.8.1 CryptMGF1() */
 /* This function performs MGF1 using the selected hash. MGF1 is T(n) = T(n-1) || H(seed ||
    counter). This function returns the length of the mask produced which could be zero if the digest
    algorithm is not supported */
@@ -722,7 +722,7 @@ CryptMGF1(
 	}
     return (UINT16)mSize;
 }
-/*     10.2.14.8.2 CryptKDFa() */
+/* 10.2.13.8.2 CryptKDFa() */
 /* This function performs the key generation according to Part 1 of the TPM specification. */
 /* This function returns the number of bytes generated which may be zero. */
 /* The key and keyStream pointers are not allowed to be NULL. The other pointer values may be
@@ -813,7 +813,7 @@ CryptKDFa(
 	*counterInOut = counter;
     return generated;
 }
-/* 	10.2.14.8.3 CryptKDFe() */
+/* 10.2.13.8.3 CryptKDFe() */
 /* KDFe() as defined in TPM specification part 1. */
 /* This function returns the number of bytes generated which may be zero. */
 /* The Z and keyStream pointers are not allowed to be NULL. The other pointer values may be

@@ -3,7 +3,7 @@
 /*			     Entropy						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entropy.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: Entropy.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -142,7 +142,7 @@ _plat__GetEntropy(
 	    // NOTE 1: The following command does not provide proper cryptographic entropy.
 	    // Its primary purpose to make sure that different instances of the simulator,
 	    // possibly started by a script on the same machine, are seeded differently.
-	    // But vendors of the actual TPMs need to ensure availability of proper entropy
+	    // Vendors of the actual TPMs need to ensure availability of proper entropy
 	    // using their platform specific means.
 	    //
 	    // NOTE 2: In debug builds by default the reference implementation will seed

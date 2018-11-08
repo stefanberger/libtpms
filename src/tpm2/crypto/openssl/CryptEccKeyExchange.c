@@ -3,7 +3,7 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: CryptEccKeyExchange.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -80,6 +80,7 @@ SM2KeyExchange(
 /* a) Convert xQ to an integer xqi using the convention specified in Appendix C.3. */
 /* b) Calculate xqm = xqi mod 2^ceil(f/2) (where f = ceil(log2(n)). */
 /* c) Calculate the associate value function avf(Q) = xqm + 2ceil(f / 2) */
+/*  Always returns TRUE(1). */
 static BOOL
 avf1(
      bigNum               bnX,           // IN/OUT: the reduced value
@@ -102,7 +103,6 @@ avf1(
 /* Points QsB() and QeB() are required to be on the curve of inQsA. The function will fail, possibly
    catastrophically, if this is not the case. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS results is valid */
 /* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
 static TPM_RC
 C_2_2_MQV(
@@ -305,7 +305,6 @@ avfSm2(
    private key. All points are required to be on the curve of inQsA. The function will fail
    catastrophically if this is not the case */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS results is valid */
 /* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
 LIB_EXPORT TPM_RC
 SM2KeyExchange(

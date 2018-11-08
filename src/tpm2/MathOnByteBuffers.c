@@ -3,7 +3,7 @@
 /*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: MathOnByteBuffers.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -178,7 +178,6 @@ ModExpB(
 /* Divide an integer (n) by an integer (d) producing a quotient (q) and a remainder (r). If q or r
    is not needed, then the pointer to them may be set to NULL. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS operation complete */
 /* TPM_RC_NO_RESULT q or r is too small to receive the result */
 LIB_EXPORT TPM_RC
 DivideB(
