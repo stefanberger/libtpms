@@ -96,7 +96,7 @@ NvFileOpen(
 {
     // Try to open an exist NVChip file for read/write
 #   if defined _MSC_VER && 1
-    if(0 != fopen_s(&s_NvFile, "NVChip", mode))
+    if(fopen_s(&s_NvFile, "NVChip", mode) != 0)
 	s_NvFile = NULL;
 #   else
     s_NvFile = fopen("NVChip", mode);
@@ -110,6 +110,7 @@ NvFileOpen(
 /* FALSE failure */
 static int
 NvFileCommit(
+	     void
 	     	)
 {
     int         OK;
@@ -207,7 +208,7 @@ _plat__NVEnable(
     _plat__NvMemoryClear(0, NV_MEMORY_SIZE);
     
     // If the file exists
-    if(0 == NvFileOpen("r+b"))
+    if(NvFileOpen("r+b") >= 0)
 	{
 	    long    fileSize = NvFileSize(SEEK_SET);    // get the file size and leave the
 	    // file pointer at the start
@@ -224,7 +225,7 @@ _plat__NVEnable(
 		NvFileCommit();     // for any other size, initialize it
 	}
     // If NVChip file does not exist, try to create it for read/write.
-    else if(0 == NvFileOpen("w+b"))
+    else if(NvFileOpen("w+b") >= 0)
 	NvFileCommit();             // Initialize the file
     assert(NULL != s_NvFile);       // Just in case we are broken for some reason.
 #endif
@@ -250,8 +251,8 @@ _plat__NVDisable(
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
 #if FILE_BACKED_NV
-    if(NULL != s_NvFile);
-    fclose(s_NvFile);    // Close NV file
+    if(NULL != s_NvFile)
+	fclose(s_NvFile);    // Close NV file
     s_NvFile = NULL;        // Set file handle to NULL
 #endif
     return;
