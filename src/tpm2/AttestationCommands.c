@@ -3,7 +3,7 @@
 /*			   Attestation Commands  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AttestationCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: AttestationCommands.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -87,7 +87,14 @@ TPM2_Certify(
     // NOTE: the certified object is not allowed to be TPM_ALG_NULL so
     // 'certifiedObject' will never be NULL
     certifyInfo.attested.certify.name = certifiedObject->name;
-    certifyInfo.attested.certify.qualifiedName = certifiedObject->qualifiedName;
+
+    // When using an anonymous signing scheme, need to set the qualified Name to the
+    // empty buffer to avoid correlation between keys
+    if(CryptIsSchemeAnonymous(in->inScheme.scheme))
+	certifyInfo.attested.certify.qualifiedName.t.size = 0;
+    else
+	certifyInfo.attested.certify.qualifiedName = certifiedObject->qualifiedName;
+    
     // Sign attestation structure.  A NULL signature will be returned if
     // signHandle is TPM_RH_NULL.  A TPM_RC_NV_UNAVAILABLE, TPM_RC_NV_RATE,
     // TPM_RC_VALUE, TPM_RC_SCHEME or TPM_RC_ATTRIBUTES error may be returned
