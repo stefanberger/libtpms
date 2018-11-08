@@ -3,7 +3,7 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1319 2018-08-30 13:35:27Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,13 +59,13 @@
 /*										*/
 /********************************************************************************/
 
-/* 10.2.13 CryptEccSignature.c */
-/* 10.2.13.1 Includes and Defines */
+/* 10.2.12 CryptEccSignature.c */
+/* 10.2.12.1 Includes and Defines */
 #include "Tpm.h"
 #include "CryptEccSignature_fp.h"
 #if ALG_ECC
-/* 10.2.13.2 Utility Functions */
-/* 10.2.13.2.1 EcdsaDigest() */
+/* 10.2.12.2 Utility Functions */
+/* 10.2.12.2.1 EcdsaDigest() */
 /* Function to adjust the digest so that it is no larger than the order of the curve. This is used
    for ECDSA sign and verification. */
 static bigNum
@@ -91,7 +91,7 @@ EcdsaDigest(
 	}
     return bnD;
 }
-/* 10.2.13.2.2 BnSchnorrSign() */
+/* 10.2.12.2.2 BnSchnorrSign() */
 /* This contains the Schnorr signature computation. It is used by both ECDSA and Schnorr
    signing. The result is computed as: [s = k + r * d (mod n)] where */
 /* a) s is the signature */
@@ -127,8 +127,8 @@ BnSchnorrSign(
     BnDiv(NULL, bnS, bnT1, bnN);
     return (BnEqualZero(bnS)) ? TPM_RC_NO_RESULT : TPM_RC_SUCCESS;
 }
-/* 10.2.13.3 Signing Functions */
-/* 10.2.13.3.1 BnSignEcdsa() */
+/* 10.2.12.3 Signing Functions */
+/* 10.2.12.3.1 BnSignEcdsa() */
 /* This function implements the ECDSA signing algorithm. The method is described in the comments
    below. This version works with internal numbers. */
 TPM_RC
@@ -204,7 +204,7 @@ BnSignEcdsa(
     return retVal;
 }
 #if ALG_ECDAA
-/* 10.2.13.3.2 BnSignEcdaa() */
+/* 10.2.12.3.2 BnSignEcdaa() */
 /* This function performs s = r + T * d mod q where */
 /* a) 'r is a random, or pseudo-random value created in the commit phase */
 /* b) nonceK is a TPM-generated, random value 0 < nonceK < n */
@@ -285,7 +285,7 @@ BnSignEcdaa(
 }
 #endif // ALG_ECDAA
 #if ALG_ECSCHNORR
-/* 10.2.13.3.3 SchnorrReduce() */
+/* 10.2.12.3.3 SchnorrReduce() */
 /* Function to reduce a hash result if it's magnitude is to large. The size of number is set so that
    it has no more bytes of significance than the reference value. If the resulting number can have
    more bits of significance than the reference. */
@@ -299,7 +299,7 @@ SchnorrReduce(
     if(number->size > maxBytes)
 	number->size = maxBytes;
 }
-/* 10.2.13.3.4 SchnorrEcc() */
+/* 10.2.12.3.4 SchnorrEcc() */
 /* This function is used to perform a modified Schnorr signature. */
 /* This function will generate a random value k and compute */
 /* a) (xR, yR) = [k]G */
@@ -373,6 +373,11 @@ BnSignEcSchnorr(
 #endif // ALG_ECSCHNORR
 #if ALG_SM2
 #ifdef _SM2_SIGN_DEBUG
+/* 10.2.12.3.5	BnHexEqual() */
+/* This function compares a bignum value to a hex string. */
+/* Return Value	Meaning */
+/* TRUE(1)	values equal */
+/* FALSE(0)	values not equal */
 static BOOL
 BnHexEqual(
 	   bigNum           bn,        //IN: big number value
@@ -384,7 +389,7 @@ BnHexEqual(
     return (BnUnsignedCmp(bn, bnC) == 0);
 }
 #endif // _SM2_SIGN_DEBUG
-/* 10.2.13.3.5 BnSignEcSm2() */
+/* 10.2.12.3.5 BnSignEcSm2() */
 /* This function signs a digest using the method defined in SM2 Part 2. The method in the standard
    will add a header to the message to be signed that is a hash of the values that define the
    key. This then hashed with the message to produce a digest (e) that is signed. This function
@@ -479,7 +484,7 @@ BnSignEcSm2(
     return TPM_RC_SUCCESS;
 }
 #endif // ALG_SM2
-/* 10.2.13.3.6 CryptEccSign() */
+/* 10.2.12.3.6 CryptEccSign() */
 /* This function is the dispatch function for the various ECC-based signing schemes. There is a bit
    of ugliness to the parameter passing. In order to test this, we sometime would like to use a
    deterministic RNG so that we can get the same signatures during testing. The easiest way to do
@@ -557,7 +562,7 @@ CryptEccSign(
     return retVal;
 }
 #if ALG_ECDSA
-/* 10.2.13.3.7 BnValidateSignatureEcdsa() */
+/* 10.2.12.3.7 BnValidateSignatureEcdsa() */
 /* This function validates an ECDSA signature. rIn and sIn should have been checked to make sure
    that they are in the range 0 < v < n */
 /* Error Returns Meaning */
@@ -613,7 +618,7 @@ BnValidateSignatureEcdsa(
 }
 #endif      // ALG_ECDSA
 #if ALG_SM2
-/* 10.2.13.3.8 BnValidateSignatureEcSm2() */
+/* 10.2.12.3.8 BnValidateSignatureEcSm2() */
 /* This function is used to validate an SM2 signature. */
 /* Error Returns Meaning */
 /* TPM_RC_SIGNATURE signature not valid */
@@ -676,7 +681,7 @@ BnValidateSignatureEcSm2(
 }
 #endif  // ALG_SM2
 #if ALG_ECSCHNORR
-/* 10.2.13.3.9 BnValidateSignatureEcSchnorr() */
+/* 10.2.12.3.9 BnValidateSignatureEcSchnorr() */
 /* This function is used to validate an EC Schnorr signature. */
 /* Error Returns Meaning */
 /* TPM_RC_SIGNATURE signature not valid */
@@ -728,7 +733,7 @@ BnValidateSignatureEcSchnorr(
     return (OK) ? TPM_RC_SUCCESS : TPM_RC_SIGNATURE;
 }
 #endif  // ALG_ECSCHNORR
-/* 10.2.13.3.10 CryptEccValidateSignature() */
+/* 10.2.12.3.10 CryptEccValidateSignature() */
 /* This function validates an EcDsa() or EcSchnorr() signature. The point Qin needs to have been
    validated to be on the curve of curveId. */
 /* Error Returns Meaning */
@@ -799,14 +804,13 @@ CryptEccValidateSignature(
     CURVE_FREE(E);
     return retVal;
 }
-/* 10.2.13.3.11 CryptEccCommitCompute() */
+/* 10.2.12.3.11 CryptEccCommitCompute() */
 /* This function performs the point multiply operations required by TPM2_Commit(). */
 /* If B or M is provided, they must be on the curve defined by curveId. This routine does not check
    that they are on the curve and results are unpredictable if they are not. */
 /* It is a fatal error if r is NULL. If B is not NULL, then it is a fatal error if d is NULL or if K
    and L are both NULL. If M is not NULL, then it is a fatal error if E is NULL. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS computations completed normally */
 /* TPM_RC_NO_RESULT if K, L or E was computed to be the point at infinity */
 /* TPM_RC_CANCELED a cancel indication was asserted during this function */
 LIB_EXPORT TPM_RC

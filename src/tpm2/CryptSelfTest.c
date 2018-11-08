@@ -196,7 +196,6 @@ CryptInitializeToTest(
    which it has no test. This allows the knowledge about which algorithms have test to be accessed
    through the interface that provides the test. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS test complete */
 /* TPM_RC_CANCELED test was canceled */
 LIB_EXPORT
 TPM_RC

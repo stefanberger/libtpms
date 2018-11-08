@@ -3,7 +3,7 @@
 /*			   Functions Required for TDES  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDes.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptDes.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -106,6 +106,9 @@ CryptSetOddByteParity(
 }
 /* 10.2.9.2.2 CryptDesIsWeakKey() */
 /* Check to see if a DES key is on the list of weak, semi-weak, or possibly weak keys. */
+/* Return Value	Meaning */
+/* TRUE(1)	DES key is weak */
+/* FALSE(0)	DES key is not weak */
 static BOOL
 CryptDesIsWeakKey(
 		  UINT64            k

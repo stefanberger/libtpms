@@ -3,7 +3,7 @@
 /*		Functions used for ticket computations.				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Ticket.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Ticket.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
 /*										*/
 /********************************************************************************/
 

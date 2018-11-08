@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1314 2018-08-28 14:25:12Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -185,8 +185,11 @@ MathLibraryCompatibilityCheck(
     OSSL_LEAVE();
 }
 #endif
-/* B.2.3.2.3.2. BnModMult() */
+/* B.2.3.2.3.3. BnModMult() */
 /* Does multiply and divide returning the remainder of the divide. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnModMult(
 	  bigNum              result,
@@ -219,8 +222,11 @@ BnModMult(
     OSSL_LEAVE();
     return OK;
 }
-/* B.2.3.2.3.3. BnMult() */
+/* B.2.3.2.3.4. BnMult() */
 /* Multiplies two numbers */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnMult(
        bigNum               result,
@@ -249,9 +255,12 @@ BnMult(
     OSSL_LEAVE();
     return OK;
 }
-/* B.2.3.2.3.4. BnDiv() */
+/* B.2.3.2.3.5. BnDiv() */
 /* This function divides two bigNum values. The function returns FALSE if there is an error in the
    operation. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnDiv(
       bigNum               quotient,
@@ -303,8 +312,11 @@ BnDiv(
 }
 
 #if ALG_RSA
-/* B.2.3.2.3.5. BnGcd() */
+/* B.2.3.2.3.6. BnGcd() */
 /* Get the greatest common divisor of two numbers */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnGcd(
       bigNum      gcd,            // OUT: the common divisor
@@ -330,9 +342,12 @@ BnGcd(
     OSSL_LEAVE();
     return OK;
 }
-/* B.2.3.2.3.6. BnModExp() */
+/* B.2.3.2.3.7. BnModExp() */
 /* Do modular exponentiation using bigNum values. The conversion from a bignum_t to a bigNum is
    trivial as they are based on the same structure */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnModExp(
 	 bigNum               result,         // OUT: the result
@@ -360,8 +375,11 @@ BnModExp(
     OSSL_LEAVE();
     return OK;
 }
-/* B.2.3.2.3.7. BnModInverse() */
+/* B.2.3.2.3.8. BnModInverse() */
 /* Modular multiplicative inverse */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 LIB_EXPORT BOOL
 BnModInverse(
 	     bigNum               result,
@@ -388,8 +406,11 @@ BnModInverse(
 #endif // TPM_ALG_RSA
 
 #if ALG_ECC
-/* B.2.3.2.3.8. PointFromOssl() */
+/* B.2.3.2.3.9. PointFromOssl() */
 /* Function to copy the point result from an OSSL function to a bigNum */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure in operation */
 static BOOL
 PointFromOssl(
 	      bigPoint         pOut,      // OUT: resulting point
@@ -419,7 +440,7 @@ PointFromOssl(
     BN_CTX_end(E->CTX);
     return OK;
 }
-/* B.2.3.2.3.9. EcPointInitialized() */
+/* B.2.3.2.3.10. EcPointInitialized() */
 /* Allocate and initialize a point. */
 static EC_POINT *
 EcPointInitialized(
@@ -438,7 +459,7 @@ EcPointInitialized(
     BN_free(bnX);
     return P;
 }
-/* B.2.3.2.3.10. BnCurveInitialize() */
+/* B.2.3.2.3.11. BnCurveInitialize() */
 /* This function initializes the OpenSSL() group definition */
 /* It is a fatal error if groupContext is not provided. */
 /* Return Values Meaning */
@@ -501,7 +522,7 @@ BnCurveInitialize(
     return OK ? E : NULL;
 }
 /* B.2.3.2.3.11. BnEccModMult() */
-/* This function does a point multiply of the form R = [d]S */
+/* This functi2n does a point multiply of the form R = [d]S */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
 LIB_EXPORT BOOL
@@ -525,7 +546,7 @@ BnEccModMult(
     BN_free(bnD);
     return !BnEqualZero(R->z);
 }
-/* B.2.3.2.3.12. BnEccModMult2() */
+/* B.2.3.2.3.13. BnEccModMult2() */
 /* This function does a point multiply of the form R = [d]G + [u]Q */
 /* FALSE	failure in operation; treat as result being point at infinity */
 LIB_EXPORT BOOL

@@ -3,7 +3,7 @@
 /*			Interfaces to the CryptoEngine()			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -1199,10 +1199,10 @@ CryptIsAsymDecryptScheme(
    scheme algorithm, if the schemes are compatible, the input scheme will be chosen. */
 /* This function should not be called if 'signObject->publicArea.type' == TPM_ALG_SYMCIPHER. */
 /* Return Values Meaning */
+/* TRUE scheme selected */
 /* FALSE both scheme and key's default scheme are empty; or scheme is empty while key's default
    scheme requires explicit input scheme (split signing); or non-empty default key scheme differs
    from scheme */
-/* TRUE scheme selected */
 BOOL
 CryptSelectSignScheme(
 		      OBJECT              *signObject,    // IN: signing key

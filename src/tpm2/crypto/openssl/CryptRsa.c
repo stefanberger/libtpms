@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -103,6 +103,10 @@ RsaInitializeExponent(
 #endif
 }
 /* 10.2.19.4.1 ComputePrivateExponent() */
+/* This function computes the private exponent from the primes. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure */
 static BOOL
 ComputePrivateExponent(
 		       bigNum               P,             // IN: first prime (size is 1/2 of bnN)
@@ -159,6 +163,9 @@ ComputePrivateExponent(
 /* 10.2.19.4.2 RsaPrivateKeyOp() */
 /* This function is called to do the exponentiation with the private key. Compile options allow use
    of the simple (but slow) private exponent, or the more complex but faster CRT method. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure */
 static BOOL
 RsaPrivateKeyOp(
 		bigNum               inOut, // IN/OUT: number to be exponentiated

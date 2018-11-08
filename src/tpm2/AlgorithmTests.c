@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: AlgorithmTests.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -215,6 +215,9 @@ TestSymmetricAlgorithm(
 /* 10.2.1.4.3 AllSymsAreDone() */
 /* Checks if both symmetric algorithms have been tested. This is put here so that addition of a
    symmetric algorithm will be relatively easy to handle */
+/* Return Value	Meaning */
+/* TRUE(1)	all symmetric algorithms tested */
+/* FALSE(0)	not all symmetric algorithms tested */
 static BOOL
 AllSymsAreDone(
 	       ALGORITHM_VECTOR        *toTest
@@ -224,6 +227,9 @@ AllSymsAreDone(
 }
 /* 10.2.1.4.4 AllModesAreDone() */
 /* Checks if all the modes have been tested */
+/* Return Value	Meaning */
+/* TRUE(1)	all modes tested */
+/* FALSE(0)	all modes not tested */
 static BOOL
 AllModesAreDone(
 		ALGORITHM_VECTOR            *toTest
@@ -756,7 +762,6 @@ TestEcc(
    no test (i.e. no tests are actually run but the vector is cleared). */
 /* NOTE: toTest will only ever have bits set for implemented algorithms but alg can be anything. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS test complete */
 /* TPM_RC_CANCELED test was canceled */
 LIB_EXPORT
 TPM_RC

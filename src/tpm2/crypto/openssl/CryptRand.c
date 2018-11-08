@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: CryptRand.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -538,7 +538,8 @@ CryptRandomGenerate(
     return DRBG_Generate((RAND_STATE *)&drbgDefault, buffer, (UINT16)randomSize);
 }
 /* 10.2.18.4.4 DRBG_InstantiateSeededKdf() */
-/* Function used to instantiate a KDF-based RNG. This is used for derivations */
+/* Function used to instantiate a KDF-based RNG. This is used for derivations. This function always
+   returns TRUE. */
 LIB_EXPORT BOOL
 DRBG_InstantiateSeededKdf(
 			  KDF_STATE       *state,         // OUT: buffer to hold the state
@@ -580,7 +581,8 @@ DRBG_AdditionalData(
 }
 /* 10.2.18.4.6 DRBG_InstantiateSeeded() */
 /* This function is used to instantiate a random number generator from seed values. The nominal use
-   of this generator is to create sequences of pseudo-random numbers from a seed value. */
+   of this generator is to create sequences of pseudo-random numbers from a seed value. This
+   function always returns TRUE. */
 LIB_EXPORT BOOL
 DRBG_InstantiateSeeded(
 		       DRBG_STATE      *drbgState,     // IN/OUT: buffer to hold the state
@@ -620,7 +622,7 @@ DRBG_InstantiateSeeded(
     return TRUE;
 }
 /* 10.2.18.4.7 CryptRandStartup() */
-/* This function is called when TPM_Startup() is executed. */
+/* This function is called when TPM_Startup() is executed. This function always returns TRUE. */
 LIB_EXPORT BOOL
 CryptRandStartup(
 		 void
@@ -657,6 +659,9 @@ CryptRandInit(
    the function returns TRUE without generating any bits or updating the reseed counter. This
    function returns 0 if a reseed is required. Otherwise, it returns the number of bytes produced
    which could be less than the number requested if the request is too large. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure */
 LIB_EXPORT UINT16
 DRBG_Generate(
 	      RAND_STATE      *state,
@@ -813,6 +818,8 @@ DRBG_Instantiate(
 }
 /* 10.2.18.7 DRBG_Uninstantiate() */
 /* This is Uninstantiate_function() from [SP 800-90A 9.4]. */
+/* Error Returns	Meaning */
+/* TPM_RC_VALUE	not a valid */
 LIB_EXPORT TPM_RC
 DRBG_Uninstantiate(
 		   DRBG_STATE      *drbgState      // IN/OUT: working state to erase

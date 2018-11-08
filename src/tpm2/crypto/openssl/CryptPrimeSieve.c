@@ -3,7 +3,7 @@
 /*			     CryptPrimeSieve					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrimeSieve.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: CryptPrimeSieve.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -370,7 +370,7 @@ SetFieldSize(
    prime, the function returns FALSE and a new random value needs to be chosen. */
 /* Error Returns Meaning */
 /* TPM_RC_SUCCESS candidate is probably prime */
-/* TPM_RC_NO_RESULT candidate is not prime and couldn't find and alternative in in the field */
+/* TPM_RC_NO_RESULT candidate is not prime and couldn't find and alternative in the field */
 LIB_EXPORT TPM_RC
 PrimeSelectWithSieve(
 		     bigNum           candidate,         // IN/OUT: The candidate to filter

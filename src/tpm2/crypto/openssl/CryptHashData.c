@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Hash ALgorithm Constants     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHashData.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptHashData.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2018					*/
 /*										*/
 /********************************************************************************/
 

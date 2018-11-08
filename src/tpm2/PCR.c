@@ -3,7 +3,7 @@
 /*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
+/*            $Id: PCR.c 1370 2018-11-02 19:39:07Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -847,7 +847,6 @@ PcrWrite(
 /* 8.7.3.25 PCRAllocate() */
 /* This function is used to change the PCR allocation. */
 /* Error Returns Meaning */
-/* TPM_RC_SUCCESS allocate success */
 /* TPM_RC_NO_RESULT allocate failed */
 /* TPM_RC_PCR improper allocation */
 TPM_RC
