@@ -3,7 +3,7 @@
 /*			  TPM Part 2 Headers	   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTypes.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: TpmTypes.h 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -80,11 +80,11 @@ typedef  UINT32             TPM_SPEC;
 #define  TPM_SPEC_FAMILY         (TPM_SPEC)(SPEC_FAMILY)
 #define  SPEC_LEVEL              00
 #define  TPM_SPEC_LEVEL          (TPM_SPEC)(SPEC_LEVEL)
-#define  SPEC_VERSION            149
+#define  SPEC_VERSION            150
 #define  TPM_SPEC_VERSION        (TPM_SPEC)(SPEC_VERSION)
 #define  SPEC_YEAR               2018
 #define  TPM_SPEC_YEAR           (TPM_SPEC)(SPEC_YEAR)
-#define  SPEC_DAY_OF_YEAR        219
+#define  SPEC_DAY_OF_YEAR        262
 #define  TPM_SPEC_DAY_OF_YEAR    (TPM_SPEC)(SPEC_DAY_OF_YEAR)
 /* Table 2:7 - Definition of TPM_GENERATED Constants */
 typedef  UINT32             TPM_GENERATED;
