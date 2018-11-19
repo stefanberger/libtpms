@@ -3985,8 +3985,9 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         }
         /* write data size before array */
         if (nrh->size < sizeof(NV_RAM_HEADER)) {
-            TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: datasize corrupted: %d\n",
-                                (int)datasize);
+            TPMLIB_LogTPM2Error(
+                "NV_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %d < %zu\n",
+                (int)nrh->size, sizeof(NV_RAM_HEADER));
             break;
         }
         datasize = nrh->size - sizeof(NV_RAM_HEADER);
