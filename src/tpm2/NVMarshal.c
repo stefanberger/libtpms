@@ -245,11 +245,8 @@ BOOL_Unmarshal(BOOL *boolean, BYTE **buffer, INT32 *size)
 static int
 TPM2B_Cmp(const TPM2B *t1, const TPM2B *t2)
 {
-    int ret;
-
-    ret = memcmp(&t1->size, &t2->size, sizeof(t1->size));
-    if (ret)
-        return ret;
+    if (t1->size != t2->size)
+        return 1;
 
     return memcmp(t1->buffer, t2->buffer, t1->size);
 }
@@ -2938,7 +2935,10 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     PERSISTENT_DATA pd;
-    TPM2B_SEED seed;
+    TPM2B_SEED seed = {
+        .b.size = 0,
+    };
+
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
 
     if (rc == TPM_RC_SUCCESS) {
