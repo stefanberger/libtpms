@@ -186,6 +186,7 @@ NvWrite(
     SET_NV_UPDATE(UT_NV);
     return;
 }
+#if 0 // libtpms added being (for Coverity)
 /* 8.5.3.7 NvUpdatePersistent() */
 /* This function is used to update a value in the PERSISTENT_DATA structure and commits the value to
    NV. */
@@ -213,6 +214,7 @@ NvClearPersistent(
     MemorySet((&gp) + offset, 0, size);
     NvWrite(offset, size, (&gp) + offset);
 }
+#endif // libtpms added end
 /* 8.5.3.9 NvReadPersistent() */
 /* This function reads persistent data to the RAM copy of the gp structure. */
 void

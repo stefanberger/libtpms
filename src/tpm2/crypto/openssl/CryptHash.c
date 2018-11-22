@@ -270,6 +270,7 @@ CryptHashGetContextAlg(
 /* 10.2.13.5 State Import and Export */
 /* 10.2.13.5.1 CryptHashCopyState */
 /* This function is used to clone a HASH_STATE. */
+#if 0 // libtpms added begin
 LIB_EXPORT void
 CryptHashCopyState(
 		   HASH_STATE          *out,           // OUT: destination of the state
@@ -294,6 +295,7 @@ CryptHashCopyState(
 	}
     return;
 }
+#endif // libtpms added end
 /* 10.2.13.5.2 CryptHashExportState() */
 /* This function is used to export a hash or HMAC hash state. This function would be called when
    preparing to context save a sequence object. */
