@@ -257,8 +257,10 @@ TPM_RESULT TPM_Sbuffer_Append(TPM_STORE_BUFFER *sbuffer,
     }
     /* append the data */
     if (rc == 0) {
-        memcpy(sbuffer->buffer_current, data, data_length);
-        sbuffer->buffer_current += data_length;
+        if (data_length > 0) { /* libtpms added (ubsan) */
+            memcpy(sbuffer->buffer_current, data, data_length);
+            sbuffer->buffer_current += data_length;
+        }
     }
     return rc;
 }
