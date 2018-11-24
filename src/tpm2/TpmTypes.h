@@ -463,8 +463,8 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  HR_PCR                  (TPM_HC)((TPM_HT_PCR<<HR_SHIFT))
 #define  HR_HMAC_SESSION         (TPM_HC)((TPM_HT_HMAC_SESSION<<HR_SHIFT))
 #define  HR_POLICY_SESSION       (TPM_HC)((TPM_HT_POLICY_SESSION<<HR_SHIFT))
-#define  HR_TRANSIENT            (TPM_HC)((TPM_HT_TRANSIENT<<HR_SHIFT))
-#define  HR_PERSISTENT           (TPM_HC)((TPM_HT_PERSISTENT<<HR_SHIFT))
+#define  HR_TRANSIENT            (TPM_HC)(((UINT32)TPM_HT_TRANSIENT<<HR_SHIFT))  /* libtpms cast (ubsan) */
+#define  HR_PERSISTENT           (TPM_HC)(((UINT32)TPM_HT_PERSISTENT<<HR_SHIFT)) /* libtpms cast (ubsan) */
 #define  HR_NV_INDEX             (TPM_HC)((TPM_HT_NV_INDEX<<HR_SHIFT))
 #define  HR_PERMANENT            (TPM_HC)((TPM_HT_PERMANENT<<HR_SHIFT))
 #define  PCR_FIRST               (TPM_HC)((HR_PCR+0))
