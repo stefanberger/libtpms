@@ -336,8 +336,12 @@ CryptGenerateR(
     for(iterations = 1; iterations < 1000000;)
 	{
 	    int     i;
+	    const TPM2B *buf = NULL; /* libtpms changed begin (ubsan) */
+
+	    if (name)
+	        buf = &name->b;      /* libtpms changed end */
 	    CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG, &gr.commitNonce.b, COMMIT_STRING,
-		      &name->b, &cntr.b, n.t.size * 8, r->t.buffer, &iterations, FALSE);
+		      buf /* libtpms */, &cntr.b, n.t.size * 8, r->t.buffer, &iterations, FALSE);
 	    // "random" value must be less than the prime
 	    if(UnsignedCompareB(r->b.size, r->b.buffer, n.t.size, n.t.buffer) >= 0)
 		continue;
