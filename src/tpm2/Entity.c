@@ -299,7 +299,10 @@ EntityGetAuthValue(
 	    break;
 	}
     // Copy the authValue
-    MemoryCopy2B(&auth->b, &pAuth->b, sizeof(auth->t.buffer));
+    if (!pAuth)                                                    /* libtpms changed begin (ubsan) */
+        MemoryCopy2B(&auth->b, NULL, sizeof(auth->t.buffer));
+    else
+        MemoryCopy2B(&auth->b, &pAuth->b, sizeof(auth->t.buffer)); /* libtpms changed end */
     MemoryRemoveTrailingZeros(auth);
     return auth->t.size;
 }
