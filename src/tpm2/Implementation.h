@@ -327,7 +327,7 @@
 #define  CC_AC_GetCapability              CC_NO
 #define  CC_AC_Send                       CC_NO
 #define  CC_Policy_AC_SendSelect          CC_NO
-#define  CC_Vendor_TCG_Test               CC_YES
+#define  CC_Vendor_TCG_Test               CC_NO /* libtpms changed */
 
 /* From Vendor-Specific: Table 6 - Defines for PLATFORM Values */
 #define  PLATFORM_FAMILY         TPM_SPEC_FAMILY
