@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1272 2018-07-20 17:46:57Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1378 2018-11-19 20:43:20Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -723,10 +723,9 @@ TPMI_SH_AUTH_SESSION_Unmarshal(TPMI_SH_AUTH_SESSION *target, BYTE **buffer, INT3
 /* Table 45 - Definition of (TPM_HANDLE) TPMI_SH_HMAC Type <IN/OUT> */
 
 TPM_RC
-TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
     
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -743,10 +742,9 @@ TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC *target, BYTE **buffer, INT32 *size, BOOL al
 /* Table 46 - Definition of (TPM_HANDLE) TPMI_SH_POLICY Type <IN/OUT> */
 
 TPM_RC
-TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
     
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -763,10 +761,9 @@ TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY *target, BYTE **buffer, INT32 *size, BOO
 /* Table 47 - Definition of (TPM_HANDLE) TPMI_DH_CONTEXT Type  */
 
 TPM_RC
-TPMI_DH_CONTEXT_Unmarshal(TPMI_DH_CONTEXT *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_DH_CONTEXT_Unmarshal(TPMI_DH_CONTEXT *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -870,10 +867,9 @@ TPMI_RH_ENABLES_Unmarshal(TPMI_RH_ENABLES *target, BYTE **buffer, INT32 *size, B
 /* Table 50 - Definition of (TPM_HANDLE) TPMI_RH_HIERARCHY_AUTH Type <IN> */
 
 TPM_RC
-TPMI_RH_HIERARCHY_AUTH_Unmarshal(TPMI_RH_HIERARCHY_AUTH *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_HIERARCHY_AUTH_Unmarshal(TPMI_RH_HIERARCHY_AUTH *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
     
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -895,10 +891,9 @@ TPMI_RH_HIERARCHY_AUTH_Unmarshal(TPMI_RH_HIERARCHY_AUTH *target, BYTE **buffer, 
 /* Table 51 - Definition of (TPM_HANDLE) TPMI_RH_PLATFORM Type <IN> */
 
 TPM_RC
-TPMI_RH_PLATFORM_Unmarshal(TPMI_RH_PLATFORM *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_PLATFORM_Unmarshal(TPMI_RH_PLATFORM *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -942,10 +937,9 @@ TPMI_RH_ENDORSEMENT_Unmarshal(TPMI_RH_ENDORSEMENT *target, BYTE **buffer, INT32 
 /* Table 54 - Definition of (TPM_HANDLE) TPMI_RH_PROVISION Type <IN> */
 
 TPM_RC
-TPMI_RH_PROVISION_Unmarshal(TPMI_RH_PROVISION *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_PROVISION_Unmarshal(TPMI_RH_PROVISION *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -965,10 +959,9 @@ TPMI_RH_PROVISION_Unmarshal(TPMI_RH_PROVISION *target, BYTE **buffer, INT32 *siz
 /* Table 55 - Definition of (TPM_HANDLE) TPMI_RH_CLEAR Type <IN> */
 
 TPM_RC
-TPMI_RH_CLEAR_Unmarshal(TPMI_RH_CLEAR *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_CLEAR_Unmarshal(TPMI_RH_CLEAR *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -988,10 +981,9 @@ TPMI_RH_CLEAR_Unmarshal(TPMI_RH_CLEAR *target, BYTE **buffer, INT32 *size, BOOL 
 /* Table 56 - Definition of (TPM_HANDLE) TPMI_RH_NV_AUTH Type <IN> */
 
 TPM_RC
-TPMI_RH_NV_AUTH_Unmarshal(TPMI_RH_NV_AUTH *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_NV_AUTH_Unmarshal(TPMI_RH_NV_AUTH *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
     
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -1016,10 +1008,9 @@ TPMI_RH_NV_AUTH_Unmarshal(TPMI_RH_NV_AUTH *target, BYTE **buffer, INT32 *size, B
 /* Table 57 - Definition of (TPM_HANDLE) TPMI_RH_LOCKOUT Type <IN> */
 
 TPM_RC
-TPMI_RH_LOCKOUT_Unmarshal(TPMI_RH_LOCKOUT *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_LOCKOUT_Unmarshal(TPMI_RH_LOCKOUT *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -1038,10 +1029,9 @@ TPMI_RH_LOCKOUT_Unmarshal(TPMI_RH_LOCKOUT *target, BYTE **buffer, INT32 *size, B
 /* Table 58 - Definition of (TPM_HANDLE) TPMI_RH_NV_INDEX Type <IN/OUT> */
 
 TPM_RC
-TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size, BOOL allowNull)
+TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    allowNull = allowNull;
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
@@ -4246,7 +4236,7 @@ TPMS_NV_PUBLIC_Unmarshal(TPMS_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
     TPM_RC rc = TPM_RC_SUCCESS;
     
     if (rc == TPM_RC_SUCCESS) {
-	rc = TPMI_RH_NV_INDEX_Unmarshal(&target->nvIndex, buffer, size, NO);
+	rc = TPMI_RH_NV_INDEX_Unmarshal(&target->nvIndex, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMI_ALG_HASH_Unmarshal(&target->nameAlg, buffer, size, NO);
