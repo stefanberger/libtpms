@@ -103,7 +103,8 @@ TPM_RESULT TPM12_IO_TpmEstablished_Reset(void);
 int TPMLIB_LogPrintf(const char *format, ...);
 void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...) \
      ATTRIBUTE_FORMAT(2, 3);
-
+void TPMLIB_LogArray(unsigned int indent, const unsigned char *data,
+                     size_t datalen);
 
 #define TPMLIB_LogError(format, ...) \
      TPMLIB_LogPrintfA(~0, "libtpms: "format, __VA_ARGS__)

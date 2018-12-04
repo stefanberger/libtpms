@@ -546,6 +546,33 @@ void TPMLIB_LogPrintfA(unsigned int indent, const char *format, ...)
     va_end(args);
 }
 
+/*
+ * TPMLIB_LogArray: Display an array of data
+ *
+ * @indent: how many spaces to indent; indent of ~0 forces logging
+ *          with indent 0 even if not debug_level is set
+ * @data: the data to print
+ * @datalen: length of the data
+ */
+void TPMLIB_LogArray(unsigned int indent, const unsigned char *data,
+                     size_t datalen)
+{
+    char line[80];
+    size_t i, o = 0;
+
+    for (i = 0; i < datalen; i++) {
+        snprintf(&line[o], sizeof(line) - o, "%02x ", data[i]);
+        o += 3;
+        if (o >= 16 * 3) {
+            TPMLIB_LogPrintfA(indent, "%s\n", line);
+            o = 0;
+        }
+    }
+    if (o > 0) {
+        TPMLIB_LogPrintfA(indent, "%s\n", line);
+    }
+}
+
 void ClearCachedState(enum TPMLIB_StateType st)
 {
     free(cached_blobs[st].buffer);

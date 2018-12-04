@@ -66,6 +66,7 @@
 #include "tpm_nvfilename.h"
 
 extern BOOL      g_inFailureMode;
+static BOOL      reportedFailureCommand;
 
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
@@ -97,6 +98,7 @@ TPM_RESULT TPM2_MainInit(void)
     bool has_cached_state;
 
     g_inFailureMode = FALSE;
+    reportedFailureCommand = FALSE;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -199,6 +201,13 @@ TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
     }
 
     *resp_size = resp.BufferSize;
+
+    if (g_inFailureMode && !reportedFailureCommand) {
+        reportedFailureCommand = TRUE;
+        TPMLIB_LogTPM2Error("%s: Entered failure mode through command:\n",
+                            __func__);
+        TPMLIB_LogArray(~0, command, command_size);
+    }
 
     return TPM_SUCCESS;
 }
