@@ -68,6 +68,7 @@
 #define MANUFACTURE_C
 #include "Tpm.h"
 #include "TpmSizeChecks_fp.h"
+#include "tpm_library_intern.h"  // libtpms added
 /* 9.9.3 Functions */
 /* 9.9.3.1 TPM_Manufacture() */
 /* This function initializes the TPM values in preparation for the TPMs first use. This function
@@ -76,6 +77,7 @@
 /* Return Values Meaning */
 /* 0 success */
 /* 1 manufacturing process previously performed */
+/* -1 an error occurred -- libtpms added */
 LIB_EXPORT int
 TPM_Manufacture(
 		int             firstTime       // IN: indicates if this is the first call from
@@ -98,7 +100,21 @@ TPM_Manufacture(
     NvManufacture();
     // Clear the magic value in the DRBG state
     go.drbgState.magic = 0;
-    CryptStartup(SU_RESET);
+    if (CryptStartup(SU_RESET) == FALSE) { // libtpms added begin
+        TPMLIB_LogTPM2Error(
+            "CryptStartup failed:\n"
+            "IsEntropyBad            : %d\n"
+            "IsTestStateSet(TESTING) : %d\n"
+            "IsTestStateSet(TESTED)  : %d\n"
+            "IsTestStateSet(ENTROPY) : %d\n"
+            "IsDrbgTested            : %d\n",
+            IsEntropyBad(),
+            IsTestStateSet(TESTING),
+            IsTestStateSet(TESTED),
+            IsTestStateSet(ENTROPY),
+            IsDrbgTested());
+        return -1;
+    }                                      // libtpms added end
     // default configuration for PCR
     PCRSimStart();
     // initialize pre-installed hierarchy data

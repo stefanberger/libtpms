@@ -203,7 +203,9 @@ TPM2_Startup(
 	startup = SU_RESET;
     // Startup for cryptographic library. Don't do this until after the orderly
     // state has been read in from NV.
-    CryptStartup(startup);
+    if (CryptStartup(startup) == FALSE) { // libtpms changed begin
+        FAIL(FATAL_ERROR_INTERNAL);
+    }                                     // libtpms changed end
     // When the cryptographic library has been started, indicate that a TPM2_Startup
     // command has been received.
     TPMRegisterStartup();

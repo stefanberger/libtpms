@@ -630,16 +630,18 @@ CryptRandStartup(
 {
 #if ! _DRBG_STATE_SAVE
     // If not saved in NV, re-instantiate on each startup
-    DRBG_Instantiate(&drbgDefault, 0, NULL);
+    return DRBG_Instantiate(&drbgDefault, 0, NULL);      // libtpms changed; return BOOL
 #else
     // If the running state is saved in NV, NV has to be loaded before it can
     // be updated
     if(go.drbgState.magic == DRBG_MAGIC)
-	DRBG_Reseed(&go.drbgState, NULL, NULL);
+	return DRBG_Reseed(&go.drbgState, NULL, NULL);   // libtpms changed; return BOOL
     else
-	DRBG_Instantiate(&go.drbgState, 0, NULL);
+	return DRBG_Instantiate(&go.drbgState, 0, NULL); // libtpms changed; return BOOL
 #endif
+#if 0
     return TRUE;
+#endif
 }
 /* 10.2.18.4.8 CryptRandInit() */
 /* This function is called when _TPM_Init() is being processed */
