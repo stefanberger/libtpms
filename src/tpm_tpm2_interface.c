@@ -122,7 +122,11 @@ TPM_RESULT TPM2_MainInit(void)
 
     if (!has_cached_state && !_TPM2_CheckNVRAMFileExists()) {
         _plat__NVEnable(NULL);
-        TPM_Manufacture(TRUE);
+        if (TPM_Manufacture(TRUE) < 0 || g_inFailureMode) {
+            TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
+                                "failure mode\n", __func__);
+            reportedFailureCommand = TRUE;
+        }
     }
 
     _rpc__Signal_PowerOn(FALSE);
