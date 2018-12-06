@@ -23,13 +23,17 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     assert(res == TPM_SUCCESS);
 
     res = TPMLIB_MainInit();
-    assert(res == TPM_SUCCESS);
+    if (res != TPM_SUCCESS)
+        fprintf(stderr, "Error: TPMLIB_MainInit() failed\n");
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, startup, sizeof(startup));
-    assert(res == TPM_SUCCESS);
+    if (res != TPM_SUCCESS)
+        fprintf(stderr, "Error: TPMLIB_Process(Startup) failed\n");
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, (unsigned char*)data, size);
-    assert(res == TPM_SUCCESS);
+    if (res != TPM_SUCCESS)
+        fprintf(stderr, "Error: TPMLIB_Process(fuzz-command) failed\n")
+
 
     TPMLIB_Terminate();
     TPM_Free(rbuffer);
