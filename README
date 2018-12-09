@@ -88,7 +88,7 @@ Fuzz testing is known to work with Fedora 28 or later. It requires that the
 Ex:
 $ ./configure --with-openssl --with-tpm2 --enable-sanitizers --enable-fuzzer CC=clang
 $ make && make -C tests fuzz
-$ tests/fuzz tests/corpus-execute-command
+$ tests/run-fuzzer.sh
 
 Maintainers
 -----------
