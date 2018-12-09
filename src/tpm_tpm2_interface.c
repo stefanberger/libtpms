@@ -191,6 +191,13 @@ TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
 
     _rpc__Send_Command(locality, req, &resp);
 
+    /* it may come back with a different buffer, especially in failure mode */
+    if (resp.Buffer != *respbuffer) {
+        if (resp.BufferSize > *respbufsize)
+            resp.BufferSize = *respbufsize;
+        memcpy(*respbuffer, resp.Buffer, resp.BufferSize);
+    }
+
     *resp_size = resp.BufferSize;
 
     return TPM_SUCCESS;
