@@ -5,7 +5,7 @@ Priority: optional
 Build-Depends: automake, autoconf, libtool, libssl-dev, sed,
  make, coreutils, pkg-config, gawk, sed, bash, dh-exec
 
-Package: libtpms
+Package: libtpms0
 Architecture: any
 Multi-Arch: same
 Depends: openssl,
@@ -18,5 +18,5 @@ Package: libtpms-dev
 Architecture: all
 Section: libdevel
 Description: libtpms header files and man pages
- The libtpms-dev package provides header files and man pages for the
+ The libtpms0-dev package provides header files and man pages for the
  functions provided by libtpms.
