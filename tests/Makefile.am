@@ -4,11 +4,16 @@
 # For the license, see the LICENSE file in the root directory.
 #
 
+TESTS_ENVIRONMENT = \
+  abs_top_testdir=`cd '$(top_srcdir)'/tests; pwd` \
+  abs_top_builddir=`cd '$(top_builddir)'; pwd` \
+  abs_top_srcdir=`cd '$(top_srcdir)'; pwd`
+
 AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
-check_PROGRAMS = base64decode nvram_offsets
-TESTS = base64decode.sh nvram_offsets
+check_PROGRAMS = base64decode nvram_offsets tpm2_pcr_read
+TESTS = base64decode.sh nvram_offsets tpm2_pcr_read.sh
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
@@ -47,4 +52,7 @@ freebl_sha1flattensize_LDFLAGS = \
 EXTRA_DIST = \
 	freebl_sha1flattensize.c \
 	base64decode.c \
-	base64decode.sh
+	base64decode.sh \
+	common \
+	tpm2_pcr_read.c \
+	tpm2_pcr_read.sh
