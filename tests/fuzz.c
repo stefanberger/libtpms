@@ -32,8 +32,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, (unsigned char*)data, size);
     if (res != TPM_SUCCESS)
-        fprintf(stderr, "Error: TPMLIB_Process(fuzz-command) failed\n")
-
+        fprintf(stderr, "Error: TPMLIB_Process(fuzz-command) failed\n");
 
     TPMLIB_Terminate();
     TPM_Free(rbuffer);
