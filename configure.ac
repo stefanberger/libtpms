@@ -162,6 +162,10 @@ AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
 AC_SUBST([SANITIZERS])
 AC_SUBST([FUZZER])
 
+AC_ARG_ENABLE([test-coverage],
+  AS_HELP_STRING([--enable-test-coverage], [Enable test coverage flags]),
+  [COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage" COVERAGE_LDFLAGS="-fprofile-arcs"])
+
 LT_INIT
 AC_PROG_CC
 AC_PROG_INSTALL
@@ -209,7 +213,8 @@ if test "x$enable_hardening" != "xno"; then
 fi
 
 if test "$test_CFLAGS" != set; then
-  CFLAGS="$CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
+  CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
+  LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
 fi
 
 AC_CONFIG_FILES(Makefile                   \
