@@ -56,3 +56,8 @@ EXTRA_DIST = \
 	common \
 	tpm2_pcr_read.c \
 	tpm2_pcr_read.sh
+
+CLEANFILES = \
+	*.gcov \
+	*.gcda \
+	*.gcno

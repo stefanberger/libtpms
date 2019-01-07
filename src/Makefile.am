@@ -598,4 +598,17 @@ EXTRA_DIST = \
 	libtpms.syms \
 	test.syms
 
-CLEANFILES = a.out
+CLEANFILES = \
+	a.out \
+	*.gcov \
+	*.gcda \
+	*.gcno \
+	tpm12/*.gcov \
+	tpm12/*.gcda \
+	tpm12/*.gcno \
+	tpm2/*.gcov \
+	tpm2/*.gcda \
+	tpm2/*.gcno \
+	tpm2/crypto/openssl/*.gcov \
+	tpm2/crypto/openssl/*.gcda \
+	tpm2/crypto/openssl/*.gcno
