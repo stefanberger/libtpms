@@ -30,3 +30,27 @@ script:
 matrix:
   include:
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=distcheck"
+    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
+           TARGET="install"
+      dist: xenial
+      before_script:
+      - sudo pip install cpp-coveralls
+      script:
+        ./autogen.sh ${CONFIG} &&
+        sudo make -j$(nproc) ${TARGET} &&
+        sudo make -j$(nproc) check &&
+        git clone https://github.com/stefanberger/swtpm.git &&
+        pushd swtpm &&
+         sudo apt -y install devscripts equivs python-twisted libfuse-dev
+           libglib2.0-dev libgmp-dev expect libtasn1-dev socat findutils
+           tpm-tools gnutls-dev gnutls-bin &&
+         ./autogen.sh --with-gnutls --prefix=/usr &&
+         export SWTPM_TEST_EXPENSIVE=1 &&
+         sudo make -j$(nproc) check &&
+        popd
+      after_success:
+        # coveralls creates some odd paths
+        sudo cpp-coveralls --gcov-options '\-lp'
+          -e src/tpm12/tpm12
+          -e src/tpm2/tpm2
+          -e src/tpm2/crypto/openssl/tpm2/
