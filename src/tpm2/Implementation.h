@@ -106,7 +106,6 @@
  #endif
 #elif defined __APPLE__
  #define  BIG_ENDIAN_TPM       NO
- #define  LITTLE_ENDIAN_TPM    YES
 #else
  #error Unsupported OS
 #endif                                             /* libtpms added end */
