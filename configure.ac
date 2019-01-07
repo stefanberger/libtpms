@@ -38,15 +38,7 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [create a debug build]),
   [DEBUG="no",
    AC_MSG_RESULT([no])])
 
-# If the user has not set CFLAGS, do something appropriate
-test_CFLAGS=${CFLAGS+set}
-if test "$test_CFLAGS" != set; then
-	if test "$DEBUG" = "yes"; then
-		CFLAGS="-O0 -g -DDEBUG"
-	else
-		CFLAGS="-g -O2"
-	fi
-elif test "$DEBUG" = "yes"; then
+if test "$DEBUG" = "yes"; then
 	CFLAGS="$CFLAGS -O0 -g -DDEBUG"
 fi
 
@@ -212,10 +204,8 @@ if test "x$enable_hardening" != "xno"; then
 	AC_SUBST([HARDENING_LDFLAGS])
 fi
 
-if test "$test_CFLAGS" != set; then
-  CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
-  LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
-fi
+CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
+LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
 
 AC_CONFIG_FILES(Makefile                   \
 		dist/libtpms.spec          \
