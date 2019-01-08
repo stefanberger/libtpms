@@ -26,12 +26,13 @@ addons:
     branch_pattern: coverity_scan
 script:
   - ./autogen.sh ${CONFIG}
-  - make -j$(nproc) ${TARGET}
+  - make -j$(${NPROC}) ${TARGET}
 matrix:
   include:
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=distcheck"
+           NPROC="nproc"
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
-           TARGET="install"
+           TARGET="install" NPROC="nproc"
       dist: xenial
       before_script:
       - sudo pip install cpp-coveralls
@@ -54,3 +55,9 @@ matrix:
           -e src/tpm12/tpm12
           -e src/tpm2/tpm2
           -e src/tpm2/crypto/openssl/tpm2/
+    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
+           NPROC="sysctl -n hw.ncpu" CFLAGS="-I/usr/local/opt/openssl/include"
+           LDFLAGS="-L/usr/local/opt/openssl/lib"
+           # 'distcheck' results in duplicate symbol errors
+      os: osx
+      compiler: clang
