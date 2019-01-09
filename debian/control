@@ -15,8 +15,9 @@ Description: TPM emulation library
  Libtpms is a library that provides TPM functionality.
 
 Package: libtpms-dev
-Architecture: all
+Architecture: any
 Section: libdevel
+Depends: ${misc:Depends}, libtpms0 (= ${binary:Version})
 Description: libtpms header files and man pages
  The libtpms-dev package provides header files and man pages for the
  functions provided by libtpms.
