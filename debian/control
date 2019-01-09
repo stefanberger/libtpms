@@ -5,7 +5,7 @@ Priority: optional
 Build-Depends: automake, autoconf, libtool, libssl-dev, sed,
  make, coreutils, pkg-config, gawk, sed, bash, dh-exec
 
-Package: libtpms
+Package: libtpms0
 Architecture: any
 Multi-Arch: same
 Depends: openssl,
