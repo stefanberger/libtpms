@@ -2,8 +2,8 @@ Source: libtpms
 Maintainer: Stefan Berger <stefanb@linux.vnet.ibm.com>
 Section: libs
 Priority: optional
-Build-Depends: automake, autoconf, libtool, libssl-dev, sed,
- make, coreutils, pkg-config, gawk, sed, bash, dh-exec
+Build-Depends: automake, autoconf, libtool, libssl-dev,
+ gawk, dh-exec, debhelper
 
 Package: libtpms0
 Architecture: any
