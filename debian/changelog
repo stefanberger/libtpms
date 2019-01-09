@@ -1,4 +1,10 @@
-libtpms (0.6.0-1-dev1) RELEASED; urgency=medium
+libtpms (0.6.0-1) RELEASED; urgency=medium
+
+  * Stable release
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Wed, 09 Jan 2019 12:28:12 -0500
+
+libtpms (0.6.0-1~dev1) RELEASED; urgency=medium
 
   * Developer release 1
 
