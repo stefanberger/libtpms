@@ -1,5 +1,19 @@
 CHANGES - changes for libtpms
 
+version 0.6.0
+  - added TPM 2 support (revision 150)
+
+  - New API calls:
+    - TPMLIB_CancelCommand
+    - TPMLIB_ChooseTPMVersion
+    - TPMLIB_SetDebugFD
+    - TPMLIB_SetDebugLevel
+    - TPMLIB_SetDebugPrefix
+    - TPMLIB_SetBufferSize
+    - TPMLIB_ValidateState
+    - TPMLIB_SetState
+    - TPMLIB_GetState
+
 version 0.5.1
   first public release
 
