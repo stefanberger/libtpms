@@ -2,7 +2,7 @@
 
 %define name      @PACKAGE@
 %define version   @VERSION@
-%define release   1_dev1
+%define release   0~dev1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %if "%{?crypto_subsystem}" == ""
@@ -19,7 +19,7 @@ Release:        %{release}%{?dist}
 License:        BSD
 Group:          Development/Libraries
 Url:            http://github.com/stefanberger/libtpms
-Source:         http://github.com/stefanberger/libtpms/archive/v%{version}.tar.gz
+Source:         libtpms-%{version}.tar.gz
 Provides:       libtpms-%{crypto_subsystem} = %{version}-%{release}
 
 %if "%{crypto_subsystem}" == "openssl"
@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Jan 14 2018 Stefan Berger - 0.6.0-1
+- Release of version 0.6.0 with TPM 2.0 support
+
 * Mon Jun 30 2014 Stefan Berger - 0.5.2-1
 - Updated to version 0.5.2
 - coverity fixes
