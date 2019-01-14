@@ -1,3 +1,7 @@
+libtpms (0.7.0~dev1) UNRELEASED; urgency=medium
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 14 Jan 2019 10:25:08 -0500
+
 libtpms (0.6.0-1) RELEASED; urgency=medium
 
   * Stable release
