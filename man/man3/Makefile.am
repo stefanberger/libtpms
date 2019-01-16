@@ -54,7 +54,7 @@ man3_MANS_generated = \
 	TPMLIB_VolatileAll_Store.3 \
 	TPM_Malloc.3
 
-man3_MANS += $(man3_MANs_generated)
+man3_MANS += $(man3_MANS_generated)
 
 %.3 : %.pod
 	@pod2man -r "libtpms" \
@@ -64,4 +64,4 @@ man3_MANS += $(man3_MANs_generated)
 
 EXTRA_DIST = $(man3_MANS) $(man3_PODS)
 
-CLEANFILES = $(man3_MANs_generated)
+CLEANFILES = $(man3_MANS_generated)
