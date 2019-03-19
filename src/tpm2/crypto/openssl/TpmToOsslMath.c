@@ -428,7 +428,11 @@ PointFromOssl(
     if(y == NULL)
 	FAIL(FATAL_ERROR_ALLOCATION);
     // If this returns false, then the point is at infinity
+#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
+    OK = EC_POINT_get_affine_coordinates(E->G, pIn, x, y, E->CTX);
+#else
     OK = EC_POINT_get_affine_coordinates_GFp(E->G, pIn, x, y, E->CTX);
+#endif
     if(OK)
 	{
 	    OsslToTpmBn(pOut->x, x);
@@ -454,7 +458,11 @@ EcPointInitialized(
 			     ? EC_POINT_new(E->G) : NULL;
     pAssert(E != NULL);
     if(P != NULL)
+#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
+	EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX);
+#else
 	EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX);
+#endif
     BN_free(bnY);
     BN_free(bnX);
     return P;
@@ -494,7 +502,11 @@ BnCurveInitialize(
     OK = OK && ((P = EC_POINT_new(group)) != NULL);
     // Need to use this in case Montgomery method is being used
     OK = OK
+#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
+	 && EC_POINT_set_affine_coordinates(group, P, bnX, bnY, CTX);
+#else
 	 && EC_POINT_set_affine_coordinates_GFp(group, P, bnX, bnY, CTX);
+#endif
     // Now set the generator
     OK = OK && EC_GROUP_set_generator(group, P, bnN, bnH);
     if(P != NULL)
