@@ -89,24 +89,28 @@ int main(void)
     };
 
     res = TPMLIB_ChooseTPMVersion(TPMLIB_TPM_VERSION_2);
-    assert(res == TPM_SUCCESS);
+    if (res) {
+        fprintf(stderr, "TPMLIB_ChooseTPMVersion() failed: 0x%02x\n", res);
+        goto exit;
+    }
 
     res = TPMLIB_MainInit();
-    if (res != TPM_SUCCESS) {
-        fprintf(stderr, "TPMLIB_MainInit() failed\n");
+    if (res) {
+        fprintf(stderr, "TPMLIB_MainInit() failed: 0x%02x\n", res);
         goto exit;
     }
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, startup, sizeof(startup));
-    if (res != TPM_SUCCESS) {
-        fprintf(stderr, "TPMLIB_Process(Startup) failed\n");
+    if (res) {
+        fprintf(stderr, "TPMLIB_Process(Startup) failed: 0x%02x\n", res);
         goto exit;
     }
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal,
                          tpm2_pcr_read, sizeof(tpm2_pcr_read));
-    if (res != TPM_SUCCESS) {
-        fprintf(stderr, "TPMLIB_Process(TPM2_PCR_Read) failed\n");
+    if (res) {
+        fprintf(stderr, "TPMLIB_Process(TPM2_PCR_Read) failed: 0x%02x\n",
+                res);
         goto exit;
     }
 
@@ -121,7 +125,140 @@ int main(void)
         goto exit;
     }
 
+    /* Extend PCR 10 with string '1234' */
+    unsigned char tpm2_pcr_extend[] = {
+        0x80, 0x02, 0x00, 0x00, 0x00, 0x41, 0x00, 0x00,
+        0x01, 0x82, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00,
+        0x00, 0x09, 0x40, 0x00, 0x00, 0x09, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
+        0x0b, 0x31, 0x32, 0x33, 0x34, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00
+    };
+
+    res = TPMLIB_Process(&rbuffer, &rlength, &rtotal,
+                         tpm2_pcr_extend, sizeof(tpm2_pcr_extend));
+    if (res != TPM_SUCCESS) {
+        fprintf(stderr,
+                "TPMLIB_Process(TPM2_PCR_Extend) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    /* Read value of PCR 10 */
+    unsigned char tpm2_pcr10_read[] = {
+        0x80, 0x01, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00,
+        0x01, 0x7e, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0b,
+        0x03, 0x00, 0x04, 0x00
+    };
+
+    res = TPMLIB_Process(&rbuffer, &rlength, &rtotal,
+                         tpm2_pcr10_read, sizeof(tpm2_pcr10_read));
+    if (res) {
+        fprintf(stderr, "TPMLIB_Process(PCR10 Read) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    const unsigned char tpm2_pcr10_read_resp[] = {
+        0x80, 0x01, 0x00, 0x00, 0x00, 0x3e, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00,
+        0x00, 0x01, 0x00, 0x0b, 0x03, 0x00, 0x04, 0x00,
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x20, 0x1f, 0x7f,
+        0xb1, 0x00, 0xe1, 0xb2, 0xd1, 0x95, 0x19, 0x4b,
+        0x58, 0xe7, 0xc3, 0x09, 0xa5, 0x86, 0x30, 0x7c,
+        0x34, 0x64, 0x19, 0xdc, 0xb2, 0xd5, 0x9f, 0x52,
+        0x2b, 0xe7, 0xf0, 0x94, 0x51, 0x01
+    };
+
+    if (memcmp(tpm2_pcr10_read_resp, rbuffer, rlength)) {
+        fprintf(stderr, "TPM2_PCRRead(PCR10) did not return expected result\n");
+        goto exit;
+    }
+
+    /* save permanent and volatile state */
+    unsigned char *perm;
+    uint32_t permlen = 0;
+    res = TPMLIB_GetState(TPMLIB_STATE_PERMANENT, &perm, &permlen);
+    if (res) {
+        fprintf(stderr, "TPMLIB_GetState(PERMANENT) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    unsigned char *vol;
+    uint32_t vollen = 0;
+    res = TPMLIB_GetState(TPMLIB_STATE_VOLATILE, &vol, &vollen);
+    if (res) {
+        fprintf(stderr, "TPMLIB_GetState(VOLATILE) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    /* terminate and resume where we left off */
+    TPMLIB_Terminate();
+
+    res = TPMLIB_SetState(TPMLIB_STATE_PERMANENT, perm, permlen);
+    if (res) {
+        fprintf(stderr, "TPMLIB_SetState(PERMANENT) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    res = TPMLIB_SetState(TPMLIB_STATE_VOLATILE, vol, vollen);
+    if (res) {
+        fprintf(stderr, "TPMLIB_SetState(VOLATILE) failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    res = TPMLIB_MainInit();
+    if (res) {
+        fprintf(stderr, "TPMLIB_MainInit() after SetState failed: 0x%02x\n", res);
+        goto exit;
+    }
+
+    res = TPMLIB_Process(&rbuffer, &rlength, &rtotal,
+                         tpm2_pcr10_read, sizeof(tpm2_pcr10_read));
+    if (res) {
+        fprintf(stderr,
+                "TPMLIB_Process(PCR10 Read) after SetState failedL 0x%02x\n",
+                res);
+        goto exit;
+    }
+
+    if (memcmp(tpm2_pcr10_read_resp, rbuffer, rlength)) {
+        fprintf(stderr,
+                "TPM2_PCRRead(PCR10) after SetState did not return expected "
+                "result\n");
+        goto exit;
+    }
+
+    unsigned char tpm2_shutdown[] = {
+         0x80, 0x01, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00,
+         0x01, 0x45, 0x00, 0x00
+    };
+
+    res = TPMLIB_Process(&rbuffer, &rlength, &rtotal,
+                         tpm2_shutdown, sizeof(tpm2_shutdown));
+    if (res) {
+        fprintf(stderr,
+                "TPMLIB_Process(Shutdown) after SetState failed: 0x%02x\n",
+                res);
+        goto exit;
+    }
+
+    unsigned char tpm2_shutdown_resp[] = {
+         0x80, 0x01, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00,
+         0x00, 0x00
+    };
+
+    if (memcmp(tpm2_shutdown_resp, rbuffer, rlength)) {
+        fprintf(stderr,
+                "TPM2_PCRRead(Shutdown) after SetState did not return expected "
+                "result\n");
+        goto exit;
+    }
+
     ret = 0;
+
+    fprintf(stdout, "OK\n");
 
 exit:
     TPMLIB_Terminate();
