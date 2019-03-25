@@ -71,7 +71,7 @@ static BOOL      reportedFailureCommand;
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
  */
-TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
+TPM_BOOL _TPM2_CheckNVRAMFileExists(bool *has_nvram_loaddata_callback)
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -81,6 +81,7 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
     uint32_t tpm_number = 0;
     TPM_RESULT ret;
 
+    *has_nvram_loaddata_callback = cbs->tpm_nvram_loaddata != NULL;
     if (cbs->tpm_nvram_loaddata) {
         ret = cbs->tpm_nvram_loaddata(&data, &length, tpm_number, name);
         free(data);
@@ -88,7 +89,10 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(void)
         if (ret != TPM_RETRY)
             return TRUE;
     }
+#else
+    *has_nvram_loaddata_callback = FALSE;
 #endif /* TPM_LIBTPMS_CALLBACKS */
+
     return FALSE;
 }
 
@@ -96,6 +100,8 @@ TPM_RESULT TPM2_MainInit(void)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     bool has_cached_state;
+    bool has_nvram_file;
+    bool has_nvram_loaddata_callback;
 
     g_inFailureMode = FALSE;
     reportedFailureCommand = FALSE;
@@ -119,14 +125,26 @@ TPM_RESULT TPM2_MainInit(void)
     _rpc__Signal_PowerOff();
 
     has_cached_state = HasCachedState(TPMLIB_STATE_PERMANENT);
+    has_nvram_file = _TPM2_CheckNVRAMFileExists(&has_nvram_loaddata_callback);
 
-    if (!has_cached_state && !_TPM2_CheckNVRAMFileExists()) {
-        _plat__NVEnable(NULL);
-        if (TPM_Manufacture(TRUE) < 0 || g_inFailureMode) {
-            TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
-                                "failure mode\n", __func__);
-            reportedFailureCommand = TRUE;
+    if (!has_cached_state) {
+        if (!has_nvram_file) {
+            ret = _plat__NVEnable(NULL);
+            if (ret)
+                TPMLIB_LogTPM2Error(
+                    "%s: _plat__NVEnable(NULL) failed: %d\n",
+                    __func__, ret);
+            if (TPM_Manufacture(TRUE) < 0 || g_inFailureMode) {
+                TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
+                                    "failure mode\n", __func__);
+                reportedFailureCommand = TRUE;
+            }
         }
+    } else if (!has_nvram_loaddata_callback) {
+        ret = _plat__NVEnable_NVChipFile(NULL);
+        if (ret)
+            TPMLIB_LogTPM2Error("%s: _plat__NVEnable_File(NULL) failed: %d\n",
+                                __func__, ret);
     }
 
     _rpc__Signal_PowerOn(FALSE);
