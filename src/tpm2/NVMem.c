@@ -189,7 +189,6 @@ _plat__NVEnable(
 #ifdef TPM_LIBTPMS_CALLBACKS
     int ret;
 #endif
-    NOT_REFERENCED(platParameter);          // to keep compiler quiet
     //
     // Start assuming everything is OK
     s_NV_unrecoverable = FALSE;
@@ -200,7 +199,19 @@ _plat__NVEnable(
     if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
         return ret;
 #endif /* TPM_LIBTPMS_CALLBACKS */
+    return _plat__NVEnable_NVChipFile(platParameter);
+}
 
+int
+_plat__NVEnable_NVChipFile(
+		void            *platParameter  // IN: platform specific parameters
+		)
+{
+    NOT_REFERENCED(platParameter);          // to keep compiler quiet
+    //
+    // Start assuming everything is OK
+    s_NV_unrecoverable = FALSE;
+    s_NV_recoverable = FALSE;
 #if FILE_BACKED_NV
     if(s_NvFile != NULL)
 	return 0;
