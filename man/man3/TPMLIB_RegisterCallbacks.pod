@@ -95,6 +95,15 @@ where the I<TPM_PATH> environment variable pointed to when
 B<TPMLIB_MainInit()> was executed. Failure to write the TPM's state into
 files will put the TPM into failure mode.
 
+If this function is not set (NULL), then the original NVChip file
+will be read when using a TPM 2. This file contains the memory dump of
+internal data structures and is neither portable between endianesses or
+architectures of different sizes (32 bit, 64 bit), nor will it allow
+handling extensions of those internal data structures it carries
+through additions in the TPM 2 code. In the worst case this may result
+in memory access errors by internal functions and result in crashes.
+Therefore, it is recommended to set this function and handle the writing
+of the TPM state.
 
 =item B<tpm_nvram_storedata>
 
@@ -114,6 +123,10 @@ The default implementation reads the TPM's state from files in a directory
 where the I<TPM_PATH> environment variable pointed to when
 B<TPMLIB_MainInit()> was executed. Failure to read the TPM's state from
 files may put the TPM into failure mode.
+
+If this function is not set (NULL), the memory dump will be written
+to the NVChip file (TPM 2) and the same comments apply as when the
+I<tpm_nvram_loaddata> interface function is not set.
 
 =item B<tpm_nvram_deletename>
 
