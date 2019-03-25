@@ -30,6 +30,10 @@ resources (memory allocations) the TPM has used and must be called after
 the last TPM command was processed by the TPM. The B<TPMLIB_MainInit()>
 function can then be called again.
 
+Use B<TPMLIB_RegisterCallbacks()> to set callback functions for
+initialization and writing and restoring the internal state in a
+portable format.
+
 =head1 ERRORS
 
 =over 4
