@@ -198,6 +198,12 @@ LIB_EXPORT int
 _plat__NVEnable(
 		void            *platParameter  // IN: platform specific parameters
 		);
+/* libtpms added begin */
+LIB_EXPORT int
+_plat__NVEnable_NVChipFile(
+		void            *platParameter  // IN: platform specific parameters
+		);
+/* libtpms added end */
 /* C.8.5.3. _plat__NVDisable() */
 /* Disable NV memory */
 LIB_EXPORT void
