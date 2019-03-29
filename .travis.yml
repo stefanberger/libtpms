@@ -51,11 +51,7 @@ matrix:
          sudo make -j$(nproc) check &&
         popd
       after_success:
-        # coveralls creates some odd paths
-        sudo cpp-coveralls --gcov-options '\-lp'
-          -e src/tpm12/tpm12
-          -e src/tpm2/tpm2
-          -e src/tpm2/crypto/openssl/tpm2/
+        sudo cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
            NPROC="sysctl -n hw.ncpu" CFLAGS="-I/usr/local/opt/openssl/include"
            LDFLAGS="-L/usr/local/opt/openssl/lib"
