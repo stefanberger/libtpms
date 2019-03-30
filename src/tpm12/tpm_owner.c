@@ -1035,7 +1035,7 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
 	tpm_state->tpm_permanent_flags.disableFullDALogicInfo = FALSE;
 #endif
 	/* f. allowMaintenance */
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
 	tpm_state->tpm_permanent_flags.allowMaintenance = FALSE;
 #else
 	tpm_state->tpm_permanent_flags.allowMaintenance = TRUE;

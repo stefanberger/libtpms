@@ -633,7 +633,7 @@ static TPM_ORDINAL_TABLE tpm_ordinal_table[] =
      FALSE},
     
     {TPM_ORD_CreateMaintenanceArchive,
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
      TPM_Process_Unused, TPM_Process_Unused,
      FALSE,
      FALSE,
@@ -1172,7 +1172,7 @@ static TPM_ORDINAL_TABLE tpm_ordinal_table[] =
      FALSE},
     
     {TPM_ORD_KillMaintenanceFeature,
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
      TPM_Process_Unused, TPM_Process_Unused,
      FALSE,
      FALSE,
@@ -1256,7 +1256,7 @@ static TPM_ORDINAL_TABLE tpm_ordinal_table[] =
      FALSE},
     
     {TPM_ORD_LoadMaintenanceArchive,
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
      TPM_Process_Unused, TPM_Process_Unused,
      FALSE,
      FALSE,
@@ -1275,7 +1275,7 @@ static TPM_ORDINAL_TABLE tpm_ordinal_table[] =
      FALSE},
     
     {TPM_ORD_LoadManuMaintPub,
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
      TPM_Process_Unused, TPM_Process_Unused,
      FALSE,
      FALSE,
@@ -1567,7 +1567,7 @@ static TPM_ORDINAL_TABLE tpm_ordinal_table[] =
      FALSE},
     
     {TPM_ORD_ReadManuMaintPub,
-#ifdef TPM_NOMAINTENANCE
+#if defined(TPM_NOMAINTENANCE) || defined(TPM_NOMAINTENANCE_COMMANDS)
      TPM_Process_Unused, TPM_Process_Unused,
      FALSE,
      FALSE,
