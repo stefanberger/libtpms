@@ -90,8 +90,10 @@ extern tpm_state_t *tpm_instances[];
 */
 
 TPM_RESULT TPM_Global_Init(tpm_state_t *tpm_state);
+#if 0
 TPM_RESULT TPM_Global_Load(tpm_state_t *tpm_state);
 TPM_RESULT TPM_Global_Store(tpm_state_t *tpm_state);
+#endif
 void       TPM_Global_Delete(tpm_state_t *tpm_state);
 
 

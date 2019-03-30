@@ -1465,6 +1465,7 @@ void TPM_KeyParms_Init(TPM_KEY_PARMS *tpm_key_parms)
     return;
 }
 
+#if 0
 /* TPM_KeyParms_SetRSA() is a 'Set' version specific to RSA keys */
 
 TPM_RESULT TPM_KeyParms_SetRSA(TPM_KEY_PARMS *tpm_key_parms,
@@ -1499,6 +1500,7 @@ TPM_RESULT TPM_KeyParms_SetRSA(TPM_KEY_PARMS *tpm_key_parms,
     }
     return rc;
 }
+#endif
 
 
 /* TPM_KeyParms_Copy() copies the source to the destination.

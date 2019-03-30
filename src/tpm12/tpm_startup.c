@@ -1258,6 +1258,7 @@ TPM_RESULT TPM_Startup_Deactivated(tpm_state_t *tpm_state)
     return returnCode;
 }
 
+#if 0
 /* TPM_Startup_Any() rev 96
 
    Handles Actions common to all TPM_Startup options.
@@ -1277,6 +1278,7 @@ TPM_RESULT TPM_Startup_Any(tpm_state_t *tpm_state)
     tpm_state->tpm_stany_flags.postInitialise = FALSE;
     return returnCode;
 }
+#endif
 
 /* 3.3 TPM_SaveState rev 111
 

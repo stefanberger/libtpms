@@ -57,6 +57,8 @@ void       TPM_Digest_XOR(TPM_DIGEST out,
                           const TPM_DIGEST in2);
 TPM_RESULT TPM_Digest_Compare(const TPM_DIGEST expect, const TPM_DIGEST actual);
 void       TPM_Digest_IsZero(TPM_BOOL *isZero, TPM_DIGEST tpm_digest);
+#if 0
 void 	   TPM_Digest_IsMinusOne(TPM_BOOL *isMinusOne, TPM_DIGEST tpm_digest);
+#endif
 
 #endif

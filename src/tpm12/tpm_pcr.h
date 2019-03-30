@@ -119,9 +119,11 @@ TPM_RESULT TPM_PCRSelection_CheckRange(const TPM_PCR_SELECTION *tpm_pcr_selectio
 void       TPM_PCRSelection_Compare(TPM_BOOL *match,
                                     TPM_PCR_SELECTION *tpm_pcr_selection1,
                                     TPM_PCR_SELECTION *tpm_pcr_selection2);
+#if 0
 void TPM_PCRSelection_LessThan(TPM_BOOL *lessThan,
                                TPM_PCR_SELECTION *tpm_pcr_selection_new,
                                TPM_PCR_SELECTION *tpm_pcr_selection_old);
+#endif
 
 /* TPM_PCR_ATTRIBUTES */
 
@@ -288,9 +290,11 @@ TPM_RESULT TPM_PCRComposite_Set(TPM_PCR_COMPOSITE *tpm_pcr_composite,
 */
 
 void       TPM_QuoteInfo_Init(TPM_QUOTE_INFO *tpm_quote_info);
+#if 0
 TPM_RESULT TPM_QuoteInfo_Load(TPM_QUOTE_INFO *tpm_quote_info,
                               unsigned char **stream,
                               uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_QuoteInfo_Store(TPM_STORE_BUFFER *sbuffer,
                                const TPM_QUOTE_INFO *tpm_quote_info);
 void       TPM_QuoteInfo_Delete(TPM_QUOTE_INFO *tpm_quote_info);
@@ -300,9 +304,11 @@ void       TPM_QuoteInfo_Delete(TPM_QUOTE_INFO *tpm_quote_info);
 */
 
 void       TPM_QuoteInfo2_Init(TPM_QUOTE_INFO2 *tpm_quote_info2);
+#if 0
 TPM_RESULT TPM_QuoteInfo2_Load(TPM_QUOTE_INFO2 *tpm_quote_info2,
                                unsigned char **stream,
                                uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_QuoteInfo2_Store(TPM_STORE_BUFFER *sbuffer,
                                 const TPM_QUOTE_INFO2 *tpm_quote_info2);
 void       TPM_QuoteInfo2_Delete(TPM_QUOTE_INFO2 *tpm_quote_info2);

@@ -62,9 +62,11 @@ TPM_RESULT TPM_LoadBool(TPM_BOOL *tpm_bool,
 TPM_RESULT TPM_LoadLong(unsigned long *result,
                         const unsigned char *stream,
                         uint32_t stream_size);
+#if 0
 TPM_RESULT TPM_LoadString(const char **name,
                           unsigned char **stream,
                           uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_CheckTag(TPM_STRUCTURE_TAG expectedTag,
 			unsigned char **stream,
                         uint32_t *stream_size);

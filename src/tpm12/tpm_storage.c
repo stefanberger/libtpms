@@ -144,6 +144,7 @@ TPM_RESULT TPM_BoundData_Load(TPM_BOUND_DATA *tpm_bound_data,
     return rc;
 }
 
+#if 0
 /* TPM_BoundData_Store()
    
    serialize the structure to a stream contained in 'sbuffer'
@@ -171,6 +172,7 @@ TPM_RESULT TPM_BoundData_Store(TPM_STORE_BUFFER *sbuffer,
     }
     return rc;
 }
+#endif
 
 /* TPM_BoundData_Delete()
 

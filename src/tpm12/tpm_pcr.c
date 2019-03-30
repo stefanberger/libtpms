@@ -2281,6 +2281,7 @@ void TPM_PCRSelection_Compare(TPM_BOOL *match,
     return;
 }
 
+#if 0
 /* TPM_PCRSelection_LessThan() compares the new selection to the old selection.	 It returns lessThan
    TRUE is the new selection does not select a PCR that was selected by the old selection.
 */
@@ -2303,6 +2304,7 @@ void TPM_PCRSelection_LessThan(TPM_BOOL *lessThan,
     }	
     return;
 }
+#endif
 
 
 /*
@@ -2326,6 +2328,7 @@ void TPM_QuoteInfo_Init(TPM_QUOTE_INFO *tpm_quote_info)
     return;
 }
 
+#if 0
 /* TPM_QuoteInfo_Load()
 
    deserialize the structure from a 'stream'
@@ -2367,6 +2370,7 @@ TPM_RESULT TPM_QuoteInfo_Load(TPM_QUOTE_INFO *tpm_quote_info,
     }
     return rc;
 }
+#endif
 
 /* TPM_QuoteInfo_Store()
    
@@ -2437,6 +2441,7 @@ void TPM_QuoteInfo2_Init(TPM_QUOTE_INFO2 *tpm_quote_info2)
     return;
 }
 
+#if 0
 /* TPM_QuoteInfo2_Load()
 
    deserialize the structure from a 'stream'
@@ -2472,6 +2477,7 @@ TPM_RESULT TPM_QuoteInfo2_Load(TPM_QUOTE_INFO2 *tpm_quote_info2,
     }
     return rc;
 }
+#endif
 
 /* TPM_QuoteInfo2_Store()
    

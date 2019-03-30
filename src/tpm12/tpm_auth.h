@@ -50,7 +50,9 @@
   TPM_AUTHDATA
 */
 
+#if 0
 void       TPM_Authdata_Init(TPM_AUTHDATA tpm_authdata);
+#endif
 TPM_RESULT TPM_Authdata_Load(TPM_AUTHDATA tpm_authdata,
                              unsigned char **stream,
                              uint32_t *stream_size);
@@ -112,8 +114,10 @@ void       TPM_ChangeauthValidate_Init(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_v
 TPM_RESULT TPM_ChangeauthValidate_Load(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_validate,
                                        unsigned char **stream,
                                        uint32_t *stream_size);
+#if 0
 TPM_RESULT TPM_ChangeauthValidate_Store(TPM_STORE_BUFFER *sbuffer,
                                         const TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_validate);
+#endif
 void       TPM_ChangeauthValidate_Delete(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_validate);
 
 /*

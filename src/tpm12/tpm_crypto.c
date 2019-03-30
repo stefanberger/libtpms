@@ -752,6 +752,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char* encrypt_data,    /* encrypted dat
     return rc;
 }
 
+#if 0
 /* TPM_RSAPublicEncryptRaw() does a raw public key operation without any padding.
 
 */
@@ -821,6 +822,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     }
     return rc;
 }
+#endif
 
 /* TPM_RSASign() signs 'message' of size 'message_size' using the private key n,e,d and the
    signature scheme 'sigScheme' as specified in PKCS #1 v2.0.

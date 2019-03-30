@@ -50,8 +50,10 @@ void       TPM_EKBlob_Init(TPM_EK_BLOB *tpm_ek_blob);
 TPM_RESULT TPM_EKBlob_Load(TPM_EK_BLOB *tpm_ek_blob,
                            unsigned char **stream,
                            uint32_t *stream_size);
+#if 0
 TPM_RESULT TPM_EKBlob_Store(TPM_STORE_BUFFER *sbuffer,
                             const TPM_EK_BLOB *tpm_ek_blob);
+#endif
 void       TPM_EKBlob_Delete(TPM_EK_BLOB *tpm_ek_blob);
 
 /*
@@ -62,14 +64,17 @@ void       TPM_EKBlobActivate_Init(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate);
 TPM_RESULT TPM_EKBlobActivate_Load(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate,
                                    unsigned char **stream,
                                    uint32_t *stream_size);
+#if 0
 TPM_RESULT TPM_EKBlobActivate_Store(TPM_STORE_BUFFER *sbuffer,
                                     const TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate);
+#endif
 void       TPM_EKBlobActivate_Delete(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate);
 
 /*
   TPM_EK_BLOB_AUTH
 */
 
+#if 0
 void       TPM_EKBlobAuth_Init(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth);
 TPM_RESULT TPM_EKBlobAuth_Load(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth,
                                unsigned char **stream,
@@ -77,7 +82,7 @@ TPM_RESULT TPM_EKBlobAuth_Load(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth,
 TPM_RESULT TPM_EKBlobAuth_Store(TPM_STORE_BUFFER *sbuffer,
                                 const TPM_EK_BLOB_AUTH *tpm_ek_blob_auth);
 void       TPM_EKBlobAuth_Delete(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth);
-
+#endif
 
 
 /*
@@ -85,9 +90,11 @@ void       TPM_EKBlobAuth_Delete(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth);
 */
 
 void       TPM_IdentityContents_Init(TPM_IDENTITY_CONTENTS *tpm_identity_contents);
+#if 0
 TPM_RESULT TPM_IdentityContents_Load(TPM_IDENTITY_CONTENTS *tpm_identity_contents,
                                      unsigned char **stream,
                                      uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_IdentityContents_Store(TPM_STORE_BUFFER *sbuffer,
                                       TPM_IDENTITY_CONTENTS *tpm_identity_contents);
 void       TPM_IdentityContents_Delete(TPM_IDENTITY_CONTENTS *tpm_identity_contents);
@@ -100,8 +107,10 @@ void       TPM_AsymCaContents_Init(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents);
 TPM_RESULT TPM_AsymCaContents_Load(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents,
                                    unsigned char **stream,
                                    uint32_t *stream_size);
+#if 0
 TPM_RESULT TPM_AsymCaContents_Store(TPM_STORE_BUFFER *sbuffer,
                                     const TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents);
+#endif
 void       TPM_AsymCaContents_Delete(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents);
 
 

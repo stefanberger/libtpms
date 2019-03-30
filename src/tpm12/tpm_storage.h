@@ -52,8 +52,10 @@ void       TPM_BoundData_Init(TPM_BOUND_DATA *tpm_bound_data);
 TPM_RESULT TPM_BoundData_Load(TPM_BOUND_DATA *tpm_bound_data,
                               unsigned char **stream,
                               uint32_t *stream_size);
+#if 0
 TPM_RESULT TPM_BoundData_Store(TPM_STORE_BUFFER *sbuffer,
                                const TPM_BOUND_DATA *tpm_bound_data);
+#endif
 void       TPM_BoundData_Delete(TPM_BOUND_DATA *tpm_bound_data);
 
 /*
