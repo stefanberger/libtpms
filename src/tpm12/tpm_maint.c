@@ -37,7 +37,7 @@
 /* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.		*/
 /********************************************************************************/
 
-#ifndef TPM_NOMAINTENANCE
+#if !defined(TPM_NOMAINTENANCE) && !defined(TPM_NOMAINTENANCE_COMMANDS)
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -44,6 +44,8 @@ libtpms_tpm12_la_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
 libtpms_tpm12_la_CFLAGS += -DTPM_NV_DISK
 # build a POSIX type of TPM
 libtpms_tpm12_la_CFLAGS += -DTPM_POSIX
+# build without maintenance commands
+libtpms_tpm12_la_CFLAGS += -DTPM_NOMAINTENANCE_COMMANDS
 
 libtpms_tpm12_la_CFLAGS += @DEBUG_DEFINES@
 
