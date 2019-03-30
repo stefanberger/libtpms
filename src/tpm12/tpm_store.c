@@ -485,6 +485,7 @@ static TPM_RESULT TPM_Sbuffer_AdjustReturnCode(TPM_STORE_BUFFER *sbuffer, TPM_RE
     return rc;
 }
 
+#if 0
 /* Test appending to the TPM_STORE_BUFFER up to the limit */
 
 TPM_RESULT TPM_Sbuffer_Test(void)
@@ -518,6 +519,7 @@ TPM_RESULT TPM_Sbuffer_Test(void)
     TPM_Sbuffer_Delete(&sbuffer);
     return rc;
 }
+#endif
 
 /* type to byte stream */
 void STORE32(unsigned char *buffer, unsigned int offset, uint32_t value)

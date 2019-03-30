@@ -126,6 +126,7 @@ TPM_RESULT TPM_Global_Init(tpm_state_t *tpm_state)
     return rc;
 }
 
+#if 0
 /* TPM_Global_Load() loads the tpm_state_t global structures for the TPM instance from NVRAM.
 
    tpm_state->tpm_number must be set by the caller.
@@ -169,6 +170,7 @@ TPM_RESULT TPM_Global_Store(tpm_state_t *tpm_state)
     }
     return rc;
 }
+#endif
 
 /* TPM_Global_Delete()
 

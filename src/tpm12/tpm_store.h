@@ -84,7 +84,9 @@ TPM_RESULT TPM_Sbuffer_StoreFinalResponse(TPM_STORE_BUFFER *sbuffer,
                                           TPM_RESULT returnCode,
                                           tpm_state_t *tpm_state);
 
+#if 0
 TPM_RESULT TPM_Sbuffer_Test(void);
+#endif
 
 /* type to byte stream */
 

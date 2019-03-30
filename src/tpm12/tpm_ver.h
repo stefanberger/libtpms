@@ -61,9 +61,11 @@ TPM_RESULT TPM_StructVer_CheckVer(TPM_STRUCT_VER *tpm_struct_ver);
 void       TPM_Version_Init(TPM_VERSION *tpm_version);
 void       TPM_Version_Set(TPM_VERSION *tpm_version,
                            TPM_PERMANENT_DATA *tpm_permanent_data);
+#if 0
 TPM_RESULT TPM_Version_Load(TPM_VERSION *tpm_version,
                             unsigned char **stream,
                             uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_Version_Store(TPM_STORE_BUFFER *sbuffer,
                              const TPM_VERSION *tpm_version);
 void       TPM_Version_Delete(TPM_VERSION *tpm_version);

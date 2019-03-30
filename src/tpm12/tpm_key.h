@@ -178,12 +178,14 @@ TPM_RESULT TPM_KeyParms_Set(TPM_KEY_PARMS *tpm_key_parms,
                             TPM_SIG_SCHEME sigScheme,
                             uint32_t parmSize,
                             BYTE* parms);
+#if 0
 TPM_RESULT TPM_KeyParms_SetRSA(TPM_KEY_PARMS *tpm_key_parms,
                                TPM_ALGORITHM_ID algorithmID,
                                TPM_ENC_SCHEME encScheme,
                                TPM_SIG_SCHEME sigScheme,
                                uint32_t keyLength,
                                TPM_SIZED_BUFFER *exponent);
+#endif
 TPM_RESULT TPM_KeyParms_Copy(TPM_KEY_PARMS *tpm_key_parms_dest,
                              TPM_KEY_PARMS *tpm_key_parms_src);
 TPM_RESULT TPM_KeyParms_Load(TPM_KEY_PARMS *tpm_key_parms,

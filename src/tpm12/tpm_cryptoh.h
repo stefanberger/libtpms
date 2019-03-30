@@ -59,9 +59,11 @@ void       TPM_SignInfo_Delete(TPM_SIGN_INFO *tpm_sign_info);
 */
 
 void       TPM_CertifyInfo_Init(TPM_CERTIFY_INFO *tpm_certify_info);
+#if 0
 TPM_RESULT TPM_CertifyInfo_Load(TPM_CERTIFY_INFO *tpm_certify_info,
                                 unsigned char **stream,
                                 uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_CertifyInfo_Store(TPM_STORE_BUFFER *sbuffer,
                                  TPM_CERTIFY_INFO *tpm_certify_info);
 void       TPM_CertifyInfo_Delete(TPM_CERTIFY_INFO *tpm_certify_info);
@@ -74,9 +76,11 @@ TPM_RESULT TPM_CertifyInfo_Set(TPM_CERTIFY_INFO *tpm_certify_info,
 */
 
 void       TPM_CertifyInfo2_Init(TPM_CERTIFY_INFO2 *tpm_certify_info2);
+#if 0
 TPM_RESULT TPM_CertifyInfo2_Load(TPM_CERTIFY_INFO2 *tpm_certify_info2,
                                  unsigned char **stream,
                                  uint32_t *stream_size);
+#endif
 TPM_RESULT TPM_CertifyInfo2_Store(TPM_STORE_BUFFER *sbuffer,
                                   TPM_CERTIFY_INFO2 *tpm_certify_info2);
 void       TPM_CertifyInfo2_Delete(TPM_CERTIFY_INFO2 *tpm_certify_info2);

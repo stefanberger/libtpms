@@ -204,6 +204,7 @@ void TPM_Version_Set(TPM_VERSION *tpm_version,
     return;
 }
 
+#if 0
 /* TPM_Version_Load()
 
    deserialize the structure from a 'stream'
@@ -238,6 +239,7 @@ TPM_RESULT TPM_Version_Load(TPM_VERSION *tpm_version,
     }
     return rc;
 }
+#endif
 /* TPM_Version_Store()
    
    serialize the structure to a stream contained in 'sbuffer'

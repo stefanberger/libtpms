@@ -51,7 +51,9 @@
 TPM_RESULT TPM_Startup_Clear(tpm_state_t *tpm_state);
 TPM_RESULT TPM_Startup_State(tpm_state_t *tpm_state);
 TPM_RESULT TPM_Startup_Deactivated(tpm_state_t *tpm_state);
+#if 0
 TPM_RESULT TPM_Startup_Any(tpm_state_t *tpm_state);
+#endif
 
 /*
   Save State

@@ -82,6 +82,7 @@
        authFailCount = 0
 */
 
+#if 0
 /* TPM_Authdata_Init() zeros the tpm_authdata
 
 */
@@ -92,6 +93,7 @@ void TPM_Authdata_Init(TPM_AUTHDATA tpm_authdata)
     memset(tpm_authdata, 0, TPM_AUTHDATA_SIZE);
     return;
 }
+#endif
 
 /* TPM_Authdata_Load()
 
@@ -509,6 +511,7 @@ TPM_RESULT TPM_ChangeauthValidate_Load(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_v
     return rc;
 }
 
+#if 0
 /* TPM_ChangeauthValidate_Store()
    
    serialize the structure to a stream contained in 'sbuffer'
@@ -531,6 +534,7 @@ TPM_RESULT TPM_ChangeauthValidate_Store(TPM_STORE_BUFFER *sbuffer,
     }
     return rc;
 }
+#endif
 
 /* TPM_ChangeauthValidate_Delete()
 

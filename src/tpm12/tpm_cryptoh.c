@@ -176,6 +176,7 @@ void TPM_CertifyInfo_Init(TPM_CERTIFY_INFO *tpm_certify_info)
     return;
 }
 
+#if 0
 /* TPM_CertifyInfo_Load()
 
    deserialize the structure from a 'stream'
@@ -242,6 +243,7 @@ TPM_RESULT TPM_CertifyInfo_Load(TPM_CERTIFY_INFO *tpm_certify_info,
     }
     return rc;
 }
+#endif
 
 /* TPM_CertifyInfo_Store()
    
@@ -382,6 +384,7 @@ void TPM_CertifyInfo2_Init(TPM_CERTIFY_INFO2 *tpm_certify_info2)
     return;
 }
 
+#if 0
 /* TPM_CertifyInfo2_Load()
 
    deserialize the structure from a 'stream'
@@ -471,6 +474,7 @@ TPM_RESULT TPM_CertifyInfo2_Load(TPM_CERTIFY_INFO2 *tpm_certify_info2,
     }
     return rc;
 }
+#endif
 
 /* TPM_CertifyInfo2_Store()
    

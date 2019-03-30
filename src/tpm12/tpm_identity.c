@@ -107,6 +107,7 @@ TPM_RESULT TPM_EKBlob_Load(TPM_EK_BLOB *tpm_ek_blob,
     return rc;
 }
 
+#if 0
 /* TPM_EKBlob_Store()
    
    serialize the structure to a stream contained in 'sbuffer'
@@ -130,6 +131,7 @@ TPM_RESULT TPM_EKBlob_Store(TPM_STORE_BUFFER *sbuffer,
     }
     return rc;
 }
+#endif
 
 /* TPM_EKBlob_Delete()
 
@@ -206,6 +208,7 @@ TPM_RESULT TPM_EKBlobActivate_Load(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate,
     return rc;
 }
 
+#if 0
 /* TPM_EKBlobActivate_Store()
    
    serialize the structure to a stream contained in 'sbuffer'
@@ -236,6 +239,7 @@ TPM_RESULT TPM_EKBlobActivate_Store(TPM_STORE_BUFFER *sbuffer,
     }
     return rc;
 }
+#endif
 
 /* TPM_EKBlobActivate_Delete()
 
@@ -261,6 +265,7 @@ void TPM_EKBlobActivate_Delete(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate)
   TPM_EK_BLOB_AUTH
 */
 
+#if 0
 /* TPM_EKBlobAuth_Init()
 
    sets members to default values
@@ -341,6 +346,7 @@ void TPM_EKBlobAuth_Delete(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth)
     }
     return;
 }
+#endif
 
 /*
   TPM_IDENTITY_CONTENTS
@@ -500,6 +506,7 @@ TPM_RESULT TPM_AsymCaContents_Load(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents,
     return rc;
 }
 
+#if 0
 /* TPM_AsymCaContents_Store()
    
    serialize the structure to a stream contained in 'sbuffer'
@@ -520,6 +527,7 @@ TPM_RESULT TPM_AsymCaContents_Store(TPM_STORE_BUFFER *sbuffer,
     }
     return rc;
 }
+#endif
 
 /* TPM_AsymCaContents_Delete()
 

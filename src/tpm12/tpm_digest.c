@@ -146,6 +146,7 @@ void TPM_Digest_IsZero(TPM_BOOL *isZero, TPM_DIGEST tpm_digest)
     return;
 }
 
+#if 0
 void TPM_Digest_IsMinusOne(TPM_BOOL *isMinusOne, TPM_DIGEST tpm_digest)
 {
     size_t i;
@@ -158,4 +159,4 @@ void TPM_Digest_IsMinusOne(TPM_BOOL *isMinusOne, TPM_DIGEST tpm_digest)
     }
     return;
 }
-
+#endif

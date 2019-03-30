@@ -254,6 +254,7 @@ TPM_RESULT TPM_LoadLong(unsigned long *result,
     return rc;
 }
 
+#if 0
 /* TPM_LoadString() returns a pointer to a C string.  It does not copy the string.
 
  */
@@ -280,6 +281,7 @@ TPM_RESULT TPM_LoadString(const char **name,
     }
     return rc;
 }
+#endif
 
 /* TPM_CheckTag() loads a TPM_STRUCTURE_TAG from 'stream'.  It check that the value is 'expectedTag'
    and returns TPM_INVALID_STRUCTURE on error.
