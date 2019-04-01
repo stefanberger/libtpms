@@ -546,7 +546,8 @@ check:
 
 .PHONY: srccheck
 srccheck:
-	@n=`grep -i "nuvo" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
+	@cd $(srcdir) && \
+	n=`grep -i "nuvo" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
 	if test $$n -ne 0; then \
 		echo "Filter sources!"; \
 		exit 1; \
