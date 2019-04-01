@@ -13,7 +13,7 @@ AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
 check_PROGRAMS = base64decode nvram_offsets tpm2_pcr_read tpm2_createprimary
-TESTS = base64decode.sh nvram_offsets tpm2_pcr_read.sh tpm2_createprimary.sh
+TESTS = fuzz.sh base64decode.sh nvram_offsets tpm2_pcr_read.sh tpm2_createprimary.sh
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
@@ -25,10 +25,14 @@ nvram_offsets_CFLAGS = $(AM_CFLAGS) \
 	-DTPM_POSIX
 nvram_offsets_LDFLAGS = $(AM_LDFLAGS)
 
-if WITH_FUZZER
 check_PROGRAMS += fuzz
-fuzz_CFLAGS = -fsanitize=fuzzer $(AM_CFLAGS)
-fuzz_LDFLAGS = -fsanitize=fuzzer $(AM_LDFLAGS)
+fuzz_SOURCES = fuzz.cc
+fuzz_CXXFLAGS = $(FUZZER) $(AM_CFLAGS)
+fuzz_LDFLAGS = $(FUZZER) $(LIB_FUZZING_ENGINE) $(AM_LDFLAGS)
+if !WITH_FUZZER
+if !WITH_FUZZING_ENGINE
+fuzz_SOURCES += fuzz-main.c
+endif
 endif
 
 if LIBTPMS_USE_FREEBL
@@ -57,7 +61,8 @@ EXTRA_DIST = \
 	tpm2_createprimary.c \
 	tpm2_createprimary.sh \
 	tpm2_pcr_read.c \
-	tpm2_pcr_read.sh
+	tpm2_pcr_read.sh \
+	fuzz.sh
 
 CLEANFILES = \
 	*.gcov \

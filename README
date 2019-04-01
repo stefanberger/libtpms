@@ -90,6 +90,9 @@ $ ./configure --with-openssl --with-tpm2 --enable-sanitizers --enable-fuzzer CC=
 $ make && make -C tests fuzz
 $ tests/run-fuzzer.sh
 
+oss-fuzz builds with its own fuzzer flags, and set $LIB_FUZZING_ENGINE
+to be linked with. The script run by oss-fuzz is tests/oss-fuzz.sh.
+
 Maintainers
 -----------
 libtpms is currently being maintained by Stefan Berger <stefanb@us.ibm.com>.
