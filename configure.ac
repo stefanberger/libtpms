@@ -154,12 +154,16 @@ AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
 AC_SUBST([SANITIZERS])
 AC_SUBST([FUZZER])
 
+AM_CONDITIONAL([WITH_FUZZING_ENGINE], [test "x$LIB_FUZZING_ENGINE" != "x"])
+AC_SUBST([LIB_FUZZING_ENGINE])
+
 AC_ARG_ENABLE([test-coverage],
   AS_HELP_STRING([--enable-test-coverage], [Enable test coverage flags]),
   [COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage" COVERAGE_LDFLAGS="-fprofile-arcs"])
 
 LT_INIT
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 

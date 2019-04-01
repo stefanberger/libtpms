@@ -17,7 +17,7 @@ export LIBTPMS=$(pwd)
 autoreconf -vfi
 
 cd $build
-$LIBTPMS/configure --disable-shared --enable-static --with-openssl --with-tpm2 --enable-fuzzer
+$LIBTPMS/configure --disable-shared --enable-static --with-openssl --with-tpm2
 make -j$(nproc) && make -C tests fuzz
 
 zip -jqr $OUT/fuzz_seed_corpus.zip "$LIBTPMS/tests/corpus-execute-command"

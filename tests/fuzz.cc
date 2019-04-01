@@ -9,7 +9,7 @@
 #include <libtpms/tpm_error.h>
 #include <libtpms/tpm_memory.h>
 
-int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     unsigned char *rbuffer = NULL;
     uint32_t rlength;
