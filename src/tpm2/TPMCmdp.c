@@ -116,6 +116,7 @@ _rpc__Signal_PowerOn(
     // Set state as power on
     s_isPowerOn = TRUE;
 }
+#if 0 /* libtpms added */
 /* D.5.3.2. Signal_Restart() */
 /* This function processes the clock restart indication. All it does is call the platform
    function. */
@@ -126,6 +127,7 @@ _rpc__Signal_Restart(
 {
     _plat__TimerRestart();
 }
+#endif /* libtpms added */
 /* D.5.3.3. Signal_PowerOff() */
 /* This function processes the power off indication. Its primary function is to set a flag
    indicating that the next power on indication should cause _TPM_Init() to be called. */
@@ -140,6 +142,7 @@ _rpc__Signal_PowerOff(
     s_isPowerOn = FALSE;
     return;
 }
+#if 0 /* libtpms added */
 /* D.5.3.4. _rpc__ForceFailureMode() */
 /* This function is used to debug the Failure Mode logic of the TPM. It will set a flag in the TPM
    code such that the next call to TPM2_SelfTest() will result in a failure, putting the TPM into
@@ -216,6 +219,7 @@ _rpc__Signal_HashEnd(
     _TPM_Hash_End();
     return;
 }
+#endif /* libtpms added */
 /* D.5.3.10. rpc_Send_Command() */
 /* This is the interface to the TPM code. */
 void
@@ -279,6 +283,7 @@ _rpc__Signal_NvOn(
     _plat__SetNvAvail();
     return;
 }
+#if 0 /* libtpms added */
 /* D.5.3.13. _rpc__Signal_NvOff() */
 /* This function is used to set the indication that NV memory is no longer available. */
 void
@@ -331,6 +336,7 @@ _rpc__Shutdown(
 #endif
     return;
 }
+#endif /* libtpms added */
 
 /* libtpms added begin */
 static BOOL tpmEstablished;

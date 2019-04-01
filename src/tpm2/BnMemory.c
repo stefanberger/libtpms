@@ -90,6 +90,7 @@ BnSetTop(
 	}
     return bn;
 }
+#if 0 /* libtpms added */
 /* 10.2.5.3.2 BnClearTop() */
 /* This function will make sure that all unused words are zero. */
 LIB_EXPORT bigNum
@@ -108,6 +109,7 @@ BnClearTop(
 	}
     return bn;
 }
+#endif /* libtpms added */
 /* 10.2.5.3.3 BnInitializeWord() */
 /* This function is used to initialize an allocated bigNum with a word value. The bigNum does not
    have to be allocated with a single word. */
@@ -170,6 +172,7 @@ BnCopy(
     return TRUE;
 }
 #if ALG_ECC
+#if 0 /* libtpms added */
 /* 10.2.5.3.6 BnPointCopy() */
 /* Function to copy a bn point. */
 LIB_EXPORT BOOL
@@ -182,6 +185,7 @@ BnPointCopy(
 	&& BnCopy(pOut->y, pIn->y)
 	&& BnCopy(pOut->z, pIn->z);
 }
+#endif /* libtpms added */
 /* 10.2.5.3.7 BnInitializePoint() */
 /* This function is used to initialize a point structure with the addresses of the coordinates. */
 LIB_EXPORT bn_point_t *

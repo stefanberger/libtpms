@@ -172,6 +172,7 @@ TPM_TearDown(
     g_manufactured = FALSE;
     return 0;
 }
+#if 0  /* libtpms added */
 /* 9.9.3.3 TpmEndSimulation() */
 /* This function is called at the end of the simulation run. It is used to provoke printing of any
    statistics that might be needed. */
@@ -192,3 +193,4 @@ TpmEndSimulation(
 #endif
 #endif // SIMULATION
 }
+#endif /* libtpms added */

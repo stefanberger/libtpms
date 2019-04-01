@@ -239,10 +239,12 @@ ObjectSetHierarchy(
 		   TPM_HANDLE           parentHandle,
 		   OBJECT              *parent
 		   );
+#if 0 /* libtpms added */
 void
 ObjectSetExternal(
 		  OBJECT      *object
 		  );
+#endif /* libtpms added */
 
 
 #endif

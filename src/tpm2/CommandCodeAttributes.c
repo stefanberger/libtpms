@@ -541,6 +541,7 @@ CommandCapGetCCList(
 	}
     return more;
 }
+#if 0 /* libtpms added */
 /* 9.3.3.14 IsVendorCommand() */
 /* Function indicates if a command index references a vendor command. */
 /* Return Values Meaning */
@@ -554,4 +555,4 @@ IsVendorCommand(
 {
     return (IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V));
 }
-
+#endif /* libtpms added */

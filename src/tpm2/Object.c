@@ -929,6 +929,7 @@ ObjectGetPublicAttributes(
 {
     return HandleToObject(handle)->publicArea.objectAttributes;
 }
+#if 0 /* libtpms added */
 OBJECT_ATTRIBUTES
 ObjectGetProperties(
 		    TPM_HANDLE       handle
@@ -936,3 +937,4 @@ ObjectGetProperties(
 {
     return HandleToObject(handle)->attributes;
 }
+#endif /* libtpms added */

@@ -107,8 +107,10 @@ ShiftLeft(
 	  TPM2B       *value          // IN/OUT: value to shift and shifted value out
 	  );
 
+#if 0 /* libtpms added */
 BOOL
 IsNumeric(
 	  TPM2B       *value
 	  );
+#endif /* libtpms added */
 #endif

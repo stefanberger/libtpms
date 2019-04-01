@@ -265,6 +265,7 @@ ShiftLeft(
     return value;
 }
 
+#if 0 /* libtpms added */
 /* 9.11.2.7	IsNumeric() */
 /* Verifies that all the characters are simple numeric (0-9) */
 BOOL
@@ -280,3 +281,4 @@ IsNumeric(
 	}
     return TRUE;
 }
+#endif /* libtpms added */

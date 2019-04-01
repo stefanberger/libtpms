@@ -1405,6 +1405,7 @@ UnmarshalToPublic(
 	result = TPM_RC_SIZE;
     return result;
 }
+#if 0 /* libtpms added */
 /* 7.6.3.20 ObjectSetExternal() */
 /* Set the external attributes for an object. */
 void
@@ -1414,3 +1415,4 @@ ObjectSetExternal(
 {
     object->attributes.external = SET;
 }
+#endif /* libtpms added */
