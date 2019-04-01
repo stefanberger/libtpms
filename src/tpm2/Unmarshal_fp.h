@@ -78,8 +78,10 @@ extern "C" {
     UINT16_Unmarshal(UINT16 *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     UINT32_Unmarshal(UINT32 *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     INT32_Unmarshal(INT32 *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     UINT64_Unmarshal(UINT64 *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -96,8 +98,10 @@ extern "C" {
     TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM_CC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM_RC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM_CLOCK_ADJUST_Unmarshal(TPM_CLOCK_ADJUST *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -202,8 +206,10 @@ extern "C" {
     TPM2B_NONCE_Unmarshal(TPM2B_NONCE *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM2B_AUTH_Unmarshal(TPM2B_AUTH *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_OPERAND_Unmarshal(TPM2B_OPERAND *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_EVENT_Unmarshal(TPM2B_EVENT *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -248,6 +254,7 @@ extern "C" {
     TPML_DIGEST_VALUES_Unmarshal(TPML_DIGEST_VALUES *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPML_PCR_SELECTION_Unmarshal(TPML_PCR_SELECTION *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPML_ALG_PROPERTY_Unmarshal(TPML_ALG_PROPERTY *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -290,6 +297,7 @@ extern "C" {
     TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMS_AUTH_RESPONSE_Unmarshal(TPMS_AUTH_RESPONSE *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -308,8 +316,10 @@ extern "C" {
     TPM2B_LABEL_Unmarshal(TPM2B_LABEL *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMS_DERIVE_Unmarshal(TPMS_DERIVE *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_DERIVE_Unmarshal(TPM2B_DERIVE *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_SENSITIVE_DATA_Unmarshal(TPM2B_SENSITIVE_DATA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -366,12 +376,16 @@ extern "C" {
     TPMU_KDF_SCHEME_Unmarshal(TPMU_KDF_SCHEME *target, BYTE **buffer, INT32 *size, UINT32 selector);
     LIB_EXPORT TPM_RC
     TPMT_KDF_SCHEME_Unmarshal(TPMT_KDF_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMI_ALG_ASYM_SCHEME_Unmarshal(TPMI_ALG_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, UINT32 selector);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMT_ASYM_SCHEME_Unmarshal(TPMT_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
@@ -398,8 +412,10 @@ extern "C" {
     TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_ALGORITHM_DETAIL_ECC_Unmarshal(TPMS_ALGORITHM_DETAIL_ECC *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_SIGNATURE_RSA_Unmarshal(TPMS_SIGNATURE_RSA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -428,8 +444,10 @@ extern "C" {
     TPMU_PUBLIC_ID_Unmarshal(TPMU_PUBLIC_ID *target, BYTE **buffer, INT32 *size, UINT32 selector);
     LIB_EXPORT TPM_RC
     TPMS_KEYEDHASH_PARMS_Unmarshal(TPMS_KEYEDHASH_PARMS *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_ASYM_PARMS_Unmarshal(TPMS_ASYM_PARMS *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_RSA_PARMS_Unmarshal(TPMS_RSA_PARMS *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
@@ -444,8 +462,10 @@ extern "C" {
     TPM2B_PUBLIC_Unmarshal(TPM2B_PUBLIC *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
     TPM2B_TEMPLATE_Unmarshal(TPM2B_TEMPLATE *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_PRIVATE_VENDOR_SPECIFIC_Unmarshal(TPM2B_PRIVATE_VENDOR_SPECIFIC *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMU_SENSITIVE_COMPOSITE_Unmarshal(TPMU_SENSITIVE_COMPOSITE *target, BYTE **buffer, INT32 *size, UINT32 selector);
     LIB_EXPORT TPM_RC
@@ -464,16 +484,20 @@ extern "C" {
     TPM2B_NV_PUBLIC_Unmarshal(TPM2B_NV_PUBLIC *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_CONTEXT_DATA_Unmarshal(TPMS_CONTEXT_DATA *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPM2B_CONTEXT_DATA_Unmarshal(TPM2B_CONTEXT_DATA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size);
+#if 0 /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMS_CREATION_DATA_Unmarshal(TPMS_CREATION_DATA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM2B_CREATION_DATA_Unmarshal(TPM2B_CREATION_DATA *target, BYTE **buffer, INT32 *size);
+#endif /* libtpms added */
     
 #ifdef __cplusplus
 }

@@ -157,6 +157,7 @@ NvFileSize(
 }
 #endif
 
+#if 0 /* libtpms added */
 /* C.6.3.4. _plat__NvErrors() */
 /* This function is used by the simulator to set the error flags in the NV subsystem to simulate an
    error in the NV loading process */
@@ -169,6 +170,7 @@ _plat__NvErrors(
     s_NV_unrecoverable = unrecoverable;
     s_NV_recoverable = recoverable;
 }
+#endif /* libtpms added */
 /* C.6.3.5. _plat__NVEnable() */
 /* Enable NV memory. */
 /* This version just pulls in data from a file. In a real TPM, with NV on chip, this function would
@@ -410,6 +412,7 @@ _plat__SetNvAvail(
     s_NvIsAvailable = TRUE;
     return;
 }
+#if 0 /* libtpms added */
 /* C.6.3.15. _plat__ClearNvAvail() */
 /* Set the current NV state to unavailable.  This function is for testing purpose only.  It is not
    part of the platform NV logic */
@@ -421,3 +424,4 @@ _plat__ClearNvAvail(
     s_NvIsAvailable = FALSE;
     return;
 }
+#endif /* libtpms added */

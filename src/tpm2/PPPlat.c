@@ -91,6 +91,7 @@ _plat__PhysicalPresenceAsserted(
     // so always return TRUE;
     return s_physicalPresence;
 }
+#if 0 /* libtpms added */
 /* C.10.3.2. _plat__Signal_PhysicalPresenceOn() */
 /* Signal physical presence on */
 LIB_EXPORT void
@@ -111,3 +112,4 @@ _plat__Signal_PhysicalPresenceOff(
     s_physicalPresence = FALSE;
     return;
 }
+#endif /* libtpms added */

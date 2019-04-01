@@ -169,6 +169,7 @@ UnmarshalHeader(
     header->code = ucode;
     return TRUE;
 }
+#if 0 /* libtpms added */
 /* 9.17.4 Public Functions */
 /* 9.17.4.1 SetForceFailureMode() */
 /* This function is called by the simulator to enable failure mode testing. */
@@ -182,6 +183,7 @@ SetForceFailureMode(
 #endif
     return;
 }
+#endif /* libtpms added */
 /* 9.17.4.2 TpmFail() */
 /* This function is called by TPM.lib when a failure occurs. It will set up the failure values to be
    returned on TPM2_GetTestResult(). */

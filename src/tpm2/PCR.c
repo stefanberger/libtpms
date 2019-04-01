@@ -824,6 +824,7 @@ PCRRead(
     *pcrCounter = gr.pcrCounter;
     return;
 }
+#if 0 /* libtpms added */
 /* 8.7.3.24 PcrWrite() */
 /* This function is used by _TPM_Hash_End() to set a PCR to the computed hash of the H-CRTM
    event. */
@@ -844,6 +845,7 @@ PcrWrite(
 	}
     return;
 }
+#endif /* libtpms added */
 /* 8.7.3.25 PCRAllocate() */
 /* This function is used to change the PCR allocation. */
 /* Error Returns Meaning */

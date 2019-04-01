@@ -104,6 +104,7 @@ void
 _rpc__Signal_PowerOff(
 		      void
 		      );
+#if 0 /* libtpms added */
 /* D.2.2.4. _rpc__ForceFailureMode() */
 /* This function is used to debug the Failure Mode logic of the TPM. It will set a flag in the TPM
    code such that the next call to TPM2_SelfTest() will result in a failure, putting the TPM into
@@ -142,6 +143,7 @@ void
 _rpc__Signal_HashEnd(
 		     void
 		     );
+#endif /* libtpms added */
 /* rpc__Send_Command() This is the interface to the TPM code. */
 void
 _rpc__Send_Command(
@@ -171,6 +173,7 @@ void
 _rpc__Signal_NvOn(
 		  void
 		  );
+#if 0 /* libtpms added */
 /* D.2.2.13. _rpc__Signal_NvOff() */
 /* This function is used to set the indication that NV memory is no longer available. */
 void
@@ -197,6 +200,7 @@ main(
      int              argc,
      char            *argv[]
      );
+#endif /* libtpms added */
 /* libtpms added begin */
 void _rpc__Signal_SetTPMEstablished(void);
 BOOL _rpc__Signal_GetTPMEstablished(void);

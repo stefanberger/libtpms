@@ -175,6 +175,7 @@ _plat__LocalitySet(
 		   unsigned char    locality
 		   );
 /* C.8.5. From NVMem.c */
+#if 0 /* libtpms added */
 /* C.8.5.1. _plat__NvErrors() */
 /* This function is used by the simulator to set the error flags in the NV subsystem to simulate an error in the NV loading process */
 LIB_EXPORT void
@@ -182,6 +183,7 @@ _plat__NvErrors(
 		int              recoverable,
 		int            unrecoverable
 		);
+#endif /* libtpms added */
 /* C.8.5.2. _plat__NVEnable() */
 /* Enable NV memory. */
 /* This version just pulls in data from a file. In a real TPM, with NV on chip, this function would
@@ -337,6 +339,7 @@ LIB_EXPORT int
 _plat__PhysicalPresenceAsserted(
 				void
 				);
+#if 0 /* libtpms added */
 /* C.8.7.2. _plat__Signal_PhysicalPresenceOn() */
 /* Signal physical presence on */
 LIB_EXPORT void
@@ -349,6 +352,7 @@ LIB_EXPORT void
 _plat__Signal_PhysicalPresenceOff(
 				  void
 				  );
+#endif /* libtpms added */
 
 /* C.8.8. From RunCommand.c */
 /* C.8.8.1. _plat__RunCommand() */

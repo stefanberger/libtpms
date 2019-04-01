@@ -140,6 +140,7 @@ CryptMacEnd(
     state->hashState.type = HASH_STATE_EMPTY;
     return retVal;
 }
+#if 0 /* libtpms added */
 /* 10.2.20.2.4	CryptMacEnd2B() */
 /* Dispatch to the MAC end function using a 2B. */
 UINT16
@@ -150,5 +151,6 @@ CryptMacEnd2B (
 {
     return CryptMacEnd(state, data->size, data->buffer);
 }
+#endif /* libtpms added */
 #endif // SMAC_IMPLEMENTED
 

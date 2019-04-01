@@ -67,10 +67,12 @@ BnSetTop(
 	 bigNum           bn,        // IN/OUT: number to clean
 	 crypt_uword_t    top        // IN: the new top
 	 );
+#if 0  /* libtpms added */
 LIB_EXPORT bigNum
 BnClearTop(
 	   bigNum          bn
 	   );
+#endif /* libtpms added */
 LIB_EXPORT bigNum
 BnInitializeWord(
 		 bigNum          bn,         // IN:
@@ -87,11 +89,13 @@ BnCopy(
        bigNum           out,
        bigConst         in
        );
+#if 0   /* libtpms added */
 LIB_EXPORT BOOL
 BnPointCopy(
 	    bigPoint                 pOut,
 	    pointConst               pIn
 	    );
+#endif  /* libtpms added */
 LIB_EXPORT bn_point_t *
 BnInitializePoint(
 		  bigPoint             p,     // OUT: structure to receive pointers

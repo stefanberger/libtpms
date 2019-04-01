@@ -89,11 +89,13 @@ UINT32_Unmarshal(UINT32 *target, BYTE **buffer, INT32 *size)
     return TPM_RC_SUCCESS;
 }
 
+#if 0 /* libtpms added */
 TPM_RC
 INT32_Unmarshal(INT32 *target, BYTE **buffer, INT32 *size)
 {
     return UINT32_Unmarshal((UINT32 *)target, buffer, size);
 }
+#endif /* libtpms added */
 
 
 TPM_RC
@@ -238,6 +240,7 @@ TPM_CC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 17 - Definition of (UINT32) TPM_RC Constants (Actions) <OUT> */
 
 TPM_RC
@@ -250,6 +253,7 @@ TPM_RC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 18 - Definition of (INT8) TPM_CLOCK_ADJUST Constants <IN> */
 
@@ -1534,6 +1538,7 @@ TPM2B_AUTH_Unmarshal(TPM2B_AUTH *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 76 - Definition of Types for TPM2B_OPERAND */
 
 TPM_RC
@@ -1546,6 +1551,7 @@ TPM2B_OPERAND_Unmarshal(TPM2B_OPERAND *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 77 - Definition of TPM2B_EVENT Structure */
 
@@ -1977,6 +1983,7 @@ TPML_PCR_SELECTION_Unmarshal(TPML_PCR_SELECTION *target, BYTE **buffer, INT32 *s
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 103 - Definition of TPML_ALG_PROPERTY Structure <OUT> */
 
 TPM_RC
@@ -2431,6 +2438,7 @@ TPMS_AUTH_RESPONSE_Unmarshal(TPMS_AUTH_RESPONSE *target, BYTE **buffer, INT32 *s
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 124 - Definition of {!ALG.S} (TPM_KEY_BITS) TPMI_!ALG.S_KEY_BITS Type */
 
@@ -2659,6 +2667,7 @@ TPMS_DERIVE_Unmarshal(TPMS_DERIVE *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 2:137 - Definition of TPM2B_DERIVE Structure (StructuresTable()) */
 
 TPM_RC
@@ -2671,6 +2680,7 @@ TPM2B_DERIVE_Unmarshal(TPM2B_DERIVE *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 139 - Definition of TPM2B_SENSITIVE_DATA Structure */
 
@@ -3594,6 +3604,7 @@ TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, B
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 167 - Definition of {ECC} TPMS_ALGORITHM_DETAIL_ECC Structure <OUT> */
 
 TPM_RC
@@ -3636,6 +3647,7 @@ TPMS_ALGORITHM_DETAIL_ECC_Unmarshal(TPMS_ALGORITHM_DETAIL_ECC *target, BYTE **bu
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 168 - Definition of {RSA} TPMS_SIGNATURE_RSA Structure */
 
@@ -4301,6 +4313,7 @@ TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 200 - Definition of TPMS_CONTEXT_DATA Structure <IN/OUT, S> */
 
 TPM_RC
@@ -4316,6 +4329,7 @@ TPMS_CONTEXT_DATA_Unmarshal(TPMS_CONTEXT_DATA *target, BYTE **buffer, INT32 *siz
     }
     return rc;
 }
+#endif /* libtpms added */
 
 /* Table 201 - Definition of TPM2B_CONTEXT_DATA Structure <IN/OUT> */
 
@@ -4352,6 +4366,7 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+#if 0 /* libtpms added */
 /* Table 204 - Definition of TPMS_CREATION_DATA Structure <OUT> */
 
 TPM_RC
@@ -4412,4 +4427,5 @@ TPM2B_CREATION_DATA_Unmarshal(TPM2B_CREATION_DATA *target, BYTE **buffer, INT32 
     }
     return rc;
 }
+#endif /* libtpms added */
 

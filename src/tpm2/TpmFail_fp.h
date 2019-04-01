@@ -64,10 +64,12 @@
 
 #include "BaseTypes.h"
 
+#if 0 /* libtpms added */
 LIB_EXPORT void
 SetForceFailureMode(
 		    void
 		    );
+#endif /* libtpms added */
 NORETURN void
 TpmFail(
 #if FAIL_TRACE   /* libtpms added begin */
@@ -91,12 +93,14 @@ TpmFailureMode(
 	       unsigned int    *outResponseSize,   // OUT: response buffer size
 	       unsigned char   **outResponse       // OUT: response buffer
 	       );
+#if 0 /* libtpms added */
 void
 UnmarshalFail(
 	      void            *type,
 	      BYTE            **buffer,
 	      INT32           *size
 	      );
+#endif /* libtpms added */
 
 
 #endif
