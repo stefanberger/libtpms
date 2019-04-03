@@ -51,7 +51,9 @@ matrix:
          sudo make -j$(nproc) check &&
         popd
       after_success:
-        sudo cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
+        uidgid="$(id -nu):$(id -ng)" &&
+        sudo chown -R ${uidgid} ./ &&
+        cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
            NPROC="sysctl -n hw.ncpu" CFLAGS="-I/usr/local/opt/openssl/include"
            LDFLAGS="-L/usr/local/opt/openssl/lib"
