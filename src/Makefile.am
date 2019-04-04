@@ -528,33 +528,6 @@ libtpms_tpm2_la_CFLAGS += \
 
 endif # LIBTPMS_USE_OPENSSL
 
-# some of the original TPM2 files have been modified; in case of an update
-# we do not want to loose these modifications
-check:
-	n=`cd $(srcdir) && grep "TPM_LIBTPMS_CALLBACK" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	exp=21; \
-	if test $$n -ne $$exp; then \
-		echo "TPM_LIBTPMS_CALLBACK occurrence has changed to $$n from $$exp"; \
-		exit 1; \
-	fi; \
-	n=`cd $(srcdir) && grep TPM2_GetBufferSize tpm2/Implementation.h | grep -E "^#define" | wc -l`; \
-	exp=2; \
-	if test $$n -ne $$exp; then \
-		echo "Lost patches to tpm2/Implementation.h ?"; \
-		exit 1; \
-	fi
-
-.PHONY: srccheck
-srccheck:
-	@cd $(srcdir) && \
-	n=`grep -i "nuvo" $(libtpms_tpm2_la_SOURCES) | wc -l`; \
-	if test $$n -ne 0; then \
-		echo "Filter sources!"; \
-		exit 1; \
-	fi
-
-all: srccheck
-
 endif # WITH_TPM2
 
 #
