@@ -3,7 +3,7 @@
 /*			     	Swap						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: swap.h 1311 2018-08-23 21:39:29Z kgoldman $			*/
+/*            $Id: swap.h 1407 2019-01-07 17:55:07Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -97,10 +97,10 @@
 #define BYTE_ARRAY_TO_UINT32(b)       *((uint32_t *)(b))
 #define BYTE_ARRAY_TO_UINT64(b)       *((uint64_t *)(b))
 /* Disaggregate a UINT into a byte array */
-#define UINT8_TO_BYTE_ARRAY(i, b) {*((uint8_t *)(b)) = (i);} */
-#define UINT16_TO_BYTE_ARRAY(i, b) {*((uint16_t *)(b)) = (i);} */
-#define UINT32_TO_BYTE_ARRAY(i, b) {*((uint32_t *)(b)) = (i);} */
-#define UINT64_TO_BYTE_ARRAY(i, b)  {*((uint64_t *)(b)) = (i);} */
+#define UINT8_TO_BYTE_ARRAY(i, b) {*((uint8_t *)(b)) = (i);}
+#define UINT16_TO_BYTE_ARRAY(i, b) {*((uint16_t *)(b)) = (i);}
+#define UINT32_TO_BYTE_ARRAY(i, b) {*((uint32_t *)(b)) = (i);}
+#define UINT64_TO_BYTE_ARRAY(i, b)  {*((uint64_t *)(b)) = (i);}
 #else
 /* the little endian macros for machines that allow unaligned memory access the big-endian macros
    for machines that allow unaligned memory access Aggregate a byte array into a UINT */

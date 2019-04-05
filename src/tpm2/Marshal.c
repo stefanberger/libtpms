@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: Marshal.c 1451 2019-04-02 14:07:17Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -86,14 +86,6 @@ UINT8_Marshal(UINT8 *source, BYTE **buffer, INT32 *size)
     return sizeof(UINT8);
 }
     
-#if 0   /* libtpms added */
-UINT16
-INT8_Marshal(INT8 *source, BYTE **buffer, INT32 *size)
-{
-    return UINT8_Marshal((UINT8 *)source, buffer, size);
-}
-#endif /* libtpms added */
-    
 UINT16
 UINT16_Marshal(UINT16 *source, BYTE **buffer, INT32 *size)
 {
@@ -137,14 +129,6 @@ UINT32_Marshal(UINT32 *source, BYTE **buffer, INT32 *size)
     }
     return sizeof(UINT32);
 }
-
-#if 0   /* libtpms added */
-UINT16
-INT32_Marshal(INT32 *source, BYTE **buffer, INT32 *size)
-{
-    return UINT32_Marshal((UINT32 *)source, buffer, size);
-}
-#endif  /* libtpms added */
 
 UINT16
 UINT64_Marshal(UINT64 *source, BYTE **buffer, INT32 *size)
@@ -372,18 +356,6 @@ TPMI_YES_NO_Marshal(TPMI_YES_NO *source, BYTE **buffer, INT32 *size)
     written += UINT8_Marshal(source, buffer, size);
     return written;
 }
-
-#if 0 /* libtpms added */
-/* Table 2:48 - Definition of TPMI_DH_CONTEXT Type (InterfaceTable()) */
-
-UINT16
-TPMI_DH_CONTEXT_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size)
-{
-    UINT16 written = 0;
-    written += TPM_HANDLE_Marshal(source, buffer, size);
-    return written;
-}
-#endif /* libtpms added */
 
 /* Table 2:49 - Definition of TPMI_DH_SAVED Type (InterfaceTable()) */
 
@@ -2008,19 +1980,6 @@ TPMU_PUBLIC_PARMS_Marshal(TPMU_PUBLIC_PARMS *source, BYTE **buffer, INT32 *size,
     }
     return written;
 }
-
-#if 0 /* libtpms added */
-/* Table 2:190 - Definition of TPMT_PUBLIC_PARMS Structure (StructuresTable()) */
-
-UINT16
-TPMT_PUBLIC_PARMS_Marshal(TPMT_PUBLIC_PARMS *source, BYTE **buffer, INT32 *size)
-{
-    UINT16 written = 0;
-    written += TPMI_ALG_PUBLIC_Marshal(&source->type, buffer, size);
-    written += TPMU_PUBLIC_PARMS_Marshal(&source->parameters, buffer, size, source->type);
-    return written;
-}
-#endif /* libtpms added */
 
 /* Table 2:191 - Definition of TPMT_PUBLIC Structure (StructuresTable()) */
 

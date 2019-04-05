@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEcc.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptEcc.h 1442 2019-03-19 17:25:28Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -71,7 +71,7 @@
 #define _CRYPT_ECC_H
 /* 10.1.2.1.1 ECC-related Structures */
 /* This is used to define the macro that may or may not be in the data set for the curve
-   (BnEccData.c). If there is a mismatch, the compiler will warn that there is to much/not enough
+   (CryptEccData.c). If there is a mismatch, the compiler will warn that there is to much/not enough
    initialization data in the curve. The macro is used because not all versions of the
    CryptEccData.c need the curve name. */
 #ifdef NAMED_CURVES

@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: GpMacros.h 1445 2019-03-21 21:41:40Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -256,7 +256,7 @@
 #       error  "Implementation.h specifies a non-compliant PRIMARY_SEED_SIZE"
 #   endif
 #endif	// !SKIP_PROOF_ERRORS
-/* If CONTEXT_ENCRYP_ALG is defined, then the vendor is using the old style table */
+/* If CONTEXT_ENCRYPT_ALG is defined, then the vendor is using the old style table */
 #ifndef CONTEXT_ENCRYPT_ALG
 #define CONTEXT_ENCRYPT_ALG             CONCAT(TPM_ALG_, CONTEXT_ENCRYPT_ALGORITHM)
 #define CONTEXT_ENCRYPT_KEY_BITS					\

@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
+/*            $Id: Clock.c 1407 2019-01-07 17:55:07Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -169,7 +169,7 @@ _plat__RealTime(
     clock64_t           time;
     //#ifdef _MSC_VER	kgold
 #ifdef TPM_WINDOWS
-    #include <SYS/Timeb.h>
+    #include <sys/timeb.h>
     struct _timeb       sysTime;
     //
     _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
