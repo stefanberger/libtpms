@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptHash.c 1442 2019-03-19 17:25:28Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -282,9 +282,6 @@ CryptHashCopyState(
     out->def = in->def;
     if(in->hashAlg != TPM_ALG_NULL)
 	{
-	    // Just verify that the hashAlg makes sense (is implemented)
-	    CryptGetHashDef(in->hashAlg);
-	    // ... and copy.
 	    HASH_STATE_COPY(out, in);
 	}
     if(in->type == HASH_STATE_HMAC)

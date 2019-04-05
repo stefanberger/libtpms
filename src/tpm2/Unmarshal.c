@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1378 2018-11-19 20:43:20Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1451 2019-04-02 14:07:17Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -88,15 +88,6 @@ UINT32_Unmarshal(UINT32 *target, BYTE **buffer, INT32 *size)
     *size -= sizeof(UINT32);
     return TPM_RC_SUCCESS;
 }
-
-#if 0 /* libtpms added */
-TPM_RC
-INT32_Unmarshal(INT32 *target, BYTE **buffer, INT32 *size)
-{
-    return UINT32_Unmarshal((UINT32 *)target, buffer, size);
-}
-#endif /* libtpms added */
-
 
 TPM_RC
 UINT64_Unmarshal(UINT64 *target, BYTE **buffer, INT32 *size)
@@ -239,21 +230,6 @@ TPM_CC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
-
-#if 0 /* libtpms added */
-/* Table 17 - Definition of (UINT32) TPM_RC Constants (Actions) <OUT> */
-
-TPM_RC
-TPM_RC_Unmarshal(TPM_RC *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = UINT32_Unmarshal(target, buffer, size);  
-    }
-    return rc;
-}
-#endif /* libtpms added */
 
 /* Table 18 - Definition of (INT8) TPM_CLOCK_ADJUST Constants <IN> */
 
@@ -1538,21 +1514,6 @@ TPM2B_AUTH_Unmarshal(TPM2B_AUTH *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-#if 0 /* libtpms added */
-/* Table 76 - Definition of Types for TPM2B_OPERAND */
-
-TPM_RC
-TPM2B_OPERAND_Unmarshal(TPM2B_OPERAND *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_DIGEST_Unmarshal(target, buffer, size);
-    }
-    return rc;
-}
-#endif /* libtpms added */
-
 /* Table 77 - Definition of TPM2B_EVENT Structure */
 
 TPM_RC
@@ -2420,24 +2381,6 @@ TPM2B_ATTEST_Unmarshal(TPM2B_ATTEST *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-/* Table 123 - Definition of TPMS_AUTH_RESPONSE Structure <OUT> */
-
-TPM_RC
-TPMS_AUTH_RESPONSE_Unmarshal(TPMS_AUTH_RESPONSE *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-    
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_NONCE_Unmarshal(&target->nonce, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMA_SESSION_Unmarshal(&target->sessionAttributes, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_AUTH_Unmarshal(&target->hmac, buffer, size);
-    }
-    return rc;
-}
 #endif /* libtpms added */
 
 /* Table 124 - Definition of {!ALG.S} (TPM_KEY_BITS) TPMI_!ALG.S_KEY_BITS Type */
@@ -2666,21 +2609,6 @@ TPMS_DERIVE_Unmarshal(TPMS_DERIVE *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
-
-#if 0 /* libtpms added */
-/* Table 2:137 - Definition of TPM2B_DERIVE Structure (StructuresTable()) */
-
-TPM_RC
-TPM2B_DERIVE_Unmarshal(TPM2B_DERIVE *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_Unmarshal(&target->b, sizeof(TPMS_DERIVE), buffer, size);
-    }
-    return rc;
-}
-#endif /* libtpms added */
 
 /* Table 139 - Definition of TPM2B_SENSITIVE_DATA Structure */
 
@@ -3294,24 +3222,6 @@ TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size,
     return rc;
 }
 
-/* Table 153 - Definition of TPMT_ASYM_SCHEME Structure <> */
-
-#if 0
-TPM_RC
-TPMT_ASYM_SCHEME_Unmarshal(TPMT_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMI_ALG_ASYM_SCHEME_Unmarshal(&target->scheme, buffer, size, allowNull);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMU_ASYM_SCHEME_Unmarshal(&target->details, buffer, size, target->scheme);
-    }
-    return rc;
-}
-#endif
-
 /* Table 154 - Definition of (TPM_ALG_ID) {RSA} TPMI_ALG_RSA_SCHEME Type */
 
 TPM_RC
@@ -3604,51 +3514,6 @@ TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, B
     return rc;
 }
 
-#if 0 /* libtpms added */
-/* Table 167 - Definition of {ECC} TPMS_ALGORITHM_DETAIL_ECC Structure <OUT> */
-
-TPM_RC
-TPMS_ALGORITHM_DETAIL_ECC_Unmarshal(TPMS_ALGORITHM_DETAIL_ECC *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM_ECC_CURVE_Unmarshal(&target->curveID, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = UINT16_Unmarshal(&target->keySize, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMT_KDF_SCHEME_Unmarshal(&target->kdf, buffer, size, YES);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMT_ECC_SCHEME_Unmarshal(&target->sign, buffer, size, YES);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->p, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->a, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->b, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->gX, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->gY, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->n, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->h, buffer, size);
-    }
-    return rc;
-}
-#endif /* libtpms added */
-
 /* Table 168 - Definition of {RSA} TPMS_SIGNATURE_RSA Structure */
 
 TPM_RC
@@ -3915,24 +3780,6 @@ TPMS_KEYEDHASH_PARMS_Unmarshal(TPMS_KEYEDHASH_PARMS *target, BYTE **buffer, INT3
     return rc;
 }
 
-/* Table 179 - Definition of TPMS_ASYM_PARMS Structure <> */
-
-#if 0
-TPM_RC
-TPMS_ASYM_PARMS_Unmarshal(TPMS_ASYM_PARMS *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-    
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMT_SYM_DEF_OBJECT_Unmarshal(&target->symmetric, buffer, size, YES);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMT_ASYM_SCHEME_Unmarshal(&target->scheme, buffer, size, YES);
-    }
-    return rc;
-}
-#endif
-
 /* Table 180 - Definition of {RSA} TPMS_RSA_PARMS Structure */
 
 TPM_RC
@@ -4098,21 +3945,6 @@ TPM2B_TEMPLATE_Unmarshal(TPM2B_TEMPLATE *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-/* Table 186 - Definition of TPM2B_PRIVATE_VENDOR_SPECIFIC Structure<> */
-
-#if 0
-TPM_RC
-TPM2B_PRIVATE_VENDOR_SPECIFIC_Unmarshal(TPM2B_PRIVATE_VENDOR_SPECIFIC *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_Unmarshal(&target->b, PRIVATE_VENDOR_SPECIFIC_BYTES, buffer, size);
-    }
-    return rc;
-}
-#endif
-    
 /* Table 187 - Definition of TPMU_SENSITIVE_COMPOSITE Union <IN/OUT, S> */
 
 TPM_RC
@@ -4313,24 +4145,6 @@ TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer
     return rc;
 }
 
-#if 0 /* libtpms added */
-/* Table 200 - Definition of TPMS_CONTEXT_DATA Structure <IN/OUT, S> */
-
-TPM_RC
-TPMS_CONTEXT_DATA_Unmarshal(TPMS_CONTEXT_DATA *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_DIGEST_Unmarshal(&target->integrity, buffer, size);	
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_CONTEXT_SENSITIVE_Unmarshal(&target->encrypted, buffer, size);
-    }
-    return rc;
-}
-#endif /* libtpms added */
-
 /* Table 201 - Definition of TPM2B_CONTEXT_DATA Structure <IN/OUT> */
 
 TPM_RC
@@ -4365,67 +4179,4 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
-
-#if 0 /* libtpms added */
-/* Table 204 - Definition of TPMS_CREATION_DATA Structure <OUT> */
-
-TPM_RC
-TPMS_CREATION_DATA_Unmarshal(TPMS_CREATION_DATA *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPML_PCR_SELECTION_Unmarshal(&target->pcrSelect, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_DIGEST_Unmarshal(&target->pcrDigest, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMA_LOCALITY_Unmarshal(&target->locality, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM_ALG_ID_Unmarshal(&target->parentNameAlg, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_NAME_Unmarshal(&target->parentName, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_NAME_Unmarshal(&target->parentQualifiedName, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_DATA_Unmarshal(&target->outsideInfo, buffer, size);
-    }
-    return rc;
-}
-
-/* Table 205 - Definition of TPM2B_CREATION_DATA Structure <OUT> */
-
-TPM_RC
-TPM2B_CREATION_DATA_Unmarshal(TPM2B_CREATION_DATA *target, BYTE **buffer, INT32 *size)
-{
-    TPM_RC rc = TPM_RC_SUCCESS;
-    
-    INT32 startSize;
-    if (rc == TPM_RC_SUCCESS) {
-	rc = UINT16_Unmarshal(&target->size, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	if (target->size == 0) {
-	    rc = TPM_RC_SIZE;
-	}
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	startSize = *size;
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	rc = TPMS_CREATION_DATA_Unmarshal(&target->creationData, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-	if (target->size != startSize - *size) {
-	    rc = TPM_RC_SIZE;
-	}
-    }
-    return rc;
-}
-#endif /* libtpms added */
 

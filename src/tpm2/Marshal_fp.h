@@ -3,7 +3,7 @@
 /*			   Parameter Marshaling  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal_fp.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Marshal_fp.h 1451 2019-04-02 14:07:17Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -70,18 +70,10 @@ extern "C" {
 
     UINT16
     UINT8_Marshal(UINT8 *source, BYTE **buffer, INT32 *size);
-#if 0  /* libtpms added */
-    UINT16
-    INT8_Marshal(INT8 *source, BYTE **buffer, INT32 *size);
-#endif /* libtpms added */
     UINT16
     UINT16_Marshal(UINT16 *source, BYTE **buffer, INT32 *size);
     UINT16
     UINT32_Marshal(UINT32 *source, BYTE **buffer, INT32 *size);
-#if 0  /* libtpms added */
-    UINT16
-    INT32_Marshal(INT32 *source, BYTE **buffer, INT32 *size);
-#endif /* libtpms added */
     UINT16
     UINT64_Marshal(UINT64 *source, BYTE **buffer, INT32 *size);
     UINT16
@@ -122,10 +114,6 @@ extern "C" {
     TPMA_CC_Marshal(TPMA_CC *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMI_YES_NO_Marshal(TPMI_YES_NO *source, BYTE **buffer, INT32 *size);
-#if 0 /* libtpms added */
-    UINT16
-    TPMI_DH_CONTEXT_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size);
-#endif /* libtpms added */
     UINT16
     TPMI_DH_SAVED_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size);
     UINT16

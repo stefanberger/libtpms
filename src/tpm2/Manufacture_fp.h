@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Performs the manufacturing of the TPM			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Manufacture_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Manufacture_fp.h 1451 2019-04-02 14:07:17Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
