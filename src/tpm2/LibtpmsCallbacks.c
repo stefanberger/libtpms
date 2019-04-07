@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "PlatformData.h"
+#include "Platform.h"
 #include "LibtpmsCallbacks.h"
 #include "NVMarshal.h"
 

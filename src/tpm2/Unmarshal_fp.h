@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal_fp.h 1378 2018-11-19 20:43:20Z kgoldman $		*/
+/*            $Id: Unmarshal_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -64,6 +64,7 @@
 #ifndef UNMARSHAL_FP_H
 #define UNMARSHAL_FP_H
 
+#include "Tpm.h"
 #include "TpmTypes.h"
 
 #ifdef __cplusplus

@@ -3,7 +3,7 @@
 /*			     Entropy						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entropy.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: Entropy.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -67,9 +67,8 @@
 
 #include <openssl/rand.h>   /* libtpms added */
 
-#include "PlatformData.h"
-#include "Platform_fp.h"
 #include <time.h>
+#include "Platform.h"
 #ifdef _MSC_VER
 #include <process.h>
 #else
