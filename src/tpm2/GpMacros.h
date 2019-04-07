@@ -130,7 +130,7 @@
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
 #define PRIVATE_VENDOR_SPECIFIC_BYTES					\
-    ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))
+    ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))  /* libtpms: keep as was in rev 150 */
 /* 5.11.5	Compile-time Checks */
 /* In some cases, the relationship between two values may be dependent on things that change based
    on various selections like the chosen cryptographic libraries. It is possible that these
