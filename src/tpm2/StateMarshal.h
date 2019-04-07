@@ -39,7 +39,7 @@
 #ifndef STATE_MARSHAL_H
 #define STATE_MARSHAL_H
 
-#include "BaseTypes.h"
+#include "Tpm.h"
 #include "TpmTypes.h"
 
 /*

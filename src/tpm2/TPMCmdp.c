@@ -3,7 +3,7 @@
 /*			  Process the commands    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TPMCmdp.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: TPMCmdp.c 1478 2019-06-10 21:15:14Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -69,7 +69,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
-#include "Implementation.h"
 #include "TpmBuildSwitches.h"
 #ifdef TPM_WINDOWS
 #include <windows.h>
@@ -91,6 +90,7 @@
 #ifdef TPM_POSIX
 #include "TcpServerPosix_fp.h"
 #endif
+#include "TpmProfile.h"		/* kgold */
 
 static BOOL     s_isPowerOn = FALSE;
 /* D.4.3. Functions */

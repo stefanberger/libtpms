@@ -3,7 +3,7 @@
 /*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: PlatformData.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,16 +55,15 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018.				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019.				*/
 /*										*/
 /********************************************************************************/
 
-/* A.1 PlatformData.h */
+/* c.8 PlatformData.h */
 /* This file contains the instance data for the Platform module. It is collected in this file so
    that the state of the module is easier to manage. */
 #ifndef _PLATFORM_DATA_H_
 #define _PLATFORM_DATA_H_
-#include      "Implementation.h"
 /* From Cancel.c Cancel flag.  It is initialized as FALSE, which indicate the command is not being
    canceled */
 extern int     s_isCanceled;
@@ -99,7 +98,7 @@ extern BOOL              s_timerReset;
 /* This value indicates that the timer was stopped. It causes a clock discontinuity. */
 extern BOOL              s_timerStopped;
 /* CLOCK_NOMINAL is the number of hardware ticks per mS. A value of 300000 means that the nominal
-   clock rate used to drive the hardware clock is 30 MHz(). The adjustment rates are used to
+   clock rate used to drive the hardware clock is 30 MHz. The adjustment rates are used to
    determine the conversion of the hardware ticks to internal hardware clock value. In practice, we
    would expect that there would be a hardware register will accumulated mS. It would be incremented
    by the output of a pre-scaler. The pre-scaler would divide the ticks from the clock by some value

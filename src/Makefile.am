@@ -357,7 +357,6 @@ noinst_HEADERS += \
 	tpm2/Hierarchy_fp.h \
 	tpm2/HMAC_fp.h \
 	tpm2/HMAC_Start_fp.h \
-	tpm2/Implementation.h \
 	tpm2/Import_fp.h \
 	tpm2/IncrementalSelfTest_fp.h \
 	tpm2/InternalRoutines.h \

@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "Implementation.h"
 #include "Tpm.h"
 
 /* from Global.h */

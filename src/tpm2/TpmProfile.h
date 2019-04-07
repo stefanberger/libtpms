@@ -289,7 +289,7 @@
 #define MAX_ALG_LIST_SIZE               64
 #endif
 #ifndef PRIMARY_SEED_SIZE
-#define PRIMARY_SEED_SIZE               32
+#define PRIMARY_SEED_SIZE               64 /* libtpms: 64 per define USE_SPEC_COMPLIANT_PROOFS */
 #endif
 #ifndef CONTEXT_ENCRYPT_ALGORITHM
 #define CONTEXT_ENCRYPT_ALGORITHM       AES

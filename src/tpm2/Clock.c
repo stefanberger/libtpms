@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1407 2019-01-07 17:55:07Z kgoldman $			*/
+/*            $Id: Clock.c 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -71,10 +71,9 @@
    TPM. In this implementation, all the time values are measured in millisecond. However, the
    precision of the clock functions may be implementation dependent. */
 /* C.3.2. Includes and Data Definitions */
-#include "PlatformData.h"
-#include "Platform_fp.h"
-#include "TpmFail_fp.h"
 #include <assert.h>
+#include "Platform.h"
+#include "TpmFail_fp.h"
 
 /* libtpms added begin */
 /* ClockGetTime -- get time given a specified clock type */
