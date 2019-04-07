@@ -3,7 +3,7 @@
 /*			Managing and accessing the hierarchy-related values   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: Hierarchy.c 1389 2018-12-03 22:31:00Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -138,6 +138,7 @@ HierarchyStartup(
 	{
 	    gc.platformAuth.t.size = 0;
 	    gc.platformPolicy.t.size = 0;
+	    gc.platformAlg = TPM_ALG_NULL;
 	    // enable the storage and endorsement hierarchies and the platformNV
 	    gc.shEnable = gc.ehEnable = gc.phEnableNV = TRUE;
 	}
