@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: Global.h 1442 2019-03-19 17:25:28Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -1113,7 +1113,7 @@ typedef struct
     SESSION             session;        // session structure
 } SESSION_SLOT;
 extern SESSION_SLOT     s_sessions[MAX_LOADED_SESSIONS];
-/* The index in conextArray that has the value of the oldest saved session context. When no context
+/* The index in contextArray that has the value of the oldest saved session context. When no context
    is saved, this will have a value that is greater than or equal to MAX_ACTIVE_SESSIONS. */
 extern UINT32            s_oldestSavedSession;
 /* The number of available session slot openings.  When this is 1, a session can't be created or
