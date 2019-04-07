@@ -3,7 +3,7 @@
 /*			 	Startup Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: StartupCommands.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: StartupCommands.c 1442 2019-03-19 17:25:28Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -320,13 +320,10 @@ TPM2_Shutdown(
 	    else if(g_StartupLocality3)
 		gp.orderlyState = TPM_SU_STATE | STARTUP_LOCALITY_3;
 	}
-    else if(in->shutdownType == TPM_SU_CLEAR)
+    else if(in->shutdownType != TPM_SU_CLEAR)
 	{
-	    // Save STATE_RESET data
-	    NvWrite(NV_STATE_RESET_DATA, sizeof(STATE_RESET_DATA), &gr);
+	    return TPM_RCS_VALUE + RC_Shutdown_shutdownType;
 	}
-    else
-	FAIL(FATAL_ERROR_INTERNAL);
     NV_SYNC_PERSISTENT(orderlyState);
     return TPM_RC_SUCCESS;
 }
