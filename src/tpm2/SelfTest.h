@@ -3,7 +3,7 @@
 /*		Structure definitions for the self-test				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SelfTest.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: SelfTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -68,53 +68,16 @@
 /* 5.16.2 Defines */
 /* Was typing this a lot */
 #define SELF_TEST_FAILURE   FAIL(FATAL_ERROR_SELF_TEST)
-/* Use the definition of key sizes to set algorithm values for key size. Need to do this to avoid a
-   lot of #ifdefs in the code. Also, define the index for each of the algorithms. */
-#if ALG_AES && defined  AES_KEY_SIZE_BITS_128
-#   define  AES_128     YES
-#   define  AES_128_INDEX   0
-#else
-#   define  AES_128     NO
-#endif
-#if ALG_AES && defined  AES_KEY_SIZE_BITS_192
-#   define  AES_192     YES
-#   define  AES_192_INDEX   (AES_128)
-#else
-#   define  AES_192     NO
-#endif
-#if ALG_AES && defined  AES_KEY_SIZE_BITS_256
-#   define  AES_256     YES
-#   define  AES_256_INDEX   (AES_128 + AES_192)
-#else
-#   define  AES_256     NO
-#endif
-#if ALG_SM4 && defined SM4_KEY_SIZE_BITS_128
-#   define  SM4_128     YES
-#   define  SM4_128_INDEX   (AES_128 + AES_192 + AES_256)
-#else
-#   define  SM4_128     NO
-#endif
-// libtpms added begin
-#if ALG_TDES && defined TDES_KEY_SIZE_BITS_128
-#   define  TDES_128    YES
-#   define  TDES_128_INDEX  (AES_128 + AES_192 + AES_256 + SM4_128)
-#   define  TDES_128_INDEX2 (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128)
-#else
-#   define  TDES_128    NO
-#endif
-#if ALG_TDES && defined TDES_KEY_SIZE_BITS_192
-#   define  TDES_192    YES
-#   define  TDES_192_INDEX  (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128 \
-                             + TDES_128)
-#   define  TDES_192_INDEX2 (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128 \
-                             + TDES_128 + TDES_192)
-#else
-#   define  TDES_192    NO
-#endif
-// libtpms added end
-#define NUM_SYMS    (AES_128 + AES_192 + AES_256 + SM4_128 \
-                     + TDES_128 + TDES_128 + TDES_192 + TDES_192)  // libtpms changed
+
+// Use the definition of key sizes to set algorithm values for key size.
+
+#define AES_ENTRIES (AES_128 + AES_192 + AES_256)
+#define SM4_ENTRIES (SM4_128)
+#define CAMELLIA_ENTRIES (CAMELLIA_128 + CAMELLIA_192 + CAMELLIA_256)
+#define TDES_ENTRIES (TDES_128 * 2 + TDES_192 * 2) /* libtpms changed */
+#define NUM_SYMS    (AES_ENTRIES + SM4_ENTRIES + CAMELLIA_ENTRIES + TDES_ENTRIES)
 typedef UINT32      SYM_INDEX;
+
 /* These two defines deal with the fact that the TPM_ALG_ID table does not delimit the symmetric
    mode values with a TPM_SYM_MODE_FIRST and TPM_SYM_MODE_LAST */
 #define TPM_SYM_MODE_FIRST       ALG_CTR_VALUE

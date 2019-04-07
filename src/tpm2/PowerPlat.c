@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			 Platform Power Support    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PowerPlat.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: PowerPlat.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 /* C.7 PowerPlat.c */
 /* C.7.1. Includes and Function Prototypes */
-#include    "PlatformData.h"
-#include    "Platform_fp.h"
+#include    "Platform.h"
 #include    "_TPM_Init_fp.h"
 /* C.7.2. Functions */
 /* C.7.2.1. _plat__Signal_PowerOn() */

@@ -3,7 +3,7 @@
 /*		Platform specific entry and fail processing	   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: RunCommand.c 953 2017-03-06 20:31:40Z kgoldman $		*/
+/*            $Id: RunCommand.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -72,8 +72,7 @@
    in which the TPM is executing. For a simulator, setjmp/longjmp is used. For an OS, a system exit
    to the OS would be appropriate. */
 /* C.11.2. Includes and locals */
-#include "PlatformData.h"
-#include "Platform_fp.h"
+#include "Platform.h"
 #include <setjmp.h>
 #include "ExecCommand_fp.h"
 jmp_buf              s_jumpBuffer;

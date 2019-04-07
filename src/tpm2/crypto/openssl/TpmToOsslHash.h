@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,19 +55,16 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/ 
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/ 
 /*										*/
 /********************************************************************************/
 
-#ifndef TPMTOOSSLHASH_H
-#define TPMTOOSSLHASH_H
-
 /* B.2.2.1. TpmToOsslHash.h */
 /* B.2.2.1.1. Introduction */
-/* This header file is used to splice the OpenSSL() hash code into the TPM code. */
-#ifndef _TPM_TO_OSSL_HASH_H_
-#define _TPM_TO_OSSL_HASH_H_
-#if HASH_LIB == OSSL
+/* This header file is used to splice the OpenSSL hash code into the TPM code. */
+#ifndef HASH_LIB_DEFINED
+#define HASH_LIB_DEFINED
+#define HASH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <openssl/ossl_typ.h>
@@ -146,7 +143,6 @@ typedef const BYTE    *PCBYTE;
      (hashStateTo)->def->contextSize)
 /* Function aliases. The code in CryptHash.c uses the internal designation for the functions. These
    need to be translated to the function names of the library. */
-//      Internal Designation        External Designation
 #define tpmHashStart_SHA1           SHA1_Init   // external name of the initialization method
 #define tpmHashData_SHA1            SHA1_Update
 #define tpmHashEnd_SHA1             SHA1_Final
@@ -175,7 +171,6 @@ typedef const BYTE    *PCBYTE;
 #define LibHashInit()
 /* This definition would change if there were something to report */
 #define HashLibSimulationEnd()
-#endif // HASH_LIB == OSSL
-#endif //
+#endif // // HASH_LIB_DEFINED
 
-#endif
+

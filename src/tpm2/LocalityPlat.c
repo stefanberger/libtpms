@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     Platform Locality Support				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: LocalityPlat.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: LocalityPlat.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 /* C.5 LocalityPlat.c */
 /* C.5.1. Includes */
-#include "PlatformData.h"
-#include "Platform_fp.h"
+#include "Platform.h"
 /* C.5.2. Functions */
 /* C.5.2.1. _plat__LocalityGet() */
 /* Get the most recent command locality in locality value form. This is an integer value for

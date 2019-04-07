@@ -129,8 +129,13 @@
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
-#define PRIVATE_VENDOR_SPECIFIC_BYTES					\
-    ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))  /* libtpms: keep as was in rev 150 */
+
+/* This was wrong in rev 155, but is not used anyway because of the protector.  The correct value is
+   in TpmProfile.h, which is included before GpMacros.h */
+#ifndef PRIVATE_VENDOR_SPECIFIC_BYTES
+#define PRIVATE_VENDOR_SPECIFIC_BYTES		\
+    (MAX_RSA_KEY_BYTES/2)
+#endif
 /* 5.10.5	Compile-time Checks */
 /* In some cases, the relationship between two values may be dependent on things that change based
    on various selections like the chosen cryptographic libraries. It is possible that these

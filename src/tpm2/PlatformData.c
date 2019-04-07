@@ -3,7 +3,7 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: PlatformData.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,17 +55,16 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
-/* C.10 PlatformData.c */
-/* C.10.1. Description */
+/* C.9 PlatformData.c */
+/* C.9.1. Description */
 /* This file will instance the TPM variables that are not stack allocated. The descriptions for
    these variables are in Global.h for this project. */
-/* C.10.2. Includes */
-#include    "Implementation.h"
-#include    "PlatformData.h"
+/* C.9.2. Includes */
+#include    "Platform.h"
 /* From Cancel.c */
 BOOL                 s_isCanceled;
 /* From Clock.c */

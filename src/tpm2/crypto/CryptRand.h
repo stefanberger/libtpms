@@ -72,9 +72,9 @@
 /* a) the key size */
 /* b) the block size (the IV size) */
 /* c) the symmetric algorithm */
-#define DRBG_KEY_SIZE_BITS MAX_AES_KEY_BITS
-#define DRBG_IV_SIZE_BITS (MAX_AES_BLOCK_SIZE_BYTES * 8)
-#define DRBG_ALGORITHM TPM_ALG_AES
+#define DRBG_KEY_SIZE_BITS      AES_MAX_KEY_SIZE_BITS
+#define DRBG_IV_SIZE_BITS       (AES_MAX_BLOCK_SIZE * 8)
+#define DRBG_ALGORITHM          TPM_ALG_AES
 typedef tpmKeyScheduleAES DRBG_KEY_SCHEDULE;
 #define DRBG_ENCRYPT_SETUP(key, keySizeInBits, schedule)		\
     TpmCryptSetEncryptKeyAES(key, keySizeInBits, schedule)

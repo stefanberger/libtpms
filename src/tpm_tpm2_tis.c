@@ -40,6 +40,7 @@
 
 #include <stdint.h>
 
+#include "tpm2/Tpm.h"
 #include "tpm2/TpmTypes.h"
 #include "tpm2/TpmBuildSwitches.h"
 #include "tpm2/_TPM_Hash_Start_fp.h"

@@ -46,8 +46,7 @@
 #define OBJECT_C
 #define PCR_C
 #define SESSION_C
-#include "PlatformData.h"
-#include "Implementation.h"
+#include "Platform.h"
 #include "NVMarshal.h"
 #include "Marshal_fp.h"
 #include "Unmarshal_fp.h"
