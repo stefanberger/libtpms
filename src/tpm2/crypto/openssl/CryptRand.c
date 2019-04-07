@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptRand.c 1409 2019-01-14 20:39:15Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -529,13 +529,13 @@ CryptRandomStir(
 /* Generate a randomSize number or random bytes. */
 LIB_EXPORT UINT16
 CryptRandomGenerate(
-		    INT32            randomSize,
+		    UINT16           randomSize,
 		    BYTE            *buffer
 		    )
 {
     if(randomSize > UINT16_MAX)
 	randomSize = UINT16_MAX;
-    return DRBG_Generate((RAND_STATE *)&drbgDefault, buffer, (UINT16)randomSize);
+    return DRBG_Generate((RAND_STATE *)&drbgDefault, buffer, randomSize);
 }
 /* 10.2.18.4.4 DRBG_InstantiateSeededKdf() */
 /* Function used to instantiate a KDF-based RNG. This is used for derivations. This function always

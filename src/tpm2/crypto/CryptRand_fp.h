@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand_fp.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: CryptRand_fp.h 1409 2019-01-14 20:39:15Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -103,7 +103,7 @@ CryptRandomStir(
 		);
 LIB_EXPORT UINT16
 CryptRandomGenerate(
-		    INT32            randomSize,
+		    UINT16           randomSize,
 		    BYTE            *buffer
 		    );
 LIB_EXPORT BOOL
