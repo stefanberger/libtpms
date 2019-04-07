@@ -3,7 +3,7 @@
 /*			Self-Test of Cryptographic Functions 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSelfTest.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: CryptSelfTest.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -205,7 +205,7 @@ CryptTestAlgorithm(
 		   )
 {
     TPM_RC                   result;
-#if defined SELF_TEST
+#if SELF_TEST
     result = TestAlgorithm(alg, toTest);
 #else
     // If this is an attempt to determine the algorithms for which there is a
