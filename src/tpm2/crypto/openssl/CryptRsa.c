@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1409 2019-01-14 20:39:15Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -292,7 +292,7 @@ OaepEncode(
     INT32        i;
     BYTE         mySeed[MAX_DIGEST_SIZE];
     BYTE        *seed = mySeed;
-    INT32        hLen = CryptHashGetDigestSize(hashAlg);
+    UINT16       hLen = CryptHashGetDigestSize(hashAlg);
     BYTE         mask[MAX_RSA_KEY_BYTES];
     BYTE        *pp;
     BYTE        *pm;
