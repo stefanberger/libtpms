@@ -3,7 +3,7 @@
 /*			   Compiler Dependencies  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CompilerDependencies.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: CompilerDependencies.h 1453 2019-04-05 16:43:36Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +55,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef COMPILERDEPEDENCIES_H
 #define COMPILERDEPEDENCIES_H
+
+/* kgold - Not in the original code.  A user reported that it was required for a non-Visual Studio
+   environment.
+*/
+
+#ifdef TPM_WINDOWS
+#include <windows.h>
+#include <winsock.h>
+#endif
 
 /* 5.10	CompilerDependencies.h */
 #ifdef GCC
