@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1451 2019-04-02 14:07:17Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1457 2019-04-08 20:42:07Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -1950,7 +1950,9 @@ TPML_PCR_SELECTION_Unmarshal(TPML_PCR_SELECTION *target, BYTE **buffer, INT32 *s
     return rc;
 }
 
-#if 0 /* libtpms added */
+
+#if 0
+
 /* Table 103 - Definition of TPML_ALG_PROPERTY Structure <OUT> */
 
 TPM_RC
@@ -2387,7 +2389,7 @@ TPM2B_ATTEST_Unmarshal(TPM2B_ATTEST *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-#endif /* libtpms added */
+#endif
 
 /* Table 124 - Definition of {!ALG.S} (TPM_KEY_BITS) TPMI_!ALG.S_KEY_BITS Type */
 
