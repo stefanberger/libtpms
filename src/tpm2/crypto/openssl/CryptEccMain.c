@@ -3,7 +3,7 @@
 /*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1462 2019-04-10 18:13:35Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -338,12 +338,8 @@ CryptGenerateR(
     for(iterations = 1; iterations < 1000000;)
 	{
 	    int     i;
-	    const TPM2B *buf = NULL; /* libtpms changed begin (ubsan) */
-
-	    if (name)
-	        buf = &name->b;      /* libtpms changed end */
 	    CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG, &gr.commitNonce.b, COMMIT_STRING,
-		      buf /* libtpms */, &cntr.b, n.t.size * 8, r->t.buffer, &iterations, FALSE);
+		      (TPM2B *)name, &cntr.b, n.t.size * 8, r->t.buffer, &iterations, FALSE);
 	    // "random" value must be less than the prime
 	    if(UnsignedCompareB(r->b.size, r->b.buffer, n.t.size, n.t.buffer) >= 0)
 		continue;
