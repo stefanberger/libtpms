@@ -74,6 +74,7 @@
 #include "NVMarshal.h"
 #include "LibtpmsCallbacks.h"
 #include <errno.h>
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
 /* libtpms added end */
 
