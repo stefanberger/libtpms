@@ -68,6 +68,7 @@
 #define MANUFACTURE_C
 #include "Tpm.h"
 #include "TpmSizeChecks_fp.h"
+#define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"  // libtpms added
 /* 9.9.3 Functions */
 /* 9.9.3.1 TPM_Manufacture() */
