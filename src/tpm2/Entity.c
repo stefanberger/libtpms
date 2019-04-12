@@ -3,7 +3,7 @@
 /*		Accessing properties for handles of various types		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entity.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Entity.c 1462 2019-04-10 18:13:35Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -299,10 +299,7 @@ EntityGetAuthValue(
 	    break;
 	}
     // Copy the authValue
-    if (!pAuth)                                                    /* libtpms changed begin (ubsan) */
-        MemoryCopy2B(&auth->b, NULL, sizeof(auth->t.buffer));
-    else
-        MemoryCopy2B(&auth->b, &pAuth->b, sizeof(auth->t.buffer)); /* libtpms changed end */
+    MemoryCopy2B((TPM2B *)auth, (TPM2B *)pAuth, sizeof(auth->t.buffer));
     MemoryRemoveTrailingZeros(auth);
     return auth->t.size;
 }
