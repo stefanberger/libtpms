@@ -7,25 +7,8 @@ TESTDIR=${abs_top_testdir:-$(dirname "$0")}
 DIR=${PWD}
 
 WORKDIR=$(mktemp -d)
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-${ROOT}/src/.libs}
 
 . ${TESTDIR}/common
-
-case "$(uname -s)" in
-Linux)
-	if ! [ -d ${LD_LIBRARY_PATH} ]; then
-		echo "Wrong path to libtpms library: ${LD_LIBRARY_PATH}"
-		exit 1
-	fi
-
-	if ! [ -f "$(readlink -f ${LD_LIBRARY_PATH}/libtpms.so)" ]; then
-		echo "Cannot find libtpms at ${LD_LIBRARY_PATH}/libtpms.so"
-		exit 1
-	fi
-	;;
-*)
-	;;
-esac
 
 function cleanup()
 {
