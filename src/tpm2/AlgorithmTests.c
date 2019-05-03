@@ -255,7 +255,7 @@ TestSymmetric(
     //
     if(!TEST_BIT(alg, *toTest))
 	return TPM_RC_SUCCESS;
-    if(alg == ALG_AES_VALUE || alg == ALG_SM4_VALUE || alg == ALG_CAMELLIA_VALUE)
+    if(alg == ALG_AES_VALUE || alg == ALG_SM4_VALUE || alg == ALG_CAMELLIA_VALUE || alg == ALG_TDES_VALUE)
 	{
 	    // Will test the algorithm for all modes and key sizes
 	    CLEAR_BOTH(alg);
@@ -814,6 +814,9 @@ TestAlgorithm(
 #if ALG_CAMELLIA
 		    // no test vectors for camellia
 		    //            case ALG_CAMELLIA_VALUE:
+#endif
+#if ALG_TDES
+                  case ALG_TDES_VALUE:
 #endif
 		    // Symmetric modes
 #if !ALG_CFB
