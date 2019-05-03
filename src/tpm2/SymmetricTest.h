@@ -104,6 +104,18 @@ const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS] = {
      {dataOut_SM4128_CTR, dataOut_SM4128_OFB, dataOut_SM4128_CBC,
       dataOut_SM4128_CFB, dataOut_AES128_ECB}}
 #endif
+#if TDES_128
+    COMMA
+    {ALG_TDES_VALUE, 128, key_TDES128, 8, sizeof(dataIn_TDES128), dataIn_TDES128,
+     {dataOut_TDES128_CTR, dataOut_TDES128_OFB, dataOut_TDES128_CBC,
+      dataOut_TDES128_CFB, dataOut_TDES128_ECB}}
+#endif
+#if TDES_192
+    COMMA
+    {ALG_TDES_VALUE, 192, key_TDES192, 8, sizeof(dataIn_TDES192), dataIn_TDES192,
+     {dataOut_TDES192_CTR, dataOut_TDES192_OFB, dataOut_TDES192_CBC,
+      dataOut_TDES192_CFB, dataOut_TDES192_ECB}}
+#endif
 };
 #undef COMMA
 
