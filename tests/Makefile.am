@@ -12,8 +12,8 @@ TESTS_ENVIRONMENT = \
 AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
-check_PROGRAMS = base64decode nvram_offsets tpm2_pcr_read
-TESTS = base64decode.sh nvram_offsets tpm2_pcr_read.sh
+check_PROGRAMS = base64decode nvram_offsets tpm2_pcr_read tpm2_selftest
+TESTS = base64decode.sh nvram_offsets tpm2_pcr_read.sh tpm2_selftest.sh
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
@@ -55,7 +55,9 @@ EXTRA_DIST = \
 	base64decode.sh \
 	common \
 	tpm2_pcr_read.c \
-	tpm2_pcr_read.sh
+	tpm2_pcr_read.sh \
+	tpm2_selftest.c \
+	tpm2_selftest.sh
 
 CLEANFILES = \
 	*.gcov \

@@ -33,6 +33,7 @@ Makefile
 /tests/fuzz
 /tests/freebl_sha1flattensize
 /tests/nvram_offsets
+/tests/tpm2_selftest
 /debian/*debhelper*
 /debian/*substvars
 /debian/files
