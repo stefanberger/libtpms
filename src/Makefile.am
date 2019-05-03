@@ -505,6 +505,7 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/CryptRsa.c \
 	tpm2/crypto/openssl/CryptSmac.c \
 	tpm2/crypto/openssl/CryptSym.c \
+	tpm2/crypto/openssl/Helpers.c \
 	tpm2/crypto/openssl/TpmToOsslDesSupport.c \
 	tpm2/crypto/openssl/TpmToOsslMath.c \
 	tpm2/crypto/openssl/TpmToOsslSupport.c
@@ -514,6 +515,7 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/BnMath_fp.h \
 	tpm2/crypto/openssl/BnMemory_fp.h \
 	tpm2/crypto/openssl/BnValues.h \
+	tpm2/crypto/openssl/Helpers_fp.h \
 	tpm2/crypto/openssl/LibSupport.h \
 	tpm2/crypto/openssl/TpmToOsslDesSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslHash.h \
