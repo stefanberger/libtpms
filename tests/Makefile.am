@@ -12,8 +12,20 @@ TESTS_ENVIRONMENT = \
 AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
-check_PROGRAMS = base64decode nvram_offsets tpm2_pcr_read tpm2_createprimary
-TESTS = fuzz.sh base64decode.sh nvram_offsets tpm2_pcr_read.sh tpm2_createprimary.sh
+check_PROGRAMS = \
+	base64decode \
+	nvram_offsets \
+	tpm2_createprimary \
+	tpm2_pcr_read \
+	tpm2_selftest
+
+TESTS = \
+	base64decode.sh \
+	fuzz.sh \
+	nvram_offsets \
+	tpm2_createprimary.sh \
+	tpm2_pcr_read.sh \
+	tpm2_selftest.sh
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
@@ -62,6 +74,8 @@ EXTRA_DIST = \
 	tpm2_createprimary.sh \
 	tpm2_pcr_read.c \
 	tpm2_pcr_read.sh \
+	tpm2_selftest.c \
+	tpm2_selftest.sh \
 	fuzz.sh
 
 CLEANFILES = \

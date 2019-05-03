@@ -43,6 +43,7 @@ Makefile
 /tests/nvram_offsets
 /tests/tpm2_createprimary
 /tests/tpm2_pcr_read
+/tests/tpm2_selftest
 /debian/*debhelper*
 /debian/*substvars
 /debian/files
