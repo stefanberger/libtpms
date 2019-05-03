@@ -67,6 +67,7 @@
 /* 10.2.19.2 Includes, Defines, and Typedefs */
 #include "Tpm.h"
 #include "CryptSym.h"
+#include "Helpers_fp.h"  // libtpms changed
 /* 10.2.19.3.1	CryptSymInit() */
 /* This function is called to do _TPM_Init() processing */
 BOOL
@@ -155,6 +156,8 @@ CryptGetSymmetricBlockSize(
 	}
     return 0;
 }
+
+#if !USE_OPENSSL_FUNCTIONS // libtpms added
 /* 10.2.20.5 Symmetric Encryption */
 /* This function performs symmetric encryption based on the mode. */
 /* Error Returns Meaning */
@@ -458,6 +461,250 @@ CryptSymmetricDecrypt(
 	}
     return TPM_RC_SUCCESS;
 }
+
+#else // libtpms added begin
+
+#if ALG_TDES && ALG_CTR
+// Emulated TDES Counter mode since OpenSSL does not implement it
+static void TDES_CTR(const BYTE *key,            // IN
+                     INT32       keySizeInBits,  // IN
+                     INT32       dSize,          // IN
+                     const BYTE *dIn,            // IN
+                     BYTE       *iv,             // IN
+                     BYTE       *dOut,           // OUT
+                     INT16       blockSize       // IN
+                     )
+{
+    tpmCryptKeySchedule_t   keySchedule;
+    int                     i;
+    BYTE                    tmp[MAX_SYM_BLOCK_SIZE];
+    BYTE                   *pT;
+
+    TDES_set_encrypt_key(key, keySizeInBits,
+                         (tpmKeyScheduleTDES *)&keySchedule.TDES);
+
+    for(; dSize > 0; dSize -= blockSize)
+	{
+	    // Encrypt the current value of the IV(counter)
+	    TDES_encrypt(iv, tmp, (tpmKeyScheduleTDES *)&keySchedule.TDES);
+	    //increment the counter (counter is big-endian so start at end)
+	    for(i = blockSize - 1; i >= 0; i--)
+		if((iv[i] += 1) != 0)
+		    break;
+	    // XOR the encrypted counter value with input and put into output
+	    pT = tmp;
+	    for(i = (dSize < blockSize) ? dSize : blockSize; i > 0; i--)
+		*dOut++ = *dIn++ ^ *pT++;
+	}
+}
+#endif
+
+/* 10.2.20.5 Symmetric Encryption */
+/* This function performs symmetric encryption based on the mode. */
+/* Error Returns Meaning */
+/* TPM_RC_SIZE dSize is not a multiple of the block size for an algorithm that requires it */
+/* TPM_RC_FAILURE Fatal error */
+LIB_EXPORT TPM_RC
+CryptSymmetricEncrypt(
+		      BYTE                *dOut,          // OUT:
+		      TPM_ALG_ID           algorithm,     // IN: the symmetric algorithm
+		      UINT16               keySizeInBits, // IN: key size in bits
+		      const BYTE          *key,           // IN: key buffer. The size of this buffer
+		      //     in bytes is (keySizeInBits + 7) / 8
+		      TPM2B_IV            *ivInOut,       // IN/OUT: IV for decryption.
+		      TPM_ALG_ID           mode,          // IN: Mode to use
+		      INT32                dSize,         // IN: data size (may need to be a
+		      //     multiple of the blockSize)
+		      const BYTE          *dIn            // IN: data buffer
+		      )
+{
+    INT16                blockSize;
+    BYTE                *iv;
+    BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
+    evpfunc              evpfn;
+    EVP_CIPHER_CTX      *ctx = NULL;
+    int                  outlen1 = 0;
+    int                  outlen2 = 0;
+    BYTE                *pOut = dOut;
+    BYTE                *buffer = NULL; // for in-place encryption
+    UINT32               buffersize = 0;
+    BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
+    UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
+    TPM_RC               retVal = TPM_RC_SUCCESS;
+
+    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    if(dSize == 0)
+	return TPM_RC_SUCCESS;
+    TEST(algorithm);
+    blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
+    if(blockSize == 0)
+	return TPM_RC_FAILURE;
+    // If the iv is provided, then it is expected to be block sized. In some cases,
+    // the caller is providing an array of 0's that is equal to [MAX_SYM_BLOCK_SIZE]
+    // with no knowledge of the actual block size. This function will set it.
+    if((ivInOut != NULL) && (mode != ALG_ECB_VALUE))
+	{
+	    ivInOut->t.size = blockSize;
+	    iv = ivInOut->t.buffer;
+	}
+    else
+	iv = defaultIv;
+
+    switch (mode)
+        {
+          case ALG_ECB_VALUE:
+          case ALG_CBC_VALUE:
+	    // For ECB & CBC the data size must be an even multiple of the
+	    // cipher block size
+	    if((dSize % blockSize) != 0)
+		return TPM_RC_SIZE;
+        }
+
+    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                         keyToUse, &keyToUseLen);
+    if (evpfn == NULL)
+        return TPM_RC_FAILURE;
+
+    if (dIn == dOut) {
+        // in-place encryption; we use a temp buffer
+        buffersize = TPM2_ROUNDUP(dSize, blockSize);
+        buffer = malloc(buffersize);
+        if (buffer == NULL)
+            ERROR_RETURN(TPM_RC_FAILURE);
+
+        pOut = buffer;
+    }
+
+#if ALG_TDES && ALG_CTR
+    if (algorithm == TPM_ALG_TDES && mode == ALG_CTR_VALUE) {
+        TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, pOut, blockSize);
+        outlen1 = dSize;
+        ERROR_RETURN(TPM_RC_SUCCESS);
+    }
+#endif
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx ||
+        EVP_EncryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
+        EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
+        EVP_EncryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    pAssert(outlen1 <= dSize || dSize >= outlen1 + blockSize);
+
+    if (EVP_EncryptFinal_ex(ctx, pOut + outlen1, &outlen2) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+ Exit:
+    if (retVal == TPM_RC_SUCCESS && pOut != dOut)
+        memcpy(dOut, pOut, outlen1 + outlen2);
+
+    clear_and_free(buffer, buffersize);
+    EVP_CIPHER_CTX_free(ctx);
+
+    return retVal;
+}
+
+/* 10.2.20.5.1 CryptSymmetricDecrypt() */
+/* This function performs symmetric decryption based on the mode. */
+/* Error Returns Meaning */
+/* TPM_RC_FAILURE A fatal error */
+/* TPM_RCS_SIZE dSize is not a multiple of the block size for an algorithm that requires it */
+LIB_EXPORT TPM_RC
+CryptSymmetricDecrypt(
+		      BYTE                *dOut,          // OUT: decrypted data
+		      TPM_ALG_ID           algorithm,     // IN: the symmetric algorithm
+		      UINT16               keySizeInBits, // IN: key size in bits
+		      const BYTE          *key,           // IN: key buffer. The size of this buffer
+		      //     in bytes is (keySizeInBits + 7) / 8
+		      TPM2B_IV            *ivInOut,       // IN/OUT: IV for decryption.
+		      TPM_ALG_ID           mode,          // IN: Mode to use
+		      INT32                dSize,         // IN: data size (may need to be a
+		      //     multiple of the blockSize)
+		      const BYTE          *dIn            // IN: data buffer
+		      )
+{
+    INT16                blockSize;
+    BYTE                *iv;
+    BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
+    evpfunc              evpfn;
+    EVP_CIPHER_CTX      *ctx = NULL;
+    int                  outlen1 = 0;
+    int                  outlen2 = 0;
+    BYTE                *pOut = dOut;
+    BYTE                *buffer = NULL;
+    UINT32               buffersize = 0;
+    BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
+    UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
+    TPM_RC               retVal = TPM_RC_SUCCESS;
+
+    // These are used but the compiler can't tell because they are initialized
+    // in case statements and it can't tell if they are always initialized
+    // when needed, so... Comment these out if the compiler can tell or doesn't
+    // care that these are initialized before use.
+    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    if(dSize == 0)
+	return TPM_RC_SUCCESS;
+    TEST(algorithm);
+    blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
+    if(blockSize == 0)
+	return TPM_RC_FAILURE;
+    // If the iv is provided, then it is expected to be block sized. In some cases,
+    // the caller is providing an array of 0's that is equal to [MAX_SYM_BLOCK_SIZE]
+    // with no knowledge of the actual block size. This function will set it.
+    if((ivInOut != NULL) && (mode != ALG_ECB_VALUE))
+	{
+	    ivInOut->t.size = blockSize;
+	    iv = ivInOut->t.buffer;
+	}
+    else
+	iv = defaultIv;
+
+    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                         keyToUse, &keyToUseLen);
+    if (evpfn ==  NULL)
+        return TPM_RC_FAILURE;
+
+    if (dIn == dOut) {
+        // in-place encryption; we use a temp buffer
+        buffersize = TPM2_ROUNDUP(dSize, blockSize);
+        buffer = malloc(buffersize);
+        if (buffer == NULL)
+            ERROR_RETURN(TPM_RC_FAILURE);
+        pOut = buffer;
+    }
+
+#if ALG_TDES && ALG_CTR
+    if (algorithm == TPM_ALG_TDES && mode == ALG_CTR_VALUE) {
+        TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, pOut, blockSize);
+        outlen1 = dSize;
+        ERROR_RETURN(TPM_RC_SUCCESS);
+    }
+#endif
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx ||
+        EVP_DecryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
+        EVP_DecryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    pAssert(outlen1 <= dSize || dSize >= outlen1 + blockSize);
+
+    if (EVP_DecryptFinal(ctx, pOut + outlen1, &outlen2) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+ Exit:
+    if (retVal == TPM_RC_SUCCESS && pOut != dOut)
+        memcpy(dOut, pOut, outlen1 + outlen2);
+
+    clear_and_free(buffer, buffersize);
+    EVP_CIPHER_CTX_free(ctx);
+
+    return retVal;
+}
+
+#endif // libtpms added end
+
 /* 10.2.20.5.2 CryptSymKeyValidate() */
 /* Validate that a provided symmetric key meets the requirements of the TPM */
 /* Error Returns Meaning */
