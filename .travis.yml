@@ -28,6 +28,8 @@ addons:
 script:
   - ./autogen.sh ${CONFIG}
   - make -j$(${NPROC}) ${TARGET}
+after_failure:
+  - for f in tests/*.log; do echo ">>>>>>> $f <<<<<<<"; tail -n 50 $f; done
 matrix:
   include:
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=distcheck"
