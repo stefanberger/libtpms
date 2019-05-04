@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include <libtpms/tpm_library.h>
 #include <libtpms/tpm_error.h>
@@ -13,6 +14,10 @@ int main(void)
     uint32_t rtotal = 0;
     TPM_RESULT res;
     int ret = 1;
+    unsigned char *perm = NULL;
+    uint32_t permlen = 0;
+    unsigned char *vol = NULL;
+    uint32_t vollen = 0;
     unsigned char startup[] = {
         0x80, 0x01, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00,
         0x01, 0x44, 0x00, 0x00
@@ -177,16 +182,12 @@ int main(void)
     }
 
     /* save permanent and volatile state */
-    unsigned char *perm;
-    uint32_t permlen = 0;
     res = TPMLIB_GetState(TPMLIB_STATE_PERMANENT, &perm, &permlen);
     if (res) {
         fprintf(stderr, "TPMLIB_GetState(PERMANENT) failed: 0x%02x\n", res);
         goto exit;
     }
 
-    unsigned char *vol;
-    uint32_t vollen = 0;
     res = TPMLIB_GetState(TPMLIB_STATE_VOLATILE, &vol, &vollen);
     if (res) {
         fprintf(stderr, "TPMLIB_GetState(VOLATILE) failed: 0x%02x\n", res);
@@ -261,6 +262,8 @@ int main(void)
     fprintf(stdout, "OK\n");
 
 exit:
+    free(perm);
+    free(vol);
     TPMLIB_Terminate();
     TPM_Free(rbuffer);
 
