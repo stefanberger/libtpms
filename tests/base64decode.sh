@@ -5,14 +5,12 @@ binary=$(mktemp)
 
 trap "rm -f $input $binary" EXIT
 
-if [ -z "$(type -p seq)" ]; then
-function seq()
+function sseq()
 {
-	for ((i = $1; i < $2; i++)); do
+	for ((i = $1; i < $2; i=i<<1)); do
 		echo $i
 	done
 }
-fi
 
 function do_base64()
 {
@@ -26,7 +24,7 @@ function do_base64()
 	fi
 }
 
-for i in $(seq 1 1024) 2048 10240;
+for i in $(sseq 1 1024) 2048 10240;
 do
 	echo $i
 	dd if=/dev/urandom of=$binary bs=1 count=$i &>/dev/null
