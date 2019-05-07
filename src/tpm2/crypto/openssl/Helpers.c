@@ -440,4 +440,56 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     return retVal;
 }
 
+LIB_EXPORT TPM_RC
+OpenSSLCryptRsaGenerateKey(
+		    OBJECT              *rsaKey,            // IN/OUT: The object structure in which
+		    //          the key is created.
+		    UINT32               e,
+		    int                  keySizeInBits
+		    )
+{
+    TPMT_PUBLIC         *publicArea = &rsaKey->publicArea;
+    TPMT_SENSITIVE      *sensitive = &rsaKey->sensitive;
+    TPM_RC               retVal = TPM_RC_SUCCESS;
+    int                  rc;
+    RSA                 *rsa = NULL;
+    const BIGNUM        *bnP = NULL;
+    const BIGNUM        *bnN = NULL;
+    BIGNUM              *bnE = BN_new();
+    BN_RSA(tmp);
+
+    if (bnE == NULL || BN_set_word(bnE, e) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    // Need to initialize the privateExponent structure
+    RsaInitializeExponent(&rsaKey->privateExponent);
+
+    rsa = RSA_new();
+    if (rsa == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    rc = RSA_generate_key_ex(rsa, keySizeInBits, bnE, NULL);
+    if (rc == 0)
+        ERROR_RETURN(TPM_RC_NO_RESULT);
+
+    RSA_get0_key(rsa, &bnN, NULL, NULL);
+    RSA_get0_factors(rsa, &bnP, NULL);
+
+    OsslToTpmBn(tmp, bnN);
+    BnTo2B((bigNum)tmp, &publicArea->unique.rsa.b, 0);
+
+    OsslToTpmBn(tmp, bnP);
+    BnTo2B((bigNum)tmp, &sensitive->sensitive.rsa.b, 0);
+
+    // CryptRsaGenerateKey calls ComputePrivateExponent; we have to call
+    // it via CryptRsaLoadPrivateExponent
+    retVal = CryptRsaLoadPrivateExponent(rsaKey);
+
+ Exit:
+    BN_free(bnE);
+    RSA_free(rsa);
+
+    return retVal;
+}
+
 #endif // USE_OPENSSL_FUNCTIONS_RSA

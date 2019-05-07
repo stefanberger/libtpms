@@ -94,6 +94,14 @@ BOOL OpenSSLEccGetPrivate(
 const char *GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg);
 
 LIB_EXPORT TPM_RC
+OpenSSLCryptRsaGenerateKey(
+		    OBJECT              *rsaKey,            // IN/OUT: The object structure in which
+		    //          the key is created.
+		    UINT32               e,
+		    int                  keySizeInBits
+		    );
+
+LIB_EXPORT TPM_RC
 InitOpenSSLRSAPublicKey(OBJECT    *key,   // IN
                         EVP_PKEY **pkey   //OUT
                        );

@@ -194,6 +194,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	AC_CHECK_LIB([crypto], [RSA_set0_key],, not_found=1)
 	AC_CHECK_LIB([crypto], [RSA_set0_factors],, not_found=1)
 	AC_CHECK_LIB([crypto], [RSA_set0_crt_params],, not_found=1)
+	AC_CHECK_LIB([crypto], [RSA_generate_key_ex],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_new],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_PKEY_assign],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt_init],, not_found=1)

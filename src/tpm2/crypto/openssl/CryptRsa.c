@@ -1102,6 +1102,10 @@ CryptRsaGenerateKey(
 #endif
     // Make sure that key generation has been tested
     TEST(ALG_NULL_VALUE);
+#if USE_OPENSSL_FUNCTIONS_RSA          // libtpms added begin
+    if (rand == NULL)
+        return OpenSSLCryptRsaGenerateKey(rsaKey, e, keySizeInBits);
+#endif                                 // libtpms added end
     // Need to initialize the privateExponent structure
     RsaInitializeExponent(&rsaKey->privateExponent);
     // The prime is computed in P. When a new prime is found, Q is checked to
