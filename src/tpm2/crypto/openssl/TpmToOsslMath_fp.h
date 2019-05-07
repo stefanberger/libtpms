@@ -65,7 +65,7 @@
 void
 OsslToTpmBn(
 	    bigNum          bn,
-	    BIGNUM          *osslBn
+	    const BIGNUM   *osslBn   // libtpms added 'const'
 	    );
 BIGNUM *
 BigInitialized(

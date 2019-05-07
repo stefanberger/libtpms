@@ -81,7 +81,7 @@
 void
 OsslToTpmBn(
 	    bigNum          bn,
-	    BIGNUM          *osslBn
+	    const BIGNUM   *osslBn   // libtpms: added 'const'
 	    )
 {
     unsigned char buffer[LARGEST_NUMBER + 1];
