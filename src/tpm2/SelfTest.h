@@ -94,19 +94,26 @@
 #else
 #   define  SM4_128     NO
 #endif
+// libtpms added begin
 #if ALG_TDES && defined TDES_KEY_SIZE_BITS_128
 #   define  TDES_128    YES
 #   define  TDES_128_INDEX  (AES_128 + AES_192 + AES_256 + SM4_128)
+#   define  TDES_128_INDEX2 (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128)
 #else
 #   define  TDES_128    NO
 #endif
 #if ALG_TDES && defined TDES_KEY_SIZE_BITS_192
 #   define  TDES_192    YES
-#   define  TDES_192_INDEX  (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128)
+#   define  TDES_192_INDEX  (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128 \
+                             + TDES_128)
+#   define  TDES_192_INDEX2 (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128 \
+                             + TDES_128 + TDES_192)
 #else
 #   define  TDES_192    NO
 #endif
-#define NUM_SYMS    (AES_128 + AES_192 + AES_256 + SM4_128 + TDES_128 + TDES_192)
+// libtpms added end
+#define NUM_SYMS    (AES_128 + AES_192 + AES_256 + SM4_128 \
+                     + TDES_128 + TDES_128 + TDES_192 + TDES_192)  // libtpms changed
 typedef UINT32      SYM_INDEX;
 /* These two defines deal with the fact that the TPM_ALG_ID table does not delimit the symmetric
    mode values with a TPM_SYM_MODE_FIRST and TPM_SYM_MODE_LAST */
