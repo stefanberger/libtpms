@@ -191,6 +191,12 @@ TestSymmetricAlgorithm(
     BYTE                            encrypted[MAX_SYM_BLOCK_SIZE * 2];
     BYTE                            decrypted[MAX_SYM_BLOCK_SIZE * 2];
     TPM2B_IV                        iv;
+
+    // libtpms added beging
+    if (test->dataOut[mode - ALG_CTR_VALUE] == NULL)
+        return;
+    // libtpms added end
+
     //
     // Get the appropriate IV
     iv.t.size = (UINT16)MakeIv(mode, test->ivSize, iv.t.buffer);
