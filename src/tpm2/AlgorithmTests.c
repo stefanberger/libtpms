@@ -154,6 +154,42 @@ TestHash(
     }
     return TPM_RC_SUCCESS;
 }
+// libtpms added begin
+#if ALG_CMAC
+static TPM_RC
+TestCMAC(
+	 ALGORITHM_VECTOR    *toTest
+	 )
+{
+    SMAC_STATE          state;
+    UINT16              copied;
+    BYTE                out[MAX_SYM_BLOCK_SIZE];
+    UINT32              outSize = sizeof(out);
+    UINT16              blocksize;
+    int                 i;
+    TPMU_PUBLIC_PARMS   cmac_keyParms;
+
+    // initializing this statically seems impossible with gcc...
+    cmac_keyParms.symDetail.sym.algorithm = ALG_AES_VALUE;
+    cmac_keyParms.symDetail.sym.keyBits.sym = 128;
+
+    for (i = 0; CMACTests[i].key; i++ )
+	{
+	    blocksize = CryptCmacStart(&state, &cmac_keyParms,
+				       TPM_ALG_CMAC, CMACTests[i].key);
+	    pAssert(blocksize <= outSize);
+	    CryptCmacData(&state.state, CMACTests[i].datalen,
+			  CMACTests[i].data);
+	    copied = CryptCmacEnd(&state.state, outSize, out);
+	    if((CMACTests[i].outlen != copied)
+	      || (memcmp(out, CMACTests[i].out, CMACTests[i].outlen) != 0)) {
+		SELF_TEST_FAILURE;
+	    }
+	}
+    return TPM_RC_SUCCESS;
+}
+#endif
+// libtpms added end
 /* 10.2.1.4 Symmetric Test Functions */
 /* 10.2.1.4.1 MakeIv() */
 /* Internal function to make the appropriate IV depending on the mode. */
@@ -811,6 +847,15 @@ TestAlgorithm(
 		    // Symmetric block ciphers
 #if ALG_AES
 		  case ALG_AES_VALUE:
+// libtpms added begin
+#if ALG_CMAC
+		    if (doTest) {
+		         result = TestCMAC(toTest);
+		         if (result != TPM_RC_SUCCESS)
+		             break;
+	            }
+#endif
+// libtpms added end
 #endif
 #if ALG_SM4
 		    // if SM4 is implemented, its test is like other block ciphers but there
