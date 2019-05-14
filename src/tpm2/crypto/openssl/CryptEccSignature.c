@@ -63,6 +63,7 @@
 /* 10.2.12.1 Includes and Defines */
 #include "Tpm.h"
 #include "CryptEccSignature_fp.h"
+#include "TpmToOsslMath_fp.h"  // libtpms added
 #if ALG_ECC
 /* 10.2.12.2 Utility Functions */
 /* 10.2.12.2.1 EcdsaDigest() */
@@ -567,6 +568,7 @@ CryptEccSign(
    that they are in the range 0 < v < n */
 /* Error Returns Meaning */
 /* TPM_RC_SIGNATURE signature not valid */
+#if !USE_OPENSSL_FUNCTIONS_ECDSA  // libtpms added
 TPM_RC
 BnValidateSignatureEcdsa(
 			 bigNum                   bnR,           // IN: r component of the signature
@@ -616,6 +618,67 @@ BnValidateSignatureEcdsa(
  Exit:
     return retVal;
 }
+#else // USE_OPENSSL_FUNCTIONS_ECDSA     libtpms added begin
+TPM_RC
+BnValidateSignatureEcdsa(
+			 bigNum                   bnR,           // IN: r component of the signature
+			 bigNum                   bnS,           // IN: s component of the signature
+			 bigCurve                 E,             // IN: the curve used in the signature
+			 //     process
+			 bn_point_t              *ecQ,           // IN: the public point of the key
+			 const TPM2B_DIGEST      *digest         // IN: the digest that was signed
+			 )
+{
+    int               retVal;
+    int               rc;
+    ECDSA_SIG        *sig = NULL;
+    EC_KEY           *eckey = NULL;
+    BIGNUM           *r = BigInitialized(bnR);
+    BIGNUM           *s = BigInitialized(bnS);
+    EC_POINT         *q = EcPointInitialized(ecQ, E);
+
+    sig = ECDSA_SIG_new();
+    eckey = EC_KEY_new();
+
+    if (r == NULL || s == NULL || q == NULL || sig == NULL || eckey == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EC_KEY_set_group(eckey, E->G) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EC_KEY_set_public_key(eckey, q) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (ECDSA_SIG_set0(sig, r, s) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    /* sig now owns r and s */
+    r = NULL;
+    s = NULL;
+
+    rc = ECDSA_do_verify(digest->b.buffer, digest->b.size, sig, eckey);
+    switch (rc) {
+    case 1:
+        retVal = TPM_RC_SUCCESS;
+        break;
+    case 0:
+        retVal = TPM_RC_SIGNATURE;
+        break;
+    default:
+        retVal = TPM_RC_FAILURE;
+        break;
+    }
+
+ Exit:
+    EC_KEY_free(eckey);
+    ECDSA_SIG_free(sig);
+    EC_POINT_clear_free(q);
+    BN_clear_free(r);
+    BN_clear_free(s);
+
+    return retVal;
+}
+#endif // USE_OPENSSL_FUNCTIONS_ECDSA     libtpms added end
 #endif      // ALG_ECDSA
 #if ALG_SM2
 /* 10.2.12.3.8 BnValidateSignatureEcSm2() */
