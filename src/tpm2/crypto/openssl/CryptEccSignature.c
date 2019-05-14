@@ -69,6 +69,7 @@
 /* 10.2.12.2.1 EcdsaDigest() */
 /* Function to adjust the digest so that it is no larger than the order of the curve. This is used
    for ECDSA sign and verification. */
+#if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
 static bigNum
 EcdsaDigest(
 	    bigNum               bnD,           // OUT: the adjusted digest
@@ -92,6 +93,7 @@ EcdsaDigest(
 	}
     return bnD;
 }
+#endif                                 // libtpms added
 /* 10.2.12.2.2 BnSchnorrSign() */
 /* This contains the Schnorr signature computation. It is used by both ECDSA and Schnorr
    signing. The result is computed as: [s = k + r * d (mod n)] where */
@@ -132,6 +134,7 @@ BnSchnorrSign(
 /* 10.2.12.3.1 BnSignEcdsa() */
 /* This function implements the ECDSA signing algorithm. The method is described in the comments
    below. This version works with internal numbers. */
+#if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
 TPM_RC
 BnSignEcdsa(
 	    bigNum                   bnR,           // OUT: r component of the signature
@@ -204,6 +207,54 @@ BnSignEcdsa(
  Exit:
     return retVal;
 }
+#else // !USE_OPENSSL_FUNCTIONS_ECDSA  libtpms added begin
+TPM_RC
+BnSignEcdsa(
+	    bigNum                   bnR,           // OUT: r component of the signature
+	    bigNum                   bnS,           // OUT: s component of the signature
+	    bigCurve                 E,             // IN: the curve used in the signature
+	    //     process
+	    bigNum                   bnD,           // IN: private signing key
+	    const TPM2B_DIGEST      *digest,        // IN: the digest to sign
+	    RAND_STATE              *rand           // IN: used in debug of signing
+	    )
+{
+    ECDSA_SIG        *sig = NULL;
+    EC_KEY           *eckey;
+    int               retVal;
+    const BIGNUM     *r;
+    const BIGNUM     *s;
+    BIGNUM           *d = BigInitialized(bnD);
+
+    eckey = EC_KEY_new();
+
+    if (d == NULL || eckey == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EC_KEY_set_group(eckey, E->G) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EC_KEY_set_private_key(eckey, d) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    sig = ECDSA_do_sign(digest->b.buffer, digest->b.size, eckey);
+    if (sig == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    ECDSA_SIG_get0(sig, &r, &s);
+    OsslToTpmBn(bnR, r);
+    OsslToTpmBn(bnS, s);
+
+    retVal = TPM_RC_SUCCESS;
+
+ Exit:
+    BN_clear_free(d);
+    EC_KEY_free(eckey);
+    ECDSA_SIG_free(sig);
+
+    return retVal;
+}
+#endif  // USE_OPENSSL_FUNCTIONS_ECDSA libtpms added end
 #if ALG_ECDAA
 /* 10.2.12.3.2 BnSignEcdaa() */
 /* This function performs s = r + T * d mod q where */
