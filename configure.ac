@@ -171,6 +171,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	AC_CHECK_LIB([crypto], [ECDSA_SIG_new],, not_found=1)
 	AC_CHECK_LIB([crypto], [ECDSA_SIG_set0],, not_found=1)
 	AC_CHECK_LIB([crypto], [ECDSA_do_verify],, not_found=1)
+	AC_CHECK_LIB([crypto], [ECDSA_do_sign],, not_found=1)
 	AC_CHECK_LIB([crypto], [EC_KEY_set_group],, not_found=1)
 	if test "x$not_found" = "x0"; then
 		use_openssl_functions_ecdsa=1
