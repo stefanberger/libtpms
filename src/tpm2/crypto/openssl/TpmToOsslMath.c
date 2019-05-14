@@ -446,7 +446,7 @@ PointFromOssl(
 }
 /* B.2.3.2.3.10. EcPointInitialized() */
 /* Allocate and initialize a point. */
-static EC_POINT *
+LIB_EXPORT EC_POINT *   // libtpms: exported function
 EcPointInitialized(
 		   pointConst          initializer,
 		   bigCurve            E

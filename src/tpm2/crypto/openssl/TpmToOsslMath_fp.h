@@ -71,6 +71,13 @@ BIGNUM *
 BigInitialized(
 	       bigConst            initializer
 	       );
+// libtpms added begin
+EC_POINT *
+EcPointInitialized(
+		   pointConst          initializer,
+		   bigCurve            E
+		   );
+// libtpms added end
 void
 MathLibraryCompatibilityCheck(
 			      void
