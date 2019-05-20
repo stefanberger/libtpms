@@ -61,6 +61,8 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#include "TpmTypes.h"
+
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 TPM_RC
 OpenSSLCryptGenerateKeyDes(
@@ -84,5 +86,11 @@ BOOL OpenSSLEccGetPrivate(
                           const EC_GROUP    *G       // IN:  the EC_GROUP to use
                          );
 #endif
+
+#if USE_OPENSSL_FUNCTIONS_RSA
+
+const char *GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg);
+
+#endif // USE_OPENSSL_FUNCTIONS_RSA
 
 #endif  /* HELPERS_H */

@@ -62,6 +62,8 @@
 #include "Helpers_fp.h"
 #include "TpmToOsslMath_fp.h"
 
+#include "config.h"
+
 #include <openssl/evp.h>
 
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
@@ -234,3 +236,51 @@ OpenSSLEccGetPrivate(
     return OK;
 }
 #endif // USE_OPENSSL_FUNCTIONS_EC
+
+#if USE_OPENSSL_FUNCTIONS_RSA
+
+static const struct hnames {
+    const char *name;
+    TPM_ALG_ID hashAlg;
+} hnames[HASH_COUNT + 1] = {
+    {
+#if ALG_SHA1
+        .name     = "sha1",
+        .hashAlg  = ALG_SHA1_VALUE,
+    }, {
+#endif
+#if ALG_SHA256
+        .name     = "sha256",
+        .hashAlg  = ALG_SHA256_VALUE,
+    }, {
+#endif
+#if ALG_SHA384
+        .name     = "sha384",
+        .hashAlg  = ALG_SHA384_VALUE,
+    }, {
+#endif
+#if ALG_SHA512
+        .name     = "sha512",
+        .hashAlg  = ALG_SHA512_VALUE,
+    }, {
+#endif
+        .name     = NULL,
+    }
+};
+#if HASH_COUNT != ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512
+# error Missing entry in hnames array!
+#endif
+
+LIB_EXPORT const char *
+GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg)
+{
+    unsigned i;
+
+    for (i = 0; i < HASH_COUNT; i++) {
+        if (hashAlg == hnames[i].hashAlg)
+            return hnames[i].name;
+    }
+    return NULL;
+}
+
+#endif // USE_OPENSSL_FUNCTIONS_RSA
