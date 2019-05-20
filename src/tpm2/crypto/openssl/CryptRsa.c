@@ -67,6 +67,10 @@
 /* Need this define to get the private defines for this function */
 #define CRYPT_RSA_C
 #include "Tpm.h"
+#include "Helpers_fp.h"  // libtpms added
+
+#include <openssl/rsa.h> // libtpms added
+
 #if ALG_RSA
 /* 10.2.19.3 Obligatory Initialization Functions */
 /* 10.2.19.3.1 CryptRsaInit() */
@@ -273,6 +277,7 @@ RSADP(
    equal the size of the modulus */
 /* Error Returns Meaning */
 /* TPM_RC_VALUE hashAlg is not valid or message size is too large */
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 static TPM_RC
 OaepEncode(
 	   TPM2B       *padded,        // OUT: the pad data
@@ -342,6 +347,7 @@ OaepEncode(
  Exit:
     return retVal;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.6 OaepDecode() */
 /* This function performs OAEP padding checking. The size of the buffer to receive the recovered
    data. If the padding is not valid, the dSize size is set to zero and the function returns
@@ -421,6 +427,7 @@ OaepDecode(
 /* This function performs the encoding for RSAES-PKCS1-V1_5-ENCRYPT as defined in PKCS#1V2.1 */
 /* Error Returns Meaning */
 /* TPM_RC_VALUE message size is too large */
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 static TPM_RC
 RSAES_PKCS1v1_5Encode(
 		      TPM2B       *padded,        // OUT: the pad data
@@ -453,6 +460,7 @@ RSAES_PKCS1v1_5Encode(
 	}
     return TPM_RC_SUCCESS;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.8 RSAES_Decode() */
 /* This function performs the decoding for RSAES-PKCS1-V1_5-ENCRYPT as defined in PKCS#1V2.1 */
 /* Error Returns Meaning */
@@ -484,6 +492,7 @@ RSAES_Decode(
     memcpy(message->buffer, &coded->buffer[pSize], coded->size - pSize);
     return TPM_RC_SUCCESS;
 }
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 /* 10.2.19.4.9 PssEncode() */
 /* This function creates an encoded block of data that is the size of modulus. The function uses the
    maximum salt size that will fit in the encoded block. */
@@ -541,6 +550,7 @@ PssEncode(
     // and we are done
     return TPM_RC_SUCCESS;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.10 PssDecode() */
 /* This function checks that the PSS encoded block was built from the provided digest. If the check
    is successful, TPM_RC_SUCCESS is returned. Any other value indicates an error. */
@@ -635,6 +645,7 @@ PssDecode(
  Exit:
     return retVal;
 }
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 /* 10.2.19.4.11 () RSASSA_Encode */
 /* Encode a message using PKCS1v1().5 method. */
 /* Error Returns Meaning */
@@ -680,6 +691,7 @@ RSASSA_Encode(
  Exit:
     return retVal;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.12 RSASSA_Decode() */
 /* This function performs the RSASSA decoding of a signature. */
 /* Error Returns Meaning */
@@ -823,6 +835,7 @@ CryptRsaLoadPrivateExponent(
 /* Error Returns Meaning */
 /* TPM_RC_VALUE cOutSize is too small (must be the size of the modulus) */
 /* TPM_RC_SCHEME padType is not a supported scheme */
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 LIB_EXPORT TPM_RC
 CryptRsaEncrypt(
 		TPM2B_PUBLIC_KEY_RSA        *cOut,          // OUT: the encrypted data
@@ -888,6 +901,7 @@ CryptRsaEncrypt(
  Exit:
     return retVal;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.16 CryptRsaDecrypt() */
 /* This is the entry point for decryption using RSA. Decryption is use of the private exponent. The
    padType parameter determines what padding was used. */
@@ -939,6 +953,7 @@ CryptRsaDecrypt(
  Exit:
     return retVal;
 }
+#if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 /* 10.2.19.4.17 CryptRsaSign() */
 /* This function is used to generate an RSA signature of the type indicated in scheme. */
 /* Error Returns Meaning */
@@ -984,6 +999,7 @@ CryptRsaSign(
 	}
     return retVal;
 }
+#endif                                 // libtpms added
 /* 10.2.19.4.18 CryptRsaValidateSignature() */
 /* This function is used to validate an RSA signature. If the signature is valid TPM_RC_SUCCESS is
    returned. If the signature is not valid, TPM_RC_SIGNATURE is returned. Other return codes
@@ -1173,4 +1189,201 @@ CryptRsaGenerateKey(
 	rsaKey->attributes.privateExp = SET;
     return retVal;
 }
+
+#if USE_OPENSSL_FUNCTIONS_RSA          // libtpms added begin
+LIB_EXPORT TPM_RC
+CryptRsaEncrypt(
+		TPM2B_PUBLIC_KEY_RSA        *cOut,          // OUT: the encrypted data
+		TPM2B                       *dIn,           // IN: the data to encrypt
+		OBJECT                      *key,           // IN: the key used for encryption
+		TPMT_RSA_DECRYPT            *scheme,        // IN: the type of padding and hash
+		//     if needed
+		const TPM2B                 *label,         // IN: in case it is needed
+		RAND_STATE                  *rand           // IN: random number generator
+		//     state (mostly for testing)
+		)
+{
+    TPM_RC                       retVal;
+    TPM2B_PUBLIC_KEY_RSA         dataIn;
+    TPM2B_PUBLIC_KEY_RSA         scratch;
+    size_t                       outlen;
+    EVP_PKEY                    *pkey = NULL;
+    EVP_PKEY_CTX                *ctx = NULL;
+    const EVP_MD                *md;
+    const char                  *digestname;
+    unsigned char               *tmp = NULL;
+    //
+    // if the input and output buffers are the same, copy the input to a scratch
+    // buffer so that things don't get messed up.
+    if(dIn == &cOut->b)
+	{
+	    MemoryCopy2B(&dataIn.b, dIn, sizeof(dataIn.t.buffer));
+	    dIn = &dataIn.b;
+	}
+    // All encryption schemes return the same size of data
+    pAssert(sizeof(cOut->t.buffer) >= key->publicArea.unique.rsa.t.size);
+    cOut->t.size = key->publicArea.unique.rsa.t.size;
+    TEST(scheme->scheme);
+
+    retVal = InitOpenSSLRSAPublicKey(key, &pkey);
+    if (retVal != TPM_RC_SUCCESS)
+        return retVal;
+
+    ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (ctx == NULL ||
+        EVP_PKEY_encrypt_init(ctx) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    switch(scheme->scheme)
+	{
+          case ALG_NULL_VALUE:  // 'raw' encryption
+	    {
+		INT32                 i;
+		INT32                 dSize = dIn->size;
+		// dIn can have more bytes than cOut as long as the extra bytes
+		// are zero. Note: the more significant bytes of a number in a byte
+		// buffer are the bytes at the start of the array.
+		for(i = 0; (i < dSize) && (dIn->buffer[i] == 0); i++);
+		dSize -= i;
+		scratch.t.size = cOut->t.size;
+		pAssert(scratch.t.size <= sizeof(scratch.t.buffer));
+		if(dSize > scratch.t.size)
+		    ERROR_RETURN(TPM_RC_VALUE);
+		// Pad cOut with zeros if dIn is smaller
+		memset(scratch.t.buffer, 0, scratch.t.size - dSize);
+		// And copy the rest of the value; value is then right-aligned
+		memcpy(&scratch.t.buffer[scratch.t.size - dSize], &dIn->buffer[i], dSize);
+
+		dIn = &scratch.b;
+	    }
+            if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING) <= 0)
+                ERROR_RETURN(TPM_RC_FAILURE);
+            break;
+          case ALG_RSAES_VALUE:
+            if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0)
+                ERROR_RETURN(TPM_RC_FAILURE);
+            break;
+          case ALG_OAEP_VALUE:
+            digestname = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg);
+            if (digestname == NULL)
+                ERROR_RETURN(TPM_RC_VALUE);
+
+            md = EVP_get_digestbyname(digestname);
+            if (md == NULL ||
+                EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
+                EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0)
+                ERROR_RETURN(TPM_RC_FAILURE);
+
+            if (label->size > 0) {
+                tmp = malloc(label->size);
+                if (tmp == NULL)
+                    ERROR_RETURN(TPM_RC_FAILURE);
+                memcpy(tmp, label->buffer, label->size);
+            }
+            // label->size == 0 is supported
+            if (EVP_PKEY_CTX_set0_rsa_oaep_label(ctx, tmp, label->size) <= 0)
+                ERROR_RETURN(TPM_RC_FAILURE);
+            tmp = NULL;
+            break;
+          default:
+            ERROR_RETURN(TPM_RC_SCHEME);
+            break;
+	}
+
+    outlen = cOut->t.size;
+
+    if (EVP_PKEY_encrypt(ctx, cOut->t.buffer, &outlen,
+                         dIn->buffer, dIn->size) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    cOut->t.size = outlen;
+
+ Exit:
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
+    free(tmp);
+
+    return retVal;
+}
+
+LIB_EXPORT TPM_RC
+CryptRsaSign(
+	     TPMT_SIGNATURE      *sigOut,
+	     OBJECT              *key,           // IN: key to use
+	     TPM2B_DIGEST        *hIn,           // IN: the digest to sign
+	     RAND_STATE          *rand           // IN: the random number generator
+	     //      to use (mostly for testing)
+	     )
+{
+    TPM_RC                retVal = TPM_RC_SUCCESS;
+    UINT16                modSize;
+    size_t                outlen;
+    int                   padding;
+    EVP_PKEY             *pkey = NULL;
+    EVP_PKEY_CTX         *ctx = NULL;
+    const EVP_MD         *md;
+    const char           *digestname;
+    TPMI_ALG_HASH         hashAlg;
+
+    // parameter checks
+    pAssert(sigOut != NULL && key != NULL && hIn != NULL);
+    modSize = key->publicArea.unique.rsa.t.size;
+    // for all non-null signatures, the size is the size of the key modulus
+    sigOut->signature.rsapss.sig.t.size = modSize;
+    TEST(sigOut->sigAlg);
+
+    switch(sigOut->sigAlg)
+         {
+          case ALG_NULL_VALUE:
+            sigOut->signature.rsapss.sig.t.size = 0;
+            return TPM_RC_SUCCESS;
+          case ALG_RSAPSS_VALUE:
+            padding = RSA_PKCS1_PSS_PADDING;
+            hashAlg = sigOut->signature.rsapss.hash;
+            break;
+          case ALG_RSASSA_VALUE:
+            padding = RSA_PKCS1_PADDING;
+            hashAlg = sigOut->signature.rsassa.hash;
+            break;
+          default:
+            ERROR_RETURN(TPM_RC_SCHEME);
+         }
+
+    digestname = GetDigestNameByHashAlg(hashAlg);
+    if (digestname == NULL)
+        ERROR_RETURN(TPM_RC_VALUE);
+
+    md = EVP_get_digestbyname(digestname);
+    if (md == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    retVal = InitOpenSSLRSAPrivateKey(key, &pkey);
+    if (retVal != TPM_RC_SUCCESS)
+        return retVal;
+
+    ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (ctx == NULL ||
+        EVP_PKEY_sign_init(ctx) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0 ||
+        EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    outlen = sigOut->signature.rsapss.sig.t.size;
+    if (EVP_PKEY_sign(ctx,
+                      sigOut->signature.rsapss.sig.t.buffer, &outlen,
+                      hIn->b.buffer, hIn->b.size) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    sigOut->signature.rsapss.sig.t.size = outlen;
+
+ Exit:
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
+
+    return retVal;
+}
+#endif // USE_OPENSSL_FUNCTIONS_RSA    libtpms added end
+
 #endif // TPM_ALG_RSA
