@@ -167,6 +167,9 @@ BOOL
 BnEccGetPrivate(
 		bigNum                   dOut,      // OUT: the qualified random value
 		const ECC_CURVE_DATA    *C,         // IN: curve for which the private key
+#if USE_OPENSSL_FUNCTIONS_EC
+		const EC_GROUP          *G,         // IN: the EC_GROUP to use; must be != NULL for rand == NULL
+#endif
 		//     needs to be appropriate
 		RAND_STATE              *rand       // IN: state for DRBG
 		);

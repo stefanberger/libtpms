@@ -71,4 +71,11 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
                      UINT16       *keyToUseLen      // IN/OUT
                      );
 
+#if USE_OPENSSL_FUNCTIONS_EC
+BOOL OpenSSLEccGetPrivate(
+                          bigNum             dOut,   // OUT: the qualified random value
+                          const EC_GROUP    *G       // IN:  the EC_GROUP to use
+                         );
+#endif
+
 #endif  /* HELPERS_H */

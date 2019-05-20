@@ -62,6 +62,8 @@
 /* 10.2.12 CryptEccMain.c */
 /* 10.2.12.1 Includes and Defines */
 #include "Tpm.h"
+#include "Helpers_fp.h"                // libtpms added
+#include "TpmToOsslMath_fp.h"          // libtpms added
 #if ALG_ECC
 /* This version requires that the new format for ECC data be used */
 #if !USE_BN_ECC_DATA
@@ -543,6 +545,7 @@ BnPointMult(
    Random Value Meaning */
 /* TRUE		success */
 /* FALSE	failure generating private key */
+#if !USE_OPENSSL_FUNCTIONS_EC          // libtpms added
 BOOL
 BnEccGetPrivate(
 		bigNum                   dOut,      // OUT: the qualified random value
@@ -564,7 +567,34 @@ BnEccGetPrivate(
     OK = OK && BnAddWord(dOut, bnExtraBits, 1);
     return OK;
 }
+#else                                  // libtpms added begin
+BOOL
+BnEccGetPrivate(
+		bigNum                   dOut,      // OUT: the qualified random value
+		const ECC_CURVE_DATA    *C,         // IN: curve for which the private key
+		const EC_GROUP          *G,         // IN: the EC_GROUP to use; must be != NULL for rand == NULL
+		//     needs to be appropriate
+		RAND_STATE              *rand       // IN: state for DRBG
+		)
+{
+    bigConst                 order = CurveGetOrder(C);
+    BOOL                     OK;
+    UINT32                   orderBits = BnSizeInBits(order);
+    UINT32                   orderBytes = BITS_TO_BYTES(orderBits);
+    BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
+    BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
 
+    if (rand == NULL)
+        return OpenSSLEccGetPrivate(dOut, G);
+
+    //
+    OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);
+    OK = OK && BnSubWord(nMinus1, order, 1);
+    OK = OK && BnMod(bnExtraBits, nMinus1);
+    OK = OK && BnAddWord(dOut, bnExtraBits, 1);
+    return OK;
+}
+#endif // USE_OPENSSL_FUNCTIONS_EC        libtpms added end
 /* 10.2.11.2.21 BnEccGenerateKeyPair() */
 /* This function gets a private scalar from the source of random bits and does the point multiply to
    get the public key. */
@@ -578,7 +608,11 @@ BnEccGenerateKeyPair(
 {
     BOOL                 OK = FALSE;
     // Get a private scalar
+#if USE_OPENSSL_FUNCTIONS_EC           // libtpms added beging
+    OK = BnEccGetPrivate(bnD, AccessCurveData(E), E->G, rand);
+#else                                  // libtpms added end
     OK = BnEccGetPrivate(bnD, AccessCurveData(E), rand);
+#endif                                 // libtpms added
     // Do a point multiply
     OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
     if(!OK)
