@@ -147,6 +147,7 @@ AC_ARG_WITH([tpm2],
 
 use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
+use_openssl_functions_ec=0
 use_openssl_functions_ecdsa=0
 AC_ARG_ENABLE(use-openssl-functions,
 	AS_HELP_STRING([--disable-use-openssl-functions],
@@ -166,6 +167,15 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 		use_openssl_functions_symmetric=1
 		use_openssl_functions_for="symmetric (AES, TDES) "
 	fi
+	# Check for EC crypto support
+	not_found=0
+	AC_CHECK_LIB([crypto], [EC_KEY_set_group],, not_found=1)
+	AC_CHECK_LIB([crypto], [EC_KEY_generate_key],, not_found=1)
+	AC_CHECK_LIB([crypto], [EC_KEY_get0_private_key],, not_found=1)
+	if test "x$not_found" = "x0"; then
+		use_openssl_functions_ec=1
+		use_openssl_functions_for="${use_openssl_functions_for}general elliptic curve (EC) "
+	fi
 	# Check for ECDSA crypto support
 	not_found=0
 	AC_CHECK_LIB([crypto], [ECDSA_SIG_new],, not_found=1)
@@ -179,6 +189,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	fi
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
+CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_ECDSA=$use_openssl_functions_ecdsa"
 
 AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),

@@ -60,6 +60,7 @@
 
 #include "Tpm.h"
 #include "Helpers_fp.h"
+#include "TpmToOsslMath_fp.h"
 
 #include <openssl/evp.h>
 
@@ -179,3 +180,35 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 }
 
 #endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
+
+#if USE_OPENSSL_FUNCTIONS_EC
+BOOL
+OpenSSLEccGetPrivate(
+                     bigNum             dOut,  // OUT: the qualified random value
+                     const EC_GROUP    *G      // IN:  the EC_GROUP to use
+                    )
+{
+    BOOL           OK = FALSE;
+    const BIGNUM  *D;
+    EC_KEY        *eckey = EC_KEY_new();
+
+    pAssert(G != NULL);
+
+    if (!eckey)
+        return FALSE;
+
+    if (EC_KEY_set_group(eckey, G) != 1)
+        goto Exit;
+
+    if (EC_KEY_generate_key(eckey) == 1) {
+        OK = TRUE;
+        D = EC_KEY_get0_private_key(eckey);
+        OsslToTpmBn(dOut, D);
+    }
+
+ Exit:
+    EC_KEY_free(eckey);
+
+    return OK;
+}
+#endif // USE_OPENSSL_FUNCTIONS_EC
