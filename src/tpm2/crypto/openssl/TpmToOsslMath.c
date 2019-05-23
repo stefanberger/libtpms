@@ -214,11 +214,11 @@ BnModMult(
                                   sizeof(crypt_uword_t));
 	    OsslToTpmBn(result, bnResult);
 	}
-    BN_free(bnTemp);
-    BN_free(bnMod);
-    BN_free(bnOp2);
-    BN_free(bnOp1);
-    BN_free(bnResult);
+    BN_clear_free(bnTemp);
+    BN_clear_free(bnMod);
+    BN_clear_free(bnOp2);
+    BN_clear_free(bnOp1);
+    BN_clear_free(bnResult);
     OSSL_LEAVE();
     return OK;
 }
@@ -249,9 +249,9 @@ BnMult(
 	    OsslToTpmBn(temp, bnTemp);
 	    BnCopy(result, temp);
 	}
-    BN_free(bnB);
-    BN_free(bnA);
-    BN_free(bnTemp);
+    BN_clear_free(bnB);
+    BN_clear_free(bnA);
+    BN_clear_free(bnTemp);
     OSSL_LEAVE();
     return OK;
 }
@@ -303,10 +303,10 @@ BnDiv(
     BIGNUM_PRINT("    bnDivisor: ", bnSor, TRUE);
     BIGNUM_PRINT("   bnQuotient: ", bnQ, TRUE);
     BIGNUM_PRINT("  bnRemainder: ", bnR, TRUE);
-    BN_free(bnSor);
-    BN_free(bnDend);
-    BN_free(bnR);
-    BN_free(bnQ);
+    BN_clear_free(bnSor);
+    BN_clear_free(bnDend);
+    BN_clear_free(bnR);
+    BN_clear_free(bnQ);
     OSSL_LEAVE();
     return OK;
 }
@@ -336,9 +336,9 @@ BnGcd(
 	    OsslToTpmBn(gcd, bnGcd);
 	    gcd->size = DIV_UP(BN_num_bytes(bnGcd), sizeof(crypt_uword_t));
 	}
-    BN_free(bn2);
-    BN_free(bn1);
-    BN_free(bnGcd);
+    BN_clear_free(bn2);
+    BN_clear_free(bn1);
+    BN_clear_free(bnGcd);
     OSSL_LEAVE();
     return OK;
 }
@@ -368,10 +368,10 @@ BnModExp(
 	{
 	    OsslToTpmBn(result, bnResult);
 	}
-    BN_free(bnM);
-    BN_free(bnE);
-    BN_free(bnN);
-    BN_free(bnResult);
+    BN_clear_free(bnM);
+    BN_clear_free(bnE);
+    BN_clear_free(bnN);
+    BN_clear_free(bnResult);
     OSSL_LEAVE();
     return OK;
 }
@@ -397,9 +397,9 @@ BnModInverse(
 	{
 	    OsslToTpmBn(result, bnResult);
 	}
-    BN_free(bnM);
-    BN_free(bnN);
-    BN_free(bnResult);
+    BN_clear_free(bnM);
+    BN_clear_free(bnN);
+    BN_clear_free(bnResult);
     OSSL_LEAVE();
     return OK;
 }
@@ -463,8 +463,8 @@ EcPointInitialized(
 #else
 	EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX);
 #endif
-    BN_free(bnY);
-    BN_free(bnX);
+    BN_clear_free(bnY);
+    BN_clear_free(bnX);
     return P;
 }
 /* B.2.3.2.3.11. BnCurveInitialize() */
@@ -510,7 +510,7 @@ BnCurveInitialize(
     // Now set the generator
     OK = OK && EC_GROUP_set_generator(group, P, bnN, bnH);
     if(P != NULL)
-	EC_POINT_free(P);
+	EC_POINT_clear_free(P);
     if(!OK && group != NULL)
 	{
 	    EC_GROUP_free(group);
@@ -524,13 +524,13 @@ BnCurveInitialize(
     E->G = group;
     E->CTX = CTX;
     E->C = C;
-    BN_free(bnH);
-    BN_free(bnN);
-    BN_free(bnY);
-    BN_free(bnX);
-    BN_free(bnB);
-    BN_free(bnA);
-    BN_free(bnP);
+    BN_clear_free(bnH);
+    BN_clear_free(bnN);
+    BN_clear_free(bnY);
+    BN_clear_free(bnX);
+    BN_clear_free(bnB);
+    BN_clear_free(bnA);
+    BN_clear_free(bnP);
     return OK ? E : NULL;
 }
 /* B.2.3.2.3.11. BnEccModMult() */
@@ -553,9 +553,9 @@ BnEccModMult(
     else
 	EC_POINT_mul(E->G, pR, NULL, pS, bnD, E->CTX);
     PointFromOssl(R, pR, E);
-    EC_POINT_free(pR);
-    EC_POINT_free(pS);
-    BN_free(bnD);
+    EC_POINT_clear_free(pR);
+    EC_POINT_clear_free(pS);
+    BN_clear_free(bnD);
     return !BnEqualZero(R->z);
 }
 /* B.2.3.2.3.13. BnEccModMult2() */
@@ -589,11 +589,11 @@ BnEccModMult2(
 	    EC_POINTs_mul(E->G, pR, NULL, 2, points, scalars, E->CTX);
 	}
     PointFromOssl(R, pR, E);
-    EC_POINT_free(pR);
-    EC_POINT_free(pS);
-    EC_POINT_free(pQ);
-    BN_free(bnD);
-    BN_free(bnU);
+    EC_POINT_clear_free(pR);
+    EC_POINT_clear_free(pS);
+    EC_POINT_clear_free(pQ);
+    BN_clear_free(bnD);
+    BN_clear_free(bnU);
     return !BnEqualZero(R->z);
 }
 /* B.2.3.2.4. BnEccAdd() */
@@ -614,9 +614,9 @@ BnEccAdd(
     //
     EC_POINT_add(E->G, pR, pS, pQ, E->CTX);
     PointFromOssl(R, pR, E);
-    EC_POINT_free(pR);
-    EC_POINT_free(pS);
-    EC_POINT_free(pQ);
+    EC_POINT_clear_free(pR);
+    EC_POINT_clear_free(pS);
+    EC_POINT_clear_free(pQ);
     return !BnEqualZero(R->z);
 }
 #endif // TPM_ALG_ECC
