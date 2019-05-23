@@ -89,6 +89,7 @@ _NORMAL_WARNING_LEVEL_
 #include "CryptTest.h"
 #include "TpmError.h"
 #include "NV.h"
+#include "Utils.h"
 //** Defines and Types
 //*** Crypto Self-Test Values
 extern ALGORITHM_VECTOR     g_implementedAlgorithms;
@@ -886,15 +887,12 @@ extern STATE_RESET_DATA gr;
 /* libtpms added: to put certain data structure at fixed offsets
  *                to give the ones below some room to expand
  */
-#define NV_ROUNDUP(VAL, SIZE) \
-  ( ( (VAL) + (SIZE) - 1 ) / (SIZE) ) * (SIZE)
-
 #define NV_PERSISTENT_DATA  (0)
 #define NV_STATE_RESET_DATA (NV_PERSISTENT_DATA + sizeof(PERSISTENT_DATA))
 #define NV_STATE_CLEAR_DATA (NV_STATE_RESET_DATA + sizeof(STATE_RESET_DATA))
 #define NV_ORDERLY_DATA     (NV_STATE_CLEAR_DATA + sizeof(STATE_CLEAR_DATA))
-#define NV_INDEX_RAM_DATA   NV_ROUNDUP(NV_ORDERLY_DATA + sizeof(ORDERLY_DATA),\
-                                       1024) /* libtpms added */
+#define NV_INDEX_RAM_DATA   TPM2_ROUNDUP(NV_ORDERLY_DATA + sizeof(ORDERLY_DATA),\
+                                         1024) /* libtpms added */
 #define NV_USER_DYNAMIC     (NV_INDEX_RAM_DATA + sizeof(s_indexOrderlyRam))
 #define NV_USER_DYNAMIC_END     NV_MEMORY_SIZE
 /* 5.10.13 Global Macro Definitions */
