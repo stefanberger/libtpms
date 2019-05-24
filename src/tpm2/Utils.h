@@ -39,7 +39,16 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "Memory_fp.h"
+
 #define TPM2_ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1) / (SIZE) ) * (SIZE)
+
+static inline void clear_and_free(void *ptr, size_t size) {
+    if (ptr) {
+        MemorySet(ptr, 0, size);
+        free(ptr);
+    }
+}
 
 #endif /* UTILS_H */
