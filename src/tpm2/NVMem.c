@@ -291,15 +291,15 @@ _plat__IsNvAvailable(
 		     )
 {
     int         retVal = 0;
-    // NV is not available if the TPM is in failure mode
-    if(!s_NvIsAvailable)
-	retVal = 1;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     if (libtpms_plat__IsNvAvailable() == 1)
         return 0;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
+    // NV is not available if the TPM is in failure mode
+    if(!s_NvIsAvailable)
+	retVal = 1;
 #if FILE_BACKED_NV
     else
 	retVal = (s_NvFile == NULL);
