@@ -135,18 +135,25 @@ NvFileSize(
 	   )
 {
     long    fileSize;
-    long    filePos = ftell(s_NvFile);
+    long    filePos;
     //
+
     assert(NULL != s_NvFile);
-    
+
+    filePos = ftell(s_NvFile);  // libtpms changed begin
+    if (filePos < 0)
+        return -1;              // libtpms changed end
+
     fseek(s_NvFile, 0, SEEK_END);
     fileSize = ftell(s_NvFile);
     switch(leaveAt)
 	{
 	  case SEEK_SET:
 	    filePos = 0;
+	    /* fall through */
 	  case SEEK_CUR:
-	    fseek(s_NvFile, filePos, SEEK_SET);
+	    if (fseek(s_NvFile, filePos, SEEK_SET) < 0)  // libtpms changed
+	        return -1;                               // libtpms changed
 	    break;
 	  case SEEK_END:
 	    break;
