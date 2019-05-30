@@ -30,6 +30,8 @@ script:
   - make -j$(${NPROC}) ${TARGET}
 after_failure:
   - for f in tests/*.log; do echo ">>>>>>> $f <<<<<<<"; tail -n 50 $f; done
+before_install:
+  - test $TRAVIS_BRANCH != coverity_scan -o ${TRAVIS_JOB_NUMBER##*.} = 1 || exit 0
 matrix:
   include:
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=distcheck"
