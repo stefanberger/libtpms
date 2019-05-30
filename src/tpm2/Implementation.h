@@ -1219,7 +1219,4 @@ typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
 #   error Bad size for MAX_SYM_KEY_BITS or MAX_SYM_BLOCK_SIZE
 #endif
 
-/* libtpms: Use OpenSSL's crypto functions where possible */
-#define USE_OPENSSL_FUNCTIONS   YES
-
 #endif  // _IMPLEMENTATION_H_

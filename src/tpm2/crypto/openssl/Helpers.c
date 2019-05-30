@@ -63,7 +63,7 @@
 
 #include <openssl/evp.h>
 
-#if USE_OPENSSL_FUNCTIONS
+#if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
                      UINT16        keySizeInBits,   // IN
@@ -178,4 +178,4 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     return evpfn;
 }
 
-#endif // USE_OPENSSL_FUNCTIONS
+#endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC

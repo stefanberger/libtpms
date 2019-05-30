@@ -145,6 +145,29 @@ AC_ARG_WITH([tpm2],
 	AM_CONDITIONAL(WITH_TPM2, false)
 )
 
+use_openssl_functions_for=""
+use_openssl_functions_symmetric=0
+AC_ARG_ENABLE(use-openssl-functions,
+	AS_HELP_STRING([--disable-use-openssl-functions],
+		       [Use TPM 2 crypot code rather than OpenSSL crypto functions]),
+)
+AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
+	if test "x$cryptolib" != "xopenssl"; then
+		AC_MSG_ERROR([OpenSSL crypto function usage requires openssl as crypto library])
+	fi
+	# Check for symmetric key crypto functions
+	not_found=0
+	AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_new],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_EncryptInit_ex],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_aes_128_cbc],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_des_ede3_cbc],, not_found=1)
+	if test "x$not_found" = "x0"; then
+		use_openssl_functions_symmetric=1
+		use_openssl_functions_for="symmetric (AES, TDES) "
+	fi
+])
+CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
+
 AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),
     [SANITIZERS="-fsanitize=address,undefined"], [])
 AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
@@ -236,10 +259,11 @@ echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
 echo "HARDENING_LDFLAGS=$HARDENING_LDFLAGS"
 echo "LDFLAGS=$LDFLAGS"
 echo
-echo "Version to build    : $PACKAGE_VERSION"
-echo "Crypto library      : $cryptolib"
-echo "Debug build         : $enable_debug"
-echo "With TPM2 support   : $with_tpm2"
-echo "HAVE_VERSION_SCRIPT : $have_version_script"
+echo "Version to build        : $PACKAGE_VERSION"
+echo "Crypto library          : $cryptolib"
+echo "Debug build             : $enable_debug"
+echo "With TPM2 support       : $with_tpm2"
+echo "HAVE_VERSION_SCRIPT     : $have_version_script"
+echo "Use openssl crypto for  : $use_openssl_functions_for"
 echo
 echo
