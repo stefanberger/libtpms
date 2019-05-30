@@ -58,6 +58,24 @@ matrix:
         uidgid="$(id -nu):$(id -ng)" &&
         sudo chown -R ${uidgid} ./ &&
         cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
+    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
+           TARGET="install" NPROC="nproc"
+      dist: xenial
+      script:
+        sed -i 's/.* USE_OPENSSL_FUNCTIONS .*/#define USE_OPENSSL_FUNCTIONS NO/'
+            src/tpm2/Implementation.h &&
+        ./autogen.sh ${CONFIG} &&
+        sudo make -j$(nproc) ${TARGET} &&
+        sudo make -j$(nproc) check &&
+        git clone https://github.com/stefanberger/swtpm.git &&
+        pushd swtpm &&
+         sudo apt -y install devscripts equivs python-twisted libfuse-dev
+           libglib2.0-dev libgmp-dev expect libtasn1-dev socat findutils
+           tpm-tools gnutls-dev gnutls-bin &&
+         ./autogen.sh --with-gnutls --prefix=/usr &&
+         export SWTPM_TEST_EXPENSIVE=1 &&
+         sudo make -j$(nproc) check &&
+        popd
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
            NPROC="sysctl -n hw.ncpu" CFLAGS="-I/usr/local/opt/openssl/include"
            LDFLAGS="-L/usr/local/opt/openssl/lib"
