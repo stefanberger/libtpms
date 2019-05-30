@@ -101,7 +101,7 @@ void TDES_encrypt(
 		     &ks[0], &ks[1], &ks[2],
 		     DES_ENCRYPT);
 }
-#if !USE_OPENSSL_FUNCTIONS
+#if !USE_OPENSSL_FUNCTIONS_SYMMETRIC
 /* B.2.3.1.3.3. TDES_decrypt() */
 /* As with TDES_encypt() this function bridges between the TPM single schedule model and the
    OpenSSL() three schedule model. */

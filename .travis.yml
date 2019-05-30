@@ -58,12 +58,10 @@ matrix:
         uidgid="$(id -nu):$(id -ng)" &&
         sudo chown -R ${uidgid} ./ &&
         cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
-    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
+    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage --disable-use-openssl-functions"
            TARGET="install" NPROC="nproc"
       dist: xenial
       script:
-        sed -i 's/.* USE_OPENSSL_FUNCTIONS .*/#define USE_OPENSSL_FUNCTIONS NO/'
-            src/tpm2/Implementation.h &&
         ./autogen.sh ${CONFIG} &&
         sudo make -j$(nproc) ${TARGET} &&
         sudo make -j$(nproc) check &&

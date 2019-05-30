@@ -157,7 +157,7 @@ CryptGetSymmetricBlockSize(
     return 0;
 }
 
-#if !USE_OPENSSL_FUNCTIONS // libtpms added
+#if !USE_OPENSSL_FUNCTIONS_SYMMETRIC // libtpms added
 /* 10.2.20.5 Symmetric Encryption */
 /* This function performs symmetric encryption based on the mode. */
 /* Error Returns Meaning */
