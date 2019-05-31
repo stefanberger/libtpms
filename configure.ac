@@ -149,6 +149,7 @@ use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
 use_openssl_functions_ec=0
 use_openssl_functions_ecdsa=0
+use_openssl_functions_rsa=0
 AC_ARG_ENABLE(use-openssl-functions,
 	AS_HELP_STRING([--disable-use-openssl-functions],
 		       [Use TPM 2 crypot code rather than OpenSSL crypto functions]),
@@ -188,10 +189,31 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 		use_openssl_functions_ecdsa=1
 		use_openssl_functions_for="${use_openssl_functions_for}elliptic curve (ECDSA) "
 	fi
+	# Check for RSA crypto functions
+	not_found=0
+	AC_CHECK_LIB([crypto], [RSA_set0_key],, not_found=1)
+	AC_CHECK_LIB([crypto], [RSA_set0_factors],, not_found=1)
+	AC_CHECK_LIB([crypto], [RSA_set0_crt_params],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_new],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_assign],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt_init],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt_init],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_sign_init],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_sign],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_verify_init],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_PKEY_verify],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_get_digestbyname],, not_found=1)
+	if test "x$not_found" = "x0"; then
+		use_openssl_functions_rsa=1
+		use_openssl_functions_for="${use_openssl_functions_for}RSA "
+	fi
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_ECDSA=$use_openssl_functions_ecdsa"
+CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_RSA=$use_openssl_functions_rsa"
 
 AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),
     [SANITIZERS="-fsanitize=address,undefined"], [])
