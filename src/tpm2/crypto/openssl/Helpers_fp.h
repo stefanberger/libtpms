@@ -63,6 +63,8 @@
 
 #include "TpmTypes.h"
 
+#include <openssl/evp.h>
+
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 TPM_RC
 OpenSSLCryptGenerateKeyDes(
@@ -90,6 +92,16 @@ BOOL OpenSSLEccGetPrivate(
 #if USE_OPENSSL_FUNCTIONS_RSA
 
 const char *GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg);
+
+LIB_EXPORT TPM_RC
+InitOpenSSLRSAPublicKey(OBJECT    *key,   // IN
+                        EVP_PKEY **pkey   //OUT
+                       );
+
+LIB_EXPORT TPM_RC
+InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
+                         EVP_PKEY  **pkey      // OUT
+                        );
 
 #endif // USE_OPENSSL_FUNCTIONS_RSA
 
