@@ -65,6 +65,7 @@
 #include "config.h"
 
 #include <openssl/evp.h>
+#include <openssl/rsa.h>
 
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
@@ -281,6 +282,162 @@ GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg)
             return hnames[i].name;
     }
     return NULL;
+}
+
+static BOOL
+ComputePrivateExponentD(
+		       const BIGNUM   *P,      // IN: first prime (size is 1/2 of bnN)
+		       const BIGNUM   *Q,      // IN: second prime (size is 1/2 of bnN)
+		       const BIGNUM   *E,      // IN: the public exponent
+		       const BIGNUM   *N,      // IN: the public modulus
+		       BIGNUM        **D       // OUT:
+                       )
+{
+    BOOL    pOK = FALSE;
+    BIGNUM *phi;
+    BN_CTX *ctx;
+    //
+    // compute Phi = (p - 1)(q - 1) = pq - p - q + 1 = n - p - q + 1
+    phi = BN_dup(N);
+    ctx = BN_CTX_new();
+    if (phi && ctx) {
+        pOK = BN_sub(phi, phi, P);
+        pOK = pOK && BN_sub(phi, phi, Q);
+        pOK = pOK && BN_add_word(phi, 1);
+        // Compute the multiplicative inverse d = 1/e mod Phi
+        pOK = pOK && (*D = BN_mod_inverse(NULL, E, phi, ctx)) != NULL;
+    }
+    BN_CTX_free(ctx);
+    BN_clear_free(phi);
+
+    return pOK;
+}
+
+LIB_EXPORT TPM_RC
+InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
+                        EVP_PKEY   **pkey     // OUT
+                       )
+{
+    TPM_RC      retVal;
+    RSA        *rsakey = RSA_new();
+    BIGNUM     *N = NULL;
+    BIGNUM     *E = BN_new();
+    BN_ULONG    eval;
+
+    *pkey = EVP_PKEY_new();
+
+    if (rsakey == NULL || *pkey == NULL || E == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if(key->publicArea.parameters.rsaDetail.exponent != 0)
+        eval = key->publicArea.parameters.rsaDetail.exponent;
+    else
+        eval = RSA_DEFAULT_PUBLIC_EXPONENT;
+
+    if (BN_set_word(E, eval) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    N = BN_bin2bn(key->publicArea.unique.rsa.b.buffer,
+                  key->publicArea.unique.rsa.b.size, NULL);
+    if (N == NULL ||
+        RSA_set0_key(rsakey, N, E, NULL) != 1 ||
+        EVP_PKEY_assign_RSA(*pkey, rsakey) == 0)
+        ERROR_RETURN(TPM_RC_FAILURE)
+
+    RSA_set_flags(rsakey, RSA_FLAG_NO_BLINDING);
+
+    retVal = TPM_RC_SUCCESS;
+
+ Exit:
+    if (retVal != TPM_RC_SUCCESS) {
+        RSA_free(rsakey);
+        EVP_PKEY_free(*pkey);
+        *pkey = NULL;
+    }
+
+    return retVal;
+}
+
+LIB_EXPORT TPM_RC
+InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
+                         EVP_PKEY  **pkey      // OUT
+                        )
+{
+    const BIGNUM *N = NULL;
+    const BIGNUM *E = NULL;
+    BIGNUM       *P = NULL;
+    BIGNUM       *Q = NULL;
+    BIGNUM       *Qr = NULL;
+    BIGNUM       *D = NULL;
+#if CRT_FORMAT_RSA == YES
+    BIGNUM       *dP = NULL;
+    BIGNUM       *dQ = NULL;
+    BIGNUM       *qInv = NULL;
+#endif
+    RSA          *key;
+    BN_CTX       *ctx = NULL;
+    TPM_RC        retVal = InitOpenSSLRSAPublicKey(rsaKey, pkey);
+
+    if (retVal != TPM_RC_SUCCESS)
+        return retVal;
+
+    if(!rsaKey->attributes.privateExp)
+        CryptRsaLoadPrivateExponent(rsaKey);
+
+    ctx = BN_CTX_new();
+    Q = BN_new();
+    Qr = BN_new();
+    P = BN_bin2bn(rsaKey->sensitive.sensitive.rsa.t.buffer,
+                  rsaKey->sensitive.sensitive.rsa.t.size, NULL);
+    if (ctx == NULL || Q == NULL || Qr == NULL || P == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE)
+
+    key = EVP_PKEY_get0_RSA(*pkey);
+    if (key == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+    RSA_get0_key(key, &N, &E, NULL);
+
+    /* Q = N/P; no remainder */
+    BN_div(Q, Qr, N, P, ctx);
+    if(!BN_is_zero(Qr))
+        ERROR_RETURN(TPM_RC_BINDING);
+
+    // TODO(stefanb): consider caching D in the OBJECT
+    if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE ||
+        RSA_set0_key(key, NULL, NULL, D) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+    D = NULL;
+
+#if CRT_FORMAT_RSA == YES
+    /* CRT parameters are not absolutely needed but may speed up ops */
+    dP = BigInitialized((bigConst)&rsaKey->privateExponent.dP);
+    dQ = BigInitialized((bigConst)&rsaKey->privateExponent.dQ);
+    qInv = BigInitialized((bigConst)&rsaKey->privateExponent.qInv);
+    if (dP == NULL || dQ == NULL || qInv == NULL ||
+        RSA_set0_crt_params(key, dP, dQ, qInv) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+#endif
+
+    retVal = TPM_RC_SUCCESS;
+
+ Exit:
+    BN_CTX_free(ctx);
+    BN_clear_free(P);
+    BN_clear_free(Q);
+    BN_free(Qr);
+
+    if (retVal != TPM_RC_SUCCESS) {
+        BN_clear_free(D);
+#if CRT_FORMAT_RSA == YES
+        BN_clear_free(dP);
+        BN_clear_free(dQ);
+        BN_clear_free(qInv);
+#endif
+        EVP_PKEY_free(*pkey);
+        *pkey = NULL;
+    }
+
+    return retVal;
 }
 
 #endif // USE_OPENSSL_FUNCTIONS_RSA
