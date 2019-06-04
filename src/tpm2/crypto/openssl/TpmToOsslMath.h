@@ -71,6 +71,9 @@
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 #include <openssl/bn.h>
+#if USE_OPENSSL_FUNCTIONS_ECDSA        // libtpms added begin
+#include <openssl/ecdsa.h>
+#endif                                 // libtpms added end
 /* B.2.2.2.2. Macros and Defines */
 /* Make sure that the library is using the correct size for a crypt word */
 #if !(defined THIRTY_TWO_BIT || defined SIXTY_FOUR_BIT || defined SIXTY_FOUR_BIT_LONG)
