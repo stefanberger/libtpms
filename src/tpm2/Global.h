@@ -83,6 +83,7 @@ _NORMAL_WARNING_LEVEL_
 #undef CONTEXT_SLOT
 #  define CONTEXT_SLOT    UINT8
 #endif
+#include "BackwardsCompatibility.h" // libtpms added
 #include "Capabilities.h"
 #include "TpmTypes.h"
 #include "CommandAttributes.h"
@@ -704,6 +705,10 @@ typedef struct
     TPM2B_SEED          EPSeed;
     TPM2B_SEED          SPSeed;
     TPM2B_SEED          PPSeed;
+    // SEED_COMPAT_LEVELs related to creation time of seeds
+    SEED_COMPAT_LEVEL   EPSeedCompatLevel; // libtpms added begin
+    SEED_COMPAT_LEVEL   SPSeedCompatLevel;
+    SEED_COMPAT_LEVEL   PPSeedCompatLevel; // libtpms added end
     // Note there is a nullSeed in the state_reset memory.
     // Hierarchy proofs
     TPM2B_PROOF          phProof;

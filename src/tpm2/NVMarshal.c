@@ -241,6 +241,29 @@ BOOL_Unmarshal(BOOL *boolean, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+static UINT16
+SEED_COMPAT_LEVEL_Marshal(SEED_COMPAT_LEVEL *source,
+                          BYTE **buffer, INT32 *size)
+{
+    return UINT8_Marshal((UINT8 *)source, buffer, size);
+}
+
+static TPM_RC
+SEED_COMPAT_LEVEL_Unmarshal(SEED_COMPAT_LEVEL *source,
+                            BYTE **buffer, INT32 *size,
+                            const char *name)
+{
+    TPM_RC rc;
+
+    rc = UINT8_Unmarshal((UINT8 *)source, buffer, size);
+    if (rc == TPM_RC_SUCCESS && *source > SEED_COMPAT_LEVEL_LAST) {
+        TPMLIB_LogTPM2Error("%s compatLevel '%u' higher than supported '%u'\n",
+                            name, *source, SEED_COMPAT_LEVEL_LAST);
+        rc = TPM_RC_BAD_VERSION;
+    }
+    return rc;
+}
+
 static int
 TPM2B_Cmp(const TPM2B *t1, const TPM2B *t2)
 {
@@ -3689,7 +3712,7 @@ skip_future_versions:
 }
 
 #define PERSISTENT_DATA_MAGIC   0x12213443
-#define PERSISTENT_DATA_VERSION 3
+#define PERSISTENT_DATA_VERSION 4
 
 static UINT16
 PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
@@ -3702,7 +3725,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_DATA_VERSION,
-                                PERSISTENT_DATA_MAGIC, 1);
+                                PERSISTENT_DATA_MAGIC, 4);
     written += BOOL_Marshal(&data->disableClear, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->ownerAlg, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->endorsementAlg, buffer, size);
@@ -3775,8 +3798,17 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += TPML_PCR_SELECTION_Marshal(&gp.pcrAllocated, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    written += SEED_COMPAT_LEVEL_Marshal(&data->EPSeedCompatLevel,
+                                         buffer, size);
+    written += SEED_COMPAT_LEVEL_Marshal(&data->SPSeedCompatLevel,
+                                         buffer, size);
+    written += SEED_COMPAT_LEVEL_Marshal(&data->PPSeedCompatLevel,
+                                         buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
 
+    BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
 
@@ -3962,6 +3994,11 @@ skip_num_policy_pcr_group:
 #endif
     }
 
+    /* default values before conditional block */
+    data->EPSeedCompatLevel = SEED_COMPAT_LEVEL_ORIGINAL;
+    data->SPSeedCompatLevel = SEED_COMPAT_LEVEL_ORIGINAL;
+    data->PPSeedCompatLevel = SEED_COMPAT_LEVEL_ORIGINAL;
+
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
@@ -3969,8 +4006,24 @@ skip_num_policy_pcr_group:
                         "Volatile State", "version 3 or later");
         rc = TPML_PCR_SELECTION_Unmarshal(&shadow.pcrAllocated, buffer, size);
 
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
                         "PERSISTENT DATA", "version 4 or later");
+
+        if (rc == TPM_RC_SUCCESS) {
+            rc = SEED_COMPAT_LEVEL_Unmarshal(&data->EPSeedCompatLevel,
+                                             buffer, size, "EPSeed");
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = SEED_COMPAT_LEVEL_Unmarshal(&data->SPSeedCompatLevel,
+                                             buffer, size, "SPSeed");
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            rc = SEED_COMPAT_LEVEL_Unmarshal(&data->PPSeedCompatLevel,
+                                             buffer, size, "PPSeed");
+        }
+
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "PERSISTENT DATA", "version 5 or later");
         /* future versions nest-append here */
     }
 
