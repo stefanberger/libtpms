@@ -66,6 +66,28 @@
 
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
+TPM_RC
+OpenSSLCryptGenerateKeyDes(
+                           TPMT_SENSITIVE *sensitive    // OUT: sensitive area
+                          )
+{
+    DES_cblock *key;
+    size_t      offset;
+    size_t      limit;
+
+    limit = MIN(sizeof(sensitive->sensitive.sym.t.buffer),
+                sensitive->sensitive.sym.t.size);
+    limit = TPM2_ROUNDUP(limit, sizeof(*key));
+    pAssert(limit < sizeof(sensitive->sensitive.sym.t.buffer));
+
+    for (offset = 0; offset < limit; offset += sizeof(*key)) {
+        key = (DES_cblock *)&sensitive->sensitive.sym.t.buffer[offset];
+        if (DES_random_key(key) != 1)
+            return TPM_RC_NO_RESULT;
+    }
+    return TPM_RC_SUCCESS;
+}
+
 evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
                      UINT16        keySizeInBits,   // IN
                      TPM_ALG_ID    mode,            // IN

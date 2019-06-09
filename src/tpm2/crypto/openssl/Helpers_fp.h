@@ -61,6 +61,12 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
+#if USE_OPENSSL_FUNCTIONS_SYMMETRIC
+TPM_RC
+OpenSSLCryptGenerateKeyDes(
+                           TPMT_SENSITIVE *sensitive    // OUT: sensitive area
+                          );
+
 typedef const EVP_CIPHER *(*evpfunc)(void);
 
 evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
@@ -70,6 +76,7 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
                      BYTE         *keyToUse,        // OUT same as key or stretched key
                      UINT16       *keyToUseLen      // IN/OUT
                      );
+#endif
 
 #if USE_OPENSSL_FUNCTIONS_EC
 BOOL OpenSSLEccGetPrivate(
