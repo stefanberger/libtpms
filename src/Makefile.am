@@ -323,7 +323,6 @@ noinst_HEADERS += \
 	tpm2/CreateLoaded_fp.h \
 	tpm2/CreatePrimary_fp.h \
 	tpm2/CryptSelfTest_fp.h \
-	tpm2/CryptUtil_fp.h \
 	tpm2/DA_fp.h \
 	tpm2/DictionaryAttackLockReset_fp.h \
 	tpm2/DictionaryAttackParameters_fp.h \
