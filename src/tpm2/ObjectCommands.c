@@ -507,7 +507,8 @@ TPM2_CreateLoaded(
 						    &HierarchyGetPrimarySeed(in->parentHandle)->b,
 						    PRIMARY_OBJECT_CREATION,
 						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
-						    &in->inSensitive.sensitive.data.b);
+						    &in->inSensitive.sensitive.data.b,
+						    HierarchyGetPrimarySeedCompatLevel(in->parentHandle)); // libtpms added
 		    if (result != TPM_RC_SUCCESS)
 			return result;
 	        }

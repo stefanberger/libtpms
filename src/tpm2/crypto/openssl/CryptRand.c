@@ -600,7 +600,8 @@ DRBG_InstantiateSeeded(
 		       const TPM2B     *seed,          // IN: the seed to use
 		       const TPM2B     *purpose,       // IN: a label for the generation process.
 		       const TPM2B     *name,          // IN: name of the object
-		       const TPM2B     *additional     // IN: additional data
+		       const TPM2B     *additional,    // IN: additional data
+		       SEED_COMPAT_LEVEL seedCompatLevel // IN: compatibility level; libtpms added
 		       )
 {
     DF_STATE         dfState;
@@ -614,6 +615,7 @@ DRBG_InstantiateSeeded(
     // Initialize the DRBG state
     memset(drbgState, 0, sizeof(DRBG_STATE));
     drbgState->magic = DRBG_MAGIC;
+    drbgState->seedCompatLevel = seedCompatLevel; // libtpms added
     // Size all of the values
     totalInputSize = (seed != NULL) ? seed->size : 0;
     totalInputSize += (purpose != NULL) ? purpose->size : 0;
@@ -669,6 +671,28 @@ CryptRandInit(
 #endif
     return DRBG_SelfTest();
 }
+// libtpms added begin
+LIB_EXPORT SEED_COMPAT_LEVEL
+DRBG_GetSeedCompatLevel(
+               RAND_STATE     *state
+	      )
+{
+    if(state == NULL)
+        {
+	    return SEED_COMPAT_LEVEL_LAST;
+	}
+    else if(state->drbg.magic == DRBG_MAGIC)
+	{
+	    DRBG_STATE          *drbgState = (DRBG_STATE *)state;
+
+	    return drbgState->seedCompatLevel;
+	}
+    else
+	{
+	    return SEED_COMPAT_LEVEL_LAST;
+	}
+}
+// libtpms added end
 /* 10.2.16.5 DRBG_Generate() */
 /* This function generates a random sequence according SP800-90A. If random is not NULL, then
    randomSize bytes of random values are generated. If random is NULL or randomSize is zero, then
