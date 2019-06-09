@@ -480,7 +480,8 @@ TPM2_CreateLoaded(
 				      &parent->sensitive.sensitive.bits.b,
 				      &labelContext.label.b,
 				      &labelContext.context.b,
-				      TPM_MAX_DERIVATION_BITS);
+				      TPM_MAX_DERIVATION_BITS,
+				      COMPAT_LEVEL_LAST);       // libtpms added
 	    // Clear the sensitive size so that the creation functions will not try
 	    // to use this value.
 	    in->inSensitive.sensitive.data.t.size = 0;
@@ -507,7 +508,8 @@ TPM2_CreateLoaded(
 						    &HierarchyGetPrimarySeed(in->parentHandle)->b,
 						    PRIMARY_OBJECT_CREATION,
 						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
-						    &in->inSensitive.sensitive.data.b);
+						    &in->inSensitive.sensitive.data.b,
+						    HierarchyGetPrimarySeedCompatLevel(in->parentHandle)); // libtpms added
 		    if (result != TPM_RC_SUCCESS)
 			return result;
 	        }
