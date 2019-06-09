@@ -78,6 +78,12 @@ TPM2B_SEED *
 HierarchyGetPrimarySeed(
 			TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy
 			);
+// libtpms added begin
+SEED_COMPAT_LEVEL
+HierarchyGetPrimarySeedCompatLevel(
+                                   TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
+                                   );
+// libtpms added end
 BOOL
 HierarchyIsEnabled(
 		   TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy

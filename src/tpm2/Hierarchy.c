@@ -86,6 +86,9 @@ HierarchyPreInstall_Init(
 #endif
     CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
     CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
+    gp.EPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added begin
+    gp.SPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;
+    gp.PPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added end
     // Initialize owner, endorsement and lockout authorization
     gp.ownerAuth.t.size = 0;
     gp.endorsementAuth.t.size = 0;
@@ -109,6 +112,9 @@ HierarchyPreInstall_Init(
     NV_SYNC_PERSISTENT(EPSeed);
     NV_SYNC_PERSISTENT(SPSeed);
     NV_SYNC_PERSISTENT(PPSeed);
+    NV_SYNC_PERSISTENT(EPSeedCompatLevel);  // libtpms added begin
+    NV_SYNC_PERSISTENT(SPSeedCompatLevel);
+    NV_SYNC_PERSISTENT(PPSeedCompatLevel);  // libtpms added end
     NV_SYNC_PERSISTENT(ownerAuth);
     NV_SYNC_PERSISTENT(endorsementAuth);
     NV_SYNC_PERSISTENT(lockoutAuth);
@@ -207,6 +213,31 @@ HierarchyGetPrimarySeed(
 	}
     return seed;
 }
+// libtpms added begin
+SEED_COMPAT_LEVEL
+HierarchyGetPrimarySeedCompatLevel(
+				   TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
+			           )
+{
+    switch(hierarchy)
+	{
+	  case TPM_RH_PLATFORM:
+	    return gp.PPSeedCompatLevel;
+	    break;
+	  case TPM_RH_OWNER:
+	    return gp.SPSeedCompatLevel;
+	    break;
+	  case TPM_RH_ENDORSEMENT:
+	    return gp.EPSeedCompatLevel;
+	    break;
+	  case TPM_RH_NULL:
+	    return SEED_COMPAT_LEVEL_LAST;
+	  default:
+	    FAIL(FATAL_ERROR_INTERNAL);
+	    break;
+	}
+}
+// libtpms added end
 /* 8.3.3.5 HierarchyIsEnabled() */
 /* This function checks to see if a hierarchy is enabled. */
 /* NOTE: The TPM_RH_NULL hierarchy is always enabled. */
