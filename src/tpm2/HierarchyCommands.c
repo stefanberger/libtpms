@@ -291,6 +291,7 @@ TPM2_ChangePPS(
     // Internal Data Update
     // Reset platform hierarchy seed from RNG
     CryptRandomGenerate(sizeof(gp.PPSeed.t.buffer), gp.PPSeed.t.buffer);
+    gp.PPSeedCompatLevel = COMPAT_LEVEL_LAST; // libtpms added
     // Create a new phProof value from RNG to prevent the saved platform
     // hierarchy contexts being loaded
     CryptRandomGenerate(sizeof(gp.phProof.t.buffer), gp.phProof.t.buffer);
@@ -335,6 +336,7 @@ TPM2_ChangeEPS(
     // Internal Data Update
     // Reset endorsement hierarchy seed from RNG
     CryptRandomGenerate(sizeof(gp.EPSeed.t.buffer), gp.EPSeed.t.buffer);
+    gp.EPSeedCompatLevel = COMPAT_LEVEL_LAST; // libtpms added
     // Create new ehProof value from RNG
     CryptRandomGenerate(sizeof(gp.ehProof.t.buffer), gp.ehProof.t.buffer);
     // Enable endorsement hierarchy
@@ -382,6 +384,7 @@ TPM2_Clear(
     // Internal Data Update
     // Reset storage hierarchy seed from RNG
     CryptRandomGenerate(sizeof(gp.SPSeed.t.buffer), gp.SPSeed.t.buffer);
+    gp.SPSeedCompatLevel = COMPAT_LEVEL_LAST; // libtpms added
     // Create new shProof and ehProof value from RNG
     CryptRandomGenerate(sizeof(gp.shProof.t.buffer), gp.shProof.t.buffer);
     CryptRandomGenerate(sizeof(gp.ehProof.t.buffer), gp.ehProof.t.buffer);

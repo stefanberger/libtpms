@@ -482,6 +482,7 @@ noinst_HEADERS += \
 	tpm2/VerifySignature_fp.h \
 	tpm2/ZGen_2Phase_fp.h \
 	\
+	tpm2/BackwardsCompatibility.h \
 	tpm2/LibtpmsCallbacks.h \
 	tpm2/NVMarshal.h \
 	tpm2/StateMarshal.h \
