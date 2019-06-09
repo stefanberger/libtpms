@@ -64,6 +64,7 @@
 /* This file contains the extra functions required for TDES. */
 /* 10.2.9.2 Includes, Defines, and Typedefs */
 #include "Tpm.h"
+#include "Helpers_fp.h"                // libtpms added
 #if ALG_TDES
 #define DES_NUM_WEAK 64
 const UINT64 DesWeakKeys[DES_NUM_WEAK] = {
@@ -165,6 +166,10 @@ CryptGenerateKeyDes(
     // number of bits.
     sensitive->sensitive.sym.t.size =
 	BITS_TO_BYTES(publicArea->parameters.symDetail.sym.keyBits.sym);
+#if USE_OPENSSL_FUNCTIONS_SYMMETRIC    // libtpms added begin
+    if (rand == NULL)
+        return OpenSSLCryptGenerateKeyDes(sensitive);
+#endif                                 // libtpms added end
     do
 	{
 	    BYTE                    *pK = sensitive->sensitive.sym.t.buffer;
