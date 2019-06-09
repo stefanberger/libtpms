@@ -114,7 +114,8 @@ DRBG_InstantiateSeededKdf(
 			  TPM2B           *seed,          // IN: the seed to use
 			  const TPM2B     *label,         // IN: a label for the generation process.
 			  TPM2B           *context,       // IN: the context value
-			  UINT32           limit          // IN: Maximum number of bits from the KDF
+			  UINT32           limit,         // IN: Maximum number of bits from the KDF
+			  COMPAT_LEVEL     compatLevel    // IN: compatibility level (associated with seeds); libtpms added
 			  );
 LIB_EXPORT void
 DRBG_AdditionalData(
@@ -127,7 +128,8 @@ DRBG_InstantiateSeeded(
 		       const TPM2B     *seed,          // IN: the seed to use
 		       const TPM2B     *purpose,       // IN: a label for the generation process.
 		       const TPM2B     *name,          // IN: name of the object
-		       const TPM2B     *additional     // IN: additional data
+		       const TPM2B     *additional,    // IN: additional data
+		       COMPAT_LEVEL     compatLevel    // IN: compatibility level (associated with seed); libtpms added
 		       );
 LIB_EXPORT BOOL
 CryptRandStartup(
@@ -143,6 +145,12 @@ DRBG_Generate(
 	      BYTE            *random,        // OUT: buffer to receive the random values
 	      UINT16           randomSize     // IN: the number of bytes to generate
 	      );
+// libtpms added begin
+LIB_EXPORT COMPAT_LEVEL
+DRBG_GetCompatLevel(
+               RAND_STATE     *state          // IN
+              );
+// libtpms added end
 LIB_EXPORT BOOL
 DRBG_Instantiate(
 		 DRBG_STATE      *drbgState,         // OUT: the instantiated value

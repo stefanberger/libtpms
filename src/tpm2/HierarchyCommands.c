@@ -103,7 +103,8 @@ TPM2_CreatePrimary(
 			   &HierarchyGetPrimarySeed(in->primaryHandle)->b,
 			   PRIMARY_OBJECT_CREATION,
 			   (TPM2B *)PublicMarshalAndComputeName(publicArea, &name),
-			   &in->inSensitive.sensitive.data.b);
+			   &in->inSensitive.sensitive.data.b,
+			   HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
     newObject->attributes.primary = SET;
     if(in->primaryHandle == TPM_RH_ENDORSEMENT)
 	newObject->attributes.epsHierarchy = SET;
