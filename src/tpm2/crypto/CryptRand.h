@@ -138,6 +138,7 @@ typedef union
 	UINT64      reseedCounter;
 	UINT32      magic;
 	DRBG_SEED   seed; // contains the key and IV for the counter mode DRBG
+	SEED_COMPAT_LEVEL seedCompatLevel;   // libtpms added: the compatibility level for keeping backwards compatibility
 	UINT32      lastValue[4];   // used when the TPM does continuous self-test
 	// for FIPS compliance of DRBG
     } DRBG_STATE, *pDRBG_STATE;
