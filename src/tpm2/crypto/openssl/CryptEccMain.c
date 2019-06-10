@@ -584,8 +584,8 @@ BnEccGetPrivate(
     BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
     BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
 
-    if (rand == NULL)
-        return OpenSSLEccGetPrivate(dOut, G);
+    if (rand == NULL || DRBG_GetCompatLevel(rand) == COMPAT_LEVEL_OPENSSL)
+        return OpenSSLEccGetPrivate(dOut, G, rand);
 
     //
     OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);

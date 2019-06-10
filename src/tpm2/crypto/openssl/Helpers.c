@@ -185,7 +185,8 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 BOOL
 OpenSSLEccGetPrivate(
                      bigNum             dOut,  // OUT: the qualified random value
-                     const EC_GROUP    *G      // IN:  the EC_GROUP to use
+                     const EC_GROUP    *G,     // IN:  the EC_GROUP to use
+                     RAND_STATE        *rand   // IN: state for DRBG
                     )
 {
     BOOL           OK = FALSE;
@@ -193,6 +194,9 @@ OpenSSLEccGetPrivate(
     EC_KEY        *eckey = EC_KEY_new();
 
     pAssert(G != NULL);
+
+    if (rand != NULL)
+        pAssert(FALSE);  // FIXME: Use rand's KDF for key generation
 
     if (!eckey)
         return FALSE;

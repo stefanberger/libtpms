@@ -74,7 +74,8 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 #if USE_OPENSSL_FUNCTIONS_EC
 BOOL OpenSSLEccGetPrivate(
                           bigNum             dOut,   // OUT: the qualified random value
-                          const EC_GROUP    *G       // IN:  the EC_GROUP to use
+                          const EC_GROUP    *G,      // IN:  the EC_GROUP to use
+                          RAND_STATE        *rand    // IN:  state for DRBG
                          );
 #endif
 
