@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1272 2018-07-20 17:46:57Z kgoldman $		*/
+/*            $Id: Object.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -88,7 +88,7 @@ ObjectSetInUse(
 }
 /* 8.6.3.3 ObjectStartup() */
 /* This function is called at TPM2_Startup() to initialize the object subsystem. */
-void
+BOOL
 ObjectStartup(
 	      void
 	      )
@@ -100,7 +100,7 @@ ObjectStartup(
 	    //Set the slot to not occupied
 	    ObjectFlush(&s_objects[i]);
 	}
-    return;
+    return TRUE;
 }
 /* 8.6.3.4 ObjectCleanupEvict() */
 /* In this implementation, a persistent object is moved from NV into an object slot for
