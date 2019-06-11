@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,9 +55,11 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
+
+/* 5.19	TpmBuildSwitches.h */
 
 /* This file contains the build switches. This contains switches for multiple versions of the
    crypto-library so some may not apply to your environment. */
@@ -80,6 +82,14 @@
 #define YES 1
 #undef NO
 #define NO 0
+
+/* Allow the command line to specify a profile file. E.g., PROFILE=/the/profile.h */
+
+#ifdef PROFILE
+#   define PROFILE_QUOTE(a) #a
+#   define PROFILE_INCLUDE(a) PROFILE_QUOTE(a)
+#   include PROFILE_INCLUDE(PROFILE)
+#endif
 
 // Need an unambiguous definition for DEBUG. Don't change this
 #ifndef DEBUG
