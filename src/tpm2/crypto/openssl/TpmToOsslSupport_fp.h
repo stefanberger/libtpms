@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Initialization of the Interface to the OpenSSL Library		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: TpmToOsslSupport_fp.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -70,6 +70,14 @@ void
 OsslContextLeave(
 		 BN_CTX          *context
 		 );
+BN_CTX *
+OsslPushContext(
+		BN_CTX          *CTX
+		);
+void
+OsslPopContext(
+	       BN_CTX          *CTX
+	       );
 
 
 #endif
