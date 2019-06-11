@@ -120,6 +120,7 @@ typedef union
     BYTE         test[sizeof(TEST_RESPONSE)];
     BYTE         cap[sizeof(CAPABILITY_RESPONSE)];
 } RESPONSES;
+
 /* Buffer to hold the responses. This may be a little larger than required due to padding that a
    compiler might add. */
 /* NOTE: This is not in Global.c because of the specialized data definitions above. Since the data
@@ -129,7 +130,9 @@ typedef union
 #ifndef __IGNORE_STATE__ // Don't define this value
 static BYTE response[sizeof(RESPONSES)];
 #endif
+
 /* 9.17.3 Local Functions */
+
 /* 9.17.3.1 MarshalUint16() */
 /* Function to marshal a 16 bit value to the output buffer. */
 static INT32
@@ -150,27 +153,38 @@ MarshalUint32(
 {
     return UINT32_Marshal(&integer, buffer, NULL);
 }
-/* 9.17.3.3 UnmarshalHeader() */
-/* function to unmarshal the 10-byte command header. */
-static BOOL
-UnmarshalHeader(
-		HEADER          *header,
-		BYTE            **buffer,
-		INT32           *size
-		)
+
+/* 9.17.3.3	Unmarshal32() */
+static BOOL Unmarshal32(
+			UINT32          *target,
+			BYTE           **buffer,
+			INT32           *size
+			)
 {
-    UINT32 usize;
-    TPM_RC ucode;
-    if(UINT16_Unmarshal(&header->tag, buffer, size) != TPM_RC_SUCCESS
-       || UINT32_Unmarshal(&usize, buffer, size) != TPM_RC_SUCCESS
-       || UINT32_Unmarshal(&ucode, buffer, size) != TPM_RC_SUCCESS)
+    if((*size -= 4) < 0)
 	return FALSE;
-    header->size = usize;
-    header->code = ucode;
+    *target = BYTE_ARRAY_TO_UINT32(*buffer);
+    *buffer += 4;
     return TRUE;
 }
+
+/* 9.17.3.4	Unmarshal16() */
+static BOOL Unmarshal16(
+			UINT16          *target,
+			BYTE           **buffer,
+			INT32           *size
+			)
+{
+    if((*size -= 2) < 0)
+	return FALSE;
+    *target = BYTE_ARRAY_TO_UINT16(*buffer);
+    *buffer += 2;
+    return TRUE;
+}
+
+/* 9.17.4Public Functions */
 #if 0 /* libtpms added */
-/* 9.17.4 Public Functions */
+/* 9.17.4Public Functions */
 /* 9.17.4.1 SetForceFailureMode() */
 /* This function is called by the simulator to enable failure mode testing. */
 LIB_EXPORT void
@@ -280,19 +294,22 @@ TpmFailureMode(
 	       unsigned char   **outResponse       // OUT: response buffer
 	       )
 {
-    BYTE            *buffer;
     UINT32           marshalSize;
     UINT32           capability;
     HEADER           header;    // unmarshaled command header
     UINT32           pt;    // unmarshaled property type
     UINT32           count; // unmarshaled property count
+    UINT8           *buffer = inRequest;
+    INT32            size = inRequestSize;
+
     // If there is no command buffer, then just return TPM_RC_FAILURE
     if(inRequestSize == 0 || inRequest == NULL)
 	goto FailureModeReturn;
     // If the header is not correct for TPM2_GetCapability() or
     // TPM2_GetTestResult() then just return the in failure mode response;
-    buffer = inRequest;
-    if(!UnmarshalHeader(&header, &inRequest, (INT32 *)&inRequestSize))
+    if(! (Unmarshal16(&header.tag,  &buffer, &size)
+	  && Unmarshal32(&header.size, &buffer, &size)
+	  && Unmarshal32(&header.code, &buffer, &size)))
 	goto FailureModeReturn;
     if(header.tag != TPM_ST_NO_SESSIONS
        || header.size < 10)
@@ -318,13 +335,10 @@ TpmFailureMode(
 	    // returned for the capability, property, and count
 	    if(header.size != (10 + (3 * sizeof(UINT32)))
 	       // also verify that this is requesting TPM properties
-	       || TPM_RC_SUCCESS != UINT32_Unmarshal(&capability, &inRequest,
-						     (INT32 *)&inRequestSize)
+	       || !Unmarshal32(&capability, &buffer, &size)
 	       || capability != TPM_CAP_TPM_PROPERTIES
-	       || TPM_RC_SUCCESS != UINT32_Unmarshal(&pt, &inRequest,
-						     (INT32 *)&inRequestSize)
-	       || TPM_RC_SUCCESS != UINT32_Unmarshal(&count, &inRequest,
-						     (INT32 *)&inRequestSize))
+	       || !Unmarshal32(&pt, &buffer, &size)
+	       || !Unmarshal32(&count, &buffer, &size))
 		goto FailureModeReturn;
 	    // If in failure mode because of an unrecoverable read error, and the
 	    // property is 0 and the count is 0, then this is an indication to
