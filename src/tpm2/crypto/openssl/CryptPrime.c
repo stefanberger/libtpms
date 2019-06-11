@@ -127,7 +127,7 @@ IsPrimeInt(
 	}
     return TRUE;
 }
-/* 10.2.16.1.3 BnIsPrime() */
+/* 10.2.16.1.3 BnIsProbablyPrime() */
 /* This function is used when the key sieve is not implemented. This function Will try to eliminate
    some of the obvious things before going on to perform MillerRabin() as a final verification of
    primeness. */
@@ -195,10 +195,12 @@ MillerRabin(
     int              iterations = MillerRabinRounds(BnSizeInBits(bnW));
     //
     INSTRUMENT_INC(MillerRabinTrials[PrimeIndex]);
+    
     pAssert(bnW->size > 1);
     // Let a be the largest integer such that 2^a divides w1.
     BnSubWord(bnWm1, bnW, 1);
     pAssert(bnWm1->size != 0);
+    
     // Since w is odd (w-1) is even so start at bit number 1 rather than 0
     // Get the number of bits in bnWm1 so that it doesn't have to be recomputed
     // on each iteration.
@@ -217,16 +219,17 @@ MillerRabin(
 	{
 	    // 4.1 Obtain a string b of wlen bits from an RBG.
 	    // Ensure that 1 < b < w1.
-	    do
-		{
-		    BnGetRandomBits(bnB, wLen, rand);
-		    // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
-		} while((BnUnsignedCmpWord(bnB, 1) <= 0)
-			|| (BnUnsignedCmp(bnB, bnWm1) >= 0));
+	    // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
+	    while(BnGetRandomBits(bnB, wLen, rand) && ((BnUnsignedCmpWord(bnB, 1) <= 0)
+						       || (BnUnsignedCmp(bnB, bnWm1) >= 0)));
+	    if(g_inFailureMode)
+		return FALSE;
+	    
 	    // 4.3 z = b^m mod w.
 	    // if ModExp fails, then say this is not
 	    // prime and bail out.
 	    BnModExp(bnZ, bnB, bnM, bnW);
+	    
 	    // 4.4 If ((z == 1) or (z = w == 1)), then go to step 4.7.
 	    if((BnUnsignedCmpWord(bnZ, 1) == 0)
 	       || (BnUnsignedCmp(bnZ, bnWm1) == 0))
@@ -285,7 +288,7 @@ RsaCheckPrime(
 	// 0 != (p - 1) mod e
 	BnSubWord(prime, prime, 2);
     if(BnIsProbablyPrime(prime, rand) == 0)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_RETURN(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
  Exit:
     return retVal;
 #else
