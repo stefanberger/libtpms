@@ -341,15 +341,20 @@ _plat__NvIsDifferent(
 /* NOTE: A useful optimization would be for this code to compare the current contents of NV with the
    local copy and note the blocks that have changed. Then only write those blocks when
    _plat__NvCommit() is called. */
-LIB_EXPORT void
+
+LIB_EXPORT BOOL
 _plat__NvMemoryWrite(
 		     unsigned int     startOffset,   // IN: write start
 		     unsigned int     size,          // IN: size of bytes to write
 		     void            *data           // OUT: data buffer
 		     )
 {
-    assert(startOffset + size <= NV_MEMORY_SIZE);
-    memcpy(&s_NV[startOffset], data, size);    // Copy the data to the NV image
+    if(startOffset + size <= NV_MEMORY_SIZE)
+	{
+	    memcpy(&s_NV[startOffset], data, size);     // Copy the data to the NV image
+	    return TRUE;
+	}
+    return FALSE;
 }
 /* C.6.3.11. _plat__NvMemoryClear() */
 /* Function is used to set a range of NV memory bytes to an implementation-dependent value. The
