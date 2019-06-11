@@ -3,7 +3,7 @@
 /*		Structures and data definitions for the symmetric tests		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricTest.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: SymmetricTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,18 +55,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
+
+/* 10.1.11 SymmetricTest.h */
+
+/* 10.1.11.1	Introduction */
 
 /* This file contains the structures and data definitions for the symmetric tests. This file
    references the header file that contains the actual test vectors. This organization was chosen so
    that the program that is used to generate the test vector values does not have to also
    re-generate this data. */
 
-/* 10.1.11 SymmetricTest.h */
 #ifndef     SELF_TEST_DATA
-#error  "This file many only be included in AlgorithmTests.c"
+#error  "This file may only be included in AlgorithmTests.c"
 #endif
 #ifndef     _SYMMETRIC_TEST_H
 #define     _SYMMETRIC_TEST_H
@@ -74,60 +77,47 @@
 
 /* 10.1.11.2 Symmetric Test Structures */
 
-const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS] = {
-#undef  COMMA
-#if AES_128
+const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS + 1] = {
+#if ALG_AES && AES_128
     {ALG_AES_VALUE, 128, key_AES128, 16, sizeof(dataIn_AES128), dataIn_AES128,
      {dataOut_AES128_CTR, dataOut_AES128_OFB, dataOut_AES128_CBC,
-      dataOut_AES128_CFB, dataOut_AES128_ECB}}
-#   define COMMA ,
+      dataOut_AES128_CFB, dataOut_AES128_ECB}},
 #endif
-#if AES_192
-    COMMA
+#if ALG_AES && AES_192
     {ALG_AES_VALUE, 192, key_AES192, 16, sizeof(dataIn_AES192), dataIn_AES192,
      {dataOut_AES192_CTR, dataOut_AES192_OFB, dataOut_AES192_CBC,
-      dataOut_AES192_CFB, dataOut_AES192_ECB}}
-#   undef   COMMA
-#   define COMMA ,
+      dataOut_AES192_CFB, dataOut_AES192_ECB}},
 #endif
-#if AES_256
-    COMMA
+#if ALG_AES && AES_256
     {ALG_AES_VALUE, 256, key_AES256, 16, sizeof(dataIn_AES256), dataIn_AES256,
      {dataOut_AES256_CTR, dataOut_AES256_OFB, dataOut_AES256_CBC,
-      dataOut_AES256_CFB, dataOut_AES256_ECB}}
-#   undef  COMMA
-#   define COMMA ,
+      dataOut_AES256_CFB, dataOut_AES256_ECB}},
 #endif
-#if SM4_128
-    COMMA
+#if ALG_SM4 && SM4_128
     {ALG_SM4_VALUE, 128, key_SM4128, 16, sizeof(dataIn_SM4128), dataIn_SM4128,
      {dataOut_SM4128_CTR, dataOut_SM4128_OFB, dataOut_SM4128_CBC,
-      dataOut_SM4128_CFB, dataOut_AES128_ECB}}
+      dataOut_SM4128_CFB, dataOut_AES128_ECB}},
 #endif
 // libtpms added begin
-#if TDES_128
-    COMMA
+#if ALG_TDES && TDES_128
     {ALG_TDES_VALUE, 128, key_TDES128, 8, sizeof(dataIn_TDES128), dataIn_TDES128,
      {dataOut_TDES128_CTR, dataOut_TDES128_OFB, dataOut_TDES128_CBC,
-      dataOut_TDES128_CFB, dataOut_TDES128_ECB}}
-    COMMA
+      dataOut_TDES128_CFB, dataOut_TDES128_ECB}},
     {ALG_TDES_VALUE, 128, key_TDES128, 8, sizeof(dataInShort_TDES128), dataInShort_TDES128,
      {NULL, dataOutShort_TDES128_OFB, NULL,
-      dataOutShort_TDES128_CFB, NULL}}
+      dataOutShort_TDES128_CFB, NULL}},
 #endif
-#if TDES_192
-    COMMA
+#if ALG_TDES && TDES_192
     {ALG_TDES_VALUE, 192, key_TDES192, 8, sizeof(dataIn_TDES192), dataIn_TDES192,
      {dataOut_TDES192_CTR, dataOut_TDES192_OFB, dataOut_TDES192_CBC,
-      dataOut_TDES192_CFB, dataOut_TDES192_ECB}}
-    COMMA
+      dataOut_TDES192_CFB, dataOut_TDES192_ECB}},
     {ALG_TDES_VALUE, 192, key_TDES192, 8, sizeof(dataInShort_TDES192), dataInShort_TDES192,
      {NULL, dataOutShort_TDES192_OFB, NULL,
-      dataOutShort_TDES192_CFB, NULL}}
+      dataOutShort_TDES192_CFB, NULL}},
 #endif
 // libtpms added end
+    {0}
 };
-#undef COMMA
 
 #endif  // _SYMMETRIC_TEST_H
 
