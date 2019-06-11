@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		Initialization of the Interface to the OpenSSL Library.	   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport.c 1314 2018-08-28 14:25:12Z kgoldman $			*/
+/*            $Id: TpmToOsslSupport.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 /* B.2.3.3. TpmToOsslSupport.c */
 /* B.2.3.3.1. Introduction */
-/* The functions in this file are used for initialization of the interface to the OpenSSL()
+/* The functions in this file are used for initialization of the interface to the OpenSSL
    library. */
 /* B.2.3.3.2. Defines and Includes */
 #include "Tpm.h"
@@ -81,8 +81,8 @@ SupportLibInit(
     return TRUE;
 }
 /* B.2.3.3.2.2. OsslContextEnter() */
-/* This function is used to initialize an OpenSSL() context at the start of a function that will
-   call to an OpenSSL() math function. */
+/* This function is used to initialize an OpenSSL context at the start of a function that will
+   call to an OpenSSL math function. */
 BN_CTX *
 OsslContextEnter(
 		 void

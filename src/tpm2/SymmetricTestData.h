@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			 Vector for testing Either Encrypt or Decrypt    	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricTestData.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: SymmetricTestData.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,12 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef SYMMETRICTESTDATA_H
 #define SYMMETRICTESTDATA_H
-
 
 /* 10.1.10 SymmetricTestData.h */
 /* This is a vector for testing either encrypt or decrypt. The premise for decrypt is that the IV
