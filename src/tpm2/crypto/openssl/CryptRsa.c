@@ -489,6 +489,28 @@ RSAES_Decode(
     memcpy(message->buffer, &coded->buffer[pSize], coded->size - pSize);
     return TPM_RC_SUCCESS;
 }
+/* 10.2.17.4.13	CryptRsaPssSaltSize() */
+/* This function computes the salt size used in PSS. It is broken out so that the X509 code can get
+   the same value that is used by the encoding function in this module. */
+INT16
+CryptRsaPssSaltSize(
+    INT16              hashSize,
+    INT16               outSize
+)
+{
+    INT16               saltSize;
+    //
+    // (Mask Length) = (outSize - hashSize - 1);
+    // Max saltSize is (Mask Length) - 1
+    saltSize = (outSize - hashSize - 1) - 1;
+    // Use the maximum salt size allowed by FIPS 186-4
+    if (saltSize > hashSize)
+	saltSize = hashSize;
+    else if (saltSize < 0)
+	saltSize = 0;
+    return saltSize;
+}
+
 /* 10.2.17.4.9 PssEncode() */
 /* This function creates an encoded block of data that is the size of modulus. The function uses the
    maximum salt size that will fit in the encoded block. */
