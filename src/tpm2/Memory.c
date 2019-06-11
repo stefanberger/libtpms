@@ -3,7 +3,7 @@
 /*		 Miscellaneous Memory Manipulation Routines    			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Memory.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
+/*            $Id: Memory.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -260,13 +260,10 @@ ByteArrayToUint16(
 		  BYTE                *a
 		  )
 {
-    UINT16      retVal;
-    retVal  = a[0]; retVal <<= 8;
-    retVal += a[1];
-    return retVal;
+    return ((UINT16)a[0] << 8) + a[1];
 }
 
-/* 9.12.3.12 ByteArrayToUint32() */
+/* 9.12.3.13 ByteArrayToUint32() */
 /* Function to write an integer to a byte array */
 
 UINT32
@@ -274,15 +271,10 @@ ByteArrayToUint32(
 		  BYTE                *a
 		  )
 {
-    UINT32      retVal;
-    retVal  = a[0]; retVal <<= 8;
-    retVal += a[1]; retVal <<= 8;
-    retVal += a[2]; retVal <<= 8;
-    retVal += a[3];
-    return retVal;
+    return (UINT32)((((((UINT32)a[0] << 8) + a[1]) << 8) + (UINT32)a[2]) << 8) + a[3];
 }
 
-/* 9.12.3.13 ByteArrayToUint64() */
+/* 9.12.3.14 ByteArrayToUint64() */
 /* Function to write an integer to a byte array */
 
 UINT64
@@ -290,15 +282,6 @@ ByteArrayToUint64(
 		  BYTE                *a
 		  )
 {
-    UINT64      retVal;
-    retVal  = a[0]; retVal <<= 8;
-    retVal += a[1]; retVal <<= 8;
-    retVal += a[2]; retVal <<= 8;
-    retVal += a[3]; retVal <<= 8;
-    retVal += a[4]; retVal <<= 8;
-    retVal += a[5]; retVal <<= 8;
-    retVal += a[6]; retVal <<= 8;
-    retVal += a[7];
-    return retVal;
+    return (((UINT64)BYTE_ARRAY_TO_UINT32(a)) << 32) + BYTE_ARRAY_TO_UINT32(&a[4]);
 }
 
