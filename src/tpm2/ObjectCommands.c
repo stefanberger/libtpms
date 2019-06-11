@@ -3,7 +3,7 @@
 /*			     Object Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ObjectCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: ObjectCommands.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -503,12 +503,13 @@ TPM2_CreateLoaded(
 	                newObject->attributes.epsHierarchy = SET;
 	            // If so, use the primary seed and the digest of the template
 	            // to seed the DRBG
-		    DRBG_InstantiateSeeded((DRBG_STATE *)rand,
-					   &HierarchyGetPrimarySeed(in->parentHandle)->b,
-					   PRIMARY_OBJECT_CREATION,
-					   (TPM2B *)PublicMarshalAndComputeName(publicArea,
-										&name),
-					   &in->inSensitive.sensitive.data.b);
+		    result = DRBG_InstantiateSeeded((DRBG_STATE *)rand,
+						    &HierarchyGetPrimarySeed(in->parentHandle)->b,
+						    PRIMARY_OBJECT_CREATION,
+						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
+						    &in->inSensitive.sensitive.data.b);
+		    if (result != TPM_RC_SUCCESS)
+			return result;
 	        }
 	    else
 		// This is an ordinary object so use the normal random number generator
