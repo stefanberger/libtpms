@@ -207,24 +207,26 @@
 #endif
 #if ALG_RSA
 #define     RSA_SECURITY_STRENGTH (MAX_RSA_KEY_BITS >= 15360 ? 256 :	\
-				   (MAX_RSA_KEY_BITS >=  7680 ? 192 :	\
-				    (MAX_RSA_KEY_BITS >=  3072 ? 128 :	\
-				     (MAX_RSA_KEY_BITS >=  2048 ? 112 : \
-				      (MAX_RSA_KEY_BITS >=  1024 ?  80 :  0)))))
+				  (MAX_RSA_KEY_BITS >=  7680 ? 192 :	\
+				  (MAX_RSA_KEY_BITS >=  3072 ? 128 :	\
+				  (MAX_RSA_KEY_BITS >=  2048 ? 112 :    \
+				  (MAX_RSA_KEY_BITS >=  1024 ?  80 :  0)))))
 #else
 #define     RSA_SECURITY_STRENGTH   0
 #endif // ALG_RSA
 #if ALG_ECC
 #define     ECC_SECURITY_STRENGTH (MAX_ECC_KEY_BITS >= 521 ? 256 :	\
-				   (MAX_ECC_KEY_BITS >= 384 ? 192 :	\
-				    (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
+				  (MAX_ECC_KEY_BITS >= 384 ? 192 :	\
+				  (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
 #else
 #define     ECC_SECURITY_STRENGTH   0
 #endif // ALG_ECC
 #define     MAX_ASYM_SECURITY_STRENGTH					\
     MAX(RSA_SECURITY_STRENGTH, ECC_SECURITY_STRENGTH)
 #define     MAX_HASH_SECURITY_STRENGTH  ((CONTEXT_INTEGRITY_HASH_SIZE * 8) / 2)
+
 /*     Unless some algorithm is broken... */
+
 #define     MAX_SYM_SECURITY_STRENGTH   MAX_SYM_KEY_BITS
 #define MAX_SECURITY_STRENGTH_BITS					\
     MAX(MAX_ASYM_SECURITY_STRENGTH,					\
@@ -256,6 +258,7 @@
 #       error  "Implementation.h specifies a non-compliant PRIMARY_SEED_SIZE"
 #   endif
 #endif	// !SKIP_PROOF_ERRORS
+
 /* If CONTEXT_ENCRYPT_ALG is defined, then the vendor is using the old style table */
 #ifndef CONTEXT_ENCRYPT_ALG
 #define CONTEXT_ENCRYPT_ALG             CONCAT(TPM_ALG_, CONTEXT_ENCRYPT_ALGORITHM)
