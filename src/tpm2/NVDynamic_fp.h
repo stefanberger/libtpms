@@ -3,7 +3,7 @@
 /*		Dynamic space for user defined NV 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVDynamic_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: NVDynamic_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -113,6 +113,14 @@ NvGetIndexData(
 	       UINT16           size,          // IN: size of NV data
 	       void            *data           // OUT: data buffer
 	       );
+void
+NvHashIndexData(
+		HASH_STATE          *hashState,     // IN: Initialized hash state
+		NV_INDEX            *nvIndex,       // IN: Index
+		NV_REF               locator,       // IN: where the data is located
+		UINT32               offset,        // IN: starting offset
+		UINT16               size           // IN: amount to hash
+		);
 UINT64
 NvGetUINT64Data(
 		NV_INDEX        *nvIndex,       // IN: the in RAM index descriptor

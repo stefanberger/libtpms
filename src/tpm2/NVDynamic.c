@@ -3,7 +3,7 @@
 /*		Dynamic space for user defined NV      				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVDynamic.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: NVDynamic.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -768,6 +768,42 @@ NvGetIndexData(
 	    NvRead(data, locator + sizeof(NV_INDEX) + offset, size);
 	}
     return;
+}
+/* 8.4.5.7	NvHashIndexData() */
+/* This function adds Index data to a hash. It does this in parts to avoid large stack buffers. */
+void
+NvHashIndexData(
+		HASH_STATE          *hashState,     // IN: Initialized hash state
+		NV_INDEX            *nvIndex,       // IN: Index
+		NV_REF               locator,       // IN: where the data is located
+		UINT32               offset,        // IN: starting offset
+		UINT16               size           // IN: amount to hash
+		)
+{
+#define BUFFER_SIZE     64
+    BYTE                 buffer[BUFFER_SIZE];
+    if (offset > nvIndex->publicArea.dataSize)
+	return;
+    // Make sure that we don't try to read off the end.
+    if ((offset + size) > nvIndex->publicArea.dataSize)
+	size = nvIndex->publicArea.dataSize - (UINT16)offset;
+#if BUFFER_SIZE >= MAX_NV_INDEX_SIZE
+    NvGetIndexData(nvIndex, locator, offset, size, buffer);
+    CryptDigestUpdate(hashState, size, buffer);
+#else
+    {
+	INT16                i;
+	UINT16               readSize;
+	//
+	for (i = size; i > 0; offset += readSize, i -= readSize)
+	    {
+		readSize = (i < BUFFER_SIZE) ? i : BUFFER_SIZE;
+		NvGetIndexData(nvIndex, locator, offset, readSize, buffer);
+		CryptDigestUpdate(hashState, readSize, buffer);
+	    }
+    }
+#endif // BUFFER_SIZE >= MAX_NV_INDEX_SIZE
+#undef  BUFFER_SIZE
 }
 /* 8.4.5.7 NvGetUINT64Data() */
 /* Get data in integer format of a bit or counter NV Index. */
