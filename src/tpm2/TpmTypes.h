@@ -1233,6 +1233,11 @@ typedef struct {
     UINT16                  offset;
     TPM2B_MAX_NV_BUFFER     nvContents;
 } TPMS_NV_CERTIFY_INFO;
+/* Table 125 - Definition of TPMS_NV_DIGEST_CERTIFY_INFO Structure <OUT> */
+typedef struct {
+    TPM2B_NAME		indexName;
+    TPM2B_DIGEST	nvDigest;
+} TPMS_NV_DIGEST_CERTIFY_INFO; 
 /* Table 2:121 - Definition of TPMI_ST_ATTEST Type  */
 typedef  TPM_ST             TPMI_ST_ATTEST;
 /* Table 2:122 - Definition of TPMU_ATTEST Union  */
@@ -1244,6 +1249,7 @@ typedef union {
     TPMS_SESSION_AUDIT_INFO    sessionAudit;
     TPMS_TIME_ATTEST_INFO      time;
     TPMS_NV_CERTIFY_INFO       nv;
+    TPMS_NV_DIGEST_CERTIFY_INFO	nvDigest;
 } TPMU_ATTEST;
 /* Table 2:123 - Definition of TPMS_ATTEST Structure  */
 typedef struct {
