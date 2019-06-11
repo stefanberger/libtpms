@@ -478,7 +478,7 @@ PCR_ClearAuth(
 }
 /* 8.7.3.15 PCRStartup() */
 /* This function initializes the PCR subsystem at TPM2_Startup(). */
-void
+BOOL
 PCRStartup(
 	   STARTUP_TYPE     type,          // IN: startup type
 	   BYTE             locality       // IN: startup locality
@@ -529,6 +529,8 @@ PCRStartup(
 				    pcrSavedData = GetSavedPcrPointer(
 								      gp.pcrAllocated.pcrSelections[j].hash,
 								      saveIndex);
+				    if(pcrSavedData == NULL)
+					return FALSE;
 				    MemoryCopy(pcrData, pcrSavedData, pcrSize);
 				}
 			    else
@@ -553,6 +555,7 @@ PCRStartup(
     // Reset authValues on TPM2_Startup(CLEAR)
     if(type != SU_RESUME)
 	PCR_ClearAuth();
+    return TRUE;
 }
 /* 8.7.3.16 PCRStateSave() */
 /* This function is used to save the PCR values that will be restored on TPM Resume. */
