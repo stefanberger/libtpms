@@ -3,7 +3,7 @@
 /*			    Manage the session context counter 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Session.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: Session.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -160,7 +160,7 @@ ContextIdSetOldest(
 }
 /* 8.9.4 Startup Function -- SessionStartup() */
 /* This function initializes the session subsystem on TPM2_Startup(). */
-void
+BOOL
 SessionStartup(
 	       STARTUP_TYPE     type
 	       )
@@ -202,7 +202,7 @@ SessionStartup(
 	    // Initialize oldest saved session
 	    s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
 	}
-    return;
+    return TRUE;
 }
 /* 8.9.5 Access Functions */
 /* 8.9.5.1 SessionIsLoaded() */
