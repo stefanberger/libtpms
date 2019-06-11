@@ -128,6 +128,12 @@ CryptRsaGenerateKey(
 		    RAND_STATE          *rand               // IN: if not NULL, the deterministic
 		    //     RNG state
 		    );
+INT16
+MakeDerTag(
+	   TPM_ALG_ID   hashAlg,
+	   INT16        sizeOfBuffer,
+	   BYTE        *buffer
+	   );
 
 
 #endif
