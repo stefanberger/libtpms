@@ -1481,7 +1481,7 @@ NvSetStartupAttributes(
 /* b) reset NV Index data that has TPMA_NV_CLEAR_STCLEAR SET; and */
 /* c) set the lower bits in orderly counters to 1 for a non-orderly startup */
 /* It is a prerequisite that NV be available for writing before this function is called. */
-void
+BOOL
 NvEntityStartup(
 		STARTUP_TYPE     type           // IN: start up type
 		)
@@ -1498,7 +1498,7 @@ NvEntityStartup(
     NvSetMaxCount(NvGetMaxCount());
     // If recovering from state save, do nothing else
     if(type == SU_RESUME)
-	return;
+	return TRUE;
     // Iterate all the NV Index to clear the locks
     while((currentAddr = NvNextIndex(&nvHandle, &iter)) != 0)
 	{
@@ -1532,7 +1532,7 @@ NvEntityStartup(
 		    UINT64_TO_BYTE_ARRAY(counter, currentRamAddr + sizeof(NV_RAM_HEADER));
 		}
 	}
-    return;
+    return TRUE;
 }
 /* 8.4.5.30 NvCapGetCounterAvail() */
 /* This function returns an estimate of the number of additional counter type NV Indexes that can be
