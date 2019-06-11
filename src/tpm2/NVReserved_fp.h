@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: NVReserved_fp.h 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -86,7 +86,7 @@ NvRead(
        UINT32           nvOffset,      // IN: offset in NV of value
        UINT32           size           // IN: size of the value to read
        );
-void
+BOOL
 NvWrite(
 	UINT32           nvOffset,      // IN: location in NV to receive data
 	UINT32           size,          // IN: size of the data to move
