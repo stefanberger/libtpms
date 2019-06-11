@@ -83,7 +83,8 @@ MemoryCopy(
 	   int          sSize
 	   )
 {
-    memmove(dest, src, sSize);
+    if (dest != src)
+	memmove(dest, src, sSize);
 }
 
 /* 9.12.3.2 MemoryEqual() */
