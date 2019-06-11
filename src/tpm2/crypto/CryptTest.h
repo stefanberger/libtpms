@@ -3,7 +3,7 @@
 /*			  constant definitions used for self-test.   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptTest.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
+/*            $Id: CryptTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -89,7 +89,5 @@ typedef struct
     UINT32      ecc;
 #endif
 } CRYPTO_SELF_TEST_STATE;
-/* This structure contains the cryptographic self-test state values. */
-extern CRYPTO_SELF_TEST_STATE   g_cryptoSelfTestState;
 #endif // _CRYPT_TEST_H
 
