@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Functions That Support Command Audit 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandAudit.c 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CommandAudit.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -92,7 +92,7 @@ CommandAuditPreInstall_Init(
 }
 /* 8.1.3.2 CommandAuditStartup() */
 /* This function clears the command audit digest on a TPM Reset. */
-void
+BOOL
 CommandAuditStartup(
 		    STARTUP_TYPE     type           // IN: start up type
 		    )
@@ -102,6 +102,7 @@ CommandAuditStartup(
 	    // Reset the digest size to initialize the digest
 	    gr.commandAuditDigest.t.size = 0;
 	}
+    return TRUE;
 }
 /* 8.1.3.3 CommandAuditSet() */
 /* This function will SET the audit flag for a command. This function will not SET the audit flag
