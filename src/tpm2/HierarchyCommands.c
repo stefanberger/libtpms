@@ -3,7 +3,7 @@
 /*			     Hierarchy Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HierarchyCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: HierarchyCommands.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -99,17 +99,20 @@ TPM2_CreatePrimary(
     // used as a random number generator during the object creation.
     // The caller does not know the seed values so the actual name does not have
     // to be over the input, it can be over the unmarshaled structure.
-    DRBG_InstantiateSeeded(&rand,
-			   &HierarchyGetPrimarySeed(in->primaryHandle)->b,
-			   PRIMARY_OBJECT_CREATION,
-			   (TPM2B *)PublicMarshalAndComputeName(publicArea, &name),
-			   &in->inSensitive.sensitive.data.b);
-    newObject->attributes.primary = SET;
-    if(in->primaryHandle == TPM_RH_ENDORSEMENT)
-	newObject->attributes.epsHierarchy = SET;
-    // Create the primary object.
-    result = CryptCreateObject(newObject, &in->inSensitive.sensitive,
-			       (RAND_STATE *)&rand);
+    result = DRBG_InstantiateSeeded(&rand,
+				    &HierarchyGetPrimarySeed(in->primaryHandle)->b,
+				    PRIMARY_OBJECT_CREATION,
+				    (TPM2B *)PublicMarshalAndComputeName(publicArea, &name),
+				    &in->inSensitive.sensitive.data.b);
+    if (result == TPM_RC_SUCCESS)
+	{
+	    newObject->attributes.primary = SET;
+	    if(in->primaryHandle == TPM_RH_ENDORSEMENT)
+		newObject->attributes.epsHierarchy = SET;
+	    // Create the primary object.
+	    result = CryptCreateObject(newObject, &in->inSensitive.sensitive,
+				       (RAND_STATE *)&rand);
+	}
     if(result != TPM_RC_SUCCESS)
 	return result;
     // Set the publicArea and name from the computed values
