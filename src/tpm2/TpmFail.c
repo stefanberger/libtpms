@@ -3,7 +3,7 @@
 /*			     Failure Mode Handling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmFail.c 1263 2018-07-12 13:56:36Z kgoldman $		*/
+/*            $Id: TpmFail.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -141,8 +141,11 @@ MarshalUint16(
 	      BYTE            **buffer
 	      )
 {
-    return UINT16_Marshal(&integer, buffer, NULL);
+    UINT16_TO_BYTE_ARRAY(integer, *buffer);
+    *buffer += 2;
+    return 2;
 }
+
 /* 9.17.3.2 MarshalUint32() */
 /* Function to marshal a 32 bit value to the output buffer. */
 static INT32
@@ -151,7 +154,9 @@ MarshalUint32(
 	      BYTE            **buffer
 	      )
 {
-    return UINT32_Marshal(&integer, buffer, NULL);
+    UINT32_TO_BYTE_ARRAY(integer, *buffer);
+    *buffer += 4;
+    return 4;
 }
 
 /* 9.17.3.3	Unmarshal32() */
