@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			For Selected Math Library     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/* $Id: SupportLibraryFunctionPrototypes_fp.h 1047 2017-07-20 18:27:34Z kgoldman $ */
+/* $Id: SupportLibraryFunctionPrototypes_fp.h 1476 2019-06-10 19:32:03Z kgoldman $ */
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,9 +55,11 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
+
+/* 5.16	SupportLibraryFunctionPrototypes_fp.h */
 
 #ifndef SUPPORT_LIBRARY_FUNCTION_PROTOTYPES_H
 #define SUPPORT_LIBRARY_FUNCTION_PROTOTYPES_H
@@ -68,7 +70,8 @@
    function will only need to do a format conversion between the TPM big number and the support
    library big number. The TPM big number format was chosen to make this relatively simple and
    fast. */
-LIB_EXPORT int SupportLibInit(void);
+LIB_EXPORT
+int SupportLibInit(void);
 /* MathLibraryCompatibililtyCheck() This function is only used during development to make sure that
    the library that is being referenced is using the same size of data structures as the TPM. */
 void
@@ -120,5 +123,9 @@ LIB_EXPORT BOOL BnEccAdd(bigPoint R, pointConst S, pointConst Q, bigCurve E);
    of pointers to bigNum values. The curve-dependent values are set by a different function. This
    function is only needed if the TPM supports ECC.*/
 LIB_EXPORT bigCurve BnCurveInitialize(bigCurve E, TPM_ECC_CURVE curveId);
+/* 5.16.14.1	BnCurveFree() */
+/* This function will free the allocated components of the curve and end the frame in which the
+   curve data exists */
+LIB_EXPORT void BnCurveFree(bigCurve E);
 
 #endif
