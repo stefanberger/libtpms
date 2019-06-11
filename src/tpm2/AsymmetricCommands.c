@@ -3,7 +3,7 @@
 /*			  Asymmetric Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AsymmetricCommands.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: AsymmetricCommands.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "RSA_Encrypt_fp.h"
 #if CC_RSA_Encrypt  // Conditional expansion of this file
-#if ALG_RSA
 TPM_RC
 TPM2_RSA_Encrypt(
 		 RSA_Encrypt_In      *in,            // IN: input parameter list
@@ -95,12 +94,10 @@ TPM2_RSA_Encrypt(
 			     &in->label.b, NULL);
     return result;
 }
-#endif
 #endif // CC_RSA_Encrypt
 #include "Tpm.h"
 #include "RSA_Decrypt_fp.h"
 #if CC_RSA_Decrypt  // Conditional expansion of this file
-#if ALG_RSA
 TPM_RC
 TPM2_RSA_Decrypt(
 		 RSA_Decrypt_In      *in,            // IN: input parameter list
@@ -140,12 +137,10 @@ TPM2_RSA_Decrypt(
 			     scheme, &in->label.b);
     return result;
 }
-#endif
 #endif // CC_RSA_Decrypt
 #include "Tpm.h"
 #include "ECDH_KeyGen_fp.h"
 #if CC_ECDH_KeyGen  // Conditional expansion of this file
-#if ALG_ECC
 TPM_RC
 TPM2_ECDH_KeyGen(
 		 ECDH_KeyGen_In      *in,            // IN: input parameter list
@@ -187,12 +182,10 @@ TPM2_ECDH_KeyGen(
 	} while(result == TPM_RC_NO_RESULT);
     return result;
 }
-#endif // ALG_ECC
 #endif // CC_ECDH_KeyGen
 #include "Tpm.h"
 #include "ECDH_ZGen_fp.h"
 #if CC_ECDH_ZGen  // Conditional expansion of this file
-#if ALG_ECC
 TPM_RC
 TPM2_ECDH_ZGen(
 	       ECDH_ZGen_In    *in,            // IN: input parameter list
@@ -225,12 +218,10 @@ TPM2_ECDH_ZGen(
 	return RcSafeAddToResult(result, RC_ECDH_ZGen_inPoint);
     return result;
 }
-#endif
 #endif // CC_ECDH_ZGen
 #include "Tpm.h"
 #include "ECC_Parameters_fp.h"
 #if CC_ECC_Parameters  // Conditional expansion of this file
-#if ALG_ECC
 TPM_RC
 TPM2_ECC_Parameters(
 		    ECC_Parameters_In   *in,            // IN: input parameter list
@@ -244,7 +235,6 @@ TPM2_ECC_Parameters(
     else
 	return TPM_RCS_VALUE + RC_ECC_Parameters_curveID;
 }
-#endif
 #endif // CC_ECC_Parameters
 #include "Tpm.h"
 #include "ZGen_2Phase_fp.h"
@@ -306,4 +296,4 @@ TPM2_ZGen_2Phase(
 	CryptEndCommit(in->counter);
     return result;
 }
-#endif
+#endif // CC_ZGen_2Phase
