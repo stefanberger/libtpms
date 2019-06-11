@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand_fp.h 1409 2019-01-14 20:39:15Z kgoldman $		*/
+/*            $Id: CryptRand_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -71,20 +71,6 @@ DRBG_GetEntropy(
 void
 IncrementIv(
 	    DRBG_IV         *iv
-	    );
-void
-EncryptDRBG(
-	    BYTE                *dOut,
-	    UINT32               dOutBytes,
-	    DRBG_KEY_SCHEDULE   *keySchedule,
-	    DRBG_IV             *iv,
-	    UINT32              *lastValue      // Points to the last output value
-	    );
-void
-DRBG_Update(
-	    DRBG_STATE          *drbgState,     // IN:OUT state to update
-	    DRBG_KEY_SCHEDULE   *keySchedule,   // IN: the key schedule (optional)
-	    DRBG_SEED           *providedData   // IN: additional data
 	    );
 BOOL
 DRBG_Reseed(
@@ -121,7 +107,7 @@ DRBG_AdditionalData(
 		    DRBG_STATE      *drbgState,     // IN:OUT state to update
 		    TPM2B           *additionalData // IN: value to incorporate
 		    );
-LIB_EXPORT BOOL
+LIB_EXPORT TPM_RC
 DRBG_InstantiateSeeded(
 		       DRBG_STATE      *drbgState,     // IN: buffer to hold the state
 		       const TPM2B     *seed,          // IN: the seed to use
