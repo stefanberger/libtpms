@@ -662,6 +662,51 @@ PssDecode(
  Exit:
     return retVal;
 }
+/* 10.2.17.4.16	MakeDerTag() */
+/* Construct the DER value that is used in RSASSA */
+/* Return Value	Meaning */
+/* > 0	size of value */
+/* <= 0	no hash exists */
+INT16
+MakeDerTag(
+	   TPM_ALG_ID   hashAlg,
+	   INT16        sizeOfBuffer,
+	   BYTE        *buffer
+	   )
+{
+    //    0x30, 0x31,       // SEQUENCE (2 elements) 1st
+    //        0x30, 0x0D,   // SEQUENCE (2 elements)
+    //            0x06, 0x09,   // HASH OID
+    //                0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01,
+    //             0x05, 0x00,  // NULL
+    //        0x04, 0x20  //  OCTET STRING
+    HASH_DEF   *info = CryptGetHashDef(hashAlg);
+    INT16       oidSize;
+    // If no OID, can't do encode
+    VERIFY(info != NULL);
+    oidSize = 2 + (info->OID)[1];
+    // make sure this fits in the buffer
+    VERIFY(sizeOfBuffer >= (oidSize + 8));
+    *buffer++ = 0x30;  // 1st SEQUENCE
+    // Size of the 1st SEQUENCE is 6 bytes + size of the hash OID + size of the
+    // digest size
+    *buffer++ = (BYTE)(6 + oidSize + info->digestSize);   //
+    *buffer++ = 0x30; // 2nd SEQUENCE
+    // size is 4 bytes of overhead plus the side of the OID
+    *buffer++ = (BYTE)(2 + oidSize);
+    MemoryCopy(buffer, info->OID, oidSize);
+    buffer += oidSize;
+    *buffer++ = 0x05;   // Add a NULL
+    *buffer++ = 0x00;
+    
+    *buffer++ = 0x04;
+    *buffer++ = (BYTE)(info->digestSize);
+    return oidSize + 8;
+ Error:
+    return 0;
+    
+}
+
 /* 10.2.17.4.17	RSASSA_Encode() */
 /* Encode a message using PKCS1v1.5 method. */
 /* Error Returns	Meaning */
