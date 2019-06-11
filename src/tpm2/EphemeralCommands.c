@@ -3,7 +3,7 @@
 /*			 	Ephemeral EC Keys    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EphemeralCommands.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: EphemeralCommands.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Commit_fp.h"
 #if CC_Commit  // Conditional expansion of this file
-#if ALG_ECC
 TPM_RC
 TPM2_Commit(
 	    Commit_In       *in,            // IN: input parameter list
@@ -158,12 +157,10 @@ TPM2_Commit(
     out->counter = CryptCommit();
     return TPM_RC_SUCCESS;
 }
-#endif
 #endif // CC_Commit
 #include "Tpm.h"
 #include "EC_Ephemeral_fp.h"
 #if CC_EC_Ephemeral  // Conditional expansion of this file
-#if ALG_ECC
 TPM_RC
 TPM2_EC_Ephemeral(
 		  EC_Ephemeral_In     *in,            // IN: input parameter list
@@ -190,5 +187,4 @@ TPM2_EC_Ephemeral(
 	} while(result == TPM_RC_NO_RESULT);
     return TPM_RC_SUCCESS;
 }
-#endif
 #endif // CC_EC_Ephemeral
