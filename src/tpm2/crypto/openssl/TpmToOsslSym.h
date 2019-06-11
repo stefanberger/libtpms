@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,25 +55,24 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
-
-#ifndef TPMTOOSSLSYM_H
-#define TPMTOOSSLSYM_H
 
 /* B.2.2.2. TpmToOsslSym.h */
 /* B.2.2.2.1. Introduction */
 /* This header file is used to splice the OpenSSL() library into the TPM code. */
 /* The support required of a library are a hash module, a block cipher module and portions of a big
    number library. */
-#ifndef _TPM_TO_OSSL_SYM_H_
-#define _TPM_TO_OSSL_SYM_H_
-#if SYM_LIB == OSSL
+
+#ifndef SYM_LIB_DEFINED
+#define SYM_LIB_DEFINED
+#define SYM_LIB_OSSL
 #include <openssl/aes.h>
 #include <openssl/des.h>
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
+
 /* B.2.2.3.2. Links to the OpenSSL AES code */
 #if ALG_SM4
 #error "SM4 is not available"
@@ -122,8 +121,4 @@ typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
 #endif
 /* This definition would change if there were something to report */
 #define SymLibSimulationEnd()
-#endif // SYM_LIB == OSSL
-#endif // _TPM_TO_OSSL_SYM_H_
-
-
-#endif
+#endif // SYM_LIB_DEFINED
