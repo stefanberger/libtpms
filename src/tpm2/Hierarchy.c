@@ -125,7 +125,7 @@ HierarchyPreInstall_Init(
 }
 /* 8.3.3.2 HierarchyStartup() */
 /* This function is called at TPM2_Startup() to initialize the hierarchy related values. */
-void
+BOOL
 HierarchyStartup(
 		 STARTUP_TYPE     type           // IN: start up type
 		 )
@@ -150,7 +150,7 @@ HierarchyStartup(
 	    gr.nullSeed.t.size = sizeof(gr.nullSeed.t.buffer);
 	    CryptRandomGenerate(gr.nullSeed.t.size, gr.nullSeed.t.buffer);
 	}
-    return;
+    return TRUE;
 }
 /* 8.3.3.3 HierarchyGetProof() */
 /* This function finds the proof value associated with a hierarchy.It returns a pointer to the proof

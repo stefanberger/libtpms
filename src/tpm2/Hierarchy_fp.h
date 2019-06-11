@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy_fp.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Hierarchy_fp.h 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -66,7 +66,7 @@ void
 HierarchyPreInstall_Init(
 			 void
 			 );
-void
+BOOL
 HierarchyStartup(
 		 STARTUP_TYPE     type           // IN: start up type
 		 );
