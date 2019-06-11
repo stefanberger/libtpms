@@ -61,7 +61,7 @@
 
 #include "TpmSizeChecks_fp.h"
 
-#if RUNTIME_SIZE_CHECKS
+#if RUNTIME_SIZE_CHECKS                // libtpms added
 /* Some of the values (such as sizes) are the result of different options set in
    Implementation.h. The combination might not be consistent. A function is defined
    (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the function, define
@@ -70,4 +70,4 @@ void TpmSizeChecks(void)
 {
     return;
 }
-#endif /* RUNTIME_SIZE_CHECKS */
+#endif /* RUNTIME_SIZE_CHECKS */       // libtpms added
