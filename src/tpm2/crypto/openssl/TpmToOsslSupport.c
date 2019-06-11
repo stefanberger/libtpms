@@ -65,7 +65,7 @@
    library. */
 /* B.2.3.3.2. Defines and Includes */
 #include "Tpm.h"
-#if MATH_LIB == OSSL
+#ifdef MATH_LIB_OSSL
 /*     Used to pass the pointers to the correct sub-keys */
 typedef const BYTE *desKeyPointers[3];
 /* B.2.3.3.2.1. SupportLibInit() */
@@ -127,4 +127,4 @@ OsslPopContext(
 	BN_CTX_end(CTX);
 }
 
-#endif // MATH_LIB == OSSL
+#endif // MATH_LIB_OSSL
