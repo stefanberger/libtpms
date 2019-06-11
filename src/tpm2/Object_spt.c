@@ -926,7 +926,7 @@ SensitiveToPrivate(
     else
 	{
 	    // Otherwise, using parent's name algorithm
-	    hashAlg = ObjectGetNameAlg(parent);
+	    hashAlg = parent->publicArea.nameAlg;
 	}
     // Starting of sensitive data without wrappers
     sensitiveData = outPrivate->t.buffer;
@@ -993,7 +993,7 @@ PrivateToSensitive(
     else
 	{
 	    // Otherwise, using parent's name algorithm
-	    hashAlg = ObjectGetNameAlg(parent);
+	    hashAlg = parent->publicArea.nameAlg;
 	}
     // unwrap outer
     result = UnwrapOuter(parent, name, hashAlg, NULL, TRUE,
@@ -1083,7 +1083,7 @@ SensitiveToDuplicate(
 	{
 	    doOuterWrap = TRUE;
 	    // Use parent nameAlg as outer hash algorithm
-	    outerHash = ObjectGetNameAlg(parent);
+	    outerHash = parent->publicArea.nameAlg;
 	    // Adjust sensitive data pointer
 	    sensitiveData += sizeof(UINT16) + CryptHashGetDigestSize(outerHash);
 	}
@@ -1247,7 +1247,7 @@ SecretToCredential(
     UINT16               dataSize;      // data blob size
     pAssert(secret != NULL && outIDObject != NULL);
     // use protector's name algorithm as outer hash
-    outerHash = ObjectGetNameAlg(protector);
+    outerHash = protector->publicArea.nameAlg;
     // Marshal secret area to credential buffer, leave space for integrity
     sensitiveData = outIDObject->t.credential
 		    + sizeof(UINT16) + CryptHashGetDigestSize(outerHash);
@@ -1286,7 +1286,7 @@ CredentialToSecret(
     BYTE                    *sensitiveData; // pointer to the sensitive data
     UINT16                   dataSize;
     // use protector's name algorithm as outer hash
-    outerHash = ObjectGetNameAlg(protector);
+    outerHash = protector->publicArea.nameAlg;
     // Unwrap outer, a TPM_RC_INTEGRITY error may be returned at this point
     result = UnwrapOuter(protector, name, outerHash, seed, FALSE,
 			 inIDObject->size, inIDObject->buffer);

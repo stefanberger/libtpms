@@ -95,10 +95,6 @@ GetName(
 	TPMI_DH_OBJECT   handle,        // IN: handle of the object
 	NAME            *name           // OUT: name of the object
 	);
-TPMI_ALG_HASH
-ObjectGetNameAlg(
-		 OBJECT          *object         // IN: handle of the object
-		 );
 void
 GetQualifiedName(
 		 TPMI_DH_OBJECT   handle,        // IN: handle of the object
