@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: Object_spt.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -872,7 +872,7 @@ UnwrapOuter(
 }
 /* 7.6.3.10 MarshalSensitive() */
 /* This function is used to marshal a sensitive area. Among other things, it adjusts the size of the
-   authValue to be no smaller than the digest of nameAlg Returns the size of the marshaled area. */
+   authValue to be no smaller than the digest of nameAlg.  Returns the size of the marshaled area. */
 static UINT16
 MarshalSensitive(
 		 BYTE                *buffer,            // OUT: receiving buffer
@@ -901,7 +901,7 @@ MarshalSensitive(
 void
 SensitiveToPrivate(
 		   TPMT_SENSITIVE  *sensitive,     // IN: sensitive structure
-		   TPM2B           *name,          // IN: the name of the object
+		   TPM2B_NAME      *name,          // IN: the name of the object
 		   OBJECT          *parent,        // IN: The parent object
 		   TPM_ALG_ID       nameAlg,       // IN: hash algorithm in public area.  This
 		   //     parameter is used when parentHandle is
@@ -916,7 +916,7 @@ SensitiveToPrivate(
     UINT16              integritySize;
     UINT16              ivSize;
     //
-    pAssert(name != NULL && name->size != 0);
+    pAssert(name != NULL && name->t.size != 0);
     // Find the hash algorithm for integrity computation
     if(parent == NULL)
 	{
@@ -941,7 +941,7 @@ SensitiveToPrivate(
     // Marshal the sensitive area including authValue size adjustments.
     dataSize = MarshalSensitive(sensitiveData, sensitive, nameAlg);
     //Produce outer wrap, including encryption and HMAC
-    outPrivate->t.size = ProduceOuterWrap(parent, name, hashAlg, NULL,
+    outPrivate->t.size = ProduceOuterWrap(parent, &name->b, hashAlg, NULL,
 					  TRUE, dataSize, outPrivate->t.buffer);
     return;
 }
