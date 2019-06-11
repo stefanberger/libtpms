@@ -3,7 +3,7 @@
 /*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1370 2018-11-02 19:39:07Z kgoldman $			*/
+/*            $Id: PCR.c 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -277,37 +277,38 @@ GetSavedPcrPointer(
 		   UINT32           pcrIndex       // IN: PCR index in PCR_SAVE
 		   )
 {
+    BYTE            *retVal;
     switch(alg)
 	{
 #if ALG_SHA1
 	  case TPM_ALG_SHA1:
-	    return gc.pcrSave.sha1[pcrIndex];
+	    retVal = gc.pcrSave.sha1[pcrIndex];
 	    break;
 #endif
 #if ALG_SHA256
 	  case TPM_ALG_SHA256:
-	    return gc.pcrSave.sha256[pcrIndex];
+	    retVal = gc.pcrSave.sha256[pcrIndex];
 	    break;
 #endif
 #if ALG_SHA384
 	  case TPM_ALG_SHA384:
-	    return gc.pcrSave.sha384[pcrIndex];
+	    retVal = gc.pcrSave.sha384[pcrIndex];
 	    break;
 #endif
 #if ALG_SHA512
 	  case TPM_ALG_SHA512:
-	    return gc.pcrSave.sha512[pcrIndex];
+	    retVal = gc.pcrSave.sha512[pcrIndex];
 	    break;
 #endif
 #if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
-	    return gc.pcrSave.sm3_256[pcrIndex];
+	    retVal = gc.pcrSave.sm3_256[pcrIndex];
 	    break;
 #endif
 	  default:
-	    break;
+	    FAIL(FATAL_ERROR_INTERNAL);
 	}
-    FAIL(FATAL_ERROR_INTERNAL);
+    return retVal;
 }
 /* 8.7.3.9 PcrIsAllocated() */
 /* This function indicates if a PCR number for the particular hash algorithm is allocated. */
