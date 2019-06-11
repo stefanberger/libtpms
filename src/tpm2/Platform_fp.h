@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*		NV read and write access methods     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform_fp.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: Platform_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -248,7 +248,7 @@ _plat__NvIsDifferent(
 /* NOTE: A useful optimization would be for this code to compare the current contents of NV with the
    local copy and note the blocks that have changed. Then only write those blocks when
    _plat__NvCommit() is called. */
-LIB_EXPORT void
+LIB_EXPORT BOOL
 _plat__NvMemoryWrite(
 		     unsigned int     startOffset,   // IN: write start
 		     unsigned int     size,          // IN: size of bytes to write
