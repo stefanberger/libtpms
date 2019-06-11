@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NV.h 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: NV.h 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -117,7 +117,7 @@ typedef struct {
 } NV_RAM_HEADER;
 /* Defines the end-of-list marker for NV. The list terminator is a UINT32 of zero, followed by the
    current value of s_maxCounter which is a 64-bit value. The structure is defined as an array of 3
-   UINT32 values so that there is no padding between the UINT32 list end marker and the UIT64m()
+   UINT32 values so that there is no padding between the UINT32 list end marker and the UINT64
    maxCounter value. */
 typedef UINT32 NV_LIST_TERMINATOR[3];
 /* 5.14.3	Orderly RAM Values */

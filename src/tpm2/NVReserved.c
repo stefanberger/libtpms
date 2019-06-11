@@ -63,7 +63,8 @@
 /* 8.5.2 Includes, Defines and Data Definitions */
 #define NV_C
 #include    "Tpm.h"
-/*     8.5.2.1 NvInitStatic() */
+/* 8.5.3	Functions */
+/*     8.5.3.1 NvInitStatic() */
 /* This function initializes the static variables used in the NV subsystem. */
 static void
 NvInitStatic(
@@ -76,8 +77,7 @@ NvInitStatic(
     s_evictNvEnd = (NV_REF)NV_MEMORY_SIZE;
     return;
 }
-/* 8.5.3 Externally Accessible Functions */
-/* 8.5.3.1 NvCheckState() */
+/* 8.5.3.2 NvCheckState() */
 /* Function to check the NV state by accessing the platform-specific function to get the NV state.
    The result state is registered in s_NvIsAvailable that will be reported by NvIsAvailable(). */
 /* This function is called at the beginning of ExecuteCommand() before any potential check of
@@ -98,7 +98,7 @@ NvCheckState(
 	g_NvStatus = TPM_RC_NV_RATE;
     return;
 }
-/* 8.5.3.2 NvCommit */
+/* 8.5.3.3 NvCommit */
 /* This is a wrapper for the platform function to commit pending NV writes. */
 BOOL
 NvCommit(
@@ -107,7 +107,7 @@ NvCommit(
 {
     return (_plat__NvCommit() == 0);
 }
-/* 8.5.3.3 NvPowerOn() */
+/* 8.5.3.4 NvPowerOn() */
 /* This function is called at _TPM_Init() to initialize the NV environment. */
 /* Return Values Meaning */
 /* TRUE all NV was initialized */
@@ -128,7 +128,7 @@ NvPowerOn(
 	}
     return nvError == 0;
 }
-/* 8.5.3.4 NvManufacture() */
+/* 8.5.3.5 NvManufacture() */
 /* This function initializes the NV system at pre-install time. */
 /* This function should only be called in a manufacturing environment or in a simulation. */
 /* The layout of NV memory space is an implementation choice. */
@@ -155,7 +155,7 @@ NvManufacture(
     NvWriteNvListEnd(NV_USER_DYNAMIC);
     return;
 }
-/* 8.5.3.5 NvRead() */
+/* 8.5.3.6 NvRead() */
 /* This function is used to move reserved data from NV memory to RAM. */
 void
 NvRead(
@@ -169,7 +169,7 @@ NvRead(
     _plat__NvMemoryRead(nvOffset, size, outBuffer);
     return;
 }
-/* 8.5.3.6 NvWrite() */
+/* 8.5.3.7 NvWrite() */
 /* This function is used to post reserved data for writing to NV memory. Before the TPM completes
    the operation, the value will be written. */
 BOOL
@@ -189,7 +189,7 @@ NvWrite(
     return FALSE;
 }
 #if 0 // libtpms added being (for Coverity)
-/* 8.5.3.7 NvUpdatePersistent() */
+/* 8.5.3.8 NvUpdatePersistent() */
 /* This function is used to update a value in the PERSISTENT_DATA structure and commits the value to
    NV. */
 void
@@ -203,7 +203,7 @@ NvUpdatePersistent(
     MemoryCopy(&gp + offset, buffer, size);
     NvWrite(offset, size, buffer);
 }
-/* 8.5.3.8 NvClearPersistent() */
+/* 8.5.3.9 NvClearPersistent() */
 /* This function is used to clear a persistent data entry and commit it to NV */
 void
 NvClearPersistent(
@@ -217,7 +217,7 @@ NvClearPersistent(
     NvWrite(offset, size, (&gp) + offset);
 }
 #endif // libtpms added end
-/* 8.5.3.9 NvReadPersistent() */
+/* 8.5.3.10 NvReadPersistent() */
 /* This function reads persistent data to the RAM copy of the gp structure. */
 void
 NvReadPersistent(

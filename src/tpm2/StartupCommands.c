@@ -322,6 +322,7 @@ TPM2_Shutdown(
 	    else if(g_StartupLocality3)
 		gp.orderlyState = TPM_SU_STATE | STARTUP_LOCALITY_3;
 	}
+    // only two shutdown options
     else if(in->shutdownType != TPM_SU_CLEAR)
 	{
 	    return TPM_RCS_VALUE + RC_Shutdown_shutdownType;

@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     							*/
+/*			     	ECC Main					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1462 2019-04-10 18:13:35Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,8 +59,8 @@
 /*										*/
 /********************************************************************************/
 
-/* 10.2.12 CryptEccMain.c */
-/* 10.2.12.1 Includes and Defines */
+/* 10.2.11 CryptEccMain.c */
+/* 10.2.11.1 Includes and Defines */
 #include "Tpm.h"
 #include "Helpers_fp.h"                // libtpms added
 #include "TpmToOsslMath_fp.h"          // libtpms added
@@ -69,7 +69,7 @@
 #if !USE_BN_ECC_DATA
 #error "Need to SET USE_BN_ECC_DATA to YES in Implementaion.h"
 #endif
-/* 10.2.12.2 Functions */
+/* 10.2.11.2 Functions */
 #if SIMULATION
 void
 EccSimulationEnd(
@@ -81,7 +81,7 @@ EccSimulationEnd(
 #endif
 }
 #endif // SIMULATION
-/* 10.2.12.2.1 CryptEccInit() */
+/* 10.2.11.2.1 CryptEccInit() */
 /* This function is called at _TPM_Init() */
 BOOL
 CryptEccInit(
@@ -90,7 +90,7 @@ CryptEccInit(
 {
     return TRUE;
 }
-/* 10.2.12.2.2 CryptEccStartup() */
+/* 10.2.11.2.2 CryptEccStartup() */
 /* This function is called at TPM2_Startup(). */
 BOOL
 CryptEccStartup(
@@ -99,7 +99,7 @@ CryptEccStartup(
 {
     return TRUE;
 }
-/* 10.2.12.2.3 ClearPoint2B(generic */
+/* 10.2.11.2.3 ClearPoint2B(generic */
 /* Initialize the size values of a TPMS_ECC_POINT structure. */
 void
 ClearPoint2B(
@@ -112,7 +112,7 @@ ClearPoint2B(
 	    p->y.t.size = 0;
 	}
 }
-/* 10.2.12.2.4 CryptEccGetParametersByCurveId() */
+/* 10.2.11.2.4 CryptEccGetParametersByCurveId() */
 /* This function returns a pointer to the curve data that is associated with the indicated
    curveId. If there is no curve with the indicated ID, the function returns NULL. This function is
    in this module so that it can be called by GetCurve() data. */
@@ -132,7 +132,7 @@ CryptEccGetParametersByCurveId(
 	}
     return NULL;
 }
-/*  10.2.12.2.5 CryptEccGetKeySizeForCurve() */
+/*  10.2.11.2.5 CryptEccGetKeySizeForCurve() */
 /* This function returns the key size in bits of the indicated curve */
 LIB_EXPORT UINT16
 CryptEccGetKeySizeForCurve(
@@ -145,7 +145,7 @@ CryptEccGetKeySizeForCurve(
     keySizeInBits = (curve != NULL) ? curve->keySizeBits : 0;
     return keySizeInBits;
 }
-/* 10.2.12.2.6 GetCurveData() */
+/* 10.2.11.2.6 GetCurveData() */
 /* This function returns the a pointer for the parameter data associated with a curve. */
 const ECC_CURVE_DATA *
 GetCurveData(
@@ -168,7 +168,7 @@ CryptEccGetCurveByIndex(
 	return TPM_ECC_NONE;
     return eccCurves[i].curveId;
 }
-/* 10.2.12.2.8 CryptEccGetParameter() */
+/* 10.2.11.2.8 CryptEccGetParameter() */
 /* This function returns an ECC curve parameter. The parameter is selected by a single character
    designator from the set of {PNABXYH}. */
 /* Return Values Meaning */
@@ -217,7 +217,7 @@ CryptEccGetParameter(
     // not try to convert so just return FALSE instead.
     return (parameter != NULL) ? BnTo2B(parameter, &out->b, 0) : 0;
 }
-/* 10.2.12.2.9 CryptCapGetECCCurve() */
+/* 10.2.11.2.9 CryptCapGetECCCurve() */
 /* This function returns the list of implemented ECC curves. */
 /* Return Values Meaning */
 /* YES if no more ECC curve is available */
@@ -261,7 +261,7 @@ CryptCapGetECCCurve(
 	}
     return more;
 }
-/* 10.2.12.2.10 CryptGetCurveSignScheme() */
+/* 10.2.11.2.10 CryptGetCurveSignScheme() */
 /* This function will return a pointer to the scheme of the curve. */
 const TPMT_ECC_SCHEME *
 CryptGetCurveSignScheme(
@@ -274,7 +274,7 @@ CryptGetCurveSignScheme(
     else
 	return NULL;
 }
-/* 10.2.12.2.11 CryptGenerateR() */
+/* 10.2.11.2.11 CryptGenerateR() */
 /* This function computes the commit random value for a split signing scheme. */
 /* If c is NULL, it indicates that r is being generated for TPM2_Commit(). If c is not NULL, the TPM
    will validate that the gr.commitArray bit associated with the input value of c is SET. If not,
@@ -339,7 +339,8 @@ CryptGenerateR(
 	{
 	    int     i;
 	    CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG, &gr.commitNonce.b, COMMIT_STRING,
-		      (TPM2B *)name, &cntr.b, n.t.size * 8, r->t.buffer, &iterations, FALSE);
+		      (TPM2B *)name, &cntr.b, n.t.size * 8, r->t.buffer,
+		      &iterations, FALSE);
 	    // "random" value must be less than the prime
 	    if(UnsignedCompareB(r->b.size, r->b.buffer, n.t.size, n.t.buffer) >= 0)
 		continue;
@@ -351,7 +352,7 @@ CryptGenerateR(
 	}
     return FALSE;
 }
-/* 10.2.12.2.12 CryptCommit() */
+/* 10.2.11.2.12 CryptCommit() */
 /* This function is called when the count value is committed. The gr.commitArray value associated
    with the current count value is SET and g_commitCounter is incremented. The low-order 16 bits of
    old value of the counter is returned. */
@@ -365,7 +366,7 @@ CryptCommit(
     SET_BIT(oldCount & COMMIT_INDEX_MASK, gr.commitArray);
     return oldCount;
 }
-/* 10.2.12.2.13 CryptEndCommit() */
+/* 10.2.11.2.13 CryptEndCommit() */
 /* This function is called when the signing operation using the committed value is completed. It
    clears the gr.commitArray bit associated with the count value so that it can't be used again. */
 void
@@ -375,7 +376,7 @@ CryptEndCommit(
 {
     ClearBit((c & COMMIT_INDEX_MASK), gr.commitArray, sizeof(gr.commitArray));
 }
-/* 10.2.12.2.14 CryptEccGetParameters() */
+/* 10.2.11.2.14 CryptEccGetParameters() */
 /* This function returns the ECC parameter details of the given curve */
 /* Return Values Meaning */
 /* TRUE success */
@@ -406,7 +407,7 @@ CryptEccGetParameters(
 	}
     return found;
 }
-/* 10.2.12.2.15 BnGetCurvePrime() */
+/* 10.2.11.2.15 BnGetCurvePrime() */
 /* This function is used to get just the prime modulus associated with a curve */
 const bignum_t *
 BnGetCurvePrime(
@@ -416,7 +417,7 @@ BnGetCurvePrime(
     const ECC_CURVE_DATA    *C = GetCurveData(curveId);
     return (C != NULL) ? CurveGetPrime(C) : NULL;
 }
-/* 10.2.12.2.16 BnGetCurveOrder() */
+/* 10.2.11.2.16 BnGetCurveOrder() */
 /* This function is used to get just the curve order */
 const bignum_t *
 BnGetCurveOrder(
@@ -426,7 +427,7 @@ BnGetCurveOrder(
     const ECC_CURVE_DATA    *C = GetCurveData(curveId);
     return (C != NULL) ? CurveGetOrder(C) : NULL;
 }
-/* 10.2.12.2.17 BnIsOnCurve() */
+/* 10.2.11.2.17 BnIsOnCurve() */
 /* This function checks if a point is on the curve. */
 BOOL
 BnIsOnCurve(
@@ -458,7 +459,7 @@ BnIsOnCurve(
     else
 	return FALSE;
 }
-/* 10.2.12.2.18 BnIsValidPrivateEcc() */
+/* 10.2.11.2.18 BnIsValidPrivateEcc() */
 /* Checks that 0 < x < q */
 BOOL
 BnIsValidPrivateEcc(
@@ -480,7 +481,7 @@ CryptEccIsValidPrivateKey(
     BN_INITIALIZED(bnD, MAX_ECC_PARAMETER_BYTES * 8, d);
     return !BnEqualZero(bnD) && (BnUnsignedCmp(bnD, BnGetCurveOrder(curveId)) < 0);
 }
-/* 10.2.12.2.19 BnPointMul() */
+/* 10.2.11.2.19 BnPointMul() */
 /* This function does a point multiply of the form R = [d]S + [u]Q where the parameters are bigNum
    values. If S is NULL and d is not NULL, then it computes R = [d]G + [u]Q or just R = [d]G if u
    and Q are NULL. If skipChecks is TRUE, then the function will not verify that the inputs are
@@ -534,7 +535,7 @@ BnPointMult(
 	}
     return  (OK ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT);
 }
-/* 10.2.12.2.20	BnEccGetPrivate() */
+/* 10.2.11.2.20	BnEccGetPrivate() */
 /* This function gets random values that are the size of the key plus 64 bits. The value is reduced
    (mod (q - 1)) and incremented by 1 (q is the order of the curve. This produces a value (d) such
    that 1 <= d < q. This is the method of FIPS 186-4 Section B.4.1 'Key Pair Generation Using Extra
@@ -617,7 +618,7 @@ BnEccGenerateKeyPair(
 	BnSetWord(ecQ->z, 1);
     return OK;
 }
-/* 10.2.12.2.21 CryptEccNewKeyPair */
+/* 10.2.11.2.21 CryptEccNewKeyPair */
 /* This function creates an ephemeral ECC. It is ephemeral in that is expected that the private part
    of the key will be discarded */
 LIB_EXPORT TPM_RC
@@ -647,7 +648,7 @@ CryptEccNewKeyPair(
     CURVE_FREE(E);
     return OK ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
 }
-/* 10.2.12.2.22 CryptEccPointMultiply() */
+/* 10.2.11.2.22 CryptEccPointMultiply() */
 /* This function computes 'R := [dIn]G + [uIn]QIn. Where dIn and uIn are scalars, G and QIn are
    points on the specified curve and G is the default generator of the curve. */
 /* The xOut and yOut parameters are optional and may be set to NULL if not used. */
@@ -690,7 +691,7 @@ CryptEccPointMultiply(
     CURVE_FREE(E);
     return retVal;
 }
-/* 10.2.12.2.23 CryptEccIsPointOnCurve() */
+/* 10.2.11.2.23 CryptEccIsPointOnCurve() */
 /* This function is used to test if a point is on a defined curve. It does this by checking that y^2
    mod p = x^3 + a*x + b mod p */
 /* It is a fatal error if Q is not specified (is NULL). */
@@ -711,7 +712,7 @@ CryptEccIsPointOnCurve(
     OK = (C != NULL && (BnIsOnCurve(ecQ, C)));
     return OK;
 }
-/* 10.2.12.2.24 CryptEccGenerateKey() */
+/* 10.2.11.2.24 CryptEccGenerateKey() */
 /* This function generates an ECC key pair based on the input parameters. This routine uses KDFa()
    to produce candidate numbers. The method is according to FIPS 186-3, section B.1.2 "Key Pair
    Generation by Testing Candidates." According to the method in FIPS 186-3, the resulting private

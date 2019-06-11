@@ -3,7 +3,7 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: Global.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,15 +55,26 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.5 Global.c */
+/* 9.5	Global.c */
 /* 9.5.1 Description */
-/* This file will instance the TPM variables that are not stack allocated. The descriptions for
-   these variables is in Global.h. */
-/* 9.5.2 Includes and Defines */
+/* This file will instance the TPM variables that are not stack allocated. Descriptions of global
+   variables are in Global.h. There macro macro definitions that allows a variable to be instanced
+   or simply defined as an external variable. When global.h is included from this .c file, GLOBAL_C
+   is defined and values are instanced (and possibly initialized), but when global.h is included by
+   any other file, they are simply defined as external values. DO NOT DEFINE GLOBAL_C IN ANY OTHER
+   FILE. */
+/* NOTE: This is a change from previous implementations where Global.h just contained the extern
+   declaration and values were instanced in this file. This change keeps the definition and
+   instance in one file making maintenance easier. The instanced data will still be in the
+   global.obj file. */
+/* The OIDs.h file works in a way that is similar to the Global.h with the definition of the
+   values in OIDs.h such that they are instanced in global.obj. The macros that are defined in
+   Global.h are used in OIDs.h in the same way as they are in Global.h. */
+
 #define GLOBAL_C
 #include "Tpm.h"
 /* 9.5.3 Global Data Values */

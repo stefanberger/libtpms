@@ -1002,6 +1002,7 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 #endif
 
+// Additional values for benefit of code
 #define TPM_CC_FIRST                        0x0000011F
 #define TPM_CC_LAST                         0x00000196
 #if COMPRESSED_LISTS
@@ -1218,5 +1219,4 @@ typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
 #if MAX_SYM_KEY_BITS == 0 || MAX_SYM_BLOCK_SIZE == 0
 #   error Bad size for MAX_SYM_KEY_BITS or MAX_SYM_BLOCK_SIZE
 #endif
-
 #endif  // _IMPLEMENTATION_H_
