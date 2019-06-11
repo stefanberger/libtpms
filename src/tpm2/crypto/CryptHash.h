@@ -92,7 +92,7 @@ typedef struct sequenceMethods {
 } SMAC_METHODS;
 
 #if 0   /* libtpms changed begin (undefined behavior of macro expansion) */
-# define SMAC_IMPLEMENTED (defined TPM_CC_MAC || defined TPM_CC_MAC_Start)
+#define SMAC_IMPLEMENTED (defined CC_MAC || defined CC_MAC_Start)
 #else
 # if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
 #  define SMAC_IMPLEMENTED 1
