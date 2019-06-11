@@ -239,7 +239,20 @@ Uint64ToByteArray(
     a[0] = (BYTE)(i);
 }
 
-/* 9.12.3.11 ByteArrayToUint16() */
+/* 9.12.3.11	ByteArrayToUint8() */
+/* Function to write a UINT8 to a byte array. This is included for completeness and to allow certain
+   macro expansions */
+#if 0                 // libtpms added
+UINT8
+ByteArrayToUint8(
+		 BYTE                *a
+		 )
+{
+    return          *a;
+}
+#endif                // libtpms added
+
+/* 9.12.3.12 ByteArrayToUint16() */
 /* Function to write an integer to a byte array */
 
 UINT16
