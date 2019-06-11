@@ -3,7 +3,7 @@
 /*		Simulated Power State Transitions of the TPM			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Power.c 1311 2018-08-23 21:39:29Z kgoldman $			*/
+/*            $Id: Power.c 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -83,13 +83,13 @@ TPMInit(
 /* This function registers the fact that the TPM has been initialized (a TPM2_Startup() has
    completed successfully). */
 
-void
+BOOL
 TPMRegisterStartup(
 		   void
 		   )
 {
     g_initialized = TRUE;
-    return;
+    return TRUE;
 }
 
 /* 9.13.3.3 TPMIsStarted() */
