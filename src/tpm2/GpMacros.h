@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1445 2019-03-21 21:41:40Z kgoldman $		*/
+/*            $Id: GpMacros.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,21 +55,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef GPMACROS_H
 #define GPMACROS_H
 
-/* 5.11.1	Introduction */
+/* 5.10.1	Introduction */
 /* This file is a collection of miscellaneous macros. */
 #ifndef NULL
 #define NULL 0
 #endif
 #include "swap.h"
 #include "VendorString.h"
-/* 5.11.2	For Self-test */
+/* 5.10.2	For Self-test */
 /* These macros are used in CryptUtil() to invoke the incremental self test. */
 #if SELF_TEST
 #   define     TEST(alg) if(TEST_BIT(alg, g_toTest)) CryptTestAlgorithm(alg, NULL)
@@ -83,7 +83,7 @@
 #   define TEST(alg)
 #   define TEST_HASH(alg)
 #endif // SELF_TEST
-/* 5.11.3	For Failures */
+/* 5.10.3	For Failures */
 #if defined _POSIX_
 #   define FUNCTION_NAME        __func__     /* libtpms changed */
 #else
@@ -91,10 +91,10 @@
 #endif
 #if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
-#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(errorCode) /* libtpms added */
+#   define LOG_FAILURE(errorCode) (TpmLogFailure(errorCode))
 #else
-#   define FAIL(errorCode) (TpmFail(FUNCTION_NAME, __LINE__, errorCode))
-#   define FAIL_NOCMD(errorCode) (TpmSetFailureMode(FUNCTION_NAME, __LINE__, errorCode)) /* libtpms added */
+#   define FAIL(errorCode)        TpmFail(FUNCTION_NAME, __LINE__, errorCode)
+#   define LOG_FAILURE(errorCode) TpmLogFailure(FUNCTION_NAME, __LINE__, errorCode)
 #endif
 /* If implementation is using longjmp, then the call to TpmFail() does not return and the compiler
    will complain about unreachable code that comes after. To allow for not having longjmp, TpmFail()
@@ -124,14 +124,14 @@
 #else
 #   define pAssert(a) {if(!(a)) FAIL(FATAL_ERROR_PARAMETER);}
 #endif
-/* 5.11.4	Derived from Vendor-specific values */
+/* 5.10.4	Derived from Vendor-specific values */
 /* Values derived from vendor specific settings in Implementation.h */
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
 #define PRIVATE_VENDOR_SPECIFIC_BYTES					\
     ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))  /* libtpms: keep as was in rev 150 */
-/* 5.11.5	Compile-time Checks */
+/* 5.10.5	Compile-time Checks */
 /* In some cases, the relationship between two values may be dependent on things that change based
    on various selections like the chosen cryptographic libraries. It is possible that these
    selections will result in incompatible settings. These are often detectable by the compiler but
