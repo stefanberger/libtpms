@@ -182,16 +182,6 @@ HandleToObject(
     pAssert(s_objects[index].attributes.occupied);
     return &s_objects[index];
 }
-/* 8.6.3.8 ObjectGetNameAlg() */
-/* This function is used to get the Name algorithm of a object. */
-/* This function requires that object references a loaded object. */
-TPMI_ALG_HASH
-ObjectGetNameAlg(
-		 OBJECT          *object         // IN: handle of the object
-		 )
-{
-    return object->publicArea.nameAlg;
-}
 /* 8.6.3.9 GetQualifiedName() */
 /* This function returns the Qualified Name of the object. In this implementation, the Qualified
    Name is computed when the object is loaded and is saved in the internal representation of the
