@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			   TPM DES Support	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslDesSupport.c 1047 2017-07-20 18:27:34Z kgoldman $	*/
+/*            $Id: TpmToOsslDesSupport.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,21 +55,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 /* B.2.3.1. TpmToOsslDesSupport.c */
 /* B.2.3.1.1. Introduction */
-/* The functions in this file are used for initialization of the interface to the OpenSSL()
+/* The functions in this file are used for initialization of the interface to the OpenSSL
    library. */
 /* B.2.3.1.2. Defines and Includes */
 #include "Tpm.h"
-#if SYM_LIB == OSSL && defined TPM_ALG_TDES
+#if (defined SYM_LIB_OSSL) && ALG_TDES
 /*     B.2.3.1.3. Functions */
 /* B.2.3.1.3.1. TDES_set_encyrpt_key() */
 /* This function makes creation of a TDES key look like the creation of a key for any of the other
-   OpenSSL() block ciphers. It will create three key schedules, one for each of the DES keys. If
+   OpenSSL block ciphers. It will create three key schedules, one for each of the DES keys. If
    there are only two keys, then the third schedule is a copy of the first. */
 void
 TDES_set_encrypt_key(
@@ -89,7 +89,7 @@ TDES_set_encrypt_key(
 			      &keySchedule[2]);
 }
 /* B.2.3.1.3.2. TDES_encyrpt() */
-/* The TPM code uses one key schedule. For TDES, the schedule contains three schedules. OpenSSL()
+/* The TPM code uses one key schedule. For TDES, the schedule contains three schedules. OpenSSL
    wants the schedules referenced separately. This function does that. */
 void TDES_encrypt(
 		  const BYTE              *in,
@@ -104,7 +104,7 @@ void TDES_encrypt(
 #if !USE_OPENSSL_FUNCTIONS_SYMMETRIC
 /* B.2.3.1.3.3. TDES_decrypt() */
 /* As with TDES_encypt() this function bridges between the TPM single schedule model and the
-   OpenSSL() three schedule model. */
+   OpenSSL three schedule model. */
 void TDES_decrypt(
 		  const BYTE          *in,
 		  BYTE                *out,
@@ -115,5 +115,5 @@ void TDES_decrypt(
 		     &ks[0], &ks[1], &ks[2],
 		     DES_DECRYPT);
 }
-#endif
-#endif // SYM_LIB == OSSL
+#endif // !USE_OPENSSL_FUNCTIONS_SYMMETRIC
+#endif // SYM_LIB_OSSL
