@@ -403,6 +403,7 @@ noinst_HEADERS += \
 	tpm2/PCR_Reset_fp.h \
 	tpm2/PCR_SetAuthPolicy_fp.h \
 	tpm2/PCR_SetAuthValue_fp.h \
+	tpm2/Platform.h \
 	tpm2/PlatformData.h \
 	tpm2/Platform_fp.h \
 	tpm2/PolicyAuthorize_fp.h \
