@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,28 +55,30 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 /* B.2.3.2. TpmToOsslMath.c */
 /* B.2.3.2.1. Introduction */
 /* This file contains the math functions that are not implemented in the BnMath() library
-   (yet). These math functions will call the OpenSSL() library to execute the operations. There is a
-   difference between the internal format and the OpenSSL() format. To call the OpenSSL() function,
+   (yet). These math functions will call the OpenSSL library to execute the operations. There is a
+   difference between the internal format and the OpenSSL format. To call the OpenSSL function,
    a BIGNUM structure is created for each passed variable. The sizes in the bignum_t are copied and
    the d pointer in the BIGNUM is set to point to the d parameter of the bignum_t. On return,
    SetSizeOsslToTpm() is used for each returned variable to make sure that the pointers are not
    changed. The size of the returned BIGGNUM is copied to bignum_t. */
 /* B.2.3.2.2. Includes and Defines */
+
 #include "Tpm.h"
-#if MATH_LIB == OSSL
+#ifdef MATH_LIB_OSSL
 #include "TpmToOsslMath_fp.h"
+
 /* B.2.3.2.3.1. OsslToTpmBn() */
-/* This function converts an OpenSSL() BIGNUM to a TPM bignum. In this implementation it is assumed
-   that OpenSSL() used the same format for a big number as does the TPM -- an array of native-endian
+/* This function converts an OpenSSL BIGNUM to a TPM bignum. In this implementation it is assumed
+   that OpenSSL used the same format for a big number as does the TPM -- an array of native-endian
    words in little-endian order. */
-/* If the array allocated for the OpenSSL() BIGNUM is not the space within the TPM bignum, then the
+/* If the array allocated for the OpenSSL BIGNUM is not the space within the TPM bignum, then the
    data is copied. Otherwise, just the size field of the BIGNUM is copied. */
 void
 OsslToTpmBn(
@@ -468,7 +470,7 @@ EcPointInitialized(
     return P;
 }
 /* B.2.3.2.3.11. BnCurveInitialize() */
-/* This function initializes the OpenSSL() group definition */
+/* This function initializes the OpenSSL group definition */
 /* It is a fatal error if groupContext is not provided. */
 /* Return Values Meaning */
 /* NULL the TPM_ECC_CURVE is not valid */
@@ -619,5 +621,5 @@ BnEccAdd(
     EC_POINT_clear_free(pQ);
     return !BnEqualZero(R->z);
 }
-#endif // TPM_ALG_ECC
-#endif // MATHLIB OSSL
+#endif // ALG_ECC
+#endif // MATH_LIB_OSSL

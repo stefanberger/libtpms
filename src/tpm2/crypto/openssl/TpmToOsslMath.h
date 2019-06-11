@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,27 +55,36 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef TPMTOOSSLMATH_H
-#define TPMTOOSSLMATH_H
+
 
 /* B.2.2.1. TpmToOsslMath.h */
 /* B.2.2.1.1. Introduction */
 /* This file contains the structure definitions used for ECC in the LibTopCrypt() version of the
    code. These definitions would change, based on the library. The ECC-related structures that cross
    the TPM interface are defined in TpmTypes.h */
-#if MATH_LIB == OSSL
+
+#ifndef MATH_LIB_DEFINED
+#define MATH_LIB_DEFINED
+#define MATH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/ec.h>
+#if 0
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#include <openssl/bn_lcl.h>
+#endif
+#endif
 #include <openssl/bn.h>
 #if USE_OPENSSL_FUNCTIONS_ECDSA        // libtpms added begin
 #include <openssl/ecdsa.h>
 #endif                                 // libtpms added end
+
 /* B.2.2.2.2. Macros and Defines */
 /* Make sure that the library is using the correct size for a crypt word */
+
 #if !(defined THIRTY_TWO_BIT || defined SIXTY_FOUR_BIT || defined SIXTY_FOUR_BIT_LONG)
 #error "No architecture found"
 #endif
@@ -122,7 +131,6 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 #define OSSL_LEAVE()     OsslContextLeave(CTX)
 /* This definition would change if there were something to report */
 #define MathLibSimulationEnd()
-#endif // MATH_LIB == OSSL
+#endif // MATH_LIB_DEFINED
 
 
-#endif
