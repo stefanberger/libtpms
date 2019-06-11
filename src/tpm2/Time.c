@@ -3,7 +3,7 @@
 /*		Functions relating to the TPM's time functions 	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Time.c 1259 2018-07-10 19:11:09Z kgoldman $			*/
+/*            $Id: Time.c 1476 2019-06-10 19:32:03Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -105,7 +105,7 @@ TimeNewEpoch(
    start a new epoch even if one is due when TPM_Startup() has not been run. This is because the
    state of NV is not known until startup completes. When Startup is done, then it will create the
    epoch nonce to complete the initializations by calling this function. */
-void
+BOOL
 TimeStartup(
 	    STARTUP_TYPE     type           // IN: start up type
 	    )
@@ -115,7 +115,7 @@ TimeStartup(
     // the same as previously saved.  Otherwise, it is not safe.
     if(!NV_IS_ORDERLY)
 	go.clockSafe = NO;
-    return;
+    return TRUE;
 }
 /* 8.10.3.4 TimeClockUpdate() */
 /* This function updates go.clock. If newTime requires an update of NV, then NV is checked for
