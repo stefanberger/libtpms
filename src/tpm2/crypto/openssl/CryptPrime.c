@@ -318,7 +318,7 @@ RsaAdjustPrimeCandidate(
 }
 /* 10.2.16.1.8 BnGeneratePrimeForRSA() */
 /* Function to generate a prime of the desired size with the proper attributes for an RSA prime. */
-void
+TPM_RC
 BnGeneratePrimeForRSA(
 		      bigNum          prime,
 		      UINT32          bits,
@@ -332,12 +332,17 @@ BnGeneratePrimeForRSA(
     pAssert(prime->allocated >= BITS_TO_CRYPT_WORDS(bits));
     // Only try to handle specific sizes of keys in order to save overhead
     pAssert((bits % 32) == 0);
+    
     prime->size = BITS_TO_CRYPT_WORDS(bits);
+    
     while(!found)
 	{
 	    DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
+	    if(g_inFailureMode)
+		return TPM_RC_FAILURE;
 	    RsaAdjustPrimeCandidate(prime);
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
+    return TPM_RC_SUCCESS;
 }
 #endif // TPM_ALG_RSA
