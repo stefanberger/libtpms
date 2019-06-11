@@ -3,7 +3,7 @@
 /*		NV TPM persistent and state save data  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVReserved.c 1265 2018-07-15 18:29:22Z kgoldman $		*/
+/*            $Id: NVReserved.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -123,7 +123,7 @@ NvPowerOn(
     if(g_powerWasLost)
 	{
 	    if((nvError = _plat__NVEnable(0)) < 0)
-		FAIL_NOCMD(FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
+		LOG_FAILURE(FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
 	    NvInitStatic();
 	}
     return nvError == 0;
