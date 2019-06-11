@@ -373,6 +373,7 @@ noinst_HEADERS += \
 	tpm2/Marshal_fp.h \
 	tpm2/MathOnByteBuffers_fp.h \
 	tpm2/Memory_fp.h \
+	tpm2/MinMax.h \
 	tpm2/NV_Certify_fp.h \
 	tpm2/NV_ChangeAuth_fp.h \
 	tpm2/NV_DefineSpace_fp.h \
