@@ -112,7 +112,7 @@ TPM2_Create(
     TicketComputeCreation(EntityGetHierarchy(in->parentHandle), &newObject->name,
 			  &out->creationHash, &out->creationTicket);
     // Prepare output private data from sensitive
-    SensitiveToPrivate(&newObject->sensitive, &newObject->name.b, parentObject,
+    SensitiveToPrivate(&newObject->sensitive, &newObject->name, parentObject,
 		       publicArea->nameAlg,
 		       &out->outPrivate);
     // Finish by copying the remaining return values
@@ -395,7 +395,7 @@ TPM2_ObjectChangeAuth(
     sensitive = object->sensitive;
     sensitive.authValue = in->newAuth;
     // Protect the sensitive area
-    SensitiveToPrivate(&sensitive, &object->name.b, HandleToObject(in->parentHandle),
+    SensitiveToPrivate(&sensitive, &object->name, HandleToObject(in->parentHandle),
 		       object->publicArea.nameAlg,
 		       &out->outPrivate);
     return TPM_RC_SUCCESS;
@@ -523,7 +523,7 @@ TPM2_CreateLoaded(
     // area
     if(parent != NULL && !derivation)
 	// Prepare output private data from sensitive
-	SensitiveToPrivate(&newObject->sensitive, &newObject->name.b,
+	SensitiveToPrivate(&newObject->sensitive, &newObject->name,
 			   parent, newObject->publicArea.nameAlg,
 			   &out->outPrivate);
     else
