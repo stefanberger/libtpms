@@ -299,4 +299,5 @@
 #   define GET_ATTRIBUTE(a, type, b)					\
     (type)((a & type##_##b) >> type##_##b##_SHIFT)
 #endif
+#define VERIFY(_X) if(!(_X)) goto Error
 #endif // GP_MACROS_H
