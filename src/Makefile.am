@@ -305,6 +305,7 @@ noinst_HEADERS += \
 	tpm2/Bits_fp.h \
 	tpm2/Capabilities.h \
 	tpm2/CertifyCreation_fp.h \
+	tpm2/CertifyX509_fp.h \
 	tpm2/Certify_fp.h \
 	tpm2/ChangeEPS_fp.h \
 	tpm2/ChangePPS_fp.h \
