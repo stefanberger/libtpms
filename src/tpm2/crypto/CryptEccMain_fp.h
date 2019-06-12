@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     	ECC Main					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: CryptEccMain_fp.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -90,6 +90,10 @@ const ECC_CURVE_DATA *
 GetCurveData(
 	     TPM_ECC_CURVE        curveId     // IN: the curveID
 	     );
+const BYTE *
+CryptEccGetOID(
+	       TPM_ECC_CURVE       curveId
+	       );
 LIB_EXPORT TPM_ECC_CURVE
 CryptEccGetCurveByIndex(
 			UINT16               i
