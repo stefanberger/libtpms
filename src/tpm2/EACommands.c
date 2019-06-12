@@ -3,7 +3,7 @@
 /*			    Enhanced Authorization Commands			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EACommands.c 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: EACommands.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -1102,10 +1102,9 @@ TPM2_PolicyTemplate(
 }
 #endif // CC_PolicyTemplateHash
 #include "Tpm.h"
-//#include "PolicyAuthorizeNV_fp.h"
 #if CC_PolicyAuthorizeNV  // Conditional expansion of this file
-#include "PolicyAuthorizeNV_fp.h"
 #include "Policy_spt_fp.h"
+#include "PolicyAuthorizeNV_fp.h"
 TPM_RC
 TPM2_PolicyAuthorizeNV(
 		       PolicyAuthorizeNV_In    *in
