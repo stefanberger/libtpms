@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1442 2019-03-19 17:25:28Z kgoldman $		*/
+/*            $Id: CryptHash.c 1478 2019-06-10 21:15:14Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -65,21 +65,44 @@
 /* 10.2.13.2	Includes, Defines, and Types */
 #define _CRYPT_HASH_C_
 #include "Tpm.h"
+#include "CryptHash_fp.h"
+#include "CryptHash.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
 extern const HASH_INFO   g_hashData[HASH_COUNT + 1];
+#if     ALG_SHA1
+HASH_DEF_TEMPLATE(SHA1, Sha1);
+#endif
+#if     ALG_SHA256
+HASH_DEF_TEMPLATE(SHA256, Sha256);
+#endif
+#if     ALG_SHA384
+HASH_DEF_TEMPLATE(SHA384, Sha384);
+#endif
+#if     ALG_SHA512
+HASH_DEF_TEMPLATE(SHA512, Sha512);
+#endif
+#if ALG_SM3_256
+HASH_DEF_TEMPLATE(SM3_256, Sm3_256);
+#endif
+HASH_DEF NULL_Def = {{0}};
+PHASH_DEF       HashDefArray[] = {
 #if ALG_SHA1
-HASH_DEF_TEMPLATE(SHA1);
+				  &Sha1_Def,
 #endif
 #if ALG_SHA256
-HASH_DEF_TEMPLATE(SHA256);
+				  &Sha256_Def,
 #endif
 #if ALG_SHA384
-HASH_DEF_TEMPLATE(SHA384);
+				  &Sha384_Def,
 #endif
 #if ALG_SHA512
-HASH_DEF_TEMPLATE(SHA512);
+				  &Sha512_Def,
 #endif
-HASH_DEF nullDef = {{0}};
+#if ALG_SM3_256
+				  &Sm3_256_Def,
+#endif
+				  &NULL_Def
+};
 /* 10.2.13.3	Obligatory Initialization Functions */
 /* 10.2.13.3.1	CryptHashInit() */
 /* This function is called by _TPM_Init() do perform the initialization operations for the
@@ -100,7 +123,8 @@ CryptHashStartup(
 		 void
 		 )
 {
-    return TRUE;
+    int         i = sizeof(HashDefArray) / sizeof(PHASH_DEF) - 1;
+    return (i == HASH_COUNT);
 }
 /* 10.2.13.4	Hash Information Access Functions */
 /* 10.2.13.4.1	Introduction */
@@ -113,34 +137,15 @@ CryptGetHashDef(
 		TPM_ALG_ID       hashAlg
 		)
 {
-    PHASH_DEF       retVal;
-    switch(hashAlg)
+    size_t           i;
+#define HASHES  (sizeof(HashDefArray) / sizeof(PHASH_DEF))
+    for(i = 0; i < HASHES; i++)
 	{
-#if ALG_SHA1
-	  case ALG_SHA1_VALUE:
-	    return &SHA1_Def;
-	    break;
-#endif
-#if ALG_SHA256
-	  case ALG_SHA256_VALUE:
-	    retVal = &SHA256_Def;
-	    break;
-#endif
-#if ALG_SHA384
-	  case ALG_SHA384_VALUE:
-	    retVal = &SHA384_Def;
-	    break;
-#endif
-#if ALG_SHA512
-	  case ALG_SHA512_VALUE:
-	    retVal = &SHA512_Def;
-	    break;
-#endif
-	  default:
-	    retVal = &nullDef;
-	    break;
+	    PHASH_DEF p = HashDefArray[i];
+	    if(p->hashAlg == hashAlg)
+		return p;
 	}
-    return retVal;
+    return &NULL_Def;
 }
 /* 10.2.13.4.3	CryptHashIsValidAlg() */
 /* This function tests to see if an algorithm ID is a valid hash algorithm. If flag is true, then
@@ -150,36 +155,14 @@ CryptGetHashDef(
 /*     FALSE(0)	hashAlg is not valid for this TPM */
 BOOL
 CryptHashIsValidAlg(
-		    TPM_ALG_ID       hashAlg,
-		    BOOL             flag
+		    TPM_ALG_ID       hashAlg,           // IN: the algorithm to check
+		    BOOL             flag               // IN: TRUE if TPM_ALG_NULL is to be treated
+		    //     as a valid hash
 		    )
 {
-    switch(hashAlg)
-	{
-#if ALG_SHA1
-	  case ALG_SHA1_VALUE:
-#endif
-#if ALG_SHA256
-	  case ALG_SHA256_VALUE:
-#endif
-#if ALG_SHA384
-	  case ALG_SHA384_VALUE:
-#endif
-#if ALG_SHA512
-	  case ALG_SHA512_VALUE:
-#endif
-#if ALG_SM3_256
-	  case ALG_SM3_256_VALUE:
-#endif
-	    return TRUE;
-	    break;
-	  case ALG_NULL_VALUE:
-	    return flag;
-	    break;
-	  default:
-	    break;
-	}
-    return FALSE;
+    if(hashAlg == TPM_ALG_NULL)
+	return flag;
+    return CryptGetHashDef(hashAlg) != &NULL_Def;
 }
 /* 10.2.13.4.4 GetHashInfoPointer() */
 /* This function returns a pointer to the hash info for the algorithm. If the algorithm is not
@@ -216,9 +199,12 @@ CryptHashGetAlgByIndex(
 		       UINT32           index          // IN: the index
 		       )
 {
+    TPM_ALG_ID       hashAlg;
     if(index >= HASH_COUNT)
-	return TPM_ALG_NULL;
-    return g_hashData[index].alg;
+	hashAlg = TPM_ALG_NULL;
+    else
+	hashAlg = HashDefArray[index]->hashAlg;
+    return hashAlg;
 }
 /* 10.2.13.4.5	CryptHashGetDigestSize() */
 /* Returns the size of the digest produced by the hash. If hashAlg is not a hash algorithm, the TPM
