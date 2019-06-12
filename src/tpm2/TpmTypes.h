@@ -1098,6 +1098,64 @@ typedef UINT32                  TPMA_MODES;
 #define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) {(fips_140_2 << 0)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
+#define TYPE_OF_TPMA_X509_KEY_USAGE UINT32
+#define TPMA_X509_KEY_USAGE_TO_UINT32(a)     (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_X509_KEY_USAGE(a)     (*((TPMA_X509_KEY_USAGE *)&(a)))
+#define TPMA_X509_KEY_USAGE_TO_BYTE_ARRAY(i, a)				\
+    UINT32_TO_BYTE_ARRAY((TPMA_X509_KEY_USAGE_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_X509_KEY_USAGE(i, a)				\
+    {UINT32 x = BYTE_ARRAY_TO_UINT32(a);				\
+	i = UINT32_TO_TPMA_X509_KEY_USAGE(x);				\
+    }
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_X509_KEY_USAGE {                // Table 2:39
+    unsigned    digitalSignature     : 1;
+    unsigned    nonrepudiation       : 1;
+    unsigned    keyEncipherment      : 1;
+    unsigned    dataEncipherment     : 1;
+    unsigned    keyAgreement         : 1;
+    unsigned    keyCertSign          : 1;
+    unsigned    crlSign              : 1;
+    unsigned    encipherOnly         : 1;
+    unsigned    decipherOnly         : 1;
+    unsigned    Reserved_bits_at_9   : 23;
+} TPMA_X509_KEY_USAGE;                              /* Bits */
+/* This is the initializer for a TPMA_X509_KEY_USAGE structure*/
+#define TPMA_X509_KEY_USAGE_INITIALIZER(				\
+					digitalsignature, nonrepudiation,   keyencipherment, \
+					dataencipherment, keyagreement,     keycertsign, \
+					crlsign,          encipheronly,     decipheronly, \
+					bits_at_9)			\
+    {digitalsignature, nonrepudiation,   keyencipherment,		\
+	    dataencipherment, keyagreement,     keycertsign,		\
+	    crlsign,          encipheronly,     decipheronly,		\
+	    bits_at_9}
+#else // USE_BIT_FIELD_STRUCTURES
+/* This implements Table 2:39 TPMA_X509_KEY_USAGE using bit masking */
+typedef UINT32                                  TPMA_X509_KEY_USAGE;
+#define TYPE_OF_TPMA_X509_KEY_USAGE             UINT32
+#define TPMA_X509_KEY_USAGE_digitalSignature    ((TPMA_X509_KEY_USAGE)1 << 0)
+#define TPMA_X509_KEY_USAGE_nonrepudiation      ((TPMA_X509_KEY_USAGE)1 << 1)
+#define TPMA_X509_KEY_USAGE_keyEncipherment     ((TPMA_X509_KEY_USAGE)1 << 2)
+#define TPMA_X509_KEY_USAGE_dataEncipherment    ((TPMA_X509_KEY_USAGE)1 << 3)
+#define TPMA_X509_KEY_USAGE_keyAgreement        ((TPMA_X509_KEY_USAGE)1 << 4)
+#define TPMA_X509_KEY_USAGE_keyCertSign         ((TPMA_X509_KEY_USAGE)1 << 5)
+#define TPMA_X509_KEY_USAGE_crlSign             ((TPMA_X509_KEY_USAGE)1 << 6)
+#define TPMA_X509_KEY_USAGE_encipherOnly        ((TPMA_X509_KEY_USAGE)1 << 7)
+#define TPMA_X509_KEY_USAGE_decipherOnly        ((TPMA_X509_KEY_USAGE)1 << 8)
+/* This is the initializer for a TPMA_X509_KEY_USAGE bit array. */
+#define TPMA_X509_KEY_USAGE_INITIALIZER(				\
+					digitalsignature, nonrepudiation,   keyencipherment, \
+					dataencipherment, keyagreement,     keycertsign, \
+					crlsign,          encipheronly,     decipheronly, \
+					bits_at_9)			\
+    {(digitalsignature << 0) + (nonrepudiation << 1)   +		\
+	    (keyencipherment << 2)  + (dataencipherment << 3) +		\
+	    (keyagreement << 4)     + (keycertsign << 5)      +		\
+	    (crlsign << 6)          + (encipheronly << 7)     +		\
+	    (decipheronly << 8)}
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:39 - Definition of TPMI_YES_NO Type  */
 typedef  BYTE               TPMI_YES_NO;
 /* Table 2:40 - Definition of TPMI_DH_OBJECT Type  */
