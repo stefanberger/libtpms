@@ -264,6 +264,9 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Unique.c \
 	tpm2/Unmarshal.c \
 	tpm2/Vendor_TCG_Test.c \
+	tpm2/X509_ECC.c \
+	tpm2/X509_RSA.c \
+	tpm2/X509_spt.c \
 	tpm_tpm2_interface.c \
 	tpm_tpm2_tis.c \
 	\
@@ -487,6 +490,10 @@ noinst_HEADERS += \
 	tpm2/VendorString.h \
 	tpm2/Vendor_TCG_Test_fp.h \
 	tpm2/VerifySignature_fp.h \
+	tpm2/X509.h \
+	tpm2/X509_ECC_fp.h \
+	tpm2/X509_RSA_fp.h \
+	tpm2/X509_spt_fp.h \
 	tpm2/ZGen_2Phase_fp.h \
 	\
 	tpm2/LibtpmsCallbacks.h \

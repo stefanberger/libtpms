@@ -155,7 +155,16 @@ GetCurveData(
     const ECC_CURVE      *curve = CryptEccGetParametersByCurveId(curveId);
     return (curve != NULL) ? curve->curveData : NULL;
 }
-/* 10.2.12.2.7 CryptEccGetCurveByIndex() */
+/* 10.2.11.2.7	CryptEccGetOID() */
+const BYTE *
+CryptEccGetOID(
+	       TPM_ECC_CURVE       curveId
+	       )
+{
+    const ECC_CURVE         *curve = CryptEccGetParametersByCurveId(curveId);
+    return (curve != NULL) ? curve->OID : NULL;
+}
+/* 10.2.11.2.7 CryptEccGetCurveByIndex() */
 /* This function returns the number of the i-th implemented curve. The normal use would be to call
    this function with i starting at 0. When the i is greater than or equal to the number of
    implemented curves, TPM_ECC_NONE is returned. */
