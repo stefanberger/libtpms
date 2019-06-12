@@ -257,6 +257,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/TestingCommands.c \
 	tpm2/Ticket.c \
 	tpm2/Time.c \
+	tpm2/TpmAsn1.c \
 	tpm2/TpmSizeChecks.c \
 	tpm2/TPMCmdp.c \
 	tpm2/TpmFail.c \
@@ -467,6 +468,8 @@ noinst_HEADERS += \
 	tpm2/Time_fp.h \
 	tpm2/TPMB.h \
 	tpm2/TpmAlgorithmDefines.h \
+	tpm2/TpmAsn1.h \
+	tpm2/TpmAsn1_fp.h \
 	tpm2/TpmBuildSwitches.h \
 	tpm2/TpmError.h \
 	tpm2/TpmFail_fp.h \
