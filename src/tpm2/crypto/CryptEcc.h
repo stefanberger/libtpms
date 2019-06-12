@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEcc.h 1442 2019-03-19 17:25:28Z kgoldman $		*/
+/*            $Id: CryptEcc.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,9 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
-
-#ifndef CRYPTECC_H
-#define CRYPTECC_H
-
 
 /* 10.1.2 CryptEcc.h */
 /* 10.1.2.1 Introduction */
@@ -88,9 +84,9 @@ typedef struct ECC_CURVE
     const TPMT_KDF_SCHEME        kdf;
     const TPMT_ECC_SCHEME        sign;
     const ECC_CURVE_DATA        *curveData; // the address of the curve data
+    const BYTE                  *OID;
     CURVE_NAME_DEF
 } ECC_CURVE;
 extern const ECC_CURVE eccCurves[ECC_CURVE_COUNT];
-#endif
 
 #endif
