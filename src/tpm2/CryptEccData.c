@@ -3,7 +3,7 @@
 /*			ECC curve data 						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccData.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptEccData.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,11 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2018					*/
+/*  (c) Copyright IBM Corp. and others, 2018 - 2019				*/
 /*										*/
 /********************************************************************************/
 
-#include    "Tpm.h"
+/* 10.2.8	CryptEccData.c */
+#include "Tpm.h"
+#include "OIDS.h"
 /* This file contains the ECC curve data. The format of the data depends on the setting of
    USE_BN_ECC_DATA. If it is defined, then the TPM's BigNum() format is used. Otherwise, it is kept
    in TPM2B format. The purpose of having the data in BigNum() format is so that it does not have to
@@ -517,90 +519,98 @@ const ECC_CURVE_DATA SM2_P256 = {
 #define comma
 const ECC_CURVE   eccCurves[] = {
 #if ECC_NIST_P192
-    comma
-    {TPM_ECC_NIST_P192,
-     192,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &NIST_P192
-     CURVE_NAME("NIST_P192")}
+				 comma
+				 {TPM_ECC_NIST_P192,
+				  192,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &NIST_P192,
+				  OID_ECC_NIST_P192
+				  CURVE_NAME("NIST_P192")}
 #   undef comma
 #   define comma ,
 #endif // ECC_NIST_P192
 #if ECC_NIST_P224
-    comma
-    {TPM_ECC_NIST_P224,
-     224,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &NIST_P224
-     CURVE_NAME("NIST_P224")}
+				 comma
+				 {TPM_ECC_NIST_P224,
+				  224,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &NIST_P224,
+				  OID_ECC_NIST_P224
+				  CURVE_NAME("NIST_P224")}
 #   undef comma
 #   define comma ,
 #endif // ECC_NIST_P224
 #if ECC_NIST_P256
-    comma
-    {TPM_ECC_NIST_P256,
-     256,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &NIST_P256
-     CURVE_NAME("NIST_P256")}
+				 comma
+				 {TPM_ECC_NIST_P256,
+				  256,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &NIST_P256,
+				  OID_ECC_NIST_P256
+				  CURVE_NAME("NIST_P256")}
 #   undef comma
 #   define comma ,
 #endif // ECC_NIST_P256
 #if ECC_NIST_P384
-    comma
-    {TPM_ECC_NIST_P384,
-     384,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA384_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &NIST_P384
-     CURVE_NAME("NIST_P384")}
+				 comma
+				 {TPM_ECC_NIST_P384,
+				  384,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA384_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &NIST_P384,
+				  OID_ECC_NIST_P384
+				  CURVE_NAME("NIST_P384")}
 #   undef comma
 #   define comma ,
 #endif // ECC_NIST_P384
 #if ECC_NIST_P521
-    comma
-    {TPM_ECC_NIST_P521,
-     521,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA512_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &NIST_P521
-     CURVE_NAME("NIST_P521")}
+				 comma
+				 {TPM_ECC_NIST_P521,
+				  521,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA512_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &NIST_P521,
+				  OID_ECC_NIST_P521
+				  CURVE_NAME("NIST_P521")}
 #   undef comma
 #   define comma ,
 #endif // ECC_NIST_P521
 #if ECC_BN_P256
-    comma
-    {TPM_ECC_BN_P256,
-     256,
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &BN_P256
-     CURVE_NAME("BN_P256")}
+				 comma
+				 {TPM_ECC_BN_P256,
+				  256,
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &BN_P256,
+				  OID_ECC_BN_P256
+				  CURVE_NAME("BN_P256")}
 #   undef comma
 #   define comma ,
 #endif // ECC_BN_P256
 #if ECC_BN_P638
-    comma
-    {TPM_ECC_BN_P638,
-     638,
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &BN_P638
-     CURVE_NAME("BN_P638")}
+				 comma
+				 {TPM_ECC_BN_P638,
+				  638,
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &BN_P638,
+				  OID_ECC_BN_P638
+				  CURVE_NAME("BN_P638")}
 #   undef comma
 #   define comma ,
 #endif // ECC_BN_P638
 #if ECC_SM2_P256
-    comma
-    {TPM_ECC_SM2_P256,
-     256,
-     {ALG_KDF1_SP800_56A_VALUE, {{ALG_SM3_256_VALUE}}},
-     {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-     &SM2_P256
-     CURVE_NAME("SM2_P256")}
+				 comma
+				 {TPM_ECC_SM2_P256,
+				  256,
+				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SM3_256_VALUE}}},
+				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  &SM2_P256,
+				  OID_ECC_SM2_P256
+				  CURVE_NAME("SM2_P256")}
 #   undef comma
 #   define comma ,
 #endif // ECC_SM2_P256
