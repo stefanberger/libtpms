@@ -132,7 +132,7 @@ typedef UINT32  SYM_MODES;
 #else
 #error "Too many symmetric modes"
 #endif
-typedef struct {
+typedef struct SYMMETRIC_TEST_VECTOR {
     const TPM_ALG_ID     alg;                   // the algorithm
     const UINT16         keyBits;               // bits in the key
     const BYTE          *key;                   // The test key
