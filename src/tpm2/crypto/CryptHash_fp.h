@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash_fp.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: CryptHash_fp.h 1478 2019-06-10 21:15:14Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -91,10 +91,9 @@ LIB_EXPORT UINT16
 CryptHashGetBlockSize(
 		      TPM_ALG_ID       hashAlg        // IN: hash algorithm to look up
 		      );
-LIB_EXPORT UINT16
-CryptHashGetDer(
-		TPM_ALG_ID       hashAlg,       // IN: the algorithm to look up
-		const BYTE      **p
+LIB_EXPORT const BYTE *
+CryptHashGetOid(
+		TPM_ALG_ID      hashAlg
 		);
 TPM_ALG_ID
 CryptHashGetContextAlg(

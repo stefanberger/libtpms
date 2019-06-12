@@ -501,7 +501,6 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/CryptEccMain.c \
 	tpm2/crypto/openssl/CryptEccSignature.c \
 	tpm2/crypto/openssl/CryptHash.c \
-	tpm2/crypto/openssl/CryptHashData.c \
 	tpm2/crypto/openssl/CryptPrime.c \
 	tpm2/crypto/openssl/CryptPrimeSieve.c \
 	tpm2/crypto/openssl/CryptRand.c \

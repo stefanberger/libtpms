@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -69,7 +69,6 @@
 #include "CryptHash.h"
 #include "OIDS.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
-extern const HASH_INFO   g_hashData[HASH_COUNT + 1];
 #if     ALG_SHA1
 HASH_DEF_TEMPLATE(SHA1, Sha1);
 #endif
@@ -165,28 +164,6 @@ CryptHashIsValidAlg(
 	return flag;
     return CryptGetHashDef(hashAlg) != &NULL_Def;
 }
-/* 10.2.13.4.4 GetHashInfoPointer() */
-/* This function returns a pointer to the hash info for the algorithm. If the algorithm is not
-   supported, function returns a pointer to the data block associated with TPM_ALG_NULL. */
-/* NOTE: The data structure must have a digest size of 0 for TPM_ALG_NULL. */
-static
-const HASH_INFO *
-GetHashInfoPointer(
-		   TPM_ALG_ID       hashAlg
-		   )
-{
-    UINT32              i;
-    //
-    // TPM_ALG_NULL is the stop value so search up to it
-    for(i = 0; i < HASH_COUNT; i++)
-	{
-	    if(g_hashData[i].alg == hashAlg)
-		return &g_hashData[i];
-	}
-    // either the input was TPM_ALG_NUL or we didn't find the requested algorithm
-    // in either case return a pointer to the TPM_ALG_NULL "hash" descriptor
-    return &g_hashData[HASH_COUNT];
-}
 /* 10.2.13.4.4 CryptHashGetAlgByIndex() */
 /* This function is used to iterate through the hashes. TPM_ALG_NULL is returned for all indexes
    that are not valid hashes. If the TPM implements 3 hashes, then an index value of 0 will return
@@ -242,19 +219,6 @@ CryptHashGetOid(
 		)
 {
     return CryptGetHashDef(hashAlg)->OID;
-}
-/* 10.2.13.4.8 CryptHashGetDer */
-/* This function returns a pointer to the DER string for the algorithm and indicates its size. */
-LIB_EXPORT UINT16
-CryptHashGetDer(
-		TPM_ALG_ID       hashAlg,       // IN: the algorithm to look up
-		const BYTE      **p
-		)
-{
-    const HASH_INFO       *q;
-    q = GetHashInfoPointer(hashAlg);
-    *p = &q->der[0];
-    return q->derSize;
 }
 /* 10.2.13.4.8	CryptHashGetContextAlg() */
 /* This function returns the hash algorithm associated with a hash context. */
