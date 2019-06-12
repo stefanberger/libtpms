@@ -933,15 +933,16 @@ CryptCreateObject(
 		  )
 {
     TPMT_PUBLIC             *publicArea = &object->publicArea;
+    TPMT_SENSITIVE          *sensitive = &object->sensitive;
     TPM_RC                   result = TPM_RC_SUCCESS;
     //
     // Set the sensitive type for the object
-    object->sensitive.sensitiveType = publicArea->type;
+    sensitive->sensitiveType = publicArea->type;
     // For all objects, copy the initial authorization data
-    object->sensitive.authValue = sensitiveCreate->userAuth;
+    sensitive->authValue = sensitiveCreate->userAuth;
     // If the TPM is the source of the data, set the size of the provided data to
     // zero so that there's no confusion about what to do.
-    if(IS_ATTRIBUTE(object->publicArea.objectAttributes,
+    if(IS_ATTRIBUTE(publicArea->objectAttributes,
 		    TPMA_OBJECT, sensitiveDataOrigin))
 	sensitiveCreate->data.t.size = 0;
     // Generate the key and unique fields for the asymmetric keys and just the
@@ -959,17 +960,15 @@ CryptCreateObject(
 #if ALG_ECC
 	    // Create ECC key
 	  case TPM_ALG_ECC:
-	    result = CryptEccGenerateKey(&object->publicArea, &object->sensitive,
-					 rand);
+	    result = CryptEccGenerateKey(publicArea, sensitive, rand);
 	    break;
 #endif // TPM_ALG_ECC
 	  case TPM_ALG_SYMCIPHER:
-	    result = CryptGenerateKeySymmetric(&object->publicArea,
-					       &object->sensitive,
+	    result = CryptGenerateKeySymmetric(publicArea, sensitive,
 					       sensitiveCreate, rand);
 	    break;
 	  case TPM_ALG_KEYEDHASH:
-	    result = CryptGenerateKeyedHash(&object->publicArea, &object->sensitive,
+	    result = CryptGenerateKeyedHash(publicArea, sensitive,
 					    sensitiveCreate, rand);
 	    break;
 	  default:
@@ -988,17 +987,17 @@ CryptCreateObject(
 	    DRBG_AdditionalData((DRBG_STATE *)rand, &gp.ehProof.b);
 	}
     // Generate a seedValue that is the size of the digest produced by nameAlg
-    object->sensitive.seedValue.t.size =
+    sensitive->seedValue.t.size =
 	DRBG_Generate(rand, object->sensitive.seedValue.t.buffer,
 		      CryptHashGetDigestSize(publicArea->nameAlg));
-    if(object->sensitive.seedValue.t.size == 0)
+    if(sensitive->seedValue.t.size == 0)
 	return TPM_RC_NO_RESULT;
     // For symmetric objects, need to compute the unique value for the public area
     if(publicArea->type == TPM_ALG_SYMCIPHER
        || publicArea->type == TPM_ALG_KEYEDHASH)
 	{
-	    CryptComputeSymmetricUnique(&object->publicArea, &object->sensitive,
-					&object->publicArea.unique.sym);
+	    CryptComputeSymmetricUnique(publicArea, sensitive,
+					&publicArea->unique.sym);
 	}
     else
 	{
@@ -1006,11 +1005,11 @@ CryptCreateObject(
 	    // get rid of the seed.
 	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)
 	       || !IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, restricted))
-		memset(&object->sensitive.seedValue, 0,
-		       sizeof(object->sensitive.seedValue));
+		memset(&sensitive->seedValue, 0,
+		       sizeof(sensitive->seedValue));
 	}
     // Compute the name
-    PublicMarshalAndComputeName(&object->publicArea, &object->name);
+    PublicMarshalAndComputeName(publicArea, &object->name);
     return result;
 }
 /* 10.2.6.6.9 CryptGetSignHashAlg() */
