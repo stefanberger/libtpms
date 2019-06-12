@@ -562,7 +562,7 @@ BnEccGetPrivate(
     OK = OK && BnSubWord(nMinus1, order, 1);
     OK = OK && BnMod(bnExtraBits, nMinus1);
     OK = OK && BnAddWord(dOut, bnExtraBits, 1);
-    return OK;
+    return OK && !g_inFailureMode;
 }
 #else                                  // libtpms added begin
 BOOL
@@ -589,7 +589,7 @@ BnEccGetPrivate(
     OK = OK && BnSubWord(nMinus1, order, 1);
     OK = OK && BnMod(bnExtraBits, nMinus1);
     OK = OK && BnAddWord(dOut, bnExtraBits, 1);
-    return OK;
+    return OK && !g_inFailureMode;
 }
 #endif // USE_OPENSSL_FUNCTIONS_EC        libtpms added end
 /* 10.2.11.2.21 BnEccGenerateKeyPair() */
@@ -766,6 +766,8 @@ CryptEccGenerateKey(
 	    digest.t.size = MIN(sensitive->sensitive.ecc.t.size, sizeof(digest.t.buffer));
 	    // Get a random value to sign using the built in DRBG state
 	    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
+	    if(g_inFailureMode)
+		return TPM_RC_FAILURE;
 	    BnSignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
 	    // and make sure that we can validate the signature
 	    OK = BnValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest) == TPM_RC_SUCCESS;

@@ -3,7 +3,7 @@
 /*			Interfaces to the CryptoEngine()			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -181,12 +181,12 @@ CryptGenerateKeyedHash(
 	}
     else
 	{
-	    // The TPM is going to generate the data, so set the size to be the
+	    // The TPM is going to generate the data so set the size to be the
 	    // size of the digest of the algorithm
 	    sensitive->sensitive.bits.t.size =
 		DRBG_Generate(rand, sensitive->sensitive.bits.t.buffer, digestSize);
 	    if(sensitive->sensitive.bits.t.size == 0)
-		return TPM_RC_NO_RESULT;
+		return (g_inFailureMode) ? TPM_RC_FAILURE : TPM_RC_NO_RESULT;
 	}
     return TPM_RC_SUCCESS;
 }
@@ -308,15 +308,17 @@ CryptGenerateKeySymmetric(
 	}
 #endif
     else
-	{
-	    {
-		sensitive->sensitive.sym.t.size =
-		    DRBG_Generate(rand, sensitive->sensitive.sym.t.buffer,
-				  BITS_TO_BYTES(keyBits));
-		result = (sensitive->sensitive.sym.t.size == 0)
-			 ? TPM_RC_NO_RESULT : TPM_RC_SUCCESS;
-	    }
-	}
+    {
+	sensitive->sensitive.sym.t.size =
+	    DRBG_Generate(rand, sensitive->sensitive.sym.t.buffer,
+			  BITS_TO_BYTES(keyBits));
+	if(g_inFailureMode)
+	    result = TPM_RC_FAILURE;
+	else if(sensitive->sensitive.sym.t.size == 0)
+	    result = TPM_RC_NO_RESULT;
+	else
+	    result = TPM_RC_SUCCESS;
+    }
     return result;
 }
 /* 10.2.6.4.4 CryptXORObfuscation() */
@@ -990,7 +992,9 @@ CryptCreateObject(
     sensitive->seedValue.t.size =
 	DRBG_Generate(rand, object->sensitive.seedValue.t.buffer,
 		      CryptHashGetDigestSize(publicArea->nameAlg));
-    if(sensitive->seedValue.t.size == 0)
+    if(g_inFailureMode)
+	return TPM_RC_FAILURE;
+    else if(sensitive->seedValue.t.size == 0)
 	return TPM_RC_NO_RESULT;
     // For symmetric objects, need to compute the unique value for the public area
     if(publicArea->type == TPM_ALG_SYMCIPHER

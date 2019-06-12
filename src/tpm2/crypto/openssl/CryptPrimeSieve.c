@@ -3,7 +3,7 @@
 /*			     CryptPrimeSieve					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrimeSieve.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: CryptPrimeSieve.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -451,7 +451,7 @@ PrimeSelectWithSieve(
 	}
     // Ran out of bits and couldn't find a prime in this field
     INSTRUMENT_INC(noPrimeFields[PrimeIndex]);
-    return TPM_RC_NO_RESULT;
+    return (g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_NO_RESULT);
 }
 
 #if RSA_INSTRUMENT
