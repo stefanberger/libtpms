@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1265 2018-07-15 18:29:22Z kgoldman $		*/
+/*            $Id: CryptHash.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -68,14 +68,9 @@
    space to be reserved for the hash state. This allows the TPM code to not have to import all of
    the symbols used by the hash computations. This lets the build environment of the TPM code not to
    have include the header files associated with the CryptoEngine() code. */
-typedef struct
-{
-    const TPM_ALG_ID     alg;
-    const UINT16         digestSize;
-    const UINT16         blockSize;
-    const UINT16         derSize;
-    const BYTE           der[20];
-} HASH_INFO;
+
+/* 10.1.3.2	Hash-related Structures */
+
 union SMAC_STATES;
 
 /* These definitions add the high-level methods for processing state that may be an SMAC */
@@ -296,7 +291,7 @@ typedef struct _HASH_STATE
 } HASH_STATE, *PHASH_STATE;
 typedef const HASH_STATE *PCHASH_STATE;
 
-/* 10.1.3.2 HMAC State Structures */
+/* 10.1.3.3 HMAC State Structures */
 /* This header contains the hash structure definitions used in the TPM code to define the amount of
    space to be reserved for the hash state. This allows the TPM code to not have to import all of
    the symbols used by the hash computations. This lets the build environment of the TPM code not to
@@ -310,7 +305,6 @@ typedef struct hmacState
     HASH_STATE           hashState;          // the hash state
     TPM2B_HASH_BLOCK     hmacKey;            // the HMAC key
 } HMAC_STATE, *PHMAC_STATE;
-extern const HASH_INFO   g_hashData[HASH_COUNT + 1];
 /* This is for the external hash state. This implementation assumes that the size of the exported
    hash state is no larger than the internal hash state. There is a run time check that makes sure
    that this i. */
