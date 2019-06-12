@@ -67,6 +67,7 @@
 #include "Tpm.h"
 #include "CryptHash_fp.h"
 #include "CryptHash.h"
+#include "OIDS.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
 extern const HASH_INFO   g_hashData[HASH_COUNT + 1];
 #if     ALG_SHA1
@@ -231,6 +232,16 @@ CryptHashGetBlockSize(
 		      )
 {
     return CryptGetHashDef(hashAlg)->blockSize;
+}
+/* 10.2.13.4.7	CryptHashGetOid() */
+/* This function returns a pointer to DER=encoded OID for a hash algorithm. All OIDs are full OID
+   values including the Tag (0x06) and length byte. */
+LIB_EXPORT const BYTE *
+CryptHashGetOid(
+		TPM_ALG_ID      hashAlg
+		)
+{
+    return CryptGetHashDef(hashAlg)->OID;
 }
 /* 10.2.13.4.8 CryptHashGetDer */
 /* This function returns a pointer to the DER string for the algorithm and indicates its size. */
