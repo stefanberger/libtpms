@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1451 2019-04-02 14:07:17Z kgoldman $		*/
+/*            $Id: Marshal.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -1043,6 +1043,16 @@ TPMS_NV_CERTIFY_INFO_Marshal(TPMS_NV_CERTIFY_INFO *source, BYTE **buffer, INT32 
     return written;
 }
 
+/* Table 125 - Definition of TPMS_NV_DIGEST_CERTIFY_INFO Structure <OUT> */
+UINT16
+TPMS_NV_DIGEST_CERTIFY_INFO_Marshal(TPMS_NV_DIGEST_CERTIFY_INFO *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM2B_NAME_Marshal(&source->indexName, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&source->nvDigest, buffer, size);
+    return written;
+}
+
 /* Table 2:121 - Definition of TPMI_ST_ATTEST Type (InterfaceTable()) */
 
 UINT16
@@ -1081,6 +1091,9 @@ TPMU_ATTEST_Marshal(TPMU_ATTEST  *source, BYTE **buffer, INT32 *size, UINT32 sel
 	break;
       case TPM_ST_ATTEST_NV:
 	written += TPMS_NV_CERTIFY_INFO_Marshal(&source->nv, buffer, size);
+	break;
+      case TPM_ST_ATTEST_NV_DIGEST:
+	written += TPMS_NV_DIGEST_CERTIFY_INFO_Marshal(&source->nvDigest, buffer, size);
 	break;
       default:
 	pAssert(FALSE);
@@ -1433,7 +1446,7 @@ TPMS_KEY_SCHEME_ECDH_Marshal(TPMS_KEY_SCHEME_ECDH *source, BYTE **buffer, INT32 
 }
 
 UINT16
-TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV *source, BYTE **buffer, INT32 *size)
+TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV*source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
