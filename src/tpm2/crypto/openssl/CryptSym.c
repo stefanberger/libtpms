@@ -3,7 +3,7 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1370 2018-11-02 19:39:07Z kgoldman $		*/
+/*            $Id: CryptSym.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -64,10 +64,27 @@
 /* This file contains the implementation of the symmetric block cipher modes allowed for a
    TPM. These functions only use the single block encryption functions of the selected symmetric
    crypto library. */
-/* 10.2.19.2 Includes, Defines, and Typedefs */
+
+/* 10.2.19.2	Includes, Defines, and Typedefs */
 #include "Tpm.h"
 #include "CryptSym.h"
 #include "Helpers_fp.h"  // libtpms changed
+#define     KEY_BLOCK_SIZES(ALG, alg)					\
+    static const INT16       alg##KeyBlockSizes[] = {			\
+						     ALG##_KEY_SIZES_BITS, -1, ALG##_BLOCK_SIZES };
+#if ALG_AES
+KEY_BLOCK_SIZES(AES, aes);
+#endif // ALG_AES
+#if ALG_SM4
+KEY_BLOCK_SIZES(SM4, sm4);
+#endif
+#if ALG_CAMELLIA
+KEY_BLOCK_SIZES(CAMELLIA, camellia);
+#endif
+#if ALG_TDES
+KEY_BLOCK_SIZES(TDES, tdes);
+#endif
+
 /* 10.2.19.3.1	CryptSymInit() */
 /* This function is called to do _TPM_Init() processing */
 BOOL
@@ -88,73 +105,57 @@ CryptSymStartup(
 }
 /* 10.2.20.4 Data Access Functions */
 /* 10.2.20.4.1 CryptGetSymmetricBlockSize() */
-/* This function returns the block size of the algorithm. */
+/* This function returns the block size of the algorithm. The table of bit sizes has an entry for
+   each allowed key size. The entry for a key size is 0 if the TPM does not implement that key
+   size. The key size table is delimited with a negative number (-1). After the delimiter is a list
+   of block sizes with each entry corresponding to the key bit size. For most symmetric algorithms,
+   the block size is the same regardless of the key size but this arrangement allows them to be
+   different. */
 /* Return Values Meaning */
 /* <= 0 cipher not supported */
 /* > 0 the cipher block size in bytes */
+
 LIB_EXPORT INT16
 CryptGetSymmetricBlockSize(
 			   TPM_ALG_ID      symmetricAlg,   // IN: the symmetric algorithm
 			   UINT16          keySizeInBits   // IN: the key size
 			   )
 {
+    const INT16    *sizes;
+    INT16            i;
+#define ALG_CASE(SYM, sym)  case ALG_##SYM##_VALUE: sizes = sym##KeyBlockSizes; break
     switch(symmetricAlg)
 	{
 #if ALG_AES
-	  case ALG_AES_VALUE:
-	    switch(keySizeInBits)
-		{
-		  case 128:
-		    return AES_128_BLOCK_SIZE_BYTES;
-		  case 192:
-		    return AES_192_BLOCK_SIZE_BYTES;
-		  case 256:
-		    return AES_256_BLOCK_SIZE_BYTES;
-		  default:
-		    break;
-		}
-	    break;
+	    ALG_CASE(AES, aes);
 #endif
 #if ALG_SM4
-	  case ALG_SM4_VALUE:
-	    switch(keySizeInBits)
-		{
-		  case 128:
-		    return SM4_128_BLOCK_SIZE_BYTES;
-		  default:
-		    break;
-		}
+	    ALG_CASE(SM4, sm4);
 #endif
 #if ALG_CAMELLIA
-	  case ALG_CAMELLIA_VALUE:
-	    switch(keySizeInBits)
-		{
-		  case 128:
-		    return CAMELLIA_128_BLOCK_SIZE_BYTES;
-		  case 192:
-		    return CAMELLIA_192_BLOCK_SIZE_BYTES;
-		  case 256:
-		    return CAMELLIA_256_BLOCK_SIZE_BYTES;
-		  default:
-		    break;
-		}
+	    ALG_CASE(CAMELLIA, camellia);
 #endif
 #if ALG_TDES
-	  case ALG_TDES_VALUE:
-	    switch(keySizeInBits)
-		{
-		  case 128:
-		    return TDES_128_BLOCK_SIZE_BYTES;
-		  case 192:
-		    return TDES_192_BLOCK_SIZE_BYTES;
-		  default:
-		    break;
-		}
+	    ALG_CASE(TDES, tdes);
 #endif
 	  default:
-	    break;
+	    return 0;
 	}
-    return 0;
+    // Find the index of the indicated keySizeInBits
+    for(i = 0; *sizes >= 0; i++, sizes++)
+	{
+	    if(*sizes == keySizeInBits)
+		break;
+	}
+    // If sizes is pointing at the end of the list of key sizes, then the desired
+    // key size was not found so set the block size to zero.
+    if(*sizes++ < 0)
+	return 0;
+    // Advance until the end of the list is found
+    while(*sizes++ >= 0);
+    // sizes is pointing to the first entry in the list of block sizes. Use the
+    // ith index to find the block size for the corresponding key size.
+    return sizes[i];
 }
 
 #if !USE_OPENSSL_FUNCTIONS_SYMMETRIC // libtpms added
