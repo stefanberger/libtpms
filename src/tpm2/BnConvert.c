@@ -129,7 +129,7 @@ BnFrom2B(
 }
 /* 10.2.2.3.3 BnFromHex() */
 /* Convert a hex string into a bigNum. This is primarily used in debugging. */
-#ifdef _SM2_SIGN_DEBUG
+#ifdef _SM2_SIGN_DEBUG                 // libtpms added
 LIB_EXPORT bigNum
 BnFromHex(
 	  bigNum          bn,         // OUT:
@@ -170,7 +170,7 @@ BnFromHex(
     BnSetTop(bn, wordCount);
     return bn;
 }
-#endif
+#endif                                 // libtpms added
 /* 10.2.2.3.4 BnToBytes() */
 /* This function converts a BIG_NUM to a byte array. It converts the bigNum to a big-endian byte
    string and sets size to the normalized value. If size is an input 0, then the receiving buffer is
