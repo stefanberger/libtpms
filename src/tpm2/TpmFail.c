@@ -3,7 +3,7 @@
 /*			     Failure Mode Handling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmFail.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: TpmFail.c 1478 2019-06-10 21:15:14Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -222,7 +222,7 @@ TpmLogFailure(
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
 #if FAIL_TRACE
-    s_failFunction = *(UINT32 *)&function;
+    s_failFunction = *(UINT32 *)&function;	/* kgold */
     s_failLine = line;
 #else
     s_failFunction = 0;
@@ -260,7 +260,7 @@ TpmFail(
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
 #if FAIL_TRACE
-    s_failFunction = *(UINT32 *)&function;
+    memcpy(&s_failFunction, function, sizeof(uint32_t));
     s_failLine = line;
 #else
     s_failFunction = (UINT32)NULL;
