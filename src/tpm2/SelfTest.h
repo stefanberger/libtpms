@@ -104,16 +104,6 @@ typedef struct SYMMETRIC_TEST_VECTOR {
     const BYTE          *dataIn;                // data to encrypt
     const BYTE          *dataOut[NUM_SYM_MODES];// data to decrypt
 } SYMMETRIC_TEST_VECTOR;
-#if ALG_RSA
-extern const RSA_KEY        c_rsaTestKey; // This is a constant structure
-#endif
-#define SYM_TEST_VALUE_REF(value, alg, keyBits, mode)		\
-    SIZED_REFERENCE(value##_##alg##keyBits##_##mode)
-typedef struct {
-    TPM_ALG_ID      alg;
-    UINT16          keySizeBits;
-} SYM_ALG;
-#define SET_ALG(ALG, v)  MemorySetBit((v), ALG, sizeof(v) * 8)
 #if ALG_SHA512
 #       define  DEFAULT_TEST_HASH               ALG_SHA512_VALUE
 #       define  DEFAULT_TEST_DIGEST_SIZE        SHA512_DIGEST_SIZE
