@@ -72,7 +72,7 @@
 #include "TpmTypes.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
-#include "tpm_library_intern.h"
+#include "tpm_library_intern.h"  // libtpms added
 
 /*     9.17.2 Typedefs */
 /* These defines are used primarily for sizing of the local response buffer. */
