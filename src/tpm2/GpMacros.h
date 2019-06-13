@@ -190,7 +190,9 @@
 #endif
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
 #define JOIN(x,y) x##y
+#define JOIN3(x, y, z) x##y##z
 #define CONCAT(x,y) JOIN(x, y)
+#define CONCAT3(x, y, z) JOIN3(x,y,z)
 /*     If CONTEXT_INTEGRITY_HASH_ALG is defined, then the vendor is using the old style
        table. Otherwise, pick the strongest implemented hash algorithm as the context hash. */
 #ifndef CONTEXT_HASH_ALGORITHM
@@ -265,12 +267,27 @@
 #endif	// !SKIP_PROOF_ERRORS
 
 /* If CONTEXT_ENCRYPT_ALG is defined, then the vendor is using the old style table */
-#ifndef CONTEXT_ENCRYPT_ALG
-#define CONTEXT_ENCRYPT_ALG             CONCAT(TPM_ALG_, CONTEXT_ENCRYPT_ALGORITHM)
+#if defined CONTEXT_ENCRYPT_ALG
+#   undef CONTEXT_ENCRYPT_ALGORITHM
+#   if CONTEXT_ENCRYPT_ALG == ALG_AES_VALUE
+#       define CONTEXT_ENCRYPT_ALGORITHM  AES
+#   elif CONTEXT_ENCRYPT_ALG == ALG_SM4_VALUE
+#       define CONTEXT_ENCRYPT_ALGORITHM  SM4
+#   elif CONTEXT_ENCRYPT_ALG == ALG_CAMELLIA_VALUE
+#       define CONTEXT_ENCRYPT_ALGORITHM  CAMELLIA
+#   elif CONTEXT_ENCRYPT_ALG == ALG_TDES_VALUE
+#   error Are you kidding?
+#   else
+#       error Unknown value for CONTEXT_ENCRYPT_ALG
+#   endif // CONTEXT_ENCRYPT_ALG == ALG_AES_VALUE
+#else
+#   define CONTEXT_ENCRYPT_ALG						\
+    CONCAT3(ALG_, CONTEXT_ENCRYPT_ALGORITHM, _VALUE)
+#endif  // CONTEXT_ENCRYPT_ALG
 #define CONTEXT_ENCRYPT_KEY_BITS					\
-    CONCAT(CONCAT(MAX_, CONTEXT_ENCRYPT_ALGORITHM), _KEY_BITS)
+    CONCAT(CONTEXT_ENCRYPT_ALGORITHM, _MAX_KEY_SIZE_BITS)
 #define CONTEXT_ENCRYPT_KEY_BYTES       ((CONTEXT_ENCRYPT_KEY_BITS+7)/8)
-#endif
+
 /* This is updated to follow the requirement of P2 that the label not be larger than 32 bytes. */
 #ifndef LABEL_MAX_BUFFER
 #define LABEL_MAX_BUFFER MIN(32, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
