@@ -3,7 +3,7 @@
 /*			Performs the manufacturing of the TPM			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Manufacture_fp.h 1451 2019-04-02 14:07:17Z kgoldman $		*/
+/*            $Id: Manufacture_fp.h 1478 2019-06-10 21:15:14Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef MANUFACTURE_FP_H
 #define MANUFACTURE_FP_H
+
+#include "CompilerDependencies.h"	/* kgold */
 
 LIB_EXPORT int
 TPM_Manufacture(
