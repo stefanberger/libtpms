@@ -757,6 +757,18 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  AC_FIRST                (TPM_HC)((HR_AC+0))
 #define  AC_LAST                 (TPM_HC)((HR_AC+0x0000FFFF))
 
+#define TYPE_OF_TPMA_ALGORITHM  UINT32
+#define TPMA_ALGORITHM_TO_UINT32(a)  (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_ALGORITHM(a)  (*((TPMA_ALGORITHM *)&(a)))
+
+#define TPMA_ALGORITHM_TO_BYTE_ARRAY(i, a)				\
+	            UINT32_TO_BYTE_ARRAY((TPMA_ALGORITHM_TO_UINT32(i)), (a))
+
+#define BYTE_ARRAY_TO_TPMA_ALGORITHM(i, a)				\
+    {UINT32 x = BYTE_ARRAY_TO_UINT32(a);				\
+	i = UINT32_TO_TPMA_ALGORITHM(x);				\
+    }
+
 /* Table 2:30 - Definition of TPMA_ALGORITHM Bits */
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_ALGORITHM{
@@ -986,6 +998,16 @@ typedef UINT32                              TPMA_PERMANENT;
 	    (lockoutauthset << 2)     + (disableclear << 8)       +	\
 	    (inlockout << 9)          + (tpmgeneratedeps << 10)}
 #endif // USE_BIT_FIELD_STRUCTURES
+
+#define TYPE_OF_TPMA_STARTUP_CLEAR  UINT32
+#define TPMA_STARTUP_CLEAR_TO_UINT32(a)  (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_STARTUP_CLEAR(a)  (*((TPMA_STARTUP_CLEAR *)&(a)))
+#define TPMA_STARTUP_CLEAR_TO_BYTE_ARRAY(i, a)				\
+    UINT32_TO_BYTE_ARRAY((TPMA_STARTUP_CLEAR_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_STARTUP_CLEAR(i, a)				\
+    {UINT32 x = BYTE_ARRAY_TO_UINT32(a);				\
+	i = UINT32_TO_TPMA_STARTUP_CLEAR(x);				\
+    }
 
 /* Table 2:35 - Definition of TPMA_STARTUP_CLEAR Bits */
 #if USE_BIT_FIELD_STRUCTURES
@@ -1251,6 +1273,15 @@ typedef union {
 #if 	ALG_SM3_256
     BYTE                    sm3_256[SM3_256_DIGEST_SIZE];
 #endif   // ALG_SM3_256
+#if ALG_SHA3_256
+    BYTE                    sha3_256[SHA3_256_DIGEST_SIZE];
+#endif // ALG_SHA3_256
+#if ALG_SHA3_384
+    BYTE                    sha3_384[SHA3_384_DIGEST_SIZE];
+#endif // ALG_SHA3_384
+#if ALG_SHA3_512
+    BYTE                    sha3_512[SHA3_512_DIGEST_SIZE];
+#endif // ALG_SHA3_512
 } TPMU_HA;
 /* Table 2:72 - Definition of TPMT_HA Structure  */
 typedef struct {
