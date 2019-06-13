@@ -424,8 +424,6 @@ CryptStartup(
 	    MemorySet(gr.commitArray, 0, sizeof(gr.commitArray));
 	}
 #endif // TPM_ALG_ECC
-    g_inFailureMode = !OK; // libtpms added
-
     return OK;
 }
 /* 10.2.6.6 Algorithm-Independent Functions */
