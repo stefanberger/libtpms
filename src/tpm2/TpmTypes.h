@@ -315,11 +315,11 @@ typedef  UINT32             TPM_SPEC;
 #define TPM_SPEC_FAMILY         (TPM_SPEC)(SPEC_FAMILY)
 #define SPEC_LEVEL              00
 #define TPM_SPEC_LEVEL          (TPM_SPEC)(SPEC_LEVEL)
-#define SPEC_VERSION            150
+#define SPEC_VERSION            155
 #define TPM_SPEC_VERSION        (TPM_SPEC)(SPEC_VERSION)
-#define SPEC_YEAR               2018
+#define SPEC_YEAR               2019
 #define TPM_SPEC_YEAR           (TPM_SPEC)(SPEC_YEAR)
-#define SPEC_DAY_OF_YEAR        262
+#define SPEC_DAY_OF_YEAR        107
 #define TPM_SPEC_DAY_OF_YEAR    (TPM_SPEC)(SPEC_DAY_OF_YEAR)
 
 /* Table 2:7 - Definition of TPM_GENERATED Constants */
