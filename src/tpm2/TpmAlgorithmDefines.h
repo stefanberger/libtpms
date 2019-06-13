@@ -346,6 +346,7 @@
 					  + (ADD_FILL || CC_AC_GetCapability)                     /* 0x00000194 */ \
 					  + (ADD_FILL || CC_AC_Send)                              /* 0x00000195 */ \
 					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 /* 0x00000196 */ \
+					  + (ADD_FILL || CC_CertifyX509)                          /* 0x00000197 */ \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   (0 + CC_Vendor_TCG_Test)

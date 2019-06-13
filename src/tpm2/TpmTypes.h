@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -290,6 +290,7 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_AC_GetCapability             (TPM_CC)(0x00000194)
 #define TPM_CC_AC_Send                      (TPM_CC)(0x00000195)
 #define TPM_CC_Policy_AC_SendSelect         (TPM_CC)(0x00000196)
+#define TPM_CC_CertifyX509                  (TPM_CC)(0x00000197)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 
