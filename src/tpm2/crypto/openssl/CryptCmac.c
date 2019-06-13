@@ -87,7 +87,7 @@ CryptCmacStart(
     //
     if(macAlg != TPM_ALG_CMAC)
 	return 0;
-    MemorySet(cState, 0, sizeof(*cState));
+    MemorySet(cState, 0, sizeof(*cState));  // libtpms bugfix
     // set up the encryption algorithm and parameters
     cState->symAlg = def->algorithm;
     cState->keySizeBits = def->keyBits.sym;
