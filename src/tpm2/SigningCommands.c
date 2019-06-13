@@ -3,7 +3,7 @@
 /*		Signing and Signature Verification	   			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SigningCommands.c 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: SigningCommands.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -117,6 +117,11 @@ TPM2_Sign(
     // Input Validation
     if(!IsSigningObject(signObject))
 	return TPM_RCS_KEY + RC_Sign_keyHandle;
+    
+    // A key that will be used for x.509 signatures can't be used in TPM2_Sign().
+    if(IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, x509sign))
+	return TPM_RCS_ATTRIBUTES + RC_Sign_keyHandle;
+
     // pick a scheme for sign.  If the input sign scheme is not compatible with
     // the default scheme, return an error.
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
