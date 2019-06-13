@@ -3,7 +3,7 @@
 /*			Managing and accessing the hierarchy-related values   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy.c 1389 2018-12-03 22:31:00Z kgoldman $		*/
+/*            $Id: Hierarchy.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 /* 8.3 Hierarchy.c */
@@ -175,12 +175,9 @@ HierarchyGetProof(
 	    // shProof for TPM_RH_OWNER
 	    proof = &gp.shProof;
 	    break;
-	  case TPM_RH_NULL:
-	    // nullProof for TPM_RH_NULL
-	    proof = &gr.nullProof;
-	    break;
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
+	    // nullProof for TPM_RH_NULL or anything else
+	    proof = &gr.nullProof;
 	    break;
 	}
     return proof;
@@ -204,10 +201,8 @@ HierarchyGetPrimarySeed(
 	  case TPM_RH_ENDORSEMENT:
 	    seed = &gp.EPSeed;
 	    break;
-	  case TPM_RH_NULL:
-	    return &gr.nullSeed;
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
+	    seed = &gr.nullSeed;
 	    break;
 	}
     return seed;
@@ -239,7 +234,7 @@ HierarchyIsEnabled(
 	    enabled = TRUE;
 	    break;
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
+	    enabled = FALSE;
 	    break;
 	}
     return enabled;
