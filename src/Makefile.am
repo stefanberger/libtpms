@@ -205,6 +205,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/CryptSelfTest.c \
 	tpm2/CryptUtil.c \
 	tpm2/DA.c \
+	tpm2/DebugHelpers.c \
 	tpm2/DictionaryCommands.c \
 	tpm2/DuplicationCommands.c \
 	tpm2/EACommands.c \
@@ -329,6 +330,7 @@ noinst_HEADERS += \
 	tpm2/CreatePrimary_fp.h \
 	tpm2/CryptSelfTest_fp.h \
 	tpm2/DA_fp.h \
+	tpm2/DebugHelpers_fp.h \
 	tpm2/DictionaryAttackLockReset_fp.h \
 	tpm2/DictionaryAttackParameters_fp.h \
 	tpm2/Duplicate_fp.h \
