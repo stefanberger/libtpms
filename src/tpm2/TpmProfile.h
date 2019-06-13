@@ -344,6 +344,9 @@
 #define RSA_PRIVATE_SIZE                (RSA_MAX_PRIME*5)
 #endif
 #endif   // libtpms added
+#ifndef SIZE_OF_X509_SERIAL_NUMBER
+#define SIZE_OF_X509_SERIAL_NUMBER      20
+#endif
 #ifndef PRIVATE_VENDOR_SPECIFIC_BYTES
 #define PRIVATE_VENDOR_SPECIFIC_BYTES					\
     ((MAX_RSA_KEY_BYTES/2) * (3 + CRT_FORMAT_RSA * 2))  /* libtpms: keep as was in rev 150 */
@@ -525,6 +528,9 @@
 #endif
 #ifndef CC_CertifyCreation
 #define CC_CertifyCreation                  CC_YES
+#endif
+#ifndef CC_CertifyX509
+#define CC_CertifyX509                      CC_YES
 #endif
 #ifndef CC_ChangeEPS
 #define CC_ChangeEPS                        CC_YES
