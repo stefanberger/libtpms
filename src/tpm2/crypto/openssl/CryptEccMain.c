@@ -406,7 +406,8 @@ CryptEccGetParameters(
 	    parameters->keySize = curve->keySizeBits;
 	    parameters->kdf = curve->kdf;
 	    parameters->sign = curve->sign;
-	    BnTo2B(data->prime, &parameters->p.b, 0);
+	    /* BnTo2B(data->prime, &parameters->p.b, 0); */
+	    BnTo2B(data->prime, &parameters->p.b, parameters->p.t.size);
 	    BnTo2B(data->a, &parameters->a.b, 0);
 	    BnTo2B(data->b, &parameters->b.b, 0);
 	    BnTo2B(data->base.x, &parameters->gX.b, parameters->p.t.size);
