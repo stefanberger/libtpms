@@ -3,7 +3,7 @@
 /*			    Code for prime validation. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrime.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptPrime.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -295,6 +295,79 @@ RsaCheckPrime(
     return PrimeSelectWithSieve(prime, exponent, rand);
 #endif
 }
+/*********************** temporary ********************/
+#include <openssl/bn.h>
+#include "TpmToOsslMath_fp.h"
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+struct bignum_st
+       {
+       BN_ULONG *d;
+       int top;
+       int dmax;
+       int neg;
+       int flags;
+       };
+#endif
+static
+void BIGNUM_print(
+		  const char      *label,
+		  const BIGNUM    *a,
+		  BOOL             eol
+		  )
+{
+    BN_ULONG        *d;
+    int              i;
+    int              notZero = FALSE;
+    if(label != NULL)
+	printf("%s", label);
+    if(a == NULL)
+	{
+	    printf("NULL");
+	    goto done;
+	}
+    if (a->neg)
+	printf("-");
+    i = a->top;
+    d = &a->d[i - 1];
+    for(i = a->top; i > 0; i--)
+	{
+	    int         j;
+	    BN_ULONG    l = *d--;
+	    for(j = BN_BITS2 - 8; j >= 0; j -= 8)
+		{
+		    BYTE    b = (BYTE)((l >> j) & 0xFF);
+		    notZero = notZero || (b != 0);
+		    if(notZero)
+			printf("%02x", b);
+		}
+	    if(!notZero)
+		printf("0");
+	}
+ done:
+    if(eol)
+	printf("\n");
+    return;
+}
+/*********************** temporary ********************/
+/*
+ * RsaAdjustPrimeCandidate_Old is the pre-rev.155 algorithm used; we
+ * still have to use it for old seeds to maintain backwards compatibility.
+ */
+static void
+RsaAdjustPrimeCandidate_Old(
+                            bigNum      prime
+                           )
+{
+   UINT16  highBytes;
+    crypt_uword_t       *msw = &prime->d[prime->size - 1];
+#define MASK (MAX_CRYPT_UWORD >> (RADIX_BITS - 16))
+    highBytes = *msw >> (RADIX_BITS - 16);
+    // This is fixed point arithmetic on 16-bit values
+    highBytes = ((UINT32)highBytes * (UINT32)0x4AFB) >> 16;
+    highBytes += 0xB505;
+    *msw = ((crypt_uword_t)(highBytes) << (RADIX_BITS - 16)) + (*msw & MASK);
+    prime->d[0] |= 1;
+}
 /* 10.2.16.1.7 AdjustPrimeCandiate() */
 /* This function adjusts the candidate prime so that it is odd and > root(2)/2. This allows the
    product of these two numbers to be .5, which, in fixed point notation means that the most
@@ -304,20 +377,52 @@ RsaCheckPrime(
    computations take, reducing the error is not much of a cost, but it isn't totally required
    either. */
 /* The function also puts the number on a field boundary. */
+static void
+RsaAdjustPrimeCandidate_New(
+			    bigNum          prime
+			   )
+{
+#if RADIX_BITS == 64
+    UINT32       msw = prime->d[prime->size - 1] >> 32;
+#else
+    UINT32       msw = prime->d[prime->size - 1];
+#endif
+    UINT32       adjusted;
+fprintf(stderr, "%d: msw = 0x%08x\n", __LINE__, msw);
+    // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
+    adjusted = (msw >> 16) * 0x4AFB;
+fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
+    adjusted += ((msw & 0xFFFF) * (UINT32)0x4AFB) >> 16;
+fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
+    adjusted += 0xB5050000UL;
+fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
+#if RADIX_BITS == 64
+    prime->d[prime->size - 1] = (UINT64)adjusted << 32 |
+                                (prime->d[prime->size - 1] & 0xffffffff);
+#else
+    prime->d[prime->size - 1] = adjusted;
+#endif
+    // make sure the number is odd
+    prime->d[0] |= 1;
+}
 LIB_EXPORT void
 RsaAdjustPrimeCandidate(
 			bigNum          prime
 			)
 {
-    UINT16  highBytes;
-    crypt_uword_t       *msw = &prime->d[prime->size - 1];
-#define MASK (MAX_CRYPT_UWORD >> (RADIX_BITS - 16))
-    highBytes = *msw >> (RADIX_BITS - 16);
-    // This is fixed point arithmetic on 16-bit values
-    highBytes = ((UINT32)highBytes * (UINT32)0x4AFB) >> 16;
-    highBytes += 0xB505;
-    *msw = ((crypt_uword_t)(highBytes) << (RADIX_BITS - 16)) + (*msw & MASK);
-    prime->d[0] |= 1;
+    BIGNUM *p;
+    p = BigInitialized(prime);
+    BIGNUM_print("before adjust: ", p, TRUE);
+    BN_free(p);
+
+    if (1)
+        RsaAdjustPrimeCandidate_Old(prime);
+    else
+        RsaAdjustPrimeCandidate_New(prime);
+
+    p = BigInitialized(prime);
+    BIGNUM_print(" after adjust: ", p, TRUE);
+    BN_free(p);
 }
 /* 10.2.16.1.8 BnGeneratePrimeForRSA() */
 /* Function to generate a prime of the desired size with the proper attributes for an RSA prime. */
@@ -340,7 +445,21 @@ BnGeneratePrimeForRSA(
     
     while(!found)
 	{
-	    DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
+	    if (1) {
+		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
+	    } else {
+		    TPM2B_TYPE(LARGEST, LARGEST_NUMBER + 8);
+		    TPM2B_LARGEST    large;
+		    large.b.size = (UINT16)BITS_TO_BYTES(bits);
+		    if (DRBG_Generate(rand, large.t.buffer, large.t.size) == large.t.size)
+			{
+			    BnFrom2B(prime, &large.b);
+			}
+		    else
+			{
+			    return TPM_RC_FAILURE;
+			}
+	    }
 	    if(g_inFailureMode)
 		return TPM_RC_FAILURE;
 	    RsaAdjustPrimeCandidate(prime);
