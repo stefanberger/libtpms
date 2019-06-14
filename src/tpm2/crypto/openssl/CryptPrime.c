@@ -3,7 +3,7 @@
 /*			    Code for prime validation. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrime.c 1262 2018-07-11 21:03:43Z kgoldman $		*/
+/*            $Id: CryptPrime.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -295,19 +295,14 @@ RsaCheckPrime(
     return PrimeSelectWithSieve(prime, exponent, rand);
 #endif
 }
-/* 10.2.16.1.7 AdjustPrimeCandiate() */
-/* This function adjusts the candidate prime so that it is odd and > root(2)/2. This allows the
-   product of these two numbers to be .5, which, in fixed point notation means that the most
-   significant bit is 1. For this routine, the root(2)/2 is approximated with 0xB505 which is, in
-   fixed point is 0.7071075439453125 or an error of 0.0001%. Just setting the upper two bits would
-   give a value > 0.75 which is an error of > 6%. Given the amount of time all the other
-   computations take, reducing the error is not much of a cost, but it isn't totally required
-   either. */
-/* The function also puts the number on a field boundary. */
-LIB_EXPORT void
-RsaAdjustPrimeCandidate(
-			bigNum          prime
-			)
+/*
+ * RsaAdjustPrimeCandidate_PreRev155 is the pre-rev.155 algorithm used; we
+ * still have to use it for old seeds to maintain backwards compatibility.
+ */
+static void
+RsaAdjustPrimeCandidate_PreRev155(
+                            bigNum      prime
+                           )
 {
     UINT16  highBytes;
     crypt_uword_t       *msw = &prime->d[prime->size - 1];
@@ -319,14 +314,74 @@ RsaAdjustPrimeCandidate(
     *msw = ((crypt_uword_t)(highBytes) << (RADIX_BITS - 16)) + (*msw & MASK);
     prime->d[0] |= 1;
 }
-/* 10.2.16.1.8 BnGeneratePrimeForRSA() */
+
+/* 10.2.14.1.7 RsaAdjustPrimeCandidate() */
+
+/* For this math, we assume that the RSA numbers are fixed-point numbers with the decimal point to
+   the left of the most significant bit. This approach helps make it clear what is happening with
+   the MSb of the values. The two RSA primes have to be large enough so that their product will be a
+   number with the necessary number of significant bits. For example, we want to be able to multiply
+   two 1024-bit numbers to produce a number with 2028 significant bits. If we accept any 1024-bit
+   prime that has its MSb set, then it is possible to produce a product that does not have the MSb
+   SET. For example, if we use tiny keys of 16 bits and have two 8-bit primes of 0x80, then the
+   public key would be 0x4000 which is only 15-bits. So, what we need to do is made sure that each
+   of the primes is large enough so that the product of the primes is twice as large as each
+   prime. A little arithmetic will show that the only way to do this is to make sure that each of
+   the primes is no less than root(2)/2. That's what this functions does. This function adjusts the
+   candidate prime so that it is odd and >= root(2)/2. This allows the product of these two numbers
+   to be .5, which, in fixed point notation means that the most significant bit is 1. For this
+   routine, the root(2)/2 (0.7071067811865475) approximated with 0xB505 which is, in fixed point,
+   0.7071075439453125 or an error of 0.000108%. Just setting the upper two bits would give a value >
+   0.75 which is an error of > 6%. Given the amount of time all the other computations take,
+   reducing the error is not much of a cost, but it isn't totally required either. */
+/* This function can be replaced with a function that just sets the two most significant bits of
+   each prime candidate without introducing any computational issues. */
+
+static void
+RsaAdjustPrimeCandidate_New(
+			    bigNum          prime
+			   )
+{
+    UINT32          msw;
+    UINT32          adjusted;
+    
+    // If the radix is 32, the compiler should turn this into a simple assignment
+    msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
+    // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
+    adjusted = (msw >> 16) * 0x4AFB;
+    adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
+    adjusted += 0xB5050000UL;
+#if RADIX_BITS == 64
+    // Save the low-order 32 bits
+    prime->d[prime->size - 1] &= 0xFFFFFFFFUL;
+    // replace the upper 32-bits
+    prime->d[prime->size -1] |= ((crypt_uword_t)adjusted << 32);
+#else
+    prime->d[prime->size - 1] = (crypt_uword_t)adjusted;
+#endif
+    // make sure the number is odd
+    prime->d[0] |= 1;
+}
+LIB_EXPORT void
+RsaAdjustPrimeCandidate(
+			bigNum          prime
+			)
+{
+    if (1)
+        RsaAdjustPrimeCandidate_PreRev155(prime);
+    else
+        RsaAdjustPrimeCandidate_New(prime);
+}
+/* 10.2.14.1.8 BnGeneratePrimeForRSA() */
 /* Function to generate a prime of the desired size with the proper attributes for an RSA prime. */
+
 TPM_RC
 BnGeneratePrimeForRSA(
-		      bigNum          prime,
-		      UINT32          bits,
-		      UINT32          exponent,
-		      RAND_STATE      *rand
+		      bigNum          prime,          // IN/OUT: points to the BN that will get the
+		      //  random value
+		      UINT32          bits,           // IN: number of bits to get
+		      UINT32          exponent,       // IN: the exponent
+		      RAND_STATE      *rand           // IN: the random state
 		      )
 {
     BOOL            found = FALSE;
@@ -340,10 +395,21 @@ BnGeneratePrimeForRSA(
     
     while(!found)
 	{
-	    DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
-	    if(g_inFailureMode)
-		return TPM_RC_FAILURE;
+	    // The change below is to make sure that all keys that are generated from the same
+	    // seed value will be the same regardless of the endianess or word size of the CPU.
+	    //       DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));// old
+	    //       if(g_inFailureMode)                                                // old
+	// libtpms changed begin
+	    if (1) {
+		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
+		if (g_inFailureMode)
+		    return TPM_RC_FAILURE;
+	    } else {
+		if(!BnGetRandomBits(prime, bits, rand))                              // new
+		    return TPM_RC_FAILURE;
+	    }
 	    RsaAdjustPrimeCandidate(prime);
+	// libtpms changed end
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
     return TPM_RC_SUCCESS;
