@@ -215,7 +215,8 @@ typedef struct OBJECT
     // libtpms added: OBJECT lies in NVRAM; to avoid that it needs different number
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
     // same size; simple padding at the end works here
-    UINT32              _pad;
+    COMPAT_LEVEL        compatLevel;
+    UINT8               _pad[3];
 } OBJECT;
 /* This structure holds a hash sequence object or an event sequence object. */
 /* The first four components of this structure are manually set to be the same as the first four

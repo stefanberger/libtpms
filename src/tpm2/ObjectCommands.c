@@ -166,7 +166,8 @@ TPM2_Load(
     if(result == TPM_RC_SUCCESS)
 	{
 	    // Set the common OBJECT attributes for a loaded object.
-	    ObjectSetLoadedAttributes(newObject, in->parentHandle);
+	    ObjectSetLoadedAttributes(newObject, in->parentHandle,
+	                              parentObject->compatLevel);
 	}
     return result;
 }
@@ -224,7 +225,7 @@ TPM2_LoadExternal(
 	{
 	    object->attributes.external = SET;
 	    // Set the common OBJECT attributes for a loaded object.
-	    ObjectSetLoadedAttributes(object, in->hierarchy);
+	    ObjectSetLoadedAttributes(object, in->hierarchy, COMPAT_LEVEL_LAST);
 	}
     return result;
 }
@@ -418,6 +419,7 @@ TPM2_CreateLoaded(
     RAND_STATE                   randState;
     RAND_STATE                  *rand = &randState;
     TPMS_DERIVE                  labelContext;
+    COMPAT_LEVEL                 compatLevel = COMPAT_LEVEL_LAST; // libtpms added
     // Input Validation
     // How the public area is unmarshaled is determined by the parent, so
     // see if parent is a derivation parent
@@ -473,6 +475,7 @@ TPM2_CreateLoaded(
 	    result = SetLabelAndContext(&labelContext, &in->inSensitive.sensitive.data);
 	    if(result != TPM_RC_SUCCESS)
 		return result;
+	    compatLevel = parent->compatLevel; // libtpms added
 	    // Set up the KDF for object generation
 	    DRBG_InstantiateSeededKdf((KDF_STATE *)rand,
 				      scheme->details.xorr.hashAlg,
@@ -481,7 +484,7 @@ TPM2_CreateLoaded(
 				      &labelContext.label.b,
 				      &labelContext.context.b,
 				      TPM_MAX_DERIVATION_BITS,
-				      COMPAT_LEVEL_LAST);       // libtpms added
+				      compatLevel); // libtpms added
 	    // Clear the sensitive size so that the creation functions will not try
 	    // to use this value.
 	    in->inSensitive.sensitive.data.t.size = 0;
@@ -504,13 +507,14 @@ TPM2_CreateLoaded(
 	                newObject->attributes.epsHierarchy = SET;
 	            // If so, use the primary seed and the digest of the template
 	            // to seed the DRBG
+	            compatLevel = HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
 		    DRBG_InstantiateSeeded((DRBG_STATE *)rand,
 					   &HierarchyGetPrimarySeed(in->parentHandle)->b,
 					   PRIMARY_OBJECT_CREATION,
 					   (TPM2B *)PublicMarshalAndComputeName(publicArea,
 										&name),
 					   &in->inSensitive.sensitive.data.b,
-					   HierarchyGetPrimarySeedCompatLevel(in->parentHandle)); // libtpms added
+					   compatLevel);                                // libtpms added
 	        }
 	    else
 		// This is an ordinary object so use the normal random number generator
@@ -534,7 +538,7 @@ TPM2_CreateLoaded(
     out->outPublic.publicArea = newObject->publicArea;
     out->name = newObject->name;
     // Set the remaining attributes for a loaded object
-    ObjectSetLoadedAttributes(newObject, in->parentHandle);
+    ObjectSetLoadedAttributes(newObject, in->parentHandle, compatLevel); // libtpms added compatLevel
     return result;
 }
 #endif // CC_CreateLoaded
