@@ -42,6 +42,9 @@
 typedef UINT8 COMPAT_LEVEL;
 enum {
     COMPAT_LEVEL_ORIGINAL = 0,   /* original TPM 2 code up to rev155 */
+    COMPAT_LEVEL_OPENSSL = 1,    /* use OpenSSL to create any type of *derived* key:
+                                    RSA, EC, TDES, AES, etc. */
+                                 /* Only activate once all derived keys can be created using OpenSSL */
     COMPAT_LEVEL_LAST = COMPAT_LEVEL_ORIGINAL
 };
 
