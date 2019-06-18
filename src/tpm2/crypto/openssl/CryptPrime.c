@@ -364,13 +364,21 @@ RsaAdjustPrimeCandidate_New(
 }
 LIB_EXPORT void
 RsaAdjustPrimeCandidate(
-			bigNum          prime
+			bigNum          prime,
+			SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level; libtpms added
 			)
 {
-    if (1)
+    switch (seedCompatLevel) {
+    case SEED_COMPAT_LEVEL_ORIGINAL:
         RsaAdjustPrimeCandidate_PreRev155(prime);
-    else
+        break;
+    /* case SEED_COMPAT_LEVEL_LAST: */
+    case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX:
         RsaAdjustPrimeCandidate_New(prime);
+        break;
+    default:
+        FAIL(FATAL_ERROR_INTERNAL);
+    }
 }
 /* 10.2.14.1.8 BnGeneratePrimeForRSA() */
 /* Function to generate a prime of the desired size with the proper attributes for an RSA prime. */
@@ -400,15 +408,21 @@ BnGeneratePrimeForRSA(
 	    //       DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));// old
 	    //       if(g_inFailureMode)                                                // old
 	// libtpms changed begin
-	    if (1) {
+	    switch (DRBG_GetSeedCompatLevel(rand)) {
+	    case SEED_COMPAT_LEVEL_ORIGINAL:
 		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
 		if (g_inFailureMode)
 		    return TPM_RC_FAILURE;
-	    } else {
+		break;
+	    /* case SEED_COMPAT_LEVEL_LAST: */
+            case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX:
 		if(!BnGetRandomBits(prime, bits, rand))                              // new
 		    return TPM_RC_FAILURE;
+                break;
+            default:
+                FAIL(FATAL_ERROR_INTERNAL);
 	    }
-	    RsaAdjustPrimeCandidate(prime);
+	    RsaAdjustPrimeCandidate(prime, DRBG_GetSeedCompatLevel(rand));
 	// libtpms changed end
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
