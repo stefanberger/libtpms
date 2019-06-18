@@ -407,7 +407,8 @@ fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
 }
 LIB_EXPORT void
 RsaAdjustPrimeCandidate(
-			bigNum          prime
+			bigNum          prime,
+			COMPAT_LEVEL    compatLevel  // IN: compatibility level; libtpms added
 			)
 {
     BIGNUM *p;
@@ -415,10 +416,16 @@ RsaAdjustPrimeCandidate(
     BIGNUM_print("before adjust: ", p, TRUE);
     BN_free(p);
 
-    if (1)
+    switch (compatLevel) {
+    case COMPAT_LEVEL_ORIGINAL:
         RsaAdjustPrimeCandidate_Old(prime);
-    else
+        break;
+    case COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX:
         RsaAdjustPrimeCandidate_New(prime);
+        break;
+    default:
+        FAIL(FATAL_ERROR_INTERNAL);
+    }
 
     p = BigInitialized(prime);
     BIGNUM_print(" after adjust: ", p, TRUE);
@@ -445,24 +452,30 @@ BnGeneratePrimeForRSA(
     
     while(!found)
 	{
-	    if (1) {
+	    switch (DRBG_GetCompatLevel(rand)) {
+	    case COMPAT_LEVEL_ORIGINAL:
 		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
-	    } else {
-		    TPM2B_TYPE(LARGEST, LARGEST_NUMBER + 8);
-		    TPM2B_LARGEST    large;
-		    large.b.size = (UINT16)BITS_TO_BYTES(bits);
-		    if (DRBG_Generate(rand, large.t.buffer, large.t.size) == large.t.size)
-			{
-			    BnFrom2B(prime, &large.b);
-			}
-		    else
-			{
-			    return TPM_RC_FAILURE;
-			}
+		break;
+            case COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: {
+		TPM2B_TYPE(LARGEST, LARGEST_NUMBER + 8);
+	        TPM2B_LARGEST    large;
+	        large.b.size = (UINT16)BITS_TO_BYTES(bits);
+	        if (DRBG_Generate(rand, large.t.buffer, large.t.size) == large.t.size)
+	            {
+		        BnFrom2B(prime, &large.b);
+		    }
+                else
+		    {
+		        return TPM_RC_FAILURE;
+		    }
+                break;
+            }
+            default:
+                FAIL(FATAL_ERROR_INTERNAL);
 	    }
 	    if(g_inFailureMode)
 		return TPM_RC_FAILURE;
-	    RsaAdjustPrimeCandidate(prime);
+	    RsaAdjustPrimeCandidate(prime, DRBG_GetCompatLevel(rand));
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
     return TPM_RC_SUCCESS;

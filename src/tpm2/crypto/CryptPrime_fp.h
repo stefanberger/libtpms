@@ -89,7 +89,8 @@ RsaCheckPrime(
 	      );
 LIB_EXPORT void
 RsaAdjustPrimeCandidate(
-			bigNum          prime
+			bigNum          prime,
+			COMPAT_LEVEL    compatLevel  // IN: compatibility level; libtpms added
 			);
 TPM_RC
 BnGeneratePrimeForRSA(
