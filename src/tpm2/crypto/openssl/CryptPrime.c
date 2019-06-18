@@ -372,8 +372,8 @@ RsaAdjustPrimeCandidate(
     case SEED_COMPAT_LEVEL_ORIGINAL:
         RsaAdjustPrimeCandidate_PreRev155(prime);
         break;
-    /* case SEED_COMPAT_LEVEL_LAST: */
-    case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX:
+    case SEED_COMPAT_LEVEL_LAST:
+    /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
         RsaAdjustPrimeCandidate_New(prime);
         break;
     default:
@@ -414,8 +414,8 @@ BnGeneratePrimeForRSA(
 		if (g_inFailureMode)
 		    return TPM_RC_FAILURE;
 		break;
-	    /* case SEED_COMPAT_LEVEL_LAST: */
-            case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX:
+	    case SEED_COMPAT_LEVEL_LAST:
+            /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
 		if(!BnGetRandomBits(prime, bits, rand))                              // new
 		    return TPM_RC_FAILURE;
                 break;
