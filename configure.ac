@@ -186,7 +186,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	AC_CHECK_LIB([crypto], [EC_KEY_set_group],, not_found=1)
 	if test "x$not_found" = "x0"; then
 		use_openssl_functions_ecdsa=1
-		use_openssl_functions_for="${use_openssl_functions_for}elliptic curve (ECDSA)"
+		use_openssl_functions_for="${use_openssl_functions_for}elliptic curve (ECDSA) "
 	fi
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
