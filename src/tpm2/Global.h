@@ -896,6 +896,7 @@ typedef struct state_reset_data
     // the TPM_RH_NULL hierarchy. The
     // default reset value is from the RNG.
     TPM2B_SEED          nullSeed;           // The seed value for the TPM_RN_NULL
+    SEED_COMPAT_LEVEL   nullSeedCompatLevel; // libtpms added
     // hierarchy. The default reset value
     // is from the RNG.
     //*****************************************************************************
