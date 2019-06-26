@@ -232,10 +232,12 @@ typedef struct OBJECT
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
 
+    // libtpms added: SEED_COMPAT_LEVEL to use for deriving child keys
+    SEED_COMPAT_LEVEL   seedCompatLevel;
     // libtpms added: OBJECT lies in NVRAM; to avoid that it needs different number
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
     // same size; simple padding at the end works here
-    UINT32              _pad;
+    UINT8               _pad[3];
 } OBJECT;
 
 /* 5.9.3.4	HASH_OBJECT Structure */

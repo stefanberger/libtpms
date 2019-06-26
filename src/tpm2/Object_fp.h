@@ -119,7 +119,8 @@ ObjectAllocateSlot(
 void
 ObjectSetLoadedAttributes(
 			  OBJECT          *object,        // IN: object attributes to finalize
-			  TPM_HANDLE       parentHandle   // IN: the parent handle
+			  TPM_HANDLE       parentHandle,  // IN: the parent handle
+			  SEED_COMPAT_LEVEL seedCompatLevel    // IN: seedCompatLevel to use for children
 			  );
 TPM_RC
 ObjectLoad(

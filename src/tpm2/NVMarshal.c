@@ -2286,7 +2286,7 @@ skip_future_versions:
 }
 
 #define OBJECT_MAGIC 0x75be73af
-#define OBJECT_VERSION 2
+#define OBJECT_VERSION 3
 
 static UINT16
 OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
@@ -2296,7 +2296,7 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     BLOCK_SKIP_INIT;
 
     written = NV_HEADER_Marshal(buffer, size,
-                                OBJECT_VERSION, OBJECT_MAGIC, 1);
+                                OBJECT_VERSION, OBJECT_MAGIC, 3);
 
     /*
      * attributes are written in ANY_OBJECT_Marshal
@@ -2321,8 +2321,13 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPM2B_NAME_Marshal(&data->name, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    written += SEED_COMPAT_LEVEL_Marshal(&data->seedCompatLevel,
+                                         buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
 
+    BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
 
     BLOCK_SKIP_WRITE_CHECK;
@@ -2379,11 +2384,22 @@ skip_alg_rsa:
         rc = TPM2B_NAME_Unmarshal(&data->name, buffer, size);
     }
 
+    /* default values before conditional block */
+    data->seedCompatLevel = SEED_COMPAT_LEVEL_ORIGINAL;
+
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "OBJECT", "version 3 or later");
+        if (rc == TPM_RC_SUCCESS) {
+            rc = SEED_COMPAT_LEVEL_Unmarshal(&data->seedCompatLevel,
+                                        buffer, size,
+                                        "OBJECT seedCompatLevel");
+        }
+
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "OBJECT", "version 4 or later");
         /* future versions nest-append here */
     }
 
