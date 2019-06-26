@@ -127,7 +127,8 @@ TPM2_CreatePrimary(
     TicketComputeCreation(EntityGetHierarchy(in->primaryHandle), &out->name,
 			  &out->creationHash, &out->creationTicket);
     // Set the remaining attributes for a loaded object
-    ObjectSetLoadedAttributes(newObject, in->primaryHandle);
+    ObjectSetLoadedAttributes(newObject, in->primaryHandle,
+                              HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
     return result;
 }
 #endif // CC_CreatePrimary

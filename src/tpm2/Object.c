@@ -302,11 +302,14 @@ ObjectAllocateSlot(
 void
 ObjectSetLoadedAttributes(
 			  OBJECT          *object,        // IN: object attributes to finalize
-			  TPM_HANDLE       parentHandle   // IN: the parent handle
+			  TPM_HANDLE       parentHandle,  // IN: the parent handle
+			  COMPAT_LEVEL     compatLevel    // IN: compat level to use for children
 			  )
 {
     OBJECT              *parent = HandleToObject(parentHandle);
     TPMA_OBJECT          objectAttributes = object->publicArea.objectAttributes;
+
+    object->compatLevel = compatLevel; // libtpms added
     //
     // Copy the stClear attribute from the public area. This could be overwritten
     // if the parent has stClear SET
