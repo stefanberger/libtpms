@@ -155,6 +155,7 @@ HierarchyStartup(
 	    CryptRandomGenerate(gr.nullProof.t.size, gr.nullProof.t.buffer);
 	    gr.nullSeed.t.size = sizeof(gr.nullSeed.t.buffer);
 	    CryptRandomGenerate(gr.nullSeed.t.size, gr.nullSeed.t.buffer);
+	    gr.nullSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;  // libtpms added
 	}
     return TRUE;
 }
@@ -231,7 +232,7 @@ HierarchyGetPrimarySeedCompatLevel(
 	    return gp.EPSeedCompatLevel;
 	    break;
 	  case TPM_RH_NULL:
-	    return SEED_COMPAT_LEVEL_LAST;
+	    return gr.nullSeedCompatLevel;
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
