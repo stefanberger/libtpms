@@ -621,6 +621,48 @@ ObjectTerminateEvent(
 	}
     g_DRTMHandle = TPM_RH_UNASSIGNED;
 }
+// libtpms added begin
+/* ObjectValidate() */
+/* This function does some basic sanity checks on an object that */
+/* was loaded via a context-load. It tries to prevent that a context */
+/* was created with unknown flags set or buffers have in invalid size */
+/* The latter could be the case if the endianess was different on the */
+/* platform where it was created */
+static TPM_RC
+ObjectValidate(
+	       OBJECT *object   // IN: object to validate
+	       )
+{
+    if(object->attributes.reserved)
+        return TPM_RC_RESERVED_BITS;
+
+#define INVALID_SIZE_TPM2B(S)      ((S).t.size > sizeof((S).t.buffer))
+#define INVALID_SIZE_TPM2B_NAME(S) ((S).t.size > sizeof((S).t.name))
+    if(ObjectIsSequence(object))
+        {
+            HASH_OBJECT *hObject = (HASH_OBJECT *)object;
+
+	    if((hObject->objectAttributes & TPMA_OBJECT_reserved) != 0)
+		return TPM_RC_RESERVED_BITS;
+
+	    if(INVALID_SIZE_TPM2B(hObject->auth))
+		return TPM_RC_VALUE;
+	}
+    else
+	{
+	    if (INVALID_SIZE_TPM2B(object->publicArea.authPolicy) ||
+	        INVALID_SIZE_TPM2B(object->sensitive.authValue) ||
+	        INVALID_SIZE_TPM2B(object->sensitive.seedValue) ||
+	        INVALID_SIZE_TPM2B_NAME(object->qualifiedName) ||
+	        INVALID_SIZE_TPM2B_NAME(object->name))
+	        return TPM_RC_VALUE;
+	}
+#undef INVALID_SIZE_TPM2B
+#undef INVALID_SIZE_TPM2B_NAME
+
+    return TPM_RC_SUCCESS;
+}
+// libtpms added end
 /* 8.6.3.21 ObjectContextLoad() */
 /* This function loads an object from a saved object context. */
 /* Return Values Meaning */
@@ -651,6 +693,15 @@ ObjectContextLoad(
 		    // Copy input object data to internal structure
 		    MemoryCopy(newObject, object, sizeof(OBJECT));
 		}
+
+	    // libtpms added begin
+	    if(ObjectValidate(newObject) != TPM_RC_SUCCESS)
+		{
+		    MemorySet(newObject, 0, sizeof(OBJECT));
+		    ObjectFlush(newObject);
+	            newObject = NULL;
+		}
+	    // libtpms added end
 	}
     return newObject;
 }
