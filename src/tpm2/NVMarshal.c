@@ -1231,7 +1231,7 @@ skip_future_versions:
 }
 
 #define STATE_RESET_DATA_MAGIC  0x01102332
-#define STATE_RESET_DATA_VERSION 2
+#define STATE_RESET_DATA_VERSION 3
 
 TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
@@ -1322,11 +1322,20 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 #endif
 skip_alg_ecc:
 
+    /* default values before conditional block */
+    data->nullSeedCompatLevel = COMPAT_LEVEL_ORIGINAL;
+
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "STATE_RESET_DATA", "version 3 or later");
+        if (rc == TPM_RC_SUCCESS) {
+            rc = COMPAT_LEVEL_Unmarshal(&gr.nullSeedCompatLevel, buffer, size, "nullSeed");
+        }
+
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "STATE_RESET_DATA", "version 4 or later");
         /* future versions nest-append here */
     }
 
@@ -1345,7 +1354,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 
     written = NV_HEADER_Marshal(buffer, size,
                                 STATE_RESET_DATA_VERSION,
-                                STATE_RESET_DATA_MAGIC, 1);
+                                STATE_RESET_DATA_MAGIC, 3);
     written += TPM2B_PROOF_Marshal(&data->nullProof, buffer, size);
     written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
     written += UINT32_Marshal(&data->clearCount, buffer, size);
@@ -1380,8 +1389,12 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     BLOCK_SKIP_WRITE_POP(size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    written += COMPAT_LEVEL_Marshal(&data->nullSeedCompatLevel, buffer, size);
+
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
 
+    BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
 
     BLOCK_SKIP_WRITE_CHECK;
