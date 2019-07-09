@@ -724,7 +724,7 @@ CryptSecretDecrypt(
 			      {
 				  if(nonceCaller->t.size > sizeof(iv.t.buffer))
 				      return TPM_RC_FAILURE;
-				  MemoryCopy(iv.b.buffer, nonceCaller->t.buffer,
+				  MemoryCopy(iv.t.buffer, nonceCaller->t.buffer,  // libtpms changed: use iv.t.buffer
 					     nonceCaller->t.size);
 			      }
 			  // make sure secret will fit
