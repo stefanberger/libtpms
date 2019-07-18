@@ -1,5 +1,8 @@
 CHANGES - changes for libtpms
 
+version 0.7.0
+  - use OpenSSL crypto for AES, TDES, EC, and RSA operations when possible
+
 version 0.6.0
   - added TPM 2 support (revision 150)
 
