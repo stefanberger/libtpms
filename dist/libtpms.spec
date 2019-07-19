@@ -1,8 +1,8 @@
 # --- libtpm rpm-spec ---
 
 %define name      libtpms
-%define version   0.7.0
-%define release   0
+%define version   0.8.0
+%define release   0~dev1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %if "%{?crypto_subsystem}" == ""
