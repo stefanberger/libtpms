@@ -33,7 +33,7 @@ BuildRequires:  nss-softokn-freebl-static >= 3.12.9-2
 BuildRequires:  nss-softokn-devel >= 3.12.9-2, gmp-devel
 %endif
 BuildRequires:  pkgconfig gawk sed
-BuildRequires:  automake autoconf libtool bash coreutils
+BuildRequires:  automake autoconf libtool bash coreutils gcc-c++
 
 %if "%{crypto_subsystem}" == "openssl"
 Requires:       openssl
