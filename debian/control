@@ -3,7 +3,7 @@ Maintainer: Stefan Berger <stefanb@linux.vnet.ibm.com>
 Section: libs
 Priority: optional
 Build-Depends: automake, autoconf, libtool, libssl-dev,
- gawk, dh-exec, debhelper
+ gawk, dh-exec, debhelper, g++
 
 Package: libtpms0
 Architecture: any
