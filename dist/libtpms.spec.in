@@ -2,7 +2,7 @@
 
 %define name      @PACKAGE@
 %define version   @VERSION@
-%define release   0
+%define release   0~dev1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %if "%{?crypto_subsystem}" == ""
