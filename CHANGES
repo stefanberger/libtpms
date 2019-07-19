@@ -1,5 +1,11 @@
 CHANGES - changes for libtpms
 
+version 0.8.0
+  - updated to TPM 2 code release 155
+  - Due to fixes in the TPM 2 prime number generation code a downgrade from
+    version 0.8.0 to some previous version is not possible since otherwise
+    keys may not work anymore as expected
+
 version 0.7.0
   - use OpenSSL crypto for AES, TDES, EC, and RSA operations when possible
 
