@@ -62,6 +62,9 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
     UINT16 hashAlg = TPM_ALG_SHA1;
 
     if (rc == TPM_RC_SUCCESS) {
+        if ((UINT32)*size < sizeof(hash))
+            return TPM_RC_INSUFFICIENT;
+
         CryptHashBlock(hashAlg, *size - sizeof(hash), *buffer,
                        sizeof(acthash), acthash);
         rc = VolatileState_Unmarshal(buffer, size);
