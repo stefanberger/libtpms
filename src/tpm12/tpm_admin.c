@@ -627,8 +627,14 @@ TPM_RESULT TPM_Process_GetTestResult(tpm_state_t *tpm_state,
     }
     /* for now, just return the state of shutdown as a printable string */
     if (returnCode == TPM_SUCCESS) {
-	/* cast because TPM_SIZED_BUFFER is typically unsigned (binary) but sprintf expects char */
-	outData.size = sprintf((char *)(outData.buffer), "Shutdown %08x\n", tpm_state->testState);
+	size_t len = outData.size;
+	/* cast because TPM_SIZED_BUFFER is typically unsigned (binary) but snprintf expects char */
+	outData.size = snprintf((char *)(outData.buffer), len,
+	                        "Shutdown %08x\n", tpm_state->testState);
+	if (outData.size >= len) {
+	    printf("TPM_Process_GetTestResult: Error (fatal), buffer too small\n");
+	    returnCode = TPM_FAIL;
+	}
     }
     /*
       response
