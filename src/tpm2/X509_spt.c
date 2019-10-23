@@ -3,7 +3,7 @@
 /*			X509 Support						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_spt.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: X509_spt.c 1511 2019-10-07 20:40:15Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -199,33 +199,45 @@ X509ProcessExtensions(
 	return TPM_RCS_VALUE;
     
     // Get the keyUsage extension. This one is required
-    if(X509FindExtensionByOID(&ctx, &extensionCtx, OID_KEY_USAGE_EXTENSTION) &&
-       X509GetExtensionBits(&extensionCtx, &value))
-	{
-	    x509KeyUsageUnion   keyUsage;
-	    TPMA_OBJECT         attributes = object->publicArea.objectAttributes;
-	    //
-	    keyUsage.integer = value;
-	    // For KeyUsage:
-	    //  the 'sign' attribute is SET if Key Usage includes signing
-	    if(
-	       ((keyUsageSign.integer & keyUsage.integer) != 0
-		&& !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign))
+    if(X509FindExtensionByOID(&ctx, &extensionCtx, OID_KEY_USAGE_EXTENSION) &&
+        X509GetExtensionBits(&extensionCtx, &value))
+    {
+        x509KeyUsageUnion   keyUsage;
+        TPMA_OBJECT         attributes = object->publicArea.objectAttributes;
+        keyUsage.integer = value;
+#if 0	/* for debugging */
+	int badSign;
+	int badDecrypt;
+	int badFixedTpm;
+	int badRestricted;
 
-	       // and the 'decrypt' attribute is Set if Key Usage includes decryption uses
-	       || ((keyUsageDecrypt.integer & keyUsage.integer) != 0
-		   && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt))
 
-	       // Check that 'fixedTPM' is SET if Key Usage is non-repudiation
-	       || (IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, nonrepudiation)
-		   && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM))
+	badSign = (   (keyUsageSign.integer & keyUsage.integer) != 0
+	    	      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign));
+	badDecrypt = (   (keyUsageDecrypt.integer & keyUsage.integer) != 0
+	    		 && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt));
+	badFixedTpm = (   IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, nonrepudiation)
+	    		  && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM));
+	badRestricted = (   IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
+			    && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted));
 
-	       || (IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
-		   && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted))
-
-	       )
-		return TPM_RCS_ATTRIBUTES;
-	}
+#endif
+        // For KeyUsage:
+        //    the 'sign' attribute is SET if Key Usage includes signing
+        if(   (   (keyUsageSign.integer & keyUsage.integer) != 0
+               && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign))
+           // OR the 'decrypt' attribute is Set if Key Usage includes decryption uses
+           || (   (keyUsageDecrypt.integer & keyUsage.integer) != 0
+               && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt))
+           // OR that 'fixedTPM' is SET if Key Usage is non-repudiation
+           || (   IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, nonrepudiation)
+               && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM))
+           // OR that 'restricted' is SET if Key Usage is key agreement
+           || (   IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
+               && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted))
+           )
+            return TPM_RCS_ATTRIBUTES;
+    }
     else
 	// The KeyUsage extension is required
 	return TPM_RCS_VALUE;
@@ -308,6 +320,10 @@ X509PushAlgorithmIdentifierSequence(
 				    const BYTE                  *OID
 				    )
 {
+    // An algorithm ID sequence is:
+    //  SEQUENCE
+    //      OID
+    //      NULL
     ASN1StartMarshalContext(ctx);   // hash algorithm
     ASN1PushNull(ctx);
     ASN1PushOID(ctx, OID);
