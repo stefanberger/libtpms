@@ -3,7 +3,7 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: SessionProcess.c 1493 2019-09-04 13:31:35Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -1235,7 +1235,10 @@ CheckAuthSession(
     TPM_HANDLE       sessionHandle = s_sessionHandles[sessionIndex];
     TPM_HANDLE       associatedHandle = s_associatedHandles[sessionIndex];
     TPM_HT           sessionHandleType = HandleGetType(sessionHandle);
+    BOOL             authUsed;
+
     pAssert(sessionHandle != TPM_RH_UNASSIGNED);
+    
     // Take care of physical presence
     if(associatedHandle == TPM_RH_PLATFORM)
 	{
@@ -1265,11 +1268,14 @@ CheckAuthSession(
 		    session->attributes.includeAuth =
 			!IsSessionBindEntity(s_associatedHandles[sessionIndex], session);
 		}
+	    authUsed = session->attributes.includeAuth;
 	}
+    else
+        // Password session
+        authUsed = TRUE;
     // If the authorization session is going to use an authValue, then make sure
     // that access to that authValue isn't locked out.
-    // Note: session == NULL for a PW session.
-    if(session == NULL || session->attributes.includeAuth)
+    if(authUsed)
 	{
 	    // See if entity is subject to lockout.
 	    if(!IsDAExempted(associatedHandle))
@@ -1310,19 +1316,16 @@ CheckAuthSession(
     else
 	result = CheckSessionHMAC(command, sessionIndex);
     // Do processing for PIN Indexes are only three possibilities for 'result' at
-    // this point.
-    //  TPM_RC_SUCCESS
-    //  TPM_RC_AUTH_FAIL
-    //  TPM_RC_BAD_AUTH
+    // this point: TPM_RC_SUCCESS, TPM_RC_AUTH_FAIL, TPM_RC_BAD_AUTH
     // For all these cases, we would have to process a PIN index if the
     // authValue of the index was used for authorization.
-    // See if we need to do anything to a PIN index
-    if(TPM_HT_NV_INDEX == HandleGetType(associatedHandle))
+    if((TPM_HT_NV_INDEX == HandleGetType(associatedHandle)) && authUsed)
 	{
 	    NV_REF           locator;
 	    NV_INDEX        *nvIndex = NvGetIndexInfo(associatedHandle, &locator);
 	    NV_PIN           pinData;
 	    TPMA_NV          nvAttributes;
+	    
 	    pAssert(nvIndex != NULL);
 	    nvAttributes = nvIndex->publicArea.attributes;
 	    // If this is a PIN FAIL index and the value has been written
@@ -1338,7 +1341,7 @@ CheckAuthSession(
 		    NvWriteUINT64Data(nvIndex, pinData.intVal);
 		}
 	    // If this is a PIN PASS Index, increment if we have used the
-	    // authorization value for anything other than NV_Read.
+	    // authorization value.
 	    // NOTE: If the counter has already hit the limit, then we
 	    // would not get here because the authorization value would not
 	    // be available and the TPM would have returned before it gets here
