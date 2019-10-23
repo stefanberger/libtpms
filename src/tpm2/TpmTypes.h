@@ -868,21 +868,21 @@ typedef UINT32                              TPMA_OBJECT;
 #define TPMA_OBJECT_decrypt                 ((TPMA_OBJECT)1 << 17)
 #define TPMA_OBJECT_sign                    ((TPMA_OBJECT)1 << 18)
 #define TPMA_OBJECT_x509sign                ((TPMA_OBJECT)1 << 19)
-#define TPMA_OBJECT_reserved		    0xfff0f309
-// This is the initializer for a TPMA_OBJECT bit array.
-#define TPMA_OBJECT_INITIALIZER(					\
-				bit_at_0,             fixedtpm,             stclear, \
-				bit_at_3,             fixedparent,          sensitivedataorigin, \
-				userwithauth,         adminwithpolicy,      bits_at_8, \
-				noda,                 encryptedduplication, bits_at_12, \
-				restricted,           decrypt,              sign, \
-				bits_at_19)				\
-           {(fixedtpm << 1)              + (stclear << 2)               +	\
-	    (fixedparent << 4)           + (sensitivedataorigin << 5)   + 	\
-	    (userwithauth << 6)          + (adminwithpolicy << 7)       + 	\
-	    (noda << 10)                 + (encryptedduplication << 11) + 	\
-	    (restricted << 16)           + (decrypt << 17)              + 	\
-	    (sign << 18)                 + (x509sign << 19)}
+#define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f309)
+//  This is the initializer for a TPMA_OBJECT bit array.
+#define TPMA_OBJECT_INITIALIZER(                                                   \
+             bit_at_0,             fixedtpm,             stclear,                  \
+             bit_at_3,             fixedparent,          sensitivedataorigin,      \
+             userwithauth,         adminwithpolicy,      bits_at_8,                \
+             noda,                 encryptedduplication, bits_at_12,               \
+             restricted,           decrypt,              sign,                     \
+             x509sign,             bits_at_20)                                     \
+            {(fixedtpm << 1)              + (stclear << 2)               +         \
+             (fixedparent << 4)           + (sensitivedataorigin << 5)   +         \
+             (userwithauth << 6)          + (adminwithpolicy << 7)       +         \
+             (noda << 10)                 + (encryptedduplication << 11) +         \
+             (restricted << 16)           + (decrypt << 17)              +         \
+             (sign << 18)                 + (x509sign << 19)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
 #define TYPE_OF_TPMA_SESSION    UINT8
