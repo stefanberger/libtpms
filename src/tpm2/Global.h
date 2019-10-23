@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Global.h 1509 2019-10-07 19:10:05Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,13 +68,13 @@
 
 #ifndef         GLOBAL_H
 #define         GLOBAL_H
-#ifdef GLOBAL_C
-#define EXTERN
-#define INITIALIZER(_value_)  = _value_
-#else
-#define EXTERN  extern
-#define INITIALIZER(_name_)
-#endif
+// #ifdef GLOBAL_C
+// #define EXTERN
+// #define INITIALIZER(_value_)  = _value_
+// #else
+// #define EXTERN  extern
+// #define INITIALIZER(_name_)
+// #endif
 _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
 #include <stddef.h>
@@ -97,7 +97,7 @@ _NORMAL_WARNING_LEVEL_
 #include "CryptTest.h"
 #include "TpmError.h"
 #include "NV.h"
-#include "Utils.h"
+#include "Utils.h"		    // libtpms added
 //** Defines and Types
     
 //*** Size Types
@@ -207,6 +207,15 @@ typedef struct
     unsigned            publicOnly : 1;     //0) SET if only the public portion of
 #endif                                                /* libtpms added end */
 } OBJECT_ATTRIBUTES;
+
+#if ALG_RSA
+/* There is an overload of the sensitive.rsa.t.size field of a TPMT_SENSITIVE when an RSA key is
+   loaded. When the sensitive->sensitive contains an RSA key with all of the CRT values, then the
+   MSB of the size field will be set to indicate that the buffer contains all 5 of the CRT private
+   key values. */
+#define     RSA_prime_flag      0x8000
+#endif
+
 /* 5.9.3.3 OBJECT Structure */
 /* An OBJECT structure holds the object public, sensitive, and meta-data associated. This structure
    is implementation dependent. For this implementation, the structure is not optimized for space

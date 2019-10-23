@@ -3,7 +3,7 @@
 /*			OID values						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: OIDS.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: OIDS.h 1509 2019-10-07 19:10:05Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,15 +61,14 @@
 
 // 10.1.14	OIDS.h
 
+#include "Tpm.h"
+
 #ifndef _OIDS_H_
 #define _OIDS_H_
 
 // All the OIDs in this file are defined as DER-encoded values with a leading tag 0x06
 // (ASN1_OBJECT_IDENTIFIER), followed by a single length byte. This allows the OID size to be
 // determined by looking at octet[1] of the OID (total size is OID[1] + 2).
-
-#define MAKE_OID(NAME)							\
-    EXTERN  const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
 
 // These macros allow OIDs to be defined (or not) depending on whether the associated hash
 // algorithm is implemented.
@@ -144,7 +143,8 @@
 // These are encoded to take one additional byte of algorithm selector
 #define NIST_HASH       0x06, 0x09, 0x60, 0x86, 0x48, 1, 101, 3, 4, 2
 #define NIST_SIG        0x06, 0x09, 0x60, 0x86, 0x48, 1, 101, 3, 4, 3
-// hash OIDs used in a lot of places.
+
+// These hash OIDs used in a lot of places.
 #define OID_SHA1_VALUE              0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A
 SHA1_OID(_);        // Expands to
 //      MAKE_OID(_SHA1)
