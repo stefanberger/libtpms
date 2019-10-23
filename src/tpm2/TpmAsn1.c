@@ -3,7 +3,7 @@
 /*			     TPM ASN.1						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAsn1.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TpmAsn1.c 1509 2019-10-07 19:10:05Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -178,33 +178,39 @@ ASN1GetBitStringValue(
     int                  shift;
     INT16                length;
     UINT32               value = 0;
-    //
-    
-    VERIFY((length = ASN1NextTag(ctx)) >= 1);
+    int                  inputBits;
+//
+    length = ASN1NextTag(ctx);
+    VERIFY(length >= 1);
     VERIFY(ctx->tag == ASN1_BITSTRING);
-    // Get the shift value for the bit field (how many bits to loop off of the end)
+    // Get the shift value for the bit field (how many bits to lop off of the end)
     shift = NEXT_OCTET(ctx);
     length--;
+    // Get the number of bits in the input
+    inputBits = (8 * length) - shift;
     // the shift count has to make sense
     VERIFY((shift < 8) && ((length > 0) || (shift == 0)));
     // if there are any bytes left
-    for(; length > 0; length--)
-	{
-	    if(length > 1)
-		{
-		    // for all but the last octet, just shift and add the new octet
-		    VERIFY((value & 0xFF000000) == 0); // can't loose significant bits
-		    value = (value << 8) + NEXT_OCTET(ctx);
-		}
-	    else
-		{
-		    // for the last octet, just shift the accumulated value enough to
-		    // accept the significant bits in the last octet and shift the last
-		    // octet down
-		    VERIFY(((value & (0xFF000000 << (8 - shift)))) == 0);
-		    value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
-		}
-	}
+    for(; length > 1; length--)
+    {
+
+        // for all but the last octet, just shift and add the new octet
+        VERIFY((value & 0xFF000000) == 0); // can't loose significant bits
+        value = (value << 8) + NEXT_OCTET(ctx);
+
+    }
+    if(length == 1)
+    {
+        // for the last octet, just shift the accumulated value enough to 
+        // accept the significant bits in the last octet and shift the last 
+        // octet down
+        VERIFY(((value & (0xFF000000 << (8 - shift)))) == 0);
+        value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
+
+    }
+    // 'Left justify' the result
+    if(inputBits > 0)
+        value <<= (32 - inputBits);
     *val = value;
     return TRUE;
  Error:
