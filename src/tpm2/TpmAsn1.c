@@ -3,7 +3,7 @@
 /*			     TPM ASN.1						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id$		*/
+/*            $Id: TpmAsn1.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

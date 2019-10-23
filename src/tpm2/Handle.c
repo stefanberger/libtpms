@@ -3,7 +3,7 @@
 /*		fUnctions that return the type of a handle.	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Handle.c 1047 2017-07-20 18:27:34Z kgoldman $			*/
+/*            $Id: Handle.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
