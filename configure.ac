@@ -158,6 +158,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	if test "x$cryptolib" != "xopenssl"; then
 		AC_MSG_ERROR([OpenSSL crypto function usage requires openssl as crypto library])
 	fi
+	LIBS_save=$LIBS
 	# Check for symmetric key crypto functions
 	not_found=0
 	AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_new],, not_found=1)
@@ -214,6 +215,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 		use_openssl_functions_rsa=1
 		use_openssl_functions_for="${use_openssl_functions_for}RSA "
 	fi
+	LIBS=$LIBS_save
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
