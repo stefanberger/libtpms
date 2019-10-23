@@ -3,7 +3,7 @@
 /*			  TPM Part 2 Headers	   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTypes.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TpmTypes.h 1510 2019-10-07 20:27:37Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -809,6 +809,14 @@ typedef UINT32 TPMA_ALGORITHM;
 	    (method << 10)
 #endif // USE_BIT_FIELD_STRUCTURES
 
+#define TYPE_OF_TPMA_OBJECT UINT32
+#define TPMA_OBJECT_TO_UINT32(a)     (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_OBJECT(a)     (*((TPMA_OBJECT *)&(a)))
+#define TPMA_OBJECT_TO_BYTE_ARRAY(i, a)				\
+    UINT32_TO_BYTE_ARRAY((TPMA_OBJECT_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_OBJECT(i, a)					\
+    { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_OBJECT(x); }
+
 /* This is the initializer for a TPMA_OBJECT structure. */
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_OBJECT {                        // Table 2:31
@@ -877,7 +885,13 @@ typedef UINT32                              TPMA_OBJECT;
 	    (sign << 18)                 + (x509sign << 19)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
-/* Table 2:32 - Definition of TPMA_SESSION Bits */
+#define TYPE_OF_TPMA_SESSION    UINT8
+#define TPMA_SESSION_TO_UINT8(a)     (*((UINT8 *)&(a)))
+#define UINT8_TO_TPMA_SESSION(a)     (*((TPMA_SESSION *)&(a)))
+#define TPMA_SESSION_TO_BYTE_ARRAY(i, a)                                           \
+            UINT8_TO_BYTE_ARRAY((TPMA_SESSION_TO_UINT8(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_SESSION(i, a)                                           \
+            { UINT8 x = BYTE_ARRAY_TO_UINT8(a); i = UINT8_TO_TPMA_SESSION(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_SESSION {                       // Table 2:32
     unsigned    continueSession      : 1;
@@ -914,7 +928,13 @@ typedef UINT8                           TPMA_SESSION;
 	    (encrypt << 6)         + (audit << 7)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
-/* Table 2:33 - Definition of TPMA_LOCALITY Bits */
+#define TYPE_OF_TPMA_LOCALITY   UINT8
+#define TPMA_LOCALITY_TO_UINT8(a)    (*((UINT8 *)&(a)))
+#define UINT8_TO_TPMA_LOCALITY(a)    (*((TPMA_LOCALITY *)&(a)))
+#define TPMA_LOCALITY_TO_BYTE_ARRAY(i, a)                                          \
+            UINT8_TO_BYTE_ARRAY((TPMA_LOCALITY_TO_UINT8(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_LOCALITY(i, a)                                          \
+            { UINT8 x = BYTE_ARRAY_TO_UINT8(a); i = UINT8_TO_TPMA_LOCALITY(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_LOCALITY {                      // Table 2:33
     unsigned    TPM_LOC_ZERO         : 1;
@@ -1039,7 +1059,13 @@ typedef UINT32                          TPMA_STARTUP_CLEAR;
 	    (phenablenv << 3) + (orderly << 31)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
-/* Table 2:36 - Definition of TPMA_MEMORY Bits */
+#define TYPE_OF_TPMA_MEMORY UINT32
+#define TPMA_MEMORY_TO_UINT32(a)     (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_MEMORY(a)     (*((TPMA_MEMORY *)&(a)))
+#define TPMA_MEMORY_TO_BYTE_ARRAY(i, a)                                            \
+            UINT32_TO_BYTE_ARRAY((TPMA_MEMORY_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_MEMORY(i, a)                                            \
+            { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_MEMORY(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_MEMORY {                        // Table 2:36
     unsigned    sharedRAM            : 1;
@@ -1064,7 +1090,13 @@ typedef UINT32                          TPMA_MEMORY;
     {(sharedram << 0) + (sharednv << 1) + (objectcopiedtoram << 2)}
 #endif // USE_BIT_FIELD_STRUCTURES
 
-/* Table 2:37 - Definition of TPMA_CC Bits */
+#define TYPE_OF_TPMA_CC     UINT32
+#define TPMA_CC_TO_UINT32(a)     (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_CC(a)     (*((TPMA_CC *)&(a)))
+#define TPMA_CC_TO_BYTE_ARRAY(i, a)                                                \
+            UINT32_TO_BYTE_ARRAY((TPMA_CC_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_CC(i, a)                                                \
+            { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_CC(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_CC {                            // Table 2:37
     unsigned    commandIndex         : 16;
@@ -1106,7 +1138,13 @@ typedef UINT32                      TPMA_CC;
 	    (v << 29)
 #endif // USE_BIT_FIELD_STRUCTURES
 
-/* Table 2:38 - Definition of TPMA_MODES Bits */
+#define TYPE_OF_TPMA_MODES  UINT32
+#define TPMA_MODES_TO_UINT32(a)  (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_MODES(a)  (*((TPMA_MODES *)&(a)))
+#define TPMA_MODES_TO_BYTE_ARRAY(i, a)                                             \
+            UINT32_TO_BYTE_ARRAY((TPMA_MODES_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_MODES(i, a)                                             \
+            { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_MODES(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_MODES {                         // Table 2:38
     unsigned    FIPS_140_2           : 1;
@@ -2144,7 +2182,13 @@ typedef union {
     TPM2B        b;
 } TPM2B_ID_OBJECT;
 
-/* Table 2:205 - Definition of TPM_NV_INDEX Bits */
+#define TYPE_OF_TPM_NV_INDEX    UINT32
+#define TPM_NV_INDEX_TO_UINT32(a)    (*((UINT32 *)&(a)))
+#define UINT32_TO_TPM_NV_INDEX(a)    (*((TPM_NV_INDEX *)&(a)))
+#define TPM_NV_INDEX_TO_BYTE_ARRAY(i, a)                                           \
+            UINT32_TO_BYTE_ARRAY((TPM_NV_INDEX_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPM_NV_INDEX(i, a)                                           \
+            { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPM_NV_INDEX(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPM_NV_INDEX {                       // Table 2:205
     unsigned    index                : 24;
@@ -2165,6 +2209,7 @@ typedef UINT32                      TPM_NV_INDEX;
 
 // Table 2:206 - Definition of TPM_NT Constants
 typedef UINT32              TPM_NT;
+#define TYPE_OF_TPM_NT      UINT32
 #define TPM_NT_ORDINARY     (TPM_NT)(0x0)
 #define TPM_NT_COUNTER      (TPM_NT)(0x1)
 #define TPM_NT_BITS         (TPM_NT)(0x2)
@@ -2177,7 +2222,13 @@ typedef struct {
     UINT32                  pinLimit;
 } TPMS_NV_PIN_COUNTER_PARAMETERS;
 
-/* Table 2:208 - Definition of TPMA_NV Bits */
+#define TYPE_OF_TPMA_NV     UINT32
+#define TPMA_NV_TO_UINT32(a)     (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_NV(a)     (*((TPMA_NV *)&(a)))
+#define TPMA_NV_TO_BYTE_ARRAY(i, a)                                                \
+            UINT32_TO_BYTE_ARRAY((TPMA_NV_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_NV(i, a)                                                \
+            { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_NV(x); }
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_NV {                            // Table 2:208
     unsigned    PPWRITE              : 1;
@@ -2222,6 +2273,7 @@ typedef struct TPMA_NV {                            // Table 2:208
 #else // USE_BIT_FIELD_STRUCTURES
 // This implements Table 2:208 TPMA_NV using bit masking
 typedef UINT32                  TPMA_NV;
+#define TYPE_OF_TPMA_NV         UINT32
 #define TPMA_NV_PPWRITE         ((TPMA_NV)1 << 0)
 #define TPMA_NV_OWNERWRITE      ((TPMA_NV)1 << 1)
 #define TPMA_NV_AUTHWRITE       ((TPMA_NV)1 << 2)
@@ -2322,18 +2374,22 @@ typedef struct {
 typedef struct {
     UINT16                  size;
     TPMS_CREATION_DATA      creationData;
-} TPM2B_CREATION_DATA;
-/* Table 2:215 - Definition of TPM_AT Constants  */
-typedef  UINT32             TPM_AT;
-#define  TPM_AT_ANY      (TPM_AT)(0x00000000)
-#define  TPM_AT_ERROR    (TPM_AT)(0x00000001)
-#define  TPM_AT_PV1      (TPM_AT)(0x00000002)
-#define  TPM_AT_VEND     (TPM_AT)(0x80000000)
-/* Table 2:216 - Definition of TPM_AE Constants  */
-typedef  UINT32             TPM_AE;
-#define  TPM_AE_NONE    (TPM_AE)(0x00000000)
-/* Table 2:217 - Definition of TPMS_AC_OUTPUT Structure  */
-typedef struct {
+} TPM2B_CREATION_DATA;                              /* Structure */
+
+// Table 2:220 - Definition of TPM_AT Constants
+typedef UINT32              TPM_AT;
+#define TYPE_OF_TPM_AT      UINT32
+#define TPM_AT_ANY          (TPM_AT)(0x00000000)
+#define TPM_AT_ERROR        (TPM_AT)(0x00000001)
+#define TPM_AT_PV1          (TPM_AT)(0x00000002)
+#define TPM_AT_VEND         (TPM_AT)(0x80000000)
+
+// Table 2:221 - Definition of TPM_AE Constants
+typedef UINT32              TPM_AE;
+#define TYPE_OF_TPM_AE      UINT32
+#define TPM_AE_NONE         (TPM_AE)(0x00000000)
+
+typedef struct {                                    // Table 2:222
     TPM_AT                  tag;
     UINT32                  data;
 } TPMS_AC_OUTPUT;
