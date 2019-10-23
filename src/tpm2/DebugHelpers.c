@@ -5,7 +5,7 @@
 /*		       IBM Thomas J. Watson Research Center			*/
 /*            $Id: DebugHelpers.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
-/*  Licenses and Notice							*/
+/*  Licenses and Notices							*/
 /*										*/
 /*  1. Copyright Licenses:							*/
 /*										*/

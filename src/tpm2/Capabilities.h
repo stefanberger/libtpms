@@ -3,7 +3,7 @@
 /*	Number of capability values that will fit into the largest data buffer	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Capabilities.h 1047 2017-07-20 18:27:34Z kgoldman $		*/
+/*            $Id: Capabilities.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

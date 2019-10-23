@@ -3,7 +3,7 @@
 /*			     TPM X509 ECC					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id$		*/
+/*            $Id: X509_ECC_fp.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
