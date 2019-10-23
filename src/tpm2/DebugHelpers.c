@@ -3,7 +3,7 @@
 /*			Debug Helper			.	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DebugHelpers.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: DebugHelpers.c 1510 2019-10-07 20:27:37Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,6 +59,8 @@
 /*										*/
 /********************************************************************************/
 
+#if CERTIFYX509_DEBUG  // libtpms added
+
 /* C.13	DebugHelpers.c */
 /* C.13.1.	Description */
 /* This file contains the NV read and write access methods. This implementation uses RAM/file and
@@ -70,7 +72,7 @@
 #include "DebugHelpers_fp.h"
 
 FILE                *fDebug = NULL;
-const char       *fn = "DebugFile.txt";
+const char       *debugFileName = "DebugFile.txt";
 
 static FILE *
 fileOpen(
@@ -83,7 +85,7 @@ fileOpen(
     if(fopen_s(&f, fn, mode) != 0)
 	f = NULL;
 #   else
-    f = fopen(fn, "w");
+    f = fopen(fn, mode);
 #   endif
     return f;
 }
@@ -103,7 +105,7 @@ DebugFileOpen(
     // Get current date and time.
     timeString = ctime(&t);
     // Try to open the debug file
-    fDebug = fileOpen(fn, "w");
+    fDebug = fileOpen(debugFileName, "w");
     if(fDebug)
 	{
 	    fprintf(fDebug, "%s\n", timeString);
@@ -129,7 +131,7 @@ DebugDumpBuffer(
 {
     int             i;
     //
-    FILE *f = fileOpen(fn, "a");
+    FILE *f = fileOpen(debugFileName, "a");
     if(!f)
 	return;
     if(identifier)
@@ -147,3 +149,5 @@ DebugDumpBuffer(
 	}
     fclose(f);
 }
+
+#endif // libtpms added
