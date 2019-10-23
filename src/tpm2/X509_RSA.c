@@ -3,7 +3,7 @@
 /*			     TPM X509 RSA					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_RSA.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: X509_RSA.c 1509 2019-10-07 19:10:05Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -91,114 +91,114 @@ X509AddSigningAlgorithmRSA(
     if(hashDef->hashAlg != hashAlg)
 	return 0;
     switch(scheme->scheme)
-	{
-	  case ALG_RSASSA_VALUE:
-	      {
-		  // if the hash is implemented but there is no PKCS1 OID defined
-		  // then this is not a valid signing combination.
-		  if(hashDef->PKCS1[0] != ASN1_OBJECT_IDENTIFIER)
-		      break;
-		  if(ctx == NULL)
-		      return 1;
-		  ASN1StartMarshalContext(ctx);
-		  ASN1PushOID(ctx, hashDef->PKCS1);
-		  return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
-	      }
-	  case ALG_RSAPSS_VALUE:
-	    // leave if this is just an implementation check
-	    if(ctx == NULL)
-		return 1;
-	    // In the case of SHA1, everything is default and RFC4055 says that
-	    // implementations that do signature generation MUST omit the parameter
-	    // when defaults are used. )-:
-	    if(hashDef->hashAlg == ALG_SHA1_VALUE)
-		{
-		    return X509PushAlgorithmIdentifierSequence(ctx, OID_RSAPSS);
-		}
-	    else
-		{
-		    // Going to build something that looks like:
-		    //  SEQUENCE (2 elem)
-		    //     OBJECT IDENTIFIER 1.2.840.113549.1.1.10 rsaPSS (PKCS #1)
-		    //     SEQUENCE (3 elem)
-		    //       [0] (1 elem)
-		    //         SEQUENCE (2 elem)
-		    //           OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256
-		    //           NULL
-		    //       [1] (1 elem)
-		    //         SEQUENCE (2 elem)
-		    //           OBJECT IDENTIFIER 1.2.840.113549.1.1.8 pkcs1-MGF
-		    //           SEQUENCE (2 elem)
-		    //             OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256
-		    //             NULL
-		    //       [2] (1 elem)  salt length
-		    //         INTEGER 32
-		    
-		    // The indentation is just to keep track of where we are in the
-		    // structure
-		    ASN1StartMarshalContext(ctx); // SEQUENCE (2 elements)
-		    {
-			ASN1StartMarshalContext(ctx);   // SEQUENCE (3 elements)
-			{
-			    // [2] (1 elem)  salt length
-			    //    INTEGER 32
-			    ASN1StartMarshalContext(ctx);
-			    {
-				INT16       saltSize =
-				    CryptRsaPssSaltSize((INT16)hashDef->digestSize,
-							(INT16)signKey->publicArea.unique.rsa.t.size);
-				ASN1PushUINT(ctx, saltSize);
-			    }
-			    ASN1EndEncapsulation(ctx, ASN1_APPLICAIION_SPECIFIC + 2);
-			    
-			    // Add the mask generation algorithm
-			    // [1] (1 elem)
-			    //    SEQUENCE (2 elem) 1st
-			    //      OBJECT IDENTIFIER 1.2.840.113549.1.1.8 pkcs1-MGF
-			    //      SEQUENCE (2 elem) 2nd
-			    //        OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256
-			    //        NULL
-			    ASN1StartMarshalContext(ctx);   // mask context [1] (1 elem)
-			    {
-				ASN1StartMarshalContext(ctx);   // SEQUENCE (2 elem) 1st
-				// Handle the 2nd Sequence (sequence (object, null))
-				{
-				    X509PushAlgorithmIdentifierSequence(ctx,
-									hashDef->OID);
-				    // add the pkcs1-MGF OID
-				    ASN1PushOID(ctx, OID_MGF1);
-				}
-				// End outer sequence
-				ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
-			    }
-			    // End the [1]
-			    ASN1EndEncapsulation(ctx, ASN1_APPLICAIION_SPECIFIC + 1);
-			    
-			    // Add the hash algorithm
-			    // [0] (1 elem)
-			    //   SEQUENCE (2 elem) (done by
-			    //              X509PushAlgorithmIdentifierSequence)
-			    //     OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256 (NIST)
-			    //     NULL
-			    ASN1StartMarshalContext(ctx); // [0] (1 elem)
-			    {
-				X509PushAlgorithmIdentifierSequence(ctx, hashDef->OID);
-			    }
-			    ASN1EndEncapsulation(ctx, (ASN1_APPLICAIION_SPECIFIC + 0));
-			}
-			//  SEQUENCE (3 elements) end
-			ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
-			
-			// RSA PSS OID
-			// OBJECT IDENTIFIER 1.2.840.113549.1.1.10 rsaPSS (PKCS #1)
-			ASN1PushOID(ctx, OID_RSAPSS);
-		    }
-		    // End Sequence (2 elements)
-		    return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
-		}
-	  default:
-	    break;
-	}
+    {
+        case ALG_RSASSA_VALUE:
+        {
+            // if the hash is implemented but there is no PKCS1 OID defined
+            // then this is not a valid signing combination.
+            if(hashDef->PKCS1[0] != ASN1_OBJECT_IDENTIFIER)
+                break;
+            if(ctx == NULL)
+                return 1;
+            return X509PushAlgorithmIdentifierSequence(ctx, hashDef->PKCS1);
+        }
+        case ALG_RSAPSS_VALUE:
+            // leave if this is just an implementation check
+            if(ctx == NULL)
+                return 1;
+            // In the case of SHA1, everything is default and RFC4055 says that 
+            // implementations that do signature generation MUST omit the parameter
+            // when defaults are used. )-:
+            if(hashDef->hashAlg == ALG_SHA1_VALUE)
+            {
+                return X509PushAlgorithmIdentifierSequence(ctx, OID_RSAPSS);
+            }
+            else
+            {
+                // Going to build something that looks like:
+                //  SEQUENCE (2 elem)
+                //     OBJECT IDENTIFIER 1.2.840.113549.1.1.10 rsaPSS (PKCS #1)
+                //     SEQUENCE (3 elem)
+                //       [0] (1 elem)
+                //         SEQUENCE (2 elem)
+                //           OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256 
+                //           NULL
+                //       [1] (1 elem)
+                //         SEQUENCE (2 elem)
+                //           OBJECT IDENTIFIER 1.2.840.113549.1.1.8 pkcs1-MGF
+                //           SEQUENCE (2 elem)
+                //             OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256
+                //             NULL
+                //       [2] (1 elem)  salt length
+                //         INTEGER 32
+
+                // The indentation is just to keep track of where we are in the 
+                // structure
+                ASN1StartMarshalContext(ctx); // SEQUENCE (2 elements)
+                {
+                    ASN1StartMarshalContext(ctx);   // SEQUENCE (3 elements)
+                    {
+                        // [2] (1 elem)  salt length
+                        //    INTEGER 32
+                        ASN1StartMarshalContext(ctx);
+                        {
+                            INT16       saltSize =
+                                CryptRsaPssSaltSize((INT16)hashDef->digestSize,
+                                (INT16)signKey->publicArea.unique.rsa.t.size);
+                            ASN1PushUINT(ctx, saltSize);
+                        }
+                        ASN1EndEncapsulation(ctx, ASN1_APPLICAIION_SPECIFIC + 2);
+
+                        // Add the mask generation algorithm
+                        // [1] (1 elem)
+                        //    SEQUENCE (2 elem) 1st
+                        //      OBJECT IDENTIFIER 1.2.840.113549.1.1.8 pkcs1-MGF
+                        //      SEQUENCE (2 elem) 2nd  
+                        //        OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256
+                        //        NULL
+                        ASN1StartMarshalContext(ctx);   // mask context [1] (1 elem)
+                        {
+                            ASN1StartMarshalContext(ctx);   // SEQUENCE (2 elem) 1st
+                            // Handle the 2nd Sequence (sequence (object, null))
+                            {
+                                // This adds a NULL, then an OID and a SEQUENCE
+                                // wrapper.
+                                X509PushAlgorithmIdentifierSequence(ctx,
+                                    hashDef->OID);
+                                // add the pkcs1-MGF OID 
+                                ASN1PushOID(ctx, OID_MGF1);
+                            }
+                            // End outer sequence
+                            ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
+                        }
+                        // End the [1] 
+                        ASN1EndEncapsulation(ctx, ASN1_APPLICAIION_SPECIFIC + 1);
+
+                        // Add the hash algorithm
+                        // [0] (1 elem)
+                        //   SEQUENCE (2 elem) (done by 
+                        //              X509PushAlgorithmIdentifierSequence)
+                        //     OBJECT IDENTIFIER 2.16.840.1.101.3.4.2.1 sha-256 (NIST)
+                        //     NULL
+                        ASN1StartMarshalContext(ctx); // [0] (1 elem)
+                        {
+                            X509PushAlgorithmIdentifierSequence(ctx, hashDef->OID);
+                        }
+                        ASN1EndEncapsulation(ctx, (ASN1_APPLICAIION_SPECIFIC + 0));
+                    }
+                    //  SEQUENCE (3 elements) end
+                    ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
+
+                    // RSA PSS OID
+                    // OBJECT IDENTIFIER 1.2.840.113549.1.1.10 rsaPSS (PKCS #1)
+                    ASN1PushOID(ctx, OID_RSAPSS);
+                }
+                // End Sequence (2 elements)
+                return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
+            }
+        default:
+            break;
+    }
     return 0;
 }
 /* 10.2.25.2.2	X509AddPublicRSA() */
