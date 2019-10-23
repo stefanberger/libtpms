@@ -3,7 +3,7 @@
 /*	TPM commands are communicated as BYTE streams on a TCP connection	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTcpProtocol.h 1311 2018-08-23 21:39:29Z kgoldman $		*/
+/*            $Id: TpmTcpProtocol.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id$	*/
+/*            $Id: TpmProfile.h 1490 2019-07-26 21:13:22Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

@@ -3,7 +3,7 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1262 2018-07-11 21:03:43Z kgoldman $	*/
+/*            $Id: SessionProcess.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

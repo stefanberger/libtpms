@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: GpMacros.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -305,14 +305,14 @@
 #endif
 /* These macros are used to handle the variation in handling of bit fields. If */
 #if USE_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
-#   define IS_ATTRIBUTE(a, type, b)    ((a.b != 0))
+#   define IS_ATTRIBUTE(a, type, b)        (a.b != 0)
 #   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
 #   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
-#   define GET_ATTRIBUTE(a, type, b)        (a.b)
+#   define GET_ATTRIBUTE(a, type, b)       (a.b)
 #else
-#   define IS_ATTRIBUTE(a, type, b)         ((a & type##_##b) != 0)
-#   define SET_ATTRIBUTE(a, type, b)        (a |= type##_##b)
-#   define CLEAR_ATTRIBUTE(a, type, b)      (a &= ~type##_##b)
+#   define IS_ATTRIBUTE(a, type, b)        ((a & type##_##b) != 0)
+#   define SET_ATTRIBUTE(a, type, b)       (a |= type##_##b)
+#   define CLEAR_ATTRIBUTE(a, type, b)     (a &= ~type##_##b)
 #   define GET_ATTRIBUTE(a, type, b)					\
     (type)((a & type##_##b) >> type##_##b##_SHIFT)
 #endif

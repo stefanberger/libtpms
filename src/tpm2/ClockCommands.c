@@ -3,7 +3,7 @@
 /*			    Clocks and Timers	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ClockCommands.c 1259 2018-07-10 19:11:09Z kgoldman $		*/
+/*            $Id: ClockCommands.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
