@@ -145,6 +145,39 @@ AC_ARG_WITH([tpm2],
 	AM_CONDITIONAL(WITH_TPM2, false)
 )
 
+# list of extra profiles (besides default), e.g. [pcclient,another]
+define([LIBTPMS_PROFILES],[pcclient])
+
+# parse profile list
+AC_ARG_WITH([extra-profiles],
+			AC_HELP_STRING([--with-extra-profiles],
+		                   m4_join([], [comma-separated list additional of libtpms profiles, supported values: ],
+						           m4_quote(LIBTPMS_PROFILES))),
+			[
+				# illegal_profile=$(echo $with_extra_profiles | sed -E 's/pcclient,?//g' | sed -E 's/another,?//g' | ...)
+				illegal_profile=$(echo $with_extra_profiles m4_foreach([profile],
+				                                                        m4_quote(LIBTPMS_PROFILES),
+																		[| sed -E 's/profile,?//g']))
+				AS_IF([test "x" =  x$illegal_profile ],
+                      [AC_MSG_RESULT([Profile list parsed successfully])],
+                      [AC_MSG_ERROR([Illegal profile(s): $illegal_profile])])
+			],
+            [with_extra_profiles=""]
+)
+
+# for each possible profile:
+# - set conditional WITH_PROFILE_<PROFILE>
+# - create libtpms-<profile>.pc from libtpms-<profile>.pc.in (if enabled)
+m4_foreach([profile], m4_quote(LIBTPMS_PROFILES), [
+	if echo $with_extra_profiles | grep profile > /dev/null; then
+		m4_join([], [with_extra_profile_], profile, [="yes"])
+		AC_CONFIG_FILES(m4_join([], [libtpms-],profile,[.pc]))
+	fi
+	AM_CONDITIONAL(m4_join([], [WITH_PROFILE_], m4_toupper(profile)),
+	               [test m4_join([], [x$with_extra_profile_], profile) = "xyes"])
+])
+)
+
 use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
 use_openssl_functions_ec=0
@@ -317,6 +350,7 @@ echo "Version to build        : $PACKAGE_VERSION"
 echo "Crypto library          : $cryptolib"
 echo "Debug build             : $enable_debug"
 echo "With TPM2 support       : $with_tpm2"
+echo "Extra profiles          : $with_extra_profiles"
 echo "HAVE_VERSION_SCRIPT     : $have_version_script"
 echo "Use openssl crypto for  : $use_openssl_functions_for"
 echo

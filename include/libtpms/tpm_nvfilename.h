@@ -42,15 +42,21 @@
 #ifndef TPM_NVFILENAME_H
 #define TPM_NVFILENAME_H
 
+#ifdef PROFILE_PCCLIENT
+#define TPM_FILENAME_SUFFIX "-pcclient"
+#else
+#define TPM_FILENAME_SUFFIX ""
+#endif
+
 /*
   Constants for NVRAM names
 */
 
-#define TPM_PERMANENT_ALL_NAME	"permall"
+#define TPM_PERMANENT_ALL_NAME	"permall" TPM_FILENAME_SUFFIX
 
-#define TPM_SAVESTATE_NAME      "savestate"
+#define TPM_SAVESTATE_NAME      "savestate" TPM_FILENAME_SUFFIX
 
-#define TPM_VOLATILESTATE_NAME      "volatilestate"
+#define TPM_VOLATILESTATE_NAME      "volatilestate" TPM_FILENAME_SUFFIX
 
 
 #endif

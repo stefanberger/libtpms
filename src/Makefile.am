@@ -152,7 +152,7 @@ libtpms_tpm12_la_CFLAGS += $(shell nss-config --cflags)
 #including nss3/blapi.h requires a look into nspr4 dir
 libtpms_tpm12_la_CFLAGS += $(shell nspr-config --cflags)
 
-else 
+else
 
 if LIBTPMS_USE_OPENSSL
 
@@ -358,6 +358,8 @@ noinst_HEADERS += \
 	tpm2/HMAC_fp.h \
 	tpm2/HMAC_Start_fp.h \
 	tpm2/Implementation.h \
+	tpm2/Implementation_full.h \
+	tpm2/Implementation_pcclient.h \
 	tpm2/Import_fp.h \
 	tpm2/IncrementalSelfTest_fp.h \
 	tpm2/InternalRoutines.h \
@@ -532,6 +534,15 @@ endif # LIBTPMS_USE_OPENSSL
 
 endif # WITH_TPM2
 
+# libtpms-pcclient with minimal PC Client feature set
+if WITH_PROFILE_PCCLIENT
+noinst_LTLIBRARIES += libtpms_tpm2_pcclient.la
+libtpms_tpm2_pcclient_la_LIBADD = $(libtpms_tpm2_la_LIBADD)
+libtpms_tpm2_pcclient_la_CFLAGS = $(libtpms_tpm2_la_CFLAGS)
+libtpms_tpm2_pcclient_la_CFLAGS += -DPROFILE_PCCLIENT
+libtpms_tpm2_pcclient_la_SOURCES = $(libtpms_tpm2_la_SOURCES)
+endif # WITH_PROFILE_PCCLIENT
+
 #
 # Library API layer
 #
@@ -547,6 +558,15 @@ libtpms_la_LDFLAGS = -version-info $(LIBTPMS_VERSION_INFO) \
 if HAVE_VERSION_SCRIPT
 libtpms_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libtpms.syms
 endif
+
+# libtpms-pcclient with minimal PC Client feature set
+if WITH_PROFILE_PCCLIENT
+lib_LTLIBRARIES += libtpms-pcclient.la
+libtpms_pcclient_la_LIBADD = libtpms_tpm12.la libtpms_tpm2_pcclient.la
+libtpms_pcclient_la_SOURCES = $(libtpms_la_SOURCES)
+libtpms_pcclient_la_CFLAGS = $(libtpms_la_CFLAGS)
+libtpms_pcclient_la_LDFLAGS = $(libtpms_la_LDFLAGS)
+endif # WITH_PROFILE_PCCLIENT
 
 LDFLAGS_ARCH  = $(findstring -m32, $(CFLAGS))
 LDFLAGS_ARCH += $(findstring -m64, $(CFLAGS))
