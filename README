@@ -86,7 +86,8 @@ Fuzz testing is known to work with Fedora 28 or later. It requires that the
 'clang' package is installed.
 
 Ex:
-$ ./configure --with-openssl --with-tpm2 --enable-sanitizers --enable-fuzzer CC=clang
+$ ./configure --with-openssl --with-tpm2 --enable-sanitizers --enable-fuzzer \
+    CC=clang CXX=clang++
 $ make && make -C tests fuzz
 $ tests/run-fuzzer.sh
 
