@@ -305,7 +305,7 @@
 #endif
 /* These macros are used to handle the variation in handling of bit fields. If */
 #if USE_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
-#   define IS_ATTRIBUTE(a, type, b)        (a.b != 0)
+#   define IS_ATTRIBUTE(a, type, b)        ((a.b) != 0)
 #   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
 #   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
 #   define GET_ATTRIBUTE(a, type, b)       (a.b)
