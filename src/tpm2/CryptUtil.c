@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			Interfaces to the CryptoEngine()			*/
+/*			Interfaces to the Crypto Engine				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -142,9 +142,10 @@ CryptGenerateKeyedHash(
 {
     TPMT_KEYEDHASH_SCHEME   *scheme;
     TPM_ALG_ID               hashAlg;
-    UINT16                   hashBlockSize;
     UINT16                   digestSize;
+    
     scheme = &publicArea->parameters.keyedHashDetail.scheme;
+    
     if(publicArea->type != TPM_ALG_KEYEDHASH)
 	return TPM_RC_FAILURE;
     // Pick the limiting hash algorithm
@@ -154,8 +155,9 @@ CryptGenerateKeyedHash(
 	hashAlg = scheme->details.xorr.hashAlg;
     else
 	hashAlg = scheme->details.hmac.hashAlg;
-    hashBlockSize = CryptHashGetBlockSize(hashAlg);
+    /* hashBlockSize = CryptHashGetBlockSize(hashAlg); */
     digestSize = CryptHashGetDigestSize(hashAlg);
+    
     // if this is a signing or a decryption key, then the limit
     // for the data size is the block size of the hash. This limit
     // is set because larger values have lower entropy because of the
@@ -167,7 +169,7 @@ CryptGenerateKeyedHash(
 	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, decrypt)
 	       || IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
 		{
-		    if(sensitiveCreate->data.t.size > hashBlockSize)
+		    if(sensitiveCreate->data.t.size > CryptHashGetBlockSize(hashAlg))
 			return TPM_RC_SIZE;
 #if 0   // May make this a FIPS-mode requirement
 		    if(sensitiveCreate->data.t.size < (digestSize / 2))
