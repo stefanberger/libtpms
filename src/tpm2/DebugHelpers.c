@@ -3,7 +3,7 @@
 /*			Debug Helper			.	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DebugHelpers.c 1510 2019-10-07 20:27:37Z kgoldman $		*/
+/*            $Id: DebugHelpers.c 1528 2019-11-20 20:31:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,8 +59,6 @@
 /*										*/
 /********************************************************************************/
 
-#if CERTIFYX509_DEBUG  // libtpms added
-
 /* C.13	DebugHelpers.c */
 /* C.13.1.	Description */
 /* This file contains the NV read and write access methods. This implementation uses RAM/file and
@@ -69,8 +67,10 @@
 /* C.13.2.	Includes and Local */
 #include    <stdio.h>
 #include    <time.h>
+#include "Platform.h"
 #include "DebugHelpers_fp.h"
 
+#if CERTIFYX509_DEBUG
 FILE                *fDebug = NULL;
 const char       *debugFileName = "DebugFile.txt";
 
@@ -99,11 +99,16 @@ DebugFileOpen(
 	      void
 	      )
 {
-    char   	*timeString;
     time_t	t = time(NULL);
     //
     // Get current date and time.
+#   if defined _MSC_VER
+    char                 timeString[100];
+    ctime_s(timeString, (size_t)sizeof(timeString), &t);
+#   else
+    char                *timeString;
     timeString = ctime(&t);
+#   endif
     // Try to open the debug file
     fDebug = fileOpen(debugFileName, "w");
     if(fDebug)
@@ -114,6 +119,7 @@ DebugFileOpen(
 	}
     return -1;
 }
+
 void
 DebugFileClose(
 	       void
@@ -126,13 +132,13 @@ void
 DebugDumpBuffer(
 		int             size,
 		unsigned char   *buf,
-		unsigned char   *identifier
+		const char      *identifier
 		)
 {
     int             i;
     //
-    FILE *f = fileOpen(debugFileName, "a");
-    if(!f)
+    FILE *fDebug = fileOpen(debugFileName, "a");
+    if(!fDebug)
 	return;
     if(identifier)
 	fprintf(fDebug, "%s\n", identifier);
@@ -147,7 +153,7 @@ DebugDumpBuffer(
 	    if((size % 16) != 0)
 		fprintf(fDebug, "\n");
 	}
-    fclose(f);
+    fclose(fDebug);
 }
 
-#endif // libtpms added
+#endif // CERTIFYX509_DEBUG
