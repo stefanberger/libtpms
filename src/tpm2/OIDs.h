@@ -112,7 +112,7 @@
 #   define ALG_SM3_256 NO
 #endif
 #if ALG_SM3_256
-#define SM3_256_OID(NAME) MAKE_OID(NAME##SM2_256)
+#define SM3_256_OID(NAME) MAKE_OID(NAME##SM3_256)
 #else
 #define SM3_256_OID(NAME)
 #endif
