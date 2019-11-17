@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
+/*            $Id: Clock.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -160,7 +160,7 @@ clock_t     debugTime;
 /* C.3.4.2.	_plat__Time() */
 /* This is another, probably futile, attempt to define a portable function that will return a 64-bit
    clock value that has mSec resolution. */
-uint64_t
+LIB_EXPORT uint64_t
 _plat__RealTime(
 		void
 		)

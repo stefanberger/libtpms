@@ -104,7 +104,7 @@ _plat__TimerRestart(
 		    );
 // C.8.2.3. _plat__Time() This is another, probably futile, attempt to define a portable function
 // that will return a 64-bit clock value that has mSec resolution.
-uint64_t
+LIB_EXPORT uint64_t
 _plat__RealTime(
 		void
 		);
