@@ -76,9 +76,9 @@
    will fail if previously called. The TPM can be re-manufactured by calling TPM_Teardown() first
    and then calling this function again. */
 /* Return Values Meaning */
+/* -1 failure */
 /* 0 success */
 /* 1 manufacturing process previously performed */
-/* -1 an error occurred -- libtpms added */
 LIB_EXPORT int
 TPM_Manufacture(
 		int             firstTime       // IN: indicates if this is the first call from

@@ -59,8 +59,6 @@
 /*										*/
 /********************************************************************************/
 
-
-
 /* B.2.2.1. TpmToOsslMath.h */
 /* B.2.2.1.1. Introduction */
 /* This file contains the structure definitions used for ECC in the LibTopCrypt() version of the

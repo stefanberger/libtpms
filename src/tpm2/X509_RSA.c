@@ -3,7 +3,7 @@
 /*			     TPM X509 RSA					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_RSA.c 1509 2019-10-07 19:10:05Z kgoldman $		*/
+/*            $Id: X509_RSA.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -94,13 +94,13 @@ X509AddSigningAlgorithmRSA(
     {
         case ALG_RSASSA_VALUE:
         {
-            // if the hash is implemented but there is no PKCS1 OID defined
-            // then this is not a valid signing combination.
-            if(hashDef->PKCS1[0] != ASN1_OBJECT_IDENTIFIER)
-                break;
-            if(ctx == NULL)
-                return 1;
-            return X509PushAlgorithmIdentifierSequence(ctx, hashDef->PKCS1);
+	    // if the hash is implemented but there is no PKCS1 OID defined
+	    // then this is not a valid signing combination.
+	    if(hashDef->PKCS1[0] != ASN1_OBJECT_IDENTIFIER)
+		break;
+	    if(ctx == NULL)
+		return 1;
+	    return X509PushAlgorithmIdentifierSequence(ctx, hashDef->PKCS1);
         }
         case ALG_RSAPSS_VALUE:
             // leave if this is just an implementation check

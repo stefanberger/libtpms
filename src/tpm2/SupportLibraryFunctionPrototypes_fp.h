@@ -65,7 +65,7 @@
 #define SUPPORT_LIBRARY_FUNCTION_PROTOTYPES_H
 
 /* This file contains the function prototypes for the functions that need to be present in the
-   selected match library. For each function listed, there should be a small stub function. That
+   selected math library. For each function listed, there should be a small stub function. That
    stub provides the interface between the TPM code and the support library. In most cases, the stub
    function will only need to do a format conversion between the TPM big number and the support
    library big number. The TPM big number format was chosen to make this relatively simple and

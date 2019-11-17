@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	 		TPM2_SetPrimaryPolicy Command Header			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*            $Id: SetPrimaryPolicy_fp.h 809 2016-11-16 18:31:54Z kgoldman $	*/
@@ -58,8 +58,6 @@
 /*  (c) Copyright IBM Corp. and others, 2012-2015				*/
 /*										*/
 /********************************************************************************/
-
-/* rev 119 */
 
 #ifndef SETPRIMARYPOLICY_FP_H
 #define SETPRIMARYPOLICY_FP_H

@@ -3,7 +3,7 @@
 /*			This file contains extra TPM2B structures		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TPMB.h 1476 2019-06-10 19:32:03Z kgoldman $			*/
+/*            $Id: TPMB.h 1521 2019-11-15 21:00:47Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

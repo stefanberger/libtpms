@@ -492,7 +492,7 @@ DRBG_SelfTest(
 
 /* 10.2.16.3.1 Description */
 /* The functions in this section are the interface to the RNG. These are the functions that are used
-   by TPM.lib. Other functions are only visible to programs in the LtcCryptoEngine(). */
+   by TPM.lib. */
 
 /* 10.2.16.3.2 CryptRandomStir() */
 /* This function is used to cause a reseed. A DRBG_SEED amount of entropy is collected from the
@@ -592,8 +592,10 @@ DRBG_AdditionalData(
 }
 /* 10.2.16.3.6 DRBG_InstantiateSeeded() */
 /* This function is used to instantiate a random number generator from seed values. The nominal use
-   of this generator is to create sequences of pseudo-random numbers from a seed value. This
-   function always returns TRUE. */
+   of this generator is to create sequences of pseudo-random numbers from a seed value. */
+/* Returns
+   TPM_RC_FAILURE	DRBG self-test failure
+*/
 LIB_EXPORT TPM_RC
 DRBG_InstantiateSeeded(
 		       DRBG_STATE      *drbgState,     // IN/OUT: buffer to hold the state
@@ -698,7 +700,8 @@ DRBG_GetSeedCompatLevel(
    randomSize bytes of random values are generated. If random is NULL or randomSize is zero, then
    the function returns TRUE without generating any bits or updating the reseed counter. This
    function returns 0 if a reseed is required. Otherwise, it returns the number of bytes produced
-   which could be less than the number requested if the request is too large. */
+   which could be less than the number requested if the request is too large.("too large" is
+   implementation dependent.) */
 LIB_EXPORT UINT16
 DRBG_Generate(
 	      RAND_STATE      *state,

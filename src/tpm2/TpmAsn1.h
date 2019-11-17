@@ -3,7 +3,7 @@
 /*	Macro and Structure Definitions for the X509 Commands and Functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAsn1.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TpmAsn1.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -114,8 +114,8 @@
 #define PEEK_NEXT(context) ((context)->buffer[(context)->offset])
 // 10.1.15.4.2 Marshaling Macros Marshaling works in reverse order. The offset is set to the top of
 // the buffer and, as the buffer is filled, offset counts down to zero. When the full thing is
-// encoded it can be moved to the top of the buffer. This happens when the last context is closed
-// (when the
+// encoded it can be moved to the top of the buffer. This happens when the last context is closed.
+
 #define CHECK_SPACE(context, length)    VERIFY(context->offset > length)
 // 10.1.15.5	Structures
 typedef struct ASN1UnmarshalContext {

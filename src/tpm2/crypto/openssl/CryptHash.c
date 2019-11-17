@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1478 2019-06-10 21:15:14Z kgoldman $		*/
+/*            $Id: CryptHash.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -116,8 +116,8 @@ CryptHashInit(
     return TRUE;
 }
 /* 10.2.13.3.2	CryptHashStartup() */
-/* This function is called by TPM2_Startup() in case there is work to do at startup. Currently, this
-   is a placeholder. */
+/* This function is called by TPM2_Startup().  It checks that the size of the HashDefArray() is
+   consistent with the HASH_COUNT. */
 BOOL
 CryptHashStartup(
 		 void

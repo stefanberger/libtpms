@@ -3,7 +3,7 @@
 /*		Algorithm Values from the TCG Algorithm Registry 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAlgorithmDefines.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TpmAlgorithmDefines.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -73,17 +73,19 @@
      ECC_NIST_P256 + ECC_NIST_P384 + ECC_NIST_P521 + ECC_SM2_P256)
 #define MAX_ECC_KEY_BITS						\
     MAX(ECC_BN_P256 * 256,   MAX(ECC_BN_P638 * 638,			\
-				 MAX(ECC_NIST_P192 * 192, MAX(ECC_NIST_P224 * 224, \
-							      MAX(ECC_NIST_P256 * 256, MAX(ECC_NIST_P384 * 384, \
-											   MAX(ECC_NIST_P521 * 521, MAX(ECC_SM2_P256 * 256, \
-															0))))))))
+    MAX(ECC_NIST_P192 * 192, MAX(ECC_NIST_P224 * 224, \
+    MAX(ECC_NIST_P256 * 256, MAX(ECC_NIST_P384 * 384, \
+    MAX(ECC_NIST_P521 * 521, MAX(ECC_SM2_P256 * 256, \
+    0))))))))
 #define MAX_ECC_KEY_BYTES               BITS_TO_BYTES(MAX_ECC_KEY_BITS)
+
 // Table 0:6 - Defines for PLATFORM Values
 #define PLATFORM_FAMILY         TPM_SPEC_FAMILY
 #define PLATFORM_LEVEL          TPM_SPEC_LEVEL
 #define PLATFORM_VERSION        TPM_SPEC_VERSION
 #define PLATFORM_YEAR           TPM_SPEC_YEAR
 #define PLATFORM_DAY_OF_YEAR    TPM_SPEC_DAY_OF_YEAR
+
 // Table 1:12 - Defines for SHA1 Hash Values
 #define SHA1_DIGEST_SIZE    20
 #define SHA1_BLOCK_SIZE     64
