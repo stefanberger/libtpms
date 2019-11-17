@@ -1311,7 +1311,7 @@ CheckAuthSession(
 		return result;
 	}
     // Check authorization according to the type
-    if(session == NULL || session->attributes.isPasswordNeeded == SET)
+    if((TPM_RS_PW == sessionHandle) || (session->attributes.isPasswordNeeded == SET))
 	result = CheckPWAuthSession(sessionIndex);
     else
 	result = CheckSessionHMAC(command, sessionIndex);
