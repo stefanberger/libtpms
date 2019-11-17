@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Check COmpiler Options   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmSizeChecks_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: TpmSizeChecks_fp.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef TPMSIZECHECKS_FP_H
 #define TPMSIZECHECKS_FP_H
 
-void TpmSizeChecks(void);
-
+BOOL TpmSizeChecks(void);
 
 #endif
