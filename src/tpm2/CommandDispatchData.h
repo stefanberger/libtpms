@@ -1801,26 +1801,26 @@ typedef const struct {
     BYTE                    types[10];
 } CertifyX509_COMMAND_DESCRIPTOR_t;
 CertifyX509_COMMAND_DESCRIPTOR_t _CertifyX509Data = {
-						     /* entry         */     &TPM2_CertifyX509,
-						     /* inSize        */     (UINT16)(sizeof(CertifyX509_In)),
-						     /* outSize       */     (UINT16)(sizeof(CertifyX509_Out)),
-						     /* offsetOfTypes */     offsetof(CertifyX509_COMMAND_DESCRIPTOR_t, types),
-						     /* offsets       */     {(UINT16)(offsetof(CertifyX509_In, signHandle)),
-									      (UINT16)(offsetof(CertifyX509_In, qualifyingData)),
-									      (UINT16)(offsetof(CertifyX509_In, inScheme)),
-									      (UINT16)(offsetof(CertifyX509_In, partialCertificate)),
-									      (UINT16)(offsetof(CertifyX509_Out, tbsDigest)),
-									      (UINT16)(offsetof(CertifyX509_Out, signature))},
-						     /* types         */     {TPMI_DH_OBJECT_H_UNMARSHAL,
-									      TPMI_DH_OBJECT_H_UNMARSHAL + ADD_FLAG,
-									      TPM2B_DATA_P_UNMARSHAL,
-									      TPMT_SIG_SCHEME_P_UNMARSHAL + ADD_FLAG,
-									      TPM2B_MAX_BUFFER_P_UNMARSHAL,
-									      END_OF_LIST,
-									      TPM2B_MAX_BUFFER_P_MARSHAL,
-									      TPM2B_DIGEST_P_MARSHAL,
-									      TPMT_SIGNATURE_P_MARSHAL,
-									      END_OF_LIST}
+	/* entry         */     &TPM2_CertifyX509,
+	/* inSize        */     (UINT16)(sizeof(CertifyX509_In)),
+	/* outSize       */     (UINT16)(sizeof(CertifyX509_Out)),
+	/* offsetOfTypes */     offsetof(CertifyX509_COMMAND_DESCRIPTOR_t, types),
+	/* offsets       */     {(UINT16)(offsetof(CertifyX509_In, signHandle)),
+				 (UINT16)(offsetof(CertifyX509_In, reserved)),
+				 (UINT16)(offsetof(CertifyX509_In, inScheme)),
+				 (UINT16)(offsetof(CertifyX509_In, partialCertificate)),
+				 (UINT16)(offsetof(CertifyX509_Out, tbsDigest)),
+				 (UINT16)(offsetof(CertifyX509_Out, signature))},
+	/* types         */     {TPMI_DH_OBJECT_H_UNMARSHAL,
+				 TPMI_DH_OBJECT_H_UNMARSHAL + ADD_FLAG,
+				 TPM2B_DATA_P_UNMARSHAL,
+				 TPMT_SIG_SCHEME_P_UNMARSHAL + ADD_FLAG,
+				 TPM2B_MAX_BUFFER_P_UNMARSHAL,
+				 END_OF_LIST,
+				 TPM2B_MAX_BUFFER_P_MARSHAL,
+				 TPM2B_DIGEST_P_MARSHAL,
+				 TPMT_SIGNATURE_P_MARSHAL,
+				 END_OF_LIST}
 };
 #define _CertifyX509DataAddress (&_CertifyX509Data)
 #else
