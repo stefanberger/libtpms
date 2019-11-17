@@ -3,7 +3,7 @@
 /*	Macro and Structure Definitions for the X509 Commands and Functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509.h 1509 2019-10-07 19:10:05Z kgoldman $			*/
+/*            $Id: X509.h 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
