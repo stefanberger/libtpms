@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -300,7 +300,7 @@ OaepEncode(
     pAssert(padded != NULL && message != NULL);
     // A value of zero is not allowed because the KDF can't produce a result
     // if the digest size is zero.
-    if(hLen <= 0)
+    if(hLen == 0)
 	return TPM_RC_VALUE;
     // Basic size checks
     //  make sure digest isn't too big for key size
