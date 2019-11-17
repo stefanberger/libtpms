@@ -3,7 +3,7 @@
 /*		Functions relating to the TPM's time functions 	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Time.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
+/*            $Id: Time.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -64,7 +64,7 @@
    the implementation-specific time functions. */
 /* 8.10.2 Includes */
 #include "Tpm.h"
-#include "PlatformData.h"
+#include "PlatformClock.h"
 /* 8.10.3 Functions */
 /* 8.10.3.1 TimePowerOn() */
 /* This function initialize time info at _TPM_Init(). */
