@@ -382,25 +382,27 @@ RsaAdjustPrimeCandidate_New(
 			    bigNum          prime
 			   )
 {
-#if RADIX_BITS == 64
-    UINT32       msw = prime->d[prime->size - 1] >> 32;
-#else
-    UINT32       msw = prime->d[prime->size - 1];
-#endif
-    UINT32       adjusted;
+    UINT32          msw;
+    UINT32          adjusted;
+    
+    // If the radix is 32, the compiler should turn this into a simple assignment
+    msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
+
 fprintf(stderr, "%d: msw = 0x%08x\n", __LINE__, msw);
     // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
     adjusted = (msw >> 16) * 0x4AFB;
 fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
-    adjusted += ((msw & 0xFFFF) * (UINT32)0x4AFB) >> 16;
+    adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
 fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
     adjusted += 0xB5050000UL;
 fprintf(stderr, "%d: adjusted = 0x%08x\n", __LINE__, adjusted);
 #if RADIX_BITS == 64
-    prime->d[prime->size - 1] = (UINT64)adjusted << 32 |
-                                (prime->d[prime->size - 1] & 0xffffffff);
+    // Save the low-order 32 bits
+    prime->d[prime->size - 1] &= 0xFFFFFFFFUL;
+    // replace the upper 32-bits
+    prime->d[prime->size -1] |= ((crypt_uword_t)adjusted << 32);
 #else
-    prime->d[prime->size - 1] = adjusted;
+    prime->d[prime->size - 1] = (crypt_uword_t)adjusted;
 #endif
     // make sure the number is odd
     prime->d[0] |= 1;
