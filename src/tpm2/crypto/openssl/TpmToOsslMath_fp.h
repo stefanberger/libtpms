@@ -62,7 +62,7 @@
 #ifndef TPMTOOSSLMATH_FP_H
 #define TPMTOOSSLMATH_FP_H
 
-void
+BOOL
 OsslToTpmBn(
 	    bigNum          bn,
 	    const BIGNUM   *osslBn   // libtpms added 'const'
