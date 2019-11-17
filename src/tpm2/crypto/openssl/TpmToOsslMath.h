@@ -134,6 +134,9 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 		EC_GROUP_free(E->G);					\
 	    OsslContextLeave(E->CTX);					\
 	}
+#define BN_NEW()        BnNewVariable(CTX)
+
+
 /* This definition would change if there were something to report */
 #define MathLibSimulationEnd()
 #endif // MATH_LIB_DEFINED

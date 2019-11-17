@@ -189,6 +189,26 @@ void BIGNUM_print(
     return;
 }
 #endif
+
+/* B.2.3.2.3.4. BnNewVariable() */
+/* This function allocates a new variable in the provided context. If the context does not exist or
+   the allocation fails, it is a catastrophic failure. */
+#if 0
+static BIGNUM *
+BnNewVariable(
+	      BN_CTX          *CTX
+	      )
+{
+    BIGNUM          *new;
+    //
+    // This check is intended to protect against calling this function without
+    // having initialized the CTX.
+    if((CTX == NULL) || ((new = BN_CTX_get(CTX)) == NULL))
+	FAIL(FATAL_ERROR_ALLOCATION);
+    return new;
+}
+#endif
+
 #if LIBRARY_COMPATIBILITY_CHECK
 void
 MathLibraryCompatibilityCheck(
