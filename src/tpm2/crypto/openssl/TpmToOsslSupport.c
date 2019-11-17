@@ -3,7 +3,7 @@
 /*		Initialization of the Interface to the OpenSSL Library.	   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
+/*            $Id: TpmToOsslSupport.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -65,7 +65,9 @@
    library. */
 /* B.2.3.3.2. Defines and Includes */
 #include "Tpm.h"
-#ifdef MATH_LIB_OSSL
+
+#if defined(HASH_LIB_OSSL) || defined(MATH_LIB_OSSL) || defined(SYM_LIB_OSSL)
+
 /*     Used to pass the pointers to the correct sub-keys */
 typedef const BYTE *desKeyPointers[3];
 /* B.2.3.3.2.1. SupportLibInit() */
@@ -75,9 +77,6 @@ SupportLibInit(
 	       void
 	       )
 {
-#if LIBRARY_COMPATIBILITY_CHECK
-    MathLibraryCompatibilityCheck();
-#endif
     return TRUE;
 }
 /* B.2.3.3.2.2. OsslContextEnter() */
@@ -127,4 +126,4 @@ OsslPopContext(
 	BN_CTX_end(CTX);
 }
 
-#endif // MATH_LIB_OSSL
+#endif // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL
