@@ -90,7 +90,7 @@
 #if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
     || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT)		\
 	&& (RADIX_BITS != 64))
-#  error "Ossl library is using different radix"
+#   error Ossl library is using different radix
 #endif
 
 /*     Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a
@@ -102,6 +102,7 @@
 						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
 
 /* Allocate a BIGNUM and initialize with the values in a bigNum initializer */
+
 #define BIG_INITIALIZED(name, initializer)				\
     BIGNUM          *name = BigInitialized(initializer)
 
@@ -114,10 +115,18 @@ typedef struct
 } OSSL_CURVE_DATA;
 typedef OSSL_CURVE_DATA      *bigCurve;
 #define AccessCurveData(E)  ((E)->C)
+
+#include "TpmToOsslSupport_fp.h"
+
+#define OSSL_ENTER()     BN_CTX      *CTX = OsslContextEnter()
+#define OSSL_LEAVE()     OsslContextLeave(CTX)
+
+/* Start and end a context that spans multiple ECC functions. This is used so that the group for the
+   curve can persist across multiple frames. */
+
 #define CURVE_INITIALIZED(name, initializer)				\
     OSSL_CURVE_DATA     _##name;					\
     bigCurve            name =  BnCurveInitialize(&_##name, initializer)
-#include "TpmToOsslSupport_fp.h"
 #define CURVE_FREE(E)							\
     if(E != NULL)							\
 	{								\
@@ -125,8 +134,6 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 		EC_GROUP_free(E->G);					\
 	    OsslContextLeave(E->CTX);					\
 	}
-#define OSSL_ENTER()     BN_CTX      *CTX = OsslContextEnter()
-#define OSSL_LEAVE()     OsslContextLeave(CTX)
 /* This definition would change if there were something to report */
 #define MathLibSimulationEnd()
 #endif // MATH_LIB_DEFINED
