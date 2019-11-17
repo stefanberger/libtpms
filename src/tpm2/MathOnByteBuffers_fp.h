@@ -3,7 +3,7 @@
 /*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers_fp.h 1259 2018-07-10 19:11:09Z kgoldman $	*/
+/*            $Id: MathOnByteBuffers_fp.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -107,10 +107,4 @@ ShiftLeft(
 	  TPM2B       *value          // IN/OUT: value to shift and shifted value out
 	  );
 
-#if 0 /* libtpms added */
-BOOL
-IsNumeric(
-	  TPM2B       *value
-	  );
-#endif /* libtpms added */
 #endif

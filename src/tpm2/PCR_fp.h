@@ -159,14 +159,6 @@ PCRRead(
 	UINT32              *pcrCounter     // OUT: the current value of PCR generation
 	//     number
 	);
-#if 0 /* libtpms added */
-void
-PcrWrite(
-	 TPMI_DH_PCR      handle,        // IN: PCR handle to be extended
-	 TPMI_ALG_HASH    hash,          // IN: hash algorithm of PCR
-	 TPM2B_DIGEST    *digest         // IN: the new value
-	 );
-#endif /* libtpms added */
 TPM_RC
 PCRAllocate(
 	    TPML_PCR_SELECTION  *allocate,      // IN: required allocation

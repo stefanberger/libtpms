@@ -3,7 +3,7 @@
 /*	Math functions performed with canonical integers in byte buffers	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MathOnByteBuffers.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: MathOnByteBuffers.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -264,21 +264,3 @@ ShiftLeft(
 	}
     return value;
 }
-
-#if 0 /* libtpms added */
-/* 9.11.2.7	IsNumeric() */
-/* Verifies that all the characters are simple numeric (0-9) */
-BOOL
-IsNumeric(
-	  TPM2B       *value
-	  )
-{
-    UINT16      i;
-    for(i = 0; i < value->size; i++)
-	{
-	    if(value->buffer[i] < '0' || value->buffer[i] > '9')
-		return FALSE;
-	}
-    return TRUE;
-}
-#endif /* libtpms added */
