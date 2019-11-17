@@ -3,7 +3,7 @@
 /*		For accessing the TPM_CAP_TPM_PROPERTY values	  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PropertyCap.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: PropertyCap.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -205,7 +205,7 @@ TPMPropertyIsDefined(
 		  {
 		      TPMA_MEMORY     att;
 		      UINT32          u32;
-		  } attributes = {0};
+		  } attributes = { TPMA_ZERO_INITIALIZER() };
 		  SET_ATTRIBUTE(attributes.att, TPMA_MEMORY, sharedNV);
 		  SET_ATTRIBUTE(attributes.att, TPMA_MEMORY, objectCopiedToRam);
 		  // Note: For a LSb0 machine, the bits in a bit field are in the correct
@@ -399,7 +399,7 @@ TPMPropertyIsDefined(
 		  union {
 		      TPMA_PERMANENT      attr;
 		      UINT32              u32;
-		  } flags = {0};
+		  } flags = { TPMA_ZERO_INITIALIZER() };
 		  if(gp.ownerAuth.t.size != 0)
 		      SET_ATTRIBUTE(flags.attr, TPMA_PERMANENT, ownerAuthSet);
 		  if(gp.endorsementAuth.t.size != 0)
@@ -425,7 +425,7 @@ TPMPropertyIsDefined(
 		  union {
 		      TPMA_STARTUP_CLEAR  attr;
 		      UINT32              u32;
-		  } flags = {0};
+		  } flags =  { TPMA_ZERO_INITIALIZER() };
 		  //
 		  if(g_phEnable)
 		      SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, phEnable);

@@ -309,12 +309,14 @@
 #   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
 #   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
 #   define GET_ATTRIBUTE(a, type, b)       (a.b)
+#   define TPMA_ZERO_INITIALIZER()          {0}
 #else
 #   define IS_ATTRIBUTE(a, type, b)        ((a & type##_##b) != 0)
 #   define SET_ATTRIBUTE(a, type, b)       (a |= type##_##b)
 #   define CLEAR_ATTRIBUTE(a, type, b)     (a &= ~type##_##b)
 #   define GET_ATTRIBUTE(a, type, b)					\
     (type)((a & type##_##b) >> type##_##b##_SHIFT)
+#   define TPMA_ZERO_INITIALIZER()         (0)
 #endif
 #define VERIFY(_X) if(!(_X)) goto Error
 // These macros determine if the values in this file are referenced or instanced.
