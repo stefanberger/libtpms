@@ -373,9 +373,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BIGNUM       *Qr = NULL;
     BIGNUM       *D = NULL;
 #if CRT_FORMAT_RSA == YES
-    BIGNUM       *dP = NULL;
-    BIGNUM       *dQ = NULL;
-    BIGNUM       *qInv = NULL;
+    BIGNUM       *dP = BN_new();
+    BIGNUM       *dQ = BN_new();
+    BIGNUM       *qInv = BN_new();
 #endif
     RSA          *key;
     BN_CTX       *ctx = NULL;
@@ -413,9 +413,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
 
 #if CRT_FORMAT_RSA == YES
     /* CRT parameters are not absolutely needed but may speed up ops */
-    dP = BigInitialized((bigConst)&rsaKey->privateExponent.dP);
-    dQ = BigInitialized((bigConst)&rsaKey->privateExponent.dQ);
-    qInv = BigInitialized((bigConst)&rsaKey->privateExponent.qInv);
+    dP = BigInitialized(dP, (bigConst)&rsaKey->privateExponent.dP);
+    dQ = BigInitialized(dQ, (bigConst)&rsaKey->privateExponent.dQ);
+    qInv = BigInitialized(qInv, (bigConst)&rsaKey->privateExponent.qInv);
     if (dP == NULL || dQ == NULL || qInv == NULL ||
         RSA_set0_crt_params(key, dP, dQ, qInv) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);

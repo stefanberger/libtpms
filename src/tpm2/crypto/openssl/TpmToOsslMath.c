@@ -128,18 +128,33 @@ OsslToTpmBn(
    BnNewVariable(). */
 BIGNUM *
 BigInitialized(
+	       BIGNUM             *toInit,
 	       bigConst            initializer
 	       )
 {
-    BIGNUM *toInit = NULL;
+#if 1  // libtpms added begin
+    BIGNUM *_toInit;
     unsigned char buffer[LARGEST_NUMBER + 1];
     NUMBYTES buffer_len = (NUMBYTES )sizeof(buffer);
-    
-    if (initializer == NULL) {
+#endif // libtpms added end
+
+    if(initializer == NULL)
+	FAIL(FATAL_ERROR_PARAMETER);
+    if(toInit == NULL || initializer == NULL)
 	return NULL;
-    }
+
+#if 1  // libtpms added begin
     BnToBytes(initializer, buffer, &buffer_len);	/* TPM to bin */
-    toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */
+    _toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */
+    BN_copy(toInit, _toInit);
+    BN_clear_free(_toInit);
+#else  // libtpms added end
+    toInit->d = (BN_ULONG *)&initializer->d[0];
+    toInit->dmax = (int)initializer->allocated;
+    toInit->top = (int)initializer->size;
+    toInit->neg = 0;
+    toInit->flags = 0;
+#endif
     return toInit;
 }
 
@@ -193,7 +208,6 @@ void BIGNUM_print(
 /* B.2.3.2.3.4. BnNewVariable() */
 /* This function allocates a new variable in the provided context. If the context does not exist or
    the allocation fails, it is a catastrophic failure. */
-#if 0
 static BIGNUM *
 BnNewVariable(
 	      BN_CTX          *CTX
@@ -207,7 +221,6 @@ BnNewVariable(
 	FAIL(FATAL_ERROR_ALLOCATION);
     return new;
 }
-#endif
 
 #if LIBRARY_COMPATIBILITY_CHECK
 void
@@ -252,26 +265,23 @@ BnModMult(
 	  )
 {
     OSSL_ENTER();
-    BIG_INITIALIZED(bnResult, result);
+    BOOL                OK = TRUE;
+    BIGNUM              *bnResult = BN_NEW();
+    BIGNUM              *bnTemp = BN_NEW();
     BIG_INITIALIZED(bnOp1, op1);
     BIG_INITIALIZED(bnOp2, op2);
     BIG_INITIALIZED(bnMod, modulus);
-    BIG_VAR(bnTemp, (LARGEST_NUMBER_BITS * 4));
-    BOOL                OK;
-    pAssert(BnGetAllocated(result) >= BnGetSize(modulus));
-    OK = BN_mul(bnTemp, bnOp1, bnOp2, CTX);
-    OK = OK && BN_div(NULL, bnResult, bnTemp, bnMod, CTX);
-    if(OK)
-	{
-	    result->size = DIV_UP(BN_num_bytes(bnResult),
-                                  sizeof(crypt_uword_t));
-	    OsslToTpmBn(result, bnResult);
-	}
-    BN_clear_free(bnTemp);
-    BN_clear_free(bnMod);
-    BN_clear_free(bnOp2);
-    BN_clear_free(bnOp1);
-    BN_clear_free(bnResult);
+    //
+    VERIFY(BN_mul(bnTemp, bnOp1, bnOp2, CTX));
+    VERIFY(BN_div(NULL, bnResult, bnTemp, bnMod, CTX));
+    VERIFY(OsslToTpmBn(result, bnResult));
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bnMod); // libtpms added
+    BN_clear_free(bnOp2); // libtpms added
+    BN_clear_free(bnOp1); // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -290,23 +300,19 @@ BnMult(
        )
 {
     OSSL_ENTER();
-    BN_VAR(temp, (LARGEST_NUMBER_BITS * 2));
-    BIG_INITIALIZED(bnTemp, temp);
+    BIGNUM              *bnTemp = BN_NEW();
+    BOOL                 OK = TRUE;
     BIG_INITIALIZED(bnA, multiplicand);
     BIG_INITIALIZED(bnB, multiplier);
-    BOOL                OK;
-    pAssert(result->allocated >=
-	    (BITS_TO_CRYPT_WORDS(BnSizeInBits(multiplicand)
-				 + BnSizeInBits(multiplier))));
-    OK = BN_mul(bnTemp, bnA, bnB, CTX);
-    if(OK)
-	{
-	    OsslToTpmBn(temp, bnTemp);
-	    BnCopy(result, temp);
-	}
-    BN_clear_free(bnB);
-    BN_clear_free(bnA);
-    BN_clear_free(bnTemp);
+    //
+    VERIFY(BN_mul(bnTemp, bnA, bnB, CTX));
+    VERIFY(OsslToTpmBn(result, bnTemp));
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bnB); // libtpms added
+    BN_clear_free(bnA); // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -327,43 +333,28 @@ BnDiv(
       )
 {
     OSSL_ENTER();
-    BIG_INITIALIZED(bnQ, quotient);
-    BIG_INITIALIZED(bnR, remainder);
+    BIGNUM              *bnQ = BN_NEW();
+    BIGNUM              *bnR = BN_NEW();
+    BOOL                 OK = TRUE;
     BIG_INITIALIZED(bnDend, dividend);
     BIG_INITIALIZED(bnSor, divisor);
-    BOOL        OK;
-    pAssert(!BnEqualZero(divisor));
-    if(BnGetSize(dividend) < BnGetSize(divisor))
-	{
-	    if(quotient)
-		BnSetWord(quotient, 0);
-	    if(remainder)
-		BnCopy(remainder, dividend);
-	    OK = TRUE;
-	}
-    else
-	{
-	    pAssert((quotient == NULL)
-		    || (quotient->allocated >= (unsigned)(dividend->size
-							  - divisor->size)));
-	    pAssert((remainder == NULL)
-		    || (remainder->allocated >= divisor->size));
-	    OK = BN_div(bnQ, bnR, bnDend, bnSor, CTX);
-	    if(OK)
-		{
-		    OsslToTpmBn(quotient, bnQ);
-		    OsslToTpmBn(remainder, bnR);
-		}
-	}
+    //
+    if(BnEqualZero(divisor))
+	FAIL(FATAL_ERROR_DIVIDE_ZERO);
+    VERIFY(BN_div(bnQ, bnR, bnDend, bnSor, CTX));
+    VERIFY(OsslToTpmBn(quotient, bnQ));
+    VERIFY(OsslToTpmBn(remainder, bnR));
     DEBUG_PRINT("In BnDiv:\n");
     BIGNUM_PRINT("   bnDividend: ", bnDend, TRUE);
     BIGNUM_PRINT("    bnDivisor: ", bnSor, TRUE);
     BIGNUM_PRINT("   bnQuotient: ", bnQ, TRUE);
     BIGNUM_PRINT("  bnRemainder: ", bnR, TRUE);
-    BN_clear_free(bnSor);
-    BN_clear_free(bnDend);
-    BN_clear_free(bnR);
-    BN_clear_free(bnQ);
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bnSor);  // libtpms added
+    BN_clear_free(bnDend); // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -383,20 +374,19 @@ BnGcd(
       )
 {
     OSSL_ENTER();
-    BIG_INITIALIZED(bnGcd, gcd);
+    BIGNUM              *bnGcd = BN_NEW();
+    BOOL                 OK = TRUE;
     BIG_INITIALIZED(bn1, number1);
     BIG_INITIALIZED(bn2, number2);
-    BOOL            OK;
-    pAssert(gcd != NULL);
-    OK = BN_gcd(bnGcd, bn1, bn2, CTX);
-    if(OK)
-	{
-	    OsslToTpmBn(gcd, bnGcd);
-	    gcd->size = DIV_UP(BN_num_bytes(bnGcd), sizeof(crypt_uword_t));
-	}
-    BN_clear_free(bn2);
-    BN_clear_free(bn1);
-    BN_clear_free(bnGcd);
+    //
+    VERIFY(BN_gcd(bnGcd, bn1, bn2, CTX));
+    VERIFY(OsslToTpmBn(gcd, bnGcd));
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bn2);  // libtpms added
+    BN_clear_free(bn1);  // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -417,21 +407,21 @@ BnModExp(
 	 )
 {
     OSSL_ENTER();
-    BIG_INITIALIZED(bnResult, result);
+    BIGNUM              *bnResult = BN_NEW();
+    BOOL                 OK = TRUE;
     BIG_INITIALIZED(bnN, number);
     BIG_INITIALIZED(bnE, exponent);
     BIG_INITIALIZED(bnM, modulus);
-    BOOL            OK;
     //
-    OK = BN_mod_exp(bnResult, bnN, bnE, bnM, CTX);
-    if(OK)
-	{
-	    OsslToTpmBn(result, bnResult);
-	}
-    BN_clear_free(bnM);
-    BN_clear_free(bnE);
-    BN_clear_free(bnN);
-    BN_clear_free(bnResult);
+    VERIFY(BN_mod_exp(bnResult, bnN, bnE, bnM, CTX));
+    VERIFY(OsslToTpmBn(result, bnResult));
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bnM); // libtpms added
+    BN_clear_free(bnE); // libtpms added
+    BN_clear_free(bnN); // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -450,18 +440,19 @@ BnModInverse(
 	     )
 {
     OSSL_ENTER();
-    BIG_INITIALIZED(bnResult, result);
+    BIGNUM              *bnResult = BN_NEW();
+    BOOL                 OK = TRUE;
     BIG_INITIALIZED(bnN, number);
     BIG_INITIALIZED(bnM, modulus);
-    BOOL                OK;
-    OK = (BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
-    if(OK)
-	{
-	    OsslToTpmBn(result, bnResult);
-	}
-    BN_clear_free(bnM);
-    BN_clear_free(bnN);
-    BN_clear_free(bnResult);
+    //
+    VERIFY(BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
+    VERIFY(OsslToTpmBn(result, bnResult));
+    goto Exit;
+ Error:
+    OK = FALSE;
+ Exit:
+    BN_clear_free(bnM); // libtpms added
+    BN_clear_free(bnN); // libtpms added
     OSSL_LEAVE();
     return OK;
 }
@@ -517,19 +508,24 @@ EcPointInitialized(
 		   bigCurve            E
 		   )
 {
-    BIG_INITIALIZED(bnX, (initializer != NULL) ? initializer->x : NULL);
-    BIG_INITIALIZED(bnY, (initializer != NULL) ? initializer->y : NULL);
-    EC_POINT            *P = (initializer != NULL && E != NULL)
-			     ? EC_POINT_new(E->G) : NULL;
-    pAssert(E != NULL);
-    if(P != NULL)
-#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
-	EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX);
-#else
-	EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX);
-#endif
-    BN_clear_free(bnY);
-    BN_clear_free(bnX);
+    EC_POINT            *P = NULL;
+    
+    if(initializer != NULL)
+	{
+	    BIG_INITIALIZED(bnX, initializer->x);
+	    BIG_INITIALIZED(bnY, initializer->y);
+	    if(E == NULL)		// libtpms changed begin (check E before accessing)
+		FAIL(FATAL_ERROR_ALLOCATION);
+	    P = EC_POINT_new(E->G);	// libtpms changed end
+#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L	// libtpms added begin
+	    if(!EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX))
+#else									// libtpms added end
+	    if(!EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
+#endif									// libtpms added
+		P = NULL;
+	    BN_clear_free(bnX); // libtpms added
+	    BN_clear_free(bnY); // libtpms added
+	}
     return P;
 }
 
@@ -625,7 +621,7 @@ BnEccModMult(
     PointFromOssl(R, pR, E);
     EC_POINT_clear_free(pR);
     EC_POINT_clear_free(pS);
-    BN_clear_free(bnD);
+    BN_clear_free(bnD); // libtpms added
     return !BnEqualZero(R->z);
 }
 
@@ -665,8 +661,9 @@ BnEccModMult2(
     EC_POINT_clear_free(pR);
     EC_POINT_clear_free(pS);
     EC_POINT_clear_free(pQ);
-    BN_clear_free(bnD);
-    BN_clear_free(bnU);
+    BN_clear_free(bnD); // libtpms added
+    BN_clear_free(bnU); // libtpms added
+
     return !BnEqualZero(R->z);
 }
 

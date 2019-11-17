@@ -70,11 +70,24 @@
 #define MATH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/ec.h>
-#if 0
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-#include <openssl/bn_lcl.h>
-#endif
-#endif
+#if 0 // libtpms added
+#if OPENSSL_VERSION_NUMBER >= 0x10200000L
+// Check the bignum_st definition in crypto/bn/bn_lcl.h and either update the
+// version check or provide the new definition for this version.
+#   error Untested OpenSSL version
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+// from crypto/bn/bn_lcl.h
+struct bignum_st {
+    BN_ULONG *d;                /* Pointer to an array of 'BN_BITS2' bit
+				 * chunks. */
+    int top;                    /* Index of last used d +1. */
+    /* The next are internal book keeping for bn_expand. */
+    int dmax;                   /* Size of the d array. */
+    int neg;                    /* one if the number is negative */
+    int flags;
+};
+#endif // OPENSSL_VERSION_NUMBER
+#endif // libtpms added
 #include <openssl/bn.h>
 #if USE_OPENSSL_FUNCTIONS_ECDSA        // libtpms added begin
 #include <openssl/ecdsa.h>
@@ -93,18 +106,21 @@
 #   error Ossl library is using different radix
 #endif
 
-/*     Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a
-       local BIGNUM. The bigNum is initialized and then the BIGNUM is set to reference the local
-       value. */
+/* Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a local
+   BIGNUM. The bigNum is initialized and then the BIGNUM is set to reference the local value. */
+
 #define BIG_VAR(name, bits)						\
     BN_VAR(name##Bn, (bits));						\
-    BIGNUM          *name = BigInitialized(BnInit(name##Bn,		\
+    BIGNUM          *_##name = BN_new();		/* libtpms */	\
+    BIGNUM          *name = BigInitialized(_##name,	/* libtpms */	\
+					   BnInit(name##Bn,		\
 						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
 
 /* Allocate a BIGNUM and initialize with the values in a bigNum initializer */
 
 #define BIG_INITIALIZED(name, initializer)				\
-    BIGNUM          *name = BigInitialized(initializer)
+    BIGNUM          *_##name = BN_new();		/* libtpms */	\
+    BIGNUM          *name = BigInitialized(_##name, initializer) /* libtpms */
 
 typedef struct
 {
