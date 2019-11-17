@@ -186,12 +186,6 @@ void
 _rpc__RsaKeyCacheControl(
 			 int              state
 			 );
-/* D.2.2.15. _rpc__Shutdown() */
-/* This function is used to stop the TPM simulator. */
-void
-_rpc__Shutdown(
-	       void
-	       );
 /* D.2.3. From TPMCmds.c */
 /* D.2.3.1. main() */
 /* This is the main entry point for the simulator. */

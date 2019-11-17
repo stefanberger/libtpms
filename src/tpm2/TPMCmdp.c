@@ -310,32 +310,6 @@ _rpc__RsaKeyCacheControl(
     NOT_REFERENCED(state);
 #endif
 }
-/* D.4.3.15. _rpc__Shutdown() */
-/* This function is used to stop the TPM simulator. */
-void
-_rpc__Shutdown(
-	       void
-	       )
-{
-#if 0	/* kgold bypass for now */
-    RPC_STATUS status;
-    // Stop TPM
-    TPM_TearDown();
-    status = RpcMgmtStopServerListening(NULL);
-    if(status != RPC_S_OK)
-	{
-	    printf("RpcMgmtStopServerListening returned: 0x%x\n", status);
-	    exit(status);
-	}
-    status = RpcServerUnregisterIf(NULL, NULL, FALSE);
-    if(status != RPC_S_OK)
-	{
-	    printf("RpcServerUnregisterIf returned 0x%x\n", status);
-	    exit(status);
-	}
-#endif
-    return;
-}
 #endif /* libtpms added */
 
 /* libtpms added begin */
