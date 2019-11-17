@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath_fp.h 1108 2017-12-12 19:07:15Z kgoldman $			*/
+/*            $Id: TpmToOsslMath_fp.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef TPMTOOSSLMATH_FP_H
 #define TPMTOOSSLMATH_FP_H
+
+#include <openssl/bn.h>
 
 BOOL
 OsslToTpmBn(
@@ -69,6 +71,7 @@ OsslToTpmBn(
 	    );
 BIGNUM *
 BigInitialized(
+	       BIGNUM             *toInit,
 	       bigConst            initializer
 	       );
 // libtpms added begin

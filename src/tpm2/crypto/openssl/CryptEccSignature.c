@@ -224,7 +224,9 @@ BnSignEcdsa(
     int               retVal;
     const BIGNUM     *r;
     const BIGNUM     *s;
-    BIGNUM           *d = BigInitialized(bnD);
+    BIGNUM           *d = BN_new();
+
+    d = BigInitialized(d, bnD);
 
     eckey = EC_KEY_new();
 
@@ -688,9 +690,12 @@ BnValidateSignatureEcdsa(
     int               rc;
     ECDSA_SIG        *sig = NULL;
     EC_KEY           *eckey = NULL;
-    BIGNUM           *r = BigInitialized(bnR);
-    BIGNUM           *s = BigInitialized(bnS);
+    BIGNUM           *r = BN_new();
+    BIGNUM           *s = BN_new();
     EC_POINT         *q = EcPointInitialized(ecQ, E);
+
+    r = BigInitialized(r, bnR);
+    s = BigInitialized(s, bnS);
 
     sig = ECDSA_SIG_new();
     eckey = EC_KEY_new();
