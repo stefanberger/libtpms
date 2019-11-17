@@ -3,7 +3,7 @@
 /*			   Attestation Commands  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AttestationCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: AttestationCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -312,12 +312,12 @@ TPM2_GetTime(
 #include "TpmAsn1_fp.h"
 #include "X509_spt_fp.h"
 #include "Attest_spt_fp.h"
-#include "Platform_fp.h"
 #if CC_CertifyX509 // Conditional expansion of this file
 #define CERTIFYX509_DEBUG       NO // libtpms: NO
 #if CERTIFYX509_DEBUG
 #include "DebugHelpers_fp.h"
 #endif
+
 /* Error Returns	Meaning*/
 /* TPM_RC_ATTRIBUTES	the attributes of objectHandle are not compatible with the KeyUsage() or TPMA_OBJECT values in the extensions fields */
 /* TPM_RC_BINDING	the public and private portions of the key are not properly bound. */
@@ -350,10 +350,12 @@ TPM2_CertifyX509(
 #if CERTIFYX509_DEBUG
     DebugFileOpen();
     DebugDumpBuffer(in->partialCertificate.t.size, in->partialCertificate.t.buffer,
-		    (BYTE *)"partialCertificate");
+		    "partialCertificate");
 #endif
     
     // Input Validation
+    if(in->reserved.b.size != 0)
+	return TPM_RC_SIZE + RC_CertifyX509_reserved;
     // signing key must be able to sign
     if(!IsSigningObject(signKey))
 	return TPM_RCS_KEY + RC_CertifyX509_signHandle;
@@ -519,7 +521,7 @@ TPM2_CertifyX509(
 		MemoryCopy(fill, certTBS[j].buf, certTBS[j].len);
 		fill += certTBS[j].len;
 	    }
-	DebugDumpBuffer(fill - &fullTBS[0], fullTBS, (BYTE *)"\nfull TBS");
+	DebugDumpBuffer((int)(fill - &fullTBS[0]), fullTBS, "\nfull TBS");
     }
 #endif
     
@@ -532,7 +534,7 @@ TPM2_CertifyX509(
 	       out->addedToCertificate.t.size);
 #if CERTIFYX509_DEBUG
     DebugDumpBuffer(out->addedToCertificate.t.size, out->addedToCertificate.t.buffer,
-		    (BYTE *)"\naddedToCertificate");
+		    "\naddedToCertificate");
 #endif
     // only thing missing is the signature
     result = CryptSign(signKey, &in->inScheme, &out->tbsDigest, &out->signature);
