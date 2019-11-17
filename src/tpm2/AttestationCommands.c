@@ -313,7 +313,6 @@ TPM2_GetTime(
 #include "X509_spt_fp.h"
 #include "Attest_spt_fp.h"
 #if CC_CertifyX509 // Conditional expansion of this file
-#define CERTIFYX509_DEBUG       NO // libtpms: NO
 #if CERTIFYX509_DEBUG
 #include "DebugHelpers_fp.h"
 #endif

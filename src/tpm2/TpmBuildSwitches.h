@@ -328,6 +328,13 @@
 #   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO   libtpms: NO
 #endif
 
+// This define is used to control the debug for the CertifyX509() command.
+#if !(defined CERTIFYX509_DEBUG)					\
+    || ((CERTIFYX509_DEBUG != NO) && (CERTIFYX509_DEBUG != YES))
+#   undef   CERTIFYX509_DEBUG
+#   define  CERTIFYX509_DEBUG NO               // libtpms: NO
+#endif
+
 //This define is used to enable any runtime checks of the interface between the cryptographic
 //library (e.g., OpenSSL()) and the thunking layer.
 
@@ -336,7 +343,6 @@
 #   undef   LIBRARY_COMPATIBILITY_CHECK
 #   define  LIBRARY_COMPATIBILITY_CHECK    YES        // Default: Either YES or NO    libtpms: YES
 #endif
-
 
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
