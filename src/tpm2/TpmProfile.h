@@ -213,14 +213,8 @@
 #ifndef IMPLEMENTATION_PCR
 #define IMPLEMENTATION_PCR              24
 #endif
-#ifndef PCR_SELECT_MAX
-#define PCR_SELECT_MAX                  ((IMPLEMENTATION_PCR+7)/8)
-#endif
 #ifndef PLATFORM_PCR
 #define PLATFORM_PCR                    24
-#endif
-#ifndef PCR_SELECT_MIN
-#define PCR_SELECT_MIN                  ((PLATFORM_PCR+7)/8)
 #endif
 #ifndef DRTM_PCR
 #define DRTM_PCR                        17
