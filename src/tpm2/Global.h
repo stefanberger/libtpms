@@ -68,13 +68,6 @@
 
 #ifndef         GLOBAL_H
 #define         GLOBAL_H
-// #ifdef GLOBAL_C
-// #define EXTERN
-// #define INITIALIZER(_value_)  = _value_
-// #else
-// #define EXTERN  extern
-// #define INITIALIZER(_name_)
-// #endif
 _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
 #include <stddef.h>
@@ -539,7 +532,7 @@ typedef union
 EXTERN ALGORITHM_VECTOR     g_implementedAlgorithms;
 EXTERN ALGORITHM_VECTOR     g_toTest;
 
-/* 5.9.10.3	g_rcIndex */
+/* 5.9.10.3	g_rcIndex[] */
 /* This array is used to contain the array of values that are added to a return code when it is a
    parameter-, handle-, or session-related error. This is an implementation choice and the same
    result can be achieved by using a macro. */
@@ -688,6 +681,16 @@ EXTERN TPM_RC           g_NvStatus;
    expected to know the second. */
 EXTERN TPM2B_AUTH       g_platformUniqueAuthorities; // Reserved for RNG
 EXTERN TPM2B_AUTH       g_platformUniqueDetails;   // referenced by VENDOR_PERMANENT
+
+//*********************************************************************************
+//*********************************************************************************
+//** Persistent Global Values
+//*********************************************************************************
+//*********************************************************************************
+//*** Description
+// The values in this section are global values that are persistent across power
+// events. The lifetime of the values determines the structure in which the value
+// is placed.
 
 /* 5.9.11.2	PERSISTENT_DATA */
 /* This structure holds the persistent values that only change as a consequence of a specific

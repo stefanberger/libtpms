@@ -150,5 +150,4 @@ BnEccAdd(
 	 bigCurve             E          // IN: curve
 	 );
 
-
 #endif

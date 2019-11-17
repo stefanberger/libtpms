@@ -3,7 +3,7 @@
 /*			ECC curve data 						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccData.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptEccData.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

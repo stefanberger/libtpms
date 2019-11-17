@@ -60,6 +60,27 @@
 /********************************************************************************/
 
 /* 10.2.3 BnMath.c */
+
+/* 10.2.3.1	Introduction */
+/* The simulator code uses the canonical form whenever possible in order to make the code in Part 3
+   more accessible. The canonical data formats are simple and not well suited for complex big number
+   computations. When operating on big numbers, the data format is changed for easier
+   manipulation. The format is native words in little-endian format. As the magnitude of the number
+   decreases, the length of the array containing the number decreases but the starting address
+   doesn't change. */
+/* The functions in this file perform simple operations on these big numbers. Only the more complex
+   operations are passed to the underlying support library. Although the support library would have
+   most of these functions, the interface code to convert the format for the values is greater than
+   the size of the code to implement the functions here. So, rather than incur the overhead of
+   conversion, they are done here. */
+/* If an implementer would prefer, the underlying library can be used simply by making code
+   substitutions here. */
+/* NOTE: There is an intention to continue to augment these functions so that there would be no need
+   to use an external big number library. */
+/* Many of these functions have no error returns and will always return TRUE. This is to allow them
+   to be used in guarded sequences. That is: OK = OK || BnSomething(s); where the BnSomething()
+   function should not be called if OK isn't true. */
+
 /* 10.2.3.2 Includes */
 #include "Tpm.h"
 /* A constant value of zero as a stand in for NULL bigNum values */

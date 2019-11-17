@@ -60,16 +60,26 @@
 /********************************************************************************/
 
 // 5.12	LibSupport.h
-// This header file is used to select the library code that gets included in the TPM built
+// This header file is used to select the library code that gets included in the TPM build
 #ifndef _LIB_SUPPORT_H_
 #define _LIB_SUPPORT_H_
+
+#if 0 // libtpms added
 #ifndef RADIX_BITS
-#   if defined(__x86_64__) || defined(_WIN64) || defined(_M_X64) || defined(_M_ARM64)
+#   if defined(__x86_64__) || defined(__x86_64)				\
+    || defined(__amd64__) || defined(__amd64) || defined(_WIN64) || defined(_M_X64) \
+    || defined(_M_ARM64) || defined(__aarch64__) \
+    || defined(__powerpc64__) || defined(__ppc64__)
 #       define RADIX_BITS                      64
-#   else
+#   elif defined(__i386__) || defined(__i386) || defined(i386)		\
+    || defined(_WIN32) || defined(_M_IX86)				\
+    || defined(_M_ARM) || defined(__arm__) || defined(__thumb__)
 #       define RADIX_BITS                      32
+#   else
+#       error Unable to determine RADIX_BITS from compiler environment
 #   endif
 #endif // RADIX_BITS
+#endif // libtpms added
 
 // These macros use the selected libraries to the proper include files.
 #define LIB_QUOTE(_STRING_) #_STRING_

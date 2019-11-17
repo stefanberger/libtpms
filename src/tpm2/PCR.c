@@ -3,7 +3,7 @@
 /*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
+/*            $Id: PCR.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -96,7 +96,7 @@ static const PCR_Attributes s_initAttributes[] =
 /* This function indicates if a PCR belongs to a group that requires an authValue in order to modify
    the PCR.  If it does, groupIndex is set to value of the group index.  This feature of PCR is
    decided by the platform specification. */
-/* Return Values Meaning */
+/* Return Type: BOOL */
 /* TRUE: PCR belongs an authorization group */
 /* FALSE: PCR does not belong an authorization group */
 BOOL

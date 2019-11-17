@@ -3942,6 +3942,7 @@ NV_Certify_COMMAND_DESCRIPTOR_t _NV_CertifyData = {
 #else
 #define _NV_CertifyDataAddress 0
 #endif
+
 #if CC_AC_GetCapability
 #include "AC_GetCapability_fp.h"
 typedef TPM_RC  (AC_GetCapability_Entry)(
@@ -3976,6 +3977,7 @@ AC_GetCapability_COMMAND_DESCRIPTOR_t _AC_GetCapabilityData = {
 #else
 #define _AC_GetCapabilityDataAddress 0
 #endif
+
 #if CC_AC_Send
 #include "AC_Send_fp.h"
 typedef TPM_RC  (AC_Send_Entry)(
@@ -4010,6 +4012,7 @@ AC_Send_COMMAND_DESCRIPTOR_t _AC_SendData = {
 #else
 #define _AC_SendDataAddress 0
 #endif
+
 #if CC_Policy_AC_SendSelect
 #include "Policy_AC_SendSelect_fp.h"
 typedef TPM_RC  (Policy_AC_SendSelect_Entry)(

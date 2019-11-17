@@ -61,20 +61,28 @@
 
 /* B.2.3.2. TpmToOsslMath.c */
 /* B.2.3.2.1. Introduction */
-/* This file contains the math functions that are not implemented in the BnMath() library
-   (yet). These math functions will call the OpenSSL library to execute the operations. There is a
-   difference between the internal format and the OpenSSL format. To call the OpenSSL function,
-   a BIGNUM structure is created for each passed variable. The sizes in the bignum_t are copied and
-   the d pointer in the BIGNUM is set to point to the d parameter of the bignum_t. On return,
-   SetSizeOsslToTpm() is used for each returned variable to make sure that the pointers are not
-   changed. The size of the returned BIGGNUM is copied to bignum_t. */
-/* B.2.3.2.2. Includes and Defines */
+
+/* The functions in this file provide the low-level interface between the TPM code and the big
+   number and elliptic curve math routines in OpenSSL. */
+/* Most math on big numbers require a context. The context contains the memory in which OpenSSL
+   creates and manages the big number values. When a OpenSSL math function will be called that
+   modifies a BIGNUM value, that value must be created in an OpenSSL context. The first line of code
+   in such a function must be: OSSL_ENTER(); and the last operation before returning must be
+   OSSL_LEAVE(). OpenSSL variables can then be created with BnNewVariable(). Constant values to be
+   used by OpenSSL are created from the bigNum values passed to the functions in this file. Space
+   for the BIGNUM control block is allocated in the stack of the function and then it is initialized
+   by calling BigInitialized(). That function sets up the values in the BIGNUM structure and sets
+   the data pointer to point to the data in the bignum_t. This is only used when the value is known
+   to be a constant in the called function. */
+/* Because the allocations of constants is on the local stack and the OSSL_ENTER()/OSSL_LEAVE() pair
+   flushes everything created in OpenSSL memory, there should be no chance of a memory leak. */
+
 
 #include "Tpm.h"
 #ifdef MATH_LIB_OSSL
 #include "TpmToOsslMath_fp.h"
 
-/* B.2.3.2.3.1. OsslToTpmBn() */
+/* B.2.3.2.3.1.	OsslToTpmBn() */
 /* This function converts an OpenSSL BIGNUM to a TPM bignum. In this implementation it is assumed
    that OpenSSL used the same format for a big number as does the TPM -- an array of native-endian
    words in little-endian order. */
@@ -97,8 +105,11 @@ OsslToTpmBn(
 	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
 	}
 }
+
 /* B.2.3.2.3.2.	BigInitialized() */
-/* This function initializes an OSSL BIGNUM from a TPM bignum. */
+/* This function initializes an OSSL BIGNUM from a TPM bigConst. Do not use this for values that are
+   passed to OpenSLL when they are not declared as const in the function prototype. Instead, use
+   BnNewVariable(). */
 BIGNUM *
 BigInitialized(
 	       bigConst            initializer
@@ -122,6 +133,7 @@ BigInitialized(
 #else
 #   define DEBUG_PRINT(x)   printf("%s", x)
 #   define BIGNUM_PRINT(label, bn, eol) BIGNUM_print((label), (bn), (eol))
+
 static
 void BIGNUM_print(
 		  const char      *label,
@@ -186,12 +198,15 @@ MathLibraryCompatibilityCheck(
 	cAssert(osslTemp->d[0] == tpmTemp->d[0]);
     OSSL_LEAVE();
 }
+
 #endif
+
 /* B.2.3.2.3.3. BnModMult() */
 /* Does multiply and divide returning the remainder of the divide. */
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnModMult(
 	  bigNum              result,
@@ -224,11 +239,13 @@ BnModMult(
     OSSL_LEAVE();
     return OK;
 }
+
 /* B.2.3.2.3.4. BnMult() */
 /* Multiplies two numbers */
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnMult(
        bigNum               result,
@@ -257,12 +274,14 @@ BnMult(
     OSSL_LEAVE();
     return OK;
 }
+
 /* B.2.3.2.3.5. BnDiv() */
 /* This function divides two bigNum values. The function returns FALSE if there is an error in the
    operation. */
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnDiv(
       bigNum               quotient,
@@ -319,6 +338,7 @@ BnDiv(
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnGcd(
       bigNum      gcd,            // OUT: the common divisor
@@ -344,12 +364,14 @@ BnGcd(
     OSSL_LEAVE();
     return OK;
 }
+
 /* B.2.3.2.3.7. BnModExp() */
 /* Do modular exponentiation using bigNum values. The conversion from a bignum_t to a bigNum is
    trivial as they are based on the same structure */
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnModExp(
 	 bigNum               result,         // OUT: the result
@@ -377,11 +399,13 @@ BnModExp(
     OSSL_LEAVE();
     return OK;
 }
+
 /* B.2.3.2.3.8. BnModInverse() */
 /* Modular multiplicative inverse */
 /* Return Value	Meaning */
 /* TRUE(1)	success */
 /* FALSE(0)	failure in operation */
+
 LIB_EXPORT BOOL
 BnModInverse(
 	     bigNum               result,
@@ -405,9 +429,11 @@ BnModInverse(
     OSSL_LEAVE();
     return OK;
 }
+
 #endif // TPM_ALG_RSA
 
 #if ALG_ECC
+
 /* B.2.3.2.3.9. PointFromOssl() */
 /* Function to copy the point result from an OSSL function to a bigNum */
 /* Return Value	Meaning */
@@ -448,6 +474,7 @@ PointFromOssl(
 }
 /* B.2.3.2.3.10. EcPointInitialized() */
 /* Allocate and initialize a point. */
+
 LIB_EXPORT EC_POINT *   // libtpms: exported function
 EcPointInitialized(
 		   pointConst          initializer,
@@ -469,12 +496,14 @@ EcPointInitialized(
     BN_clear_free(bnX);
     return P;
 }
+
 /* B.2.3.2.3.11. BnCurveInitialize() */
 /* This function initializes the OpenSSL group definition */
 /* It is a fatal error if groupContext is not provided. */
 /* Return Values Meaning */
 /* NULL the TPM_ECC_CURVE is not valid */
 /* non-NULL points to a structure in groupContext */
+
 bigCurve
 BnCurveInitialize(
 		  bigCurve          E,           // IN: curve structure to initialize
@@ -535,10 +564,12 @@ BnCurveInitialize(
     BN_clear_free(bnP);
     return OK ? E : NULL;
 }
+
 /* B.2.3.2.3.11. BnEccModMult() */
 /* This functi2n does a point multiply of the form R = [d]S */
 /* Return Values Meaning */
 /* FALSE failure in operation; treat as result being point at infinity */
+
 LIB_EXPORT BOOL
 BnEccModMult(
 	     bigPoint             R,         // OUT: computed point
@@ -550,6 +581,7 @@ BnEccModMult(
     EC_POINT            *pR = EC_POINT_new(E->G);
     EC_POINT            *pS = EcPointInitialized(S, E);
     BIG_INITIALIZED(bnD, d);
+    
     if(S == NULL)
 	EC_POINT_mul(E->G, pR, bnD, NULL, NULL, E->CTX);
     else
@@ -560,9 +592,11 @@ BnEccModMult(
     BN_clear_free(bnD);
     return !BnEqualZero(R->z);
 }
+
 /* B.2.3.2.3.13. BnEccModMult2() */
 /* This function does a point multiply of the form R = [d]G + [u]Q */
 /* FALSE	failure in operation; treat as result being point at infinity */
+
 LIB_EXPORT BOOL
 BnEccModMult2(
 	      bigPoint             R,         // OUT: computed point
@@ -578,6 +612,7 @@ BnEccModMult2(
     BIG_INITIALIZED(bnD, d);
     EC_POINT            *pQ = EcPointInitialized(Q, E);
     BIG_INITIALIZED(bnU, u);
+    
     if(S == NULL || S == (pointConst)&(AccessCurveData(E)->base))
 	EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
@@ -598,6 +633,7 @@ BnEccModMult2(
     BN_clear_free(bnU);
     return !BnEqualZero(R->z);
 }
+
 /* B.2.3.2.4. BnEccAdd() */
 /* This function does addition of two points. */
 /* Return Values Meaning */
@@ -621,5 +657,6 @@ BnEccAdd(
     EC_POINT_clear_free(pQ);
     return !BnEqualZero(R->z);
 }
+
 #endif // ALG_ECC
 #endif // MATH_LIB_OSSL

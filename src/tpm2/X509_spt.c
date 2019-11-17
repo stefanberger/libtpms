@@ -98,8 +98,11 @@ X509FindExtensionByOID(
     // the provided context.
     if (ctx == NULL)
 	ctx = ctxIn;
+    // if the provide search context is different from the context of the extension,
+    // then copy the search context to the search context.
     else if(ctx != ctxIn)
 	*ctx = *ctxIn;
+    // Now, search in the extension context
     for(;ctx->size > ctx->offset; ctx->offset += length)
 	{
 	    VERIFY((length = ASN1NextTag(ctx)) >= 0);
@@ -311,6 +314,7 @@ X509AddPublicKey(
     return FALSE;
 }
 /* 10.2.26.3.3	X509PushAlgorithmIdentifierSequence() */
+/* The function adds the algorithm identifier sequence. */
 /* Return Value	Meaning */
 /* > 0	number of bytes added */
 /* == 0	failure */

@@ -3,7 +3,7 @@
 /*			  Functions That Support Command Audit 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandAudit.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: CommandAudit.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -66,7 +66,7 @@
 #include "Tpm.h"
 /* 8.1.3 Functions */
 /* 8.1.3.1 CommandAuditPreInstall_Init() */
-/* This function initializes the command audit list. This function is simulates the behavior of
+/* This function initializes the command audit list. This function simulates the behavior of
    manufacturing. A function is used instead of a structure definition because this is easier than
    figuring out the initialization value for a bit array. */
 /* This function would not be implemented outside of a manufacturing or simulation environment. */

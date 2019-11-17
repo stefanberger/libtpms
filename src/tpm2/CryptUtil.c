@@ -1399,7 +1399,7 @@ CryptGetTestResult(
     outData->t.size = 0;
     return TPM_RC_SUCCESS;
 }
-/* 10.2.6.6.19 CryptValidateKeys() */
+/* 10.2.6.6.17 CryptValidateKeys() */
 /* This function is used to verify that the key material of and object is valid. For a publicOnly
    object, the key is verified for size and, if it is an ECC key, it is verified to be on the
    specified curve. For a key with a sensitive area, the binding between the public and private
@@ -1596,7 +1596,7 @@ CryptValidateKeys(
 	}
     return TPM_RC_SUCCESS;
 }
-/* 10.2.6.6.21 CryptSelectMac() */
+/* 10.2.6.6.18 CryptSelectMac() */
 /* This function is used to set the MAC scheme based on the key parameters and the input scheme. */
 /* Error Returns Meaning */
 /* TPM_RC_SCHEME the scheme is not a valid mac scheme */
@@ -1653,7 +1653,7 @@ CryptSelectMac(
 	return TPM_RCS_SCHEME;
     return TPM_RC_SUCCESS;
 }
-/* 10.2.6.6.22 CryptMacIsValidForKey() */
+/* 10.2.6.6.19 CryptMacIsValidForKey() */
 /* Check to see if the key type is compatible with the mac type */
 BOOL
 CryptMacIsValidForKey(
@@ -1675,7 +1675,7 @@ CryptMacIsValidForKey(
 	}
     return FALSE;
 }
-/* 10.2.6.6.23 CryptSmacIsValidAlg() */
+/* 10.2.6.6.20 CryptSmacIsValidAlg() */
 /* This function is used to test if an algorithm is a supported SMAC algorithm. It needs to be
    updated as new algorithms are added. */
 BOOL
@@ -1698,7 +1698,7 @@ CryptSmacIsValidAlg(
 	    return FALSE;
 	}
 }
-/* 10.2.6.6.24 CryptSymModeIsValid() */
+/* 10.2.6.6.21 CryptSymModeIsValid() */
 /* Function checks to see if an algorithm ID is a valid, symmetric block cipher mode for the TPM. If
    flag is SET, them TPM_ALG_NULL is a valid mode. not include the modes used for SMAC */
 BOOL

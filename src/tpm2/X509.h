@@ -93,19 +93,27 @@ typedef struct stringRef
     BYTE        *buf;
     INT16        len;
 } stringRef;
+// This is defined to avoid bit by bit comparisons within a UINT32
 typedef union x509KeyUsageUnion {
     TPMA_X509_KEY_USAGE     x509;
     UINT32                  integer;
 } x509KeyUsageUnion;
-// 10.1.16.5 Global X509 Constants These values are instanced by X509_spt.c and referenced by other
-// X509-related files. This is the DER-encoded value for the Key Usage OID (2.5.29.15). This is the
-// full OID, not just the numeric value
+
+// 10.1.16.5	Global X509 Constants
+
+// These values are instanced by X509_spt.c and referenced by other X509-related files. This is the
+// DER-encoded value for the Key Usage OID (2.5.29.15). This is the full OID, not just the numeric
+// value
+
 #define OID_KEY_USAGE_EXTENSION_VALUE  0x06, 0x03, 0x55, 0x1D, 0x0F
 MAKE_OID(_KEY_USAGE_EXTENSION);
+
 // This is the DER-encoded value for the TCG-defined TPMA_OBJECT OID (2.23.133.10.1.1.1)
+
 #define OID_TCG_TPMA_OBJECT_VALUE       0x06, 0x07, 0x67, 0x81, 0x05, 0x0a, 0x01, \
 	0x01, 0x01
 MAKE_OID(_TCG_TPMA_OBJECT);
+
 #ifdef _X509_SPT_
 // If a bit is SET in keyUsageSign is also SET in keyUsagem then the associated key 
 // has to have 'sign' SET.

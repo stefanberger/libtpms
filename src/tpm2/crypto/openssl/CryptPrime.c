@@ -59,7 +59,10 @@
 /*										*/
 /********************************************************************************/
 
-/* 10.2.16 CryptPrime.c */
+/* 10.2.14 CryptPrime.c */
+/* 10.2.14.1	Introduction */
+/* This file contains the code for prime validation. */
+
 #include "Tpm.h"
 #include "CryptPrime_fp.h"
 //#define CPRI_PRIME
@@ -70,7 +73,8 @@ extern const uint32_t      s_PrimeTableSize;
 extern const uint32_t      s_PrimesInTable;
 extern const unsigned char s_PrimeTable[];
 extern bigConst            s_CompositeOfSmallPrimes;
-/* 10.2.16.1.1 Root2() */
+
+/* 10.2.14.1.1 Root2() */
 /* This finds ceil(sqrt(n)) to use as a stopping point for searching the prime table. */
 static uint32_t
 Root2(
@@ -99,7 +103,7 @@ Root2(
     pAssert(((n / next) <= (unsigned)next) && (n / (next + 1) < (unsigned)next));
     return next;
 }
-/* 10.2.16.1.2 IsPrimeInt() */
+/* 10.2.14.1.2 IsPrimeInt() */
 /* This will do a test of a word of up to 32-bits in size. */
 BOOL
 IsPrimeInt(
@@ -127,7 +131,7 @@ IsPrimeInt(
 	}
     return TRUE;
 }
-/* 10.2.16.1.3 BnIsProbablyPrime() */
+/* 10.2.14.1.3 BnIsProbablyPrime() */
 /* This function is used when the key sieve is not implemented. This function Will try to eliminate
    some of the obvious things before going on to perform MillerRabin() as a final verification of
    primeness. */
@@ -159,7 +163,7 @@ BnIsProbablyPrime(
     }
     return MillerRabin(prime, rand);
 }
-/* 10.2.16.1.4 MillerRabinRounds() */
+/* 10.2.14.1.4 MillerRabinRounds() */
 /* Function returns the number of Miller-Rabin rounds necessary to give an error probability equal
    to the security strength of the prime. These values are from FIPS 186-3. */
 UINT32
@@ -171,7 +175,7 @@ MillerRabinRounds(
     if(bits < 1536) return 5;   // for 512 and 1K primes
     return 4;                   // for 3K public modulus and greater
 }
-/* 10.2.16.1.5 MillerRabin() */
+/* 10.2.14.1.5 MillerRabin() */
 /* This function performs a Miller-Rabin test from FIPS 186-3. It does iterations trials on the
    number. In all likelihood, if the number is not prime, the first test fails. */
 /* Return Values Meaning */
@@ -260,7 +264,7 @@ MillerRabin(
     return ret;
 }
 #if ALG_RSA
-/* 10.2.16.1.6 RsaCheckPrime() */
+/* 10.2.14.1.6 RsaCheckPrime() */
 /* This will check to see if a number is prime and appropriate for an RSA prime. */
 /* This has different functionality based on whether we are using key sieving or not. If not, the
    number checked to see if it is divisible by the public exponent, then the number is adjusted
@@ -428,4 +432,5 @@ BnGeneratePrimeForRSA(
 	}
     return TPM_RC_SUCCESS;
 }
+
 #endif // TPM_ALG_RSA

@@ -85,10 +85,10 @@
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
 #ifdef TPM_WINDOWS
-#include "TcpServer_fp.h"
+#include "TcpServer_fp.h"	/* kgold */
 #endif
 #ifdef TPM_POSIX
-#include "TcpServerPosix_fp.h"
+#include "TcpServerPosix_fp.h"	/* kgold */
 #endif
 #include "TpmProfile.h"		/* kgold */
 
@@ -153,6 +153,7 @@ _rpc__ForceFailureMode(
 		       )
 {
     SetForceFailureMode();
+    return;
 }
 /* D.4.3.5. _rpc__Signal_PhysicalPresenceOn() */
 /* This function is called to simulate activation of the physical presence pin. */

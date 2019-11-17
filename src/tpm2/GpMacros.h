@@ -125,7 +125,7 @@
 #   define pAssert(a) {if(!(a)) FAIL(FATAL_ERROR_PARAMETER);}
 #endif
 /* 5.10.4	Derived from Vendor-specific values */
-/* Values derived from vendor specific settings in Implementation.h */
+/* Values derived from vendor specific settings in TpmProfile.h */
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
@@ -262,7 +262,7 @@
 #       error "PROOF_SIZE is not compliant with TPM specification"
 #   endif
 #   if PRIMARY_SEED_SIZE < COMPLIANT_PRIMARY_SEED_SIZE
-#       error  "Implementation.h specifies a non-compliant PRIMARY_SEED_SIZE"
+#       error  "Non-compliant PRIMARY_SEED_SIZE"
 #   endif
 #endif	// !SKIP_PROOF_ERRORS
 
@@ -296,7 +296,7 @@
    is added to the timeout value returned by TPM2_PoliySigned() and TPM2_PolicySecret() and used by
    TPM2_PolicyTicket(). The timeout value is relative to Time (g_time). Time is reset whenever the
    TPM loses power and cannot be moved forward by the user (as can Clock). g_time is a 64-bit value
-   expressing time in ms. Sealing the MSb() for a flag means that the TPM needs to be reset at least
+   expressing time in ms. Stealing the MSb() for a flag means that the TPM needs to be reset at least
    once every 292,471,208 years rather than once every 584,942,417 years. */
 #define EXPIRATION_BIT ((UINT64)1 << 63)
 /* Check for consistency of the bit ordering of bit fields */

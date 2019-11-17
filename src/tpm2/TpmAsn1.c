@@ -3,7 +3,7 @@
 /*			     TPM ASN.1						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAsn1.c 1509 2019-10-07 19:10:05Z kgoldman $		*/
+/*            $Id: TpmAsn1.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -164,11 +164,13 @@ ASN1NextTag(
     return -1;
 }
 /* 10.2.23.2.4	ASN1GetBitStringValue() */
-/* Try to parse a bit string of up to 32 bits from a value that is expected to be a bit string. If
+/* Try to parse a bit string of up to 32 bits from a value that is expected to be a bit string. The
+   bit string is left justified so that the MSb of the input is the MSb of the returned value. If
    there is a general parsing error, the context->size is set to -1. */
 /*     Return Value	Meaning */
 /*     TRUE(1)	success */
 /*     FALSE(0)	failure */
+
 BOOL
 ASN1GetBitStringValue(
 		      ASN1UnmarshalContext        *ctx,
@@ -179,7 +181,7 @@ ASN1GetBitStringValue(
     INT16                length;
     UINT32               value = 0;
     int                  inputBits;
-//
+    //
     length = ASN1NextTag(ctx);
     VERIFY(length >= 1);
     VERIFY(ctx->tag == ASN1_BITSTRING);
@@ -192,31 +194,32 @@ ASN1GetBitStringValue(
     VERIFY((shift < 8) && ((length > 0) || (shift == 0)));
     // if there are any bytes left
     for(; length > 1; length--)
-    {
-
-        // for all but the last octet, just shift and add the new octet
-        VERIFY((value & 0xFF000000) == 0); // can't loose significant bits
-        value = (value << 8) + NEXT_OCTET(ctx);
-
-    }
+	{
+	    
+	    // for all but the last octet, just shift and add the new octet
+	    VERIFY((value & 0xFF000000) == 0); // can't loose significant bits
+	    value = (value << 8) + NEXT_OCTET(ctx);
+	    
+	}
     if(length == 1)
-    {
-        // for the last octet, just shift the accumulated value enough to 
-        // accept the significant bits in the last octet and shift the last 
-        // octet down
-        VERIFY(((value & (0xFF000000 << (8 - shift)))) == 0);
-        value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
-
-    }
+	{
+	    // for the last octet, just shift the accumulated value enough to
+	    // accept the significant bits in the last octet and shift the last
+	    // octet down
+	    VERIFY(((value & (0xFF000000 << (8 - shift)))) == 0);
+	    value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
+	    
+	}
     // 'Left justify' the result
     if(inputBits > 0)
-        value <<= (32 - inputBits);
+	value <<= (32 - inputBits);
     *val = value;
     return TRUE;
  Error:
     ctx->size = -1;
     return FALSE;
 }
+
 /* 10.2.23.3	Marshaling Functions */
 /* 10.2.23.3.1	Introduction */
 /* Marshaling of an ASN.1 structure is accomplished from the bottom up. That is, the things that
