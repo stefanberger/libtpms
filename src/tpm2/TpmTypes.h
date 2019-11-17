@@ -856,6 +856,7 @@ typedef struct TPMA_OBJECT {                        // Table 2:31
 // This implements Table 2:31 TPMA_OBJECT using bit masking
 typedef UINT32                              TPMA_OBJECT;
 #define TYPE_OF_TPMA_OBJECT                 UINT32
+#define TPMA_OBJECT_Reserved_bit_at_0       ((TPMA_OBJECT)1 << 0)
 #define TPMA_OBJECT_fixedTPM                ((TPMA_OBJECT)1 << 1)
 #define TPMA_OBJECT_stClear                 ((TPMA_OBJECT)1 << 2)
 #define TPMA_OBJECT_fixedParent             ((TPMA_OBJECT)1 << 4)
@@ -1175,7 +1176,7 @@ typedef struct TPMA_X509_KEY_USAGE {                // Table 2:39
     unsigned    Reserved_bits_at_0   : 23;
     unsigned    decipherOnly         : 1;
     unsigned    encipherOnly         : 1;
-    unsigned    crlSign              : 1;
+    unsigned    cRLSign              : 1;
     unsigned    keyCertSign          : 1;
     unsigned    keyAgreement         : 1;
     unsigned    dataEncipherment     : 1;
@@ -1186,11 +1187,11 @@ typedef struct TPMA_X509_KEY_USAGE {                // Table 2:39
 // This is the initializer for a TPMA_X509_KEY_USAGE structure
 #define TPMA_X509_KEY_USAGE_INITIALIZER(                                           \
              bits_at_0,        decipheronly,     encipheronly,                     \
-             crlsign,          keycertsign,      keyagreement,                     \
+             cRLSign,          keycertsign,      keyagreement,                     \
              dataencipherment, keyencipherment,  nonrepudiation,                   \
              digitalsignature)                                                     \
             {bits_at_0,        decipheronly,     encipheronly,                     \
-             crlsign,          keycertsign,      keyagreement,                     \
+             cRLSign,          keycertsign,      keyagreement,                     \
              dataencipherment, keyencipherment,  nonrepudiation,                   \
              digitalsignature}
 #else // USE_BIT_FIELD_STRUCTURES
@@ -1199,7 +1200,7 @@ typedef UINT32                                  TPMA_X509_KEY_USAGE;
 #define TYPE_OF_TPMA_X509_KEY_USAGE             UINT32
 #define TPMA_X509_KEY_USAGE_decipherOnly        ((TPMA_X509_KEY_USAGE)1 << 23)
 #define TPMA_X509_KEY_USAGE_encipherOnly        ((TPMA_X509_KEY_USAGE)1 << 24)
-#define TPMA_X509_KEY_USAGE_crlSign             ((TPMA_X509_KEY_USAGE)1 << 25)
+#define TPMA_X509_KEY_USAGE_cRLSign             ((TPMA_X509_KEY_USAGE)1 << 25)
 #define TPMA_X509_KEY_USAGE_keyCertSign         ((TPMA_X509_KEY_USAGE)1 << 26)
 #define TPMA_X509_KEY_USAGE_keyAgreement        ((TPMA_X509_KEY_USAGE)1 << 27)
 #define TPMA_X509_KEY_USAGE_dataEncipherment    ((TPMA_X509_KEY_USAGE)1 << 28)
@@ -1209,11 +1210,11 @@ typedef UINT32                                  TPMA_X509_KEY_USAGE;
 //  This is the initializer for a TPMA_X509_KEY_USAGE bit array.
 #define TPMA_X509_KEY_USAGE_INITIALIZER(                                           \
              bits_at_0,        decipheronly,     encipheronly,                     \
-             crlsign,          keycertsign,      keyagreement,                     \
+             cRLSign,          keycertsign,      keyagreement,                     \
              dataencipherment, keyencipherment,  nonrepudiation,                   \
              digitalsignature)                                                     \
     ((decipheronly << 23)     + (encipheronly << 24)     +		\
-     (crlsign << 25)          + (keycertsign << 26)      +		\
+     (cRLSign << 25)          + (keycertsign << 26)      +		\
      (keyagreement << 27)     + (dataencipherment << 28) +		\
      (keyencipherment << 29)  + (nonrepudiation << 30)   +		\
      (digitalsignature << 31))
