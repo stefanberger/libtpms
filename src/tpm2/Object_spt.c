@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Object_spt.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -569,7 +569,7 @@ PublicAttributesValidation(
 			   )
 {
     TPMA_OBJECT      attributes = publicArea->objectAttributes;
-    TPMA_OBJECT      parentAttributes = {0};
+    TPMA_OBJECT      parentAttributes = TPMA_ZERO_INITIALIZER();
     //
     if(parentObject != NULL)
 	parentAttributes = parentObject->publicArea.objectAttributes;

@@ -441,7 +441,7 @@ const TPMA_CC    s_ccAttr [] = {
     TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
 #endif
 
-    0
+    TPMA_ZERO_INITIALIZER()
 };
 
 /* This is the command code attribute structure. */
