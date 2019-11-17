@@ -398,7 +398,7 @@ noinst_HEADERS += \
 	tpm2/NV_UndefineSpaceSpecial_fp.h \
 	tpm2/NV_Write_fp.h \
 	tpm2/NV_WriteLock_fp.h \
-	tpm2/OIDS.h \
+	tpm2/OIDs.h \
 	tpm2/ObjectChangeAuth_fp.h \
 	tpm2/Object_fp.h \
 	tpm2/Object_spt_fp.h \

@@ -66,7 +66,7 @@
 #define _TPMASN1_H_
 // 10.1.15.2	Includes
 #include "Tpm.h"
-#include "OIDS.h"
+#include "OIDs.h"
 // 10.1.15.3	Defined Constants
 // 10.1.15.3.1	ASN.1 Universal Types (Class 00b
 #define ASN1_EOC                0x00

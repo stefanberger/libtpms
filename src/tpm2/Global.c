@@ -77,5 +77,5 @@
 
 #define GLOBAL_C
 #include "Tpm.h"
-#include "OIDS.h"
+#include "OIDs.h"
 #include "X509.h"	/* kgold added */
