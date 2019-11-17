@@ -2394,12 +2394,12 @@ typedef struct {                                    // Table 2:222
     TPM_AT                  tag;
     UINT32                  data;
 } TPMS_AC_OUTPUT;
-#if CC_AC_GetCapability
+
 /* Table 2:218 - Definition of TPML_AC_CAPABILITIES Structure  */
 typedef struct {
     UINT32                  count;
     TPMS_AC_OUTPUT          acCapabilities[MAX_AC_CAPABILITIES];
 } TPML_AC_CAPABILITIES;
-#endif
+
 
 #endif
