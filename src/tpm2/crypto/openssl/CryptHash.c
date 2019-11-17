@@ -67,7 +67,7 @@
 #include "Tpm.h"
 #include "CryptHash_fp.h"
 #include "CryptHash.h"
-#include "OIDS.h"
+#include "OIDs.h"
 #define HASH_TABLE_SIZE     (HASH_COUNT + 1)
 #if     ALG_SHA1
 HASH_DEF_TEMPLATE(SHA1, Sha1);

@@ -61,7 +61,7 @@
 
 /* 10.2.8	CryptEccData.c */
 #include "Tpm.h"
-#include "OIDS.h"
+#include "OIDs.h"
 /* This file contains the ECC curve data. The format of the data depends on the setting of
    USE_BN_ECC_DATA. If it is defined, then the TPM's BigNum() format is used. Otherwise, it is kept
    in TPM2B format. The purpose of having the data in BigNum() format is so that it does not have to

@@ -63,7 +63,7 @@
 /* 10.2.24.1	Includes */
 #include "Tpm.h"
 #include "X509.h"
-#include "OIDS.h"
+#include "OIDs.h"
 #include "TpmAsn1_fp.h"
 #include "X509_spt_fp.h"
 #include "CryptHash_fp.h"

@@ -63,7 +63,7 @@
 /* 10.2.23.1	Includes */
 #include "Tpm.h"
 #define _OIDS_
-#include "OIDS.h"
+#include "OIDs.h"
 #include "TpmAsn1.h"
 #include "TpmAsn1_fp.h"
 /* 10.2.23.2	Unmarshaling Functions */
