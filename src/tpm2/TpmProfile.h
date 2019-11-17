@@ -336,14 +336,6 @@
 #ifndef TPM_MAX_DERIVATION_BITS
 #define TPM_MAX_DERIVATION_BITS         8192
 #endif
-#if 0    // libtpms added -- unused #defines
-#ifndef RSA_MAX_PRIME
-#define RSA_MAX_PRIME                   (MAX_RSA_KEY_BYTES/2)
-#endif
-#ifndef RSA_PRIVATE_SIZE
-#define RSA_PRIVATE_SIZE                (RSA_MAX_PRIME*5)
-#endif
-#endif   // libtpms added
 #ifndef SIZE_OF_X509_SERIAL_NUMBER
 #define SIZE_OF_X509_SERIAL_NUMBER      20
 #endif
