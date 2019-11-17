@@ -83,7 +83,7 @@
 #undef NO
 #define NO 0
 
-/* Allow the command line to specify a profile file. E.g., PROFILE=/the/profile.h */
+/* Allow the command line to specify a profile file */
 
 #ifdef PROFILE
 #   define PROFILE_QUOTE(a) #a
@@ -124,10 +124,12 @@
 
 // Define this to run the function that checks the compatibility between the chosen big number math
 // library and the TPM code. Not all ports use this.
-#if !(defined LIBRARY_COMPATABILITY_CHECK)				\
-    || ((LIBRARY_COMPATABILITY_CHECK != NO) && (LIBRARY_COMPATABILITY_CHECK != YES))
-#   undef   LIBRARY_COMPATABILITY_CHECK
-#   define  LIBRARY_COMPATABILITY_CHECK     YES     // Default: Either YES or NO
+
+#if !(defined LIBRARY_COMPATIBILITY_CHECK)				\
+    || (( LIBRARY_COMPATIBILITY_CHECK != NO)				\
+	&& (LIBRARY_COMPATIBILITY_CHECK != YES))
+#   undef   LIBRARY_COMPATIBILITY_CHECK
+#   define  LIBRARY_COMPATIBILITY_CHECK     YES     // Default: Either YES or NO  libtpms: YES
 #endif
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
 #   undef   FIPS_COMPLIANT
@@ -335,14 +337,6 @@
 #   define  CERTIFYX509_DEBUG NO               // libtpms: NO
 #endif
 
-//This define is used to enable any runtime checks of the interface between the cryptographic
-//library (e.g., OpenSSL()) and the thunking layer.
-
-#if !(defined LIBRARY_COMPATIBILITY_CHECK)				\
-    || ((LIBRARY_COMPATIBILITY_CHECK != NO) && (LIBRARY_COMPATIBILITY_CHECK != YES))
-#   undef   LIBRARY_COMPATIBILITY_CHECK
-#   define  LIBRARY_COMPATIBILITY_CHECK    YES        // Default: Either YES or NO    libtpms: YES
-#endif
 
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
