@@ -3,7 +3,7 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.c 1509 2019-10-07 19:10:05Z kgoldman $		*/
+/*            $Id: Global.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -78,4 +78,6 @@
 #define GLOBAL_C
 #include "Tpm.h"
 #include "OIDs.h"
-#include "X509.h"	/* kgold added */
+#if CC_CertifyX509
+#   include "X509.h"
+#endif // CC_CertifyX509
