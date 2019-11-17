@@ -3,7 +3,7 @@
 /*			     	ECC Main					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccMain.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptEccMain.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -67,7 +67,7 @@
 #if ALG_ECC
 /* This version requires that the new format for ECC data be used */
 #if !USE_BN_ECC_DATA
-#error "Need to SET USE_BN_ECC_DATA to YES in Implementaion.h"
+#error "Need to SET USE_BN_ECC_DATA to YES in TpmBuildSwitches.h"
 #endif
 /* 10.2.11.2 Functions */
 #if SIMULATION
@@ -347,12 +347,15 @@ CryptGenerateR(
     for(iterations = 1; iterations < 1000000;)
 	{
 	    int     i;
+
 	    CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG, &gr.commitNonce.b, COMMIT_STRING,
-		      (TPM2B *)name, &cntr.b, n.t.size * 8, r->t.buffer,
-		      &iterations, FALSE);
+		      (TPM2B *)name, &cntr.b, n.t.size * 8,	// libtpms ubsan
+		      r->t.buffer, &iterations, FALSE);		// libtpms changed
+
 	    // "random" value must be less than the prime
 	    if(UnsignedCompareB(r->b.size, r->b.buffer, n.t.size, n.t.buffer) >= 0)
 		continue;
+
 	    // in this implementation it is required that at least bit
 	    // in the upper half of the number be set
 	    for(i = n.t.size / 2; i >= 0; i--)
