@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -84,26 +84,42 @@
 
 /* B.2.3.2.3.1.	OsslToTpmBn() */
 /* This function converts an OpenSSL BIGNUM to a TPM bignum. In this implementation it is assumed
-   that OpenSSL used the same format for a big number as does the TPM -- an array of native-endian
-   words in little-endian order. */
-/* If the array allocated for the OpenSSL BIGNUM is not the space within the TPM bignum, then the
-   data is copied. Otherwise, just the size field of the BIGNUM is copied. */
-void
+   that OpenSSL uses a different control structure but the same data layout -- an array of
+   native-endian words in little-endian order. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure because value will not fit or OpenSSL variable doesn't exist */
+BOOL
 OsslToTpmBn(
 	    bigNum          bn,
 	    const BIGNUM   *osslBn   // libtpms: added 'const'
 	    )
 {
-    unsigned char buffer[LARGEST_NUMBER + 1];
-    int buffer_len;
+    VERIFY(osslBn != NULL);
+    // If the bn is NULL, it means that an output value pointer was NULL meaning that
+    // the results is simply to be discarded.
+    unsigned char buffer[LARGEST_NUMBER + 1];	// libtpms added
+    int buffer_len;				// libtpms added
 
     if(bn != NULL)
 	{
-	    pAssert(BN_num_bytes(osslBn) >= 0);
-	    pAssert(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
+#if 1 //libtpms added begin
+	    VERIFY(BN_num_bytes(osslBn) >= 0);
+	    VERIFY(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
 	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
 	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
+#else // libtpms added end
+	    int         i;
+	    //
+	    VERIFY((unsigned)osslBn->top <= BnGetAllocated(bn));
+	    for(i = 0; i < osslBn->top; i++)
+		bn->d[i] = osslBn->d[i];
+	    BnSetTop(bn, osslBn->top);
+#endif // libtpms added
 	}
+    return TRUE;
+ Error:
+    return FALSE;
 }
 
 /* B.2.3.2.3.2.	BigInitialized() */
