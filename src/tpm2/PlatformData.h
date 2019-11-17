@@ -3,7 +3,7 @@
 /*		Instance data for the Platform module. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PlatformData.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: PlatformData.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,41 +62,40 @@
 /* c.8 PlatformData.h */
 /* This file contains the instance data for the Platform module. It is collected in this file so
    that the state of the module is easier to manage. */
+
 #ifndef _PLATFORM_DATA_H_
 #define _PLATFORM_DATA_H_
+#ifdef  _PLATFORM_DATA_C_
+#define EXTERN
+#else
+#define EXTERN  extern
+#endif
+
 /* From Cancel.c Cancel flag.  It is initialized as FALSE, which indicate the command is not being
    canceled */
-extern int     s_isCanceled;
-
-#ifdef _MSC_VER
-#include <sys/types.h>
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#include <time.h>
-#endif
+EXTERN int     s_isCanceled;
 
 #ifndef HARDWARE_CLOCK
 typedef uint64_t     clock64_t;
 // This is the value returned the last time that the system clock was read. This is only relevant
 // for a simulator or virtual TPM.
-extern clock64_t       s_realTimePrevious;
+EXTERN clock64_t       s_realTimePrevious;
 // These values are used to try to synthesize a long lived version of clock().
-extern clock64_t        s_lastSystemTime;
-extern clock64_t        s_lastReportedTime;
+EXTERN clock64_t        s_lastSystemTime;
+EXTERN clock64_t        s_lastReportedTime;
 // This is the rate adjusted value that is the equivalent of what would be read from a hardware
 // register that produced rate adjusted time.
-extern clock64_t        s_tpmTime;
+EXTERN clock64_t        s_tpmTime;
 /* libtpms added begin */
-extern int64_t          s_hostMonotonicAdjustTime;
-extern uint64_t         s_suspendedElapsedTime;
+EXTERN int64_t          s_hostMonotonicAdjustTime;
+EXTERN uint64_t         s_suspendedElapsedTime;
 /* libtpms added end */
 #endif // HARDWARE_CLOCK
 
 /* This value indicates that the timer was reset */
-extern BOOL              s_timerReset;
+EXTERN BOOL              s_timerReset;
 /* This value indicates that the timer was stopped. It causes a clock discontinuity. */
-extern BOOL              s_timerStopped;
+EXTERN BOOL              s_timerStopped;
 /* CLOCK_NOMINAL is the number of hardware ticks per mS. A value of 300000 means that the nominal
    clock rate used to drive the hardware clock is 30 MHz. The adjustment rates are used to
    determine the conversion of the hardware ticks to internal hardware clock value. In practice, we
@@ -115,11 +114,11 @@ extern BOOL              s_timerStopped;
 #define     CLOCK_ADJUST_LIMIT      5000
 /* This variable records the time when _plat__TimerReset() is called.  This mechanism allow us to
    subtract the time when TPM is power off from the total time reported by clock() function */
-extern uint64_t        s_initClock;
+EXTERN uint64_t        s_initClock;
 /* This variable records the timer adjustment factor. */
-extern unsigned int         s_adjustRate;
+EXTERN unsigned int         s_adjustRate;
 /* From LocalityPlat.c Locality of current command */
-extern unsigned char s_locality;
+EXTERN unsigned char s_locality;
 /* From NVMem.c Choose if the NV memory should be backed by RAM or by file. If this macro is
    defined, then a file is used as NV.  If it is not defined, then RAM is used to back NV
    memory. Comment out to use RAM. */
@@ -141,14 +140,14 @@ extern unsigned char s_locality;
 #error Do not define SIMULATION for libtpms!
 #endif // SIMULATION
 
-extern unsigned char     s_NV[NV_MEMORY_SIZE];
-extern BOOL              s_NvIsAvailable;
-extern BOOL              s_NV_unrecoverable;
-extern BOOL              s_NV_recoverable;
+EXTERN unsigned char     s_NV[NV_MEMORY_SIZE];
+EXTERN BOOL              s_NvIsAvailable;
+EXTERN BOOL              s_NV_unrecoverable;
+EXTERN BOOL              s_NV_recoverable;
 /* From PPPlat.c Physical presence.  It is initialized to FALSE */
-extern BOOL     s_physicalPresence;
+EXTERN BOOL     s_physicalPresence;
 /* From Power */
-extern BOOL        s_powerLost;
+EXTERN BOOL        s_powerLost;
 /* From Entropy.c */
-extern uint32_t        lastEntropy;
+EXTERN uint32_t        lastEntropy;
 #endif // _PLATFORM_DATA_H_
