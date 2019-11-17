@@ -457,47 +457,47 @@
 #endif
 // Table 1:00 - Defines for RSA Asymmetric Cipher Algorithm Constants
 #ifndef RSA_1024
-#define RSA_1024                    (ALG_RSA & YES)
+#define RSA_1024                    (ALG_RSA && YES)
 #endif
 #ifndef RSA_2048
-#define RSA_2048                    (ALG_RSA & YES)
+#define RSA_2048                    (ALG_RSA && YES)
 #endif
 #ifndef RSA_3072
-#define RSA_3072                    (ALG_RSA & NO)
+#define RSA_3072                    (ALG_RSA && NO)
 #endif
 #ifndef RSA_4096
-#define RSA_4096                    (ALG_RSA & NO)
+#define RSA_4096                    (ALG_RSA && NO)
 #endif
 // Table 1:17 - Defines for AES Symmetric Cipher Algorithm Constants
 #ifndef AES_128
-#define AES_128                     (ALG_AES & YES)
+#define AES_128                     (ALG_AES && YES)
 #endif
 #ifndef AES_192
-#define AES_192                     (ALG_AES & NO)
+#define AES_192                     (ALG_AES && NO)
 #endif
 #ifndef AES_256
-#define AES_256                     (ALG_AES & YES)
+#define AES_256                     (ALG_AES && YES)
 #endif
 // Table 1:18 - Defines for SM4 Symmetric Cipher Algorithm Constants
 #ifndef SM4_128
-#define SM4_128                     (ALG_SM4 & YES)
+#define SM4_128                     (ALG_SM4 && YES)
 #endif
 // Table 1:19 - Defines for CAMELLIA Symmetric Cipher Algorithm Constants
 #ifndef CAMELLIA_128
-#define CAMELLIA_128                    (ALG_CAMELLIA & YES)
+#define CAMELLIA_128                (ALG_CAMELLIA && YES)
 #endif
 #ifndef CAMELLIA_192
-#define CAMELLIA_192                    (ALG_CAMELLIA & NO)
+#define CAMELLIA_192                (ALG_CAMELLIA && NO)
 #endif
 #ifndef CAMELLIA_256
-#define CAMELLIA_256                    (ALG_CAMELLIA & NO)
+#define CAMELLIA_256                (ALG_CAMELLIA && YES)
 #endif
 // Table 1:17 - Defines for TDES Symmetric Cipher Algorithm Constants
 #ifndef TDES_128
-#define TDES_128                    (ALG_TDES & YES)
+#define TDES_128                    (ALG_TDES && YES)
 #endif
 #ifndef TDES_192
-#define TDES_192                    (ALG_TDES & YES)
+#define TDES_192                    (ALG_TDES && YES)
 #endif
 // Table 0:5 - Defines for Implemented Commands
 #ifndef CC_AC_GetCapability
