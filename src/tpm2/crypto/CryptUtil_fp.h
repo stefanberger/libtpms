@@ -200,17 +200,6 @@ TPM_RC
 CryptGetTestResult(
 		   TPM2B_MAX_BUFFER    *outData        // OUT: test result data
 		   );
-#if 0 /* libtpms added */
-BOOL
-CryptIsUniqueSizeValid(
-		       TPMT_PUBLIC     *publicArea     // IN: the public area to check
-		       );
-BOOL
-CryptIsSensitiveSizeValid(
-			  TPMT_PUBLIC             *publicArea,        // IN: the object's public part
-			  TPMT_SENSITIVE          *sensitiveArea      // IN: the object's sensitive part
-			  );
-#endif /* libtpms added */
 TPM_RC
 CryptValidateKeys(
 		  TPMT_PUBLIC      *publicArea,
@@ -218,12 +207,6 @@ CryptValidateKeys(
 		  TPM_RC            blamePublic,
 		  TPM_RC            blameSensitive
 		  );
-#if 0 /* libtpms added */
-void
-CryptAlgsSetImplemented(
-			void
-			);
-#endif /* libtpms added */
 TPM_RC
 CryptSelectMac(
 	       TPMT_PUBLIC             *publicArea,
