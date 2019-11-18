@@ -76,7 +76,9 @@ const UNMARSHAL_t UnmarshalArray[] = {
     (UNMARSHAL_t)TPMI_RH_CLEAR_Unmarshal,
 #define TPMI_RH_HIERARCHY_AUTH_H_UNMARSHAL  (TPMI_RH_CLEAR_H_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_RH_HIERARCHY_AUTH_Unmarshal,
-#define TPMI_RH_LOCKOUT_H_UNMARSHAL     (TPMI_RH_HIERARCHY_AUTH_H_UNMARSHAL + 1)
+#define TPMI_RH_HIERARCHY_POLICY_H_UNMARSHAL  (TPMI_RH_HIERARCHY_AUTH_H_UNMARSHAL + 1)
+    (UNMARSHAL_t)TPMI_RH_HIERARCHY_POLICY_Unmarshal,
+#define TPMI_RH_LOCKOUT_H_UNMARSHAL     (TPMI_RH_HIERARCHY_POLICY_H_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_RH_LOCKOUT_Unmarshal,
 #define TPMI_RH_NV_AUTH_H_UNMARSHAL     (TPMI_RH_LOCKOUT_H_UNMARSHAL + 1)
     (UNMARSHAL_t)TPMI_RH_NV_AUTH_Unmarshal,
@@ -2916,7 +2918,7 @@ SetPrimaryPolicy_COMMAND_DESCRIPTOR_t _SetPrimaryPolicyData = {
     /* offsetOfTypes */   offsetof(SetPrimaryPolicy_COMMAND_DESCRIPTOR_t, types),
     /* offsets */         {(UINT16)(offsetof(SetPrimaryPolicy_In, authPolicy)),
 			   (UINT16)(offsetof(SetPrimaryPolicy_In, hashAlg))},
-    /* types */           {TPMI_RH_HIERARCHY_AUTH_H_UNMARSHAL,
+    /* types */           {TPMI_RH_HIERARCHY_POLICY_H_UNMARSHAL,
 			   TPM2B_DIGEST_P_UNMARSHAL,
 			   TPMI_ALG_HASH_P_UNMARSHAL + ADD_FLAG,
 			   END_OF_LIST,
