@@ -3,7 +3,7 @@
 /*			    Code for prime validation. 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrime.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptPrime.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -147,7 +147,7 @@ BnIsProbablyPrime(
 #else
 	if(BnGetSize(prime) == 1)
 #endif
-	    return IsPrimeInt(prime->d[0]);
+	    return IsPrimeInt((uint32_t)prime->d[0]);
     if(BnIsEven(prime))
 	return FALSE;
     if(BnUnsignedCmpWord(prime, s_LastPrimeInTable) <= 0)
@@ -208,7 +208,7 @@ MillerRabin(
     // Since w is odd (w-1) is even so start at bit number 1 rather than 0
     // Get the number of bits in bnWm1 so that it doesn't have to be recomputed
     // on each iteration.
-    i = bnWm1->size * RADIX_BITS;
+    i = (int)(bnWm1->size * RADIX_BITS);
     // Now find the largest power of 2 that divides w1
     for(a = 1;
 	(a < (bnWm1->size * RADIX_BITS)) &&
