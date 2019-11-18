@@ -57,22 +57,52 @@ int tpm_swallow_printf_args(const char *format, ...)
 
 #else
 
-/* TPM_PrintFour() prints a prefix plus 4 bytes of a buffer */
-
-void TPM_PrintFour(const char *string, const unsigned char* buff)
+void TPM_PrintFourLimit(const char *string,
+                        const unsigned char *buff, size_t buflen)
 {
     if (buff != NULL) {
-        TPMLIB_LogPrintf("%s %02x %02x %02x %02x\n",
-               string,
-               buff[0],
-               buff[1],
-               buff[2],
-               buff[3]);
+        switch (buflen) {
+        case 0:
+            TPMLIB_LogPrintf("%s (no data)\n", string);
+            break;
+        case 1:
+            TPMLIB_LogPrintf("%s %02x\n",
+                   string,
+                   buff[0]);
+            break;
+        case 2:
+            TPMLIB_LogPrintf("%s %02x %02x\n",
+                   string,
+                   buff[0],
+                   buff[1]);
+            break;
+        case 3:
+            TPMLIB_LogPrintf("%s %02x %02x %02x\n",
+                   string,
+                   buff[0],
+                   buff[1],
+                   buff[2]);
+            break;
+        default:
+            TPMLIB_LogPrintf("%s %02x %02x %02x %02x\n",
+                   string,
+                   buff[0],
+                   buff[1],
+                   buff[2],
+                   buff[3]);
+        }
     }
     else {
         TPMLIB_LogPrintf("%s null\n", string);
     }
     return;
+}
+
+/* TPM_PrintFour() prints a prefix plus 4 bytes of a buffer */
+
+void TPM_PrintFour(const char *string, const unsigned char* buff)
+{
+    TPM_PrintFourLimit(string, buff, 4);
 }
 
 #endif
