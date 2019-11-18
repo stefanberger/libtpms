@@ -3,7 +3,7 @@
 /*			For Selected Math Library     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/* $Id: SupportLibraryFunctionPrototypes_fp.h 1476 2019-06-10 19:32:03Z kgoldman $ */
+/* $Id: SupportLibraryFunctionPrototypes_fp.h 1519 2019-11-15 20:43:51Z kgoldman $ */
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -74,7 +74,7 @@ LIB_EXPORT
 int SupportLibInit(void);
 /* MathLibraryCompatibililtyCheck() This function is only used during development to make sure that
    the library that is being referenced is using the same size of data structures as the TPM. */
-void
+BOOL
 MathLibraryCompatibilityCheck(
 			      void
 			      );

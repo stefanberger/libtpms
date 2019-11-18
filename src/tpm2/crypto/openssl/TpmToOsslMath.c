@@ -223,29 +223,39 @@ BnNewVariable(
 }
 
 #if LIBRARY_COMPATIBILITY_CHECK
-void
+
+BOOL
 MathLibraryCompatibilityCheck(
 			      void
 			      )
 {
     OSSL_ENTER();
-    BIGNUM          *osslTemp = BN_CTX_get(CTX);
-    BN_VAR(tpmTemp, 64 * 8); // allocate some space for a test value
-    crypt_uword_t           i;
-    TPM2B_TYPE(TEST, 16);
-    TPM2B_TEST              test = {{16, {0x0F, 0x0E, 0x0D, 0x0C,
-					  0x0B, 0x0A, 0x09, 0x08,
-					  0x07, 0x06, 0x05, 0x04,
-					  0x03, 0x02, 0x01, 0x00}}};
-    // Convert the test TPM2B to a bigNum
-    BnFrom2B(tpmTemp, &test.b);
-    // Convert the test TPM2B to an OpenSSL BIGNUM
-    BN_bin2bn(test.t.buffer, test.t.size, osslTemp);
+    BIGNUM              *osslTemp = BnNewVariable(CTX);
+#if 0
+    crypt_uword_t        i;
+#endif
+    BYTE                 test[] = {0x1F, 0x1E, 0x1D, 0x1C, 0x1B, 0x1A, 0x19, 0x18,
+				   0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10,
+				   0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08,
+				   0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
+    BN_VAR(tpmTemp, sizeof(test) * 8); // allocate some space for a test value
+    //
+    // Convert the test data to a bigNum
+    BnFromBytes(tpmTemp, test, sizeof(test));
+    // Convert the test data to an OpenSSL BIGNUM
+    BN_bin2bn(test, sizeof(test), osslTemp);
     // Make sure the values are consistent
-    cAssert(osslTemp->top == (int)tpmTemp->size);
+#if 0
+    VERIFY(osslTemp->top == (int)tpmTemp->size);
     for(i = 0; i < tpmTemp->size; i++)
-	cAssert(osslTemp->d[0] == tpmTemp->d[0]);
+	VERIFY(osslTemp->d[i] == tpmTemp->d[i]);
+#endif
     OSSL_LEAVE();
+    return 1;
+#if 0
+ Error:
+    return 0;
+#endif
 }
 
 #endif
