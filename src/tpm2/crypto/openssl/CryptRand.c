@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1488 2019-07-10 12:50:30Z kgoldman $		*/
+/*            $Id: CryptRand.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -544,8 +544,6 @@ CryptRandomGenerate(
 		    BYTE            *buffer
 		    )
 {
-    if(randomSize > UINT16_MAX)
-	randomSize = UINT16_MAX;
     return DRBG_Generate((RAND_STATE *)&drbgDefault, buffer, randomSize);
 }
 /* 10.2.16.3.4 DRBG_InstantiateSeededKdf() */
@@ -711,6 +709,9 @@ DRBG_Generate(
 {
     if(state == NULL)
 	state = (RAND_STATE *)&drbgDefault;
+    if(random == NULL)
+	return 0;
+
     // If the caller used a KDF state, generate a sequence from the KDF not to
     // exceed the limit.
     if(state->kdf.magic == KDF_MAGIC)
@@ -718,8 +719,7 @@ DRBG_Generate(
 	    KDF_STATE       *kdf = (KDF_STATE *)state;
 	    UINT32           counter = (UINT32)kdf->counter;
 	    INT32            bytesLeft = randomSize;
-	    if(random == NULL)
-		return 0;
+
 	    // If the number of bytes to be returned would put the generator
 	    // over the limit, then return 0
 	    if((((kdf->counter * kdf->digestSize) + randomSize) * 8) > kdf->limit)
