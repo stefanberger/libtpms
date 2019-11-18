@@ -136,9 +136,10 @@ _rpc__Signal_PowerOff(
 		      void
 		      )
 {
-    if(!s_isPowerOn) return;
-    // Pass power off signal to platform
-    _plat__Signal_PowerOff();
+    if(s_isPowerOn)
+	// Pass power off signal to platform
+	_plat__Signal_PowerOff();
+    // This could be redundant, but...
     s_isPowerOn = FALSE;
     return;
 }
@@ -162,10 +163,10 @@ _rpc__Signal_PhysicalPresenceOn(
 				void
 				)
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Pass physical presence on to platform
-    _plat__Signal_PhysicalPresenceOn();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Pass physical presence on to platform
+	_plat__Signal_PhysicalPresenceOn();
     return;
 }
 /* D.4.3.6. _rpc__Signal_PhysicalPresenceOff() */
@@ -175,10 +176,10 @@ _rpc__Signal_PhysicalPresenceOff(
 				 void
 				 )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Pass physical presence off to platform
-    _plat__Signal_PhysicalPresenceOff();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Pass physical presence off to platform
+	_plat__Signal_PhysicalPresenceOff();
     return;
 }
 /* D.4.3.7. _rpc__Signal_Hash_Start() */
@@ -188,10 +189,10 @@ _rpc__Signal_Hash_Start(
 			void
 			)
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Pass _TPM_Hash_Start signal to TPM
-    _TPM_Hash_Start();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Pass _TPM_Hash_Start signal to TPM
+	_TPM_Hash_Start();
     return;
 }
 /* D.4.3.8. _rpc__Signal_Hash_Data() */
@@ -201,10 +202,10 @@ _rpc__Signal_Hash_Data(
 		       _IN_BUFFER       input
 		       )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Pass _TPM_Hash_Data signal to TPM
-    _TPM_Hash_Data(input.BufferSize, input.Buffer);
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Pass _TPM_Hash_Data signal to TPM
+	_TPM_Hash_Data(input.BufferSize, input.Buffer);
     return;
 }
 /* D.4.3.9. _rpc__Signal_HashEnd() */
@@ -214,10 +215,10 @@ _rpc__Signal_HashEnd(
 		     void
 		     )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Pass _TPM_HashEnd signal to TPM
-    _TPM_Hash_End();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Pass _TPM_HashEnd signal to TPM
+	_TPM_Hash_End();
     return;
 }
 #endif /* libtpms added */
@@ -253,9 +254,9 @@ _rpc__Signal_CancelOn(
 		      )
 {
     // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Set the platform canceling flag.
-    _plat__SetCancel();
+    if(s_isPowerOn)
+	// Set the platform canceling flag.
+	_plat__SetCancel();
     return;
 }
 /* D.4.3.11. _rpc__Signal_CancelOff() */
@@ -265,10 +266,10 @@ _rpc__Signal_CancelOff(
 		       void
 		       )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    // Set the platform canceling flag.
-    _plat__ClearCancel();
+    // If TPM power is n
+    if(s_isPowerOn)
+	// Set the platform canceling flag.
+	_plat__ClearCancel();
     return;
 }
 /* D.4.3.12. _rpc__Signal_NvOn() */
@@ -279,9 +280,10 @@ _rpc__Signal_NvOn(
 		  void
 		  )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    _plat__SetNvAvail();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Make the NV available
+	_plat__SetNvAvail();
     return;
 }
 #if 0 /* libtpms added */
@@ -292,9 +294,10 @@ _rpc__Signal_NvOff(
 		   void
 		   )
 {
-    // If TPM is power off, reject this signal
-    if(!s_isPowerOn) return;
-    _plat__ClearNvAvail();
+    // If TPM power is on
+    if(s_isPowerOn)
+	// Make NV not available
+	_plat__ClearNvAvail();
     return;
 }
 void RsaKeyCacheControl(int state);
