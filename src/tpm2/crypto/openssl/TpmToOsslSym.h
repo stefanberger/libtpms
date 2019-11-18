@@ -71,6 +71,7 @@
 #define SYM_LIB_OSSL
 #include <openssl/aes.h>
 #include <openssl/des.h>
+#include <openssl/camellia.h>
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
 
@@ -134,9 +135,20 @@ typedef void(*TpmCryptSetSymKeyCall_t)(
 #if ALG_SM4
 #error "SM4 is not available"
 #endif
-#if ALG_CAMELLIA
-#error "Camellia is not available"
-#endif
+
+/* B.2.2.3.6.	Links to the OpenSSL CAMELLIA code */
+/* Macros to set up the encryption/decryption key schedules */
+
+#define TpmCryptSetEncryptKeyCAMELLIA(key, keySizeInBits, schedule)	\
+    Camellia_set_key((key), (keySizeInBits), (tpmKeyScheduleCAMELLIA *)(schedule))
+#define TpmCryptSetDecryptKeyCAMELLIA(key, keySizeInBits, schedule)	\
+    Camellia_set_key((key), (keySizeInBits), (tpmKeyScheduleCAMELLIA *)(schedule))
+
+/* Macros to alias encryption calls to specific algorithms. This should be used sparingly. */
+
+#define TpmCryptEncryptCAMELLIA          Camellia_encrypt
+#define TpmCryptDecryptCAMELLIA          Camellia_decrypt
+#define tpmKeyScheduleCAMELLIA           CAMELLIA_KEY
 
 /* Forward reference */
 
