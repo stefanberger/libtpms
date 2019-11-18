@@ -3,7 +3,7 @@
 /*	 		TPM2_SetPrimaryPolicy Command Header			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SetPrimaryPolicy_fp.h 809 2016-11-16 18:31:54Z kgoldman $	*/
+/*            $Id: SetPrimaryPolicy_fp.h 1521 2019-11-15 21:00:47Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2012-2015				*/
+/*  (c) Copyright IBM Corp. and others, 2012 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -63,7 +63,7 @@
 #define SETPRIMARYPOLICY_FP_H
 
 typedef struct {
-    TPMI_RH_HIERARCHY_AUTH	authHandle;
+    TPMI_RH_HIERARCHY_POLICY	authHandle;
     TPM2B_DIGEST		authPolicy;
     TPMI_ALG_HASH		hashAlg;
 } SetPrimaryPolicy_In;
