@@ -81,10 +81,6 @@ EcPointInitialized(
 		   bigCurve            E
 		   );
 // libtpms added end
-void
-MathLibraryCompatibilityCheck(
-			      void
-			      );
 LIB_EXPORT BOOL
 BnModMult(
 	  bigNum              result,

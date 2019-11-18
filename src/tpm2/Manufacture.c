@@ -92,6 +92,11 @@ TPM_Manufacture(
     if(!TpmSizeChecks())
 	return -1;
 #endif
+#if LIBRARY_COMPATIBILITY_CHECK
+    // Make sure that the attached library performs as expected.
+    if(!MathLibraryCompatibilityCheck())
+	return -1;
+#endif
     // If TPM has been manufactured, return indication.
     if(!firstTime && g_manufactured)
 	return 1;
