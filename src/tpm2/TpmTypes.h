@@ -718,7 +718,9 @@ typedef  TPM_HANDLE         TPM_RH;
 #define  TPM_RH_PLATFORM_NV    (TPM_RH)(0x4000000D)
 #define  TPM_RH_AUTH_00        (TPM_RH)(0x40000010)
 #define  TPM_RH_AUTH_FF        (TPM_RH)(0x4000010F)
-#define  TPM_RH_LAST           (TPM_RH)(0x4000010F)
+#define  TPM_RH_ACT_0          (TPM_RH)(0x40000110)
+#define  TPM_RH_ACT_F          (TPM_RH)(0x4000011F)
+#define  TPM_RH_LAST           (TPM_RH)(0x4000011F)
 /* Table 2:29 - Definition of TPM_HC Constants  */
 typedef  TPM_HANDLE         TPM_HC;
 #define  HR_HANDLE_MASK          (TPM_HC)(0x00FFFFFF)
@@ -1248,6 +1250,8 @@ typedef  TPM_HANDLE         TPMI_RH_HIERARCHY;
 typedef  TPM_HANDLE         TPMI_RH_ENABLES;
 /* Table 2:51 - Definition of TPMI_RH_HIERARCHY_AUTH Type  */
 typedef  TPM_HANDLE         TPMI_RH_HIERARCHY_AUTH;
+/* Table 2:55 - Definition of TPMI_RH_HIERARCHY_POLICY Type  */
+typedef  TPM_HANDLE         TPMI_RH_HIERARCHY_POLICY;
 /* Table 2:52 - Definition of TPMI_RH_PLATFORM Type  */
 typedef  TPM_HANDLE         TPMI_RH_PLATFORM;
 /* Table 2:53 - Definition of TPMI_RH_OWNER Type  */
