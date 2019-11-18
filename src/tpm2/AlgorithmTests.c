@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1476 2019-06-10 19:32:03Z kgoldman $	*/
+/*            $Id: AlgorithmTests.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -132,7 +132,10 @@ TestHash(
 #endif
 #if ALG_SM3_256
 	  case ALG_SM3_256_VALUE:
-	    testDigest = &c_SM3_256_digest.b;
+#error Missing test case for SM3
+	    // There are currently not test vectors for SM3
+	    //            testDigest = &c_SM3_256_digest.b;
+	    testDigest = NULL;
 	    break;
 #endif
 	  default:
@@ -140,6 +143,11 @@ TestHash(
 	}
     // Clear the to-test bits
     CLEAR_BOTH(hashAlg);
+    
+    // If there is an algorithm without test vectors, then assume that things are OK.
+    if(testDigest == NULL)
+	return TPM_RC_SUCCESS;
+
     // Set the HMAC key to twice the digest size
     digestSize = CryptHashGetDigestSize(hashAlg);
     CryptHmacStart(&state, hashAlg, digestSize * 2,

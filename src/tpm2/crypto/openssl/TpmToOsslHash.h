@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -67,6 +67,9 @@
 #define HASH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+#if ALG_SM3
+#include <openssl/sm3.h>
+#endif
 #include <openssl/ossl_typ.h>
 /* B.2.2.1.2. Links to the OpenSSL HASH code */
 /* Redefine the internal name used for each of the hash state structures to the name used by the
@@ -76,6 +79,7 @@
 #define tpmHashStateSHA256_t      SHA256_CTX
 #define tpmHashStateSHA384_t      SHA512_CTX
 #define tpmHashStateSHA512_t      SHA512_CTX
+#define tpmHashStateSM3_256_t     SM3_CTX
 #if ALG_SM3_256
 #   error "The version of OpenSSL used by this code does not support SM3"
 #endif
@@ -167,6 +171,13 @@ typedef const BYTE    *PCBYTE;
 #define tpmHashStateCopy_SHA512     memcpy
 #define tpmHashStateExport_SHA512   memcpy
 #define tpmHashStateImport_SHA512   memcpy
+#define tpmHashStart_SM3_256        sm3_init
+#define tpmHashData_SM3_256         sm3_update
+#define tpmHashEnd_SM3_256          sm3_final
+#define tpmHashStateCopy_SM3_256    memcpy
+#define tpmHashStateExport_SM3_256  memcpy
+#define tpmHashStateImport_SM3_256  memcpy
+
 #endif // _CRYPT_HASH_C_
 #define LibHashInit()
 /* This definition would change if there were something to report */

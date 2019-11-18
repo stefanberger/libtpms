@@ -3,7 +3,7 @@
 /*			OID values						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: OIDS.h 1509 2019-10-07 19:10:05Z kgoldman $			*/
+/*            $Id: OIDs.h 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -218,8 +218,9 @@ SHA384_OID(_ECDSA_);    // (1.2.840.10045.4.3.3) SHA384 digest signed by an ECDS
 #define OID_ECDSA_SHA512_VALUE      0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, \
 	0x03, 0x04
 SHA512_OID(_ECDSA_);    // (1.2.840.10045.4.3.4) SHA512 digest signed by an ECDSA key.
-#define OID_ECDSA_SM3_256_VALUE     0x00
-SM3_256_OID(_ECDSA_);
+#define OID_ECDSA_SM3_256_VALUE     0x06, 0x08, 0x2A, 0x81, 0x1C, 0xCF, 0x55, 0x01, \
+	0x83, 0x75
+SM3_256_OID(_ECDSA_);   // 1.2.156.10197.1.501
 #define OID_ECDSA_SHA3_256_VALUE    NIST_SIG, 10
 SHA3_256_OID(_ECDSA_);
 #define OID_ECDSA_SHA3_384_VALUE    NIST_SIG, 11
