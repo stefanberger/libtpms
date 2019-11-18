@@ -120,6 +120,6 @@ _plat__Signal_PowerOff(
 		       )
 {
     // Prepare NV memory for power off
-    _plat__NVDisable();
+    _plat__NVDisable(0);
     return;
 }

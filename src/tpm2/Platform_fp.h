@@ -3,7 +3,7 @@
 /*		NV read and write access methods     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: Platform_fp.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -210,7 +210,7 @@ _plat__NVEnable_NVChipFile(
 /* Disable NV memory */
 LIB_EXPORT void
 _plat__NVDisable(
-		 void
+		 BOOL             delete           // IN: If TRUE, delete the NV contents.
 		 );
 /* C.8.6.4. _plat__IsNvAvailable() */
 /* Check if NV is available */
@@ -295,6 +295,15 @@ LIB_EXPORT void
 _plat__ClearNvAvail(
 		    void
 		    );
+
+/* C.6.2.15.	_plat__NVNeedsManufacture() */
+/* This function is used by the simulator to determine when the TPM's NV state needs to be manufactured. */
+
+LIB_EXPORT BOOL
+_plat__NVNeedsManufacture(
+			  void
+			  );
+
 /* C.8.6. From PowerPlat.c */
 /* C.8.6.1. _plat__Signal_PowerOn() */
 /* Signal platform power on */
