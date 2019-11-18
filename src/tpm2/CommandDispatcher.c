@@ -3,7 +3,7 @@
 /*			   Command Dispatcher	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatcher.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: CommandDispatcher.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -76,6 +76,8 @@
    unmarshaling so that the compare operation is valid in cases where some bytes are unused. */
 /* 6.3.1.1 Includes and Typedefs */
 #include "Tpm.h"
+// #include "Marshal.h" kgold
+
 #if TABLE_DRIVEN_DISPATCH
 typedef TPM_RC(NoFlagFunction)(void *target, BYTE **buffer, INT32 *size);
 typedef TPM_RC(FlagFunction)(void *target, BYTE **buffer, INT32 *size, BOOL flag);
@@ -128,7 +130,7 @@ ParseHandleBuffer(
     COMMAND_DESCRIPTOR_t    *desc;
     BYTE                    *types;
     BYTE                     type;
-    BYTE                     dtype;
+    BYTE                     dType;
     // Make sure that nothing strange has happened
     pAssert(command->index
 	    < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t *));
@@ -145,15 +147,23 @@ ParseHandleBuffer(
     for(type = *types++;
 	// check each byte to make sure that we have not hit the start
 	// of the parameters
-	(dtype = (type & 0x7F)) < PARAMETER_FIRST_TYPE;
+	(dType = (type & 0x7F)) < PARAMETER_FIRST_TYPE;
 	// get the next type
 	type = *types++)
 	{
+#if TABLE_DRIVEN_MARSHAL
+	marshalIndex_t      index;
+    index = UnmarshalArray[dType] | ((type & 0x80) ? NULL_FLAG : 0);
+    result = Unmarshal(index, &(command->handles[command->handleNum]),
+		       &command->parameterBuffer, &command->parameterSize);
+    
+#else
+
 	    // See if unmarshaling of this handle type requires a flag
-	    if(dtype < HANDLE_FIRST_FLAG_TYPE)
+	    if(dType < HANDLE_FIRST_FLAG_TYPE)
 		{
 		    // Look up the function to do the unmarshaling
-		    NoFlagFunction  *f = (NoFlagFunction *)UnmarshalArray[dtype];
+		    NoFlagFunction  *f = (NoFlagFunction *)UnmarshalArray[dType];
 		    // call it
 		    result = f(&(command->handles[command->handleNum]),
 			       &command->parameterBuffer,
@@ -162,12 +172,13 @@ ParseHandleBuffer(
 	    else
 		{
 		    //  Look up the function
-		    FlagFunction    *f = UnmarshalArray[dtype];
+		    FlagFunction    *f = UnmarshalArray[dType];
 		    // Call it setting the flag to the appropriate value
 		    result = f(&(command->handles[command->handleNum]),
 			       &command->parameterBuffer,
 			       &command->parameterSize, (type & 0x80) != 0);
 		}
+#endif
 	    // Got a handle
 	    // We do this first so that the match for the handle offset of the
 	    // response code works correctly.
@@ -289,6 +300,14 @@ CommandDispatcher(
     for(; (dType = (type & 0x7F)) <= PARAMETER_LAST_TYPE; type = *types++)
 	{
 	    pNum++;
+#if TABLE_DRIVEN_MARSHAL
+	    {
+		marshalIndex_t      index = UnmarshalArray[dType];
+		index |= (type & 0x80) ? NULL_FLAG : 0;
+		result = Unmarshal(index, &commandIn[offset], &command->parameterBuffer,
+				   &command->parameterSize);
+	    }
+#else
 	    if(dType < PARAMETER_FIRST_FLAG_TYPE)
 		{
 		    NoFlagFunction      *f = (NoFlagFunction *)UnmarshalArray[dType];
@@ -302,6 +321,7 @@ CommandDispatcher(
 			       &command->parameterSize,
 			       (type & 0x80) != 0);
 		}
+#endif
 	    if(result != TPM_RC_SUCCESS)
 		{
 		    result += TPM_RC_P + (TPM_RC_1 * pNum);
@@ -369,9 +389,16 @@ CommandDispatcher(
     for(;(dType = (type & 0x7F)) <= RESPONSE_PARAMETER_LAST_TYPE
 	    && !g_inFailureMode; type = *types++)
 	{
+#if TABLE_DRIVEN_MARSHAL
+	    marshalIndex_t      index = MarshalArray[dType];
+	    command->parameterSize += Marshal(index, &commandOut[offset],
+					      &command->responseBuffer,
+					      &maxOutSize);
+#else
 	    const MARSHAL_t     f = MarshalArray[dType];
 	    command->parameterSize += f(&commandOut[offset], &command->responseBuffer,
 					&maxOutSize);
+#endif
 	    offset = *offsets++;
 	}
     result = (maxOutSize < 0) ? TPM_RC_FAILURE : TPM_RC_SUCCESS;
