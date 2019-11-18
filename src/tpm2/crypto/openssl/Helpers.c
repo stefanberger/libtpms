@@ -195,8 +195,40 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 #endif
 
 #if ALG_CAMELLIA
-#error Missing implementation of EVP for Camellia
     case TPM_ALG_CAMELLIA:
+        *keyToUseLen = keySizeInBytes;
+        switch (mode) {
+#if ALG_CTR
+        case ALG_CTR_VALUE:
+            evpfn = (evpfunc []){EVP_camellia_128_ctr, EVP_camellia_192_ctr,
+                                 EVP_camellia_256_ctr}[i];
+            break;
+#endif
+#if ALG_OFB
+        case ALG_OFB_VALUE:
+            evpfn = (evpfunc[]){EVP_camellia_128_ofb, EVP_camellia_192_ofb,
+                                EVP_camellia_256_ofb}[i];
+            break;
+#endif
+#if ALG_CBC
+        case ALG_CBC_VALUE:
+            evpfn = (evpfunc[]){EVP_camellia_128_cbc, EVP_camellia_192_cbc,
+                                EVP_camellia_256_cbc}[i];
+            break;
+#endif
+#if ALG_CFB
+        case ALG_CFB_VALUE:
+            evpfn = (evpfunc[]){EVP_camellia_128_cfb, EVP_camellia_192_cfb,
+                                EVP_camellia_256_cfb}[i];
+            break;
+#endif
+#if ALG_ECB
+        case ALG_ECB_VALUE:
+            evpfn = (evpfunc[]){EVP_camellia_128_ecb, EVP_camellia_192_ecb,
+                                EVP_camellia_256_ecb}[i];
+            break;
+#endif
+        }
         break;
 #endif
     }

@@ -863,8 +863,7 @@ TestAlgorithm(
 		    //            case ALG_SM4_VALUE:
 #endif
 #if ALG_CAMELLIA
-		    // no test vectors for camellia
-		    //            case ALG_CAMELLIA_VALUE:
+		  case ALG_CAMELLIA_VALUE:
 #endif
 #if ALG_TDES
                   case ALG_TDES_VALUE:

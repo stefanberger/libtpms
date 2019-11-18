@@ -165,6 +165,7 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	AC_CHECK_LIB([crypto], [EVP_EncryptInit_ex],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_aes_128_cbc],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_des_ede3_cbc],, not_found=1)
+	AC_CHECK_LIB([crypto], [EVP_camellia_128_cbc],, not_found=1)
 	AC_CHECK_LIB([crypto], [DES_random_key],, not_found=1)
 	if test "x$not_found" = "x0"; then
 		use_openssl_functions_symmetric=1

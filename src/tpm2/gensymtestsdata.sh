@@ -38,6 +38,43 @@ function do_aes() {
     done
 }
 
+function do_camellia() {
+    local data="$1"
+    local osslflag="$2"
+
+    for keysize in 128 192 256; do
+        tmp=CAMELLIA_KEY_${keysize}
+        key=$(eval echo \$$tmp)
+        for mode in ecb cbc cfb ofb ctr; do
+            cipher="camellia-${keysize}-${mode}"
+            bs=$((128 / 8))
+            iv=""
+            ivparm=""
+            case $mode in
+            ecb)
+                ;;
+            ctr)
+                v=255
+                for ((c=0; c < bs; c++)); do
+                   iv="$(printf "%02x" $v)${iv}"
+                   v=$((v - 1))
+                done
+                ivparm="-iv ${iv}"
+                ;;
+            *)
+                for ((c=0; c < bs; c++)); do
+                   iv="${iv}$(printf "%02x" $c)"
+                done
+                ivparm="-iv ${iv}"
+                ;;
+            esac
+            echo -n "$cipher: "
+            openssl enc -e -K "${key}" ${ivparm} -${cipher} -in <(echo -en "$data") ${osslflag} | \
+                od -t x1 -w128 -An | \
+                sed -n 's/ \([a-f0-9]\{2\}\)/ 0x\1/pg'
+        done
+    done
+}
 
 function do_tdes() {
     local data="$1"
@@ -99,3 +136,12 @@ echo "----------------"
 echo "---- TDES (short input) -----"
 do_tdes "\x31\x32\x33\x34\x35" "-nopad"
 echo "----------------"
+
+CAMELLIA_KEY_128=${AES_KEY_128}
+CAMELLIA_KEY_192=${AES_KEY_192}
+CAMELLIA_KEY_256=${AES_KEY_256}
+CAMELLIA_DATA_IN=${AES_DATA_IN}
+
+echo "----- CAMELLIA -----"
+do_camellia "${CAMELLIA_DATA_IN}" ""
+echo "--------------------"
