@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptHash.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -131,6 +131,9 @@ typedef union
 #endif
 #if ALG_SHA512
     tpmHashStateSHA512_t       Sha512;
+#endif
+#if ALG_SM3_256
+    tpmHashStateSM3_256_t      Sm3_256;
 #endif
     // Additions for symmetric block cipher MAC
 #if SMAC_IMPLEMENTED

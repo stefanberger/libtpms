@@ -441,7 +441,7 @@
 #define ALG_SM2                         (ALG_YES && ALG_ECC) /* libtpms enabled */
 #endif
 #ifndef ALG_SM3_256
-#define ALG_SM3_256                     ALG_NO
+#define ALG_SM3_256                     ALG_NO      /* libtpms: NO */
 #endif
 #ifndef ALG_SM4
 #define ALG_SM4                         ALG_NO
