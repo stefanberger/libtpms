@@ -3,7 +3,7 @@
 /*			Simple Operations on Big Numbers     			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnMath.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: BnMath.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -168,10 +168,10 @@ BnAdd(
 	}
     pAssert(result->allocated >= n1->size);
     stop = MIN(n1->size, n2->allocated);
-    carry = AddSame(result->d, n1->d, n2->d, stop);
+    carry = (int)AddSame(result->d, n1->d, n2->d, (int)stop);
     if(n1->size > stop)
-	carry = CarryProp(&result->d[stop], &n1->d[stop], n1->size - stop, carry);
-    CarryResolve(result, n1->size, carry);
+	carry = CarryProp(&result->d[stop], &n1->d[stop], (int)(n1->size - stop), carry);
+    CarryResolve(result, (int)n1->size, carry);
     return TRUE;
 }
 /* 10.2.3.3.4 BnAddWord() */
@@ -186,8 +186,8 @@ BnAddWord(
     int              carry;
     //
     carry = (result->d[0] = op->d[0] + word) < word;
-    carry = CarryProp(&result->d[1], &op->d[1], op->size - 1, carry);
-    CarryResolve(result, op->size, carry);
+    carry = CarryProp(&result->d[1], &op->d[1], (int)(op->size - 1), carry);
+    CarryResolve(result, (int)op->size, carry);
     return TRUE;
 }
 /* 10.2.3.3.5 SubSame() */
@@ -242,13 +242,13 @@ BnSub(
       )
 {
     int             borrow;
-    crypt_uword_t   stop = MIN(op1->size, op2->allocated);
+    int             stop = (int)MIN(op1->size, op2->allocated);
     //
     // Make sure that op2 is not obviously larger than op1
     pAssert(op1->size >= op2->size);
     borrow = SubSame(result->d, op1->d, op2->d, stop);
-    if(op1->size > stop)
-	borrow = BorrowProp(&result->d[stop], &op1->d[stop], op1->size - stop,
+    if(op1->size > (crypt_uword_t)stop)
+	borrow = BorrowProp(&result->d[stop], &op1->d[stop], (int)(op1->size - stop),
 			    borrow);
     pAssert(!borrow);
     BnSetTop(result, op1->size);
@@ -268,7 +268,7 @@ BnSubWord(
     pAssert(op->size > 1 || word <= op->d[0]);
     borrow = word > op->d[0];
     result->d[0] = op->d[0] - word;
-    borrow = BorrowProp(&result->d[1], &op->d[1], op->size - 1, borrow);
+    borrow = BorrowProp(&result->d[1], &op->d[1], (int)(op->size - 1), borrow);
     pAssert(!borrow);
     BnSetTop(result, op->size);
     return TRUE;
@@ -292,7 +292,7 @@ BnUnsignedCmp(
     int              i;
     //
     pAssert((op1 != NULL) && (op2 != NULL));
-    retVal = op1->size - op2->size;
+    retVal = (int)(op1->size - op2->size);
     if(retVal == 0)
 	{
 	    for(i = (int)(op1->size - 1); i >= 0; i--)
@@ -379,7 +379,7 @@ BnMsb(
     if(bn != NULL && bn->size > 0)
 	{
 	    int         retVal = Msb(bn->d[bn->size - 1]);
-	    retVal += (bn->size - 1) * RADIX_BITS;
+	    retVal += (int)(bn->size - 1) * RADIX_BITS;
 	    return retVal;
 	}
     else
@@ -426,7 +426,7 @@ BnSetBit(
     // Grow the number if necessary to set the bit.
     while(bn->size <= offset)
 	bn->d[bn->size++] = 0;
-    bn->d[offset] |= (1 << RADIX_MOD(bitNum));
+    bn->d[offset] |= (crypt_uword_t)(1 << RADIX_MOD(bitNum));
     return TRUE;
 }
 /* 10.2.3.3.17 BnTestBit() */
@@ -534,7 +534,7 @@ BnGetRandomBits(
 	{
 	    if(BnFrom2B(n, &large.b) != NULL)
 		{
-		    if(BnMaskBits(n, bits))
+		    if(BnMaskBits(n, (crypt_uword_t)bits))
 			return TRUE;
 		}
 	}

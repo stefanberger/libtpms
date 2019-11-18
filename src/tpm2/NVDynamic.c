@@ -3,7 +3,7 @@
 /*		Dynamic space for user defined NV      				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVDynamic.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: NVDynamic.c 1525 2019-11-18 20:04:03Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -388,7 +388,7 @@ NvRamTestSpaceIndex(
 		    UINT32           size           // IN: size of the data to be added to RAM
 		    )
 {
-    UINT32          remaining = RAM_ORDERLY_END - NvRamGetEnd();
+    UINT32          remaining = (UINT32)(RAM_ORDERLY_END - NvRamGetEnd());
     UINT32          needed = sizeof(NV_RAM_HEADER) + size;
     // NvRamGetEnd points to the next available byte.
     return remaining >= needed;
@@ -475,7 +475,7 @@ NvDeleteRAM(
     // Get the offset of next node
     nextNode = nodeAddress + size;
     // Copy the data
-    MemoryCopy(nodeAddress, nextNode, lastUsed - nextNode);
+    MemoryCopy(nodeAddress, nextNode, (int)(lastUsed - nextNode));
     // Clear out the reclaimed space
     MemorySet(lastUsed - size, 0, size);
     // Write reserved RAM space to NV to reflect the newly delete NV Index
@@ -1594,7 +1594,7 @@ NvCapGetCounterAvail(
 		availNVSpace -= reserved;
 	}
     // Compute the available space in RAM
-    availRAMSpace = RAM_ORDERLY_END - NvRamGetEnd();
+    availRAMSpace = (RAM_ORDERLY_END - NvRamGetEnd());	/* kgold - removed cast */
     // Return the min of counter number in NV and in RAM
     if(availNVSpace / NV_INDEX_COUNTER_SIZE
        > availRAMSpace / NV_RAM_INDEX_COUNTER_SIZE)
