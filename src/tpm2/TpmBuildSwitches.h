@@ -129,7 +129,7 @@
     || (( LIBRARY_COMPATIBILITY_CHECK != NO)				\
 	&& (LIBRARY_COMPATIBILITY_CHECK != YES))
 #   undef   LIBRARY_COMPATIBILITY_CHECK
-#   define  LIBRARY_COMPATIBILITY_CHECK     YES     // Default: Either YES or NO  libtpms: YES
+#   define  LIBRARY_COMPATIBILITY_CHECK YES     // Default: Either YES or NO  libtpms: YES
 #endif
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
 #   undef   FIPS_COMPLIANT
@@ -271,7 +271,7 @@
 #   if !(defined RUNTIME_SIZE_CHECKS)					\
     || ((RUNTIME_SIZE_CHECKS != NO) && (RUNTIME_SIZE_CHECKS != YES))
 #       undef RUNTIME_SIZE_CHECKS
-#       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO
+#       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO  libtpms: NO
 #   endif
 
 // If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
@@ -337,6 +337,11 @@
 #   define  CERTIFYX509_DEBUG NO               // libtpms: NO
 #endif
 
+#if !(defined TABLE_DRIVEN_MARSHAL)					\
+    || ((TABLE_DRIVEN_MARSHAL != NO) && (TABLE_DRIVEN_MARSHAL != YES))
+#   undef   TABLE_DRIVEN_MARSHAL
+#   define  TABLE_DRIVEN_MARSHAL NO    // Default: Either YES or NO  libtpms: NO
+#endif
 
 /* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
    algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
