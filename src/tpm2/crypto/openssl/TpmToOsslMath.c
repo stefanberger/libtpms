@@ -546,65 +546,85 @@ EcPointInitialized(
 /* NULL the TPM_ECC_CURVE is not valid */
 /* non-NULL points to a structure in groupContext */
 
-bigCurve
+LIB_EXPORT bigCurve
 BnCurveInitialize(
 		  bigCurve          E,           // IN: curve structure to initialize
 		  TPM_ECC_CURVE     curveId      // IN: curve identifier
 		  )
 {
-    EC_GROUP                *group = NULL;
-    EC_POINT                *P = NULL;
     const ECC_CURVE_DATA    *C = GetCurveData(curveId);
-    BN_CTX                  *CTX = NULL;
-    BIG_INITIALIZED(bnP, C != NULL ? C->prime : NULL);
-    BIG_INITIALIZED(bnA, C != NULL ? C->a : NULL);
-    BIG_INITIALIZED(bnB, C != NULL ? C->b : NULL);
-    BIG_INITIALIZED(bnX, C != NULL ? C->base.x : NULL);
-    BIG_INITIALIZED(bnY, C != NULL ? C->base.y : NULL);
-    BIG_INITIALIZED(bnN, C != NULL ? C->order : NULL);
-    BIG_INITIALIZED(bnH, C != NULL ? C->h : NULL);
-    int                      OK = (C != NULL);
-    //
-    OK = OK && ((CTX = OsslContextEnter()) != NULL);
-    // initialize EC group, associate a generator point and initialize the point
-    // from the parameter data
-    // Create a group structure
-    OK = OK && (group = EC_GROUP_new_curve_GFp(bnP, bnA, bnB, CTX)) != NULL;
-    // Allocate a point in the group that will be used in setting the
-    // generator. This is not needed after the generator is set.
-    OK = OK && ((P = EC_POINT_new(group)) != NULL);
-    // Need to use this in case Montgomery method is being used
-    OK = OK
+    if(C == NULL)
+	E = NULL;
+    if(E != NULL)
+	{
+	    // This creates the OpenSSL memory context that stays in effect as long as the
+	    // curve (E) is defined.
+	    OSSL_ENTER();                       // if the allocation fails, the TPM fails
+	    EC_POINT                *P = NULL;
+	    BIG_INITIALIZED(bnP, C->prime);
+	    BIG_INITIALIZED(bnA, C->a);
+	    BIG_INITIALIZED(bnB, C->b);
+	    BIG_INITIALIZED(bnX, C->base.x);
+	    BIG_INITIALIZED(bnY, C->base.y);
+	    BIG_INITIALIZED(bnN, C->order);
+	    BIG_INITIALIZED(bnH, C->h);
+	    //
+	    E->C = C;
+	    E->CTX = CTX;
+	    
+	    // initialize EC group, associate a generator point and initialize the point
+	    // from the parameter data
+	    // Create a group structure
+	    E->G = EC_GROUP_new_curve_GFp(bnP, bnA, bnB, CTX);
+	    VERIFY(E->G != NULL);
+	    
+	    // Allocate a point in the group that will be used in setting the
+	    // generator. This is not needed after the generator is set.
+	    P = EC_POINT_new(E->G);
+	    VERIFY(P != NULL);
+	    
+	    // Need to use this in case Montgomery method is being used
 #if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
-	 && EC_POINT_set_affine_coordinates(group, P, bnX, bnY, CTX);
+	    VERIFY(EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, CTX));
 #else
-	 && EC_POINT_set_affine_coordinates_GFp(group, P, bnX, bnY, CTX);
+	    VERIFY(EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
 #endif
-    // Now set the generator
-    OK = OK && EC_GROUP_set_generator(group, P, bnN, bnH);
-    if(P != NULL)
-	EC_POINT_clear_free(P);
-    if(!OK && group != NULL)
-	{
-	    EC_GROUP_free(group);
-	    group = NULL;
+	    // Now set the generator
+	    VERIFY(EC_GROUP_set_generator(E->G, P, bnN, bnH));
+	    
+	    EC_POINT_free(P);
+	    goto Exit_free;  // libtpms changed
+	Error:
+	    EC_POINT_free(P);
+	    BnCurveFree(E);
+	    E = NULL;
+
+ Exit_free:			// libtpms added begin
+	    BN_clear_free(bnH);
+	    BN_clear_free(bnN);
+	    BN_clear_free(bnY);
+	    BN_clear_free(bnX);
+	    BN_clear_free(bnB);
+	    BN_clear_free(bnA);
+	    BN_clear_free(bnP); // libtpms added end
 	}
-    if(!OK && CTX != NULL)
+// Exit:
+    return E;
+}
+
+/* B.2.3.2.3.15.	BnCurveFree() */
+/* This function will free the allocated components of the curve and end the frame in which the
+   curve data exists */
+LIB_EXPORT void
+BnCurveFree(
+	    bigCurve E
+	    )
+{
+    if(E)
 	{
-	    OsslContextLeave(CTX);
-	    CTX = NULL;
+	    EC_GROUP_free(E->G);
+	    OsslContextLeave(E->CTX);
 	}
-    E->G = group;
-    E->CTX = CTX;
-    E->C = C;
-    BN_clear_free(bnH);
-    BN_clear_free(bnN);
-    BN_clear_free(bnY);
-    BN_clear_free(bnX);
-    BN_clear_free(bnB);
-    BN_clear_free(bnA);
-    BN_clear_free(bnP);
-    return OK ? E : NULL;
 }
 
 /* B.2.3.2.3.11. BnEccModMult() */

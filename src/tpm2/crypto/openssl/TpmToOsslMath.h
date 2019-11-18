@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*	 		TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -143,13 +143,12 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 #define CURVE_INITIALIZED(name, initializer)				\
     OSSL_CURVE_DATA     _##name;					\
     bigCurve            name =  BnCurveInitialize(&_##name, initializer)
-#define CURVE_FREE(E)							\
-    if(E != NULL)							\
-	{								\
-	    if(E->G != NULL)						\
-		EC_GROUP_free(E->G);					\
-	    OsslContextLeave(E->CTX);					\
-	}
+
+#define CURVE_FREE(name)               BnCurveFree(name)
+
+/* Start and end a local stack frame within the context of the curve frame */
+#define ECC_ENTER()     BN_CTX         *CTX = OsslPushContext(E->CTX)
+#define ECC_LEAVE()     OsslPopContext(CTX)
 #define BN_NEW()        BnNewVariable(CTX)
 
 
