@@ -63,8 +63,7 @@
 /* 8.4.2 Includes, Defines and Data Definitions */
 #define NV_C
 #include "Tpm.h"
-#include "PlatformData.h"
-#include "NVDynamic_fp.h"  /* libtpms added */
+
 /* 8.4.3 Local Functions */
 /* 8.4.3.1 NvNext() */
 /* This function provides a method to traverse every data entry in NV dynamic area. */
