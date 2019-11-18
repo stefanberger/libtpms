@@ -46,6 +46,8 @@
 /* prototypes */
 
 void TPM_PrintFour(const char *string, const unsigned char* buff);
+void TPM_PrintFourLimit(const char *string,
+                        const unsigned char* buff, size_t bufflen);
 void TPM_PrintAll(const char *string, const unsigned char* buff, uint32_t length);
 
 #if 0
