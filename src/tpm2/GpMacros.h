@@ -129,6 +129,8 @@
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
 #define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
 #define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
+#define RSA_MAX_PRIME           (MAX_RSA_KEY_BYTES / 2)
+#define RSA_PRIVATE_SIZE        (RSA_MAX_PRIME * 5)
 
 /* This was wrong in rev 155, but is not used anyway because of the protector.  The correct value is
    in TpmProfile.h, which is included before GpMacros.h */

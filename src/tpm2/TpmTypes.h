@@ -1922,7 +1922,7 @@ typedef  TPM_KEY_BITS       TPMI_RSA_KEY_BITS;
 typedef union {
     struct {
 	UINT16                  size;
-	BYTE                    buffer[MAX_RSA_KEY_BYTES/2];
+	BYTE                    buffer[RSA_PRIVATE_SIZE];
     }            t;
     TPM2B        b;
 } TPM2B_PRIVATE_KEY_RSA;
