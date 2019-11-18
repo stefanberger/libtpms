@@ -654,7 +654,7 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
     if (rc == 0) {
         printf("  TPM_RSAPrivateDecrypt: RSA_padding_check_PKCS1 recovered %d bytes\n",
 	       *decrypt_data_length);
-        TPM_PrintFour("  TPM_RSAPrivateDecrypt: Decrypt data", decrypt_data);
+        TPM_PrintFourLimit("  TPM_RSAPrivateDecrypt: Decrypt data", decrypt_data, decrypt_data_size);
     }
     PORT_FreeArena(rsa_pri_key.arena, PR_TRUE);	/* @1 */
     free(padded_data);                  	/* @2 */
@@ -772,7 +772,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     if (rc == 0) {
         TPM_PrintFour("  TPM_RSAPublicEncryptRaw: Public modulus", narr);
         TPM_PrintAll("  TPM_RSAPublicEncryptRaw: Public exponent", earr, ebytes);
-        TPM_PrintFour("  TPM_RSAPublicEncryptRaw: Decrypt data", decrypt_data);
+        TPM_PrintFourLimit("  TPM_RSAPublicEncryptRaw: Decrypt data", decrypt_data, decrypt_data_size);
         /* raw public key operation, encrypt the decrypt_data */
 	rv = RSA_PublicKeyOp(&rsa_pub_key,	/* freebl public key token */
 			     encrypt_data,      /* output - the encrypted data */
@@ -941,7 +941,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
     if (rc == 0) {
         printf("  TPM_RSASignDER: Applying PKCS1 type 1 padding, size from %lu to %u\n",
                (unsigned long)message_size, rsa_pri_key->modulus.len);
-        TPM_PrintFour("  TPM_RSASignDER: Input message", message);
+        TPM_PrintFourLimit("  TPM_RSASignDER: Input message", message, message_size);
         /* This call checks that the message will fit with the padding */
 	rc = TPM_PKCS1_PaddingType1Add(message_pad,         		/* to */
 				       rsa_pri_key->modulus.len,	/* to length */
@@ -1028,8 +1028,8 @@ TPM_RESULT TPM_RSAVerifySHA1(unsigned char *signature,          /* input */
 	irc = memcmp(message, padded_data + padLength, message_size);
 	if (irc != 0) {
 	    printf("TPM_RSAVerifySHA1: Error, message mismatch\n");
-	    TPM_PrintFour(" TPM_RSAVerifySHA1: message", message);
-	    TPM_PrintFour(" TPM_RSAVerifySHA1: message from signature", padded_data + padLength);
+	    TPM_PrintFourLimit(" TPM_RSAVerifySHA1: message", message, message_size);
+	    TPM_PrintFourLimit(" TPM_RSAVerifySHA1: message from signature", padded_data + padLength, message_size);
 	    rc = TPM_BAD_SIGNATURE;
 	}
     }
