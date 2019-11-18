@@ -650,7 +650,7 @@ static TPM_RESULT TPM_SealCryptCommon(BYTE **o1,	/* freed by caller */
 	rc = TPM_Malloc(o1, inData->size);	/* freed by caller */
     }
     if (rc == TPM_SUCCESS) {
-	TPM_PrintFour("  TPM_SealCryptCommon: input data", inData->buffer);
+	TPM_PrintFourLimit("  TPM_SealCryptCommon: input data", inData->buffer, inData->size);
     }
     switch (adipEncScheme) {
       case TPM_ET_XOR:
@@ -1227,7 +1227,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     }	
     if (returnCode == TPM_SUCCESS) {
 	printf("TPM_Process_Sealx: Sealing %u bytes\n", inData.size);
-	TPM_PrintFour("TPM_Process_Sealx: Sealing data", inData.buffer);
+	TPM_PrintFourLimit("TPM_Process_Sealx: Sealing data", inData.buffer, inData.size);
     }	
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;

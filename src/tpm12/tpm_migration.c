@@ -844,9 +844,9 @@ TPM_RESULT TPM_CreateBlobCommon(TPM_SIZED_BUFFER *outData,	/* The modified, encr
     }
     /* e. Create x1 by XOR of o1 with r1 */
     if (rc == 0) {
-	TPM_PrintFour("TPM_CreateBlobCommon: r1 -", r1);
+	TPM_PrintFourLimit("TPM_CreateBlobCommon: r1 -", r1, o1_size);
 	TPM_XOR(x1, o1, r1, o1_size);
-	TPM_PrintFour("TPM_CreateBlobCommon: x1 -", x1);
+	TPM_PrintFourLimit("TPM_CreateBlobCommon: x1 -", x1, o1_size);
 	/* f. Copy r1 into the output field "random".*/
 	rc = TPM_SizedBuffer_Set(random, o1_size, r1);
     }
@@ -1513,7 +1513,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     /* 3. Create d1 by decrypting the inData area using the key in parentHandle */
     if (returnCode == TPM_SUCCESS) {
 	printf("TPM_Process_ConvertMigrationBlob: Decrypting inData\n");
-	TPM_PrintFour("TPM_Process_ConvertMigrationBlob: inData", inData.buffer);
+	TPM_PrintFourLimit("TPM_Process_ConvertMigrationBlob: inData", inData.buffer, inData.size);
 	returnCode = TPM_RSAPrivateDecryptMalloc(&d1Decrypt,		/* decrypted data */
 						 &d1DecryptLength,	/* actual size of d1 data */
 						 inData.buffer,		/* encrypted data */
@@ -1535,7 +1535,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	printf("TPM_Process_ConvertMigrationBlob: d1 length %u\n", d1DecryptLength);
-	TPM_PrintFour("TPM_Process_ConvertMigrationBlob: d1 -", d1Decrypt);
+	TPM_PrintFourLimit("TPM_Process_ConvertMigrationBlob: d1 -", d1Decrypt, d1DecryptLength);
 	/* 4. Create o1 by XOR d1 and random parameter */
 	TPM_XOR(o1Oaep, d1Decrypt, random.buffer, d1DecryptLength);
 	/* 5. Create m1 a TPM_MIGRATE_ASYMKEY structure, seed and pHash by OAEP decoding o1 */

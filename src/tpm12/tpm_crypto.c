@@ -649,7 +649,7 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
     if (rc == 0) {
         *decrypt_data_length = irc;
         printf("  TPM_RSAPrivateDecrypt: RSA_padding_check_PKCS1_OAEP() recovered %d bytes\n", irc);
-        TPM_PrintFour("  TPM_RSAPrivateDecrypt: Decrypt data", decrypt_data);
+        TPM_PrintFourLimit("  TPM_RSAPrivateDecrypt: Decrypt data", decrypt_data, *decrypt_data_length);
     }
     if (rsa_pri_key != NULL) {
         RSA_free(rsa_pri_key);          /* @1 */
@@ -798,7 +798,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     if (rc == 0) {
         TPM_PrintFour("  TPM_RSAPublicEncryptRaw: Public modulus", narr);
         TPM_PrintAll("  TPM_RSAPublicEncryptRaw: Public exponent", earr, ebytes);
-        TPM_PrintFour("  TPM_RSAPublicEncryptRaw: Decrypt data", decrypt_data);
+        TPM_PrintFourLimit("  TPM_RSAPublicEncryptRaw: Decrypt data", decrypt_data, decrypt_data_size);
         /* encrypt the decrypt_data */
         irc = RSA_public_encrypt(decrypt_data_size,      	/* from length */
                                  decrypt_data,     	/* from - the clear text data */
@@ -981,7 +981,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
     if (rc == 0) {
         printf("  TPM_RSASignDER: Applying PKCS1 type 1 padding, size from %lu to %u\n",
                (unsigned long)message_size, key_size);
-        TPM_PrintFour("  TPM_RSASignDER: Input message", message);
+        TPM_PrintFourLimit("  TPM_RSASignDER: Input message", message, message_size);
         /* This call checks that the message will fit with the padding */
         irc = RSA_padding_add_PKCS1_type_1(message_pad,         /* to */
                                            key_size,
@@ -2319,7 +2319,7 @@ static TPM_RESULT TPM_SymmetricKeyData_Crypt(unsigned char *data_out,           
     }
     /* initialize initial chaining vector */
     if (rc == 0) {
-        TPM_PrintFour("  TPM_SymmetricKeyData_Crypt: Input", data_in);
+        TPM_PrintFourLimit("  TPM_SymmetricKeyData_Crypt: Input", data_in, length);
         /* encrypt operation */
         memset(&ivec, 0, sizeof(DES_cblock));
         DES_ede3_cbc_encrypt(data_in,

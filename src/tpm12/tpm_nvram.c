@@ -1537,8 +1537,8 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	    }
 	    /* c. Set data to area pointed to by offset */
 	    if ((returnCode == TPM_SUCCESS) && !isGPIO) {
-		TPM_PrintFour("TPM_Process_NVReadValue: read data",
-			      d1NvdataSensitive->data + offset);
+		TPM_PrintFourLimit("TPM_Process_NVReadValue: read data",
+			      d1NvdataSensitive->data + offset, dataSize);
 		returnCode = TPM_SizedBuffer_Set(&data,
 						 dataSize, d1NvdataSensitive->data + offset);
 	    }
@@ -1861,8 +1861,8 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 	    }
 	    /* c. Set data to area pointed to by offset */
 	    if ((returnCode == TPM_SUCCESS) && !isGPIO) {
-		TPM_PrintFour("TPM_Process_NVReadValueAuth: read data",
-			      d1NvdataSensitive->data + offset);
+		TPM_PrintFourLimit("TPM_Process_NVReadValueAuth: read data",
+			      d1NvdataSensitive->data + offset, dataSize);
 		returnCode = TPM_SizedBuffer_Set(&data, dataSize, d1NvdataSensitive->data + offset);
 	    }
 	    /* GPIO */
@@ -2078,7 +2078,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	printf("TPM_Process_NVWriteValue: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, data.size);
-	TPM_PrintFour("TPM_Process_NVWriteValue: data", data.buffer);
+	TPM_PrintFourLimit("TPM_Process_NVWriteValue: data", data.buffer, data.size);
 	/* 1. If TPM_PERMANENT_FLAGS -> nvLocked is FALSE then all authorization checks except for
 	   the max NV writes are ignored */
 	/* a. Ignored checks include physical presence, owner authorization, TPM_NV_PER_OWNERWRITE,
@@ -2569,7 +2569,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	printf("TPM_Process_NVWriteValueAuth: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, data.size);
-	TPM_PrintFour("TPM_Process_NVWriteValueAuth: data", data.buffer);
+	TPM_PrintFourLimit("TPM_Process_NVWriteValueAuth: data", data.buffer, data.size);
 	printf("TPM_Process_NVWriteValueAuth: Loading data from NVRAM\n");
 	returnCode = TPM_NVIndexEntries_GetEntry(&d1NvdataSensitive,
 						 &(tpm_state->tpm_nv_index_entries),
