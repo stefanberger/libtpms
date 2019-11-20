@@ -310,7 +310,7 @@ TestSymmetric(
 				mode <= TPM_SYM_MODE_LAST;
 				mode++)
 				{
-				    if(TEST_BIT(mode, *toTest))
+				    if(TEST_BIT(mode, g_implementedAlgorithms)) // libtpms always test implemented modes
 					TestSymmetricAlgorithm(&c_symTestValues[index], mode);
 				}
 			}
