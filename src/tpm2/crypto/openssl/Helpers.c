@@ -184,13 +184,16 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
             evpfn = (evpfunc[]){EVP_des_ede3_ecb, EVP_des_ede3_ecb, NULL}[i];
             break;
 #endif
-	}
+        }
+        break;
 #endif
+
 #if ALG_SM4
 #error Missing implementation of EVP for SM4
     case TPM_ALG_SM4:
         break;
 #endif
+
 #if ALG_CAMELLIA
 #error Missing implementation of EVP for Camellia
     case TPM_ALG_CAMELLIA:
