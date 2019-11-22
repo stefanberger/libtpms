@@ -444,7 +444,7 @@
 #define ALG_SM3_256                     ALG_NO      /* libtpms: NO */
 #endif
 #ifndef ALG_SM4
-#define ALG_SM4                         ALG_NO
+#define ALG_SM4                         ALG_NO      /* libtpms: NO */
 #endif
 #ifndef ALG_SYMCIPHER
 #define ALG_SYMCIPHER                   ALG_YES

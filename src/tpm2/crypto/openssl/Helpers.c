@@ -189,8 +189,35 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 #endif
 
 #if ALG_SM4
-#error Missing implementation of EVP for SM4
     case TPM_ALG_SM4:
+        *keyToUseLen = keySizeInBytes;
+        switch (mode) {
+#if ALG_CTR
+        case ALG_CTR_VALUE:
+            evpfn = (evpfunc[]){EVP_sm4_ctr, NULL, NULL}[i];
+            break;
+#endif
+#if ALG_OFB
+        case ALG_OFB_VALUE:
+            evpfn = (evpfunc[]){EVP_sm4_ofb, NULL, NULL}[i];
+            break;
+#endif
+#if ALG_CBC
+        case ALG_CBC_VALUE:
+            evpfn = (evpfunc[]){EVP_sm4_cbc, NULL, NULL}[i];
+            break;
+#endif
+#if ALG_CFB
+        case ALG_CFB_VALUE:
+            evpfn = (evpfunc[]){EVP_sm4_cfb, NULL, NULL}[i];
+            break;
+#endif
+#if ALG_ECB
+        case ALG_ECB_VALUE:
+            evpfn = (evpfunc[]){EVP_sm4_ecb, NULL, NULL}[i];
+            break;
+#endif
+        }
         break;
 #endif
 
