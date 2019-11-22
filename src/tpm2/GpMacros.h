@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1509 2019-10-07 19:10:05Z kgoldman $		*/
+/*            $Id: GpMacros.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -132,12 +132,6 @@
 #define RSA_MAX_PRIME           (MAX_RSA_KEY_BYTES / 2)
 #define RSA_PRIVATE_SIZE        (RSA_MAX_PRIME * 5)
 
-/* This was wrong in rev 155, but is not used anyway because of the protector.  The correct value is
-   in TpmProfile.h, which is included before GpMacros.h */
-#ifndef PRIVATE_VENDOR_SPECIFIC_BYTES
-#define PRIVATE_VENDOR_SPECIFIC_BYTES		\
-    (MAX_RSA_KEY_BYTES/2)
-#endif
 /* 5.10.5	Compile-time Checks */
 /* In some cases, the relationship between two values may be dependent on things that change based
    on various selections like the chosen cryptographic libraries. It is possible that these
