@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -71,6 +71,9 @@
 #define SYM_LIB_OSSL
 #include <openssl/aes.h>
 #include <openssl/des.h>
+#if ALG_SM4			/* kgold */
+#include <openssl/sm4.h>
+#endif
 #include <openssl/camellia.h>
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
@@ -132,9 +135,18 @@ typedef void(*TpmCryptSetSymKeyCall_t)(
 #include "TpmToOsslDesSupport_fp.h"
 #endif        // libtpms added end
 
-#if ALG_SM4
-#error "SM4 is not available"
-#endif
+/* B.2.2.3.5.	Links to the OpenSSL SM4 code */
+/* Macros to set up the encryption/decryption key schedules */
+
+#define TpmCryptSetEncryptKeySM4(key, keySizeInBits, schedule)	\
+    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
+#define TpmCryptSetDecryptKeySM4(key, keySizeInBits, schedule)	\
+    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
+/* Macros to alias encryption calls to specific algorithms. This should be used sparingly. */
+
+#define TpmCryptEncryptSM4          SM4_encrypt
+#define TpmCryptDecryptSM4          SM4_decrypt
+#define tpmKeyScheduleSM4           SM4_KEY
 
 /* B.2.2.3.6.	Links to the OpenSSL CAMELLIA code */
 /* Macros to set up the encryption/decryption key schedules */
