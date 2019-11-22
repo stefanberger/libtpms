@@ -96,10 +96,6 @@ struct bignum_st {
 /* B.2.2.2.2. Macros and Defines */
 /* Make sure that the library is using the correct size for a crypt word */
 
-#if !(defined THIRTY_TWO_BIT || defined SIXTY_FOUR_BIT || defined SIXTY_FOUR_BIT_LONG)
-#error "No architecture found"
-#endif
-
 #if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
     || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT)		\
 	&& (RADIX_BITS != 64))
