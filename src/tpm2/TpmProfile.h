@@ -155,6 +155,14 @@
 #ifndef RH_ACT_A
 #define RH_ACT_A                        NO  /* libtpms: no */
 #endif
+// libtpms added begin
+#if RH_ACT_0 + RH_ACT_1 + RH_ACT_2 + RH_ACT_3 + RH_ACT_4 + \
+    RH_ACT_1 + RH_ACT_5 + RH_ACT_6 + RH_ACT_7 + RH_ACT_8 + \
+    RH_ACT_9 + RH_ACT_A + RH_ACT_B + RH_ACT_C + RH_ACT_D + \
+    RH_ACT_E + RH_ACT_F == 0
+#define __ACT_DISABLED
+#endif
+// libtpms added end
 
 // Table 0:7 - Defines for Implementation Values
 #ifndef FIELD_UPGRADE_IMPLEMENTED
