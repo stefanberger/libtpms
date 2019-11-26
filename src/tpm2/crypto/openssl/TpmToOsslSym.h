@@ -96,6 +96,8 @@ typedef void(*TpmCryptSetSymKeyCall_t)(
 				       void *keySchedule
 				       );
 
+#define SYM_ALIGNMENT   4 /* libtpms: keep old value */
+
 /* B.2.2.3.3.	Links to the OpenSSL AES code */
 /* Macros to set up the encryption/decryption key schedules */
 
