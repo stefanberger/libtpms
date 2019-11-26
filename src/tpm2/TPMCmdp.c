@@ -3,7 +3,7 @@
 /*			  Process the commands    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TPMCmdp.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TPMCmdp.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -75,6 +75,7 @@
 #include <winsock.h>
 #endif
 #include "Platform_fp.h"
+#include "PlatformACT_fp.h"
 #include "ExecCommand_fp.h"
 #include "Manufacture_fp.h"
 #include "_TPM_Init_fp.h"
@@ -313,6 +314,22 @@ _rpc__RsaKeyCacheControl(
 #else
     NOT_REFERENCED(state);
 #endif
+}
+
+#define TPM_RH_ACT_0        0x40000110
+
+/* D.4.2.15.	_rpc__ACT_GetSignaled() */
+/* This function is used to count the ACT second tick. */
+BOOL
+_rpc__ACT_GetSignaled(
+		      UINT32 actHandle
+		      )
+{
+    // If TPM power is on
+    if (s_isPowerOn)
+	// Query the platform
+	return _plat__ACT_GetSignaled(actHandle - TPM_RH_ACT_0);
+    return FALSE;
 }
 #endif /* libtpms added */
 

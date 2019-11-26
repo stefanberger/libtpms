@@ -3,7 +3,7 @@
 /*			 Platform Power Support    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PowerPlat.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: PowerPlat.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,6 +62,7 @@
 /* C.7 PowerPlat.c */
 /* C.7.1. Includes and Function Prototypes */
 #include    "Platform.h"
+#include    "PlatformACT_fp.h"		/* added kgold */
 #include    "_TPM_Init_fp.h"
 /* C.7.2. Functions */
 /* C.7.2.1. _plat__Signal_PowerOn() */
@@ -121,5 +122,7 @@ _plat__Signal_PowerOff(
 {
     // Prepare NV memory for power off
     _plat__NVDisable(0);
+    // Disable tick ACT tick processing
+    _plat__ACT_EnableTicks(FALSE);
     return;
 }
