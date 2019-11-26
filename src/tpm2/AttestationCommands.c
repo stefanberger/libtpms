@@ -3,7 +3,7 @@
 /*			   Attestation Commands  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AttestationCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: AttestationCommands.c 1529 2019-11-21 23:29:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -312,6 +312,7 @@ TPM2_GetTime(
 #include "TpmAsn1_fp.h"
 #include "X509_spt_fp.h"
 #include "Attest_spt_fp.h"
+#include "Platform_fp.h"
 #if CC_CertifyX509 // Conditional expansion of this file
 #if CERTIFYX509_DEBUG
 #include "DebugHelpers_fp.h"
