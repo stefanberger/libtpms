@@ -3,7 +3,7 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
+/*            $Id: Clock.c 1529 2019-11-21 23:29:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -278,12 +278,12 @@ _plat__TimerRead(
 /* C.3.4.3. _plat__TimerWasReset() */
 /* This function is used to interrogate the flag indicating if the tick timer has been reset. */
 /* If the resetFlag parameter is SET, then the flag will be CLEAR before the function returns. */
-LIB_EXPORT BOOL
+LIB_EXPORT int
 _plat__TimerWasReset(
 		     void
 		     )
 {
-    BOOL         retVal = s_timerReset;
+    int retVal = s_timerReset;
     s_timerReset = FALSE;
     return retVal;
 }
@@ -295,7 +295,7 @@ _plat__TimerWasReset(
    it is the one that has the most impact on the TPM code as the flag can only be accessed by one
    entity in the TPM. Any other implementation of the hardware can be made to look like a read-once
    register. */
-LIB_EXPORT BOOL
+LIB_EXPORT int
 _plat__TimerWasStopped(
 		       void
 		       )
