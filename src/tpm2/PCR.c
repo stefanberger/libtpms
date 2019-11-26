@@ -3,7 +3,7 @@
 /*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
+/*            $Id: PCR.c 1529 2019-11-21 23:29:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -91,8 +91,8 @@ static const PCR_Attributes s_initAttributes[] =
 	{0, 0x0F, 0x1F},        // PCR 23, Application specific
 	{0, 0x0F, 0x1F}         // PCR 24, testing policy
     };
-/* 8.7.3 Functions */
-/* 8.7.3.1 PCRBelongsAuthGroup() */
+/* 8.7.2 Functions */
+/* 8.7.2.1 PCRBelongsAuthGroup() */
 /* This function indicates if a PCR belongs to a group that requires an authValue in order to modify
    the PCR.  If it does, groupIndex is set to value of the group index.  This feature of PCR is
    decided by the platform specification. */
@@ -123,13 +123,13 @@ PCRBelongsAuthGroup(
 #endif
     return FALSE;
 }
-/* 8.7.3.2 PCRBelongsPolicyGroup() */
+/* 8.7.2.2 PCRBelongsPolicyGroup() */
 /* This function indicates if a PCR belongs to a group that requires a policy authorization in order
    to modify the PCR.  If it does, groupIndex is set to value of the group index.  This feature of
    PCR is decided by the platform specification. */
 /* Return Values Meaning */
-/* TRUE: PCR belongs a policy group */
-/* FALSE: PCR does not belong a policy group */
+/* TRUE: PCR belongs to a policy group */
+/* FALSE: PCR does not belong to a policy group */
 BOOL
 PCRBelongsPolicyGroup(
 		      TPMI_DH_PCR      handle,        // IN: handle of PCR
@@ -152,11 +152,11 @@ PCRBelongsPolicyGroup(
 #endif
     return FALSE;
 }
-/* 8.7.3.3 PCRBelongsTCBGroup() */
+/* 8.7.2.3 PCRBelongsTCBGroup() */
 /* This function indicates if a PCR belongs to the TCB group. */
 /* Return Values Meaning */
-/* TRUE: PCR belongs to TCB group */
-/* FALSE: PCR does not belong to TCB group */
+/* TRUE: PCR belongs to a TCB group */
+/* FALSE: PCR does not belong to a TCB group */
 static BOOL
 PCRBelongsTCBGroup(
 		   TPMI_DH_PCR      handle         // IN: handle of PCR
@@ -172,10 +172,10 @@ PCRBelongsTCBGroup(
 #endif
     return FALSE;
 }
-/* 8.7.3.4 PCRPolicyIsAvailable() */
+/* 8.7.2.4 PCRPolicyIsAvailable() */
 /* This function indicates if a policy is available for a PCR. */
 /* Return Values Meaning */
-/* TRUE the PCR should be authorized by policy */
+/* TRUE the PCR may be authorized by policy */
 /* FALSE the PCR does not allow policy */
 BOOL
 PCRPolicyIsAvailable(
@@ -185,7 +185,7 @@ PCRPolicyIsAvailable(
     UINT32          groupIndex;
     return PCRBelongsPolicyGroup(handle, &groupIndex);
 }
-/* 8.7.3.5 PCRGetAuthValue() */
+/* 8.7.2.5 PCRGetAuthValue() */
 /* This function is used to access the authValue of a PCR.  If PCR does not belong to an authValue
    group, an EmptyAuth() will be returned. */
 TPM2B_AUTH *
@@ -203,7 +203,7 @@ PCRGetAuthValue(
 	    return NULL;
 	}
 }
-/* 8.7.3.6 PCRGetAuthPolicy() */
+/* 8.7.2.6 PCRGetAuthPolicy() */
 /* This function is used to access the authorization policy of a PCR. It sets policy to the
    authorization policy and returns the hash algorithm for policy If the PCR does not allow a
    policy, TPM_ALG_NULL is returned. */
@@ -225,7 +225,7 @@ PCRGetAuthPolicy(
 	    return TPM_ALG_NULL;
 	}
 }
-/* 8.7.3.7 PCRSimStart() */
+/* 8.7.2.7 PCRSimStart() */
 /* This function is used to initialize the policies when a TPM is manufactured. This function would
    only be called in a manufacturing environment or in a TPM simulator. */
 void
@@ -266,7 +266,7 @@ PCRSimStart(
     NV_SYNC_PERSISTENT(pcrAllocated);
     return;
 }
-/* 8.7.3.8 GetSavedPcrPointer() */
+/* 8.7.2.8 GetSavedPcrPointer() */
 /* This function returns the address of an array of state saved PCR based on the hash algorithm. */
 /* Return Values Meaning */
 /* NULL no such algorithm */
@@ -310,7 +310,7 @@ GetSavedPcrPointer(
 	}
     return retVal;
 }
-/* 8.7.3.9 PcrIsAllocated() */
+/* 8.7.2.9 PcrIsAllocated() */
 /* This function indicates if a PCR number for the particular hash algorithm is allocated. */
 /* Return Values Meaning */
 /* FALSE PCR is not allocated */
@@ -340,7 +340,7 @@ PcrIsAllocated(
 	}
     return allocated;
 }
-/* 8.7.3.10 GetPcrPointer() */
+/* 8.7.2.10 GetPcrPointer() */
 /* This function returns the address of an array of PCR based on the hash algorithm. */
 /* Return Values Meaning */
 /* NULL no such algorithm */
@@ -387,7 +387,7 @@ GetPcrPointer(
 	}
     return pcr;
 }
-/* 8.7.3.11 IsPcrSelected() */
+/* 8.7.2.11 IsPcrSelected() */
 /* This function indicates if an indicated PCR number is selected by the bit map in selection. */
 /* Return Values Meaning */
 /* FALSE PCR is not selected */
@@ -403,7 +403,7 @@ IsPcrSelected(
 		&& ((selection->pcrSelect[pcr / 8]) & (1 << (pcr % 8))) != 0);
     return selected;
 }
-/* 8.7.3.12 FilterPcr() */
+/* 8.7.2.12 FilterPcr() */
 /* This function modifies a PCR selection array based on the implemented PCR. */
 static void
 FilterPcr(
@@ -436,7 +436,7 @@ FilterPcr(
 	}
     return;
 }
-/* 8.7.3.13 PcrDrtm() */
+/* 8.7.2.13 PcrDrtm() */
 /* This function does the DRTM and H-CRTM processing it is called from _TPM_Hash_End(). */
 void
 PcrDrtm(
@@ -460,7 +460,7 @@ PcrDrtm(
 	    PCRExtend(pcrHandle, hash, digest->t.size, (BYTE *)digest->t.buffer);
 	}
 }
-/* 8.7.3.14 PCR_ClearAuth() */
+/* 8.7.2.14 PCR_ClearAuth() */
 /* This function is used to reset the PCR authorization values. It is called on TPM2_Startup(CLEAR)
    and TPM2_Clear(). */
 void
@@ -476,7 +476,7 @@ PCR_ClearAuth(
 	}
 #endif
 }
-/* 8.7.3.15 PCRStartup() */
+/* 8.7.2.15 PCRStartup() */
 /* This function initializes the PCR subsystem at TPM2_Startup(). */
 BOOL
 PCRStartup(
@@ -557,7 +557,7 @@ PCRStartup(
 	PCR_ClearAuth();
     return TRUE;
 }
-/* 8.7.3.16 PCRStateSave() */
+/* 8.7.2.16 PCRStateSave() */
 /* This function is used to save the PCR values that will be restored on TPM Resume. */
 void
 PCRStateSave(
@@ -598,7 +598,7 @@ PCRStateSave(
 	}
     return;
 }
-/* 8.7.3.17 PCRIsStateSaved() */
+/* 8.7.2.17 PCRIsStateSaved() */
 /* This function indicates if the selected PCR is a PCR that is state saved on
    TPM2_Shutdown(STATE). The return value is based on PCR attributes. */
 /* Return Values Meaning */
@@ -615,7 +615,7 @@ PCRIsStateSaved(
     else
 	return FALSE;
 }
-/* 8.7.3.18 PCRIsResetAllowed() */
+/* 8.7.2.18 PCRIsResetAllowed() */
 /* This function indicates if a PCR may be reset by the current command locality. The return value
    is based on PCR attributes, and not the PCR allocation. */
 /* Return Values Meaning */
@@ -642,7 +642,7 @@ PCRIsResetAllowed(
     else
 	return TRUE;
 }
-/* 8.7.3.19 PCRChanged() */
+/* 8.7.2.19 PCRChanged() */
 /* This function checks a PCR handle to see if the attributes for the PCR are set so that any change
    to the PCR causes an increment of the pcrCounter. If it does, then the function increments the
    counter. Will also bump the counter if the handle is zero which means that PCR 0 can not be in
@@ -661,7 +661,7 @@ PCRChanged(
 		FAIL(FATAL_ERROR_COUNTER_OVERFLOW);
 	}
 }
-/* 8.7.3.20 PCRIsExtendAllowed() */
+/* 8.7.2.20 PCRIsExtendAllowed() */
 /* This function indicates a PCR may be extended at the current command locality. The return value
    is based on PCR attributes, and not the PCR allocation. */
 /* Return Values Meaning */
@@ -683,7 +683,7 @@ PCRIsExtendAllowed(
     else
 	return TRUE;
 }
-/* 8.7.3.21 PCRExtend() */
+/* 8.7.2.21 PCRExtend() */
 /* This function is used to extend a PCR in a specific bank. */
 void
 PCRExtend(
@@ -710,7 +710,7 @@ PCRExtend(
 	}
     return;
 }
-/* 8.7.3.22 PCRComputeCurrentDigest() */
+/* 8.7.2.22 PCRComputeCurrentDigest() */
 /* This function computes the digest of the selected PCR. */
 /* As a side-effect, selection is modified so that only the implemented PCR will have their bits
    still set. */
@@ -755,7 +755,7 @@ PCRComputeCurrentDigest(
     CryptHashEnd2B(&hashState, &digest->b);
     return;
 }
-/* 8.7.3.23 PCRRead() */
+/* 8.7.2.23 PCRRead() */
 /* This function is used to read a list of selected PCR.  If the requested PCR number exceeds the
    maximum number that can be output, the selection is adjusted to reflect the actual output PCR. */
 void
@@ -828,7 +828,7 @@ PCRRead(
     *pcrCounter = gr.pcrCounter;
     return;
 }
-/* 8.7.3.25 PCRAllocate() */
+/* 8.7.2.25 PCRAllocate() */
 /* This function is used to change the PCR allocation. */
 /* Error Returns Meaning */
 /* TPM_RC_NO_RESULT allocate failed */
@@ -923,7 +923,7 @@ PCRAllocate(
     NV_WRITE_PERSISTENT(pcrAllocated, newAllocate);
     return TPM_RC_SUCCESS;
 }
-/* 8.7.3.26 PCRSetValue() */
+/* 8.7.2.26 PCRSetValue() */
 /* This function is used to set the designated PCR in all banks to an initial value. The initial
    value is signed and will be sign extended into the entire PCR. */
 void
@@ -961,7 +961,7 @@ PCRSetValue(
 		}
 	}
 }
-/* 8.7.3.27 PCRResetDynamics */
+/* 8.7.2.27 PCRResetDynamics */
 /* This function is used to reset a dynamic PCR to 0.  This function is used in DRTM sequence. */
 void
 PCRResetDynamics(
@@ -991,7 +991,7 @@ PCRResetDynamics(
 	}
     return;
 }
-/* 8.7.3.28 PCRCapGetAllocation() */
+/* 8.7.2.28 PCRCapGetAllocation() */
 /* This function is used to get the current allocation of PCR banks. */
 /* Return Values Meaning */
 /* YES: if the return count is 0 */
@@ -1013,7 +1013,7 @@ PCRCapGetAllocation(
 	    return NO;
 	}
 }
-/* 8.7.3.29 PCRSetSelectBit() */
+/* 8.7.2.29 PCRSetSelectBit() */
 /* This function sets a bit in a bitmap array. */
 static void
 PCRSetSelectBit(
@@ -1024,7 +1024,7 @@ PCRSetSelectBit(
     bitmap[pcr / 8] |= (1 << (pcr % 8));
     return;
 }
-/* 8.7.3.30 PCRGetProperty() */
+/* 8.7.2.30 PCRGetProperty() */
 /* This function returns the selected PCR property. */
 /* Return Values Meaning */
 /* TRUE the property type is implemented */
@@ -1123,7 +1123,7 @@ PCRGetProperty(
 	}
     return TRUE;
 }
-/* 8.7.3.31 PCRCapGetProperties() */
+/* 8.7.2.31 PCRCapGetProperties() */
 /* This function returns a list of PCR properties starting at property. */
 /* Return Values Meaning */
 /* YES: if no more property is available */
@@ -1165,7 +1165,7 @@ PCRCapGetProperties(
 	}
     return more;
 }
-/* 8.7.3.32 PCRCapGetHandles() */
+/* 8.7.2.32 PCRCapGetHandles() */
 /* This function is used to get a list of handles of PCR, started from handle. If handle exceeds the
    maximum PCR handle range, an empty list will be returned and the return value will be NO. */
 /* Return Values Meaning */

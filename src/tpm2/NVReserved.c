@@ -188,6 +188,7 @@ NvWrite(
 	}
     return FALSE;
 }
+
 #if 0 // libtpms added being (for Coverity)
 /* 8.5.3.8 NvUpdatePersistent() */
 /* This function is used to update a value in the PERSISTENT_DATA structure and commits the value to

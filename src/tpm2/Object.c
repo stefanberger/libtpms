@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Object.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -241,8 +241,8 @@ ObjectGetHierarchy(
 }
 /* 8.6.3.11 GetHeriarchy() */
 /* This function returns the handle of the hierarchy to which a handle belongs. This function is
-   similar to ObjectGetHierarchy() but this routine takes a handle but ObjectGetHierarchy() takes an
-   pointer to an object. */
+   similar to ObjectGetHierarchy() but this routine takes a handle while ObjectGetHierarchy() takes
+   an pointer to an object. */
 /* This function requires that handle references a loaded object. */
 TPMI_RH_HIERARCHY
 GetHeriarchy(

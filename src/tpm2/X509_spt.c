@@ -3,7 +3,7 @@
 /*			X509 Support						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_spt.c 1511 2019-10-07 20:40:15Z kgoldman $		*/
+/*            $Id: X509_spt.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -78,7 +78,7 @@
 //#   include "X509_SM2_fp.h"
 #endif // ALG_RSA
 /* 10.2.26.2	Unmarshaling Functions */
-/* 10.2.26.2.1	X509FindExtensionOID() */
+/* 10.2.26.2.1	X509FindExtensionByOID() */
 /* This will search a list of X509 extensions to find an extension with the requested OID. If the
    extension is found, the output context (ctx) is set up to point to the OID in the extension. */
 /*     Return Value	Meaning */

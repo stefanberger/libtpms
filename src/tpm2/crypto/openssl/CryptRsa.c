@@ -511,6 +511,7 @@ CryptRsaPssSaltSize(
 	saltSize = 0;
     return saltSize;
 }
+
 #if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 /* 10.2.17.4.9 PssEncode() */
 /* This function creates an encoded block of data that is the size of modulus. The function uses the
@@ -814,6 +815,7 @@ RSASSA_Decode(
     return retVal;
 }
 #endif                                 // libtpms added
+
 /* 10.2.17.4.13 CryptRsaSelectScheme() */
 /* This function is used by TPM2_RSA_Decrypt() and TPM2_RSA_Encrypt().  It sets up the rules to
    select a scheme between input and object default. This function assume the RSA object is

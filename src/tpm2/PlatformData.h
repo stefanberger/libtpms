@@ -79,7 +79,7 @@ EXTERN int     s_isCanceled;
 typedef uint64_t     clock64_t;
 // This is the value returned the last time that the system clock was read. This is only relevant
 // for a simulator or virtual TPM.
-EXTERN clock64_t       s_realTimePrevious;
+EXTERN clock64_t        s_realTimePrevious;
 // These values are used to try to synthesize a long lived version of clock().
 EXTERN clock64_t        s_lastSystemTime;
 EXTERN clock64_t        s_lastReportedTime;
@@ -98,9 +98,9 @@ EXTERN BOOL              s_timerReset;
 EXTERN BOOL              s_timerStopped;
 /* This variable records the time when _plat__TimerReset() is called.  This mechanism allow us to
    subtract the time when TPM is power off from the total time reported by clock() function */
-EXTERN uint64_t        s_initClock;
+EXTERN uint64_t         s_initClock;
 /* This variable records the timer adjustment factor. */
-EXTERN unsigned int         s_adjustRate;
+EXTERN unsigned int     s_adjustRate;
 /* From LocalityPlat.c Locality of current command */
 EXTERN unsigned char s_locality;
 /* From NVMem.c Choose if the NV memory should be backed by RAM or by file. If this macro is
@@ -124,7 +124,7 @@ EXTERN unsigned char s_locality;
 #error Do not define SIMULATION for libtpms!
 #endif // SIMULATION
 
-EXTERN unsigned char     s_NV[NV_MEMORY_SIZE];
+EXTERN unsigned char    s_NV[NV_MEMORY_SIZE];
 EXTERN BOOL              s_NvIsAvailable;
 EXTERN BOOL              s_NV_unrecoverable;
 EXTERN BOOL              s_NV_recoverable;

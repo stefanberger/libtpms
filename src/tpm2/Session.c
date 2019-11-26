@@ -3,7 +3,7 @@
 /*			    Manage the session context counter 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Session.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Session.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -122,10 +122,10 @@
 /* Assume we have a small contextArray with 8, 4-bit values with values 1 and 2 used to indicate the
    loaded context slot number.  Also assume that the array contains hex values of (0 0 1 0 3 0 9 F)
    and that the contextCounter is an 8-bit counter with a value of 0x37. Since the low nibble is 7,
-   that means that values above 7 are older than values below it and, in this example, 9 is the
-   oldest value. */
+   that means that values closest to but above 7 are older than values below it and, in this
+   example, 9 is the oldest value. */
 /* Note if we subtract the counter value, from each slot that contains a saved contextID we get (- -
-   - - B - 2 - 8) and the oldest entry is now easy to find. */
+   - - B - 2 - 8) and the oldest entry is now easy to find because it has the lowest value. */
 
 static void
 ContextIdSetOldest(
@@ -134,7 +134,7 @@ ContextIdSetOldest(
 {
     CONTEXT_SLOT    lowBits;
     CONTEXT_SLOT    entry;
-    CONTEXT_SLOT    smallest = ((CONTEXT_SLOT)~0);
+    CONTEXT_SLOT    smallest = ((CONTEXT_SLOT)~0);	/* Set to the maximum possible */
     UINT32  i;
     // Set oldestSaveContext to a value indicating none assigned
     s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
@@ -231,7 +231,7 @@ SessionIsLoaded(
 /* 8.9.5.2 SessionIsSaved() */
 /* This function test a session handle references a saved session.  The handle must have previously
    been checked to make sure that it is a valid handle for an authorization session. */
-/* NOTE: An password authorization does not have a session. */
+/* NOTE: A password authorization does not have a session. */
 /* This function requires that the handle be a valid session handle. */
 /* Return Values Meaning */
 /* TRUE if session is saved */
