@@ -134,4 +134,9 @@ EXTERN BOOL     s_physicalPresence;
 EXTERN BOOL        s_powerLost;
 /* From Entropy.c */
 EXTERN uint32_t        lastEntropy;
+
+#define DEFINE_ACT(N)   EXTERN ACT_DATA ACT_##N;
+FOR_EACH_ACT(DEFINE_ACT)
+EXTERN int             actTicksAllowed;
+
 #endif // _PLATFORM_DATA_H_

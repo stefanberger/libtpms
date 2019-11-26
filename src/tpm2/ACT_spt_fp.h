@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*						*/
+/*			 ACT Command Support   					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform.h 1521 2019-11-15 21:00:47Z kgoldman $		*/
+/*            $Id$		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,21 +55,41 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019.				  	*/
+/*  (c) Copyright IBM Corp. and others, 2019					*/
 /*										*/
 /********************************************************************************/
 
-/* C.14	Platform.h */
+#ifndef ACT_SPT_FP_H
+#define ACT_SPT_FP_H
 
-#ifndef    _PLATFORM_H_
-#define    _PLATFORM_H_
-#include "TpmBuildSwitches.h"
-#include "BaseTypes.h"
-#include "TPMB.h"
-#include "MinMax.h"
-#include "TpmProfile.h"
-#include "PlatformACT.h"
-#include "PlatformClock.h"
-#include "PlatformData.h"
-#include "Platform_fp.h"
-#endif  // _PLATFORM_H_
+BOOL
+ActStartup(
+	   STARTUP_TYPE        type
+	   );
+BOOL
+ActGetSignaled(
+	       TPM_RH              actHandle
+	       );
+BOOL
+ActShutdown(
+	    TPM_SU              state       //IN: the type of the shutdown.
+	    );
+BOOL
+ActIsImplemented(
+		 UINT32          act
+		 );
+TPM_RC
+ActCounterUpdate(
+		 TPM_RH          handle,         //IN: the handle of the act
+		 UINT32          newValue        //IN: the value to set in the ACT
+		 );
+TPMI_YES_NO
+ActGetCapabilityData(
+		     TPM_HANDLE       actHandle,     // IN: the handle for the starting ACT
+		     UINT32           maxCount,      // IN: maximum allowed return values
+		     TPML_ACT_DATA   *actList        // OUT: ACT data list
+		     );
+
+
+
+#endif

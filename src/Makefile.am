@@ -182,6 +182,7 @@ libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
 libtpms_tpm2_la_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
 
 libtpms_tpm2_la_SOURCES = \
+	tpm2/ACTCommands.c \
 	tpm2/AlgorithmCap.c \
 	tpm2/AlgorithmTests.c \
 	tpm2/AsymmetricCommands.c \
@@ -298,6 +299,9 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptSym_fp.h \
 	tpm2/crypto/CryptTest.h \
 	tpm2/crypto/CryptUtil_fp.h \
+	tpm2/ACT.h \
+	tpm2/ACT_spt_fp.h \
+	tpm2/ACT_SetTimeout_fp.h \
 	tpm2/ActivateCredential_fp.h \
 	tpm2/AlgorithmCap_fp.h \
 	tpm2/AlgorithmTests_fp.h \
@@ -411,6 +415,8 @@ noinst_HEADERS += \
 	tpm2/PCR_SetAuthPolicy_fp.h \
 	tpm2/PCR_SetAuthValue_fp.h \
 	tpm2/Platform.h \
+	tpm2/PlatformACT.h \
+	tpm2/PlatformACT_fp.h \
 	tpm2/PlatformClock.h \
 	tpm2/PlatformData.h \
 	tpm2/Platform_fp.h \

@@ -219,7 +219,7 @@
 #define MAX_TDES_BLOCK_SIZE_BYTES   TDES_MAX_BLOCK_SIZE
 // Additional values for benefit of code
 #define TPM_CC_FIRST                        0x0000011F
-#define TPM_CC_LAST                         0x00000197
+#define TPM_CC_LAST                         0x00000198
 #if COMPRESSED_LISTS
 #define ADD_FILL            0
 #else
@@ -349,6 +349,7 @@
 					  + (ADD_FILL || CC_AC_Send)                              /* 0x00000195 */ \
 					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 /* 0x00000196 */ \
 					  + (ADD_FILL || CC_CertifyX509)                          /* 0x00000197 */ \
+					  + (ADD_FILL || CC_ACT_SetTimeout)                       /* 0x00000198 */ \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   (0 + CC_Vendor_TCG_Test)

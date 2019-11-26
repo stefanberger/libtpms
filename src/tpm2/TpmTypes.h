@@ -291,6 +291,7 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_AC_Send                      (TPM_CC)(0x00000195)
 #define TPM_CC_Policy_AC_SendSelect         (TPM_CC)(0x00000196)
 #define TPM_CC_CertifyX509                  (TPM_CC)(0x00000197)
+#define TPM_CC_ACT_SetTimeout               (TPM_CC)(0x00000198)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 
@@ -562,7 +563,8 @@ typedef UINT32             TPM_CAP;
 #define TPM_CAP_PCR_PROPERTIES     (TPM_CAP)(0x00000007)
 #define TPM_CAP_ECC_CURVES         (TPM_CAP)(0x00000008)
 #define TPM_CAP_AUTH_POLICIES      (TPM_CAP)(0x00000009)
-#define TPM_CAP_LAST               (TPM_CAP)(0x00000009)
+#define TPM_CAP_ACT 		   (TPM_CAP)(0x0000000a)
+#define TPM_CAP_LAST               (TPM_CAP)(0x0000000a)
 #define TPM_CAP_VENDOR_PROPERTY    (TPM_CAP)(0x00000100)
 
 /* Table 2:23 - Definition of TPM_PT Constants */
@@ -1222,6 +1224,33 @@ typedef UINT32                                  TPMA_X509_KEY_USAGE;
      (digitalsignature << 31))
 #endif // USE_BIT_FIELD_STRUCTURES
 
+#define TYPE_OF_TPMA_ACT    UINT32
+#define TPMA_ACT_TO_UINT32(a)    (*((UINT32 *)&(a)))
+#define UINT32_TO_TPMA_ACT(a)    (*((TPMA_ACT *)&(a)))
+#define TPMA_ACT_TO_BYTE_ARRAY(i, a)					\
+    UINT32_TO_BYTE_ARRAY((TPMA_ACT_TO_UINT32(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_ACT(i, a)					\
+    { UINT32 x = BYTE_ARRAY_TO_UINT32(a); i = UINT32_TO_TPMA_ACT(x); }
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct TPMA_ACT {                           // Table 2:40
+    unsigned    signaled             : 1;
+    unsigned    preserveSignaled     : 1;
+    unsigned    Reserved_bits_at_2   : 30;
+} TPMA_ACT;                                         /* Bits */
+// This is the initializer for a TPMA_ACT structure
+#define TPMA_ACT_INITIALIZER(signaled, preservesignaled, bits_at_2)	\
+    {signaled, preservesignaled, bits_at_2}
+#else // USE_BIT_FIELD_STRUCTURES
+// This implements Table 2:40 TPMA_ACT using bit masking
+typedef UINT32                      TPMA_ACT;
+#define TYPE_OF_TPMA_ACT            UINT32
+#define TPMA_ACT_signaled           ((TPMA_ACT)1 << 0)
+#define TPMA_ACT_preserveSignaled   ((TPMA_ACT)1 << 1)
+// This is the initializer for a TPMA_ACT bit array.
+#define TPMA_ACT_INITIALIZER(signaled, preservesignaled, bits_at_2)	\
+    {(signaled << 0) + (preservesignaled << 1)}
+#endif // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:39 - Definition of TPMI_YES_NO Type  */
 typedef  BYTE               TPMI_YES_NO;
 /* Table 2:40 - Definition of TPMI_DH_OBJECT Type  */
@@ -1270,6 +1299,8 @@ typedef  TPM_HANDLE         TPMI_RH_LOCKOUT;
 typedef  TPM_HANDLE         TPMI_RH_NV_INDEX;
 /* Table 2:60 - Definition of TPMI_RH_AC Type  */
 typedef  TPM_HANDLE         TPMI_RH_AC;
+/* Table 2:65 - Definition of TPMI_RH_ACT Type  */
+typedef  TPM_HANDLE         TPMI_RH_ACT;
 /* Table 2:61 - Definition of TPMI_ALG_HASH Type  */
 typedef  TPM_ALG_ID         TPMI_ALG_HASH;
 /* Table 2:62 - Definition of TPMI_ALG_ASYM Type  */
@@ -1462,6 +1493,12 @@ typedef struct {
     TPM_HANDLE              handle;
     TPMT_HA                 policyHash;
 } TPMS_TAGGED_POLICY;
+/* Table 105 - Definition of TPMS_ACT_DATA Structure <OUT> */
+typedef struct {
+    TPM_HANDLE		    handle;
+    UINT32		    timeout;
+    TPMA_ACT		    attributes;
+} TPMS_ACT_DATA;
 /* Table 2:97 - Definition of TPML_CC Structure  */
 typedef struct {
     UINT32                  count;
@@ -1522,6 +1559,11 @@ typedef struct {
     UINT32                  count;
     TPMS_TAGGED_POLICY      policies[MAX_TAGGED_POLICIES];
 } TPML_TAGGED_POLICY;
+/* Table 2:118 - Definition of TPML_ACT_DATA Structure <OUT> */
+typedef struct {
+    UINT32		count;
+    TPMS_ACT_DATA	actData[MAX_ACT_DATA];
+} TPML_ACT_DATA;
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union  */
 typedef union {
     TPML_ALG_PROPERTY           algorithms;
@@ -1536,6 +1578,7 @@ typedef union {
     TPML_ECC_CURVE              eccCurves;
 #endif   // ALG_ECC
     TPML_TAGGED_POLICY          authPolicies;
+    TPML_ACT_DATA 		actData;
 } TPMU_CAPABILITIES;
 /* Table 2:111 - Definition of TPMS_CAPABILITY_DATA Structure  */
 typedef struct {

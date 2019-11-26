@@ -3,7 +3,7 @@
 /*			Include Headers for Internal Routines			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: InternalRoutines.h 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: InternalRoutines.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -79,6 +79,7 @@
 #include "NVReserved_fp.h"
 #include "NVDynamic_fp.h"
 #include "NV_spt_fp.h"
+#include "ACT_spt_fp.h"
 #include "PCR_fp.h"
 #include "DA_fp.h"
 #include "TpmFail_fp.h"

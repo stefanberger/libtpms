@@ -56,6 +56,7 @@
 #include "tpm2/_TPM_Hash_Data_fp.h"
 #include "tpm2/_TPM_Init_fp.h"
 #include "tpm2/StateMarshal.h"
+#include "tpm2/PlatformACT.h"
 #include "tpm2/PlatformData.h"
 #include "tpm2/Volatile.h"
 

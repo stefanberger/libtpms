@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Marshal.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -2229,6 +2229,43 @@ TPM2B_CREATION_DATA_Marshal(TPM2B_CREATION_DATA *source, BYTE **buffer, INT32 *s
     }
     else {
 	written += sizeof(UINT16);
+    }
+    return written;
+}
+
+/* Table 225 - Definition of (UINT32) TPM_AT Constants */
+
+UINT16
+TPM_AT_Marshal(TPM_AT *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += UINT32_Marshal(source, buffer, size);
+    return written;
+}
+
+/* Table 227 - Definition of TPMS_AC_OUTPUT Structure <OUT> */
+
+UINT16
+TPMS_AC_OUTPUT_Marshal(TPMS_AC_OUTPUT *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += TPM_AT_Marshal(&source->tag, buffer, size);
+    written += UINT32_Marshal(&source->data, buffer, size);
+    return written;
+}
+
+/* Table 228 - Definition of TPML_AC_CAPABILITIES Structure <OUT> */
+
+UINT16
+TPML_AC_CAPABILITIES_Marshal(TPML_AC_CAPABILITIES *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    UINT32 i;
+    
+    written += UINT32_Marshal(&source->count, buffer, size);
+    for (i = 0 ; i < source->count ; i++) {
+	written += TPMS_AC_OUTPUT_Marshal(&source->acCapabilities[i], buffer, size);
     }
     return written;
 }
