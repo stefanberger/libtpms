@@ -192,12 +192,6 @@
 #ifndef RADIX_BITS
 #define RADIX_BITS                      32
 #endif
-#ifndef HASH_ALIGNMENT
-#define HASH_ALIGNMENT                  4
-#endif
-#ifndef SYMMETRIC_ALIGNMENT
-#define SYMMETRIC_ALIGNMENT             4
-#endif
 #ifndef HASH_LIB
 #define HASH_LIB                        Ossl
 #endif

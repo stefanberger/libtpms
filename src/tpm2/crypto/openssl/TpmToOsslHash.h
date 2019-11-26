@@ -3,7 +3,7 @@
 /*		Used to splice the OpenSSL() hash code into the TPM code  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslHash.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: TpmToOsslHash.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -98,6 +98,9 @@ typedef const BYTE    *PCBYTE;
    library). */
 /* The macro that calls the method also defines how the parameters get swizzled between the default
    form (in CryptHash.c)and the library form. */
+
+#define HASH_ALIGNMENT  4 /* libtpms: keep old value */
+
 /* Initialize the hash context */
 #define HASH_START_METHOD_DEF   void (HASH_START_METHOD)(PANY_HASH_STATE state)
 #define HASH_START(hashState)						\
