@@ -485,7 +485,7 @@ TPM2_CreateLoaded(
 				      &parent->sensitive.sensitive.bits.b,
 				      &labelContext.label.b,
 				      &labelContext.context.b,
-				      TPM_MAX_DERIVATION_BITS);
+				      MAX_DERIVATION_BITS);
 	    // Clear the sensitive size so that the creation functions will not try
 	    // to use this value.
 	    in->inSensitive.sensitive.data.t.size = 0;
