@@ -3,7 +3,7 @@
 /*			 	Startup Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: StartupCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: StartupCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,6 +61,7 @@
 
 /* 9.2	_TPM_Init */
 #include "Tpm.h"
+#include "PlatformACT_fp.h"		/* added kgold */
 #include "_TPM_Init_fp.h"
 #include "StateMarshal.h"   /* libtpms added */
 // This function is used to process a _TPM_Init indication.
@@ -87,6 +88,8 @@ _TPM_Init(
     // Clear the flag that forces failure on self-test
     g_forceFailureMode = FALSE;
 #endif
+    // Disable the tick processing
+    _plat__ACT_EnableTicks(FALSE);
     // Set initialization state
     TPMInit();
     // Set g_DRTMHandle as unassigned
@@ -223,6 +226,8 @@ TPM2_Startup(
     OK = OK && PCRStartup(startup, locality);
     // Restore/Initialize command audit information
     OK = OK && CommandAuditStartup(startup);
+    // Restore the ACT
+    OK = OK && ActStartup(startup);
     //// The following code was moved from Time.c where it made no sense
     if (OK)
 	{
@@ -303,6 +308,8 @@ TPM2_Shutdown(
     gp.orderlyState = in->shutdownType;
     // PCR private date state save
     PCRStateSave(in->shutdownType);
+    // Save the ACT state
+    ActShutdown(in->shutdownType);
     // Save RAM backed NV index data
     NvUpdateIndexOrderlyData();
 #if ACCUMULATE_SELF_HEAL_TIMER

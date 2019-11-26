@@ -3,7 +3,7 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1493 2019-09-04 13:31:35Z kgoldman $	*/
+/*            $Id: SessionProcess.c 1532 2019-11-26 14:28:36Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -67,6 +67,7 @@
    session area of a response */
 #define SESSION_PROCESS_C
 #include "Tpm.h"
+#include "ACT.h"
 /* 6.4.3.1 IsDAExempted() */
 /* This function indicates if a handle is exempted from DA logic. A handle is exempted if it is */
 /* a) a primary seed handle, */
