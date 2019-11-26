@@ -182,6 +182,7 @@ libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
 libtpms_tpm2_la_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
 
 libtpms_tpm2_la_SOURCES = \
+	tpm2/ACT_spt.c \
 	tpm2/ACTCommands.c \
 	tpm2/AlgorithmCap.c \
 	tpm2/AlgorithmTests.c \
@@ -238,6 +239,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/ObjectCommands.c \
 	tpm2/Object_spt.c \
 	tpm2/PCR.c \
+	tpm2/PlatformACT.c \
 	tpm2/PlatformData.c \
 	tpm2/Policy_spt.c \
 	tpm2/Power.c \
