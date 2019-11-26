@@ -3,7 +3,7 @@
 /*		fUnctions that return the type of a handle.	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Handle.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
+/*            $Id: Handle.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -104,7 +104,13 @@ NextPermanentHandle(
 #ifdef  VENDOR_PERMANENT
 		  case VENDOR_PERMANENT:
 #endif
-		    return inHandle;
+		    // Each of the implemented ACT
+#define ACT_IMPLEMENTED_CASE(N)						\
+	            case TPM_RH_ACT_##N:
+		    
+	            FOR_EACH_ACT(ACT_IMPLEMENTED_CASE)
+			
+	                return inHandle;
 		    break;
 		  default:
 		    break;
