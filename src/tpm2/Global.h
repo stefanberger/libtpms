@@ -72,10 +72,6 @@ _REDUCE_WARNING_LEVEL_(2)
 #include <string.h>
 #include <stddef.h>
 _NORMAL_WARNING_LEVEL_
-#if SIMULATION
-#undef CONTEXT_SLOT
-#  define CONTEXT_SLOT    UINT8
-#endif
 #include "BackwardsCompatibility.h" // libtpms added
 #include "Capabilities.h"
 #include "TpmTypes.h"
