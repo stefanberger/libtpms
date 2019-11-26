@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			    PRNG Test Vectors 				*/
+/*			    PRNG Test Vectors 					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PRNG_TestVectors.h 1311 2018-08-23 21:39:29Z kgoldman $	*/
+/*            $Id: PRNG_TestVectors.h 1529 2019-11-21 23:29:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,17 +55,20 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef PRNG_TESTVECTORS_H
-#define PRNG_TESTVECTORS_H
+/* 10.1.17	PRNG_TestVectors.h */
 
 #ifndef     _MSBN_DRBG_TEST_VECTORS_H
 #define     _MSBN_DRBG_TEST_VECTORS_H
 //#if DRBG_ALGORITHM == TPM_ALG_AES && DRBG_KEY_BITS == 256
 #if DRBG_KEY_SIZE_BITS == 256
+
+/* Entropy is the size of the state. The state is the size of the key plus the IV. The IV is a
+   block. If Key = 256 and Block = 128 then State = 384 */
+
 #define DRBG_TEST_INITIATE_ENTROPY				\
         0x0d, 0x15, 0xaa, 0x80, 0xb1, 0x6c, 0x3a, 0x10,		\
 	0x90, 0x6c, 0xfe, 0xdb, 0x79, 0x5d, 0xae, 0x0b,		\
@@ -86,7 +89,6 @@
 #define DRBG_TEST_GENERATED					\
         0x94, 0x6f, 0x51, 0x82, 0xd5, 0x45, 0x10, 0xb9,		\
 	0x46, 0x12, 0x48, 0xf5, 0x71, 0xca, 0x06, 0xc9
-//#elif DRBG_ALGORITHM == TPM_ALG_AES && DRBG_KEY_BITS == 128
 #elif DRBG_KEY_SIZE_BITS == 128
 #define DRBG_TEST_INITIATE_ENTROPY				\
         0x8f, 0xc1, 0x1b, 0xdb, 0x5a, 0xab, 0xb7, 0xe0,		\
@@ -106,6 +108,3 @@
 	0x44, 0x76, 0x9a, 0x8e, 0x6e, 0x8c, 0x1a, 0xd4
 #endif
 #endif      //     _MSBN_DRBG_TEST_VECTORS_H
-
-
-#endif

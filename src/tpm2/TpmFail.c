@@ -189,7 +189,6 @@ static BOOL Unmarshal16(
 
 /* 9.17.4Public Functions */
 #if 0 /* libtpms added */
-/* 9.17.4Public Functions */
 /* 9.17.4.1 SetForceFailureMode() */
 /* This function is called by the simulator to enable failure mode testing. */
 LIB_EXPORT void

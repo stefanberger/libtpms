@@ -1566,7 +1566,7 @@ CheckAuthNoSession(
 }
 /* 6.4.5 Response Session Processing */
 /* 6.4.5.1 Introduction */
-/* The following functions build the session area in a response, and handle the audit sessions (if
+/* The following functions build the session area in a response and handle the audit sessions (if
    present). */
 /* 6.4.5.2 ComputeRpHash() */
 /* Function to compute rpHash (Response Parameter Hash). The rpHash is only computed if there is an

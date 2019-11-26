@@ -3,7 +3,7 @@
 /*		 select the library code that gets included in the TPM build 	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: LibSupport.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: LibSupport.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

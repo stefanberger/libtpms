@@ -3,7 +3,7 @@
 /*			   Structure definitions used for ECC 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEcc.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptEcc.h 1532 2019-11-26 14:28:36Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -65,7 +65,7 @@
    internally. The ECC-related structures that cross the TPM interface are defined in TpmTypes.h */
 #ifndef _CRYPT_ECC_H
 #define _CRYPT_ECC_H
-/* 10.1.2.1.1 ECC-related Structures */
+/* 10.1.2.2 Structures */
 /* This is used to define the macro that may or may not be in the data set for the curve
    (CryptEccData.c). If there is a mismatch, the compiler will warn that there is to much/not enough
    initialization data in the curve. The macro is used because not all versions of the

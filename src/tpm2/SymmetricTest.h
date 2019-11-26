@@ -3,7 +3,7 @@
 /*		Structures and data definitions for the symmetric tests		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: SymmetricTest.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

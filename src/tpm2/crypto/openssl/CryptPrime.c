@@ -325,7 +325,7 @@ RsaAdjustPrimeCandidate_PreRev155(
    the left of the most significant bit. This approach helps make it clear what is happening with
    the MSb of the values. The two RSA primes have to be large enough so that their product will be a
    number with the necessary number of significant bits. For example, we want to be able to multiply
-   two 1024-bit numbers to produce a number with 2028 significant bits. If we accept any 1024-bit
+   two 1024-bit numbers to produce a number with 2048 significant bits. If we accept any 1024-bit
    prime that has its MSb set, then it is possible to produce a product that does not have the MSb
    SET. For example, if we use tiny keys of 16 bits and have two 8-bit primes of 0x80, then the
    public key would be 0x4000 which is only 15-bits. So, what we need to do is made sure that each
@@ -366,6 +366,8 @@ RsaAdjustPrimeCandidate_New(
     // make sure the number is odd
     prime->d[0] |= 1;
 }
+
+
 LIB_EXPORT void
 RsaAdjustPrimeCandidate(
 			bigNum          prime,

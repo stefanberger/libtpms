@@ -649,8 +649,8 @@ BnEccModMult(
     else
 	EC_POINT_mul(E->G, pR, NULL, pS, bnD, E->CTX);
     PointFromOssl(R, pR, E);
-    EC_POINT_clear_free(pR);
-    EC_POINT_clear_free(pS);
+    EC_POINT_clear_free(pR); // libtpms changed
+    EC_POINT_clear_free(pS); // libtpms changed
     BN_clear_free(bnD); // libtpms added
     return !BnEqualZero(R->z);
 }
@@ -688,9 +688,9 @@ BnEccModMult2(
 	    EC_POINTs_mul(E->G, pR, NULL, 2, points, scalars, E->CTX);
 	}
     PointFromOssl(R, pR, E);
-    EC_POINT_clear_free(pR);
-    EC_POINT_clear_free(pS);
-    EC_POINT_clear_free(pQ);
+    EC_POINT_clear_free(pR); // libtpms changed
+    EC_POINT_clear_free(pS); // libtpms changed
+    EC_POINT_clear_free(pQ); // libtpms changed
     BN_clear_free(bnD); // libtpms added
     BN_clear_free(bnU); // libtpms added
 
@@ -715,9 +715,9 @@ BnEccAdd(
     //
     EC_POINT_add(E->G, pR, pS, pQ, E->CTX);
     PointFromOssl(R, pR, E);
-    EC_POINT_clear_free(pR);
-    EC_POINT_clear_free(pS);
-    EC_POINT_clear_free(pQ);
+    EC_POINT_clear_free(pR); // libtpms changed
+    EC_POINT_clear_free(pS); // libtpms changed
+    EC_POINT_clear_free(pQ); // libtpms changed
     return !BnEqualZero(R->z);
 }
 

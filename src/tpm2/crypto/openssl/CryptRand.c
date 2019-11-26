@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptRand.c 1532 2019-11-26 14:28:36Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

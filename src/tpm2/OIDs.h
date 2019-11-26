@@ -3,7 +3,7 @@
 /*			OID values						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: OIDs.h 1519 2019-11-15 20:43:51Z kgoldman $			*/
+/*            $Id: OIDs.h 1529 2019-11-21 23:29:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -59,7 +59,7 @@
 /*										*/
 /********************************************************************************/
 
-// 10.1.14	OIDS.h
+// 10.1.16	OIDs.h
 
 #include "Tpm.h"
 

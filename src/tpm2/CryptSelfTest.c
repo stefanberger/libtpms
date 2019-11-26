@@ -3,7 +3,7 @@
 /*			Self-Test of Cryptographic Functions 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSelfTest.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: CryptSelfTest.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -171,8 +171,7 @@ CryptIncrementalSelfTest(
     return TPM_RC_SUCCESS;
 }
 /* 10.2.7.2.4 CryptInitializeToTest() */
-/* This function will initialize the data structures for testing all the algorithms. This should not
-   be called unless CryptAlgsSetImplemented() has been called */
+/* This function will initialize the data structures for testing all the algorithms. */
 void
 CryptInitializeToTest(
 		      void

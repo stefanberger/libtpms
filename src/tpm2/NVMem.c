@@ -3,7 +3,7 @@
 /*			 NV read and write access methods			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVMem.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
+/*            $Id: NVMem.c 1529 2019-11-21 23:29:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

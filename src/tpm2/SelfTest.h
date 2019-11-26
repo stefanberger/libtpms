@@ -3,7 +3,7 @@
 /*		Structure definitions for the self-test				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SelfTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: SelfTest.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,11 +62,12 @@
 #ifndef SELFTEST_H
 #define SELFTEST_H
 
-/* 5.16.1 Introduction */
+/* 10.1.10	SelfTest.h */
+/* 10.1.10.1	Introduction */
+
 /* This file contains the structure definitions for the self-test. It also contains macros for use
    when the self-test is implemented. */
-/* 5.16.2 Defines */
-/* Was typing this a lot */
+
 #define SELF_TEST_FAILURE   FAIL(FATAL_ERROR_SELF_TEST)
 
 // Use the definition of key sizes to set algorithm values for key size.
@@ -80,9 +81,11 @@ typedef UINT32      SYM_INDEX;
 
 /* These two defines deal with the fact that the TPM_ALG_ID table does not delimit the symmetric
    mode values with a TPM_SYM_MODE_FIRST and TPM_SYM_MODE_LAST */
+
 #define TPM_SYM_MODE_FIRST       ALG_CTR_VALUE
 #define TPM_SYM_MODE_LAST        ALG_ECB_VALUE
 #define NUM_SYM_MODES   (TPM_SYM_MODE_LAST - TPM_SYM_MODE_FIRST + 1)
+
 /* Define a type to hold a bit vector for the modes. */
 #if NUM_SYM_MODES <= 0
 #error  "No symmetric modes implemented"
