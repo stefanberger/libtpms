@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1509 2019-10-07 19:10:05Z kgoldman $		*/
+/*            $Id: Global.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -857,6 +857,18 @@ typedef struct orderly_data
     UINT64              lockoutTimer;   // current value of s_lockoutTimer
     UINT64              time;           // current value of g_time at shutdown
 #endif // ACCUMULATE_SELF_HEAL_TIMER
+
+#ifndef __ACT_DISABLED	// libtpms added
+#error ACT not suported in ORDERLY_DATA!
+    // These are the ACT Timeout values. They are saved with the other timers
+#define DefineActData(N)  ACT_STATE      ACT_##N;
+    FOR_EACH_ACT(DefineActData)
+
+    // this is the 'signaled' attribute data for all the ACT. It is done this way so
+    // that they can be manipulated by ACT number rather than having to access a
+    // structure.
+    UINT32              signaledACT;
+#endif			// libtpms added
 } ORDERLY_DATA;
 #if ACCUMULATE_SELF_HEAL_TIMER
 #define     s_selfHealTimer     go.selfHealTimer
@@ -893,6 +905,15 @@ typedef struct state_clear_data
     // authorization. If more are required, then this structure would be changed to
     // an array.
     PCR_AUTHVALUE       pcrAuthValues;
+
+
+#ifndef __ACT_DISABLED	// libtpms added
+    //*****************************************************************************
+    //           ACT
+    //*****************************************************************************
+#define DefineActPolicySpace(N)     TPMT_HA     act_##N;
+    FOR_EACH_ACT(DefineActPolicySpace)
+#endif			// libtpms added
 } STATE_CLEAR_DATA;
 EXTERN STATE_CLEAR_DATA gc;
 
