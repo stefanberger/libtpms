@@ -189,9 +189,6 @@
 
 #endif                                 // libtpms added
 
-#ifndef RADIX_BITS
-#define RADIX_BITS                      32
-#endif
 #ifndef HASH_LIB
 #define HASH_LIB                        Ossl
 #endif
@@ -200,9 +197,6 @@
 #endif
 #ifndef MATH_LIB
 #define MATH_LIB                        Ossl
-#endif
-#ifndef BSIZE
-#define BSIZE                           UINT16
 #endif
 #ifndef IMPLEMENTATION_PCR
 #define IMPLEMENTATION_PCR              24
