@@ -87,7 +87,9 @@ _NORMAL_WARNING_LEVEL_
 #include "CryptTest.h"
 #include "TpmError.h"
 #include "NV.h"
+#include "ACT.h"
 #include "Utils.h"		    // libtpms added
+
 //** Defines and Types
     
 //*** Size Types
@@ -1312,6 +1314,17 @@ EXTERN UINT32    s_failLine;            // the line in the file at which
 EXTERN UINT32    s_failCode;            // the error code used
 EXTERN FailFunction    *LibFailCallback;
 #endif // TPM_FAIL_C
+
+//*****************************************************************************
+//*** From ACT_spt.c
+//*****************************************************************************
+// This value is used to indicate if an ACT has been updated since the last
+// TPM2_Startup() (one bit for each ACT). If the ACT is not updated
+// (TPM2_ACT_SetTimeout()) after a startup, then on each TPM2_Shutdown() the TPM will
+// save 1/2 of the current timer value. This prevents an attack on the ACT by saving
+// the counter and then running for a long period of time before doing a TPM Restart.
+// A quick TPM2_Shutdown() after each
+EXTERN UINT16                       s_ActUpdated;
 
 /* 5.9.16.9	From CommandCodeAttributes.c */
 

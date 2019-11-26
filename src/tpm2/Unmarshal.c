@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -1048,6 +1048,44 @@ TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
 	if (isNotNv) {
+	    rc = TPM_RC_VALUE;
+	}
+    }
+    return rc;
+}
+
+/* Table 64 - Definition of (TPM_HANDLE) TPMI_RH_AC Type <IN> */
+
+TPM_RC
+TPMI_RH_AC_Unmarshal(TPMI_RH_AC *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotAC = (*target < AC_FIRST) || (*target > AC_LAST);
+	if (isNotAC) {
+	    rc = TPM_RC_VALUE;
+	}
+    }
+    return rc;
+}
+
+/* Table 65 - Definition of (TPM_HANDLE) TPMI_RH_ACT Type <IN> */
+
+TPM_RC
+TPMI_RH_ACT_Unmarshal( TPMI_RH_ACT *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);  
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotACT = (*target < TPM_RH_ACT_0) || (*target > TPM_RH_ACT_F);
+	if (isNotACT) {
 	    rc = TPM_RC_VALUE;
 	}
     }
@@ -4249,3 +4287,15 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+/* Table 225 - Definition of (UINT32) TPM_AT Constants */
+
+TPM_RC
+TPM_AT_Unmarshal(TPM_AT *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT32_Unmarshal(target, buffer, size);  
+    }
+    return rc;
+}

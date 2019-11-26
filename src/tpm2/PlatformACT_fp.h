@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*						*/
+/*			Platform Authenticated Countdown Timer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform.h 1521 2019-11-15 21:00:47Z kgoldman $		*/
+/*            $Id: PlatformACT_fp.h 1531 2019-11-21 23:54:38Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,21 +55,50 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019.				  	*/
+/*  (c) Copyright IBM Corp. and others, 2019					*/
 /*										*/
 /********************************************************************************/
 
-/* C.14	Platform.h */
+#ifndef PLATFORMACT_FP_H
+#define PLATFORMACT_FP_H
 
-#ifndef    _PLATFORM_H_
-#define    _PLATFORM_H_
-#include "TpmBuildSwitches.h"
-#include "BaseTypes.h"
-#include "TPMB.h"
-#include "MinMax.h"
-#include "TpmProfile.h"
-#include "PlatformACT.h"
-#include "PlatformClock.h"
-#include "PlatformData.h"
-#include "Platform_fp.h"
-#endif  // _PLATFORM_H_
+LIB_EXPORT int
+_plat__ACT_GetImplemented(
+			  uint32_t            act
+			  );
+LIB_EXPORT uint32_t
+_plat__ACT_GetRemaining(
+			uint32_t            act             //IN: the ACT selector
+			);
+LIB_EXPORT int
+_plat__ACT_GetSignaled(
+		       uint32_t            act         //IN: number of ACT to check
+		       );
+LIB_EXPORT void
+_plat__ACT_SetSignaled(
+		       uint32_t            act,
+		       int                 on
+		       );
+LIB_EXPORT int
+_plat__ACT_GetPending(
+		      uint32_t            act         //IN: number of ACT to check
+		      );
+LIB_EXPORT int
+_plat__ACT_UpdateCounter(
+			 uint32_t            act,        // IN: ACT to update
+			 uint32_t            newValue   // IN: the value to post
+			 );
+LIB_EXPORT void
+_plat__ACT_EnableTicks(
+		       int	enable
+		       );
+LIB_EXPORT void
+_plat__ACT_Tick(
+		void
+		);
+LIB_EXPORT int
+_plat__ACT_Initialize(
+		      void
+		      );
+
+#endif

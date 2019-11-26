@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     							*/
+/*			    Unmarshal Prototypes				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal_fp.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: Unmarshal_fp.h 1526 2019-11-18 20:25:45Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2012-2018				*/
+/*  (c) Copyright IBM Corp. and others, 2012 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -167,6 +167,10 @@ extern "C" {
     TPMI_RH_LOCKOUT_Unmarshal(TPMI_RH_LOCKOUT *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size);
+    LIB_EXPORT TPM_RC
+    TPMI_RH_AC_Unmarshal(TPMI_RH_AC *target, BYTE **buffer, INT32 *size);
+    LIB_EXPORT TPM_RC
+    TPMI_RH_ACT_Unmarshal(TPMI_RH_ACT *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
@@ -459,6 +463,8 @@ extern "C" {
     TPM2B_CONTEXT_DATA_Unmarshal(TPM2B_CONTEXT_DATA *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size);
+    LIB_EXPORT TPM_RC
+    TPM_AT_Unmarshal(TPM_AT *target, BYTE **buffer, INT32 *size);
     
 #ifdef __cplusplus
 }

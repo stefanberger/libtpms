@@ -3,7 +3,7 @@
 /*			     TPM Size Checks					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmSizeChecks.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: TpmSizeChecks.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,6 +61,7 @@
 
 //** Includes, Defines, and Types
 #include    "Tpm.h"
+#include    "PlatformACT_fp.h"		/* kgold */
 #include    "TpmSizeChecks_fp.h"
 #include    <stdio.h>
 #include    <assert.h>

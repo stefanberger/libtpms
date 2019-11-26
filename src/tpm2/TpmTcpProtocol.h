@@ -3,7 +3,7 @@
 /*	TPM commands are communicated as BYTE streams on a TCP connection	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTcpProtocol.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: TpmTcpProtocol.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -99,6 +99,7 @@
 #define TPM_SESSION_END             20
 #define TPM_STOP                    21
 #define TPM_GET_COMMAND_RESPONSE_SIZES  25
+#define TPM_ACT_GET_SIGNALED        26
 #define TPM_TEST_FAILURE_MODE       30
 
 // D.3.4.	Enumerations and Structures
@@ -110,6 +111,11 @@ enum TpmEndPointInfo
 	tpmInRawMode = 0x04,
 	tpmSupportsPP = 0x08
     };
+
+#ifdef _MSC_VER
+#   pragma warning(push, 3)
+#endif
+
 // Existing RPC interface type definitions retained so that the implementation
 // can be re-used
 typedef struct in_buffer
@@ -123,6 +129,9 @@ typedef struct out_buffer
     uint32_t         BufferSize;
     _OUTPUT_BUFFER   Buffer;
 } _OUT_BUFFER;
+#ifdef _MSC_VER
+#   pragma warning(pop)
+#endif
 #ifndef WIN32
 typedef unsigned long        DWORD;
 typedef void                *LPVOID;

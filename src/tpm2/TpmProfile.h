@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmProfile.h 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: TpmProfile.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -143,6 +143,19 @@
 #ifndef ECC_SM2_P256
 #define ECC_SM2_P256                    YES /* libtpms enabled */
 #endif
+
+/* Table 0:6 - Defines for Implemented ACT */
+
+#ifndef RH_ACT_0
+#define RH_ACT_0                        NO  /* libtpms: no */
+#endif
+#ifndef RH_ACT_1
+#define RH_ACT_1                        NO
+#endif
+#ifndef RH_ACT_A
+#define RH_ACT_A                        NO  /* libtpms: no */
+#endif
+
 // Table 0:7 - Defines for Implementation Values
 #ifndef FIELD_UPGRADE_IMPLEMENTED
 #define FIELD_UPGRADE_IMPLEMENTED       NO
@@ -485,6 +498,9 @@
 #define TDES_192                    (ALG_TDES && YES)
 #endif
 // Table 0:5 - Defines for Implemented Commands
+#ifndef CC_ACT_SetTimeout
+#define CC_ACT_SetTimeout                   CC_NO	/* libtpms: NO */
+#endif
 #ifndef CC_AC_GetCapability
 #define CC_AC_GetCapability                 CC_NO	/* kgold */
 #endif

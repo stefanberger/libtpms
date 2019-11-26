@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*						*/
+/*		Authenticated COuntdown Timer Commands	 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform.h 1521 2019-11-15 21:00:47Z kgoldman $		*/
+/*            $Id$		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,21 +55,27 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019.				  	*/
+/*  (c) Copyright IBM Corp. and others, 2019					*/
 /*										*/
 /********************************************************************************/
 
-/* C.14	Platform.h */
+#include "Tpm.h"
+#include "ACT_SetTimeout_fp.h"
+#if CC_ACT_SetTimeout  // Conditional expansion of this file
 
-#ifndef    _PLATFORM_H_
-#define    _PLATFORM_H_
-#include "TpmBuildSwitches.h"
-#include "BaseTypes.h"
-#include "TPMB.h"
-#include "MinMax.h"
-#include "TpmProfile.h"
-#include "PlatformACT.h"
-#include "PlatformClock.h"
-#include "PlatformData.h"
-#include "Platform_fp.h"
-#endif  // _PLATFORM_H_
+/* Error Returns	Meaning */
+/* TPM_RC_RETRY	returned when an update for the selected ACT is already pending */
+/* TPM_RC_VALUE	attempt to disable signaling from an ACT that has not expired */
+TPM_RC
+TPM2_ACT_SetTimeout(
+		    ACT_SetTimeout_In      *in             // IN: input parameter list
+		    )
+{
+    // If 'startTimeout' is UINT32_MAX, then this is an attempt to disable the ACT
+    // and turn off the signaling for the ACT. This is only valid if the ACT
+    // is signaling.
+    if((in->startTimeout == UINT32_MAX) && !ActGetSignaled(in->actHandle))
+	return TPM_RC_VALUE + RC_ACT_SetTimeout_startTimeout;
+    return ActCounterUpdate(in->actHandle, in->startTimeout);
+}
+#endif // CC_ACT_SetTimeout
