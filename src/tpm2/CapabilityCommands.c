@@ -3,7 +3,7 @@
 /*			  	Capability Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CapabilityCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: CapabilityCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -179,6 +179,14 @@ TPM2_GetCapability(
 	    out->moreData = PermanentHandleGetPolicy((TPM_HANDLE)in->property,
 						     in->propertyCount,
 						     &data->authPolicies);
+	    break;
+	  case TPM_CAP_ACT:
+	    if(((TPM_RH)in->property < TPM_RH_ACT_0)
+	       || ((TPM_RH)in->property > TPM_RH_ACT_F))
+		return TPM_RCS_VALUE + RC_GetCapability_property;
+	    out->moreData = ActGetCapabilityData((TPM_HANDLE)in->property,
+						 in->propertyCount,
+						 &data->actData);
 	    break;
 	  case TPM_CAP_VENDOR_PROPERTY:
 	    // vendor property is not implemented
