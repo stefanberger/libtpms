@@ -92,7 +92,7 @@ _plat__WasPowerLost(
 		    void
 		    )
 {
-    BOOL        retVal = s_powerLost;
+    int retVal = s_powerLost;
     s_powerLost = FALSE;
     return retVal;
 }

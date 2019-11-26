@@ -80,7 +80,7 @@
 #if FILE_BACKED_NV
 #   include         <stdio.h>
 FILE                *s_NvFile = NULL;
-BOOL                 s_NeedsManufacture = FALSE;
+int                 s_NeedsManufacture = FALSE;
 #endif
 
 /* C.6.2. Functions */
@@ -284,7 +284,7 @@ _plat__NVEnable_NVChipFile(
 /* Disable NV memory */
 LIB_EXPORT void
 _plat__NVDisable(
-		 BOOL             delete           // IN: If TRUE, delete the NV contents.
+		 int             delete           // IN: If TRUE, delete the NV contents.
 		 )
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
@@ -377,7 +377,7 @@ _plat__NvIsDifferent(
    local copy and note the blocks that have changed. Then only write those blocks when
    _plat__NvCommit() is called. */
 
-LIB_EXPORT BOOL
+LIB_EXPORT int
 _plat__NvMemoryWrite(
 		     unsigned int     startOffset,   // IN: write start
 		     unsigned int     size,          // IN: size of bytes to write
@@ -476,7 +476,7 @@ _plat__ClearNvAvail(
 /* C.6.2.15.	_plat__NVNeedsManufacture() */
 /* This function is used by the simulator to determine when the TPM's NV state needs to be manufactured. */
 
-LIB_EXPORT BOOL
+LIB_EXPORT int
 _plat__NVNeedsManufacture(
 			  void
 			  )
