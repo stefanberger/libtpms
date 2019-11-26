@@ -344,7 +344,7 @@ EntityGetAuthPolicy(
 		    hashAlg = gp.lockoutAlg;
 		    break;
 		  default:
-		    return TPM_ALG_ERROR;
+		    hashAlg = TPM_ALG_ERROR;
 		    break;
 		}
 	    break;
