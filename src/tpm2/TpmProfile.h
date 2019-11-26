@@ -241,7 +241,7 @@
 #define NUM_AUTHVALUE_PCR_GROUP         1
 #endif
 #ifndef MAX_CONTEXT_SIZE
-#define MAX_CONTEXT_SIZE                2474
+#define MAX_CONTEXT_SIZE                2474    /* libtpms changed */
 #endif
 #ifndef MAX_DIGEST_BUFFER
 #define MAX_DIGEST_BUFFER               1024
