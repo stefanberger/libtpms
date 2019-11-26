@@ -73,6 +73,7 @@ _REDUCE_WARNING_LEVEL_(2)
 #include <stddef.h>
 _NORMAL_WARNING_LEVEL_
 #include "BackwardsCompatibility.h" // libtpms added
+
 #include "Capabilities.h"
 #include "TpmTypes.h"
 #include "CommandAttributes.h"
@@ -922,10 +923,6 @@ typedef struct state_reset_data
     UINT64              objectContextID;    // This is the context ID for a saved
     //  object context. The default reset
     //  value is 0.
-#ifndef NDEBUG
-#undef  CONTEXT_SLOT
-#define CONTEXT_SLOT     BYTE
-#endif
     CONTEXT_SLOT        contextArray[MAX_ACTIVE_SESSIONS];    // This array contains
     // contains the values used to track
     // the version numbers of saved

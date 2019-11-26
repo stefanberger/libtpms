@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1529 2019-11-21 23:29:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -210,6 +210,12 @@
 
 // The switches in this group can only be enabled when doing debug during simulation
 #if SIMULATION && DEBUG
+
+/* This forces the use of a smaller context slot size. This reduction reduces the range of the epoch
+   allowing the tester to force the epoch to occur faster than the normal defined in TpmProfile.h */
+#   if !(defined CONTEXT_SLOT)
+#       define CONTEXT_SLOT             UINT8
+#   endif
 
 // Enables use of the key cache. Default is YES
 #   if !(defined USE_RSA_KEY_CACHE)					\
