@@ -3,7 +3,7 @@
 /*		Accessing properties for handles of various types		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entity.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Entity.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -115,7 +115,13 @@ EntityGetLoadStatus(
 			    // for policy checks but not always available when authValue
 			    // is being checked.
 			  case TPM_RH_LOCKOUT:
-			    break;
+	                    // Rather than have #ifdefs all over the code,
+	                    // CASE_ACT_HANDLE is defined in ACT.h. It is 'case TPM_RH_ACT_x:'
+	                    // FOR_EACH_ACT(CASE_ACT_HANDLE) creates a simple
+	                    // case TPM_RH_ACT_x: // for each of the implemented ACT.
+	                    FOR_EACH_ACT(CASE_ACT_HANDLE)
+				break;
+
 			  default:
 			    // If the implementation has a manufacturer-specific value
 			    // then test for it here. Since this implementation does
@@ -237,6 +243,8 @@ EntityGetAuthValue(
 			  // endorsementAuth for TPM_RH_ENDORSEMENT
 			  pAuth = &gp.endorsementAuth;
 			  break;
+			  // The ACT use platformAuth for auth
+			  FOR_EACH_ACT(CASE_ACT_HANDLE)
 			case TPM_RH_PLATFORM:
 			  // platformAuth for TPM_RH_PLATFORM
 			  pAuth = &gc.platformAuth;
@@ -347,6 +355,14 @@ EntityGetAuthPolicy(
 		    *authPolicy = gp.lockoutPolicy;
 		    hashAlg = gp.lockoutAlg;
 		    break;
+
+#define ACT_GET_POLICY(N)						\
+		    case TPM_RH_ACT_##N:				\
+		      *authPolicy = go.ACT_##N.authPolicy;		\
+		      hashAlg = go.ACT_##N.hashAlg;			\
+		      break;
+		    // Get the policy for each implemented ACT
+		    FOR_EACH_ACT(ACT_GET_POLICY)
 		  default:
 		    hashAlg = TPM_ALG_ERROR;
 		    break;

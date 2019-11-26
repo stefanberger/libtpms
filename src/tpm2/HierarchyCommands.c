@@ -3,7 +3,7 @@
 /*			     Hierarchy Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HierarchyCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: HierarchyCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -272,6 +272,16 @@ TPM2_SetPrimaryPolicy(
 	    NV_SYNC_PERSISTENT(lockoutAlg);
 	    NV_SYNC_PERSISTENT(lockoutPolicy);
 	    break;
+
+#define SET_ACT_POLICY(N)						\
+	    case TPM_RH_ACT_##N:					\
+	      go.ACT_##N.hashAlg = in->hashAlg;				\
+	      go.ACT_##N.authPolicy = in->authPolicy;			\
+	      g_clearOrderly = TRUE;					\
+	      break;
+	    
+	    FOR_EACH_ACT(SET_ACT_POLICY)
+	    
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
