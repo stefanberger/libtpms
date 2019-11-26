@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: GpMacros.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -333,5 +333,10 @@
 // rest of the OID. This allows a user of this OID to know how much/little to copy.
 #define MAKE_OID(NAME)							\
     EXTERN  const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
+
+/* This definition is moved from TpmProfile.h because it is not actually vendor- specific. It has to
+   be the same size as the sequence parameter of a TPMS_CONTEXT and that is a UINT64. So, this is an
+   invariant value */
+#define CONTEXT_COUNTER         UINT64
 
 #endif // GP_MACROS_H

@@ -222,9 +222,6 @@
 #ifndef CONTEXT_SLOT
 #define CONTEXT_SLOT                    UINT8   /* libtpms: use 'old' type */
 #endif
-#ifndef CONTEXT_COUNTER
-#define CONTEXT_COUNTER                 UINT64
-#endif
 #ifndef MAX_LOADED_SESSIONS
 #define MAX_LOADED_SESSIONS             3
 #endif
