@@ -117,14 +117,18 @@ EntityGetLoadStatus(
 			  case TPM_RH_LOCKOUT:
 			    break;
 			  default:
-			    // handling of the manufacture_specific handles
+			    // If the implementation has a manufacturer-specific value
+			    // then test for it here. Since this implementation does
+			    // not have any, this implementation returns the same failure
+			    // that unmarshaling of a bad handle would produce.
 			    if(((TPM_RH)handle >= TPM_RH_AUTH_00)
 			       && ((TPM_RH)handle <= TPM_RH_AUTH_FF))
-				// use the value that would have been returned from
-				// unmarshaling if it did the handle filtering
+				// if the implementation has a manufacturer-specific value
 				result = TPM_RC_VALUE;
 			    else
-				FAIL(FATAL_ERROR_INTERNAL);
+				// The handle is in the range of reserved handles but is
+				// not implemented in this TPM.
+				result = TPM_RC_VALUE;
 			    break;
 			}
 		    break;
