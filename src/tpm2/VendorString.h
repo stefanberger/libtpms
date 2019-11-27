@@ -3,7 +3,7 @@
 /*			     	Vendor String					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: VendorString.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: VendorString.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
 /*										*/
 /********************************************************************************/
 
@@ -93,7 +93,7 @@
 /* the more significant 32-bits of a vendor-specific value indicating the version of the firmware
    The following line should be un-commented and a vendor specific firmware V1 should be provided
    here. The FIRMWARE_V2 may also be defined as appropriate. */
-#define   FIRMWARE_V1         (0x20170619)
+#define   FIRMWARE_V1         (0x20191023)
 
 // the less significant 32-bits of a vendor-specific value indicating the version of the firmware
 #define   FIRMWARE_V2         (0x00163636)
