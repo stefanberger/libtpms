@@ -230,7 +230,7 @@
 #define  MIN_COUNTER_INDICES            8
 #define  NUM_STATIC_PCR                 16
 #define  MAX_ALG_LIST_SIZE              64
-#define  PRIMARY_SEED_SIZE              32
+#define  PRIMARY_SEED_SIZE              64	/* libtpms: 64 per define USE_SPEC_COMPLIANT_PROOFS */
 #define  CONTEXT_ENCRYPT_ALGORITHM      AES
 #define  NV_CLOCK_UPDATE_INTERVAL       12
 #define  NUM_POLICY_PCR                 1
