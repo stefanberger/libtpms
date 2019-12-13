@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Vendor_TCG_Test.c 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Vendor_TCG_Test.c 1548 2019-12-13 23:15:40Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -62,7 +62,7 @@
 #include "Tpm.h"
 #include "Vendor_TCG_Test_fp.h"
 #include "Marshal_fp.h"
-#if defined TPM_CC_Vendor_TCG_Test      // Conditional expansion of this file
+#if CC_Vendor_TCG_Test
 /* A dummy function for testing. */
 TPM_RC
 TPM2_Vendor_TCG_Test(
