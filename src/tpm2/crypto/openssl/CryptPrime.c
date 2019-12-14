@@ -131,6 +131,7 @@ IsPrimeInt(
 	}
     return TRUE;
 }
+#if !RSA_KEY_SIEVE	// libtpms added
 /* 10.2.14.1.3 BnIsProbablyPrime() */
 /* This function is used when the key sieve is not implemented. This function Will try to eliminate
    some of the obvious things before going on to perform MillerRabin() as a final verification of
@@ -163,6 +164,7 @@ BnIsProbablyPrime(
     }
     return MillerRabin(prime, rand);
 }
+#endif			// libtpms added
 /* 10.2.14.1.4 MillerRabinRounds() */
 /* Function returns the number of Miller-Rabin rounds necessary to give an error probability equal
    to the security strength of the prime. These values are from FIPS 186-3. */

@@ -370,6 +370,7 @@ BnDiv(
 }
 
 #if ALG_RSA
+#if !RSA_KEY_SIEVE		// libtpms added
 /* B.2.3.2.3.6. BnGcd() */
 /* Get the greatest common divisor of two numbers */
 /* Return Value	Meaning */
@@ -400,6 +401,7 @@ BnGcd(
     OSSL_LEAVE();
     return OK;
 }
+#endif				// libtpms added
 
 /* B.2.3.2.3.7. BnModExp() */
 /* Do modular exponentiation using bigNum values. The conversion from a bignum_t to a bigNum is
