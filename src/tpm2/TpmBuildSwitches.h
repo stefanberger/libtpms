@@ -138,6 +138,11 @@
 
 // Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
 // could not update failedTries
+
+/* Removes the behavior of automatically incrementing the failed tries counter after any non-orderly
+   shutdown.  When YES, the failed counter is incremented on non-orderly shutdown only if an attempt
+   to access a DA protected object was made on the previous cycle. */
+
 #if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
 #   undef   USE_DA_USED
 #   define  USE_DA_USED     YES         // Default: Either YES or NO

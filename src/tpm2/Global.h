@@ -621,6 +621,11 @@ EXTERN  BOOL            g_StartupLocality3;
 /* This location indicates if a DA-protected value is accessed during a boot cycle. If none has,
    then there is no need to increment failedTries on the next non-orderly startup. This bit is
    merged with gp.orderlyState when that gp.orderly is set to SU_NONE_VALUE */
+
+/* This global is set to FALSE on startup (after a decision has been made on whether to increment
+   the failedTries or not).  On a first attempt to access a DA protected object: this global is set
+   to 1, the orderlyState is set to SU_DA_USED, committed to NV and the command execution returns
+   with RC_RETRY (without exposing any information on the DA attempt).  */
 EXTERN	BOOL			g_daUsed;
 #endif
 
