@@ -3,7 +3,7 @@
 /*			 	Startup Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: StartupCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: StartupCommands.c 1559 2019-12-19 15:41:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -306,6 +306,15 @@ TPM2_Shutdown(
 	return TPM_RCS_TYPE + RC_Shutdown_shutdownType;
     // Internal Data Update
     gp.orderlyState = in->shutdownType;
+#if USE_DA_USED
+    // CLEAR g_daUsed so that any future DA-protected access will cause the
+    // shutdown to become non-orderly. It is not sufficient to invalidate the 
+    // shutdown state after a DA failure because an attacker can inhibit access 
+    // to NV and use the fact that an update of failedTries was attempted as an 
+    // indication of an authorization failure. By making sure that the orderly state
+    // is CLEAR before any DA attempt, this prevents the possibility of this 'attack.'
+    g_daUsed = FALSE;
+#endif
     // PCR private date state save
     PCRStateSave(in->shutdownType);
     // Save the ACT state
