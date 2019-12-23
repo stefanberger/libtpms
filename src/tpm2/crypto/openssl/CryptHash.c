@@ -213,6 +213,7 @@ CryptHashGetBlockSize(
 /* 10.2.13.4.7	CryptHashGetOid() */
 /* This function returns a pointer to DER=encoded OID for a hash algorithm. All OIDs are full OID
    values including the Tag (0x06) and length byte. */
+#if 0		// libtpms added
 LIB_EXPORT const BYTE *
 CryptHashGetOid(
 		TPM_ALG_ID      hashAlg
@@ -220,8 +221,10 @@ CryptHashGetOid(
 {
     return CryptGetHashDef(hashAlg)->OID;
 }
+#endif		// libtpms added
 /* 10.2.13.4.8	CryptHashGetContextAlg() */
 /* This function returns the hash algorithm associated with a hash context. */
+#if 0		// libtpms added
 TPM_ALG_ID
 CryptHashGetContextAlg(
 		       PHASH_STATE      state          // IN: the context to check
@@ -229,6 +232,7 @@ CryptHashGetContextAlg(
 {
     return state->hashAlg;
 }
+#endif		// libtpms added
 /* 10.2.13.5	State Import and Export */
 /* 10.2.13.5.1	CryptHashCopyState */
 /* This function is used to clone a HASH_STATE. */
