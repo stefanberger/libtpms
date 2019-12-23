@@ -81,7 +81,7 @@ union tpmCryptKeySchedule_t {
 #else
     uint32_t            alignment;
 #endif
-};
+} /* tpmCryptKeySchedule */;   // libtpms changed; causes duplicate symbols on OS X
 /* Each block cipher within a library is expected to conform to the same calling conventions with
    three parameters (keySchedule, in, and out) in the same order. That means that all algorithms
    would use the same order of the same parameters. The code is written assuming the (keySchedule,
