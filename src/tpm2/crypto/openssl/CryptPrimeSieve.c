@@ -542,6 +542,7 @@ GetSieveStats(
 #if !RSA_INSTRUMENT
 //*** RsaSimulationEnd()
 // Stub for call when not doing instrumentation.
+#if 0		// libtpms added
 void
 RsaSimulationEnd(
 		 void
@@ -549,4 +550,5 @@ RsaSimulationEnd(
 {
     return;
 }
+#endif		// libtpms added
 #endif
