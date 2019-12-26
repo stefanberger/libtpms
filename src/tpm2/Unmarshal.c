@@ -1085,6 +1085,9 @@ TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM *target, BYTE **buffer, INT32 *size, BOOL al
 #if ALG_CAMELLIA
 	  case TPM_ALG_CAMELLIA:	
 #endif
+#if ALG_TDES		// libtpms added begin
+	  case TPM_ALG_TDES:
+#endif			// libtpms added end
 #if ALG_XOR
 	  case TPM_ALG_XOR:		
 #endif
@@ -1121,6 +1124,9 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(TPMI_ALG_SYM_OBJECT *target, BYTE **buffer, INT32 
 #if ALG_CAMELLIA
 	  case TPM_ALG_CAMELLIA:	
 #endif
+#if ALG_TDES		// libtpms added begin
+          case TPM_ALG_TDES:
+#endif			// iibtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -2449,6 +2455,28 @@ TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *siz
 }
 #endif
 
+#if ALG_TDES		// libtpms added begin
+TPM_RC
+TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_KEY_BITS_Unmarshal(target, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	switch (*target) {
+	  case 128:
+	  case 192:
+	    break;
+	  default:
+	    rc = TPM_RC_VALUE;
+	}
+    }
+    return rc;
+}
+#endif			// libtpms added end
+
 /* Table 125 - Definition of TPMU_SYM_KEY_BITS Union */
 
 TPM_RC
@@ -2472,6 +2500,11 @@ TPMU_SYM_KEY_BITS_Unmarshal(TPMU_SYM_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	rc = TPMI_CAMELLIA_KEY_BITS_Unmarshal(&target->camellia, buffer, size);
 	break;
 #endif
+#if ALG_TDES		// libtpms added beging
+      case TPM_ALG_TDES:
+	rc = TPMI_TDES_KEY_BITS_Unmarshal(&target->tdes, buffer, size);
+	break;
+#endif			// libtpms added end
 #if ALG_XOR
       case TPM_ALG_XOR:
 	rc = TPMI_ALG_HASH_Unmarshal(&target->xorr, buffer, size, NO);
@@ -2508,6 +2541,11 @@ TPMU_SYM_MODE_Unmarshal(TPMU_SYM_MODE *target, BYTE **buffer, INT32 *size, UINT3
 	rc = TPMI_ALG_SYM_MODE_Unmarshal(&target->camellia, buffer, size, YES);
 	break;
 #endif
+#if ALG_TDES		// libtpms added begin
+      case TPM_ALG_TDES:
+	rc = TPMI_ALG_SYM_MODE_Unmarshal(&target->tdes, buffer, size, YES);
+	break;
+#endif			// libtpms added end
       case TPM_ALG_XOR:
       case TPM_ALG_NULL:
 	break;
