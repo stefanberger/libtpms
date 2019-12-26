@@ -1125,6 +1125,14 @@ TPMI_AES_KEY_BITS_Marshal(TPMI_AES_KEY_BITS *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+UINT16			// libtpms added begin
+TPMI_TDES_KEY_BITS_Marshal(TPMI_TDES_KEY_BITS *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM_KEY_BITS_Marshal(source, buffer, size);
+    return written;
+}			// libtpms added end
+
 /* Table 2:128 - Definition of TPMU_SYM_KEY_BITS Union (StructuresTable()) */
 
 UINT16
@@ -1148,6 +1156,11 @@ TPMU_SYM_KEY_BITS_Marshal(TPMU_SYM_KEY_BITS *source, BYTE **buffer, INT32 *size,
 	written += TPMI_CAMELLIA_KEY_BITS_Marshal(&source->camellia, buffer, size);
 	break;
 #endif
+#if ALG_TDES	// libtpms added begin
+      case TPM_ALG_TDES:
+	written += TPMI_TDES_KEY_BITS_Marshal(&source->tdes, buffer, size);
+	break;
+#endif		// libtpms added end
 #if ALG_XOR
       case TPM_ALG_XOR:
 	written += TPMI_ALG_HASH_Marshal(&source->xorr, buffer, size);
@@ -1184,6 +1197,11 @@ TPMU_SYM_MODE_Marshal(TPMU_SYM_MODE *source, BYTE **buffer, INT32 *size, UINT32 
 	written += TPMI_ALG_SYM_MODE_Marshal(&source->camellia, buffer, size);
 	break;
 #endif
+#if ALG_TDES		// libtpms added begin
+      case TPM_ALG_TDES:
+	written += TPMI_ALG_SYM_MODE_Marshal(&source->tdes, buffer, size);
+	break;
+#endif			// libtpms added end
 #if ALG_XOR
       case TPM_ALG_XOR:
 #endif
