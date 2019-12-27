@@ -128,7 +128,7 @@ TPM2B_SHA512    c_SHA512_digest = {{64, {
 #endif
 
 // libtpms added begin
-#if ALG_CMAC
+#if SMAC_IMPLEMENTED && ALG_CMAC
 TPM2B_TYPE(AES128, 16);
 static TPM2B_AES128 cmac_aeskey = {{16, {
     0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,

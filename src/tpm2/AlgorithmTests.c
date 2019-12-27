@@ -155,13 +155,13 @@ TestHash(
     return TPM_RC_SUCCESS;
 }
 // libtpms added begin
-#if ALG_CMAC
+#if SMAC_IMPLEMENTED && ALG_CMAC
 static TPM_RC
-TestCMAC(
+TestSMAC(
 	 ALGORITHM_VECTOR    *toTest
 	 )
 {
-    SMAC_STATE          state;
+    HMAC_STATE          state;
     UINT16              copied;
     BYTE                out[MAX_SYM_BLOCK_SIZE];
     UINT32              outSize = sizeof(out);
@@ -175,12 +175,12 @@ TestCMAC(
 
     for (i = 0; CMACTests[i].key; i++ )
 	{
-	    blocksize = CryptCmacStart(&state, &cmac_keyParms,
-				       TPM_ALG_CMAC, CMACTests[i].key);
+	    blocksize = CryptMacStart(&state, &cmac_keyParms,
+				      TPM_ALG_CMAC, CMACTests[i].key);
 	    pAssert(blocksize <= outSize);
-	    CryptCmacData(&state.state, CMACTests[i].datalen,
-			  CMACTests[i].data);
-	    copied = CryptCmacEnd(&state.state, outSize, out);
+	    CryptDigestUpdate(&state.hashState, CMACTests[i].datalen,
+			      CMACTests[i].data);
+	    copied = CryptMacEnd(&state, outSize, out);
 	    if((CMACTests[i].outlen != copied)
 	      || (memcmp(out, CMACTests[i].out, CMACTests[i].outlen) != 0)) {
 		SELF_TEST_FAILURE;
@@ -848,12 +848,12 @@ TestAlgorithm(
 #if ALG_AES
 		  case ALG_AES_VALUE:
 // libtpms added begin
-#if ALG_CMAC
-		    if (doTest) {
-		         result = TestCMAC(toTest);
-		         if (result != TPM_RC_SUCCESS)
-		             break;
-	            }
+#if SMAC_IMPLEMENTED && ALG_CMAC
+                    if (doTest) {
+                         result = TestSMAC(toTest);
+                         if (result != TPM_RC_SUCCESS)
+                             break;
+                    }
 #endif
 // libtpms added end
 #endif
