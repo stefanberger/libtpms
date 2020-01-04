@@ -135,7 +135,7 @@ TPM_RESULT TPM_NVRAM_Init(void)
         }
     }
     if (rc == 0) {
-        strncpy(state_directory, tpm_state_path, sizeof(state_directory));
+        strncpy(state_directory, tpm_state_path, length + 1);
         printf("TPM_NVRAM_Init: Rooted state path %s\n", state_directory);
     }
     return rc;
