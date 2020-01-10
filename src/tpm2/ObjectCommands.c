@@ -131,7 +131,7 @@ TPM2_Load(
 	  )
 {
     TPM_RC                   result = TPM_RC_SUCCESS;
-    TPMT_SENSITIVE           sensitive;
+    TPMT_SENSITIVE           sensitive = {0}; // libtpms changed (valgrind)
     OBJECT                  *parentObject;
     OBJECT                  *newObject;
     // Input Validation
