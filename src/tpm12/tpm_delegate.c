@@ -1629,7 +1629,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     TPM_SECRET			*hmacKey;
     TPM_SECRET			savedAuth;		/* saved copy for response */
     TPM_DELEGATE_PUBLIC		*delegatePublic;	/* from DSAP session */
-    TPM_FAMILY_TABLE_ENTRY	*familyRow;		/* family table row containing familyID */
+    TPM_FAMILY_TABLE_ENTRY	*familyRow = NULL;	/* family table row containing familyID */
     uint32_t			nv1 = tpm_state->tpm_permanent_data.noOwnerNVWrite;
 							/* temp for noOwnerNVWrite, initialize to
 							   silence compiler */
@@ -3360,7 +3360,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
     TPM_DELEGATE_INDEX		d1DelegateIndex;
     TPM_DELEGATE_OWNER_BLOB	d1DelegateOwnerBlob;
     TPM_DELEGATE_KEY_BLOB	d1DelegateKeyBlob;
-    TPM_DELEGATE_TABLE_ROW	*d1DelegateTableRow;
+    TPM_DELEGATE_TABLE_ROW	*d1DelegateTableRow = NULL;
     TPM_FAMILY_ID		familyID = 0;
     TPM_FAMILY_TABLE_ENTRY	*familyRow;		/* family table row containing familyID */
     TPM_DELEGATE_PUBLIC		*delegatePublic;	/* from DSAP session */
