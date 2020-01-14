@@ -3044,7 +3044,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER		b1_sbuffer;		/* serialization of b1 */
     TPM_STCLEAR_DATA		*v1StClearData = NULL;
     TPM_KEY_HANDLE_ENTRY	*tpm_key_handle_entry;	/* key table entry for the handle */
-    TPM_AUTH_SESSION_DATA	*tpm_auth_session_data; /* session table entry for the handle */
+    TPM_AUTH_SESSION_DATA	*tpm_auth_session_data = NULL; /* session table entry for the handle */
     TPM_TRANSPORT_INTERNAL	*tpm_transport_internal; /* transport table entry for the handle */
     TPM_DAA_SESSION_DATA	*tpm_daa_session_data;	/* daa session table entry for the handle */
     TPM_NONCE			*n1ContextNonce = NULL;
