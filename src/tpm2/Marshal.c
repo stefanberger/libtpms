@@ -2020,7 +2020,7 @@ UINT16
 TPM2B_PUBLIC_Marshal(TPM2B_PUBLIC *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    BYTE *sizePtr;
+    BYTE *sizePtr = NULL; // libtpms changes for ppc64el gcc-5 -O3
 
     if (buffer != NULL) {
 	sizePtr = *buffer;
