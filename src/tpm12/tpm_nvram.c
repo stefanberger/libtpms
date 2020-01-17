@@ -1288,7 +1288,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     TPM_BOOL			ignore_auth = FALSE;
     TPM_BOOL			dir = FALSE;
     TPM_BOOL			physicalPresence;
-    TPM_BOOL			isGPIO;
+    TPM_BOOL			isGPIO = FALSE;
     BYTE 			*gpioData = NULL;
     TPM_NV_DATA_SENSITIVE	*d1NvdataSensitive;
     uint32_t			s1Last;
@@ -2000,7 +2000,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     TPM_NV_DATA_SENSITIVE	*d1NvdataSensitive;
     uint32_t			s1Last;
     TPM_BOOL			physicalPresence;
-    TPM_BOOL			isGPIO;
+    TPM_BOOL			isGPIO = FALSE;
     uint32_t			nv1 = tpm_state->tpm_permanent_data.noOwnerNVWrite;
 							/* temp for noOwnerNVWrite, initialize to
 							   silence compiler */
