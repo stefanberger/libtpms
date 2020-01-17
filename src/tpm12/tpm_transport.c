@@ -2599,7 +2599,7 @@ TPM_RESULT TPM_Process_ReleaseTransportSigned(tpm_state_t *tpm_state,
     TPM_BOOL			authHandleValid = FALSE;
     TPM_BOOL			transHandleValid = FALSE;
     TPM_AUTH_SESSION_DATA	*auth_session_data = NULL;	/* session data for authHandle */
-    TPM_TRANSPORT_INTERNAL	*t1TpmTransportInternal;
+    TPM_TRANSPORT_INTERNAL	*t1TpmTransportInternal = NULL;
     TPM_SECRET			*hmacKey;
     TPM_KEY			*sigKey = NULL;		/* the key specified by keyHandle */
     TPM_BOOL			parentPCRStatus;
