@@ -3053,7 +3053,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     TPM_CONTEXT_SENSITIVE	c1ContextSensitive;
     TPM_CONTEXT_BLOB		b1ContextBlob;
     TPM_STORE_BUFFER		c1_sbuffer;		/* serialization of c1ContextSensitive */
-    uint32_t			contextIndex;		/* free index in context list */
+    uint32_t			contextIndex = 0;	/* free index in context list */
     uint32_t			space;			/* free space in context list */
     TPM_BOOL			isZero;
     
@@ -4931,7 +4931,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     TPM_AUTH_SESSION_DATA	*tpm_auth_session_data; /* session table entry for the handle */
     TPM_BOOL			isZero;			/* contextNonceSession not set yet */
     TPM_STCLEAR_DATA		*v1StClearData = NULL;
-    uint32_t			contextIndex;		/* free index in context list */
+    uint32_t			contextIndex = 0;	/* free index in context list */
     uint32_t			space;			/* free space in context list */
     TPM_CONTEXT_SENSITIVE	contextSensitive;
     TPM_STORE_BUFFER		contextSensitive_sbuffer; /* serialization of contextSensitive */
