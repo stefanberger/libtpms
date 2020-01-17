@@ -4844,7 +4844,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     unsigned char *	inParamEnd;		/* ending point of inParam's */
     TPM_DIGEST		inParamDigest;
     TPM_BOOL		auditStatus;		/* audit the ordinal */
-    TPM_BOOL		transportEncrypt;	/* wrapped in encrypted transport session */
+    TPM_BOOL		transportEncrypt = FALSE;/* wrapped in encrypted transport session */
     TPM_BOOL		authHandleValid = FALSE;
     TPM_AUTH_SESSION_DATA *auth_session_data;	/* session data for authHandle */
     TPM_SECRET		*hmacKey;
@@ -5144,7 +5144,7 @@ TPM_RESULT TPM_Process_SetCapability(tpm_state_t *tpm_state,
     unsigned char *	inParamEnd;		/* ending point of inParam's */
     TPM_DIGEST		inParamDigest;
     TPM_BOOL		auditStatus;		/* audit the ordinal */
-    TPM_BOOL		transportEncrypt;	/* wrapped in encrypted transport session */
+    TPM_BOOL		transportEncrypt = FALSE;/* wrapped in encrypted transport session */
     TPM_BOOL		authHandleValid = FALSE;
     TPM_AUTH_SESSION_DATA *auth_session_data;	/* session data for authHandle */
     TPM_SECRET		*hmacKey;
