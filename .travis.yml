@@ -35,7 +35,7 @@ before_install:
 matrix:
   include:
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=distcheck"
-           NPROC="nproc"
+           NPROC="nproc" CFLAGS="-O3"
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
            TARGET="install" NPROC="nproc"
       dist: xenial
