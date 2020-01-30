@@ -1732,7 +1732,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 					TPM_BOOL FIPS)
 {
     TPM_RESULT	rc = 0;
-    TPM_RSA_KEY_PARMS *tpm_rsa_key_parms;	/* used if algorithmID indicates RSA */
+    TPM_RSA_KEY_PARMS *tpm_rsa_key_parms = NULL;/* used if algorithmID indicates RSA */
 
     printf("  TPM_KeyParms_CheckProperties: keyUsage %04hx\n", tpm_key_usage);
     printf("  TPM_KeyParms_CheckProperties: sigScheme %04hx\n", tpm_key_parms->sigScheme);

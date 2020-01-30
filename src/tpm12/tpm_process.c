@@ -3381,7 +3381,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
     unsigned char *	inParamEnd;		/* ending point of inParam's */
     TPM_DIGEST		inParamDigest;
     TPM_BOOL		auditStatus;		/* audit the ordinal */
-    TPM_BOOL		transportEncrypt;	/* wrapped in encrypted transport session */
+    TPM_BOOL		transportEncrypt = FALSE;/* wrapped in encrypted transport session */
     uint16_t		subCap16 = 0;		/* the subCap as a uint16_t */
     uint32_t		subCap32 = 0;		/* the subCap as a uint32_t */
     TPM_STORE_BUFFER	capabilityResponse;	/* response */

@@ -788,7 +788,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
     uint32_t		outParamStart;	/* starting point of outParam's */
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
-    TPM_COUNTER_VALUE	*counterValue;	/* The counter value */
+    TPM_COUNTER_VALUE	*counterValue = NULL;	/* The counter value */
 
     printf("TPM_Process_IncrementCounter: Ordinal Entry\n");
     /*
