@@ -62,9 +62,15 @@ int main(void)
         goto exit;
     }
 
+#ifdef WITH_PCCLIENT
+    if (rlength != 490) {
+        fprintf(stderr, "Expected response is %u bytes, but got %u.\n",
+                490, rlength);
+#else
     if (rlength != 506) {
         fprintf(stderr, "Expected response is %u bytes, but got %u.\n",
                 506, rlength);
+#endif
         goto exit;
     }
 

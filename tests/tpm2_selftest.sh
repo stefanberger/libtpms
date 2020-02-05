@@ -6,6 +6,15 @@ ROOT=${abs_top_builddir:-$(pwd)/..}
 TESTDIR=${abs_top_testdir:-$(dirname "$0")}
 DIR=${PWD}
 
+SCRIPT="$(basename $0)"
+SUFFIX=${SCRIPT##*.}
+SCRIPT="${SCRIPT%.*}"
+EXEC=${SCRIPT}
+
+if [ ${SUFFIX} = "pcclient" ]; then
+  EXEC="${EXEC}_pcclient"
+fi
+
 WORKDIR=$(mktemp -d)
 
 . ${TESTDIR}/common
@@ -19,7 +28,7 @@ trap "cleanup" QUIT EXIT
 
 pushd $WORKDIR &>/dev/null
 
-${DIR}/tpm2_selftest
+${DIR}/${EXEC}
 rc=$?
 
 fs=$(get_filesize NVChip)

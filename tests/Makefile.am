@@ -65,6 +65,54 @@ freebl_sha1flattensize_LDFLAGS = \
 	$(shell nspr-config --libs) \
 	$(shell nss-config --libs)
 
+if WITH_PROFILE_TEST
+
+SUFFIXES: .extra
+.sh.extra:
+	$(LN_S) $(CURDIR)/$< $@
+
+AM_EXTRA_LDFLAGS = -ltpms-@TEST_PROFILE@ -L$(top_builddir)/src/.libs $(SANITIZERS)
+
+check_PROGRAMS += \
+	base64decode_extra \
+	nvram_offsets_extra \
+	tpm2_createprimary_extra \
+	tpm2_pcr_read_extra \
+	tpm2_selftest_extra \
+	fuzz_extra
+
+TESTS += \
+	base64decode.extra \
+	fuzz.extra \
+	nvram_offsets_extra \
+	tpm2_createprimary.extra \
+	tpm2_pcr_read.extra \
+	tpm2_selftest.extra
+
+base64decode_extra_SOURCES = base64decode.c
+base64decode_extra_LDFLAGS = $(AM_EXTRA_LDFLAGS)
+
+nvram_offsets_extra_SOURCES = $(nvram_offsets_SOURCES)
+nvram_offsets_extra_CFLAGS = $(nvram_offsets_CFLAGS)
+nvram_offsets_extra_LDFLAGS = $(AM_EXTRA_LDFLAGS)
+
+tpm2_createprimary_extra_SOURCES = tpm2_createprimary.c
+tpm2_createprimary_extra_CFLAGS = $(AM_CFLAGS) -DWITH_EXTRA
+tpm2_createprimary_extra_LDFLAGS = $(AM_EXTRA_LDFLAGS)
+
+tpm2_pcr_read_extra_SOURCES = tpm2_pcr_read.c
+tpm2_pcr_read_extra_CFLAGS = $(AM_CFLAGS) -DWITH_EXTRA
+tpm2_pcr_read_extra_LDFLAGS = $(AM_EXTRA_LDFLAGS)
+
+tpm2_selftest_extra_SOURCES = tpm2_selftest.c
+tpm2_selftest_extra_LDFLAGS = $(AM_EXTRA_LDFLAGS)
+
+fuzz_extra_SOURCES = $(fuzz_SOURCES)
+fuzz_extra_CXXFLAGS = $(fuzz_CXXFLAGS)
+fuzz_extra_LDFLAGS = $(FUZZER) $(LIB_FUZZING_ENGINE) $(AM_EXTRA_LDFLAGS)
+
+endif # WITH_PROFILE_TEST
+
 EXTRA_DIST = \
 	freebl_sha1flattensize.c \
 	base64decode.c \
@@ -81,4 +129,5 @@ EXTRA_DIST = \
 CLEANFILES = \
 	*.gcov \
 	*.gcda \
-	*.gcno
+	*.gcno \
+	*.extra

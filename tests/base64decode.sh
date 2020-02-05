@@ -3,6 +3,15 @@
 input=$(mktemp)
 binary=$(mktemp)
 
+SCRIPT="$(basename $0)"
+SUFFIX=${SCRIPT##*.}
+SCRIPT="${SCRIPT%.*}"
+EXEC=${SCRIPT}
+
+if [ ${SUFFIX} = "pcclient" ]; then
+  EXEC="${EXEC}_pcclient"
+fi
+
 trap "rm -f $input $binary" EXIT
 
 function sseq()
@@ -31,7 +40,7 @@ do
 	echo "-----BEGIN INITSTATE-----" > $input
 	do_base64 $binary >> $input
 	echo "-----END INITSTATE-----" >> $input
-	./base64decode $input $binary
+	./${EXEC} $input $binary
 	if [ $? -ne 0 ]; then
 		exit 1
 	fi

@@ -176,7 +176,26 @@ m4_foreach([profile], m4_quote(LIBTPMS_PROFILES), [
 	AM_CONDITIONAL(m4_join([], [WITH_PROFILE_], m4_toupper(profile)),
 	               [test m4_join([], [x$with_extra_profile_], profile) = "xyes"])
 ])
+
+# parse profile list for testing
+AC_ARG_WITH([extra-profile-tests],
+			AC_HELP_STRING([--with-extra-profile-tests],
+		                   m4_join([], [one of the additional libtpms profiles, supported values: ],
+						           m4_quote(LIBTPMS_PROFILES))),
+			[
+				# AS_IF([test "pcclient" = "$with_extra_profile_tests" -o "another" = "$with_extra_profile_tests" -o ... "a" = "b"], ...)
+				AS_IF([test m4_foreach([profile], LIBTPMS_PROFILES, "profile" = "$with_extra_profile_tests" -o) "a" = "b"],
+                      [AC_MSG_RESULT([Extra profile for testing parsed successfully])],
+                      [AC_MSG_ERROR([Illegal profile: $with_extra_profile_tests])])
+				# test if profile for testing is enabled (i.e. in $with_extra_profiles)
+				AS_IF([test "$with_extra_profiles" = "$(echo $with_extra_profiles | sed -s "s/\b$with_extra_profile_tests\b//g")"],
+				      [AC_MSG_ERROR([Extra profile for testing is not enabled: $with_extra_profile_tests])],
+					  [])
+				AC_SUBST(TEST_PROFILE, $with_extra_profile_tests)
+			],
+			[with_extra_profile_tests=""]
 )
+AM_CONDITIONAL([WITH_PROFILE_TEST], [test "$with_extra_profile_tests" != ""])
 
 use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
