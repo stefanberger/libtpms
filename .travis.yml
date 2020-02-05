@@ -80,3 +80,7 @@ matrix:
            # 'distcheck' results in duplicate symbol errors
       os: osx
       compiler: clang
+    - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --with-extra-profiles=pcclient --with-extra-profile-tests=pcclient"
+           "TARGET=check" NPROC="sysctl -n hw.ncpu"
+           CFLAGS="-I/usr/local/opt/openssl/include"
+           LDFLAGS="-L/usr/local/opt/openssl/lib"
