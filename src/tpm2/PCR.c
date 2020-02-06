@@ -213,17 +213,17 @@ PCRGetAuthPolicy(
 		 TPM2B_DIGEST    *policy         // OUT: policy of PCR
 		 )
 {
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     UINT32           groupIndex;
     if(PCRBelongsPolicyGroup(handle, &groupIndex))
 	{
 	    *policy = gp.pcrPolicies.policy[groupIndex];
 	    return gp.pcrPolicies.hashAlg[groupIndex];
 	}
-    else
-	{
-	    policy->t.size = 0;
-	    return TPM_ALG_NULL;
-	}
+#endif
+
+	policy->t.size = 0;
+	return TPM_ALG_NULL;
 }
 /* 8.7.3.7 PCRSimStart() */
 /* This function is used to initialize the policies when a TPM is manufactured. This function would
@@ -262,7 +262,9 @@ PCRSimStart(
 		    = 0xFF;
 	}
     // Store the initial configuration to NV
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     NV_SYNC_PERSISTENT(pcrPolicies);
+#endif
     NV_SYNC_PERSISTENT(pcrAllocated);
     return;
 }
@@ -1119,12 +1121,16 @@ PCRGetProperty(
 		    if(PCRBelongsPolicyGroup(pcr + PCR_FIRST, &groupIndex))
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
+#else
+		    (void) groupIndex;
 #endif
 #if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
 		  case TPM_PT_PCR_AUTH:
 		    if(PCRBelongsAuthGroup(pcr + PCR_FIRST, &groupIndex))
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
+#else
+		    (void) groupIndex;
 #endif
 #if ENABLE_PCR_NO_INCREMENT == YES
 		  case TPM_PT_PCR_NO_INCREMENT:

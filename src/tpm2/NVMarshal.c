@@ -498,6 +498,7 @@ skip_future_versions:
     return rc;
 }
 
+#if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
 #define PCR_POLICY_MAGIC 0x176be626
 #define PCR_POLICY_VERSION 2
 static UINT16
@@ -579,6 +580,7 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
 skip_future_versions:
     return rc;
 }
+#endif
 
 #define ORDERLY_DATA_MAGIC      0x56657887
 #define ORDERLY_DATA_VERSION 2
@@ -1570,6 +1572,8 @@ SHA_LONG_Unmarshal(SHA_LONG *data, BYTE **buffer, INT32 *size)
     return UINT32_Unmarshal(data, buffer, size);
 }
 
+#if ALG_SHA384 || ALG_SHA512
+
 static inline UINT16
 SHA_LONG64_Marshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
 {
@@ -1583,6 +1587,8 @@ SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
     assert(sizeof(*data) == 8);
     return UINT64_Unmarshal((UINT64 *)data, buffer, size);
 }
+
+#endif /* ALG_SHA384 || ALG_SHA512 */
 
 #if ALG_SHA1
 

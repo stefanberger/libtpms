@@ -77,8 +77,10 @@ CommandAuditPreInstall_Init(
 {
     // Clear all the audit commands
     MemorySet(gp.auditCommands, 0x00, sizeof(gp.auditCommands));
+#if CC_SetCommandCodeAuditStatus == CC_YES
     // TPM_CC_SetCommandCodeAuditStatus always being audited
     CommandAuditSet(TPM_CC_SetCommandCodeAuditStatus);
+#endif
     // Set initial command audit hash algorithm to be context integrity hash
     // algorithm
     gp.auditHashAlg = CONTEXT_INTEGRITY_HASH_ALG;
@@ -154,6 +156,7 @@ CommandAuditClear(
     // Do nothing if the command is not implemented
     if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
 	{
+#if CC_SetCommandCodeAuditStatus == CC_YES
 	    // The bit associated with TPM_CC_SetCommandCodeAuditStatus() cannot be
 	    // cleared
 	    if(commandCode != TPM_CC_SetCommandCodeAuditStatus)
@@ -165,6 +168,7 @@ CommandAuditClear(
 			    return TRUE;
 			}
 		}
+#endif
 	}
     // No change
     return FALSE;

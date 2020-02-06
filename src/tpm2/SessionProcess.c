@@ -1559,6 +1559,8 @@ CheckAuthNoSession(
 	    if(result != TPM_RC_SUCCESS)
 		return result;
 	}
+#else
+	(void) result; /* unused */
 #endif
     // Initialize number of sessions to be 0
     command->sessionNum = 0;
