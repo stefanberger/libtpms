@@ -1,12 +1,18 @@
 libtpms (0.8.0~dev1) UNRELEASED; urgency=medium
 
+  * Developer release 1
+
  -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 19 Jul 2019 13:38:08 -0500
 
 libtpms (0.7.0-1) RELEASED; urgency=medium
 
+  * Stable release
+
  -- Stefan Berger <stefanb@linux.ibm.com>  Thu, 18 Jul 2019 16:26:00 -0500
 
 libtpms (0.7.0~dev1) UNRELEASED; urgency=medium
+
+  * Stable release
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 14 Jan 2019 10:25:08 -0500
 

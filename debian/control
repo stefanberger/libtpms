@@ -2,8 +2,15 @@ Source: libtpms
 Maintainer: Stefan Berger <stefanb@linux.vnet.ibm.com>
 Section: libs
 Priority: optional
-Build-Depends: automake, autoconf, libtool, libssl-dev,
- gawk, dh-exec, debhelper (>= 9), g++
+Standards-Version: 3.9.7
+Build-Depends:
+ autoconf,
+ automake,
+ debhelper (>= 9),
+ dh-exec,
+ gawk,
+ libssl-dev,
+ libtool
 
 Package: libtpms0
 Architecture: any
