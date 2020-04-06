@@ -1,12 +1,13 @@
 #!/usr/bin/make -f
 
+# export DH_VERBOSE=1
+
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 %:
-	dh $@ --parallel 
+	dh $@ --parallel --with autotools-dev --with autoreconf
 
 override_dh_auto_configure:
-	NOCONFIGURE=1 ./autogen.sh
 	dh_auto_configure -- --with-openssl --with-tpm2
 
 override_dh_usrlocal:
