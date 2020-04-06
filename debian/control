@@ -6,7 +6,9 @@ Standards-Version: 3.9.7
 Build-Depends:
  autoconf,
  automake,
+ autotools-dev,
  debhelper (>= 9),
+ dh-autoreconf,
  dh-exec,
  gawk,
  libssl-dev,
