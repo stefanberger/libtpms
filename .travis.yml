@@ -38,7 +38,7 @@ matrix:
            NPROC="nproc" CFLAGS="-O3"
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage"
            TARGET="install" NPROC="nproc"
-      dist: xenial
+      dist: bionic
       before_script:
       - sudo pip install cpp-coveralls
       script:
@@ -47,11 +47,12 @@ matrix:
         sudo make -j$(nproc) check &&
         git clone https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
+         sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python-twisted libfuse-dev
            libglib2.0-dev libgmp-dev expect libtasn1-dev socat findutils
-           tpm-tools gnutls-dev gnutls-bin &&
+           tpm-tools gnutls-dev gnutls-bin tss2 &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
-         export SWTPM_TEST_EXPENSIVE=1 &&
+         export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
          sudo make -j$(nproc) check &&
         popd
       after_success:
@@ -60,18 +61,19 @@ matrix:
         cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage --disable-use-openssl-functions"
            TARGET="install" NPROC="nproc"
-      dist: xenial
+      dist: bionic
       script:
         ./autogen.sh ${CONFIG} &&
         sudo make -j$(nproc) ${TARGET} &&
         sudo make -j$(nproc) check &&
         git clone https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
+         sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python-twisted libfuse-dev
            libglib2.0-dev libgmp-dev expect libtasn1-dev socat findutils
-           tpm-tools gnutls-dev gnutls-bin &&
+           tpm-tools gnutls-dev gnutls-bin tss2 &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
-         export SWTPM_TEST_EXPENSIVE=1 &&
+         export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
          sudo make -j$(nproc) check &&
         popd
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
