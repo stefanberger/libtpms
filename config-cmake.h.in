@@ -1,0 +1,61 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define to 1 if you have the <blapi.h> header file. */
+#cmakedefine HAVE_BLAPI_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#cmakedefine HAVE_DLFCN_H
+
+/* Define to 1 if you have the <gmp.h> header file. */
+#cmakedefine HAVE_GMP_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#cmakedefine HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the <memory.h> header file. */
+#cmakedefine HAVE_MEMORY_H
+
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#cmakedefine HAVE_OPENSSL_AES_H @WITH_OPENSSL@
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#cmakedefine LT_OBJDIR
+
+/* Name of package */
+#cmakedefine PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#cmakedefine PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#cmakedefine PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#cmakedefine PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#cmakedefine PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#cmakedefine PACKAGE_URL
+
+/* Define to the version of this package. */
+#cmakedefine PACKAGE_VERSION
+
+/* Define to 1 if you have the ANSI C header files. */
+#cmakedefine STDC_HEADERS
+
+/* use freebl crypto library */
+#cmakedefine USE_FREEBL_CRYPTO_LIBRARY @USE_FREEBL_CRYPTO_LIBRARY@
+
+/* use openssl crypto library */
+#cmakedefine USE_OPENSSL_CRYPTO_LIBRARY @USE_OPENSSL_CRYPTO_LIBRARY@
+
+/* Version number of package */
+#cmakedefine VERSION @PROJECT_VERSION@
+
+/* whether to support TPM2 */
+#cmakedefine WITH_TPM2 @WITH_TPM2@

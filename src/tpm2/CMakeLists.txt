@@ -1,0 +1,134 @@
+add_library(tpms_tpm2 OBJECT
+    AlgorithmCap.c
+    AlgorithmTests.c
+    AsymmetricCommands.c
+    AttestationCommands.c
+    Attest_spt.c
+    AuditCommands.c
+    Bits.c
+    BnConvert.c
+    BnMath.c
+    BnMemory.c
+    Cancel.c
+    CapabilityCommands.c
+    Clock.c
+    ClockCommands.c
+    CommandAudit.c
+    CommandCodeAttributes.c
+    CommandDispatcher.c
+    ContextCommands.c
+    Context_spt.c
+    CryptEccData.c
+    CryptSelfTest.c
+    CryptUtil.c
+    DA.c
+    DictionaryCommands.c
+    DuplicationCommands.c
+    EACommands.c
+    EncryptDecrypt_spt.c
+    Entity.c
+    Entropy.c
+    EphemeralCommands.c
+    ExecCommand.c
+    Global.c
+    Handle.c
+    HashCommands.c
+    Hierarchy.c
+    HierarchyCommands.c
+    IntegrityCommands.c
+    IoBuffers.c
+    Locality.c
+    LocalityPlat.c
+    ManagementCommands.c
+    Manufacture.c
+    Marshal.c
+    MathOnByteBuffers.c
+    Memory.c
+    NVCommands.c
+    NVDynamic.c
+    NVMem.c
+    NVReserved.c
+    NV_spt.c
+    Object.c
+    ObjectCommands.c
+    Object_spt.c
+    PCR.c
+    PlatformData.c
+    Policy_spt.c
+    Power.c
+    PowerPlat.c
+    PP.c
+    PPPlat.c
+    PrimeData.c
+    PropertyCap.c
+    RandomCommands.c
+    Response.c
+    ResponseCodeProcessing.c
+    RunCommand.c
+    Session.c
+    SessionCommands.c
+    SessionProcess.c
+    SigningCommands.c
+    StartupCommands.c
+    SymmetricCommands.c
+    TestingCommands.c
+    Ticket.c
+    Time.c
+    TpmSizeChecks.c
+    TPMCmdp.c
+    TpmFail.c
+    Unique.c
+    Unmarshal.c
+    Vendor_TCG_Test.c
+    LibtpmsCallbacks.c
+    NVMarshal.c
+    StateMarshal.c
+    Volatile.c
+    ${PROJECT_SOURCE_DIR}/src/tpm_tpm2_interface.c
+    ${PROJECT_SOURCE_DIR}/src/tpm_tpm2_tis.c
+    $<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptCmac.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptDes.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptEccKeyExchange.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptEccMain.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptEccSignature.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptHash.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptHashData.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptPrime.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptPrimeSieve.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptRand.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptRsa.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptSmac.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/CryptSym.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/Helpers.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/TpmToOsslDesSupport.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/TpmToOsslMath.c>
+	$<$<BOOL:${WITH_OPENSSL}>:crypto/openssl/TpmToOsslSupport.c>
+)
+
+target_compile_definitions(tpms_tpm2
+    PUBLIC
+        _POSIX_
+        TPM_POSIX
+        # build with libtpms callback support
+        TPM_LIBTPMS_CALLBACKS
+)
+
+target_include_directories(tpms_tpm2
+    PUBLIC
+        crypto
+        crypto/openssl
+        ${PROJECT_SOURCE_DIR}/include/libtpms
+        ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_BINARY_DIR}
+)
+
+target_compile_options(tpms_tpm2
+    PRIVATE
+        -include tpm_library_conf.h
+    PUBLIC
+        $<$<BOOL:${UNIX}>:-Wall>
+        $<$<BOOL:${UNIX}>:-Werror>
+        $<$<BOOL:${UNIX}>:-Wsign-compare>
+        $<$<BOOL:${UNIX}>:-Wnested-externs>
+        $<$<BOOL:${MSVC}>:/W3>
+)

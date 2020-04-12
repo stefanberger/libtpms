@@ -50,3 +50,4 @@ Makefile
 /debian/libtpms
 /debian/libtpms-dev
 /debian/tmp
+build
