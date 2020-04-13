@@ -9,6 +9,28 @@ extern BYTE s_indexOrderlyRam[RAM_INDEX_SPACE];
 
 int main(void)
 {
+    PERSISTENT_DATA pd;
+
+    /* Check size of ppList that expands with new commands */
+#define PD_PP_LIST_EXP_SIZE 14
+    if (sizeof(pd.ppList) != PD_PP_LIST_EXP_SIZE) {
+        fprintf(stderr,
+                "sizeof(PERSISTENT_DATA.ppList) does not have expecte size "
+                "of %u bytes but %zu bytes\n",
+                PD_PP_LIST_EXP_SIZE, sizeof(pd.ppList));
+        return EXIT_FAILURE;
+    }
+
+    /* Check size of auditCommands that expands with new commands */
+#define PD_AUDIT_COMMANDS_EXP_SIZE 14
+    if (sizeof(pd.auditCommands) != PD_AUDIT_COMMANDS_EXP_SIZE) {
+        fprintf(stderr,
+                "sizeof(PERSISTENT_DATA.auditCommands) does not have expecte size "
+                "of %u bytes but %zu bytes\n",
+                PD_AUDIT_COMMANDS_EXP_SIZE, sizeof(pd.auditCommands));
+        return EXIT_FAILURE;
+    }
+
     /* ensure that the NVRAM offset of NV_USER_DYNAMIC is at the expected
        location so that there's enough memory for re-constructing NVRAM
        indices etc. into the NVRAM */
