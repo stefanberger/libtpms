@@ -277,7 +277,9 @@
 #define MAX_CAP_BUFFER                  1024
 #endif
 #ifndef NV_MEMORY_SIZE
-#define NV_MEMORY_SIZE                  (128 * 1024) /* libtpms changed */
+/* libtmps: 65 OBJECTs in USER NVRAM expanded by 704 bytes due to size
+ * increase of OBJECT from 2048 bit RSA keys to 3072 bit by 704 bytes*/
+#define NV_MEMORY_SIZE                  (128 * 1024 + 65 * 704)  /* libtpms changed */
 #endif
 #ifndef MIN_COUNTER_INDICES
 #define MIN_COUNTER_INDICES             8
@@ -469,7 +471,7 @@
 #define RSA_2048                    (ALG_RSA && YES)
 #endif
 #ifndef RSA_3072
-#define RSA_3072                    (ALG_RSA && NO)
+#define RSA_3072                    (ALG_RSA && YES)
 #endif
 #ifndef RSA_4096
 #define RSA_4096                    (ALG_RSA && NO)
