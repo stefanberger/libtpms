@@ -113,8 +113,10 @@
 // Table 1:00 - Defines for RSA Asymmetric Cipher Algorithm Constants
 #define RSA_KEY_SIZES_BITS						\
     (1024 * RSA_1024),  (2048 * RSA_2048), (3072 * RSA_3072),		\
-	(4096 * RSA_4096)
-#if   RSA_4096
+	(4096 * RSA_4096), (16384 * RSA_16384)
+#if   RSA_16384
+#   define RSA_MAX_KEY_SIZE_BITS    16384
+#elif   RSA_4096
 #   define RSA_MAX_KEY_SIZE_BITS    4096
 #elif RSA_3072
 #   define RSA_MAX_KEY_SIZE_BITS    3072
