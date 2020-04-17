@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptRand.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -143,7 +143,7 @@ typedef union
 	// for FIPS compliance of DRBG
     } DRBG_STATE, *pDRBG_STATE;
 #define DRBG_MAGIC   ((UINT32) 0x47425244) // "DRBG" backwards so that it displays
-typedef struct
+typedef struct KDF_STATE 
 {
     UINT64               counter;
     UINT32               magic;
