@@ -3,7 +3,7 @@
 /*			     TPM Size Checks					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmSizeChecks.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: TpmSizeChecks.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -56,7 +56,7 @@
 /*    information herein.							*/
 /*										*/
 /*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
-/*										*/
+/*20								*/
 /********************************************************************************/
 
 //** Includes, Defines, and Types
@@ -166,11 +166,16 @@ TpmSizeChecks(
         // round required size up to nearest 8 byte boundary.
         biggestContext = 8 * ((biggestContext + 7) / 8);
 
-        if(MAX_CONTEXT_SIZE < biggestContext)	/* kgold, was exact compare */
+        if(MAX_CONTEXT_SIZE < biggestContext)
 	    {
 		printf("MAX_CONTEXT_SIZE should be changed to %d (%d)\n",
 		       biggestContext, MAX_CONTEXT_SIZE);
 		PASS = FALSE;
+	    }
+	else if (MAX_CONTEXT_SIZE > biggestContext)
+	    {
+		printf("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
+		       biggestContext, MAX_CONTEXT_SIZE);
 	    }
     }
     {
@@ -184,8 +189,8 @@ TpmSizeChecks(
         int                         aSize = sizeof(u.attributes);
         int                         uSize = sizeof(u.uint32Value);
         u.uint32Value = 0;
-        SET_ATTRIBUTE(u.attributes, TPMA_OBJECT, Reserved_bit_at_0);
-        if(u.uint32Value != 1)
+        SET_ATTRIBUTE(u.attributes, TPMA_OBJECT, fixedTPM);
+        if(u.uint32Value != 2)
 	    {
 		printf("The bit allocation in a TPMA_OBJECT is not as expected");
 		PASS = FALSE;
@@ -196,7 +201,7 @@ TpmSizeChecks(
 		PASS = FALSE;
 	    }
     }
-    // Check that the platorm implementes each of the ACT that the TPM thinks
+    // Check that the platform implements each of the ACT that the TPM thinks are present
     {
         uint32_t            act;
         for(act = 0; act < 16; act++)
