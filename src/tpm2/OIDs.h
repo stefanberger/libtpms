@@ -3,7 +3,7 @@
 /*			OID values						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: OIDs.h 1529 2019-11-21 23:29:01Z kgoldman $			*/
+/*            $Id: OIDs.h 1594 2020-03-26 22:15:48Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -136,7 +136,7 @@
 #   define ALG_SHA3_512 NO
 #endif
 #if ALG_SHA3_512
-#define SSHA3_512_OID(NAME) MAKE_OID(NAME##SHA3_512)
+#define SHA3_512_OID(NAME) MAKE_OID(NAME##SHA3_512)
 #else
 #define SHA3_512_OID(NAME)
 #endif
@@ -204,7 +204,7 @@ SM3_256_OID(_PKCS1_);   // 1.2.156.10197.1.504
 #define OID_PKCS1_SHA3_256_VALUE    NIST_SIG, 14
 SHA3_256_OID(_PKCS1_);
 #define OID_PKCS1_SHA3_384_VALUE    NIST_SIG, 15
-SHA3_256_OID(_PKCS1_);
+SHA3_384_OID(_PKCS1_);
 #define OID_PKCS1_SHA3_512_VALUE    NIST_SIG, 16
 SHA3_512_OID(_PKCS1_);
 #endif // ALG_RSA
