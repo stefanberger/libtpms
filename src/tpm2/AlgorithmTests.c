@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: AlgorithmTests.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -871,10 +871,10 @@ TestAlgorithm(
 		    //            case ALG_SM4_VALUE:
 #endif
 #if ALG_CAMELLIA
-		  case ALG_CAMELLIA_VALUE:
+		  case ALG_CAMELLIA_VALUE:  // libtpms activated
 #endif
 #if ALG_TDES
-                  case ALG_TDES_VALUE:
+                  case ALG_TDES_VALUE:      // libtpms added
 #endif
 		    // Symmetric modes
 #if !ALG_CFB
