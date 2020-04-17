@@ -364,9 +364,16 @@ char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         "\"version\":\"id:%08X\","
         "\"model\":\"swtpm\""
     "}";
+    const char *tpmfeatures_temp =
+    "\"TPMFeatures\":{"
+        "\"RSAKeySizes\":[%s]"
+    "}";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
+    char *tpmfeatures = NULL;
+    char rsakeys[32];
+    size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
         return NULL;
@@ -392,6 +399,23 @@ char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_TPMFEATURES)) {
+        fmt = buffer;
+        buffer = NULL;
+        n = snprintf(rsakeys, sizeof(rsakeys), "%s2048%s%s",
+                     RSA_1024 ? "1024," : "",
+                     RSA_3072 ? ",3072" : "",
+                     RSA_4096 ? ",4096" : "");
+        if (n >= sizeof(rsakeys))
+            goto error;
+        if (asprintf(&tpmfeatures, tpmfeatures_temp, rsakeys) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     tpmfeatures, "%s%s%s") < 0)
+            goto error;
+        printed = true;
+    }
+
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
@@ -407,6 +431,7 @@ error:
     free(fmt);
     free(buffer);
     free(tpmattrs);
+    free(tpmfeatures);
 
     return NULL;
 }
