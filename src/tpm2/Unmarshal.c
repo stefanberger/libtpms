@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -3115,7 +3115,7 @@ TPMS_KEY_SCHEME_ECMQV_Unmarshal(TPMS_KEY_SCHEME_ECMQV *target, BYTE **buffer, IN
 /* Table 148 - Definition of Types for KDF Schemes, hash-based key- or mask-generation functions */
 
 TPM_RC
-TPMS_SCHEME_KDF1_SP800_108_Unmarshal(TPMS_SCHEME_KDF1_SP800_108 *target, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF1_SP800_108_Unmarshal(TPMS_KDF_SCHEME_KDF1_SP800_108 *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -3128,7 +3128,7 @@ TPMS_SCHEME_KDF1_SP800_108_Unmarshal(TPMS_SCHEME_KDF1_SP800_108 *target, BYTE **
 /* Table 148 - Definition of Types for KDF Schemes, hash-based key- or mask-generation functions */
 
 TPM_RC
-TPMS_SCHEME_KDF1_SP800_56A_Unmarshal(TPMS_SCHEME_KDF1_SP800_56A *target, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF1_SP800_56A_Unmarshal(TPMS_KDF_SCHEME_KDF1_SP800_56A *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -3141,7 +3141,7 @@ TPMS_SCHEME_KDF1_SP800_56A_Unmarshal(TPMS_SCHEME_KDF1_SP800_56A *target, BYTE **
 /* Table 148 - Definition of Types for KDF Schemes, hash-based key- or mask-generation functions */
 
 TPM_RC
-TPMS_SCHEME_KDF2_Unmarshal(TPMS_SCHEME_KDF2 *target, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF2_Unmarshal(TPMS_KDF_SCHEME_KDF2 *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -3154,7 +3154,7 @@ TPMS_SCHEME_KDF2_Unmarshal(TPMS_SCHEME_KDF2 *target, BYTE **buffer, INT32 *size)
 /* Table 148 - Definition of Types for KDF Schemes, hash-based key- or mask-generation functions */
 
 TPM_RC
-TPMS_SCHEME_MGF1_Unmarshal(TPMS_SCHEME_MGF1 *target, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_MGF1_Unmarshal(TPMS_KDF_SCHEME_MGF1 *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -3174,22 +3174,22 @@ TPMU_KDF_SCHEME_Unmarshal(TPMU_KDF_SCHEME *target, BYTE **buffer, INT32 *size, U
     switch (selector) {
 #if ALG_MGF1
       case TPM_ALG_MGF1:
-	rc = TPMS_SCHEME_MGF1_Unmarshal(&target->mgf1, buffer, size);
+	rc = TPMS_KDF_SCHEME_MGF1_Unmarshal(&target->mgf1, buffer, size);
 	break;
 #endif
 #if ALG_KDF1_SP800_56A
       case TPM_ALG_KDF1_SP800_56A:
-	rc = TPMS_SCHEME_KDF1_SP800_56A_Unmarshal(&target->kdf1_sp800_56a, buffer, size);
+	rc = TPMS_KDF_SCHEME_KDF1_SP800_56A_Unmarshal(&target->kdf1_sp800_56a, buffer, size);
 	break;
 #endif
 #if ALG_KDF2
       case TPM_ALG_KDF2:
-	rc = TPMS_SCHEME_KDF2_Unmarshal(&target->kdf2, buffer, size);
+	rc = TPMS_KDF_SCHEME_KDF2_Unmarshal(&target->kdf2, buffer, size);
 	break;
 #endif
 #if ALG_KDF1_SP800_108
       case TPM_ALG_KDF1_SP800_108:
-	rc = TPMS_SCHEME_KDF1_SP800_108_Unmarshal(&target->kdf1_sp800_108, buffer, size);
+	rc = TPMS_KDF_SCHEME_KDF1_SP800_108_Unmarshal(&target->kdf1_sp800_108, buffer, size);
 	break;
 #endif
       case TPM_ALG_NULL:

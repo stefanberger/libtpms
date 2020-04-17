@@ -279,13 +279,13 @@ extern "C" {
     UINT16
     TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV*source, BYTE **buffer, INT32 *size);
     UINT16
-    TPMS_SCHEME_MGF1_Marshal(TPMS_SCHEME_MGF1 *source, BYTE **buffer, INT32 *size);
+    TPMS_KDF_SCHEME_MGF1_Marshal(TPMS_KDF_SCHEME_MGF1 *source, BYTE **buffer, INT32 *size);
     UINT16
-    TPMS_SCHEME_KDF1_SP800_56A_Marshal(TPMS_SCHEME_KDF1_SP800_56A *source, BYTE **buffer, INT32 *size);
+    TPMS_KDF_SCHEME_KDF1_SP800_56A_Marshal(TPMS_KDF_SCHEME_KDF1_SP800_56A *source, BYTE **buffer, INT32 *size);
     UINT16
-    TPMS_SCHEME_KDF2_Marshal(TPMS_SCHEME_KDF2 *source, BYTE **buffer, INT32 *size);
+    TPMS_KDF_SCHEME_KDF2_Marshal(TPMS_KDF_SCHEME_KDF2 *source, BYTE **buffer, INT32 *size);
     UINT16
-    TPMS_SCHEME_KDF1_SP800_108_Marshal(TPMS_SCHEME_KDF1_SP800_108 *source, BYTE **buffer, INT32 *size);
+    TPMS_KDF_SCHEME_KDF1_SP800_108_Marshal(TPMS_KDF_SCHEME_KDF1_SP800_108 *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMU_KDF_SCHEME_Marshal(TPMU_KDF_SCHEME *source, BYTE **buffer, INT32 *size, UINT32 selector);
     UINT16
