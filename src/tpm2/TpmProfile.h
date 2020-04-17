@@ -185,31 +185,6 @@
 #define  RADIX_BITS                      32
 #endif                                 // libtpms added end
 
-#if 0                                  // libtpms added
-
-/* kgold */
-#if defined TPM_POSIX && __WORDSIZE == 32
-#define  RADIX_BITS                     32
-
-#elif TPM_POSIX && __WORDSIZE == 64
-#define  RADIX_BITS                     64
-
-#elif TPM_POSIX && !defined _LP64
-#define  RADIX_BITS                     32
-
-#elif TPM_POSIX &&  defined _LP64
-#define  RADIX_BITS                    64
-
-#elif TPM_WINDOWS
-#define  RADIX_BITS                     32
-
-#else
-#error "RADIX_BITS is not set"
-
-#endif
-
-#endif                                 // libtpms added
-
 #ifndef HASH_LIB
 #define HASH_LIB                        Ossl
 #endif
