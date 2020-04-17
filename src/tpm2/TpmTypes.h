@@ -328,6 +328,7 @@ typedef  UINT32             TPM_SPEC;
 typedef UINT32			TPM_CONSTANTS32;
 #define TYPE_OF_TPM_CONSTANTS32 UINT32
 #define TPM_GENERATED_VALUE     (TPM_CONSTANTS32)(0xFF544347)
+#define TPM_MAX_DERIVATION_BITS	(TPM_CONSTANTS32)8192
 
 /* Table 2:16 - Definition of TPM_RC Constants */
 typedef UINT32             TPM_RC;

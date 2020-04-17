@@ -310,9 +310,6 @@
 #ifndef MAX_VENDOR_BUFFER_SIZE
 #define MAX_VENDOR_BUFFER_SIZE          1024
 #endif
-#ifndef MAX_DERIVATION_BITS
-#define MAX_DERIVATION_BITS         8192
-#endif
 #ifndef SIZE_OF_X509_SERIAL_NUMBER
 #define SIZE_OF_X509_SERIAL_NUMBER      20
 #endif
