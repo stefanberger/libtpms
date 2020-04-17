@@ -1463,28 +1463,28 @@ TPMS_KEY_SCHEME_ECMQV_Marshal(TPMS_KEY_SCHEME_ECMQV*source, BYTE **buffer, INT32
 
 /* Table 2:155 - Definition of Types for KDF Schemes (TypedefTable()) */
 UINT16
-TPMS_SCHEME_MGF1_Marshal(TPMS_SCHEME_MGF1 *source, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_MGF1_Marshal(TPMS_KDF_SCHEME_MGF1 *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
     return written;
 }
 UINT16
-TPMS_SCHEME_KDF1_SP800_56A_Marshal(TPMS_SCHEME_KDF1_SP800_56A *source, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF1_SP800_56A_Marshal(TPMS_KDF_SCHEME_KDF1_SP800_56A *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
     return written;
 }
 UINT16
-TPMS_SCHEME_KDF2_Marshal(TPMS_SCHEME_KDF2 *source, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF2_Marshal(TPMS_KDF_SCHEME_KDF2 *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
     return written;
 }
 UINT16
-TPMS_SCHEME_KDF1_SP800_108_Marshal(TPMS_SCHEME_KDF1_SP800_108 *source, BYTE **buffer, INT32 *size)
+TPMS_KDF_SCHEME_KDF1_SP800_108_Marshal(TPMS_KDF_SCHEME_KDF1_SP800_108 *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
@@ -1502,22 +1502,22 @@ TPMU_KDF_SCHEME_Marshal(TPMU_KDF_SCHEME *source, BYTE **buffer, INT32 *size, UIN
     switch (selector) {
 #if ALG_MGF1
       case TPM_ALG_MGF1:
-	written += TPMS_SCHEME_MGF1_Marshal(&source->mgf1, buffer, size);
+	written += TPMS_KDF_SCHEME_MGF1_Marshal(&source->mgf1, buffer, size);
 	break;
 #endif
 #if ALG_KDF1_SP800_56A
       case TPM_ALG_KDF1_SP800_56A:
-	written += TPMS_SCHEME_KDF1_SP800_56A_Marshal(&source->kdf1_sp800_56a, buffer, size);
+	written += TPMS_KDF_SCHEME_KDF1_SP800_56A_Marshal(&source->kdf1_sp800_56a, buffer, size);
 	break;
 #endif
 #if ALG_KDF2
       case TPM_ALG_KDF2:
-	written += TPMS_SCHEME_KDF2_Marshal(&source->kdf2, buffer, size);
+	written += TPMS_KDF_SCHEME_KDF2_Marshal(&source->kdf2, buffer, size);
 	break;
 #endif
 #if ALG_KDF1_SP800_108
       case TPM_ALG_KDF1_SP800_108:
-	written += TPMS_SCHEME_KDF1_SP800_108_Marshal(&source->kdf1_sp800_108, buffer, size);
+	written += TPMS_KDF_SCHEME_KDF1_SP800_108_Marshal(&source->kdf1_sp800_108, buffer, size);
 	break;
 #endif
       case TPM_ALG_NULL:
