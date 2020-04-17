@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic primitives for RSA		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRsa.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptRsa.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -328,14 +328,14 @@ OaepEncode(
     CryptRandomGenerate(hLen, mySeed);
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
     // mask = MGF1 (seed, nSize  hLen  1)
-    CryptMGF1(dbSize, mask, hashAlg, hLen, seed);
+    CryptMGF_KDF(dbSize, mask, hashAlg, hLen, seed, 0);
     // Create the masked db
     pm = mask;
     for(i = dbSize; i > 0; i--)
 	*pp++ ^= *pm++;
     pp = &padded->buffer[hLen + 1];
     // Run the masked data through MGF1
-    if(CryptMGF1(hLen, &padded->buffer[1], hashAlg, dbSize, pp) != (unsigned)hLen)
+    if(CryptMGF_KDF(hLen, &padded->buffer[1], hashAlg, dbSize, pp, 0) != (unsigned)hLen)
 	ERROR_RETURN(TPM_RC_VALUE);
     // Now XOR the seed to create masked seed
     pp = &padded->buffer[1];
@@ -377,8 +377,8 @@ OaepDecode(
 	ERROR_RETURN(TPM_RC_VALUE);
     // Use the hash size to determine what to put through MGF1 in order
     // to recover the seedMask
-    CryptMGF1(hLen, seedMask, hashAlg, padded->size - hLen - 1,
-	      &padded->buffer[hLen + 1]);
+    CryptMGF_KDF(hLen, seedMask, hashAlg, padded->size - hLen - 1,
+		 &padded->buffer[hLen + 1], 0);
     // Recover the seed into seedMask
     pAssert(hLen <= sizeof(seedMask));
     pp = &padded->buffer[1];
@@ -386,7 +386,7 @@ OaepDecode(
     for(i = hLen; i > 0; i--)
 	*pm++ ^= *pp++;
     // Use the seed to generate the data mask
-    CryptMGF1(padded->size - hLen - 1, mask, hashAlg, hLen, seedMask);
+    CryptMGF_KDF(padded->size - hLen - 1, mask, hashAlg, hLen, seedMask, 0);
     // Use the mask generated from seed to recover the padded data
     pp = &padded->buffer[hLen + 1];
     pm = mask;
@@ -554,7 +554,7 @@ PssEncode(
     CryptDigestUpdate(&hashState, saltSize, salt);
     CryptHashEnd(&hashState, hLen, &pOut[out->size - hLen - 1]);
     // Create a mask
-    if(CryptMGF1(mLen, pOut, hashAlg, hLen, &pOut[mLen]) != mLen)
+    if(CryptMGF_KDF(mLen, pOut, hashAlg, hLen, &pOut[mLen], 0) != mLen)
 	FAIL(FATAL_ERROR_INTERNAL);
     // Since this implementation uses key sizes that are all even multiples of
     // 8, just need to make sure that the most significant bit is CLEAR
@@ -610,7 +610,7 @@ PssDecode(
     // Use the hLen bytes at the end of the buffer to generate a mask
     // Doesn't start at the end which is a flag byte
     mLen = eIn->size - hLen - 1;
-    CryptMGF1(mLen, mask, hashAlg, hLen, &pe[mLen]);
+    CryptMGF_KDF(mLen, mask, hashAlg, hLen, &pe[mLen], 0);
     // Clear the MSO of the mask to make it consistent with the encoding.
     mask[0] &= 0x7F;
     pAssert(mLen <= sizeof(mask));

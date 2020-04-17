@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash_fp.h 1478 2019-06-10 21:15:14Z kgoldman $		*/
+/*            $Id: CryptHash_fp.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -184,12 +184,13 @@ CryptHmacEnd2B(
 	       P2B              digest         // OUT: HMAC
 	       );
 LIB_EXPORT UINT16
-CryptMGF1(
+CryptMGF_KDF(
 	  UINT32           mSize,         // IN: length of the mask to be produced
 	  BYTE            *mask,          // OUT: buffer to receive the mask
 	  TPM_ALG_ID       hashAlg,       // IN: hash to use
 	  UINT32           seedSize,      // IN: size of the seed
-	  BYTE            *seed           // IN: seed size
+	  BYTE            *seed,          // IN: seed size
+	  UINT32           counter        // IN: counter initial value
 	  );
 LIB_EXPORT UINT16
 CryptKDFa(
