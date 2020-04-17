@@ -3,7 +3,7 @@
 /*			  constant definitions used for self-test.   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptTest.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: CryptTest.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -65,10 +65,10 @@
 /* 10.1.7 CryptTest.h */
 /* This file contains constant definitions used for self test */
 /* This is the definition of a bit array with one bit per algorithm */
-/* NOTE: Since bit numbering starts at zero, when ALG_LAST_VALUE is a multiple of 8,
+/* NOTE: Since bit numbering starts at zero, when TPM_ALG_LAST is a multiple of 8,
    ALGORITHM_VECTOR will need to have byte for the single bit in the last byte. So, for example,
-   when ALG_LAST_VECTOR is 8, ALGORITHM_VECTOR will need 2 bytes. */
-#define ALGORITHM_VECTOR_BYTES  ((ALG_LAST_VALUE + 8) / 8)
+   when TPM_ALG_LAST is 8, ALGORITHM_VECTOR will need 2 bytes. */
+#define ALGORITHM_VECTOR_BYTES  ((TPM_ALG_LAST + 8) / 8)
 typedef BYTE    ALGORITHM_VECTOR[ALGORITHM_VECTOR_BYTES];
 #ifdef  TEST_SELF_TEST
 LIB_EXPORT    extern  ALGORITHM_VECTOR    LibToTest;
