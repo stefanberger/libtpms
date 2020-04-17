@@ -105,6 +105,7 @@ TPM_RESULT TPMLIB_GetTPMProperty(enum TPMLIB_TPMProperty prop, int *result);
 enum TPMLIB_InfoFlags {
     TPMLIB_INFO_TPMSPECIFICATION = 1,
     TPMLIB_INFO_TPMATTRIBUTES = 2,
+    TPMLIB_INFO_TPMFEATURES = 4,
 };
 
 char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags);

@@ -32,6 +32,12 @@ The following flags are defined and return JSON objects as shown:
 
 {"TPMAttributes":{"manufacturer":"id:00001014","version":"id:00740001","model":"swtpm"}}
 
+=item B<TPMLIB_INFO_TPMFEATURES> (since v0.8.0)
+
+{"TPMFeatures":{"RSAKeySizes":[1024,2048,3072]}}
+
+This JSON object may be extended in the future.
+
 =back
 
 =head1 RETURN VALUE
