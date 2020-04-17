@@ -367,7 +367,7 @@
 #define ALG_KDF1_SP800_56A              (ALG_YES && ALG_ECC)
 #endif
 #ifndef ALG_KDF2
-#define ALG_KDF2                        ALG_YES              /* libtpms enabled */
+#define ALG_KDF2                        ALG_YES
 #endif
 #ifndef ALG_KEYEDHASH
 #define ALG_KEYEDHASH                   ALG_YES
@@ -448,6 +448,10 @@
 #ifndef RSA_4096
 #define RSA_4096                    (ALG_RSA && NO)
 #endif
+#ifndef RSA_16384
+#define RSA_16384                   (ALG_RSA && NO)
+#endif
+
 // Table 1:17 - Defines for AES Symmetric Cipher Algorithm Constants
 #ifndef AES_128
 #define AES_128                     (ALG_AES && YES)
