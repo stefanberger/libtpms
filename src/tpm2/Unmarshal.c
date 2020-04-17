@@ -157,7 +157,7 @@ TPM_KEY_BITS_Unmarshal(TPM_KEY_BITS *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 7 - Definition of (UINT32) TPM_GENERATED Constants <O> */
-
+#if 0		// libtpms added
 TPM_RC
 TPM_GENERATED_Unmarshal(TPM_GENERATED *target, BYTE **buffer, INT32 *size)
 {
@@ -173,6 +173,7 @@ TPM_GENERATED_Unmarshal(TPM_GENERATED *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif		// libtpms added
 
 /* Table 9 - Definition of (UINT16) TPM_ALG_ID Constants <IN/OUT, S> */
 
@@ -1788,7 +1789,7 @@ TPMT_TK_HASHCHECK_Unmarshal(TPMT_TK_HASHCHECK *target, BYTE **buffer, INT32 *siz
 }
 
 /* Table 92 - Definition of TPMS_ALG_PROPERTY Structure <OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPMS_ALG_PROPERTY_Unmarshal(TPMS_ALG_PROPERTY *target, BYTE **buffer, INT32 *size)
 {
@@ -1802,9 +1803,10 @@ TPMS_ALG_PROPERTY_Unmarshal(TPMS_ALG_PROPERTY *target, BYTE **buffer, INT32 *siz
     }
     return rc;
 }
+#endif		// libtpms added
 
 /* Table 93 - Definition of TPMS_TAGGED_PROPERTY Structure <OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_PROPERTY_Unmarshal(TPMS_TAGGED_PROPERTY *target, BYTE **buffer, INT32 *size)
 {
@@ -1818,9 +1820,10 @@ TPMS_TAGGED_PROPERTY_Unmarshal(TPMS_TAGGED_PROPERTY *target, BYTE **buffer, INT3
     }
     return rc;
 }
+#endif		// libtpms added
  
 /* Table 94 - Definition of TPMS_TAGGED_PCR_SELECT Structure <OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_PCR_SELECT_Unmarshal(TPMS_TAGGED_PCR_SELECT *target, BYTE **buffer, INT32 *size)
 {
@@ -1837,6 +1840,7 @@ TPMS_TAGGED_PCR_SELECT_Unmarshal(TPMS_TAGGED_PCR_SELECT *target, BYTE **buffer, 
     }
      return rc;
 }
+#endif		// libtpms added
 
 /* Table 95 - Definition of TPML_CC Structure */
 
@@ -1861,7 +1865,7 @@ TPML_CC_Unmarshal(TPML_CC *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 2:96 - Definition of TPMS_TAGGED_POLICY Structure (StructuresTable()) */
-
+#if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_POLICY_Unmarshal(TPMS_TAGGED_POLICY *target, BYTE **buffer, INT32 *size)
 {
@@ -1874,9 +1878,10 @@ TPMS_TAGGED_POLICY_Unmarshal(TPMS_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
     }	
     return rc;
 }
+#endif		// libtpms added
 
 /* Table 96 - Definition of TPML_CCA Structure <OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPML_CCA_Unmarshal(TPML_CCA *target, BYTE **buffer, INT32 *size)
 {
@@ -1896,6 +1901,7 @@ TPML_CCA_Unmarshal(TPML_CCA *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif		// libtpms added
  
 /* Table 97 - Definition of TPML_ALG Structure */
 
@@ -1920,7 +1926,7 @@ TPML_ALG_Unmarshal(TPML_ALG *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 98 - Definition of TPML_HANDLE Structure <OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size)
 {
@@ -1940,6 +1946,7 @@ TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif		// libtpms added
 
 /* Table 99 - Definition of TPML_DIGEST Structure */
 
@@ -4240,7 +4247,7 @@ TPM2B_NV_PUBLIC_Unmarshal(TPM2B_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 199 - Definition of TPM2B_CONTEXT_SENSITIVE Structure <IN/OUT> */
-
+#if 0		// libtpms added
 TPM_RC
 TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer, INT32 *size)
 {
@@ -4251,6 +4258,7 @@ TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer
     }
     return rc;
 }
+#endif		// libtpms added
 
 /* Table 201 - Definition of TPM2B_CONTEXT_DATA Structure <IN/OUT> */
 
