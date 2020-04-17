@@ -306,10 +306,6 @@ X509PushAlgorithmIdentifierSequence(
 				    const BYTE                  *OID
 				    )
 {
-    // An algorithm ID sequence is:
-    //  SEQUENCE
-    //      OID
-    //      NULL
     ASN1StartMarshalContext(ctx);   // hash algorithm
     ASN1PushNull(ctx);
     ASN1PushOID(ctx, OID);

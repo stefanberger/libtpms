@@ -63,7 +63,7 @@
 // This file contains the algorithm values from the TCG Algorithm Registry.
 #ifndef _TPM_ALGORITHM_DEFINES_H_
 #define _TPM_ALGORITHM_DEFINES_H_
-// Table 2:3 - Definition of Base Types Base Types are in BaseTypes.h
+// Table 2:3 - Definition of Base Types
 #define ECC_CURVES							\
     {TPM_ECC_BN_P256,   TPM_ECC_BN_P638,   TPM_ECC_NIST_P192,		\
      TPM_ECC_NIST_P224, TPM_ECC_NIST_P256, TPM_ECC_NIST_P384,		\

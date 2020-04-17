@@ -65,6 +65,7 @@
    internally. The ECC-related structures that cross the TPM interface are defined in TpmTypes.h */
 #ifndef _CRYPT_ECC_H
 #define _CRYPT_ECC_H
+
 /* 10.1.2.2 Structures */
 /* This is used to define the macro that may or may not be in the data set for the curve
    (CryptEccData.c). If there is a mismatch, the compiler will warn that there is to much/not enough

@@ -158,7 +158,8 @@ TPM_KEY_BITS_Unmarshal(TPM_KEY_BITS *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 7 - Definition of (UINT32) TPM_GENERATED Constants <O> */
-#if 0		// libtpms added
+
+#if 0
 TPM_RC
 TPM_GENERATED_Unmarshal(TPM_GENERATED *target, BYTE **buffer, INT32 *size)
 {
@@ -174,7 +175,7 @@ TPM_GENERATED_Unmarshal(TPM_GENERATED *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
-#endif		// libtpms added
+#endif
 
 /* Table 9 - Definition of (UINT16) TPM_ALG_ID Constants <IN/OUT, S> */
 

@@ -3,7 +3,7 @@
 /*			     ExecCommand					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ExecCommand.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: ExecCommand.c 1600 2020-03-30 22:08:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -83,7 +83,7 @@
 // 2)	call the routine that performs the command actions; and
 // 3)	marshal the responses into the response buffer.
 // f)	If any error occurs in any of the steps above create the error response and return.
-// g)	Calls BuildResponseSessions() to:
+// g)	Calls BuildResponseSession() to:
 // 1)	when necessary, encrypt a parameter
 //       2)	build the response authorization sessions
 //       3)	update the audit sessions and nonces

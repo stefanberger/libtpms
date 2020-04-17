@@ -64,7 +64,7 @@
 #ifndef TPMTYPES_H
 #define TPMTYPES_H
 
-/* Table 1:2 - Definition of TPM_ALG_ID Constants */
+/* TCG Algorithm Registry: Table 1:2 - Definition of TPM_ALG_ID Constants */
 
 typedef UINT16                          TPM_ALG_ID;
 #define TYPE_OF_TPM_ALG_ID              UINT16
@@ -157,7 +157,7 @@ typedef UINT16                          TPM_ALG_ID;
 #define     ALG_LAST_VALUE              0x0044
 #define TPM_ALG_LAST                    (TPM_ALG_ID)(ALG_LAST_VALUE)
 
-/* Table 1:3 - Definition of TPM_ECC_CURVE Constants */
+/* TCG Algorithm Registry: Table 1:3 - Definition of TPM_ECC_CURVE Constants */
 typedef UINT16              TPM_ECC_CURVE;
 #define TYPE_OF_TPM_ECC_CURVE   UINT16
 #define TPM_ECC_NONE        (TPM_ECC_CURVE)(0x0000)
@@ -170,7 +170,7 @@ typedef UINT16              TPM_ECC_CURVE;
 #define TPM_ECC_BN_P638     (TPM_ECC_CURVE)(0x0011)
 #define TPM_ECC_SM2_P256    (TPM_ECC_CURVE)(0x0020)
 
-/* Table 2:12 - Definition of TPM_CC Constants */
+/* TPM 2.0 Part 2: Table 2:12 - Definition of TPM_CC Constants */
 typedef UINT32                              TPM_CC;
 #define TYPE_OF_TPM_CC                      UINT32
 #define TPM_CC_NV_UndefineSpaceSpecial      (TPM_CC)(0x0000011F)
@@ -805,6 +805,7 @@ typedef UINT32 TPMA_ALGORITHM;
 #define TPMA_ALGORITHM_method            ((TPMA_ALGORITHM)1 << 10)
 #define TPMA_ALGORITHM_reserved		 0xfffff8f0
 
+// This is the initializer for a TPMA_ALGORITHM bit array.
 #define TPMA_ALGORITHM_INITIALIZER(					\
 				   asymmetric, symmetric,  hash,       object,     bits_at_4, \
 				   signing,    encrypting, method,     bits_at_11) \

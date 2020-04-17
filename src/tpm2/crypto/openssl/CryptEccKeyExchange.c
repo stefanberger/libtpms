@@ -3,7 +3,7 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: CryptEccKeyExchange.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -61,17 +61,16 @@
 
 /* 10.2.11 CryptEccKeyExchange.c */
 #include "Tpm.h"
-/* libtpms added begin */
+
 LIB_EXPORT TPM_RC
 SM2KeyExchange(
-              TPMS_ECC_POINT        *outZ,         // OUT: the computed point
-              TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
-              TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
-              TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
-              TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
-              TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
-              );
-/* libtpms added end */
+	       TPMS_ECC_POINT        *outZ,         // OUT: the computed point
+	       TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
+	       TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
+	       TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
+	       TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
+	       TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
+	       );
 
 #if CC_ZGen_2Phase == YES
 #if ALG_ECMQV

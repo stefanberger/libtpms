@@ -146,15 +146,18 @@
 
 // These hash OIDs used in a lot of places.
 #define OID_SHA1_VALUE              0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A
-SHA1_OID(_);        // Expands to
-//      MAKE_OID(_SHA1)
+SHA1_OID(_);        // Expands to:
+//     MAKE_OID(_SHA1)
 // which expands to:
-//      extern BYTE     OID_SHA1[]
+//     EXTERN  const BYTE OID_SHA1[] INITIALIZER({OID_SHA1_VALUE})
+// which, depending on the setting of EXTERN and
+// INITIALIZER, expands to either:
+//      extern const BYTE    OID_SHA1[]
 // or
-//      const BYTE      OID_SHA1[] = {OID_SHA1_VALUE}
+//      const BYTE           OID_SHA1[] = {OID_SHA1_VALUE}
 // which is:
-//      const BYTE      OID_SHA1[] = {0x06, 0x05, 0x2B, 0x0E,
-//                                    0x03, 0x02, 0x1A}
+//      const BYTE           OID_SHA1[] = {0x06, 0x05, 0x2B, 0x0E,
+//                                         0x03, 0x02, 0x1A}
 #define OID_SHA256_VALUE            NIST_HASH, 1
 SHA256_OID(_);
 #define OID_SHA384_VALUE            NIST_HASH, 2
