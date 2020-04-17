@@ -323,11 +323,11 @@ typedef  UINT32             TPM_SPEC;
 #define SPEC_DAY_OF_YEAR        312
 #define TPM_SPEC_DAY_OF_YEAR    (TPM_SPEC)(SPEC_DAY_OF_YEAR)
 
-/* Table 2:7 - Definition of TPM_GENERATED Constants */
+/* Table 2:7 - Definition of TPM_CONSTANTS32 Constants */
 
-typedef UINT32                  TPM_GENERATED;
-#define TYPE_OF_TPM_GENERATED   UINT32
-#define TPM_GENERATED_VALUE     (TPM_GENERATED)(0xFF544347)
+typedef UINT32			TPM_CONSTANTS32;
+#define TYPE_OF_TPM_CONSTANTS32 UINT32
+#define TPM_GENERATED_VALUE     (TPM_CONSTANTS32)(0xFF544347)
 
 /* Table 2:16 - Definition of TPM_RC Constants */
 typedef UINT32             TPM_RC;
@@ -1656,7 +1656,7 @@ typedef union {
 } TPMU_ATTEST;
 /* Table 2:123 - Definition of TPMS_ATTEST Structure  */
 typedef struct {
-    TPM_GENERATED           magic;
+    TPM_CONSTANTS32         magic;
     TPMI_ST_ATTEST          type;
     TPM2B_NAME              qualifiedSigner;
     TPM2B_DATA              extraData;

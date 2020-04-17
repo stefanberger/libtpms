@@ -194,9 +194,9 @@ TPM_KEY_BITS_Marshal(TPM_KEY_BITS *source, BYTE **buffer, INT32 *size)
     return written;
 }
    
-/* Table 2:7 - Definition of TPM_GENERATED Constants (EnumTable()) */
+/* Table 2:7 - Definition of TPM_CONSTANTS32 Constants (EnumTable()) */
 UINT16
-TPM_GENERATED_Marshal(TPM_GENERATED *source, BYTE **buffer, INT32 *size)
+TPM_CONSTANTS32_Marshal(TPM_CONSTANTS32 *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += UINT32_Marshal(source, buffer, size);
@@ -1106,7 +1106,7 @@ TPMS_ATTEST_Marshal(TPMS_ATTEST  *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
 
-    written += TPM_GENERATED_Marshal(&source->magic, buffer, size);
+    written += TPM_CONSTANTS32_Marshal(&source->magic, buffer, size);
     written += TPMI_ST_ATTEST_Marshal(&source->type, buffer, size);
     written += TPM2B_NAME_Marshal(&source->qualifiedSigner, buffer, size);
     written += TPM2B_DATA_Marshal(&source->extraData, buffer, size);

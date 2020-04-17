@@ -87,8 +87,10 @@ extern "C" {
     TPM2B_Unmarshal(TPM2B *target, UINT16 targetSize, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM_KEY_BITS_Unmarshal(TPM_KEY_BITS *target, BYTE **buffer, INT32 *size);
+#if 0
     LIB_EXPORT TPM_RC
     TPM_GENERATED_Unmarshal(TPM_GENERATED *target, BYTE **buffer, INT32 *size);
+#endif
     LIB_EXPORT TPM_RC
     TPM_ALG_ID_Unmarshal(TPM_ALG_ID *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC

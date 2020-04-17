@@ -3,7 +3,7 @@
 /*		Functions used for ticket computations.				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Ticket.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Ticket.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -77,7 +77,7 @@ TicketIsSafe(
 	     TPM2B           *buffer
 	     )
 {
-    TPM_GENERATED   valueToCompare = TPM_GENERATED_VALUE;
+    TPM_CONSTANTS32 valueToCompare = TPM_GENERATED_VALUE;
     BYTE            bufferToCompare[sizeof(valueToCompare)];
     BYTE            *marshalBuffer;
     //
@@ -86,7 +86,7 @@ TicketIsSafe(
     if(buffer->size < sizeof(valueToCompare))
 	return FALSE;
     marshalBuffer = bufferToCompare;
-    TPM_GENERATED_Marshal(&valueToCompare, &marshalBuffer, NULL);
+    TPM_CONSTANTS32_Marshal(&valueToCompare, &marshalBuffer, NULL);
     if(MemoryEqual(buffer->buffer, bufferToCompare, sizeof(valueToCompare)))
 	return FALSE;
     else

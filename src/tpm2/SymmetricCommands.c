@@ -3,7 +3,7 @@
 /*			     	Symmetric Commands				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SymmetricCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: SymmetricCommands.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -226,7 +226,7 @@ TPM2_Hash(
 	    out->validation.hierarchy = TPM_RH_NULL;
 	    out->validation.digest.t.size = 0;
 	}
-    else if(in->data.t.size >= sizeof(TPM_GENERATED)
+    else if(in->data.t.size >= sizeof(TPM_GENERATED_VALUE)
 	    && !TicketIsSafe(&in->data.b))
 	{
 	    // Ticket is not safe
