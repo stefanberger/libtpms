@@ -3,7 +3,7 @@
 /*			X509 Support						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_spt.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: X509_spt.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -15,7 +15,7 @@
 /*    derivative works, distribute, display and perform the Source Code and	*/
 /*    derivative works thereof, and to grant others the rights granted herein.	*/
 /*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
+/*  - The TCG rants to the user of the other parts of the specification 	*/
 /*    (other than the Source Code) the rights to reproduce, distribute, 	*/
 /*    display, and perform the specification solely for the purpose of 		*/
 /*    developing products based on such documents.				*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -98,7 +98,7 @@ X509FindExtensionByOID(
     // the provided context.
     if (ctx == NULL)
 	ctx = ctxIn;
-    // if the provide search context is different from the context of the extension,
+    // if the provided search context is different from the context of the extension,
     // then copy the search context to the search context.
     else if(ctx != ctxIn)
 	*ctx = *ctxIn;
@@ -245,19 +245,18 @@ X509AddSigningAlgorithm(
     switch(signKey->publicArea.type)
 	{
 #if ALG_RSA
-	  case ALG_RSA_VALUE:
+	  case TPM_ALG_RSA:
 	    return X509AddSigningAlgorithmRSA(signKey, scheme, ctx);
 #endif // ALG_RSA
 #if ALG_ECC
-	  case ALG_ECC_VALUE:
+	  case TPM_ALG_ECC:
 	    return X509AddSigningAlgorithmECC(signKey, scheme, ctx);
 #endif // ALG_ECC
-#if 0  // libtpms added
 #if ALG_SM2
-	  case ALG_SM2_VALUE: /* libtpms changed */
-	    return X509AddSigningAlgorithmSM2(signKey, scheme,ctx);
+	  case TPM_ALG_SM2:
+	    break;  // no signing algorithm for SM2 yet
+	    //            return X509AddSigningAlgorithmSM2(signKey, scheme, ctx);
 #endif // ALG_SM2
-#endif // libtpms added
 	  default:
 	    break;
 	}
