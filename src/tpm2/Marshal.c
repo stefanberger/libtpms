@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: Marshal.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -1373,6 +1373,13 @@ TPMS_SIG_SCHEME_ECDSA_Marshal(TPMS_SIG_SCHEME_ECDSA *source, BYTE **buffer, INT3
     return written;
 }
 UINT16
+TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2 *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
+    return written;
+}
+UINT16
 TPMS_SIG_SCHEME_ECSCHNORR_Marshal(TPMS_SIG_SCHEME_ECSCHNORR *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
@@ -1386,15 +1393,6 @@ TPMS_SIG_SCHEME_ECDAA_Marshal(TPMS_SIG_SCHEME_ECDAA *source, BYTE **buffer, INT3
     written += TPMS_SCHEME_ECDAA_Marshal(source, buffer, size);
     return written;
 }
-/* libtpms added begin */
-UINT16
-TPMS_SIG_SCHEME_SM2_Marshal(TPMS_SIG_SCHEME_SM2 *source, BYTE **buffer, INT32 *size)
-{
-    UINT16 written = 0;
-    written += TPMS_SCHEME_HASH_Marshal(source, buffer, size);
-    return written;
-}
-/* libtpms added end */
 
 /* Table 2:153 - Definition of Types for Encryption Schemes (TypedefTable()) */
 
@@ -1814,7 +1812,6 @@ TPMS_SIGNATURE_ECDAA_Marshal(TPMS_SIGNATURE_ECDAA *source, BYTE **buffer, INT32 
     return written;
 }
 
-/* libtpms added begin */
 UINT16
 TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2 *source, BYTE **buffer, INT32 *size)
 {
@@ -1822,7 +1819,6 @@ TPMS_SIGNATURE_SM2_Marshal(TPMS_SIGNATURE_SM2 *source, BYTE **buffer, INT32 *siz
     written += TPMS_SIGNATURE_ECC_Marshal(source, buffer, size);
     return written;
 }
-/* libtpms added end */
 
 UINT16
 TPMS_SIGNATURE_ECSCHNORR_Marshal(TPMS_SIGNATURE_ECSCHNORR *source, BYTE **buffer, INT32 *size)
