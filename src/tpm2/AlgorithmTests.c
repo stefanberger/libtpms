@@ -132,8 +132,8 @@ TestHash(
 #endif
 #if ALG_SM3_256
 	  case ALG_SM3_256_VALUE:
-#error Missing test case for SM3
-	    // There are currently not test vectors for SM3
+#error Missing test case for SM3  // libtpms added
+	    // There are currently no test vectors for SM3
 	    //            testDigest = &c_SM3_256_digest.b;
 	    testDigest = NULL;
 	    break;
@@ -286,7 +286,7 @@ AllModesAreDone(
 		)
 {
     TPM_ALG_ID                  alg;
-    for(alg = TPM_SYM_MODE_FIRST; alg <= TPM_SYM_MODE_LAST; alg++)
+    for(alg = SYM_MODE_FIRST; alg <= SYM_MODE_LAST; alg++)
 	if(TEST_BOTH(alg))
 	    return FALSE;
     return TRUE;
@@ -314,8 +314,8 @@ TestSymmetric(
 		{
 		    if(c_symTestValues[index].alg == alg)
 			{
-			    for(mode = TPM_SYM_MODE_FIRST;
-				mode <= TPM_SYM_MODE_LAST;
+			    for(mode = SYM_MODE_FIRST;
+				mode <= SYM_MODE_LAST;
 				mode++)
 				{
 				    if(TEST_BIT(mode, g_implementedAlgorithms)) // libtpms always test implemented modes
@@ -327,11 +327,11 @@ TestSymmetric(
 	    if(AllSymsAreDone(toTest))
 		{
 		    // all symmetric algorithms tested so no modes should be set
-		    for(alg = TPM_SYM_MODE_FIRST; alg <= TPM_SYM_MODE_LAST; alg++)
+		    for(alg = SYM_MODE_FIRST; alg <= SYM_MODE_LAST; alg++)
 			CLEAR_BOTH(alg);
 		}
 	}
-    else if(TPM_SYM_MODE_FIRST <= alg && alg <= TPM_SYM_MODE_LAST)
+    else if(SYM_MODE_FIRST <= alg && alg <= SYM_MODE_LAST)
 	{
 	    // Test this mode for all key sizes and algorithms
 	    for(index = 0; index < NUM_SYMS; index++)
