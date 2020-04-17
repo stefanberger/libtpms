@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -103,6 +103,15 @@ ActStartup(
 {
     // Reset all the ACT hardware
     _plat__ACT_Initialize();
+
+    // If this not a cold start, copy all the current 'signaled' settings to
+    // 'preservedSignaled'.
+#ifndef __ACT_DISABLED	// libtpms added
+    if (g_powerWasLost)
+	go.preservedSignaled = 0;
+    else
+	go.preservedSignaled |= go.signaledACT;
+#endif			// libtpms added
     
     // For TPM_RESET or TPM_RESTART, the ACTs will all be disabled and the output
     // de-asserted.
@@ -125,6 +134,8 @@ ActStartup(
 	    
 	    FOR_EACH_ACT(RESUME_ACT)
 		}
+    // set no ACT updated since last startup. This is to enable the halving of the
+    // timeout value
     s_ActUpdated = 0;
     _plat__ACT_EnableTicks(TRUE);
     return TRUE;
@@ -196,12 +207,12 @@ ActIsImplemented(
 		 )
 {
 #define CASE_ACT_
-    // This switch accounts for the TPM implemente values.
+    // This switch accounts for the TPM implemented values.
     switch(act)
 	{
 #ifndef __ACT_DISABLED	// libtpms added
 	    FOR_EACH_ACT(CASE_ACT_NUMBER)
-		// This ensures that the platorm implementes the values implemented by
+		// This ensures that the platorm implemented the values implemented by
 		// the TPM
 		return _plat__ACT_GetImplemented(act);
 #endif			// libtpms added
@@ -240,6 +251,9 @@ ActCounterUpdate(
 	        {
 	            // Indicate that the ACT has been updated since last TPM2_Startup().
 	            s_ActUpdated |= (UINT16)(1 << act);
+
+		    // Clear the preservedSignaled attribute.
+		    go.preservedSignaled &= ~((UINT16)(1 << act));
 		    
 	            // Need to clear the orderly flag
 	            g_clearOrderly = TRUE;
@@ -284,18 +298,18 @@ ActGetCapabilityData(
 			    memset(&actData->attributes, 0, sizeof(actData->attributes));
 			    actData->handle = actHandle;
 			    actData->timeout = _plat__ACT_GetRemaining(act);
-			    /* actData->attributes.signaled = _plat__ACT_GetSignaled(act); kgold */
-			    if (_plat__ACT_GetSignaled(act)) {
-				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);  	
-			    }
+			    if (_plat__ACT_GetSignaled(act))
+				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+			    else
+				CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
 			    actList->count++;
 			}
-	        }
+		}
 	    else
-	        {
-	            if(_plat__ACT_GetImplemented(act))
-	                return YES;
-	        }
+		{
+		    if(_plat__ACT_GetImplemented(act))
+			return YES;
+		}
 	}
     // If we get here, either all of the ACT values were put in the list, or the list
     // was filled and there are no more ACT values to return
