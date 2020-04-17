@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: Object_spt.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -332,7 +332,7 @@ CreateChecks(
 	return TPM_RCS_ATTRIBUTES;
     switch(publicArea->type)
 	{
-	  case ALG_KEYEDHASH_VALUE:
+	  case TPM_ALG_KEYEDHASH:
 	    // if this is a data object (sign == decrypt == CLEAR) then the
 	    // TPM cannot be the data source.
 	    if(!IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign)
@@ -342,7 +342,7 @@ CreateChecks(
 	    // comment out the next line in order to prevent a fixedTPM derivation
 	    // parent
 	    //            break;
-	  case ALG_SYMCIPHER_VALUE:
+	  case TPM_ALG_SYMCIPHER:
 	    // A restricted key symmetric key (SYMCIPHER and KEYEDHASH)
 	    // must have sensitiveDataOrigin SET unless it has fixedParent and
 	    // fixedTPM CLEAR.
@@ -387,7 +387,7 @@ SchemeChecks(
     //
     switch(publicArea->type)
 	{
-	  case ALG_SYMCIPHER_VALUE:
+	  case TPM_ALG_SYMCIPHER:
 	    symAlgs = &parms->symDetail.sym;
 	    // If this is a decrypt key, then only the block cipher modes (not
 	    // SMAC) are valid. TPM_ALG_NULL is OK too. If this is a 'sign' key,
@@ -396,7 +396,7 @@ SchemeChecks(
 	       && !CryptSymModeIsValid(symAlgs->mode.sym, TRUE))
 		return TPM_RCS_SCHEME;
 	    break;
-	  case ALG_KEYEDHASH_VALUE:
+	  case TPM_ALG_KEYEDHASH:
 	    scheme = parms->keyedHashDetail.scheme.scheme;
 	    // if both sign and decrypt
 	    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign)
@@ -719,13 +719,12 @@ GetSeedForKDF(
 /* This function produce outer wrap for a buffer containing the sensitive data. It requires the
    sensitive data being marshaled to the outerBuffer, with the leading bytes reserved for integrity
    hash.  If iv is used, iv space should be reserved at the beginning of the buffer.  It assumes the
-   sensitive data starts at address (outerBuffer + integrity size {+ iv size}). This function
-   performs: */
-/* a) Add IV before sensitive area if required */
-/* b) encrypt sensitive data, if iv is required, encrypt by iv.  otherwise, encrypted by a NULL
-   iv */
-/* c) add HMAC integrity at the beginning of the buffer It returns the total size of blob with outer
-   wrap */
+   sensitive data starts at address (outerBuffer + integrity size {+ iv size}). This function: */
+/* a) adds IV before sensitive area if required */
+/* b) encrypts sensitive data with IV or a NULL IV as required */
+/* c) adds HMAC integrity at the beginning of the buffer */
+/* d) returns the total size of blob with outer wrap */
+
 UINT16
 ProduceOuterWrap(
 		 OBJECT          *protector,     // IN: The handle of the object that provides
@@ -872,7 +871,8 @@ UnwrapOuter(
 }
 /* 7.6.3.10 MarshalSensitive() */
 /* This function is used to marshal a sensitive area. Among other things, it adjusts the size of the
-   authValue to be no smaller than the digest of nameAlg.  Returns the size of the marshaled area. */
+   authValue to be no smaller than the digest of nameAlg.  It will also make sure that the RSA
+   sensitive contains the right number of values. Returns the size of the marshaled area. */
 static UINT16
 MarshalSensitive(
 		 BYTE                *buffer,            // OUT: receiving buffer
