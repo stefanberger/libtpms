@@ -3461,6 +3461,7 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	switch (*target) {
 	  case 1024:
 	  case 2048:
+	  case 3072:
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;

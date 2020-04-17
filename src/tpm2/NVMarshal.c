@@ -3565,7 +3565,7 @@ static const struct _entry {
     { COMPILE_CONSTANT(ALG_CBC, EQ) },
     { COMPILE_CONSTANT(ALG_CFB, EQ) },
     { COMPILE_CONSTANT(ALG_ECB, EQ) },
-    { COMPILE_CONSTANT(MAX_RSA_KEY_BITS, EQ) },
+    { COMPILE_CONSTANT(MAX_RSA_KEY_BITS, LE) }, /* old: 2048 */
     { COMPILE_CONSTANT(MAX_TDES_KEY_BITS, EQ) },
     { COMPILE_CONSTANT(MAX_AES_KEY_BITS, EQ) },
     { COMPILE_CONSTANT(128, EQ) }, /* MAX_SM4_KEY_BITS      in older code was 128 also with SM4 not active */
