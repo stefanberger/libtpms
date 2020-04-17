@@ -3,7 +3,7 @@
 /*		Implementation of cryptographic functions for hashing.		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptHash.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -648,50 +648,44 @@ CryptHmacEnd2B(
     return CryptHmacEnd(hmacState, digest->size, digest->buffer);
 }
 /* 10.2.13.8	Mask and Key Generation Functions */
-/* 10.2.13.8.1	CryptMGF1() */
-/* This function performs MGF1 using the selected hash. MGF1 is T(n) = T(n-1) || H(seed ||
-   counter). This function returns the length of the mask produced which could be zero if the digest
-   algorithm is not supported */
+/* 10.2.13.8.1	CryptMGF_KDF() */
+/* This function performs MGF1/KDF1 or KDF2 using the selected hash. KDF1 and KDF2 are T(n) = T(n-1)
+   || H(seed || counter) with the difference being that, with KDF1, counter starts at 0 but with
+   KDF2, counter starts at 1. The caller determines which version by setting the initial value of
+   counter to either 0 or 1. */
 /* 	Return Value	Meaning */
 /* 	0	hash algorithm was TPM_ALG_NULL */
 /* 	> 0	should be the same as mSize */
 LIB_EXPORT UINT16
-CryptMGF1(
+CryptMGF_KDF(
 	  UINT32           mSize,         // IN: length of the mask to be produced
 	  BYTE            *mask,          // OUT: buffer to receive the mask
 	  TPM_ALG_ID       hashAlg,       // IN: hash to use
 	  UINT32           seedSize,      // IN: size of the seed
-	  BYTE            *seed           // IN: seed size
+	  BYTE            *seed,          // IN: seed size
+	  UINT32           counter        // IN: counter initial value
 	  )
 {
     HASH_STATE           hashState;
     PHASH_DEF            hDef = CryptGetHashDef(hashAlg);
-    UINT32               remaining;
-    UINT32               counter = 0;
-    BYTE                 swappedCounter[4];
-    
+    UINT32               hLen;
+    UINT32               bytes;
+    //
     // If there is no digest to compute return
-    if((hashAlg == TPM_ALG_NULL) || (mSize == 0))
+    if((hDef->digestSize == 0) || (mSize == 0))
 	return 0;
-    
-    for(remaining = mSize; ; remaining -= hDef->digestSize)
+    if(counter != 0)
+	counter = 1;
+    hLen = hDef->digestSize;
+    for(bytes = 0; bytes < mSize; bytes += hLen)
 	{
-	    // Because the system may be either Endian...
-	    UINT32_TO_BYTE_ARRAY(counter, swappedCounter);
-	    
 	    // Start the hash and include the seed and counter
 	    CryptHashStart(&hashState, hashAlg);
 	    CryptDigestUpdate(&hashState, seedSize, seed);
-	    CryptDigestUpdate(&hashState, 4, swappedCounter);
-	    
-	    // Handling the completion depends on how much space remains in the mask
-	    // buffer. If it can hold the entire digest, put it there. If not
-	    // put the digest in a temp buffer and only copy the amount that
-	    // will fit into the mask buffer.
-	    HashEnd(&hashState, remaining, mask);
-	    if(remaining <= hDef->digestSize)
-		break;
-	    mask = &mask[hDef->digestSize];
+	    CryptDigestUpdateInt(&hashState, 4, counter);
+	    // Get as much as will fit.
+	    CryptHashEnd(&hashState, MIN((mSize - bytes), hLen),
+			 &mask[bytes]);
 	    counter++;
 	}
     return (UINT16)mSize;
