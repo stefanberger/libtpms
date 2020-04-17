@@ -3,7 +3,7 @@
 /*			     TPM X509 ECC					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_ECC.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: X509_ECC.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -65,9 +65,9 @@
 #include "X509.h"
 #include "OIDs.h"
 #include "TpmAsn1_fp.h"
+#include "X509_ECC_fp.h"
 #include "X509_spt_fp.h"
 #include "CryptHash_fp.h"
-#include "X509_ECC_fp.h"	/* kgold */
 
 /* 10.2.24.2	Functions */
 /* 10.2.24.2.1	X509PushPoint() */

@@ -3,7 +3,7 @@
 /*			 	Startup Commands   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: StartupCommands.c 1559 2019-12-19 15:41:01Z kgoldman $	*/
+/*            $Id: StartupCommands.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -149,7 +149,7 @@ TPM2_Startup(
 	locality = 0;
     g_StartupLocality3 = (locality == 3);
 #if USE_DA_USED
-    // If there was no orderly shutdown, then their might have been a write to
+    // If there was no orderly shutdown, then there might have been a write to
     // failedTries that didn't get recorded but only if g_daUsed was SET in the
     // shutdown state
     g_daUsed = (gp.orderlyState == SU_DA_USED_VALUE);

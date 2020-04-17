@@ -3,7 +3,7 @@
 /*			     TPM X509 RSA					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_RSA.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: X509_RSA.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -64,10 +64,10 @@
 #include "Tpm.h"
 #include "X509.h"
 #include "TpmAsn1_fp.h"
+#include "X509_RSA_fp.h"
 #include "X509_spt_fp.h"
 #include "CryptHash_fp.h"
 #include "CryptRsa_fp.h"
-#include "X509_RSA_fp.h"	/* kgold */
 
 /* 10.2.25.2	Functions */
 #if ALG_RSA
@@ -216,16 +216,6 @@ X509AddPublicRSA(
 {
     UINT32          exp = object->publicArea.parameters.rsaDetail.exponent;
     //
-    /*
-      SEQUENCE (2 elem) 1st
-      SEQUENCE (2 elem) 2nd
-      OBJECT IDENTIFIER 1.2.840.113549.1.1.1 rsaEncryption (PKCS #1)
-      NULL
-      BIT STRING (1 elem)
-      SEQUENCE (2 elem) 3rd
-      INTEGER (2048 bit) 2197304513741227955725834199357401
-      INTEGER 65537
-    */
     // If this is a check to see if the key can be encoded, it can.
     // Need to mark the end sequence
     if(ctx == NULL)

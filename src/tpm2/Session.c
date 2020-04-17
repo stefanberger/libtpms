@@ -3,7 +3,7 @@
 /*			    Manage the session context counter 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Session.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: Session.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,77 +55,16 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
-/* The code in this file is used to manage the session context counter. The scheme implemented here
-   is a "truncated counter". This scheme allows the TPM to not need TPM_SU_CLEAR for a very long
-   period of time and still not have the context count for a session repeated. */
-/* The counter (contextCounter)in this implementation is a UINT64 but can be smaller.  The "tracking
-   array" (contextArray) only has 16-bits per context.  The tracking array is the data that needs to
-   be saved and restored across TPM_SU_STATE so that sessions are not lost when the system enters
-   the sleep state. Also, when the TPM is active, the tracking array is kept in RAM making it
-   important that the number of bytes for each entry be kept as small as possible. */
-/* The TPM prevents collisions of these truncated values by not allowing a contextID to be assigned
-   if it would be the same as an existing value.  Since the array holds 16 bits, after a context has
-   been saved, an additional 2^16-1 contexts may be saved before the count would again match.  The
-   normal expectation is that the context will be flushed before its count value is needed again but
-   it is always possible to have long-lived sessions. */
-/* The contextID is assigned when the context is saved (TPM2_ContextSave()). At that time, the TPM
-   will compare the low-order 16 bits of contextCounter to the existing values in contextArray and
-   if one matches, the TPM will return TPM_RC_CONTEXT_GAP (by construction, the entry that contains
-   the matching value is the oldest context). */
-/* The expected remediation by the TRM is to load the oldest saved session context (the one found by
-   the TPM), and save it.  Since loading the oldest session also eliminates its contextID value from
-   contextArray, there TPM will always be able to load and save the oldest existing context. */
-/* In the worst case, software may have to load and save several contexts in order to save an
-   additional one.  This should happen very infrequently. */
-/* When the TPM searches contextArray and finds that none of the contextIDs match the low-order
-   16-bits of contextCount, the TPM can copy the low bits to the contextArray associated with the
-   session, and increment contextCount. */
-/* There is one entry in contextArray for each of the active sessions allowed by the TPM
-   implementation.  This array contains either a context count, an index, or a value indicating the
-   slot is available (0). */
-/* e index into the contextArray is the handle for the session with the region selector byte of the
-   session set to zero.  If an entry in contextArray contains 0, then the corresponding handle may
-   be assigned to a session.  If the entry contains a value that is less than or equal to the number
-   of loaded sessions for the TPM, then the array entry is the slot in which the context is
-   loaded. */
-/* EXAMPLE: If the TPM allows 8 loaded sessions, then the slot numbers would be 1-8 and a
-   contextArrary value in that range would represent the loaded session. */
-/* NOTE: When the TPM firmware determines that the array entry is for a loaded session, it will
-   subtract 1 to create the zero-based slot number. */
-/* There is one significant corner case in this scheme.  When the contextCount is equal to a value
-   in the contextArray, the oldest session needs to be recycled or flushed. In order to recycle the
-   session, it must be loaded. To be loaded, there must be an available slot.  Rather than require
-   that a spare slot be available all the time, the TPM will check to see if the contextCount is
-   equal to some value in the contextArray when a session is created.  This prevents the last
-   session slot from being used when it is likely that a session will need to be recycled. */
-/* If a TPM with both 1.2 and 2.0 functionality uses this scheme for both 1.2 and 2.0 sessions, and
-   the list of active contexts is read with TPM_GetCapabiltiy(), the TPM will create 32-bit
-   representations of the list that contains 16-bit values (the TPM2_GetCapability() returns a list
-   of handles for active sessions rather than a list of contextID).  The full contextID has
-   high-order bits that are either the same as the current contextCount or one less.  It is one less
-   if the 16-bits of the contextArray has a value that is larger than the low-order 16 bits of
-   contextCount. */
 
 /* 8.9.2 Includes, Defines, and Local Variables */
 #define SESSION_C
 #include "Tpm.h"
 
 /* 8.9.3	File Scope Function -- ContextIdSetOldest() */
-/* This function is called when the oldest contextID is being loaded or deleted. Once a saved
-   context becomes the oldest, it stays the oldest until it is deleted. */
-/* Finding the oldest is a bit tricky.  It is not just the numeric comparison of values but is
-   dependent on the value of contextCounter. */
-/* Assume we have a small contextArray with 8, 4-bit values with values 1 and 2 used to indicate the
-   loaded context slot number.  Also assume that the array contains hex values of (0 0 1 0 3 0 9 F)
-   and that the contextCounter is an 8-bit counter with a value of 0x37. Since the low nibble is 7,
-   that means that values closest to but above 7 are older than values below it and, in this
-   example, 9 is the oldest value. */
-/* Note if we subtract the counter value, from each slot that contains a saved contextID we get (- -
-   - - B - 2 - 8) and the oldest entry is now easy to find because it has the lowest value. */
 
 static void
 ContextIdSetOldest(
@@ -134,7 +73,7 @@ ContextIdSetOldest(
 {
     CONTEXT_SLOT    lowBits;
     CONTEXT_SLOT    entry;
-    CONTEXT_SLOT    smallest = ((CONTEXT_SLOT)~0);	/* Set to the maximum possible */
+    CONTEXT_SLOT    smallest = ((CONTEXT_SLOT)~0);
     UINT32  i;
     // Set oldestSaveContext to a value indicating none assigned
     s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;

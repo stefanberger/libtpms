@@ -3,7 +3,7 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: Global.h 1600 2020-03-30 22:08:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -298,7 +298,7 @@ typedef struct SESSION_ATTRIBUTES
     unsigned    isBound : 1;            //3) SET if the session is bound to with an
     //   entity. This attribute will be CLEAR
     //   if either isPolicy or isAudit is SET.
-    unsigned    isCpHashDefined : 1;    //3) SET if the cpHash has been defined
+    unsigned    isCpHashDefined : 1;    //4) SET if the cpHash has been defined
     //   This attribute is not SET unless
     //   'isPolicy' is SET.
     unsigned    isAuthValueNeeded : 1;  //5) SET if the authValue is required for
@@ -620,7 +620,7 @@ EXTERN  BOOL            g_StartupLocality3;
 /*     5.9.10.15 g_daUsed */
 /* This location indicates if a DA-protected value is accessed during a boot cycle. If none has,
    then there is no need to increment failedTries on the next non-orderly startup. This bit is
-   merged with gp.orderlyState when that gp.orderly is set to SU_NONE_VALUE */
+   merged with gp.orderlyState when gp.orderly is set to SU_NONE_VALUE */
 
 /* This global is set to FALSE on startup (after a decision has been made on whether to increment
    the failedTries or not).  On a first attempt to access a DA protected object: this global is set
@@ -873,6 +873,7 @@ typedef struct orderly_data
     // that they can be manipulated by ACT number rather than having to access a
     // structure.
     UINT32              signaledACT;
+    UINT16              preservedSignaled;
 #endif			// libtpms added
 } ORDERLY_DATA;
 #if ACCUMULATE_SELF_HEAL_TIMER

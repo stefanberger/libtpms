@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			  Policy Command Support    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Policy_spt.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Policy_spt.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -216,6 +216,10 @@ PolicyDigestClear(
     MemorySet(session->u2.policyDigest.t.buffer, 0,
 	      session->u2.policyDigest.t.size);
 }
+
+/* 7.4.2.5	PolicySptCheckCondition() */
+/* Checks to see if the condition in the policy is satisfied. */
+
 BOOL
 PolicySptCheckCondition(
 			TPM_EO          operation,

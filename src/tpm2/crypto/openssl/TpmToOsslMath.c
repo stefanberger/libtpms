@@ -3,7 +3,7 @@
 /*			 TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.c 1598 2020-03-27 21:59:49Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -81,13 +81,6 @@
 #include "Tpm.h"
 #ifdef MATH_LIB_OSSL
 #include "TpmToOsslMath_fp.h"
-
-#if 0		// libtpms added
-#if OPENSSL_VERSION_NUMBER < 0x10101000		/* kgold */
-#define EC_POINT_set_affine_coordinates(a,b,c,d,e)  EC_POINT_set_affine_coordinates_GFp(a,b,c,d,e)
-#define EC_POINT_get_affine_coordinates(a,b,c,d,e)  EC_POINT_get_affine_coordinates_GFp(a,b,c,d,e)
-#endif
-#endif		// libtpms added
 
 /* B.2.3.2.3.1.	OsslToTpmBn() */
 /* This function converts an OpenSSL BIGNUM to a TPM bignum. In this implementation it is assumed
@@ -533,9 +526,9 @@ EcPointInitialized(
 	{
 	    BIG_INITIALIZED(bnX, initializer->x);
 	    BIG_INITIALIZED(bnY, initializer->y);
-	    if(E == NULL)		// libtpms changed begin (check E before accessing)
+	    if(E == NULL)
 		FAIL(FATAL_ERROR_ALLOCATION);
-	    P = EC_POINT_new(E->G);	// libtpms changed end
+	    P = EC_POINT_new(E->G);
 #if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L	// libtpms added begin
 	    if(!EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX))
 #else									// libtpms added end
