@@ -3,7 +3,7 @@
 /*			   Parameter Marshaling  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal_fp.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: Marshal_fp.h 1603 2020-04-03 17:48:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -83,7 +83,7 @@ extern "C" {
     UINT16
     TPM_KEY_BITS_Marshal(TPM_KEY_BITS *source, BYTE **buffer, INT32 *size);
     UINT16
-    TPM_GENERATED_Marshal(TPM_GENERATED *source, BYTE **buffer, INT32 *size);
+    TPM_CONSTANTS32_Marshal(TPM_CONSTANTS32 *source, BYTE **buffer, INT32 *size);
     UINT16
     TPM_ALG_ID_Marshal(TPM_ALG_ID *source, BYTE **buffer, INT32 *size);    
     UINT16
