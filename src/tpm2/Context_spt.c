@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			Context Management Command Support   			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Context_spt.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Context_spt.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016, 2017				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -65,7 +65,7 @@
 /* 7.3.2 Functions */
 /* 7.3.2.1 ComputeContextProtectionKey() */
 /* This function retrieves the symmetric protection key for context encryption It is used by
-   TPM2_ConextSave() and TPM2_ContextLoad() to create the symmetric encryption key and iv */
+   TPM2_ContextSave() and TPM2_ContextLoad() to create the symmetric encryption key and iv */
 void
 ComputeContextProtectionKey(
 			    TPMS_CONTEXT    *contextBlob,   // IN: context blob
@@ -82,16 +82,17 @@ ComputeContextProtectionKey(
     TPM2B_DATA       sequence2B, handle2B;
     // Get proof value
     proof = HierarchyGetProof(contextBlob->hierarchy);
+
     // Get sequence value in 2B format
     sequence2B.t.size = sizeof(contextBlob->sequence);
-    cAssert(sizeof(contextBlob->sequence) <= sizeof(sequence2B.t.buffer));
-    MemoryCopy(sequence2B.t.buffer, &contextBlob->sequence,
-	       sizeof(contextBlob->sequence));
+    cAssert(sequence2B.t.size <= sizeof(sequence2B.t.buffer));
+    MemoryCopy(sequence2B.t.buffer, &contextBlob->sequence, sequence2B.t.size);
+    
     // Get handle value in 2B format
     handle2B.t.size = sizeof(contextBlob->savedHandle);
-    cAssert(sizeof(contextBlob->savedHandle) <= sizeof(handle2B.t.buffer));
-    MemoryCopy(handle2B.t.buffer, &contextBlob->savedHandle,
-	       sizeof(contextBlob->savedHandle));
+    cAssert(handle2B.t.size <= sizeof(handle2B.t.buffer));
+    MemoryCopy(handle2B.t.buffer, &contextBlob->savedHandle, handle2B.t.size);
+
     // Get the symmetric encryption key size
     symKey->t.size = CONTEXT_ENCRYPT_KEY_BYTES;
     symKeyBits = CONTEXT_ENCRYPT_KEY_BITS;
