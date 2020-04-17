@@ -70,11 +70,15 @@
 #define SYM_LIB_DEFINED
 #define SYM_LIB_OSSL
 #include <openssl/aes.h>
+#if ALG_TDES
 #include <openssl/des.h>
+#endif
 #if ALG_SM4			/* kgold */
 #include <openssl/sm4.h>
 #endif
+#if ALG_CAMELLIA
 #include <openssl/camellia.h>
+#endif
 #include <openssl/bn.h>
 #include <openssl/ossl_typ.h>
 
