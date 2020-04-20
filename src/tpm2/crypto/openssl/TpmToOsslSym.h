@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1600 2020-03-30 22:08:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -73,9 +73,29 @@
 #if ALG_TDES
 #include <openssl/des.h>
 #endif
-#if ALG_SM4			/* kgold */
-#include <openssl/sm4.h>
-#endif
+
+#if ALG_SM4
+#   if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
+#       undef ALG_SM4
+#       define ALG_SM4  ALG_NO
+#   elif OPENSSL_VERSION_NUMBER >= 0x10200000L
+#       include <openssl/sm4.h>
+#   else
+// OpenSSL 1.1.1 keeps smX.h headers in the include/crypto directory,
+// and they do not get installed as part of the libssl package
+
+#       define SM4_KEY_SCHEDULE  32
+
+typedef struct SM4_KEY_st {
+    uint32_t rk[SM4_KEY_SCHEDULE];
+} SM4_KEY;
+
+int SM4_set_key(const uint8_t *key, SM4_KEY *ks);
+void SM4_encrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks);
+void SM4_decrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks);
+#   endif // OpenSSL < 1.2
+#endif // ALG_SM4
+
 #if ALG_CAMELLIA
 #include <openssl/camellia.h>
 #endif
