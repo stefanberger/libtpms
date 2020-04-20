@@ -3,7 +3,7 @@
 /*			 NV read and write access methods			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVMem.c 1529 2019-11-21 23:29:01Z kgoldman $			*/
+/*            $Id: NVMem.c 1603 2020-04-03 17:48:43Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -79,8 +79,8 @@
 
 #if FILE_BACKED_NV
 #   include         <stdio.h>
-FILE                *s_NvFile = NULL;
-int                 s_NeedsManufacture = FALSE;
+static FILE                *s_NvFile = NULL;		/* kgold made these static */
+static int                 s_NeedsManufacture = FALSE;
 #endif
 
 /* C.6.2. Functions */
@@ -148,6 +148,7 @@ NvFileSize(
 	   int         leaveAt
 	   )
 {
+    int		irc;	/* kgold, added return code checks */
     long    fileSize;
     long    filePos;
     //
@@ -157,16 +158,18 @@ NvFileSize(
     if (filePos < 0)
         return -1;              // libtpms changed end
 
-    fseek(s_NvFile, 0, SEEK_END);
+    irc = fseek(s_NvFile, 0, SEEK_END);
+    assert(irc == 0);
     fileSize = ftell(s_NvFile);
+    assert(fileSize >= 0);
     switch(leaveAt)
 	{
 	  case SEEK_SET:
 	    filePos = 0;
 	    /* fall through */
 	  case SEEK_CUR:
-	    if (fseek(s_NvFile, filePos, SEEK_SET) < 0)  // libtpms changed
-	        return -1;                               // libtpms changed
+	    irc = fseek(s_NvFile, filePos, SEEK_SET);
+	    assert(irc == 0);
 	    break;
 	  case SEEK_END:
 	    break;
