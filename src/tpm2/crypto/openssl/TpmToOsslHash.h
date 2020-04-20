@@ -67,7 +67,7 @@
 #define HASH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/sha.h>
-#if ALG_SM3
+#if ALG_SM3_256
 #include <openssl/sm3.h>
 #endif
 #include <openssl/ossl_typ.h>
