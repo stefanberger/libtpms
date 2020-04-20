@@ -1904,6 +1904,7 @@ typedef union {
 #if 	ALG_KDF1_SP800_108
     TPMS_KDF_SCHEME_KDF1_SP800_108    kdf1_sp800_108;
 #endif   // ALG_KDF1_SP800_108
+    TPMS_SCHEME_HASH                    anyKdf;
 } TPMU_KDF_SCHEME;
 /* Table 2:157 - Definition of TPMT_KDF_SCHEME Structure  */
 typedef struct {
