@@ -67,17 +67,6 @@
 #define _CRYPT_ECC_H
 
 /* 10.1.2.2 Structures */
-/* This is used to define the macro that may or may not be in the data set for the curve
-   (CryptEccData.c). If there is a mismatch, the compiler will warn that there is to much/not enough
-   initialization data in the curve. The macro is used because not all versions of the
-   CryptEccData.c need the curve name. */
-#ifdef NAMED_CURVES
-#define CURVE_NAME(a) , a
-#define CURVE_NAME_DEF const char *name;
-#else
-#  define CURVE_NAME(a)
-#  define CURVE_NAME_DEF
-#endif
 typedef struct ECC_CURVE
 {
     const TPM_ECC_CURVE          curveId;
@@ -86,8 +75,8 @@ typedef struct ECC_CURVE
     const TPMT_ECC_SCHEME        sign;
     const ECC_CURVE_DATA        *curveData; // the address of the curve data
     const BYTE                  *OID;
-    CURVE_NAME_DEF
 } ECC_CURVE;
 extern const ECC_CURVE eccCurves[ECC_CURVE_COUNT];
+#define CURVE_NAME(N)
 
 #endif
