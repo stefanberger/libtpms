@@ -3,7 +3,7 @@
 /*			     Command DIspatch Data				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatchData.h 1532 2019-11-26 14:28:36Z kgoldman $	*/
+/*            $Id: CommandDispatchData.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -1116,6 +1116,91 @@ ECDH_ZGen_COMMAND_DESCRIPTOR_t _ECDH_ZGenData = {
 #else
 #define _ECDH_ZGenDataAddress 0
 #endif
+
+#if CC_ECC_Encrypt
+
+#include "ECC_Encrypt_fp.h"
+
+typedef TPM_RC  (ECC_Encrypt_Entry)(
+				    ECC_Encrypt_In              *in,
+				    ECC_Encrypt_Out             *out
+				    );
+
+typedef const struct {
+    ECC_Encrypt_Entry       *entry;
+    UINT16                  inSize;
+    UINT16                  outSize;
+    UINT16                  offsetOfTypes;
+    UINT16                  paramOffsets[4];
+    BYTE                    types[8];
+} ECC_Encrypt_COMMAND_DESCRIPTOR_t;
+
+ECC_Encrypt_COMMAND_DESCRIPTOR_t _ECC_EncryptData = {
+    /* entry         */     &TPM2_ECC_Encrypt,
+    /* inSize        */     (UINT16)(sizeof(ECC_Encrypt_In)),
+    /* outSize       */     (UINT16)(sizeof(ECC_Encrypt_Out)),
+    /* offsetOfTypes */     offsetof(ECC_Encrypt_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */     {(UINT16)(offsetof(ECC_Encrypt_In, plainText)),
+			     (UINT16)(offsetof(ECC_Encrypt_In, inScheme)),
+			     (UINT16)(offsetof(ECC_Encrypt_Out, C2)),
+			     (UINT16)(offsetof(ECC_Encrypt_Out, C3))},
+    /* types         */     {TPMI_DH_OBJECT_H_UNMARSHAL,
+			     TPM2B_MAX_BUFFER_P_UNMARSHAL,
+			     TPMT_KDF_SCHEME_P_UNMARSHAL + ADD_FLAG,
+			     END_OF_LIST,
+			     TPM2B_ECC_POINT_P_MARSHAL,
+			     TPM2B_MAX_BUFFER_P_MARSHAL,
+			     TPM2B_DIGEST_P_MARSHAL,
+			     END_OF_LIST}
+};
+
+#define _ECC_EncryptDataAddress (&_ECC_EncryptData)
+#else
+#define _ECC_EncryptDataAddress 0
+#endif // CC_ECC_Encrypt
+
+#if CC_ECC_Decrypt
+
+#include "ECC_Decrypt_fp.h"
+
+typedef TPM_RC  (ECC_Decrypt_Entry)(
+				    ECC_Decrypt_In              *in,
+				    ECC_Decrypt_Out             *out
+				    );
+
+typedef const struct {
+    ECC_Decrypt_Entry       *entry;
+    UINT16                  inSize;
+    UINT16                  outSize;
+    UINT16                  offsetOfTypes;
+    UINT16                  paramOffsets[4];
+    BYTE                    types[8];
+} ECC_Decrypt_COMMAND_DESCRIPTOR_t;
+
+ECC_Decrypt_COMMAND_DESCRIPTOR_t _ECC_DecryptData = {
+    /* entry         */     &TPM2_ECC_Decrypt,
+    /* inSize        */     (UINT16)(sizeof(ECC_Decrypt_In)),
+    /* outSize       */     (UINT16)(sizeof(ECC_Decrypt_Out)),
+    /* offsetOfTypes */     offsetof(ECC_Decrypt_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */     {(UINT16)(offsetof(ECC_Decrypt_In, C1)),
+			     (UINT16)(offsetof(ECC_Decrypt_In, C2)),
+			     (UINT16)(offsetof(ECC_Decrypt_In, C3)),
+			     (UINT16)(offsetof(ECC_Decrypt_In, inScheme))},
+    /* types         */     {TPMI_DH_OBJECT_H_UNMARSHAL,
+			     TPM2B_ECC_POINT_P_UNMARSHAL,
+			     TPM2B_MAX_BUFFER_P_UNMARSHAL,
+			     TPM2B_DIGEST_P_UNMARSHAL,
+			     TPMT_KDF_SCHEME_P_UNMARSHAL + ADD_FLAG,
+			     END_OF_LIST,
+			     TPM2B_MAX_BUFFER_P_MARSHAL,
+			     END_OF_LIST}
+};
+
+#define _ECC_DecryptDataAddress (&_ECC_DecryptData)
+#else
+#define _ECC_DecryptDataAddress 0
+#endif // CC_ECC_Decrypt
+
 #if CC_ECC_Parameters
 #include "ECC_Parameters_fp.h"
 typedef TPM_RC  (ECC_Parameters_Entry)(
@@ -4526,6 +4611,12 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ACT_SetTimeout)
     (COMMAND_DESCRIPTOR_t *)_ACT_SetTimeoutDataAddress,
 #endif // CC_ACT_SetTimeout
+#if (PAD_LIST || CC_ECC_Encrypt)
+    (COMMAND_DESCRIPTOR_t *)_ECC_EncryptDataAddress,
+#endif // CC_ECC_Encrypt
+#if (PAD_LIST || CC_ECC_Decrypt)
+    (COMMAND_DESCRIPTOR_t *)_ECC_DecryptDataAddress,
+#endif // CC_ECC_Decrypt
     0
 };
 

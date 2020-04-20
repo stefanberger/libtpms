@@ -3,7 +3,7 @@
 /*		Command code attribute array for GetCapability	    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandAttributeData.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: CommandAttributeData.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -439,6 +439,12 @@ const TPMA_CC    s_ccAttr [] = {
 #endif
 #if (PAD_LIST || CC_ACT_SetTimeout)
     TPMA_CC_INITIALIZER(0x0198, 0, 0, 0, 0, 1, 0, 0, 0),
+#endif
+#if (PAD_LIST || CC_ECC_Encrypt)
+    TPMA_CC_INITIALIZER(0x0199, 0, 0, 0, 0, 1, 0, 0, 0),
+#endif
+#if (PAD_LIST || CC_ECC_Decrypt)
+    TPMA_CC_INITIALIZER(0x019A, 0, 0, 0, 0, 1, 0, 0, 0),
 #endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
     TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
@@ -932,6 +938,14 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #if (PAD_LIST || CC_ACT_SetTimeout)
     (COMMAND_ATTRIBUTES)(CC_ACT_SetTimeout              *  // 0x0198
 			 (IS_IMPLEMENTED+HANDLE_1_USER)),
+#endif
+#if (PAD_LIST || CC_ECC_Encrypt)
+    (COMMAND_ATTRIBUTES)(CC_ECC_Encrypt                 *  // 0x0199
+			 (IS_IMPLEMENTED+DECRYPT_2+ENCRYPT_2)),
+#endif
+#if (PAD_LIST || CC_ECC_Decrypt)
+    (COMMAND_ATTRIBUTES)(CC_ECC_Decrypt                 *  // 0x019A
+			 (IS_IMPLEMENTED+DECRYPT_2+HANDLE_1_USER+ENCRYPT_2)),
 #endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
     (COMMAND_ATTRIBUTES)(CC_Vendor_TCG_Test             *  // 0x0000
