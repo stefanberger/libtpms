@@ -3,7 +3,7 @@
 /*			    Hash structure definitions  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptHash.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -140,10 +140,10 @@ typedef union
     SMAC_STATE                 smac;
 #endif
     // to force structure alignment to be no worse than HASH_ALIGNMENT
-#if HASH_ALIGNMENT == 4
-    uint32_t             align;
-#else
+#if HASH_ALIGNMENT == 8
     uint64_t             align;
+#else
+    uint32_t             align;
 #endif
 } ANY_HASH_STATE;
 typedef ANY_HASH_STATE *PANY_HASH_STATE;
