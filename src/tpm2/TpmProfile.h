@@ -3,7 +3,7 @@
 /*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmProfile.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: TpmProfile.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -549,6 +549,12 @@
 #endif
 #ifndef CC_Duplicate
 #define CC_Duplicate                        CC_YES
+#endif
+#ifndef CC_ECC_Decrypt
+#define CC_ECC_Decrypt                      (CC_NO && ALG_ECC)
+#endif
+#ifndef CC_ECC_Encrypt
+#define CC_ECC_Encrypt                      (CC_NO && ALG_ECC)
 #endif
 #ifndef CC_ECC_Parameters
 #define CC_ECC_Parameters                   (CC_YES && ALG_ECC)

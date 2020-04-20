@@ -292,6 +292,8 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_Policy_AC_SendSelect         (TPM_CC)(0x00000196)
 #define TPM_CC_CertifyX509                  (TPM_CC)(0x00000197)
 #define TPM_CC_ACT_SetTimeout               (TPM_CC)(0x00000198)
+#define TPM_CC_ECC_Encrypt		    (TPM_CC)(0x00000199)
+#define TPM_CC_ECC_Decrypt		    (TPM_CC)(0x0000019A)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 

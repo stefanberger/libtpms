@@ -284,6 +284,7 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptCmac_fp.h \
 	tpm2/crypto/CryptDes_fp.h \
 	tpm2/crypto/CryptEcc.h \
+	tpm2/crypto/CryptEccCrypt_fp.h \
 	tpm2/crypto/CryptEccKeyExchange_fp.h \
 	tpm2/crypto/CryptEccMain_fp.h \
 	tpm2/crypto/CryptEccSignature_fp.h \

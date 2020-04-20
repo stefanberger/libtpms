@@ -3,7 +3,7 @@
 /*		Algorithm Values from the TCG Algorithm Registry 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAlgorithmDefines.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: TpmAlgorithmDefines.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -221,7 +221,7 @@
 #define MAX_TDES_BLOCK_SIZE_BYTES   TDES_MAX_BLOCK_SIZE
 // Additional values for benefit of code
 #define TPM_CC_FIRST                        0x0000011F
-#define TPM_CC_LAST                         0x00000198
+#define TPM_CC_LAST                         0x0000019A
 #if COMPRESSED_LISTS
 #define ADD_FILL            0
 #else
@@ -352,6 +352,8 @@
 					  + (ADD_FILL || CC_Policy_AC_SendSelect)                 /* 0x00000196 */ \
 					  + (ADD_FILL || CC_CertifyX509)                          /* 0x00000197 */ \
 					  + (ADD_FILL || CC_ACT_SetTimeout)                       /* 0x00000198 */ \
+					  + (ADD_FILL || CC_ECC_Encrypt)                          /* 0x00000199 */ \
+					  + (ADD_FILL || CC_ECC_Decrypt)                          /* 0x0000019A */ \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   (0 + CC_Vendor_TCG_Test)
