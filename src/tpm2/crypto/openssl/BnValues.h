@@ -3,7 +3,7 @@
 /*			  For defining the internal BIGNUM structure   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnValues.h 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: BnValues.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -153,6 +153,15 @@ extern const bignum_t   BnConstZero;
    initialized and a parameter is created with a pointer to the structure. The pointer has the name
    and the structure it points to is name_ */
 #define BN_ADDRESS(name) (bigNum)&name##_
+
+#define BN_CONST(name, words, initializer)				\
+    typedef const struct name##_type {					\
+	crypt_uword_t       allocated;					\
+	crypt_uword_t       size;					\
+	crypt_uword_t       d[words < 1 ? 1 : words];			\
+    } name##_type;							\
+    name##_type name = {(words < 1 ? 1 : words), words, {initializer}};
+
 #define BN_STRUCT_ALLOCATION(bits) (BITS_TO_CRYPT_WORDS(bits) + 1)
 /* Create a structure of the correct size. */
 #define BN_STRUCT(bits)					\
@@ -276,6 +285,40 @@ typedef struct
 #   else
 #       error "RADIX_BITS must either be 32 or 64"
 #   endif
+#endif
+
+/* These macros are used for data initialization of big number ECC constants These two macros
+   combine a macro for data definition with a macro for structure initilization. The a parameter is
+   a macro that gives numbers to each of the bytes of the initializer and defines where each of the
+   numberd bytes will show up in the final structure. The b value is a structure that contains the
+   requisite number of bytes in big endian order. S, the MJOIN and JOIND macros will combine a macro
+   defining a data layout with a macro defining the data to be places. Generally, these macros will
+   only need expansion when CryptEccData().c gets compiled. */
+#define JOINED(a,b) a b
+#define MJOIN(a,b) a b
+
+#define B4_TO_BN(a, b, c, d)  (((((a << 8) + b) << 8) + c) + d)
+#if RADIX_BYTES == 64
+#define B8_TO_BN(a, b, c, d, e, f, g, h)				\
+    (UINT64)(((((((((((((((a) << 8) | b) << 8) | c) << 8) | d) << 8)	\
+		   e) << 8) | f) << 8) | g) << 8) | h)
+#define B1_TO_BN(a)                     B8_TO_BN(0, 0, 0, 0, 0, 0, 0, a)
+#define B2_TO_BN(a, b)                  B8_TO_BN(0, 0, 0, 0, 0, 0, a, b)
+#define B3_TO_BN(a, b, c)               B8_TO_BN(0, 0, 0, 0, 0, a, b, c)
+#define B4_TO_BN(a, b, c, d)            B8_TO_BN(0, 0, 0, 0, a, b, c, d)
+#define B5_TO_BN(a, b, c, d, e)         B8_TO_BN(0, 0, 0, a, b, c, d, e)
+#define B6_TO_BN(a, b, c, d, e, f)      B8_TO_BN(0, 0, a, b, c, d, e, f)
+#define B7_TO_BN(a, b, c, d, e, f, g)   B8_TO_BN(0, a, b, c, d, e, f, g)
+#else
+#define B1_TO_BN(a)                 B4_TO_BN(0, 0, 0, a)
+#define B2_TO_BN(a, b)              B4_TO_BN(0, 0, a, b)
+#define B3_TO_BN(a, b, c)           B4_TO_BN(0, a, b, c)
+#define B4_TO_BN(a, b, c, d)        (((((a << 8) + b) << 8) + c) + d)
+#define B5_TO_BN(a, b, c, d, e)          B4_TO_BN(b, c, d, e), B1_TO_BN(a)
+#define B6_TO_BN(a, b, c, d, e, f)       B4_TO_BN(c, d, e, f), B2_TO_BN(a, b)
+#define B7_TO_BN(a, b, c, d, e, f, g)    B4_TO_BN(d, e, f, g), B3_TO_BN(a, b, c)
+#define B8_TO_BN(a, b, c, d, e, f, g, h) B4_TO_BN(e, f, g, h), B4_TO_BN(a, b, c, d)
+
 #endif
 
 /* Add implementation dependent definitions for other ECC Values and for linkages */
