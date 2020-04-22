@@ -63,6 +63,12 @@ int main(void)
     if (sizeof(OBJECT) != OBJECT_EXP_SIZE) {
         fprintf(stderr, "sizeof(OBJECT) does not have expected size of %u bytes"
                         "but %zu bytes\n", OBJECT_EXP_SIZE, sizeof(OBJECT));
+        fprintf(stderr, "sizeof(TPMT_PUBLIC) is now %zu bytes;"
+                        "was 356 bytes for 2048 bit RSA keys\n", sizeof(TPMT_PUBLIC));
+        fprintf(stderr, "sizeof(TPMT_SENSITIVE) is now %zu bytes;"
+                        "was 776 bytes for 2048 bit RSA keys\n", sizeof(TPMT_SENSITIVE));
+        fprintf(stderr, "sizeof(privateExponent_t) is now %zu bytes;"
+                        "was 608 bytes for 2048 bit RSA keys\n", sizeof(privateExponent_t));
         return EXIT_FAILURE;
     }
 
