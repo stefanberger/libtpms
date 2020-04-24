@@ -611,6 +611,7 @@ TPM2_PolicyCounterTimer(
     // Input Validation
     // Get a marshaled time structure
     infoDataSize = TimeGetMarshaled(&infoData);
+    pAssert(infoDataSize <= sizeof(infoData));  // libtpms added; 25 < 32 ==> unfounded coverity complaint
     // Make sure that the referenced stays within the bounds of the structure.
     // NOTE: the offset checks are made even for a trial policy because the policy
     // will not make any sense if the references are out of bounds of the timer
