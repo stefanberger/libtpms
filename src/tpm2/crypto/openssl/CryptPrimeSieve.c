@@ -97,7 +97,7 @@ RsaAdjustPrimeLimit(
     if(requestedPrimes < s_PrimeMarkersCount)
 	primeLimit = s_PrimeMarkers[requestedPrimes];
     else
-	primeLimit = s_LastPrimeInTable;
+	primeLimit = s_LastPrimeInTable - 2;  // libtpms: Fix for 3072 bit keys to avoid mark=5
     primeLimit >>= 1;
 }
 
