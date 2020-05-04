@@ -413,6 +413,8 @@ char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         if (asprintf(&buffer, fmt,  printed ? "," : "",
                      tpmfeatures, "%s%s%s") < 0)
             goto error;
+        free(fmt);
+        free(tpmfeatures);
         printed = true;
     }
 
