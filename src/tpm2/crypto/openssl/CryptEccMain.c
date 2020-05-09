@@ -244,6 +244,8 @@ CryptCapGetECCCurve(
 	    // If curveID is less than the starting curveID, skip it
 	    if(curve < curveID)
 		continue;
+	    if (!CryptEccIsCurveRuntimeUsable(curve)) // libtpms added: runtime filter supported curves
+		continue;
 	    if(curveList->count < maxCount)
 		{
 		    // If we have not filled up the return list, add more curves to
@@ -779,4 +781,21 @@ CryptEccGenerateKey(
     CURVE_FREE(E);
     return retVal;
 }
+
+//		libtpms added begin
+// Support for some curves may be compiled in but they may not be
+// supported by openssl's crypto library.
+LIB_EXPORT BOOL
+CryptEccIsCurveRuntimeUsable(
+			     TPMI_ECC_CURVE curveId
+			    )
+{
+    CURVE_INITIALIZED(E, curveId);
+    if (E == NULL)
+	return FALSE;
+    CURVE_FREE(E);
+    return TRUE;
+}
+//		libtpms added end
+
 #endif  // TPM_ALG_ECC
