@@ -216,5 +216,11 @@ CryptEccGenerateKey(
 		    //     RNG state
 		    );
 
+// 		libtpms added begin
+LIB_EXPORT BOOL
+CryptEccIsCurveRuntimeUsable(
+			     TPMI_ECC_CURVE curveId
+			    );
+//		libtpms added end
 
 #endif
