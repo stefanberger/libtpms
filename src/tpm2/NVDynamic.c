@@ -114,7 +114,7 @@ NvNextByType(
 	     )
 {
     NV_REF           addr;
-    TPM_HANDLE       nvHandle;
+    TPM_HANDLE       nvHandle = 0; // libtpms changed: gcc 10.1.0 complaint
     while((addr = NvNext(iter, &nvHandle)) != 0)
 	{
 	    // addr: the address of the location containing the handle of the value
