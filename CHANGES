@@ -1,5 +1,17 @@
 CHANGES - changes for libtpms
 
+version 0.6.2
+  - compilation fixes for TPM 1.2 and various architectures and gcc versions
+  - Fix support for NIST curves P{192,224,521} and SM2 P256 and BN P648
+    that would not work;
+  - Runtime filter elliptic curves (that OpenSSL does not support) and do
+    not advertise those curves as capabilities
+  - Removed unnecessary space in MANUFACTURER "IBM " -> "IBM"
+
+version 0.6.1
+  - CMAC code fix
+  - Adapt code for OpenSSL 1.2 deprecated elliptic curve API calls
+
 version 0.6.0
   - added TPM 2 support (revision 150)
 
