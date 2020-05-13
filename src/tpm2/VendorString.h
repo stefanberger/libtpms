@@ -65,7 +65,7 @@
 /* Define up to 4-byte values for MANUFACTURER.  This value defines the response for
    TPM_PT_MANUFACTURER in TPM2_GetCapability(). The following line should be un-commented and a
    vendor specific string should be provided here. */
-#define    MANUFACTURER    "IBM "
+#define    MANUFACTURER    "IBM"
 
 /*     The following #if macro may be deleted after a proper MANUFACTURER is provided. */
 #ifndef MANUFACTURER
