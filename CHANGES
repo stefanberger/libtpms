@@ -1,5 +1,16 @@
 CHANGES - changes for libtpms
 
+version 0.7.1
+  - tpm2: Fix TDES key creation by adding missing un-/marshalling functions
+  - tpm2: Fix a bug in CheckAuthSession
+  - compilation fixes for TPM 1.2 & TPM 2 and various architectures and
+    gcc versions
+  - Fix support for NIST curves P{192,224,521} and SM2 P256 and BN P648
+    that would not work;
+  - Runtime filter elliptic curves (that OpenSSL does not support) and do
+    not advertise those curves as capabilities
+  - Removed unnecessary space in MANUFACTURER "IBM " -> "IBM"
+
 version 0.7.0
   - use OpenSSL crypto for AES, TDES, EC, and RSA operations when possible
 
