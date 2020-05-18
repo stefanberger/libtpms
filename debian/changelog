@@ -1,8 +1,18 @@
+libtpms (0.7.1-1) RELEASE; urgency=medium
+
+  * Backports and other bugfixes.
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 18 May 2020 11:46:00 -0500
+
 libtpms (0.7.0-1) RELEASE; urgency=medium
+
+  * Stable release
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Thu, 18 Jul 2019 16:26:00 -0500
 
 libtpms (0.7.0~dev1) UNRELEASED; urgency=medium
+
+  * Developer release
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 14 Jan 2019 10:25:08 -0500
 
