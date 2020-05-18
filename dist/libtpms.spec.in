@@ -112,7 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
-* Mon Jan 14 2018 Stefan Berger - 0.6.0-1
+* Mon May 18 2020 Stefan Berger - 0.7.1-1
+- Backports and other bugfixes.
+
+* Mon Jan 15 2018 Stefan Berger - 0.6.0-1
 - Release of version 0.6.0 with TPM 2.0 support
 
 * Mon Jun 30 2014 Stefan Berger - 0.5.2-1
