@@ -701,6 +701,7 @@ CryptSymmetricDecrypt(
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx ||
         EVP_DecryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
+        EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
         EVP_DecryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
