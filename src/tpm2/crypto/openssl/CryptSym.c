@@ -631,8 +631,7 @@ CryptSymmetricDecrypt(
     EVP_CIPHER_CTX      *ctx = NULL;
     int                  outlen1 = 0;
     int                  outlen2 = 0;
-    BYTE                *pOut = dOut;
-    BYTE                *buffer = NULL;
+    BYTE                *buffer;
     UINT32               buffersize = 0;
     BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
     UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
@@ -680,18 +679,15 @@ CryptSymmetricDecrypt(
     if (evpfn ==  NULL)
         return TPM_RC_FAILURE;
 
-    if (dIn == dOut) {
-        // in-place encryption; we use a temp buffer
-        buffersize = TPM2_ROUNDUP(dSize, blockSize);
-        buffer = malloc(buffersize);
-        if (buffer == NULL)
-            ERROR_RETURN(TPM_RC_FAILURE);
-        pOut = buffer;
-    }
+    /* a buffer with a 'safety margin' for EVP_DecryptUpdate */
+    buffersize = TPM2_ROUNDUP(dSize + blockSize, blockSize);
+    buffer = malloc(buffersize);
+    if (buffer == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
 
 #if ALG_TDES && ALG_CTR
     if (algorithm == TPM_ALG_TDES && mode == ALG_CTR_VALUE) {
-        TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, pOut, blockSize);
+        TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, buffer, blockSize);
         outlen1 = dSize;
         ERROR_RETURN(TPM_RC_SUCCESS);
     }
@@ -701,17 +697,21 @@ CryptSymmetricDecrypt(
     if (!ctx ||
         EVP_DecryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
         EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
-        EVP_DecryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
+        EVP_DecryptUpdate(ctx, buffer, &outlen1, dIn, dSize) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
-    pAssert(outlen1 <= dSize || dSize >= outlen1 + blockSize);
+    pAssert((int)buffersize >= outlen1);
 
-    if (EVP_DecryptFinal(ctx, pOut + outlen1, &outlen2) != 1)
+    if (EVP_DecryptFinal(ctx, &buffer[outlen1], &outlen2) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
+
+    pAssert((int)buffersize >= outlen1 + outlen2);
 
  Exit:
-    if (retVal == TPM_RC_SUCCESS && pOut != dOut)
-        memcpy(dOut, pOut, outlen1 + outlen2);
+    if (retVal == TPM_RC_SUCCESS) {
+        pAssert(dSize >= outlen1 + outlen2);
+        memcpy(dOut, buffer, outlen1 + outlen2);
+    }
 
     clear_and_free(buffer, buffersize);
     EVP_CIPHER_CTX_free(ctx);
