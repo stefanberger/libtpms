@@ -1318,6 +1318,7 @@ CryptRsaDecrypt(
     const char            *digestname;
     size_t                 outlen;
     unsigned char         *tmp = NULL;
+    unsigned char          buffer[MAX_RSA_KEY_BYTES];
 
     // Make sure that the necessary parameters are provided
     pAssert(cIn != NULL && dOut != NULL && key != NULL);
@@ -1372,11 +1373,16 @@ CryptRsaDecrypt(
             break;
 	}
 
-    outlen = cIn->size;
-    if (EVP_PKEY_decrypt(ctx, dOut->buffer, &outlen,
+    /* cannot use cOut->buffer */
+    outlen = sizeof(buffer);
+    if (EVP_PKEY_decrypt(ctx, buffer, &outlen,
                          cIn->buffer, cIn->size) <= 0)
         ERROR_RETURN(TPM_RC_FAILURE);
 
+    if (outlen > dOut->size)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    memcpy(dOut->buffer, buffer, outlen);
     dOut->size = outlen;
 
     retVal = TPM_RC_SUCCESS;
