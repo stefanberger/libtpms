@@ -661,6 +661,21 @@ CryptSymmetricDecrypt(
     else
 	iv = defaultIv;
 
+    switch(mode)
+	{
+#if ALG_CBC || ALG_ECB
+	  case ALG_CBC_VALUE:
+	  case ALG_ECB_VALUE:
+	    // For ECB and CBC, the data size must be an even multiple of the
+	    // cipher block size
+	    if((dSize % blockSize) != 0)
+		return TPM_RC_SIZE;
+	    break;
+#endif
+	  default:
+	    break;
+	}
+
     evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
                          keyToUse, &keyToUseLen);
     if (evpfn ==  NULL)
