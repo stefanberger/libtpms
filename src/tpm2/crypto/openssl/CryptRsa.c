@@ -1459,6 +1459,10 @@ CryptRsaSign(
         EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0)
         ERROR_RETURN(TPM_RC_FAILURE);
 
+    if (padding == RSA_PKCS1_PSS_PADDING &&
+        EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, -1) <= 0)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
     outlen = sigOut->signature.rsapss.sig.t.size;
     if (EVP_PKEY_sign(ctx,
                       sigOut->signature.rsapss.sig.t.buffer, &outlen,
