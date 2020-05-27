@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed May 27 2020 Stefan Berger - 0.7.2-1
+- Bugfixes related to RSA signing, decryption, and symmetric decryption.
+
 * Mon May 18 2020 Stefan Berger - 0.7.1-1
 - Backports and other bugfixes.
 

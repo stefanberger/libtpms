@@ -1,3 +1,9 @@
+libtpms (0.7.2-1) RELEASE; urgency=high
+
+  * Bugfixes related to RSA signing, decryption, and symmetric decryption.
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Wed, 27 May 2020 7:53:00 -0500
+
 libtpms (0.7.1-1) RELEASE; urgency=medium
 
   * Backports and other bugfixes.
