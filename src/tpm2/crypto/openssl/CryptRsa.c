@@ -1540,7 +1540,13 @@ CryptRsaSign(
         EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0)
         ERROR_RETURN(TPM_RC_FAILURE);
 
+    /* careful with PSS padding: Use salt length = hash length (-1) if
+     *   length(digest) + length(hash-to-sign) + 2 <= modSize
+     * otherwise use the max. possible salt length, which is the default (-2)
+     * test case: 1024 bit key PSS signing sha512 hash
+     */
     if (padding == RSA_PKCS1_PSS_PADDING &&
+        EVP_MD_size(md) + hIn->b.size + 2 <= modSize && /* OSSL: RSA_padding_add_PKCS1_PSS_mgf1 */
         EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, -1) <= 0)
         ERROR_RETURN(TPM_RC_FAILURE);
 
