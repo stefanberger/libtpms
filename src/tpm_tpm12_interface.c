@@ -55,29 +55,29 @@
 #include "tpm12/tpm_permanent.h"
 #include "tpm12/tpm_nvfile.h"
 
-TPM_RESULT TPM12_MainInit(void)
+static TPM_RESULT TPM12_MainInit(void)
 {
     return TPM_MainInit();
 }
 
-void TPM12_Terminate(void)
+static void TPM12_Terminate(void)
 {
     TPM_Global_Delete(tpm_instances[0]);
     free(tpm_instances[0]);
     tpm_instances[0] = NULL;
 }
 
-TPM_RESULT TPM12_Process(unsigned char **respbuffer, uint32_t *resp_size,
-                         uint32_t *respbufsize,
-		         unsigned char *command, uint32_t command_size)
+static TPM_RESULT TPM12_Process(unsigned char **respbuffer, uint32_t *resp_size,
+                                uint32_t *respbufsize,
+                                unsigned char *command, uint32_t command_size)
 {
     *resp_size = 0;
     return TPM_ProcessA(respbuffer, resp_size, respbufsize,
                         command, command_size);
 }
 
-TPM_RESULT TPM12_VolatileAllStore(unsigned char **buffer,
-                                  uint32_t *buflen)
+static TPM_RESULT TPM12_VolatileAllStore(unsigned char **buffer,
+                                         uint32_t *buflen)
 {
     TPM_RESULT rc;
     TPM_STORE_BUFFER tsb;
@@ -102,13 +102,13 @@ TPM_RESULT TPM12_VolatileAllStore(unsigned char **buffer,
     return rc;
 }
 
-TPM_RESULT TPM12_CancelCommand(void)
+static TPM_RESULT TPM12_CancelCommand(void)
 {
     return TPM_FAIL; /* not supported */
 }
 
 
-TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
+static TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
                                 int *result)
 {
     switch (prop) {
@@ -184,7 +184,7 @@ TPM_RESULT TPM12_GetTPMProperty(enum TPMLIB_TPMProperty prop,
  *
  * Return a JSON document with contents queried for by the user's passed flags
  */
-char *TPM12_GetInfo(enum TPMLIB_InfoFlags flags)
+static char *TPM12_GetInfo(enum TPMLIB_InfoFlags flags)
 {
     const char *tpmspec =
     "\"TPMSpecification\":{"
@@ -240,9 +240,9 @@ error:
 
 static uint32_t tpm12_buffersize = TPM_BUFFER_MAX;
 
-uint32_t TPM12_SetBufferSize(uint32_t wanted_size,
-                             uint32_t *min_size,
-                             uint32_t *max_size)
+static uint32_t TPM12_SetBufferSize(uint32_t wanted_size,
+                                    uint32_t *min_size,
+                                    uint32_t *max_size)
 {
     if (min_size)
         *min_size = TPM_BUFFER_MIN;
@@ -267,8 +267,8 @@ uint32_t TPM12_GetBufferSize(void)
     return TPM12_SetBufferSize(0, NULL, NULL);
 }
 
-TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
-                               unsigned int flags)
+static TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
+                                      unsigned int flags)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     tpm_state_t tpm_state;
@@ -367,8 +367,8 @@ static TPM_RESULT TPM_PermanentAll_NVLoad_Preserve(tpm_state_t *tpm_state)
  * it from files. In case the TPM is running, we get it from the running
  * TPM.
  */
-TPM_RESULT TPM12_GetState(enum TPMLIB_StateType st,
-                          unsigned char **buffer, uint32_t *buflen)
+static TPM_RESULT TPM12_GetState(enum TPMLIB_StateType st,
+                                 unsigned char **buffer, uint32_t *buflen)
 {
     TPM_RESULT ret = TPM_FAIL;
     TPM_STORE_BUFFER tsb;
@@ -433,8 +433,8 @@ TPM_RESULT TPM12_GetState(enum TPMLIB_StateType st,
  *          previous state
  * @buflen: length of the buffer
  */
-TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
-                          const unsigned char *buffer, uint32_t buflen)
+static TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
+                                 const unsigned char *buffer, uint32_t buflen)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     unsigned char *stream = NULL, *orig_stream = NULL;

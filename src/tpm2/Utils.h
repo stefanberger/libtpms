@@ -44,7 +44,7 @@
 #define TPM2_ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1) / (SIZE) ) * (SIZE)
 
-static inline void clear_and_free(void *ptr, size_t size) {
+__attribute__((unused)) static inline void clear_and_free(void *ptr, size_t size) {
     if (ptr) {
         MemorySet(ptr, 0, size);
         free(ptr);

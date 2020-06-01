@@ -380,7 +380,7 @@ void TPM_IdentityContents_Init(TPM_IDENTITY_CONTENTS *tpm_identity_contents)
 
    NOTE: Never called.
 */
-
+#if 0
 TPM_RESULT TPM_IdentityContents_Load(TPM_IDENTITY_CONTENTS *tpm_identity_contents,
 				     unsigned char **stream,
 				     uint32_t *stream_size)
@@ -410,6 +410,7 @@ TPM_RESULT TPM_IdentityContents_Load(TPM_IDENTITY_CONTENTS *tpm_identity_content
     }
     return rc;
 }
+#endif
 
 /* TPM_IdentityContents_Store()
    

@@ -65,6 +65,7 @@
 #include "tpm_library.h"
 #include "tpm_library_intern.h"
 #include "tpm_nvfilename.h"
+#include "tpm_tis.h"
 
 static const struct tags_and_indices {
     const char    *starttag;

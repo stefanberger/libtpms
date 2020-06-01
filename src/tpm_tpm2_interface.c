@@ -72,7 +72,7 @@ static BOOL      reportedFailureCommand;
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
  */
-TPM_BOOL _TPM2_CheckNVRAMFileExists(bool *has_nvram_loaddata_callback)
+static TPM_BOOL _TPM2_CheckNVRAMFileExists(bool *has_nvram_loaddata_callback)
 {
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -97,7 +97,7 @@ TPM_BOOL _TPM2_CheckNVRAMFileExists(bool *has_nvram_loaddata_callback)
     return FALSE;
 }
 
-TPM_RESULT TPM2_MainInit(void)
+static TPM_RESULT TPM2_MainInit(void)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     bool has_cached_state;
@@ -164,16 +164,16 @@ TPM_RESULT TPM2_MainInit(void)
     return ret;
 }
 
-void TPM2_Terminate(void)
+static void TPM2_Terminate(void)
 {
     TPM_TearDown();
 
     _rpc__Signal_PowerOff();
 }
 
-TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
-                        uint32_t *respbufsize,
-		        unsigned char *command, uint32_t command_size)
+static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
+                               uint32_t *respbufsize,
+                               unsigned char *command, uint32_t command_size)
 {
     uint8_t locality = 0;
     _IN_BUFFER req;
@@ -273,8 +273,8 @@ TPM_RESULT TPM2_PersistentAllStore(unsigned char **buf,
     return ret;
 }
 
-TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
-                                 uint32_t *buflen)
+static TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
+                                        uint32_t *buflen)
 {
     TPM_RESULT rc = 0;
     INT32 size = NV_MEMORY_SIZE;
@@ -303,15 +303,15 @@ TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
     return rc;
 }
 
-TPM_RESULT TPM2_CancelCommand(void)
+static TPM_RESULT TPM2_CancelCommand(void)
 {
     _rpc__Signal_CancelOn();
 
     return TPM_SUCCESS;
 }
 
-TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
-                               int *result)
+static TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
+                                      int *result)
 {
     switch (prop) {
     case  TPMPROP_TPM_RSA_KEY_LENGTH_MAX:
@@ -350,7 +350,7 @@ TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
  *
  * Return a JSON document with contents queried for by the user's passed flags
  */
-char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
+static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
 {
     const char *tpmspec =
     "\"TPMSpecification\":{"
@@ -440,9 +440,9 @@ error:
 
 static uint32_t tpm2_buffersize = TPM_BUFFER_MAX;
 
-uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
-                            uint32_t *min_size,
-                            uint32_t *max_size)
+static uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
+                                   uint32_t *min_size,
+                                   uint32_t *max_size)
 {
     const uint32_t min = MAX_CONTEXT_SIZE + 128;
     const uint32_t max = TPM_BUFFER_MAX;
@@ -474,8 +474,8 @@ uint32_t TPM2_GetBufferSize(void)
  * Validate the state blobs to check whether they can be
  * successfully used by a TPM_INIT.
 */
-TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
-                              unsigned int flags)
+static TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
+                                     unsigned int flags)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -537,8 +537,8 @@ TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
  * it from files. In case the TPM is running, we get it from the running
  * TPM.
  */
-TPM_RESULT TPM2_GetState(enum TPMLIB_StateType st,
-                         unsigned char **buffer, uint32_t *buflen)
+static TPM_RESULT TPM2_GetState(enum TPMLIB_StateType st,
+                                unsigned char **buffer, uint32_t *buflen)
 {
     TPM_RESULT ret = TPM_FAIL;
 
@@ -592,8 +592,8 @@ TPM_RESULT TPM2_GetState(enum TPMLIB_StateType st,
  *          previous state
  * @buflen: length of the buffer
  */
-TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
-                         const unsigned char *buffer, uint32_t buflen)
+static TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
+                                const unsigned char *buffer, uint32_t buflen)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     TPM_RC rc = TPM_RC_SUCCESS;
