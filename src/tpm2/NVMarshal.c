@@ -204,7 +204,7 @@ block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
             goto SKIP_MARK;						\
     }
 
-unsigned int _ffsll(long long bits)
+static unsigned int _ffsll(long long bits)
 {
     size_t i = 0;
 
@@ -274,7 +274,7 @@ TPM2B_Cmp(const TPM2B *t1, const TPM2B *t2)
     return memcmp(t1->buffer, t2->buffer, t1->size);
 }
 
-UINT16
+static UINT16
 TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
@@ -282,7 +282,7 @@ TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
-TPM_RC
+static TPM_RC
 TPM2B_PROOF_Unmarshal(TPM2B_PROOF *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -293,7 +293,7 @@ TPM2B_PROOF_Unmarshal(TPM2B_PROOF *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-TPM_RC
+static TPM_RC
 UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
                        const char *msg)
 {
@@ -335,7 +335,7 @@ NV_HEADER_Marshal(BYTE **buffer, INT32 *size, UINT16 version, UINT32 magic,
     return written;
 }
 
-TPM_RC
+static TPM_RC
 NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
                     UINT16 cur_version, UINT32 exp_magic)
 {
@@ -606,7 +606,7 @@ skip_future_versions:
 #define ORDERLY_DATA_MAGIC      0x56657887
 #define ORDERLY_DATA_VERSION 2
 
-UINT16
+static UINT16
 ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
@@ -645,7 +645,7 @@ ORDERLY_DATA_Marshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-TPM_RC
+static TPM_RC
 ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -782,7 +782,8 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
  * restored. Only data for active PCR banks needs to restored, inactive PCR
  * banks need no data restored.
  */
-UINT64 pcrbanks_algs_active(const TPML_PCR_SELECTION *pcrAllocated)
+static UINT64
+pcrbanks_algs_active(const TPML_PCR_SELECTION *pcrAllocated)
 {
     UINT64 algs_active = 0;
     unsigned i, j;
@@ -1158,7 +1159,7 @@ skip_future_versions:
 #define STATE_CLEAR_DATA_MAGIC  0x98897667
 #define STATE_CLEAR_DATA_VERSION 2
 
-UINT16
+static UINT16
 STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
@@ -1186,7 +1187,7 @@ STATE_CLEAR_DATA_Marshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-TPM_RC
+static TPM_RC
 STATE_CLEAR_DATA_Unmarshal(STATE_CLEAR_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -1237,7 +1238,7 @@ skip_future_versions:
 #define STATE_RESET_DATA_MAGIC  0x01102332
 #define STATE_RESET_DATA_VERSION 3
 
-TPM_RC
+static TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -1349,7 +1350,7 @@ skip_future_versions:
     return rc;
 }
 
-UINT16
+static UINT16
 STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
@@ -2994,7 +2995,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     return written;
 }
 
-TPM_RC
+static TPM_RC
 VolatileState_TailV4_Unmarshal(BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -3017,7 +3018,7 @@ VolatileState_TailV4_Unmarshal(BYTE **buffer, INT32 *size)
     return rc;
 }
 
-TPM_RC
+static TPM_RC
 VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
@@ -4070,7 +4071,7 @@ skip_future_versions:
 
 #define INDEX_ORDERLY_RAM_VERSION 2
 #define INDEX_ORDERLY_RAM_MAGIC   0x5346feab
-UINT32
+static UINT32
 INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
                           BYTE **buffer, INT32 *size)
 {
@@ -4131,7 +4132,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
     return written;
 }
 
-TPM_RC
+static TPM_RC
 INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
                             BYTE **buffer, INT32 *size)
 {
@@ -4279,7 +4280,7 @@ USER_NVRAM_Display(const char *msg)
 
 #define USER_NVRAM_VERSION 2
 #define USER_NVRAM_MAGIC   0x094f22c3
-UINT32
+static UINT32
 USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
 {
     UINT32 written;
@@ -4368,7 +4369,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
  * This function fails if there's not enough NVRAM to write the data into
  * or if an unknown handle type was encountered.
  */
-TPM_RC
+static TPM_RC
 USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;

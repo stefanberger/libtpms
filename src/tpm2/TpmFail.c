@@ -508,6 +508,7 @@ TpmFailureMode(
     *outResponse = (unsigned char *)response;
     return;
 }
+#if 0		// libtpms added
 /* 9.17.6 UnmarshalFail() */
 /* This is a stub that is used to catch an attempt to unmarshal an entry that is not defined. Don't
    ever expect this to be called but... */
@@ -523,3 +524,4 @@ UnmarshalFail(
     NOT_REFERENCED(size);
     FAIL(FATAL_ERROR_INTERNAL);
 }
+#endif		// libtpms added
