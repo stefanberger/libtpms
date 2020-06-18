@@ -12,6 +12,7 @@ AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([foreign 1.6 subdir-objects])
+AM_SILENT_RULES([yes])
 
 LIBTPMS_VER_MAJOR=`echo $PACKAGE_VERSION | awk -F. '{print $1}'`
 LIBTPMS_VER_MINOR=`echo $PACKAGE_VERSION | awk -F. '{print $2}'`
