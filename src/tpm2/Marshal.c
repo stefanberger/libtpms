@@ -3,7 +3,7 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
+/*            $Id: Marshal.c 1636 2020-06-12 22:22:37Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -355,6 +355,16 @@ TPMI_YES_NO_Marshal(TPMI_YES_NO *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+/* Table 40 - Definition of (UINT32) TPMA_ACT Bits */
+
+UINT16
+TPMA_ACT_Marshal(TPMA_ACT *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += UINT32_Marshal((UINT32 *)source, buffer, size);
+    return written;
+}
+
 /* Table 2:49 - Definition of TPMI_DH_SAVED Type (InterfaceTable()) */
 
 UINT16
@@ -678,6 +688,19 @@ TPMS_TAGGED_POLICY_Marshal(TPMS_TAGGED_POLICY *source, BYTE **buffer, INT32 *siz
     return written;
 }
 
+/* Table 105 - Definition of TPMS_ACT_DATA Structure <OUT> */
+
+UINT16
+TPMS_ACT_DATA_Marshal(TPMS_ACT_DATA *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += TPM_HANDLE_Marshal(&source->handle, buffer, size);
+    written += UINT32_Marshal(&source->timeout, buffer, size);
+    written += TPMA_ACT_Marshal(&source->attributes, buffer, size);
+    return written;
+}
+
 /* Table 2:94 - Definition of TPMS_TAGGED_PROPERTY Structure (StructuresTable()) */
 
 UINT16
@@ -872,6 +895,21 @@ TPML_TAGGED_POLICY_Marshal(TPML_TAGGED_POLICY *source, BYTE **buffer, INT32 *siz
     return written;
 }
  
+/* Table 2:118 - Definition of TPML_ACT_DATA Structure (StructuresTable()) */
+
+UINT16
+TPML_ACT_DATA_Marshal(TPML_ACT_DATA *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    UINT32 i;
+
+    written += UINT32_Marshal(&source->count, buffer, size);
+    for (i = 0 ; i < source->count ; i++) {
+	written += TPMS_ACT_DATA_Marshal(&source->actData[i], buffer, size);
+    }
+    return written;
+}
+
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union (StructuresTable()) */
 
 UINT16
@@ -909,6 +947,9 @@ TPMU_CAPABILITIES_Marshal(TPMU_CAPABILITIES *source, BYTE **buffer, INT32 *size,
 	break;
       case TPM_CAP_AUTH_POLICIES:
 	written += TPML_TAGGED_POLICY_Marshal(&source->authPolicies, buffer, size);
+	break;
+      case TPM_CAP_ACT:
+	written += TPML_ACT_DATA_Marshal(&source->actData, buffer, size);
 	break;
       default:
 	pAssert(FALSE);

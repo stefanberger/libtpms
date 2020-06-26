@@ -3,7 +3,7 @@
 /*			   Parameter Marshaling  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal_fp.h 1603 2020-04-03 17:48:43Z kgoldman $		*/
+/*            $Id: Marshal_fp.h 1635 2020-06-12 21:48:27Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -115,6 +115,8 @@ extern "C" {
     UINT16
     TPMI_YES_NO_Marshal(TPMI_YES_NO *source, BYTE **buffer, INT32 *size);
     UINT16
+    TPMA_ACT_Marshal(TPMA_ACT *source, BYTE **buffer, INT32 *size);
+    UINT16
     TPMI_DH_SAVED_Marshal(TPMI_DH_CONTEXT *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMI_RH_HIERARCHY_Marshal(TPMI_RH_HIERARCHY *source, BYTE **buffer, INT32 *size);
@@ -171,6 +173,8 @@ extern "C" {
     UINT16
     TPMS_TAGGED_POLICY_Marshal(TPMS_TAGGED_POLICY *source, BYTE **buffer, INT32 *size);
     UINT16
+    TPMS_ACT_DATA_Marshal(TPMS_ACT_DATA *source, BYTE **buffer, INT32 *size);
+    UINT16
     TPMS_TAGGED_PROPERTY_Marshal(TPMS_TAGGED_PROPERTY *source, BYTE **buffer, INT32 *size);
     UINT16
     TPML_CC_Marshal(TPML_CC *source, BYTE **buffer, INT32 *size);
@@ -196,6 +200,8 @@ extern "C" {
     TPML_ECC_CURVE_Marshal(TPML_ECC_CURVE *source, BYTE **buffer, INT32 *size);
     UINT16
     TPML_TAGGED_POLICY_Marshal(TPML_TAGGED_POLICY *source, BYTE **buffer, INT32 *size);
+    UINT16
+    TPML_ACT_DATA_Marshal(TPML_ACT_DATA *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMU_CAPABILITIES_Marshal(TPMU_CAPABILITIES *source, BYTE **buffer, INT32 *size, UINT32 selector);
     UINT16
