@@ -3,7 +3,7 @@
 /*		 select the library code that gets included in the TPM build 	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: LibSupport.h 1603 2020-04-03 17:48:43Z kgoldman $		*/
+/*            $Id: LibSupport.h 1628 2020-05-27 19:35:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -71,7 +71,7 @@
     || defined(__amd64__) || defined(__amd64)				\
     || defined(_WIN64) || defined(_M_X64)		 		\
     || defined(_M_ARM64) || defined(__aarch64__) 			\
-    || defined(__powerpc64__) || defined(__ppc64__) 			\
+    || defined(__powerpc64__) || defined(__PPC64__) || defined(__ppc64__) \
     || defined(__s390x__)
 #       define RADIX_BITS                      64
 #   elif defined(__i386__) || defined(__i386) || defined(i386)		\

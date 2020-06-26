@@ -3,7 +3,7 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: TpmBuildSwitches.h 1619 2020-05-19 16:51:47Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

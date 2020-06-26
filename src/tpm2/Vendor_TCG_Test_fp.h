@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			 Sample Vendor Specific Command				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Vendor_TCG_Test_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
+/*            $Id: Vendor_TCG_Test_fp.h 1635 2020-06-12 21:48:27Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
 /*										*/
 /********************************************************************************/
 
@@ -63,12 +63,12 @@
 #define VENDOR_TCG_TEST_FP_H
 
 typedef struct {
-    UINT8 inputData;
-} Vendor_TCG_Test_In;     
+    TPM2B_DATA inputData;
+} Vendor_TCG_Test_In;
 
 typedef struct {
-    UINT8 outputData;
-} Vendor_TCG_Test_Out;     
+    TPM2B_DATA outputData;
+} Vendor_TCG_Test_Out;
 
 TPM_RC
 TPM2_Vendor_TCG_Test(
