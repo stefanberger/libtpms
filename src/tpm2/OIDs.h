@@ -3,7 +3,7 @@
 /*			OID values						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: OIDs.h 1594 2020-03-26 22:15:48Z kgoldman $			*/
+/*            $Id: OIDs.h 1628 2020-05-27 19:35:29Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -98,7 +98,7 @@
 #if ALG_SHA384
 #define SHA384_OID(NAME)  MAKE_OID(NAME##SHA384)
 #else
-#define SHA#84_OID(NAME)
+#define SHA384_OID(NAME)
 #endif
 #ifndef ALG_SHA512
 #   define ALG_SHA512 NO
