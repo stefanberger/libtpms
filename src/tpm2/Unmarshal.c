@@ -3,7 +3,7 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
+/*            $Id: Unmarshal.c 1635 2020-06-12 21:48:27Z kgoldman $		*/
 /*										*/
 /* (c) Copyright IBM Corporation 2015 - 2018					*/
 /*										*/
@@ -396,6 +396,7 @@ TPM_CAP_Unmarshal(TPM_CAP *target, BYTE **buffer, INT32 *size)
 	  case TPM_CAP_PCR_PROPERTIES:
 	  case TPM_CAP_ECC_CURVES:
 	  case TPM_CAP_AUTH_POLICIES:
+	  case TPM_CAP_ACT:
 	  case TPM_CAP_VENDOR_PROPERTY:
 	    break;
 	  default:
