@@ -3,7 +3,7 @@
 /*			     Command DIspatch Data				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatchData.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: CommandDispatchData.h 1635 2020-06-12 21:48:27Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -4605,9 +4605,6 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_CertifyX509)
     (COMMAND_DESCRIPTOR_t *)_CertifyX509DataAddress,
 #endif // CC_CertifyX509
-#if (PAD_LIST || CC_Vendor_TCG_Test)
-    (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
-#endif
 #if (PAD_LIST || CC_ACT_SetTimeout)
     (COMMAND_DESCRIPTOR_t *)_ACT_SetTimeoutDataAddress,
 #endif // CC_ACT_SetTimeout
@@ -4617,6 +4614,9 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ECC_Decrypt)
     (COMMAND_DESCRIPTOR_t *)_ECC_DecryptDataAddress,
 #endif // CC_ECC_Decrypt
+#if (PAD_LIST || CC_Vendor_TCG_Test)
+    (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
+#endif
     0
 };
 
