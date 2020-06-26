@@ -163,12 +163,19 @@ PCRBelongsTCBGroup(
 		   )
 {
 #if ENABLE_PCR_NO_INCREMENT == YES
+#if 0
     // Platform specification decides if a PCR belongs to a TCB group.  In this
     // implementation, we assume PCR[20-22] belong to TCB group.  If the platform
     // specification requires differently, the implementation should be
     // changed accordingly
     if(handle >= 20 && handle <= 22)
 	return TRUE;
+#endif
+    /* kgold - changed for PC Client, 16, 21-23 no increment */
+    if ((handle == 16) ||
+	((handle >= 21) && (handle <= 23))) {
+	return  TRUE;
+    }
 #endif
     return FALSE;
 }

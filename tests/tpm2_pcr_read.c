@@ -6,6 +6,19 @@
 #include <libtpms/tpm_error.h>
 #include <libtpms/tpm_memory.h>
 
+static void dump_array(const char *h, const unsigned char *d, size_t dlen)
+{
+    size_t i;
+
+    fprintf(stderr, "%s\n", h);
+    for (i = 0; i < dlen; i++) {
+        fprintf(stderr, "%02x ", d[i]);
+        if ((i & 0xf) == 0xf)
+            fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "\n");
+}
+
 int main(void)
 {
     unsigned char *rbuffer = NULL;
@@ -38,7 +51,7 @@ int main(void)
     };
     const unsigned char tpm2_pcr_read_exp_resp[] = {
         0x80, 0x01, 0x00, 0x00, 0x01, 0x86, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x14, 0x00, 0x00,
         0x00, 0x04, 0x00, 0x04, 0x03, 0x01, 0x00, 0x10,
         0x00, 0x0b, 0x03, 0x01, 0x00, 0x10, 0x00, 0x0c,
         0x03, 0x01, 0x00, 0x10, 0x00, 0x0d, 0x03, 0x01,
@@ -118,6 +131,8 @@ int main(void)
 
     if (memcmp(rbuffer, tpm2_pcr_read_exp_resp, rlength)) {
         fprintf(stderr, "Expected response is different than received one.\n");
+        dump_array("actual:", rbuffer, rlength);
+        dump_array("expected:", tpm2_pcr_read_exp_resp, sizeof(tpm2_pcr_read_exp_resp));
         goto exit;
     }
 
