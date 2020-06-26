@@ -3,7 +3,7 @@
 /*			     TPM Size Checks					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmSizeChecks.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: TpmSizeChecks.c 1628 2020-05-27 19:35:29Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,8 +55,8 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
-/*20								*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*										*/
 /********************************************************************************/
 
 //** Includes, Defines, and Types
@@ -168,7 +168,7 @@ TpmSizeChecks(
 
         if(MAX_CONTEXT_SIZE < biggestContext)
 	    {
-		printf("MAX_CONTEXT_SIZE should be changed to %d (%d)\n",
+		printf("MAX_CONTEXT_SIZE needs to be increased to at least to %d (%d)\n",
 		       biggestContext, MAX_CONTEXT_SIZE);
 		PASS = FALSE;
 	    }
