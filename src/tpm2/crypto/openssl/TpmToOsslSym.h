@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1600 2020-03-30 22:08:01Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1619 2020-05-19 16:51:47Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -190,7 +190,7 @@ typedef void(*TpmCryptSetSymKeyCall_t)(
 
 /* Forward reference */
 
-typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
+// kgold typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
 
 /* This definition would change if there were something to report */
 #define SymLibSimulationEnd()

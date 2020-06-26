@@ -3,7 +3,7 @@
 /*		Implementation of the symmetric block cipher modes 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptSym.h 1618 2020-05-19 15:28:41Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -63,7 +63,7 @@
 #ifndef CRYPTSYM_H
 #define CRYPTSYM_H
 
-union tpmCryptKeySchedule_t {
+typedef union tpmCryptKeySchedule_t {
 #if ALG_AES
     tpmKeyScheduleAES           AES;
 #endif
@@ -81,7 +81,7 @@ union tpmCryptKeySchedule_t {
 #else
     uint32_t            alignment;
 #endif
-} /* tpmCryptKeySchedule */;   // libtpms changed; causes duplicate symbols on OS X
+} tpmCryptKeySchedule_t;
 /* Each block cipher within a library is expected to conform to the same calling conventions with
    three parameters (keySchedule, in, and out) in the same order. That means that all algorithms
    would use the same order of the same parameters. The code is written assuming the (keySchedule,
