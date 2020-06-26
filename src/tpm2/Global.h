@@ -872,7 +872,7 @@ typedef struct orderly_data
     // this is the 'signaled' attribute data for all the ACT. It is done this way so
     // that they can be manipulated by ACT number rather than having to access a
     // structure.
-    UINT32              signaledACT;
+    UINT16              signaledACT;
     UINT16              preservedSignaled;
 #endif			// libtpms added
 } ORDERLY_DATA;
@@ -912,13 +912,13 @@ typedef struct state_clear_data
     // an array.
     PCR_AUTHVALUE       pcrAuthValues;
 
-
 #ifndef __ACT_DISABLED	// libtpms added
     //*****************************************************************************
     //           ACT
     //*****************************************************************************
 #define DefineActPolicySpace(N)     TPMT_HA     act_##N;
     FOR_EACH_ACT(DefineActPolicySpace)
+
 #endif			// libtpms added
 } STATE_CLEAR_DATA;
 EXTERN STATE_CLEAR_DATA gc;
