@@ -1,5 +1,10 @@
 CHANGES - changes for libtpms
 
+version 0.7.3
+  - Fixed the set of PCRs belonging to the TCB group. This affects the
+    pcrUpdateCounter in TPM2_Pcrread() responses, thus needs latest `swtpm`
+    (master, stable branches) for test cases to succeed there.
+
 version 0.7.2
   - Fix output buffer parameter and size for RSA decryption that could cause
     stack corruption under certain circumstances
