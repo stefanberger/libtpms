@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Jul 10 2020 Stefan Berger - 0.6.3-1
+- Fixed set of PCRs belonging to TCB group
+
 * Mon May 18 2020 Stefan Berger - 0.6.2-1
 - Backports and other bugfixes
 
