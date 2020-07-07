@@ -1,5 +1,10 @@
 CHANGES - changes for libtpms
 
+version 0.6.3
+  - Fixed the set of PCRs belonging to the TCB group. This affects the
+    pcrUpdateCounter in TPM2_Pcrread() responses, thus needs latest `swtpm`
+    (master, stable branches) for test cases to succeed there.
+
 version 0.6.2
   - compilation fixes for TPM 1.2 and various architectures and gcc versions
   - Fix support for NIST curves P{192,224,521} and SM2 P256 and BN P648
