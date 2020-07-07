@@ -16,10 +16,13 @@ version 0.8.0
   - Runtime filter supported elliptic curves supported by OpenSSL
   - Fix output buffer parameter and size for RSA decryption that could cause
     stack corruption under certain circumstances
-  - Set the RSA PSS salt length to the digest length rathern than max. possible
-  - Fixes to symmetric decrytion related to input size check,
+  - Set the RSA PSS salt length to the digest length rather than max. possible
+  - Fixes to symmetric decryption related to input size check,
     defer padding to the user [EVP_CIPHER_CTX_set_padding(ctx, 0)] and
     to always use a temporary malloc'ed buffer for decryption
+  - Fixed the set of PCRs belonging to the TCB group. This affects the
+    pcrUpdateCounter in TPM2_Pcrread() responses, thus needs latest `swtpm`
+    for test cases to succeed there.
 
 version 0.7.0
   - use OpenSSL crypto for AES, TDES, EC, and RSA operations when possible
