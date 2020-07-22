@@ -276,13 +276,25 @@ if test "x$enable_hardening" != "xno"; then
 	if test -z "$TMP1" && test -n "$TPM2"; then
 		HARDENING_CFLAGS="$HARDENING_CFLAGS -D_FORTIFY_SOURCE=2 "
 	fi
-	dnl Check ld for 'relro' and 'now'
-	if $LD --help 2>&1 | $GREP '\-z relro ' > /dev/null; then
-		HARDENING_LDFLAGS="$HARDENING_LDFLAGS -Wl,-z,relro "
-	fi
-	if $LD --help 2>&1 | $GREP '\-z now ' > /dev/null; then
-		HARDENING_LDFLAGS="$HARDENING_LDFLAGS -Wl,-z,now "
-	fi
+	dnl Check linker for 'relro' and 'now'
+	save_CFLAGS="$CFLAGS"
+	CFLAGS="-Wl,-z,relro -Werror"
+	AC_MSG_CHECKING([whether linker supports -Wl,-z,relro])
+	AC_LINK_IFELSE(
+		[AC_LANG_SOURCE([[int main() { return 0; }]])],
+		[HARDENING_LDFLAGS="$HARDENING_LDFLAGS -Wl,-z,relro"
+		 AC_MSG_RESULT(yes)],
+		[AC_MSG_RESULT(no)]
+	)
+	CFLAGS="-Wl,-z,now -Werror"
+	AC_MSG_CHECKING([whether linker supports -Wl,-z,now])
+	AC_LINK_IFELSE(
+		[AC_LANG_SOURCE([[int main() { return 0; }]])],
+		[HARDENING_LDFLAGS="$HARDENING_LDFLAGS -Wl,-z,now"
+		 AC_MSG_RESULT(yes)],
+		[AC_MSG_RESULT(no)]
+	)
+	CFLAGS="$save_CFLAGS"
 	AC_SUBST([HARDENING_CFLAGS])
 	AC_SUBST([HARDENING_LDFLAGS])
 fi
