@@ -1997,7 +1997,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     TPM_BOOL			done = FALSE;
     TPM_BOOL			dir = FALSE;
     TPM_BOOL			writeAllNV = FALSE;	/* flag to write back NV */
-    TPM_NV_DATA_SENSITIVE	*d1NvdataSensitive;
+    TPM_NV_DATA_SENSITIVE	*d1NvdataSensitive = NULL;
     uint32_t			s1Last;
     TPM_BOOL			physicalPresence;
     TPM_BOOL			isGPIO = FALSE;
