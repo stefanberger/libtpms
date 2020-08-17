@@ -2198,7 +2198,7 @@ UINT16
 TPM2B_CREATION_DATA_Marshal(TPM2B_CREATION_DATA *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    BYTE *sizePtr;
+    BYTE *sizePtr = NULL; // libtpms added for s390x on Fedora 32
 
     if (buffer != NULL) {
 	sizePtr = *buffer;
