@@ -317,6 +317,7 @@ typedef  UINT32             TPM_SPEC;
 #define SPEC_FAMILY             0x322E3000
 #define TPM_SPEC_FAMILY         (TPM_SPEC)(SPEC_FAMILY)
 #define SPEC_LEVEL              00
+#define SPEC_LEVEL_NUM          0  // libtpms added: SPEC_LEVEL without leading zeros
 #define TPM_SPEC_LEVEL          (TPM_SPEC)(SPEC_LEVEL)
 #define SPEC_VERSION            162
 #define TPM_SPEC_VERSION        (TPM_SPEC)(SPEC_VERSION)
