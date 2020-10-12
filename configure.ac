@@ -67,7 +67,23 @@ m4_if(
 
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 
-cryptolib=freebl
+
+AC_ARG_WITH([tpm2],
+	AC_HELP_STRING([--with-tpm2],
+		       [build libtpms with TPM2 support]),
+	[],
+	[with_tpm2=yes]
+)
+AS_IF([test "x$with_tpm2" = xyes], [
+	AC_MSG_RESULT([Building with TPM2 support])
+	AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
+	AM_CONDITIONAL(WITH_TPM2, true)
+	cryptolib=openssl
+], [
+	AM_CONDITIONAL(WITH_TPM2, false)
+	cryptolib=freebl
+])
+
 AC_SUBST(cryptolib, $cryptolib)
 
 AC_ARG_WITH([openssl],
@@ -134,18 +150,6 @@ openssl)
                   [use openssl crypto library])
 	;;
 esac
-
-AC_ARG_WITH([tpm2],
-	AC_HELP_STRING([--with-tpm2],
-		       [build libtpms with TPM2 support]),
-	AC_MSG_RESULT([Building with TPM2 support])
-	if test "x$cryptolib" = "xfreebl"; then
-		AC_MSG_ERROR([TPM2 support requires openssl crypto library])
-	fi
-	AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
-	AM_CONDITIONAL(WITH_TPM2, true),
-	AM_CONDITIONAL(WITH_TPM2, false)
-)
 
 use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
