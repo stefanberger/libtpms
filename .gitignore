@@ -37,6 +37,7 @@ Makefile
 /dist/libtpms.spec
 /include/libtpms/tpm_library.h
 /m4/*
+/man/man3/*.3
 /tests/base64decode
 /tests/corpus-execute-command/
 /tests/fuzz
