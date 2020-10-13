@@ -752,7 +752,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char* encrypt_data,    /* encrypted dat
     return rc;
 }
 
-#if 0
+#if USE_FREEBL_CRYPTO_LIBRARY
 /* TPM_RSAPublicEncryptRaw() does a raw public key operation without any padding.
 
 */

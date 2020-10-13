@@ -40,6 +40,8 @@
 #ifndef TPM_CRYPTO_H
 #define TPM_CRYPTO_H
 
+#include "config.h"  /* libtpms added */
+
 #include "tpm_secret.h"
 #include "tpm_types.h"
 
@@ -129,7 +131,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char* encrypt_data,
                                 uint32_t nbytes,
                                 unsigned char *earr,
                                 uint32_t ebytes);
-#if 0
+#if USE_FREEBL_CRYPTO_LIBRARY
 TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,
 				   uint32_t encrypt_data_size,
 				   unsigned char *decrypt_data,
