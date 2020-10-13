@@ -124,6 +124,7 @@ freebl)
              [])
 	LIBS="$LIBS_save"
 	CFLAGS="$CFLAGS_save $CFLAGS"
+	enable_use_openssl_functions=no
 	;;
 openssl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)
