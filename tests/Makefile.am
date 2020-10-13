@@ -13,19 +13,25 @@ AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
 
 check_PROGRAMS = \
-	base64decode \
+	base64decode
+
+TESTS = \
+	base64decode.sh
+
+if WITH_TPM2
+check_PROGRAMS += \
 	nvram_offsets \
 	tpm2_createprimary \
 	tpm2_pcr_read \
 	tpm2_selftest
 
-TESTS = \
-	base64decode.sh \
+TESTS += \
 	fuzz.sh \
 	nvram_offsets \
 	tpm2_createprimary.sh \
 	tpm2_pcr_read.sh \
 	tpm2_selftest.sh
+endif
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
@@ -37,7 +43,9 @@ nvram_offsets_CFLAGS = $(AM_CFLAGS) \
 	-DTPM_POSIX
 nvram_offsets_LDFLAGS = $(AM_LDFLAGS)
 
+if WITH_TPM2
 check_PROGRAMS += fuzz
+endif
 fuzz_SOURCES = fuzz.cc
 fuzz_CXXFLAGS = $(FUZZER) $(AM_CFLAGS)
 fuzz_LDFLAGS = $(FUZZER) $(LIB_FUZZING_ENGINE) $(AM_LDFLAGS)
