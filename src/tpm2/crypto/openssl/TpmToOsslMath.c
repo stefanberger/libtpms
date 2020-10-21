@@ -104,8 +104,10 @@ OsslToTpmBn(
     if(bn != NULL)
 	{
 #if 1 //libtpms added begin
-	    VERIFY(BN_num_bytes(osslBn) >= 0);
-	    VERIFY(sizeof(buffer) >= (size_t)BN_num_bytes(osslBn));
+	    int num_bytes;
+
+	    num_bytes = BN_num_bytes(osslBn);
+	    VERIFY(num_bytes >= 0 && sizeof(buffer) >= (size_t)num_bytes);
 	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
 	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
 #else // libtpms added end
