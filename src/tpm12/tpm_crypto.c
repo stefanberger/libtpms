@@ -539,6 +539,7 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSA **rsa_pri_key,	/* freed by cal
 	(*rsa_pri_key)->n = n;
         (*rsa_pri_key)->e = e;
 	(*rsa_pri_key)->d = d;
+	BN_set_flags(d, BN_FLG_CONSTTIME); // d is private
 #else
 	int irc = RSA_set0_key(*rsa_pri_key, n, e, d);
 	if (irc != 1) {
@@ -1150,6 +1151,8 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
     }
     if (rc == 0) {
         rc = TPM_bin2bn((TPM_BIGNUM *)&p, parr, pbytes);	/* freed @3 */
+        if (p)
+             BN_set_flags(p, BN_FLG_CONSTTIME); // p is private
     }
     /* calculate q = n/p */
     if (rc == 0) {
@@ -1158,7 +1161,8 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
             printf("TPM_RSAGetPrivateKey: Error in BN_div()\n");
             TPM_OpenSSL_PrintError();
             rc = TPM_BAD_PARAMETER;
-        }
+        } else
+            BN_set_flags(q, BN_FLG_CONSTTIME); // q is private
     }
     /* remainder should be zero */
     if (rc == 0) {
@@ -1193,7 +1197,8 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
             printf("TPM_RSAGetPrivateKey: Error in BN_mul()\n");
             TPM_OpenSSL_PrintError();
             rc = TPM_BAD_PARAMETER;
-        }
+        } else
+            BN_set_flags(r2, BN_FLG_CONSTTIME); // r2 is private
     }
     /* calculate d  = multiplicative inverse e mod r0 */
     if (rc == 0) {
@@ -1543,6 +1548,7 @@ TPM_RESULT TPM_BN_mod_exp(TPM_BIGNUM rBignum_in,
     */
     if (rc == 0) {
         printf("  TPM_BN_mod_exp: Calculate mod_exp\n");
+        BN_set_flags(pBignum, BN_FLG_CONSTTIME); // p may be private
         irc = BN_mod_exp(rBignum, aBignum, pBignum, nBignum, ctx);
         if (irc != 1) {
             printf("TPM_BN_mod_exp: Error performing BN_mod_exp()\n");
