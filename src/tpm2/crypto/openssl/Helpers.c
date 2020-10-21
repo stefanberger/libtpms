@@ -305,6 +305,7 @@ ComputePrivateExponentD(
         pOK = pOK && BN_sub(phi, phi, Q);
         pOK = pOK && BN_add_word(phi, 1);
         // Compute the multiplicative inverse d = 1/e mod Phi
+        BN_set_flags(phi, BN_FLG_CONSTTIME);
         pOK = pOK && (*D = BN_mod_inverse(NULL, E, phi, ctx)) != NULL;
     }
     BN_CTX_free(ctx);
@@ -398,9 +399,11 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     RSA_get0_key(key, &N, &E, NULL);
 
     /* Q = N/P; no remainder */
+    BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
     BN_div(Q, Qr, N, P, ctx);
     if(!BN_is_zero(Qr))
         ERROR_RETURN(TPM_RC_BINDING);
+    BN_set_flags(Q, BN_FLG_CONSTTIME); // Q is secret
 
     // TODO(stefanb): consider caching D in the OBJECT
     if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE ||

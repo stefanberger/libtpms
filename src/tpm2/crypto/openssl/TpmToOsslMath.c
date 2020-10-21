@@ -330,6 +330,7 @@ BnGcd(
     BIG_INITIALIZED(bn2, number2);
     BOOL            OK;
     pAssert(gcd != NULL);
+    BN_set_flags(bn1, BN_FLG_CONSTTIME); // number1 is secret prime number
     OK = BN_gcd(bnGcd, bn1, bn2, CTX);
     if(OK)
 	{
@@ -363,6 +364,7 @@ BnModExp(
     BIG_INITIALIZED(bnM, modulus);
     BOOL            OK;
     //
+    BN_set_flags(bnE, BN_FLG_CONSTTIME); // exponent may be private
     OK = BN_mod_exp(bnResult, bnN, bnE, bnM, CTX);
     if(OK)
 	{
@@ -392,6 +394,7 @@ BnModInverse(
     BIG_INITIALIZED(bnN, number);
     BIG_INITIALIZED(bnM, modulus);
     BOOL                OK;
+    BN_set_flags(bnN, BN_FLG_CONSTTIME); // number may be private
     OK = (BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
     if(OK)
 	{
