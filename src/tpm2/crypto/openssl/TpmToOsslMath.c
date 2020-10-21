@@ -148,6 +148,7 @@ BigInitialized(
 #if 1  // libtpms added begin
     BnToBytes(initializer, buffer, &buffer_len);	/* TPM to bin */
     _toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */
+    BN_set_flags(_toInit, BN_FLG_CONSTTIME);
     BN_copy(toInit, _toInit);
     BN_clear_free(_toInit);
 #else  // libtpms added end
@@ -392,6 +393,7 @@ BnGcd(
     BIG_INITIALIZED(bn1, number1);
     BIG_INITIALIZED(bn2, number2);
     //
+    BN_set_flags(bn1, BN_FLG_CONSTTIME); // number1 is secret prime number
     VERIFY(BN_gcd(bnGcd, bn1, bn2, CTX));
     VERIFY(OsslToTpmBn(gcd, bnGcd));
     goto Exit;
@@ -427,6 +429,7 @@ BnModExp(
     BIG_INITIALIZED(bnE, exponent);
     BIG_INITIALIZED(bnM, modulus);
     //
+    BN_set_flags(bnE, BN_FLG_CONSTTIME); // exponent may be private
     VERIFY(BN_mod_exp(bnResult, bnN, bnE, bnM, CTX));
     VERIFY(OsslToTpmBn(result, bnResult));
     goto Exit;
@@ -459,6 +462,7 @@ BnModInverse(
     BIG_INITIALIZED(bnN, number);
     BIG_INITIALIZED(bnM, modulus);
     //
+    BN_set_flags(bnN, BN_FLG_CONSTTIME); // number may be private
     VERIFY(BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
     VERIFY(OsslToTpmBn(result, bnResult));
     goto Exit;
