@@ -2361,7 +2361,8 @@ TPM_RESULT TPM_CryptoTest(void)
     unsigned char *q;		/* private key prime */
     unsigned char *d;		/* private key (private exponent) */
     unsigned char encrypt_data[2048/8];		/* encrypted data */
-    
+    unsigned char signature[2048/8];		/* signature; libtpms added */
+
     printf(" TPM_CryptoTest:\n");
     encStream = NULL;		/* freed @1 */
     decStream = NULL;		/* freed @2 */
@@ -2734,6 +2735,66 @@ TPM_RESULT TPM_CryptoTest(void)
 	    rc = TPM_FAILEDSELFTEST;
 	}
     }
+
+// libtpms added begin
+
+    if (rc == 0) {
+	printf(" TPM_CryptoTest: Test 11a - RSA sign with PKCS1v15 padding\n");
+	rc = TPM_RSASign(signature,
+			 &actual_size,
+			 sizeof(signature),
+			 TPM_SS_RSASSAPKCS1v15_SHA1,
+			 expect1,
+			 sizeof(expect1),
+			 n,				/* public modulus */
+			 2048/8,
+			 tpm_default_rsa_exponent,	/* public exponent */
+			 3,
+			 d,				/* private exponent */
+			 2048/8);
+    }
+    if (rc == 0) {
+	rc = TPM_RSAVerify(signature,		/* input signature buffer */
+			   sizeof(signature),	/* input, size of signature buffer */
+			   TPM_SS_RSASSAPKCS1v15_SHA1, /* input, type of signature */
+			   expect1,		/* message */
+			   sizeof(expect1),	/* message size */
+			   n,			/* public modulus */
+			   2048/8,
+			   tpm_default_rsa_exponent,/* public exponent */
+			   3);
+    }
+
+#if 0
+    /* Verification with TPM_SS_RSASSAPKCS1v15_DER is not supported */
+    if (rc == 0) {
+	printf(" TPM_CryptoTest: Test 11b - RSA sign with PKCS1v15_DER padding\n");
+	rc = TPM_RSASign(signature,
+			 &actual_size,
+			 sizeof(signature),
+			 TPM_SS_RSASSAPKCS1v15_DER,
+			 expect1,
+			 sizeof(expect1),
+			 n,				/* public modulus */
+			 2048/8,
+			 tpm_default_rsa_exponent,	/* public exponent */
+			 3,
+			 d,				/* private exponent */
+			 2048/8);
+    }
+    if (rc == 0) {
+	rc = TPM_RSAVerify(signature,		/* input signature buffer */
+			   sizeof(signature),	/* input, size of signature buffer */
+			   TPM_SS_RSASSAPKCS1v15_DER, /* input, type of signature */
+			   expect1,		/* message */
+			   sizeof(expect1),	/* message size */
+			   n,			/* public modulus */
+			   2048/8,
+			   tpm_default_rsa_exponent,/* public exponent */
+			   3);
+    }
+#endif // libtpms added end
+
     /* run library specific self tests as required */
     if (rc == 0) {
 	rc = TPM_Crypto_TestSpecific();
