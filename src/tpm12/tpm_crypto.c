@@ -1069,6 +1069,15 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
    'signature_length' bytes are moved to 'signature'.  'signature_length' is at most
    'signature_size'.  signature must point to RSA_size(rsa) bytes of memory.
 */
+/* Note regarding conversion to EVP_PKEY_sign for the purpose of constant-timeness:
+
+  - TPM_SS_RSASSAPKCS1v15_SHA1:
+      EVP_PKEY_sign() will call pkey_rsa_sign() which in turn will call RSA_sign() for
+      RSA_PKCS1_PADDING. This is the same as we do here.
+  - TPM_SS_RSASSAPKCS1v15_DER:
+      EVP_PKEY_sign() must not have a message digest since none of the padding choices calls
+      RSA_padding_add_PKCS1_type_1(), so we would have to do the padding again ourselves.
+*/
 
 TPM_RESULT TPM_RSASign(unsigned char *signature,        /* output */
                        unsigned int *signature_length,  /* output, size of signature */
