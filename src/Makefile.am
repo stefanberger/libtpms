@@ -74,6 +74,7 @@ libtpms_tpm12_la_SOURCES = \
 	tpm12/tpm_nonce.c \
 	tpm12/tpm_nvfile.c \
 	tpm12/tpm_nvram.c \
+	tpm12/tpm_openssl_helpers.c \
 	tpm12/tpm_owner.c \
 	tpm12/tpm_pcr.c \
 	tpm12/tpm_permanent.c \
@@ -120,6 +121,7 @@ noinst_HEADERS = \
 	tpm12/tpm_nvfile.h \
 	tpm12/tpm_nvram_const.h \
 	tpm12/tpm_nvram.h \
+	tpm12/tpm_openssl_helpers.h \
 	tpm12/tpm_owner.h \
 	tpm12/tpm_pcr.h \
 	tpm12/tpm_permanent.h \
