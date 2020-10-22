@@ -86,7 +86,9 @@ TPM_RESULT TPM_RSAGenerateEVP_PKEY(EVP_PKEY **pkey,              /* out: pkey */
         rc = TPM_bin2bn((TPM_BIGNUM *)&e, earr, ebytes);	/* freed by caller */
     }
     if (rc == 0) {
-        rc = TPM_bin2bn((TPM_BIGNUM *)&d, darr, dbytes);	/* freed by caller */
+        if (darr != NULL) {
+            rc = TPM_bin2bn((TPM_BIGNUM *)&d, darr, dbytes);	/* freed by caller */
+        }
     }
     if (rc == 0) {
         rsakey = RSA_new();
