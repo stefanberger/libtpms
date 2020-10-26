@@ -323,6 +323,7 @@ BnSignEcdaa(
 			    CryptDigestUpdate2B(&state, &digest->b);
 			    CryptHashEnd2B(&state, &T.b);
 			    BnFrom2B(bnT, &T.b);
+			    // libtpms: Note: T is NOT a concern for constant-timeness
 			    // Watch out for the name collisions in this call!!
 			    retVal = BnSchnorrSign(bnS, bnR, bnT, bnD,
 						   AccessCurveData(E)->order);
@@ -420,6 +421,7 @@ BnSignEcSchnorr(
 	    SchnorrReduce(e, order);
 	    // Convert hash to number
 	    BnFrom2B(bnR, e);
+	    // libtpms: Note: e is NOT a concern for constant-timeness
 	    // Do the Schnorr computation
 	    retVal = BnSchnorrSign(bnS, bnK, bnR, bnD, CurveGetOrder(C));
 	} while(retVal == TPM_RC_NO_RESULT);
