@@ -575,6 +575,8 @@ BnEccGetPrivate(
 		bigNum                   dOut,      // OUT: the qualified random value
 		const ECC_CURVE_DATA    *C,         // IN: curve for which the private key
 		const EC_GROUP          *G,         // IN: the EC_GROUP to use; must be != NULL for rand == NULL
+		BOOL                     noLeadingZeros, // IN: require that all bytes in the private key be set
+		                                         //     result may not have leading zero bytes
 		//     needs to be appropriate
 		RAND_STATE              *rand       // IN: state for DRBG
 		)
@@ -583,11 +585,16 @@ BnEccGetPrivate(
     BOOL                     OK;
     UINT32                   orderBits = BnSizeInBits(order);
     UINT32                   orderBytes = BITS_TO_BYTES(orderBits);
+    UINT32                   requestedBits = 0;
     BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
     BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
 
-    if (rand == NULL)
-        return OpenSSLEccGetPrivate(dOut, G);
+    if (rand == NULL) {
+        if (noLeadingZeros)
+            requestedBits = orderBits;
+
+        return OpenSSLEccGetPrivate(dOut, G, requestedBits);
+    }
 
     //
     OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);
@@ -600,6 +607,8 @@ BnEccGetPrivate(
 /* 10.2.11.2.21 BnEccGenerateKeyPair() */
 /* This function gets a private scalar from the source of random bits and does the point multiply to
    get the public key. */
+#if !USE_OPENSSL_FUNCTIONS_EC // libtpms added
+
 BOOL
 BnEccGenerateKeyPair(
 		     bigNum               bnD,            // OUT: private scalar
@@ -610,11 +619,7 @@ BnEccGenerateKeyPair(
 {
     BOOL                 OK = FALSE;
     // Get a private scalar
-#if USE_OPENSSL_FUNCTIONS_EC           // libtpms added beging
-    OK = BnEccGetPrivate(bnD, AccessCurveData(E), E->G, rand);
-#else                                  // libtpms added end
     OK = BnEccGetPrivate(bnD, AccessCurveData(E), rand);
-#endif                                 // libtpms added
     // Do a point multiply
     OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
     if(!OK)
@@ -623,6 +628,54 @@ BnEccGenerateKeyPair(
 	BnSetWord(ecQ->z, 1);
     return OK;
 }
+
+#else // libtpms added begin
+
+/* In this version of BnEccGenerateKeyPair we take a dual approach to constant
+   time requirements: For curves whose order is at the byte boundary, e.g.
+   NIST P224/P256/P384, we make sure that bnD has all bytes set (no leading zeros)
+   so that OpenSSL BIGNUM code will not reduce the number of bytes and the
+   subsequent BnEccModMult() would run faster for a shoter value. For all other
+   curves whose order is not at the byte boundary, e.g. NIST P521, we simply
+   always add the order of the curve to bnD and call BnEccModMult() with the
+   result bnD1, which leads to the same result. */
+BOOL
+BnEccGenerateKeyPair(
+		     bigNum               bnD,            // OUT: private scalar
+		     bn_point_t          *ecQ,            // OUT: public point
+		     bigCurve             E,              // IN: curve for the point
+		     RAND_STATE          *rand            // IN: DRBG state to use
+		     )
+{
+    BOOL                 OK = FALSE;
+    bigConst             order = CurveGetOrder(AccessCurveData(E));
+    UINT32               orderBits = BnSizeInBits(order);
+    BOOL                 atByteBoundary = (orderBits & 7) == 0;
+    BOOL                 noLeadingZeros = atByteBoundary;
+    ECC_NUM(bnD1);
+
+    // We request that bnD not have leading zeros if it is at byte-boundary,
+    // like for example it is the case for NIST P256.
+    OK = BnEccGetPrivate(bnD, AccessCurveData(E), E->G, noLeadingZeros, rand);
+    if (!atByteBoundary) {
+        // for NIST P521 we can add the order to bnD to ensure we have
+        // a constant amount of bytes; the result is the same as if we
+        // were doing the BnEccModMult() calculation with bnD.
+        OK = OK && BnAdd(bnD1, bnD, order);
+        OK = OK && BnEccModMult(ecQ, NULL, bnD1, E);
+    } else {
+        OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
+    }
+
+    if(!OK)
+	BnSetWord(ecQ->z, 0);
+    else
+	BnSetWord(ecQ->z, 1);
+    return OK;
+}
+
+#endif // libtpms added end
+
 /* 10.2.12.2.21 CryptEccNewKeyPair */
 /* This function creates an ephemeral ECC. It is ephemeral in that is expected that the private part
    of the key will be discarded */
