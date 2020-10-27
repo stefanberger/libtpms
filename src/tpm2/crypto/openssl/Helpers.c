@@ -272,12 +272,17 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 BOOL
 OpenSSLEccGetPrivate(
                      bigNum             dOut,  // OUT: the qualified random value
-                     const EC_GROUP    *G      // IN:  the EC_GROUP to use
+                     const EC_GROUP    *G,     // IN:  the EC_GROUP to use
+                     const UINT32       requestedBits // IN: if not 0, then dOut must have that many bits
                     )
 {
     BOOL           OK = FALSE;
     const BIGNUM  *D;
     EC_KEY        *eckey = EC_KEY_new();
+    UINT32         requestedBytes = BITS_TO_BYTES(requestedBits);
+    int            repeats = 0;
+    int            maxRepeats;
+    int            numBytes;
 
     pAssert(G != NULL);
 
@@ -287,10 +292,31 @@ OpenSSLEccGetPrivate(
     if (EC_KEY_set_group(eckey, G) != 1)
         goto Exit;
 
-    if (EC_KEY_generate_key(eckey) == 1) {
-        OK = TRUE;
-        D = EC_KEY_get0_private_key(eckey);
-        OsslToTpmBn(dOut, D);
+    maxRepeats = 8;
+    // non-byte boundary order'ed curves, like NIST P521, need more loops to
+    // have a result with topmost byte != 0
+    if (requestedBits & 7)
+        maxRepeats += (9 - (requestedBits & 7));
+
+    while (true) {
+        if (EC_KEY_generate_key(eckey) == 1) {
+            D = EC_KEY_get0_private_key(eckey);
+            // if we need a certain amount of bytes and we are below a threshold
+            // of loops, check the number of bytes we have, otherwise take the
+            // result
+            if ((requestedBytes != 0) && (repeats < maxRepeats)) {
+                numBytes = BN_num_bytes(D);
+                if ((int)requestedBytes != numBytes) {
+                    // result does not have enough bytes
+                    repeats++;
+                    continue;
+                }
+                // result is sufficient
+            }
+            OK = TRUE;
+            OsslToTpmBn(dOut, D);
+        }
+        break;
     }
 
  Exit:
