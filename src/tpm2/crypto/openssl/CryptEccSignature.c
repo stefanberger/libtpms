@@ -305,7 +305,7 @@ BnSignEcdaa(
 		    // generate nonceK such that 0 < nonceK < n
 		    // use bnT as a temp.
 #if USE_OPENSSL_FUNCTIONS_EC           // libtpms added begin
-		    if(!BnEccGetPrivate(bnT, AccessCurveData(E), E->G, rand))
+		    if(!BnEccGetPrivate(bnT, AccessCurveData(E), E->G, false, rand))
 #else                                  // libtpms added end
 		    if(!BnEccGetPrivate(bnT, AccessCurveData(E), rand))
 #endif                                 // libtpms added
