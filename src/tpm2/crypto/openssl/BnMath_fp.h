@@ -151,6 +151,13 @@ BnGenerateRandomInRange(
 			bigConst         limit,
 			RAND_STATE      *rand
 			);
-
+// libtpms added begin
+LIB_EXPORT BOOL
+BnGenerateRandomInRangeAllBytes(
+			bigNum           dest,
+			bigConst         limit,
+			RAND_STATE      *rand
+			);
+// libtpms added end
 
 #endif
