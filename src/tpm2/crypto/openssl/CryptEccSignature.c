@@ -474,6 +474,12 @@ BnSignEcSm2(
     POINT(Q1);
     bigConst                  order = (E != NULL)
 				      ? CurveGetOrder(AccessCurveData(E)) : NULL;
+// libtpms added begin
+    UINT32                    orderBits = BnSizeInBits(order);
+    BOOL                      atByteBoundary = (orderBits & 7) == 0;
+    ECC_NUM(bnK1);
+// libtpms added end
+
     //
 #ifdef _SM2_SIGN_DEBUG
     BnFromHex(bnE, "B524F552CD82B8B028476E005C377FB1"
@@ -486,16 +492,36 @@ BnSignEcSm2(
  loop:
     {
 	// Get a random number 0 < k < n
-	BnGenerateRandomInRange(bnK, order, rand);
+	//						libtpms modified begin
+	//
+	// We take a dual approach here. One for curves whose order is not at
+	// the byte boundary, e.g. NIST P521, we get a random number bnK and add
+	// the order to that number to have bnK1. This will not spill over into
+	// a new byte and we can then use bnK1 to do the do the BnEccModMult
+	// with a constant number of bytes. For curves whose order is at the
+	// byte boundary we require that the random number bnK comes back with
+	// a requested number of bytes.
+	if (!atByteBoundary) {
+	    BnGenerateRandomInRange(bnK, order, rand);
+	    BnAdd(bnK1, bnK, order);
 #ifdef _SM2_SIGN_DEBUG
-	BnFromHex(bnK, "6CB28D99385C175C94F94E934817663F"
-		  "C176D925DD72B727260DBAAE1FB2F96F");
+	    BnFromHex(bnK1, "6CB28D99385C175C94F94E934817663F"
+		      "C176D925DD72B727260DBAAE1FB2F96F");
 #endif
-	// A4: Figure out the point of elliptic curve (x1, y1)=[k]G, and according
-	// to details specified in 4.2.7 in Part 1 of this document, transform the
-	// data type of x1 into an integer;
-	if(!BnEccModMult(Q1, NULL, bnK, E))
-	    goto loop;
+	    // A4: Figure out the point of elliptic curve (x1, y1)=[k]G, and according
+	    // to details specified in 4.2.7 in Part 1 of this document, transform the
+	    // data type of x1 into an integer;
+	    if(!BnEccModMult(Q1, NULL, bnK1, E))
+	        goto loop;
+	} else {
+	    BnGenerateRandomInRangeAllBytes(bnK, order, rand);
+#ifdef _SM2_SIGN_DEBUG
+	    BnFromHex(bnK, "6CB28D99385C175C94F94E934817663F"
+		      "C176D925DD72B727260DBAAE1FB2F96F");
+#endif
+	    if(!BnEccModMult(Q1, NULL, bnK, E))
+	        goto loop;
+	}						// libtpms modified end
 	// A5: Figure out r = (e + x1) mod n,
 	BnAdd(bnR, bnE, Q1->x);
 	BnMod(bnR, order);
