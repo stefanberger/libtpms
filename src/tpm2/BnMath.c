@@ -552,3 +552,81 @@ BnGenerateRandomInRange(
 	}
     return TRUE;
 }
+
+// libtpms added begin
+
+// This version of BnSizeInBits skips any leading zero bytes in bigConst
+// and thus calculates the bits that OpenSSL will work with after truncating
+// the leading zeros
+static LIB_EXPORT unsigned
+BnSizeInBitsSkipLeadingZeros(
+	     bigConst                 n
+	     )
+{
+    int                firstByte;
+    unsigned           bitSize = BnSizeInBits(n);
+    crypt_uword_t      i;
+
+    if (bitSize <= 8)
+	return bitSize;
+
+    // search for the first limb that is non-zero
+    for (i = 0; i < n->size; i++) {
+        if (n->d[i] != 0)
+            break;
+    }
+    if (i >= n->size)
+        return 0; // should never happen
+
+    // get the first byte in this limb that is non-zero
+    firstByte = (RADIX_BITS - 1 - Msb(n->d[i])) >> 3;
+
+    return bitSize - i * sizeof(n->d[0]) - (firstByte << 3);
+}
+
+
+/* This is a version of BnGenerateRandomInRange that ensures that the upper most
+   byte is non-zero, so that the number will not be shortened and subsequent operations
+   will not have a timing-sidechannel
+ */
+LIB_EXPORT BOOL
+BnGenerateRandomInRangeAllBytes(
+			bigNum           dest,
+			bigConst         limit,
+			RAND_STATE      *rand
+			)
+{
+    BOOL     OK;
+    int      repeats = 0;
+    int      maxRepeats;
+    unsigned requestedBits;
+    unsigned requestedBytes;
+    unsigned numBytes;
+
+    if (rand)
+	return BnGenerateRandomInRange(dest, limit, rand);
+
+    // a 'limit' like 'BN_P638_n' has leading zeros and we only need 73 bytes not 80
+    requestedBits = BnSizeInBitsSkipLeadingZeros(limit);
+    requestedBytes = BITS_TO_BYTES(requestedBits);
+    maxRepeats = 8;
+    if (requestedBits & 7)
+	maxRepeats += (9 - (requestedBits & 7));
+
+    while (true) {
+	OK = BnGenerateRandomInRange(dest, limit, rand);
+	if (!OK)
+	    break;
+	if (repeats < maxRepeats) {
+	    numBytes = BITS_TO_BYTES(BnSizeInBitsSkipLeadingZeros(dest));
+	    if (numBytes < requestedBytes) {
+		repeats++;
+		continue;
+	    }
+	}
+	break;
+    }
+
+    return OK;
+}
+// libtpms added end
