@@ -61,3 +61,16 @@ TpmToOsslMath:
    - BN_mod_exp: YES, DONE
   BnModInverse:
    - BN_mod_inverse: YES, DONE
+
+
+Elliptic curve signing :
+
+CryptEccMain.c:
+  BnEccGenerateKeyPair:
+  - BnEccModMult: YES, DONE (we have control over random number bnD)
+                  called by BnSignEcSchnorr
+                  called by BnSignEcdsa (if OpenSSL function not used)
+
+CryptEccSignature.c:
+  BnEccSignSM2:
+  - BnEccModMult: YES, DONE (we have control over random number bnK)
