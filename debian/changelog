@@ -1,4 +1,4 @@
-litpmss (0.7.4) RELEASED; urgency=medium
+libtpms (0.7.4) RELEASED; urgency=medium
 
   * Addressed potential constant-time issues in TPM 1.2 and TPM 2 code
 
