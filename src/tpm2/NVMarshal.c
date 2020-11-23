@@ -3991,7 +3991,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
                           BYTE **buffer, INT32 *size)
 {
     UINT16 written;
-    NV_RAM_HEADER *nrh;
+    NV_RAM_HEADER nrh, *nrhp;
     UINT16 offset = 0;
     UINT16 datasize;
     UINT32 sourceside_size = array_size;
@@ -4005,36 +4005,42 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
     written += UINT32_Marshal(&sourceside_size, buffer, size);
 
     while (TRUE) {
-        nrh = array + offset;
+        nrhp = array + offset;
+        /* nrhp may point to misaligned address (ubsan), so use 'nrh'; first access only 'size' */
+        memcpy(&nrh, nrhp, sizeof(nrh.size));
+
         /* write the NVRAM header;
            nrh->size holds the complete size including data;
            nrh->size = 0 indicates the end */
-        written += UINT32_Marshal(&nrh->size, buffer, size);
-        if (nrh->size == 0)
+        written += UINT32_Marshal(&nrh.size, buffer, size);
+        if (nrh.size == 0)
             break;
-        written += TPM_HANDLE_Marshal(&nrh->handle, buffer, size);
-        written += TPMA_NV_Marshal(&nrh->attributes, buffer, size);
+        /* copy the entire structure now; ubsan does not allow 'nrh = *nrhp' */
+        memcpy(&nrh, nrhp, sizeof(nrh));
 
-        if (offset + nrh->size > array_size) {
+        written += TPM_HANDLE_Marshal(&nrh.handle, buffer, size);
+        written += TPMA_NV_Marshal(&nrh.attributes, buffer, size);
+
+        if (offset + nrh.size > array_size) {
             TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: nrh->size corrupted: %d\n",
-                                nrh->size);
+                                nrh.size);
             break;
         }
         /* write data size before array */
-        if (nrh->size < sizeof(NV_RAM_HEADER)) {
+        if (nrh.size < sizeof(NV_RAM_HEADER)) {
             TPMLIB_LogTPM2Error(
                 "NV_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %d < %zu\n",
-                (int)nrh->size, sizeof(NV_RAM_HEADER));
+                (int)nrh.size, sizeof(NV_RAM_HEADER));
             break;
         }
-        datasize = nrh->size - sizeof(NV_RAM_HEADER);
+        datasize = nrh.size - sizeof(NV_RAM_HEADER);
         written += UINT16_Marshal(&datasize, buffer, size);
         if (datasize > 0) {
             /* append the data */
             written += Array_Marshal(array + offset + sizeof(NV_RAM_HEADER),
                                      datasize, buffer, size);
         }
-        offset += nrh->size;
+        offset += nrh.size;
     }
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
@@ -4053,7 +4059,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
-    NV_RAM_HEADER *nrh;
+    NV_RAM_HEADER nrh, *nrhp;
     UINT16 offset = 0;
     UINT16 datasize = 0;
     UINT32 sourceside_size;
@@ -4071,31 +4077,36 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
     }
 
     while (rc == TPM_RC_SUCCESS) {
-        nrh = array + offset;
+        /* nrhp may point to misaligned address (ubsan)
+         * we read 'into' nrh and copy to nrhp at end
+         */
+        nrhp = array + offset;
+
         /* write the NVRAM header;
            nrh->size holds the complete size including data;
            nrh->size = 0 indicates the end */
-        if (offset + sizeof(nrh->size) > array_size) {
-            offset += sizeof(nrh->size);
+        if (offset + sizeof(nrh.size) > array_size) {
+            offset += sizeof(nrh.size);
             goto exit_size;
         }
 
         if (rc == TPM_RC_SUCCESS) {
-            rc = UINT32_Unmarshal(&nrh->size, buffer, size);
-            if (nrh->size == 0)
+            rc = UINT32_Unmarshal(&nrh.size, buffer, size);
+            if (nrh.size == 0) {
+                memcpy(nrhp, &nrh, sizeof(nrh.size));
                 break;
+            }
         }
         if (offset + sizeof(NV_RAM_HEADER) > array_size) {
             offset += sizeof(NV_RAM_HEADER);
             goto exit_size;
         }
         if (rc == TPM_RC_SUCCESS) {
-            rc = TPM_HANDLE_Unmarshal(&nrh->handle, buffer, size);
+            rc = TPM_HANDLE_Unmarshal(&nrh.handle, buffer, size);
         }
         if (rc == TPM_RC_SUCCESS) {
-            rc = TPMA_NV_Unmarshal(&nrh->attributes, buffer, size);
+            rc = TPMA_NV_Unmarshal(&nrh.attributes, buffer, size);
         }
-
         if (rc == TPM_RC_SUCCESS) {
             rc = UINT16_Unmarshal(&datasize, buffer, size);
         }
@@ -4110,8 +4121,10 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
         }
         if (rc == TPM_RC_SUCCESS) {
             /* fix up size in case it is architecture-dependent */
-            nrh->size = sizeof(*nrh) + datasize;
-            offset += nrh->size;
+            nrh.size = sizeof(nrh) + datasize;
+            offset += nrh.size;
+            /* copy header into possibly misaligned address in NVRAM */
+            *nrhp = nrh;
         }
     }
 
