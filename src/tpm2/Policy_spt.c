@@ -190,8 +190,11 @@ ComputeAuthTimeout(
 	policyTime = 0;
     else
 	{
-	    if(expiration < 0)
+	    if(expiration < 0) {
+	        if (expiration == (INT32)0x80000000) /* libtpms changed begin; ubsan */
+	            expiration++;                    /* libtpms changed end */
 		expiration = -expiration;
+	    }
 	    if(nonce->t.size == 0)
 		// The input time is absolute Time (not Clock), but it is expressed
 		// in seconds. To make sure that we don't time out too early, take the
