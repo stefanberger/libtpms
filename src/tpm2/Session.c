@@ -406,8 +406,11 @@ SessionCreate(
 		}
 	}
     // if no spot found, then this is an internal error
-    if(slotIndex >= MAX_LOADED_SESSIONS)
+    if(slotIndex >= MAX_LOADED_SESSIONS) {		// libtpms changed
 	FAIL(FATAL_ERROR_INTERNAL);
+	// should never get here due to longjmp	in FAIL()  libtpms added begin; cppcheck
+	return TPM_RC_FAILURE;
+    }							// libtpms added end
     // Call context ID function to get a handle.  TPM_RC_SESSION_HANDLE may be
     // returned from ContextIdHandelAssign()
     result = ContextIdSessionCreate(sessionHandle, slotIndex);
@@ -572,6 +575,12 @@ SessionContextLoad(
 	if(s_sessions[slotIndex].occupied == FALSE) break;
     // if no spot found, then this is an internal error
     pAssert(slotIndex < MAX_LOADED_SESSIONS);
+    // libtpms: besides the s_freeSessionSlots guard add another array index guard
+    if (slotIndex >= MAX_LOADED_SESSIONS) {	// libtpms added begin; cppcheck
+	FAIL(FATAL_ERROR_INTERNAL);
+	// should never get here due to longjmp	in FAIL()
+	return TPM_RC_FAILURE;
+    }						// libtpms added end
     contextIndex = *handle & HR_HANDLE_MASK;   // extract the index
     // If there is only one slot left, and the gap is at maximum, the only session
     // context that we can safely load is the oldest one.
