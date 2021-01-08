@@ -304,6 +304,17 @@ if test "x$enable_hardening" != "xno"; then
 	AC_SUBST([HARDENING_LDFLAGS])
 fi
 
+AC_ARG_ENABLE([hlk-compliance],
+  AS_HELP_STRING([--enable-hlk-compliance],
+                 [Build libtpms in such a way that it will pass certain HLK TPM 2 tests; default is 'disabled']),
+                 [],
+                 [enable_hlk_compliance=no])
+AS_IF([test "x$enable_hlk_compliance" != "xno"], [
+	CFLAGS="$CFLAGS -DTPM2_HLK_COMPLIANCE=1"
+], [
+	CFLAGS="$CFLAGS -DTPM2_HLK_COMPLIANCE=0"
+])
+
 CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
 CFLAGS="$CFLAGS -Wmissing-prototypes"
 LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"

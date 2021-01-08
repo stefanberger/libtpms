@@ -855,6 +855,10 @@ CryptEccIsCurveRuntimeUsable(
 			     TPMI_ECC_CURVE curveId
 			    )
 {
+#if TPM2_HLK_COMPLIANCE
+    if (curveId == TPM_ECC_NIST_P521) /* make HLK 2004 happy; FIXME: remove once NIST P521 accepted */
+	return FALSE;
+#endif
     CURVE_INITIALIZED(E, curveId);
     if (E == NULL)
 	return FALSE;
