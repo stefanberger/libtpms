@@ -20,6 +20,12 @@ version 0.8.0
   - Fixes to symmetric decrytion related to input size check,
     defer padding to the user [EVP_CIPHER_CTX_set_padding(ctx, 0)] and
     to always use a temporary malloc'ed buffer for decryption
+  - Extended API to support setting and clearing of flags that modify the behavior
+    of libtpms to for example be HLK compliant
+  - New API calls:
+    - TPMLIB_ClearFlags
+    - TPMLIB_GetFlags
+    - TPMLIB_SetFlags
 
 version 0.7.0
   - use OpenSSL crypto for AES, TDES, EC, and RSA operations when possible
