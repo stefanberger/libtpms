@@ -64,6 +64,7 @@
 #include "Tpm.h"
 #include "Helpers_fp.h"                // libtpms added
 #include "TpmToOsslMath_fp.h"          // libtpms added
+#include "tpm_library.h"               // libtpms added
 #if ALG_ECC
 /* This version requires that the new format for ECC data be used */
 #if !USE_BN_ECC_DATA
@@ -855,6 +856,13 @@ CryptEccIsCurveRuntimeUsable(
 			     TPMI_ECC_CURVE curveId
 			    )
 {
+    uint64_t flags = TPMLIB_GetFlags(NULL);
+
+    if (flags & TPMLIB_FLAG_HLK_COMPLIANCE) {  /* make HLK 2004 happy; FIXME: remove once NIST P521 accepted */
+        if (curveId == TPM_ECC_NIST_P521)
+            return FALSE;
+    }
+
     CURVE_INITIALIZED(E, curveId);
     if (E == NULL)
 	return FALSE;

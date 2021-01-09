@@ -166,6 +166,12 @@ TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
 TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
                            unsigned char **buffer, uint32_t *buflen);
 
+TPM_RESULT TPMLIB_SetFlags(uint64_t flags_to_set);
+TPM_RESULT TPMLIB_ClearFlags(uint64_t flags_to_clear);
+uint64_t TPMLIB_GetFlags(uint64_t *supported_flags);
+
+#define TPMLIB_FLAG_HLK_COMPLIANCE  (1 << 0)
+
 #ifdef __cplusplus
 }
 #endif

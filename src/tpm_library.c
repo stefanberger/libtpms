@@ -95,6 +95,8 @@ static struct sized_buffer cached_blobs[TPMLIB_STATE_SAVE_STATE + 1];
 static int tpmvers_choice = 0; /* default is TPM1.2 */
 static TPM_BOOL tpmvers_locked = FALSE;
 
+static uint64_t TPMLIB_Flags;
+
 uint32_t TPMLIB_GetVersion(void)
 {
     return TPM_LIBRARY_VERSION;
@@ -666,4 +668,31 @@ enum TPMLIB_StateType TPMLIB_NameToStateType(const char *name)
     if (!strcmp(name, TPM_SAVESTATE_NAME))
         return TPMLIB_STATE_SAVE_STATE;
     return 0;
+}
+
+TPM_RESULT TPMLIB_SetFlags(uint64_t flags_to_set)
+{
+    uint64_t supported_flags;
+
+    TPMLIB_GetFlags(&supported_flags);
+    if (flags_to_set & ~supported_flags)
+        return TPM_FAIL;
+
+    TPMLIB_Flags |= flags_to_set;
+
+    return TPM_SUCCESS;
+}
+
+TPM_RESULT TPMLIB_ClearFlags(uint64_t flags_to_clear)
+{
+    TPMLIB_Flags &= ~flags_to_clear;
+
+    return TPM_SUCCESS;
+}
+
+uint64_t TPMLIB_GetFlags(uint64_t *supported_flags)
+{
+    if (supported_flags)
+        *supported_flags = TPMLIB_FLAG_HLK_COMPLIANCE;
+    return TPMLIB_Flags;
 }
