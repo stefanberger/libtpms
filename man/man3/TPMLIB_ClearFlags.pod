@@ -1,0 +1,70 @@
+=head1 NAME
+
+TPMLIB_ClearFlags   - Clear flags (since v0.8.0)
+
+TPMLIB_GetFlags     - Get supported and set flags (since v0.8.0)
+
+TPMLIB_SetFlags     - Set flags (since v0.8.0)
+
+=head1 LIBRARY
+
+TPM library (libtpms, -ltpms)
+
+=head1 SYNOPSIS
+
+B<#include> <libtpms/tpm_library.h>
+
+B<TPM_RESULT TPMLIB_ClearFlags(uint64_t flags_to_clear);>
+
+B<uint64_t TPMLIB_GetFlags(uint64_t *supported_flags);>
+
+B<TPM_RESULT TPMLIB_SetFlags(uint64_t flags_to_set);>
+
+=head1 DESCRIPTION
+
+This set of API calls allows to set and get flags that influcence
+the behavior of libtpms.
+
+B<TPMLIB_ClearFlags> can be used to clear currently set flags. Some flags
+may only be cleared at a certain time relative to other calls, such as
+B<TPMLIB_MainInit>.
+
+B<TPMLIB_GetFlags> returns the currently set flags. The I<supported_flags>
+parameter is optional and returns the set of flags supported by this
+version of libtpms if a non-NULL pointer is passed.
+
+B<TPMLIB_SetFlags> allows to set flags. Some flags may only be set at
+certain time relative to other calls, such as B<TPMLIB_MainInit>.
+
+The following flags are supported:
+
+=over 4
+
+=item B<TPMLIB_FLAG_HLK_COMPLIANCE>
+
+This flag modifies the behavior of the TPM 2 code so that HLK tests
+(of a certain version) are passing while they would fail if this flag was
+not set. This flag can be set and cleared at any time.
+
+=back
+
+=head1 ERRORS
+
+=over 4
+
+=item B<TPM_SUCCESS>
+
+The function completed successfully.
+
+=item B<TPM_FAIL>
+
+General failure indicating that the flag is not supported or cannot
+currently be modified.
+
+=back
+
+=head1 SEE ALSO
+
+B<TPMLIB_MainInit>(3)
+
+=cut
