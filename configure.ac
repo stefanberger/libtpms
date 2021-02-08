@@ -318,6 +318,7 @@ AC_CONFIG_FILES(Makefile                   \
 		src/Makefile               \
 		libtpms.pc                 \
 		tests/Makefile)
+PKG_INSTALLDIR()
 AC_OUTPUT
 
 if test -z "$enable_debug" ; then

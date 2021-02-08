@@ -38,7 +38,6 @@ EXTRA_DIST = \
 	libtpms.pc.in \
 	autogen.sh
 
-pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libtpms.pc
 
 DISTCHECK_CONFIGURE_FLAGS = --with-openssl --with-tpm2
