@@ -1,5 +1,5 @@
 language: c
-dist: trusty
+dist: xenial
 env:
   global:
     secure: THraWTkpyL+b3lcnLenhXR6sxphcJS23MoUP36PT9VYhgZRI2YjO1w2h4V0uwzovbGJDU4Tc88Yxn8kL4RSgwy9cIcJcTOAorbePVRd+UFVU0nUjhwYLCKYBTLVLo7lYc0FHTgsdsba65X6keuSlAdegzCRbTvcwNqX9nanSRGI1CvYcwx22Iu5eOdJvMjwIuFOuECs7hVFrGS2rvGoyzqGNMT4A8shXOBZM/pwklRFS1oS/L1g45y3OP27yqINjtfC7wXRGsR8ItH7LAaQ+yCzNg3QzSd/3H3niEC5grcEMS23YugFUkGpqSca8SGJmkK2LFaBctpZS1P75lA/47Bxbh/byu85TUE6wZ+VPm520NkiYtBB+oxIbq1mYv+hhKuxPf5OqzdwLXVO7EAfzO57VkUqQfumWIZqV0WqCU3SdpRk+CUCCURR4P0ww+w6hQx6PzK21+d9tLtqMqdRwuricdyeLvxboWQXXl36fPf4ifmi0AZ6ILaV/LUQu24Di56RG4hO+/Pv/Qqxa8rJLpqJa0PtsYIiBNeVYLH/ZYIlS8saBedMIJ9dqh1dvBw/Jql8EZCOWif6UjYzQFgZAOZQqH9VAp1WVwQxQRo+Sq7dy+MtRKT2GEcNrdfYcL6qucBAQY00vQQBfl+FOnEzIAUImt4tbitnYTxmNx8N+QZU=
@@ -8,6 +8,7 @@ addons:
     packages:
       - automake
       - autoconf
+      - pkgconf
       - libtool
       - libssl-dev
       - sed
