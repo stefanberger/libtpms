@@ -596,7 +596,7 @@ PCR_POLICY_Unmarshal(PCR_POLICY *data, BYTE **buffer, INT32 *size)
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "ORDERLY DATA", "version 3 or later");
+                        "PCR_POLICY", "version 3 or later");
         /* future versions nest-append here */
     }
 skip_future_versions:
@@ -674,7 +674,7 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
 #endif
     if (rc == TPM_RC_SUCCESS) {
         BLOCK_SKIP_READ(skip_self_heal_timer, needs_block, buffer, size,
-                        "ORDERLY DATA", "selfHealTimer");
+                        "ORDERLY_DATA", "selfHealTimer");
     }
 #if ACCUMULATE_SELF_HEAL_TIMER
     if (rc == TPM_RC_SUCCESS) {
@@ -693,7 +693,7 @@ skip_self_heal_timer:
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "ORDERLY DATA", "version 3 or later");
+                        "ORDERLY_DATA", "version 3 or later");
         /* future versions nest-append here */
     }
 skip_future_versions:
@@ -2133,7 +2133,7 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "STATE_RESET_DATA", "version 3 or later");
+                        "HASH_STATE", "version 3 or later");
         /* future versions nest-append here */
     }
 
@@ -4036,11 +4036,11 @@ skip_num_policy_pcr_group:
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
-                        "Volatile State", "version 3 or later");
+                        "PERSISTENT_DATA", "version 3 or later");
         rc = TPML_PCR_SELECTION_Unmarshal(&shadow.pcrAllocated, buffer, size);
 
         BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
-                        "PERSISTENT DATA", "version 4 or later");
+                        "PERSISTENT_DATA", "version 4 or later");
 
         if (rc == TPM_RC_SUCCESS) {
             rc = SEED_COMPAT_LEVEL_Unmarshal(&data->EPSeedCompatLevel,
@@ -4056,7 +4056,7 @@ skip_num_policy_pcr_group:
         }
 
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "PERSISTENT DATA", "version 5 or later");
+                        "PERSISTENT_DATA", "version 5 or later");
         /* future versions nest-append here */
     }
 
@@ -4107,14 +4107,14 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         written += TPMA_NV_Marshal(&nrh.attributes, buffer, size);
 
         if (offset + nrh.size > array_size) {
-            TPMLIB_LogTPM2Error("NV_ORDERLY_RAM: nrh->size corrupted: %d\n",
+            TPMLIB_LogTPM2Error("INDEX_ORDERLY_RAM: nrh->size corrupted: %d\n",
                                 nrh.size);
             break;
         }
         /* write data size before array */
         if (nrh.size < sizeof(NV_RAM_HEADER)) {
             TPMLIB_LogTPM2Error(
-                "NV_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %d < %zu\n",
+                "INDEX_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %d < %zu\n",
                 (int)nrh.size, sizeof(NV_RAM_HEADER));
             break;
         }
@@ -4217,7 +4217,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "INDEX ORDERLY RAM", "version 3 or later");
+                        "INDEX_ORDERLY_RAM", "version 3 or later");
         /* future versions nest-append here */
     }
 
@@ -4279,7 +4279,7 @@ USER_NVRAM_Display(const char *msg)
             fprintf(stderr, " sizeof(obj): %zu\n", sizeof(obj));
         break;
         default:
-            TPMLIB_LogTPM2Error("USER NVRAM: Corrupted handle: %08x\n", handle);
+            TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
         /* advance to next entry */
         entryRef += entrysize;
@@ -4355,7 +4355,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
         break;
         default:
-            TPMLIB_LogTPM2Error("USER NVRAM: Corrupted handle: %08x\n", handle);
+            TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
         /* advance to next entry */
         entryRef += entrysize;
@@ -4518,7 +4518,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "USER NVRAM", "version 3 or later");
+                        "USER_NVRAM", "version 3 or later");
         /* future versions nest-append here */
     }
 
