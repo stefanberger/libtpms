@@ -1,3 +1,10 @@
+libtpms (0.7.5) RELEASED; urgency=medium
+
+  * Addressed UBSAN and cppcheck detected issues
+  * Return proper size of ECC Parameters to pass HLK tests
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Thu, 17 Feb 2021 09:38:00 -0500
+
 libtpms (0.7.4) RELEASED; urgency=medium
 
   * Addressed potential constant-time issues in TPM 1.2 and TPM 2 code
