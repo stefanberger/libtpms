@@ -54,5 +54,8 @@ TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size);
 
 void NVShadowRestore(void);
 
+UINT16 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size);
+TPM_RC ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size, BOOL verbose);
+
 #endif /* NVMARSHAL_H */
 
