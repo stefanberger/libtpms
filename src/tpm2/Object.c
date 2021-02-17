@@ -65,6 +65,8 @@
 /* 8.6.2 Includes and Data Definitions */
 #define OBJECT_C
 #include "Tpm.h"
+#include "NVMarshal.h" // libtpms added
+#include "BackwardsCompatibilityObject.h" // libtpms added
 /* 8.6.3 Functions */
 /* 8.6.3.1 ObjectFlush() */
 /* This function marks an object slot as available. Since there is no checking of the input
@@ -619,6 +621,7 @@ ObjectTerminateEvent(
 /* Return Values Meaning */
 /* NULL if there is no free slot for an object */
 /* NON_NULL points to the loaded object */
+#if 0			// libtpms added
 OBJECT *
 ObjectContextLoad(
 		  ANY_OBJECT_BUFFER   *object,        // IN: pointer to object structure in saved
@@ -647,6 +650,39 @@ ObjectContextLoad(
 	}
     return newObject;
 }
+#endif 			// libtpms added begin
+
+OBJECT *
+ObjectContextLoadLibtpms(BYTE           *buffer,
+                         INT32           size,
+                         TPMI_DH_OBJECT *handle
+                         )
+{
+    OBJECT      *newObject = ObjectAllocateSlot(handle);
+    TPM_RC       rc;
+    BYTE        *mybuf  = buffer;
+    INT32        mysize = size;
+
+    pAssert(handle);
+
+    // Try to allocate a slot for new object
+    if(newObject != NULL)
+	{
+	    rc = ANY_OBJECT_Unmarshal(newObject, &mybuf, &mysize, false);
+	    if (rc) {
+	         /* Attempt to load an old OBJECT that was copied out directly from
+	          * an older version of OBJECT.
+	          */
+		rc = OLD_OBJECTToOBJECT(newObject, buffer, size);
+		if (rc) {
+		    FlushObject(*handle);
+		    newObject = NULL;
+		}
+	    }
+	}
+    return newObject;
+}			// libtpms added end
+
 /* 8.6.3.22 FlushObject() */
 /* This function frees an object slot. */
 /* This function requires that the object is loaded. */
