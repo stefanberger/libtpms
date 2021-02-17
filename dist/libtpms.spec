@@ -112,7 +112,11 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
-* Mon Oct 25 2020 Stefan Berger - 0.7.4-1
+* Thu Feb 18 2021 Stefan Berger - 0.7.5-1
+- Addressed UBSAN and cppcheck detected issues
+- Return proper size of ECC Parameters to pass HLK tests
+
+* Mon Oct 26 2020 Stefan Berger - 0.7.4-1
 - Addressed potential constant-time issues in TPM 1.2 and TPM 2 code
 
 * Fri Jul 10 2020 Stefan Berger - 0.7.3-1
