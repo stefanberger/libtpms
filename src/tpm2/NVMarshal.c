@@ -336,8 +336,8 @@ NV_HEADER_Marshal(BYTE **buffer, INT32 *size, UINT16 version, UINT32 magic,
 }
 
 static TPM_RC
-NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
-                    UINT16 cur_version, UINT32 exp_magic)
+NV_HEADER_UnmarshalVerbose(NV_HEADER *data, BYTE **buffer, INT32 *size,
+                           UINT16 cur_version, UINT32 exp_magic, BOOL verbose)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
@@ -348,8 +348,9 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
         rc = UINT32_Unmarshal(&data->magic, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS && exp_magic != data->magic) {
-        TPMLIB_LogTPM2Error("%s: Invalid magic. Expected 0x%08x, got 0x%08x\n",
-                            __func__, exp_magic, data->magic);
+        if (verbose)
+            TPMLIB_LogTPM2Error("%s: Invalid magic. Expected 0x%08x, got 0x%08x\n",
+                                __func__, exp_magic, data->magic);
         rc = TPM_RC_BAD_TAG;
     }
 
@@ -359,15 +360,24 @@ NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
         rc = UINT16_Unmarshal(&data->min_version, buffer, size);
 
         if (rc == TPM_RC_SUCCESS && data->min_version > cur_version) {
-            TPMLIB_LogTPM2Error("%s: Minimum version %u higher than "
-                                "implementation version %u for type 0x%08x\n",
-                                __func__, data->min_version, cur_version,
-                                exp_magic);
+            if (verbose)
+                TPMLIB_LogTPM2Error("%s: Minimum version %u higher than "
+                                    "implementation version %u for type 0x%08x\n",
+                                    __func__, data->min_version, cur_version,
+                                    exp_magic);
             rc = TPM_RC_BAD_VERSION;
         }
     }
 
     return rc;
+}
+
+static TPM_RC
+NV_HEADER_Unmarshal(NV_HEADER *data, BYTE **buffer, INT32 *size,
+                    UINT16 cur_version, UINT32 exp_magic)
+{
+    return NV_HEADER_UnmarshalVerbose(data, buffer, size, cur_version,
+                                      exp_magic, true);
 }
 
 #define NV_INDEX_MAGIC 0x2547265a
@@ -2412,7 +2422,7 @@ skip_future_versions:
 #define ANY_OBJECT_MAGIC 0xfe9a3974
 #define ANY_OBJECT_VERSION 2
 
-static UINT16
+UINT16
 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
@@ -2441,16 +2451,17 @@ ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static TPM_RC
-ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
+TPM_RC
+ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size, BOOL verbose)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     UINT32 *ptr = (UINT32 *)&data->attributes;
     NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
-                                 ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC);
+        rc = NV_HEADER_UnmarshalVerbose(&hdr, buffer, size,
+                                        ANY_OBJECT_VERSION, ANY_OBJECT_MAGIC,
+                                        verbose);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(ptr, buffer, size);
@@ -3314,7 +3325,7 @@ skip_nv:
         rc = TPM_RC_BAD_PARAMETER;
     }
     for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
-        rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size);
+        rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size, true);
     }
 #endif
 skip_object:
@@ -4483,7 +4494,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     offset += sizeof(TPM_HANDLE);
 
                     memset(&obj, 0, sizeof(obj));
-                    rc = ANY_OBJECT_Unmarshal(&obj, buffer, size);
+                    rc = ANY_OBJECT_Unmarshal(&obj, buffer, size, true);
                     NvWrite(entryRef + o + offset, sizeof(obj), &obj);
                     offset += sizeof(obj);
                 }
