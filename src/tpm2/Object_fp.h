@@ -158,12 +158,20 @@ void
 ObjectTerminateEvent(
 		     void
 		     );
+#if 0	// libtpms added
 OBJECT *
 ObjectContextLoad(
 		  ANY_OBJECT_BUFFER   *object,        // IN: pointer to object structure in saved
 		  //     context
 		  TPMI_DH_OBJECT      *handle         // OUT: object handle
 		  );
+#endif	// libtpms added begin
+OBJECT *
+ObjectContextLoadLibtpms(BYTE           *buffer,      // IN: buffer holding the marshaled object
+                         INT32           size,        // IN: size of buffer
+                         TPMI_DH_OBJECT *handle       // OUT: object handle
+                         );
+	// libtpms added end
 void
 FlushObject(
 	    TPMI_DH_OBJECT   handle         // IN: handle to be freed

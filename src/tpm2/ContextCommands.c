@@ -61,6 +61,7 @@
 
 #include "Tpm.h"
 #include "ContextSave_fp.h"
+#include "NVMarshal.h" // libtpms added
 #if CC_ContextSave  // Conditional expansion of this file
 #include "Context_spt_fp.h"
 /* Error Returns Meaning */
@@ -114,8 +115,11 @@ TPM2_ContextSave(
 	      {
 		  OBJECT              *object = HandleToObject(in->saveHandle);
 		  ANY_OBJECT_BUFFER   *outObject;
-		  UINT16               objectSize = ObjectIsSequence(object)
-						    ? sizeof(HASH_OBJECT) : sizeof(OBJECT);
+		  unsigned char        buffer[sizeof(OBJECT) * 2];		// libtpms changed begin
+		  BYTE                *bufptr = &buffer[0];
+		  INT32                size = sizeof(buffer);
+		  UINT16               written = ANY_OBJECT_Marshal(object, &bufptr, &size);
+		  UINT16               objectSize = written;			// libtpms changed end
 		  outObject = (ANY_OBJECT_BUFFER *)(out->context.contextBlob.t.buffer
 						    + integritySize + fingerprintSize);
 		  // Set size of the context data.  The contents of context blob is vendor
@@ -127,7 +131,7 @@ TPM2_ContextSave(
 		  pAssert(out->context.contextBlob.t.size
 			  <= sizeof(out->context.contextBlob.t.buffer));
 		  // Copy the whole internal OBJECT structure to context blob
-		  MemoryCopy(outObject, object, objectSize);
+		  MemoryCopy(outObject, buffer, written);			// libtpms changed
 		  // Increment object context ID
 		  gr.objectContextID++;
 		  // If object context ID overflows, TPM should be put in failure mode
@@ -141,8 +145,10 @@ TPM2_ContextSave(
 		  if(ObjectIsSequence(object))
 		      {
 			  out->context.savedHandle = 0x80000001;
+			/* ANY_OBJECT_Marshal already wrote it			// libtpms changed begin
 			  SequenceDataExport((HASH_OBJECT *)object,
 					     (HASH_OBJECT_BUFFER *)outObject);
+			 */							// libtpms changed end
 		      }
 		  else
 		      out->context.savedHandle = (object->attributes.stClear == SET)
@@ -296,8 +302,8 @@ TPM2_ContextLoad(
 		  if(!HierarchyIsEnabled(in->context.hierarchy))
 		      return TPM_RCS_HIERARCHY + RC_ContextLoad_context;
 		  // Restore object. If there is no empty space, indicate as much
-		  outObject = ObjectContextLoad((ANY_OBJECT_BUFFER *)buffer,
-						&out->loadedHandle);
+		  outObject = ObjectContextLoadLibtpms(buffer, size,       // libtpms changed
+						       &out->loadedHandle);
 		  if(outObject == NULL)
 		      return TPM_RC_OBJECT_MEMORY;
 		  break;

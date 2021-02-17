@@ -276,6 +276,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm_tpm2_interface.c \
 	tpm_tpm2_tis.c \
 	\
+	tpm2/BackwardsCompatibilityObject.c \
 	tpm2/LibtpmsCallbacks.c \
 	tpm2/NVMarshal.c \
 	tpm2/StateMarshal.c \
@@ -512,6 +513,7 @@ noinst_HEADERS += \
 	tpm2/ZGen_2Phase_fp.h \
 	\
 	tpm2/BackwardsCompatibility.h \
+	tpm2/BackwardsCompatibilityObject.h \
 	tpm2/LibtpmsCallbacks.h \
 	tpm2/NVMarshal.h \
 	tpm2/StateMarshal.h \

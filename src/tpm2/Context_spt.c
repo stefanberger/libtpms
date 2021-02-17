@@ -153,6 +153,7 @@ ComputeContextIntegrity(
     CryptHmacEnd2B(&hmacState, &integrity->b);
     return;
 }
+#if 0
 /* 7.3.2.3 SequenceDataExport() */
 /* This function is used scan through the sequence object and either modify the hash state data for
    export (contextSave) or to import it into the internal format (contextLoad). This function should
@@ -200,3 +201,4 @@ SequenceDataImport(
 	    CryptHashImportState(hash, (EXPORT_HASH_STATE *)importHash);
 	}
 }
+#endif
