@@ -1,5 +1,14 @@
 CHANGES - changes for libtpms
 
+version 0.7.5
+  - Note: The TPM 2 implementation returns 2048 bit keys with ~1984 bit
+          strength due to a bug in the TPM 2 key creation algo that cannot
+          easily be fixed. The bug is in RsaAjustPrimeCandidate, which is
+          called before the prime number check.
+  - tpm2: Return properly sized array for b parameter for NIST P521 (HLK)
+  - tpm2: Addressed issues detected by UBSAN
+  - tpm2: Addressed issues detected by cppcheck (false positives)
+
 version 0.7.4
   - Addressed potential constant-time related issues in TPM 1.2 and TPM 2 code
     TPM 1.2: RSA decryption
