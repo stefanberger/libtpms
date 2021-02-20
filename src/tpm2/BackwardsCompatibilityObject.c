@@ -40,6 +40,10 @@
 
 #include "BackwardsCompatibilityObject.h"
 
+#ifndef static_assert
+#define static_assert(test, msg)
+#endif
+
 /* The following are data structure from libtpms 0.7.x with RSA 2048 support
  * that help to resume key and hash contexts (TPM2_ContextSave/Load) from this
  * earlier version. All structures that have different sizes in 0.8 are found
