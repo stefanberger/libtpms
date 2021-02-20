@@ -148,6 +148,11 @@
 #       define REVERSE_ENDIAN_16(_Number) _OSSwapInt16(_Number)
 #       define REVERSE_ENDIAN_32(_Number) _OSSwapInt32(_Number)
 #       define REVERSE_ENDIAN_64(_Number) _OSSwapInt64(_Number)
+#     elif defined __FreeBSD__
+#       include <sys/endian.h>
+#       define REVERSE_ENDIAN_16(_Number) bswap16(_Number)
+#       define REVERSE_ENDIAN_32(_Number) bswap32(_Number)
+#       define REVERSE_ENDIAN_64(_Number) bswap64(_Number)
 #     else
 #       error Unsupported OS
 #     endif
