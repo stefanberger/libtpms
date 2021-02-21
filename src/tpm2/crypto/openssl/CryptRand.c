@@ -358,6 +358,7 @@ DRBG_Update(
     DRBG_KEY            *key = pDRBG_KEY(&drbgState->seed);
     DRBG_IV             *iv = pDRBG_IV(&drbgState->seed);
     DRBG_KEY_SCHEDULE    localKeySchedule;
+    memset(&localKeySchedule, 0, sizeof(localKeySchedule)); /* libtpms added: coverity */
     //
     pAssert(drbgState->magic == DRBG_MAGIC);
     // If an key schedule was not provided, make one
@@ -745,6 +746,7 @@ DRBG_Generate(
 	    DRBG_STATE          *drbgState = (DRBG_STATE *)state;
 	    DRBG_KEY_SCHEDULE    keySchedule;
 	    DRBG_SEED           *seed = &drbgState->seed;
+	    memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
 	    if(drbgState->reseedCounter >= CTR_DRBG_MAX_REQUESTS_PER_RESEED)
 		{
 		    if(drbgState == &drbgDefault)
