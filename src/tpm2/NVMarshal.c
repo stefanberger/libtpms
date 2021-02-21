@@ -4077,6 +4077,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
     }
 
     while (rc == TPM_RC_SUCCESS) {
+        memset(&nrh, 0, sizeof(nrh)); /* coverity */
         /* nrhp may point to misaligned address (ubsan)
          * we read 'into' nrh and copy to nrhp at end
          */
@@ -4092,7 +4093,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
 
         if (rc == TPM_RC_SUCCESS) {
             rc = UINT32_Unmarshal(&nrh.size, buffer, size);
-            if (nrh.size == 0) {
+            if (rc == TPM_RC_SUCCESS && nrh.size == 0) {
                 memcpy(nrhp, &nrh, sizeof(nrh.size));
                 break;
             }
