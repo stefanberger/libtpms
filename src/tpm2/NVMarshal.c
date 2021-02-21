@@ -482,8 +482,10 @@ DRBG_STATE_Unmarshal(DRBG_STATE *data, BYTE **buffer, INT32 *size)
             rc = TPM_RC_SIZE;
         }
     }
-    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
-        rc = UINT32_Unmarshal(&data->lastValue[i], buffer, size);
+    if (rc == TPM_RC_SUCCESS) {
+        for (i = 0; i < ARRAY_SIZE(data->lastValue) && rc == TPM_RC_SUCCESS; i++) {
+            rc = UINT32_Unmarshal(&data->lastValue[i], buffer, size);
+        }
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
@@ -1116,8 +1118,10 @@ PCR_AUTHVALUE_Unmarshal(PCR_AUTHVALUE *data, BYTE **buffer, INT32 *size)
                             ARRAY_SIZE(data->auth), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
-    for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
-        rc = TPM2B_DIGEST_Unmarshal(&data->auth[i], buffer, size);
+    if (rc == TPM_RC_SUCCESS) {
+        for (i = 0; i < ARRAY_SIZE(data->auth) && rc == TPM_RC_SUCCESS; i++) {
+            rc = TPM2B_DIGEST_Unmarshal(&data->auth[i], buffer, size);
+        }
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
@@ -1429,6 +1433,7 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
         rc = UINT16_Unmarshal(&numbytes, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        /* coverity: num_bytes is sanitized here! */
         data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
         if (data->size > data->allocated) {
             TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %zu than "
@@ -1438,16 +1443,18 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
         }
     }
 
-    for (i = 0, idx = 0;
-         i < numbytes && rc == TPM_RC_SUCCESS;
-         i += sizeof(UINT32), idx += 1) {
-        rc = UINT32_Unmarshal(&word, buffer, size);
+    if (rc == TPM_RC_SUCCESS) {
+        for (i = 0, idx = 0;
+             i < numbytes && rc == TPM_RC_SUCCESS;
+             i += sizeof(UINT32), idx += 1) {
+            rc = UINT32_Unmarshal(&word, buffer, size);
 #if RADIX_BITS == 64
-        data->d[idx / 2] <<= 32;
-        data->d[idx / 2] |= word;
+            data->d[idx / 2] <<= 32;
+            data->d[idx / 2] |= word;
 #elif RADIX_BITS == 32
-        data->d[idx] = word;
+            data->d[idx] = word;
 #endif
+        }
     }
 
 #if RADIX_BITS == 64
@@ -2978,6 +2985,10 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        if (seed.b.size > PRIMARY_SEED_SIZE) /* coverity */
+            rc = TPM_RC_SIZE;
+    }
+    if (rc == TPM_RC_SUCCESS) {
         if (TPM2B_Cmp(&seed.b, &pd.EPSeed.b)) {
             TPMLIB_LogTPM2Error("%s: EPSeed does not match\n",
                                 __func__);
@@ -2988,6 +2999,10 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        if (seed.b.size > PRIMARY_SEED_SIZE) /* coverity */
+            rc = TPM_RC_SIZE;
+    }
+    if (rc == TPM_RC_SUCCESS) {
         if (TPM2B_Cmp(&seed.b, &pd.SPSeed.b)) {
             TPMLIB_LogTPM2Error("%s: SPSeed does not match\n",
                                 __func__);
@@ -2996,6 +3011,10 @@ VolatileState_TailV3_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_Unmarshal(&seed.b, PRIMARY_SEED_SIZE, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (seed.b.size > PRIMARY_SEED_SIZE) /* coverity */
+            rc = TPM_RC_SIZE;
     }
     if (rc == TPM_RC_SUCCESS) {
         if (TPM2B_Cmp(&seed.b, &pd.PPSeed.b)) {
