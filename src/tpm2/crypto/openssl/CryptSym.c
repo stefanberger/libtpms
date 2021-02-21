@@ -702,7 +702,8 @@ CryptSymmetricDecrypt(
 
     pAssert((int)buffersize >= outlen1);
 
-    if (EVP_DecryptFinal(ctx, &buffer[outlen1], &outlen2) != 1)
+    if ((int)buffersize <= outlen1 /* coverity */ ||
+        EVP_DecryptFinal(ctx, &buffer[outlen1], &outlen2) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
     pAssert((int)buffersize >= outlen1 + outlen2);
