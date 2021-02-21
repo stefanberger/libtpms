@@ -414,7 +414,6 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
                      tpmfeatures, "%s%s%s") < 0)
             goto error;
         free(fmt);
-        free(tpmfeatures);
         printed = true;
     }
 
@@ -426,6 +425,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
 
     free(fmt);
     free(tpmattrs);
+    free(tpmfeatures);
 
     return buffer;
 
