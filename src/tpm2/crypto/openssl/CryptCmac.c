@@ -121,6 +121,7 @@ CryptCmacData(
     tpmCryptKeySchedule_t    keySchedule;
     TpmCryptSetSymKeyCall_t  encrypt;
     //
+    memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
     SELECT(ENCRYPT);
     while(size > 0)
 	{
@@ -157,6 +158,7 @@ CryptCmacEnd(
     TPM2B_IV                 subkey = {{0, {0}}};
     BOOL                     xorVal;
     UINT16                   i;
+    memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
     subkey.t.size = cState->iv.t.size;
     // Encrypt a block of zero
     SELECT(ENCRYPT);
