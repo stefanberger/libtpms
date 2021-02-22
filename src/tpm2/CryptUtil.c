@@ -404,12 +404,14 @@ CryptStartup(
 {
     BOOL            OK;
     NOT_REFERENCED(type);
-    OK = CryptSymStartup() && CryptRandStartup() && CryptHashStartup()
+    OK = CryptSymStartup();
+    OK = OK && CryptRandStartup();
+    OK = OK && CryptHashStartup();
 #if ALG_RSA
-	 &&  CryptRsaStartup()
+    OK = OK && CryptRsaStartup();
 #endif // TPM_ALG_RSA
 #if ALG_ECC
-	 &&  CryptEccStartup()
+    OK = OK && CryptEccStartup();
 #endif // TPM_ALG_ECC
 	 ;
 #if ALG_ECC
