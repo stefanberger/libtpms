@@ -3,7 +3,7 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: GpMacros.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -194,10 +194,16 @@
        table. Otherwise, pick the strongest implemented hash algorithm as the context hash. */
 
 #ifndef CONTEXT_HASH_ALGORITHM
-#   if defined ALG_SHA512 && ALG_SHA512 == YES
+#   if defined ALG_SHA3_512 && ALG_SHA3_512 == YES
+#       define CONTEXT_HASH_ALGORITHM   SHA3_512
+#   elif defined ALG_SHA512 && ALG_SHA512 == YES
 #       define CONTEXT_HASH_ALGORITHM    SHA512
+#   elif defined ALG_SHA3_384 && ALG_SHA3_384 == YES
+#       define CONTEXT_HASH_ALGORITHM    SHA3_384
 #   elif defined ALG_SHA384 && ALG_SHA384 == YES
 #       define CONTEXT_HASH_ALGORITHM    SHA384
+#   elif defined ALG_SHA3_256 && ALG_SHA3_256 == YES
+#       define CONTEXT_HASH_ALGORITHM    SHA3_256
 #   elif defined ALG_SHA256 && ALG_SHA256 == YES
 #       define CONTEXT_HASH_ALGORITHM    SHA256
 #   elif defined ALG_SM3_256 && ALG_SM3_256 == YES
@@ -206,6 +212,9 @@
 #       define CONTEXT_HASH_ALGORITHM  SHA1
 #   endif
 #   define CONTEXT_INTEGRITY_HASH_ALG  CONCAT(TPM_ALG_, CONTEXT_HASH_ALGORITHM)
+#if CONTEXT_HASH_ALGORITHM != SHA512	// libtpms added begin
+#error CONTEXT_HASH_ALGORITHM must remain SHA512
+#endif					// libtpms added end
 #endif
 
 #ifndef CONTEXT_INTEGRITY_HASH_SIZE
