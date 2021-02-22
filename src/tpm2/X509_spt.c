@@ -204,25 +204,30 @@ X509ProcessExtensions(
         X509GetExtensionBits(&extensionCtx, &value))
     {
         x509KeyUsageUnion   keyUsage;
-	BOOL                bad;
+	BOOL                badSign;
+	BOOL                badDecrypt;
+	BOOL                badFixedTPM;
+	BOOL                badRestricted;
+
         keyUsage.integer = value;
 
 	// For KeyUsage:
 	// 1) 'sign' is SET if Key Usage includes signing
-	bad = (KEY_USAGE_SIGN.integer & keyUsage.integer) != 0
-	      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign);
+	badSign = ((KEY_USAGE_SIGN.integer & keyUsage.integer) != 0)
+		  && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign);
 	// 2) 'decrypt' is SET if Key Usage includes decryption uses
-	bad = bad || ((KEY_USAGE_DECRYPT.integer & keyUsage.integer) != 0
-		      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt));
+	badDecrypt = ((KEY_USAGE_DECRYPT.integer & keyUsage.integer) != 0)
+		     && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt);
 	// 3) 'fixedTPM' is SET if Key Usage is non-repudiation
-	bad = bad || (IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, nonrepudiation)
-		      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM));
+	badFixedTPM = IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE,
+				   nonrepudiation)
+		      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM);
 	// 4)'restricted' is SET if Key Usage is for key agreement.
-	bad = bad || (IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
-		      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted));
-	if(bad)
+	badRestricted = IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
+			&& !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted);
+	if(badSign || badDecrypt || badFixedTPM || badRestricted)
 	    return TPM_RCS_VALUE;
-    }
+   }
     else
 	// The KeyUsage extension is required
 	return TPM_RCS_VALUE;
