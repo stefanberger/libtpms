@@ -89,13 +89,15 @@ fileOpen(
 #   endif
     return f;
 }
-/* C.13.2.1.	DebugFileOpen() */
+/* C.13.2.2.	DebugFileInit() */
+/* This function initializes the file containing the debug data with the time of the file
+   creation. */
 /* This function opens the file used to hold the debug data. */
 /* Return Value	Meaning */
 /* 0	success */
 /* != 0	error */
 int
-DebugFileOpen(
+DebugFileInit(
 	      void
 	      )
 {

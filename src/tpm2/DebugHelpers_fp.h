@@ -3,7 +3,7 @@
 /*			     Debug Helper					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DebugHelpers_fp.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: DebugHelpers_fp.h 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +55,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 #ifndef DEBUGHELPERS_FP_H
 #define DEBUGHELPERS_FP_H
 
 int
-DebugFileOpen(
+DebugFileInit(
 	      void
 	      );
 void
