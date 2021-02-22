@@ -3,7 +3,7 @@
 /*	TPM commands are communicated as BYTE streams on a TCP connection	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTcpProtocol.h 1519 2019-11-15 20:43:51Z kgoldman $	*/
+/*            $Id: TpmTcpProtocol.h 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,25 +55,25 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
 /* D.3 TpmTcpProtocol.h */
 /* D.3.1. Introduction */
-/* TPM commands are communicated as BYTE streams on a TCP connection.  The TPM command protocol is
+/* TPM commands are communicated as uint8_t streams on a TCP connection.  The TPM command protocol is
    enveloped with the interface protocol described in this file. The command is indicated by a
-   UINT32 with one of the values below.  Most commands take no parameters return no TPM errors.  In
+   uint32_t with one of the values below.  Most commands take no parameters and return no TPM errors. In
    these cases the TPM interface protocol acknowledges that command processing is completed by
-   returning a UINT32=0. The command TPM_SIGNAL_HASH_DATA takes a UINT32-prepended variable length
-   BYTE array and the interface protocol acknowledges command completion with a UINT32=0. Most TPM
+   returning a uint32_t = 0. The command TPM_SIGNAL_HASH_DATA takes a uint32_t-prepended variable length
+   byte array and the interface protocol acknowledges command completion with a uint32_t = 0. Most TPM
    commands are enveloped using the TPM_SEND_COMMAND interface command. The parameters are as
-   indicated below.  The interface layer also appends a UIN32=0 to the TPM response for
+   indicated below.  The interface layer also appends a uin32_t = 0 to the TPM response for
    regularity. */
 /* D.3.2. Typedefs and Defines */
 #ifndef     TCP_TPM_PROTOCOL_H
 #define     TCP_TPM_PROTOCOL_H
-/* D.3.3. TPM Commands All commands acknowledge processing by returning a UINT32 == 0 except where
+/* D.3.3. TPM Commands All commands acknowledge processing by returning a uint32_t = 0 except where
    noted */
 #define TPM_SIGNAL_POWER_ON         1
 #define TPM_SIGNAL_POWER_OFF        2
@@ -81,11 +81,11 @@
 #define TPM_SIGNAL_PHYS_PRES_OFF    4
 #define TPM_SIGNAL_HASH_START       5
 #define TPM_SIGNAL_HASH_DATA        6
-    // {UINT32 BufferSize, BYTE[BufferSize] Buffer}
+    // {uint32_t BufferSize, uint8_t[BufferSize] Buffer}
 #define TPM_SIGNAL_HASH_END         7
 #define TPM_SEND_COMMAND            8
-    // {BYTE Locality, UINT32 InBufferSize, BYTE[InBufferSize] InBuffer} ->
-    //     {UINT32 OutBufferSize, BYTE[OutBufferSize] OutBuffer}
+// {uint8_t Locality, uint32_t InBufferSize, uint8_t[InBufferSize] InBuffer} ->
+//     {uint32_t OutBufferSize, uint8_t[OutBufferSize] OutBuffer}
 #define TPM_SIGNAL_CANCEL_ON        9
 #define TPM_SIGNAL_CANCEL_OFF       10
 #define TPM_SIGNAL_NV_ON            11

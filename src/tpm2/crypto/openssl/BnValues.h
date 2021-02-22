@@ -3,7 +3,7 @@
 /*			  For defining the internal BIGNUM structure   		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnValues.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: BnValues.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -112,7 +112,7 @@ typedef int32_t     crypt_word_t;
 #define LARGEST_NUMBER_BITS (LARGEST_NUMBER * 8)
 #define MAX_ECC_PARAMETER_BYTES (MAX_ECC_KEY_BYTES * ALG_ECC)
 /* These are the basic big number formats. This is convertible to the library- specific format
-   without to much difficulty. For the math performed using these numbers, the value is always
+   without too much difficulty. For the math performed using these numbers, the value is always
    positive. */
 #define BN_STRUCT_DEF(count) struct {			    \
 	crypt_uword_t       allocated;			    \
@@ -185,7 +185,7 @@ extern const bignum_t   BnConstZero;
     BN_INITIALIZED(name, LARGEST_NUMBER_BITS, initializer)
 /* A word size value is useful */
 #define BN_WORD(name)      BN_VAR(name, RADIX_BITS)
-/* This is used to created a word-size BIGNUM and initialize it with an input parameter to a
+/* This is used to create a word-size BIGNUM and initialize it with an input parameter to a
    function. */
 #define BN_WORD_INITIALIZED(name, initial)				\
     BN_STRUCT(RADIX_BITS)  name##_;					\
@@ -249,7 +249,7 @@ typedef struct
    structure. In some libraries, the curve structure contains a pointer to an ECC_CURVE_DATA
    structure as well as some other bits. For those cases, the AccessCurveData() macro is used in the
    code to first get the pointer to the ECC_CURVE_DATA for access. In some cases, the macro does
-   noting. */
+   nothing. */
 #define CurveGetPrime(C)    ((C)->prime)
 #define CurveGetOrder(C)    ((C)->order)
 #define CurveGetCofactor(C) ((C)->h)

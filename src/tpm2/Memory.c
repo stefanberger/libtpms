@@ -3,7 +3,7 @@
 /*		 Miscellaneous Memory Manipulation Routines    			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Memory.c 1476 2019-06-10 19:32:03Z kgoldman $		*/
+/*            $Id: Memory.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -131,7 +131,7 @@ MemoryCopy2B(
     return dest->size;
 }
 /* 9.12.3.4 MemoryConcat2B() */
-/* This function will concatenate the buffer contents of a TPM2B to an the buffer contents of
+/* This function will concatenate the buffer contents of a TPM2B to the buffer contents of
    another TPM2B and adjust the size accordingly (a := (a | b)). */
 void
 MemoryConcat2B(

@@ -1792,6 +1792,7 @@ TPMT_TK_HASHCHECK_Unmarshal(TPMT_TK_HASHCHECK *target, BYTE **buffer, INT32 *siz
 }
 
 /* Table 92 - Definition of TPMS_ALG_PROPERTY Structure <OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPMS_ALG_PROPERTY_Unmarshal(TPMS_ALG_PROPERTY *target, BYTE **buffer, INT32 *size)
@@ -1809,6 +1810,7 @@ TPMS_ALG_PROPERTY_Unmarshal(TPMS_ALG_PROPERTY *target, BYTE **buffer, INT32 *siz
 #endif		// libtpms added
 
 /* Table 93 - Definition of TPMS_TAGGED_PROPERTY Structure <OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_PROPERTY_Unmarshal(TPMS_TAGGED_PROPERTY *target, BYTE **buffer, INT32 *size)
@@ -1826,6 +1828,7 @@ TPMS_TAGGED_PROPERTY_Unmarshal(TPMS_TAGGED_PROPERTY *target, BYTE **buffer, INT3
 #endif		// libtpms added
  
 /* Table 94 - Definition of TPMS_TAGGED_PCR_SELECT Structure <OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_PCR_SELECT_Unmarshal(TPMS_TAGGED_PCR_SELECT *target, BYTE **buffer, INT32 *size)
@@ -1868,6 +1871,7 @@ TPML_CC_Unmarshal(TPML_CC *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 2:96 - Definition of TPMS_TAGGED_POLICY Structure (StructuresTable()) */
+
 #if 0		// libtpms added
 TPM_RC
 TPMS_TAGGED_POLICY_Unmarshal(TPMS_TAGGED_POLICY *target, BYTE **buffer, INT32 *size)
@@ -1884,6 +1888,7 @@ TPMS_TAGGED_POLICY_Unmarshal(TPMS_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
 #endif		// libtpms added
 
 /* Table 96 - Definition of TPML_CCA Structure <OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPML_CCA_Unmarshal(TPML_CCA *target, BYTE **buffer, INT32 *size)
@@ -1929,6 +1934,7 @@ TPML_ALG_Unmarshal(TPML_ALG *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 98 - Definition of TPML_HANDLE Structure <OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size)
@@ -4269,6 +4275,7 @@ TPM2B_NV_PUBLIC_Unmarshal(TPM2B_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 199 - Definition of TPM2B_CONTEXT_SENSITIVE Structure <IN/OUT> */
+
 #if 0		// libtpms added
 TPM_RC
 TPM2B_CONTEXT_SENSITIVE_Unmarshal(TPM2B_CONTEXT_SENSITIVE *target, BYTE **buffer, INT32 *size)

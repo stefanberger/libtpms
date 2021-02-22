@@ -189,8 +189,10 @@
 #define JOIN3(x, y, z) x##y##z
 #define CONCAT(x,y) JOIN(x, y)
 #define CONCAT3(x, y, z) JOIN3(x,y,z)
+
 /*     If CONTEXT_INTEGRITY_HASH_ALG is defined, then the vendor is using the old style
        table. Otherwise, pick the strongest implemented hash algorithm as the context hash. */
+
 #ifndef CONTEXT_HASH_ALGORITHM
 #   if defined ALG_SHA512 && ALG_SHA512 == YES
 #       define CONTEXT_HASH_ALGORITHM    SHA512
@@ -205,6 +207,7 @@
 #   endif
 #   define CONTEXT_INTEGRITY_HASH_ALG  CONCAT(TPM_ALG_, CONTEXT_HASH_ALGORITHM)
 #endif
+
 #ifndef CONTEXT_INTEGRITY_HASH_SIZE
 #define CONTEXT_INTEGRITY_HASH_SIZE CONCAT(CONTEXT_HASH_ALGORITHM, _DIGEST_SIZE)
 #endif

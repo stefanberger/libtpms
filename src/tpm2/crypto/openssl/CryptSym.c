@@ -69,6 +69,8 @@
 #include "Tpm.h"
 #include "CryptSym.h"
 #include "Helpers_fp.h"  // libtpms changed
+
+
 #define     KEY_BLOCK_SIZES(ALG, alg)					\
     static const INT16       alg##KeyBlockSizes[] = {			\
 						     ALG##_KEY_SIZES_BITS, -1, ALG##_BLOCK_SIZES };
@@ -85,6 +87,7 @@ KEY_BLOCK_SIZES(CAMELLIA, camellia);
 KEY_BLOCK_SIZES(TDES, tdes);
 #endif
 
+/* 10.2.19.3	Initialization and Data Access Functions */
 /* 10.2.19.3.1	CryptSymInit() */
 /* This function is called to do _TPM_Init() processing */
 BOOL

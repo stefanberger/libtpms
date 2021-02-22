@@ -3,7 +3,7 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: Object_spt.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -280,7 +280,7 @@ AdjustAuthSize(
 {
     UINT16               digestSize;
     // If there is no nameAlg, then this is a LoadExternal and the authVale can
-    // be any size up to the maximum allowed by the
+    // be any size up to the maximum allowed by the implementation
     digestSize = (nameAlg == TPM_ALG_NULL) ? sizeof(TPMU_HA)
 		 : CryptHashGetDigestSize(nameAlg);
     if(digestSize < MemoryRemoveTrailingZeros(auth))
@@ -871,8 +871,9 @@ UnwrapOuter(
 }
 /* 7.6.3.10 MarshalSensitive() */
 /* This function is used to marshal a sensitive area. Among other things, it adjusts the size of the
-   authValue to be no smaller than the digest of nameAlg.  It will also make sure that the RSA
-   sensitive contains the right number of values. Returns the size of the marshaled area. */
+   authValue to be no smaller than the digest of nameAlg.
+
+   Returns the size of the marshaled area. */
 static UINT16
 MarshalSensitive(
 		 BYTE                *buffer,            // OUT: receiving buffer
@@ -946,7 +947,7 @@ SensitiveToPrivate(
     return;
 }
 /* 7.6.3.12 PrivateToSensitive() */
-/* Unwrap a input private area.  Check the integrity, decrypt and retrieve data to a sensitive
+/* Unwrap an input private area.  Check the integrity, decrypt and retrieve data to a sensitive
    structure. The operations in this function: */
 /* a) check the integrity HMAC of the input private area */
 /* b) decrypt the private buffer */

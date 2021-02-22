@@ -3,7 +3,7 @@
 /*		Signing and Signature Verification	   			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SigningCommands.c 1529 2019-11-21 23:29:01Z kgoldman $	*/
+/*            $Id: SigningCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -86,7 +86,7 @@ TPM2_VerifySignature(
        || signObject->publicArea.nameAlg == TPM_ALG_NULL)
 	{
 	    // produce empty ticket if hierarchy is TPM_RH_NULL or nameAlg is
-	    // ALG_NULL
+	    // TPM_ALG_NULL
 	    out->validation.tag = TPM_ST_VERIFIED;
 	    out->validation.hierarchy = TPM_RH_NULL;
 	    out->validation.digest.t.size = 0;

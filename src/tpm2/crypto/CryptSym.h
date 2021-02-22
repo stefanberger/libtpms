@@ -82,6 +82,7 @@ typedef union tpmCryptKeySchedule_t {
     uint32_t            alignment;
 #endif
 } tpmCryptKeySchedule_t;
+
 /* Each block cipher within a library is expected to conform to the same calling conventions with
    three parameters (keySchedule, in, and out) in the same order. That means that all algorithms
    would use the same order of the same parameters. The code is written assuming the (keySchedule,
@@ -94,6 +95,7 @@ typedef union tpmCryptKeySchedule_t {
     encrypt(SWIZZLE(keySchedule, in, out))
 #   define DECRYPT(keySchedule, in, out)	\
     decrypt(SWIZZLE(keySchedule, in, out))
+
 /* Note that the macros rely on encrypt as local values in the functions that use these
    macros. Those parameters are set by the macro that set the key schedule to be used for the
    call. */

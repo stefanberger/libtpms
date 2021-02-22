@@ -3,7 +3,7 @@
 /*	Macro and Structure Definitions for the X509 Commands and Functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509.h 1519 2019-11-15 20:43:51Z kgoldman $			*/
+/*            $Id: X509.h 1658 2021-01-22 23:14:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -116,7 +116,7 @@ MAKE_OID(_TCG_TPMA_OBJECT);
 
 #ifdef _X509_SPT_
 
-// If a bit is SET in KEY_USAGE_SIGN is also SET in keyUsagem then the associated key has to have
+// If a bit is SET in KEY_USAGE_SIGN is also SET in keyUsage then the associated key has to have
 // sign SET.
 
 const x509KeyUsageUnion KEY_USAGE_SIGN =
@@ -126,7 +126,7 @@ const x509KeyUsageUnion KEY_USAGE_SIGN =
 				    /* dataencipherment */ 0, /* keyencipherment */ 0,  /* nonrepudiation */ 0,
 				    /* digitalsignature */ 1)};
 
-// If a bit is SET in KEY_USAGE_DECRYPT is also SET in keyUsagem then the associated key has to have decrypt SET.
+// If a bit is SET in KEY_USAGE_DECRYPT is also SET in keyUsage then the associated key has to have decrypt SET.
 
 const x509KeyUsageUnion KEY_USAGE_DECRYPT =
     {TPMA_X509_KEY_USAGE_INITIALIZER(

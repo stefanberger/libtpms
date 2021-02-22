@@ -1402,7 +1402,7 @@ CryptGetTestResult(
     return TPM_RC_SUCCESS;
 }
 /* 10.2.6.6.17 CryptValidateKeys() */
-/* This function is used to verify that the key material of and object is valid. For a publicOnly
+/* This function is used to verify that the key material of an object is valid. For a publicOnly
    object, the key is verified for size and, if it is an ECC key, it is verified to be on the
    specified curve. For a key with a sensitive area, the binding between the public and private
    parts of the key are verified. If the nameAlg of the key is TPM_ALG_NULL, then the size of the

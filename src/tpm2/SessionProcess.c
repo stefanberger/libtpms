@@ -496,6 +496,7 @@ IsAuthPolicyAvailable(
 }
 /* 6.4.4 Session Parsing Functions */
 /* 6.4.4.1 ClearCpRpHashes() */
+
 void
 ClearCpRpHashes(
 		COMMAND         *command
@@ -522,6 +523,7 @@ ClearCpRpHashes(
     command->sm3_256RpHash.t.size = 0;
 #endif
 }
+
 /* 6.4.4.2 GetCpHashPointer() */
 /* Function to get a pointer to the cpHash of the command */
 static TPM2B_DIGEST *
@@ -557,6 +559,7 @@ GetCpHashPointer(
 	}
     return NULL;
 }
+
 /* 6.4.4.3 GetRpHashPointer() */
 /* Function to get a pointer to the RpHash() of the command */
 static TPM2B_DIGEST *
@@ -592,6 +595,7 @@ GetRpHashPointer(
 	}
     return NULL;
 }
+
 /* 6.4.4.4 ComputeCpHash() */
 /* This function computes the cpHash as defined in Part 2 and described in Part 1. */
 static TPM2B_DIGEST *

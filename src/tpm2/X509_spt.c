@@ -198,7 +198,7 @@ X509ProcessExtensions(
     // Make sure the failure to find the value wasn't because of a fatal error
     else if(extensionCtx.size < 0)
 	return TPM_RCS_VALUE;
-    
+
     // Get the keyUsage extension. This one is required
     if(X509FindExtensionByOID(&ctx, &extensionCtx, OID_KEY_USAGE_EXTENSION) &&
         X509GetExtensionBits(&extensionCtx, &value))
@@ -226,7 +226,7 @@ X509ProcessExtensions(
     else
 	// The KeyUsage extension is required
 	return TPM_RCS_VALUE;
-    
+
     return TPM_RC_SUCCESS;
 }
 /* 10.2.26.3	Marshaling Functions */

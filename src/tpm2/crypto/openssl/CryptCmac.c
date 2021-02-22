@@ -100,7 +100,7 @@ CryptCmacStart(
     return cState->iv.t.size;
 }
 
-/* 10.2.6.3.2	CryptCmacData() */
+/* 10.2.5.3.2	CryptCmacData() */
 /* This function is used to add data to the CMAC sequence computation. The function will XOR new
    data into the IV. If the buffer is full, and there is additional input data, the data is
    encrypted into the IV buffer, the new data is then XOR into the IV. When the data runs out, the
@@ -126,17 +126,18 @@ CryptCmacData(
     while(size > 0)
 	{
 	    if(cmacState->bcount == cmacState->iv.t.size)
-		{
-		    ENCRYPT(&keySchedule, cmacState->iv.t.buffer, cmacState->iv.t.buffer);
-		    cmacState->bcount = 0;
-		}
+	        {
+	            ENCRYPT(&keySchedule, cmacState->iv.t.buffer, cmacState->iv.t.buffer);
+	            cmacState->bcount = 0;
+	        }
 	    for(;(size > 0) && (cmacState->bcount < cmacState->iv.t.size);
 		size--, cmacState->bcount++)
-		{
-		    cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
-		}
+	        {
+	            cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
+	        }
 	}
 }
+
 /* 10.2.6.3.3	CryptCmacEnd() */
 /* This is the completion function for the CMAC. It does padding, if needed, and selects the subkey
    to be applied before the last block is encrypted. */
@@ -159,10 +160,12 @@ CryptCmacEnd(
     BOOL                     xorVal;
     UINT16                   i;
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
+
     subkey.t.size = cState->iv.t.size;
     // Encrypt a block of zero
     SELECT(ENCRYPT);
     ENCRYPT(&keySchedule, subkey.t.buffer, subkey.t.buffer);
+
     // shift left by 1 and XOR with 0x0...87 if the MSb was 0
     xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
     ShiftLeft(&subkey.b);
@@ -188,6 +191,8 @@ CryptCmacEnd(
     ENCRYPT(&keySchedule, cState->iv.t.buffer, cState->iv.t.buffer);
     i = (UINT16)MIN(cState->iv.t.size, outSize);
     MemoryCopy(outBuffer, cState->iv.t.buffer, i);
+
     return i;
 }
+
 #endif

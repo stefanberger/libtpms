@@ -108,12 +108,14 @@ typedef struct tpmCmacState {
     TPM2B_IV                iv;     // IV buffer
     TPM2B_SYM_KEY           symKey;
 } tpmCmacState_t;
+
 typedef union SMAC_STATES {
 #if ALG_CMAC
     tpmCmacState_t          cmac;
 #endif
     UINT64                  pad;
 } SMAC_STATES;
+
 typedef struct SMAC_STATE {
     SMAC_METHODS            smacMethods;
     SMAC_STATES             state;
@@ -146,6 +148,7 @@ typedef union
     uint32_t             align;
 #endif
 } ANY_HASH_STATE;
+
 typedef ANY_HASH_STATE *PANY_HASH_STATE;
 typedef const ANY_HASH_STATE    *PCANY_HASH_STATE;
 #define ALIGNED_SIZE(x, b) ((((x) + (b) - 1) / (b)) * (b))

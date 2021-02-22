@@ -3,7 +3,7 @@
 /*	 		TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: TpmToOsslMath.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,13 +55,13 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
 /* B.2.2.1. TpmToOsslMath.h */
 /* B.2.2.1.1. Introduction */
-/* This file contains the structure definitions used for ECC in the LibTopCrypt() version of the
+/* This file contains the structure definitions used for ECC in the OpenSSL version of the
    code. These definitions would change, based on the library. The ECC-related structures that cross
    the TPM interface are defined in TpmTypes.h */
 
@@ -82,10 +82,10 @@
 // from crypto/bn/bn_lcl.h
 struct bignum_st {
     BN_ULONG *d;
-    int top;                    /* Index of last used d +1. */
-    /* The next are internal book keeping for bn_expand. */
-    int dmax;                   /* Size of the d array. */
-    int neg;                    /* one if the number is negative */
+    int top; 
+
+    int dmax;
+    int neg;
     int flags;
 };
 #if 0   // libtpms added
@@ -94,6 +94,7 @@ struct bignum_st {
 #endif  // libtpms added
 #endif // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
+
 #include <openssl/bn.h>
 #if USE_OPENSSL_FUNCTIONS_ECDSA        // libtpms added begin
 #include <openssl/ecdsa.h>
@@ -149,8 +150,10 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 #define CURVE_FREE(name)               BnCurveFree(name)
 
 /* Start and end a local stack frame within the context of the curve frame */
+#if 0	/* kgold not used */
 #define ECC_ENTER()     BN_CTX         *CTX = OsslPushContext(E->CTX)
 #define ECC_LEAVE()     OsslPopContext(CTX)
+#endif
 #define BN_NEW()        BnNewVariable(CTX)
 
 
