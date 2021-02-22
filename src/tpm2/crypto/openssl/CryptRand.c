@@ -3,7 +3,7 @@
 /*		DRBG with a behavior according to SP800-90A			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptRand.c 1603 2020-04-03 17:48:43Z kgoldman $		*/
+/*            $Id: CryptRand.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -658,7 +658,6 @@ CryptRandStartup(
     else
 	return DRBG_Instantiate(&go.drbgState, 0, NULL);
 #endif
-    return TRUE;
 }
 /* 10.2.16.3.8 CryptRandInit() */
 /* This function is called when _TPM_Init() is being processed */
