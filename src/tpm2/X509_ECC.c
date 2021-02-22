@@ -109,7 +109,7 @@ X509AddSigningAlgorithmECC(
     // If the desired hashAlg definition wasn't found...
     if(hashDef->hashAlg != scheme->details.any.hashAlg)
 	return 0;
-    
+
     switch(scheme->scheme)
 	{
 	  case ALG_ECDSA_VALUE:

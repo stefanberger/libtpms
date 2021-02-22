@@ -3,7 +3,7 @@
 /*			   Dictionary Attack Logic.  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DA.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
+/*            $Id: DA.c 1658 2021-01-22 23:14:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -154,7 +154,7 @@ DAStartup(
     return TRUE;
 }
 /* 8.2.3.3 DARegisterFailure() */
-/* This function is called when a authorization failure occurs on an entity that is subject to
+/* This function is called when an authorization failure occurs on an entity that is subject to
    dictionary-attack protection. When a DA failure is triggered, register the failure by resetting
    the relevant self-healing timer to the current time. */
 void

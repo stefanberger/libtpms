@@ -412,8 +412,8 @@ typedef struct SESSION
 #define     TIMEOUT_ON_RESTART  (UINT64_MAX - 1)
 typedef BYTE        SESSION_BUF[sizeof(SESSION)];
 
-/* 5.9.6	PCR */
-/* 5.9.6.1	PCR_SAVE Structure */
+/* 5.9.7	PCR */
+/* 5.9.7.1	PCR_SAVE Structure */
 /* The PCR_SAVE structure type contains the PCR data that are saved across power cycles. Only the
    static PCR are required to be saved across power cycles. The DRTM and resettable PCR are not
    saved. The number of static and resettable PCR is determined by the platform-specific
@@ -1101,8 +1101,8 @@ typedef struct _COMMAND_
 #endif
 } COMMAND;
 
-// Global sting constants for consistency in KDF function calls. These string constants are shared
-// across functions to make sure that they are all using consistent sting values.
+// Global string constants for consistency in KDF function calls. These string constants are shared
+// across functions to make sure that they are all using consistent string values.
 #define STRING_INITIALIZER(value)   {{sizeof(value), {value}}}
 #define TPM2B_STRING(name, value)					\
     typedef union name##_ {						\
@@ -1252,7 +1252,7 @@ EXTERN      BYTE            *s_cachedNvRamRef;
 EXTERN OBJECT           s_objects[MAX_LOADED_OBJECTS];
 #endif // OBJECT_C
 
-/* 5.9.16.5	From PCR.c */
+/* 5.9.17.5	From PCR.c */
 
 #if defined PCR_C || defined GLOBAL_C
 
@@ -1279,6 +1279,7 @@ typedef struct
     BYTE    sm3_256Pcr[SM3_256_DIGEST_SIZE];
 #endif
 } PCR;
+
 typedef struct
 {
     unsigned int    stateSave : 1;              // if the PCR value should be

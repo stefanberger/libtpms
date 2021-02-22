@@ -104,8 +104,8 @@ TestHash(
 {
     TPM2B_DIGEST      computed;  // value computed
     HMAC_STATE        state;
-    UINT16                   digestSize;
-    const TPM2B             *testDigest = NULL;
+    UINT16            digestSize;
+    const TPM2B       *testDigest = NULL;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
     pAssert(hashAlg != ALG_NULL_VALUE);
     switch(hashAlg)
@@ -143,7 +143,7 @@ TestHash(
 	}
     // Clear the to-test bits
     CLEAR_BOTH(hashAlg);
-    
+
     // If there is an algorithm without test vectors, then assume that things are OK.
     if(testDigest == NULL)
 	return TPM_RC_SUCCESS;

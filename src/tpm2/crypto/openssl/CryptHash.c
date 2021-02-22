@@ -103,6 +103,7 @@ PHASH_DEF       HashDefArray[] = {
 #endif
 				  &NULL_Def
 };
+
 /* 10.2.13.3	Obligatory Initialization Functions */
 /* 10.2.13.3.1	CryptHashInit() */
 /* This function is called by _TPM_Init() do perform the initialization operations for the
@@ -132,6 +133,7 @@ CryptHashStartup(
 /* 10.2.13.4.2	CryptGetHashDef() */
 /* This function accesses the hash descriptor associated with a hash a algorithm. The function
    returns a pointer to a null descriptor if hashAlg is TPM_ALG_NULL or not a defined algorithm. */
+
 PHASH_DEF
 CryptGetHashDef(
 		TPM_ALG_ID       hashAlg

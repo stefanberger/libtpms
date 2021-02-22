@@ -3,7 +3,7 @@
 /*		 select the library code that gets included in the TPM build 	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: LibSupport.h 1628 2020-05-27 19:35:29Z kgoldman $		*/
+/*            $Id: LibSupport.h 1656 2021-01-15 21:45:18Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -76,7 +76,8 @@
 #       define RADIX_BITS                      64
 #   elif defined(__i386__) || defined(__i386) || defined(i386)		\
     || defined(_WIN32) || defined(_M_IX86)				\
-    || defined(_M_ARM) || defined(__arm__) || defined(__thumb__)
+    || defined(_M_ARM) || defined(__arm__) || defined(__thumb__)	\
+    || defined(__powerpc__) || defined(__PPC__)
 #       define RADIX_BITS                      32
 #   else
 #       error Unable to determine RADIX_BITS from compiler environment

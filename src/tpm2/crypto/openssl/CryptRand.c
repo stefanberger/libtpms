@@ -649,14 +649,14 @@ CryptRandStartup(
 {
 #if ! _DRBG_STATE_SAVE
     // If not saved in NV, re-instantiate on each startup
-    return DRBG_Instantiate(&drbgDefault, 0, NULL);	/* kgold; libtpms return BOOL */
+    return DRBG_Instantiate(&drbgDefault, 0, NULL);
 #else
     // If the running state is saved in NV, NV has to be loaded before it can
     // be updated
     if(go.drbgState.magic == DRBG_MAGIC)
-	return DRBG_Reseed(&go.drbgState, NULL, NULL);		/* kgold; libtpms return BOOL */
+	return DRBG_Reseed(&go.drbgState, NULL, NULL);
     else
-	return DRBG_Instantiate(&go.drbgState, 0, NULL);	/* kgold; libtpms return BOOL */
+	return DRBG_Instantiate(&go.drbgState, 0, NULL);
 #endif
     return TRUE;
 }

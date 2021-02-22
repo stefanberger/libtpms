@@ -123,9 +123,9 @@ TPM2_EncryptDecrypt(
     if(blockSize == 0)
 	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
     // Note: When an algorithm is not supported by a TPM, the TPM_ALG_xxx for that
-    // algorithm is not defined. However, it is assumed that the ALG_xxx_VALUE for
+    // algorithm is not defined. However, it is assumed that the TPM_ALG_xxx for
     // the algorithm is always defined. Both have the same numeric value.
-    // ALG_xxx_VALUE is used here so that the code does not get cluttered with
+    // TPM_ALG_xxx is used here so that the code does not get cluttered with
     // #ifdef's. Having this check does not mean that the algorithm is supported.
     // If it was not supported the unmarshaling code would have rejected it before
     // this function were called. This means that, depending on the implementation,

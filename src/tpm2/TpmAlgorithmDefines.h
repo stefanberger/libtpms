@@ -3,7 +3,7 @@
 /*		Algorithm Values from the TCG Algorithm Registry 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmAlgorithmDefines.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: TpmAlgorithmDefines.h 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -389,7 +389,7 @@
 TPM2B_TYPE(MAX_HASH_BLOCK, MAX_HASH_BLOCK_SIZE);
 // Following typedef is for some old code
 typedef TPM2B_MAX_HASH_BLOCK    TPM2B_HASH_BLOCK;
-// Additional symmetric constants
+
 #define MAX_SYM_KEY_BITS						\
     (MAX(AES_MAX_KEY_SIZE_BITS,      MAX(CAMELLIA_MAX_KEY_SIZE_BITS,	\
 					 MAX(SM4_MAX_KEY_SIZE_BITS,      MAX(TDES_MAX_KEY_SIZE_BITS, \

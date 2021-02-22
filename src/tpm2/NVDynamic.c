@@ -3,7 +3,7 @@
 /*		Dynamic space for user defined NV      				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVDynamic.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: NVDynamic.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -70,7 +70,7 @@
 /* To begin with, parameter iter should be initialized to NV_REF_INIT indicating the first element.
    Every time this function is called, the value in iter would be adjusted pointing to the next
    element in traversal.  If there is no next element, iter value would be 0. This function returns
-   the address of the 'data entry' pointed by the iter.  If there is no more element in the set, a 0
+   the address of the 'data entry' pointed by the iter.  If there is no more elements in the set, a 0
    value is returned indicating the end of traversal. */
 static NV_REF
 NvNext(
@@ -108,13 +108,13 @@ NvNext(
 /* != 0 the next entry of the indicated type */
 static NV_REF
 NvNextByType(
-	     TPM_HANDLE      *handle,        // OUT: the handle of the found type
+	     TPM_HANDLE      *handle,        // OUT: the handle of the found type or 0
 	     NV_REF          *iter,          // IN: the iterator
 	     TPM_HT           type           // IN: the handle type to look for
 	     )
 {
     NV_REF           addr;
-    TPM_HANDLE       nvHandle = 0; // libtpms changed: gcc 10.1.0 complaint
+    TPM_HANDLE       nvHandle = 0;
     while((addr = NvNext(iter, &nvHandle)) != 0)
 	{
 	    // addr: the address of the location containing the handle of the value
@@ -616,8 +616,7 @@ NvWriteRamIndexAttributes(
 /* This function indicates if a handle references a persistent object in the range belonging to the
    platform. */
 /* Return Values Meaning */
-/* TRUE handle references a platform persistent object and may reference an owner persistent object
-   either*/
+/* TRUE handle references a platform persistent object */
 /* FALSE handle does not reference platform persistent object */
 BOOL
 NvIsPlatformPersistentHandle(
@@ -1625,9 +1624,9 @@ NvFindHandle(
 /* The TPM keeps track of the highest value of a deleted counter index. When an index is deleted,
    this value is updated if the deleted counter index is greater than the previous value. When a new
    index is created and first incremented, it will get a value that is at least one greater than any
-   other index than any previously deleted index. This insures that it is not possible to roll back
+   other index than any previously deleted index. This ensures that it is not possible to roll back
    an index. */
-/* The highest counter value is keep in NV in a special end-of-list marker. This marker is only
+/* The highest counter value is kept in NV in a special end-of-list marker. This marker is only
    updated when an index is deleted. Otherwise it just moves. */
 /* When the TPM starts up, it searches NV for the end of list marker and initializes an in memory
    value (s_maxCounter). */

@@ -273,11 +273,12 @@ PCRSimStart(
     NV_SYNC_PERSISTENT(pcrAllocated);
     return;
 }
-/* 8.7.2.8 GetSavedPcrPointer() */
+/* 8.7.3.8 GetSavedPcrPointer() */
 /* This function returns the address of an array of state saved PCR based on the hash algorithm. */
 /* Return Values Meaning */
 /* NULL no such algorithm */
 /* not NULL pointer to the 0th byte of the 0th PCR */
+
 static BYTE *
 GetSavedPcrPointer(
 		   TPM_ALG_ID       alg,           // IN: algorithm for bank
@@ -317,6 +318,7 @@ GetSavedPcrPointer(
 	}
     return retVal;
 }
+
 /* 8.7.2.9 PcrIsAllocated() */
 /* This function indicates if a PCR number for the particular hash algorithm is allocated. */
 /* Return Values Meaning */
@@ -347,11 +349,12 @@ PcrIsAllocated(
 	}
     return allocated;
 }
-/* 8.7.2.10 GetPcrPointer() */
+/* 8.7.3.10 GetPcrPointer() */
 /* This function returns the address of an array of PCR based on the hash algorithm. */
 /* Return Values Meaning */
 /* NULL no such algorithm */
 /* not NULL pointer to the 0th byte of the 0th PCR */
+
 static BYTE *
 GetPcrPointer(
 	      TPM_ALG_ID       alg,           // IN: algorithm for bank
@@ -359,6 +362,7 @@ GetPcrPointer(
 	      )
 {
     static BYTE     *pcr = NULL;
+
     if(!PcrIsAllocated(pcrNumber, alg))
 	return NULL;
     switch(alg)
@@ -394,6 +398,7 @@ GetPcrPointer(
 	}
     return pcr;
 }
+
 /* 8.7.2.11 IsPcrSelected() */
 /* This function indicates if an indicated PCR number is selected by the bit map in selection. */
 /* Return Values Meaning */
