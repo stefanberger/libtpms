@@ -3,7 +3,7 @@
 /*			     Object Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ObjectCommands.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: ObjectCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -462,7 +462,7 @@ TPM2_CreateLoaded(
 	    pAssert(scheme->details.xorr.hashAlg != TPM_ALG_NULL
 		    && scheme->details.xorr.kdf == TPM_ALG_KDF1_SP800_108);
 	    // Don't derive RSA keys
-	    if(publicArea->type == ALG_RSA_VALUE)
+	    if(publicArea->type == TPM_ALG_RSA)
 		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
 	    // sensitiveDataOrigin has to be CLEAR in a derived object. Since this
 	    // is specific to a derived object, it is checked here.

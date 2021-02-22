@@ -3,7 +3,7 @@
 /*			Interfaces to the Crypto Engine				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptUtil.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -200,7 +200,7 @@ CryptIsSchemeAnonymous(
 		       TPM_ALG_ID       scheme         // IN: the scheme algorithm to test
 		       )
 {
-    return scheme == ALG_ECDAA_VALUE;
+    return scheme == TPM_ALG_ECDAA;
 }
 /* 10.2.6.4 Symmetric Functions */
 /* 10.2.6.4.1 ParmDecryptSym() */

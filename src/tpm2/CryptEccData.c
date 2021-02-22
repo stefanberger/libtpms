@@ -3,7 +3,7 @@
 /*			ECC curve data 						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccData.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: CryptEccData.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2018 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2018 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -522,8 +522,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_NIST_P192,
 				  192,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &NIST_P192,
 				  OID_ECC_NIST_P192
 				  CURVE_NAME("NIST_P192")}
@@ -534,8 +534,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_NIST_P224,
 				  224,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &NIST_P224,
 				  OID_ECC_NIST_P224
 				  CURVE_NAME("NIST_P224")}
@@ -546,8 +546,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_NIST_P256,
 				  256,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA256_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &NIST_P256,
 				  OID_ECC_NIST_P256
 				  CURVE_NAME("NIST_P256")}
@@ -558,8 +558,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_NIST_P384,
 				  384,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA384_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA384}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &NIST_P384,
 				  OID_ECC_NIST_P384
 				  CURVE_NAME("NIST_P384")}
@@ -570,8 +570,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_NIST_P521,
 				  521,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SHA512_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA512}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &NIST_P521,
 				  OID_ECC_NIST_P521
 				  CURVE_NAME("NIST_P521")}
@@ -582,8 +582,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_BN_P256,
 				  256,
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &BN_P256,
 				  OID_ECC_BN_P256
 				  CURVE_NAME("BN_P256")}
@@ -594,8 +594,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_BN_P638,
 				  638,
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &BN_P638,
 				  OID_ECC_BN_P638
 				  CURVE_NAME("BN_P638")}
@@ -606,8 +606,8 @@ const ECC_CURVE   eccCurves[] = {
 				 comma
 				 {TPM_ECC_SM2_P256,
 				  256,
-				  {ALG_KDF1_SP800_56A_VALUE, {{ALG_SM3_256_VALUE}}},
-				  {ALG_NULL_VALUE, {{ALG_NULL_VALUE}}},
+				  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SM3_256}}},
+				  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
 				  &SM2_P256,
 				  OID_ECC_SM2_P256
 				  CURVE_NAME("SM2_P256")}

@@ -3,7 +3,7 @@
 /*			  Code to perform the various self-test functions.	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: AlgorithmTests.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -107,7 +107,7 @@ TestHash(
     UINT16            digestSize;
     const TPM2B       *testDigest = NULL;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
-    pAssert(hashAlg != ALG_NULL_VALUE);
+    pAssert(hashAlg != TPM_ALG_NULL);
 #define HASH_CASE_FOR_TEST(HASH, hash)        case ALG_##HASH##_VALUE:	\
     testDigest = &c_##HASH##_digest.b;					\
     break;
@@ -155,7 +155,7 @@ TestSMAC(
     TPMU_PUBLIC_PARMS   cmac_keyParms;
 
     // initializing this statically seems impossible with gcc...
-    cmac_keyParms.symDetail.sym.algorithm = ALG_AES_VALUE;
+    cmac_keyParms.symDetail.sym.algorithm = TPM_ALG_AES;
     cmac_keyParms.symDetail.sym.keyBits.sym = 128;
 
     for (i = 0; CMACTests[i].key; i++ )
@@ -186,9 +186,9 @@ MakeIv(
        )
 {
     BYTE          i;
-    if(mode == ALG_ECB_VALUE)
+    if(mode == TPM_ALG_ECB)
 	return 0;
-    if(mode == ALG_CTR_VALUE)
+    if(mode == TPM_ALG_CTR)
 	{
 	    // The test uses an IV that has 0xff in the last byte
 	    for(i = 1; i <= size; i++)
@@ -214,7 +214,7 @@ TestSymmetricAlgorithm(
     TPM2B_IV                        iv;
 
     // libtpms added beging
-    if (test->dataOut[mode - ALG_CTR_VALUE] == NULL)
+    if (test->dataOut[mode - TPM_ALG_CTR] == NULL)
         return;
     // libtpms added end
 
@@ -225,7 +225,7 @@ TestSymmetricAlgorithm(
     CryptSymmetricEncrypt(encrypted, test->alg, test->keyBits, test->key, &iv,
 			  mode, test->dataInOutSize, test->dataIn);
     // Check that it matches the expected value
-    if(!MemoryEqual(encrypted, test->dataOut[mode - ALG_CTR_VALUE],
+    if(!MemoryEqual(encrypted, test->dataOut[mode - TPM_ALG_CTR],
 		    test->dataInOutSize)) {
 	SELF_TEST_FAILURE;
     }
@@ -233,7 +233,7 @@ TestSymmetricAlgorithm(
     MakeIv(mode, test->ivSize, iv.t.buffer);
     CryptSymmetricDecrypt(decrypted, test->alg, test->keyBits, test->key, &iv,
 			  mode, test->dataInOutSize,
-			  test->dataOut[mode - ALG_CTR_VALUE]);
+			  test->dataOut[mode - TPM_ALG_CTR]);
     // Make sure that it matches what we started with
     if(!MemoryEqual(decrypted, test->dataIn, test->dataInOutSize)) {
 	SELF_TEST_FAILURE;
@@ -250,7 +250,7 @@ AllSymsAreDone(
 	       ALGORITHM_VECTOR        *toTest
 	       )
 {
-    return (!TEST_BOTH(ALG_AES_VALUE) && !TEST_BOTH(ALG_SM4_VALUE));
+    return (!TEST_BOTH(TPM_ALG_AES) && !TEST_BOTH(TPM_ALG_SM4));
 }
 /* 10.2.1.4.4 AllModesAreDone() */
 /* Checks if all the modes have been tested */
@@ -282,7 +282,7 @@ TestSymmetric(
     //
     if(!TEST_BIT(alg, *toTest))
 	return TPM_RC_SUCCESS;
-    if(alg == ALG_AES_VALUE || alg == ALG_SM4_VALUE || alg == ALG_CAMELLIA_VALUE || alg == ALG_TDES_VALUE)
+    if(alg == TPM_ALG_AES || alg == TPM_ALG_SM4 || alg == TPM_ALG_CAMELLIA || alg == TPM_ALG_TDES)
 	{
 	    // Will test the algorithm for all modes and key sizes
 	    CLEAR_BOTH(alg);
@@ -318,8 +318,8 @@ TestSymmetric(
 		    // tested first. That means that all of their modes would have been
 		    // tested for all key sizes. If there is no block cipher left to
 		    // test, then clear this mode bit.
-		    if(!TEST_BIT(ALG_AES_VALUE, *toTest)
-		       && !TEST_BIT(ALG_SM4_VALUE, *toTest))
+		    if(!TEST_BIT(TPM_ALG_AES, *toTest)
+		       && !TEST_BIT(TPM_ALG_SM4, *toTest))
 			{
 			    CLEAR_BOTH(alg);
 			}
@@ -336,8 +336,8 @@ TestSymmetric(
 		}
 	    if(AllModesAreDone(toTest))
 		{
-		    CLEAR_BOTH(ALG_AES_VALUE);
-		    CLEAR_BOTH(ALG_SM4_VALUE);
+		    CLEAR_BOTH(TPM_ALG_AES);
+		    CLEAR_BOTH(TPM_ALG_SM4);
 		}
 	}
     else
@@ -400,8 +400,8 @@ TestRsaEncryptDecrypt(
     rsaScheme.scheme = scheme;
     rsaScheme.details.anySig.hashAlg = DEFAULT_TEST_HASH;
     CLEAR_BOTH(scheme);
-    CLEAR_BOTH(ALG_NULL_VALUE);
-    if(scheme == ALG_NULL_VALUE)
+    CLEAR_BOTH(TPM_ALG_NULL);
+    if(scheme == TPM_ALG_NULL)
 	{
 	    // This is an encryption scheme using the private key without any encoding.
 	    memcpy(testInput.t.buffer, c_RsaTestValue, sizeof(c_RsaTestValue));
@@ -425,24 +425,24 @@ TestRsaEncryptDecrypt(
 	}
     else
 	{
-	    // ALG_RSAES_VALUE:
+	    // TPM_ALG_RSAES:
 	    // This is an decryption scheme using padding according to
 	    // PKCS#1v2.1, 7.2. This padding uses random bits. To test a public
 	    // key encryption that uses random data, encrypt a value and then
 	    // decrypt the value and see that we get the encrypted data back.
 	    // The hash is not used by this encryption so it can be TMP_ALG_NULL
-	    // ALG_OAEP_VALUE:
+	    // TPM_ALG_OAEP_:
 	    // This is also an decryption scheme and it also uses a
 	    // pseudo-random
 	    // value. However, this also uses a hash algorithm. So, we may need
 	    // to test that algorithm before use.
-	    if(scheme == ALG_OAEP_VALUE)
+	    if(scheme == TPM_ALG_OAEP)
 		{
 		    TEST_DEFAULT_TEST_HASH(toTest);
 		    kvtValue = &c_OaepKvt;
 		    testLabel = OAEP_TEST_STRING;
 		}
-	    else if(scheme == ALG_RSAES_VALUE)
+	    else if(scheme == TPM_ALG_RSAES)
 		{
 		    kvtValue = &c_RsaesKvt;
 		    testLabel = NULL;
@@ -510,8 +510,8 @@ TestRsaSignAndVerify(
     // Clear the bits indicating that the function has not been checked. This is to
     // prevent looping
     CLEAR_BOTH(scheme);
-    CLEAR_BOTH(ALG_NULL_VALUE);
-    CLEAR_BOTH(ALG_RSA_VALUE);
+    CLEAR_BOTH(TPM_ALG_NULL);
+    CLEAR_BOTH(TPM_ALG_RSA);
     RsaKeyInitialize(&testObject);
     memcpy(testDigest.t.buffer, (BYTE *)c_RsaTestValue, DEFAULT_TEST_DIGEST_SIZE);
     testDigest.t.size = DEFAULT_TEST_DIGEST_SIZE;
@@ -534,7 +534,7 @@ TestRsaSignAndVerify(
 	SELF_TEST_FAILURE;
     }
     // For RSASSA, make sure the results is what we are looking for
-    if(testSig.sigAlg == ALG_RSASSA_VALUE)
+    if(testSig.sigAlg == TPM_ALG_RSASSA)
 	{
 	    if(testSig.signature.rsassa.sig.t.size != RSA_TEST_KEY_SIZE
 	       || !MemoryEqual(c_RsassaKvt.buffer,
@@ -550,7 +550,7 @@ TestRsaSignAndVerify(
     }
     // If this is RSAPSS, check the verification with known signature
     // Have to copy because  CrytpRsaValidateSignature() eats the signature
-    if(ALG_RSAPSS_VALUE == scheme)
+    if(TPM_ALG_RSAPSS == scheme)
 	{
 	    MemoryCopy2B(&testSig.signature.rsapss.sig.b, (P2B)&c_RsapssKvt,
 			 sizeof(testSig.signature.rsapss.sig.t.buffer));
@@ -574,29 +574,29 @@ TestRsa(
     //
     switch(alg)
 	{
-	  case ALG_NULL_VALUE:
+	  case TPM_ALG_NULL:
 	    // This is the RSAEP/RSADP function. If we are processing a list, don't
 	    // need to test these now because any other test will validate
 	    // RSAEP/RSADP. Can tell this is list of test by checking to see if
 	    // 'toTest' is pointing at g_toTest. If so, this is an isolated test
 	    // an need to go ahead and do the test;
 	    if((toTest == &g_toTest)
-	       || (!TEST_BIT(ALG_RSASSA_VALUE, *toTest)
-		   && !TEST_BIT(ALG_RSAES_VALUE, *toTest)
-		   && !TEST_BIT(ALG_RSAPSS_VALUE, *toTest)
-		   && !TEST_BIT(ALG_OAEP_VALUE, *toTest)))
+	       || (!TEST_BIT(TPM_ALG_RSASSA, *toTest)
+		   && !TEST_BIT(TPM_ALG_RSAES, *toTest)
+		   && !TEST_BIT(TPM_ALG_RSAPSS, *toTest)
+		   && !TEST_BIT(TPM_ALG_OAEP, *toTest)))
 		// Not running a list of tests or no other tests on the list
 		// so run the test now
 		result = TestRsaEncryptDecrypt(alg, toTest);
 	    // if not running the test now, leave the bit on, just in case things
 	    // get interrupted
 	    break;
-	  case ALG_OAEP_VALUE:
-	  case ALG_RSAES_VALUE:
+	  case TPM_ALG_OAEP:
+	  case TPM_ALG_RSAES:
 	    result = TestRsaEncryptDecrypt(alg, toTest);
 	    break;
-	  case ALG_RSAPSS_VALUE:
-	  case ALG_RSASSA_VALUE:
+	  case TPM_ALG_RSAPSS:
+	  case TPM_ALG_RSASSA:
 	    result = TestRsaSignAndVerify(alg, toTest);
 	    break;
 	  default:
@@ -642,7 +642,7 @@ TestECDH(
     TPM_RC                  result = TPM_RC_SUCCESS;
     //
     NOT_REFERENCED(scheme);
-    CLEAR_BOTH(ALG_ECDH_VALUE);
+    CLEAR_BOTH(TPM_ALG_ECDH);
     LoadEccParameter(&ds, &c_ecTestKey_ds);
     LoadEccPoint(&Qe, &c_ecTestKey_QeX, &c_ecTestKey_QeY);
     if(TPM_RC_SUCCESS != CryptEccPointMultiply(&Z, c_testCurve, &Qe, &ds,
@@ -670,21 +670,21 @@ TestEccSignAndVerify(
     eccScheme.scheme = scheme;
     eccScheme.details.anySig.hashAlg = DEFAULT_TEST_HASH;
     CLEAR_BOTH(scheme);
-    CLEAR_BOTH(ALG_ECDH_VALUE);
+    CLEAR_BOTH(TPM_ALG_ECDH);
     // ECC signature verification testing uses a KVT.
     switch(scheme)
 	{
-	  case ALG_ECDSA_VALUE:
+	  case TPM_ALG_ECDSA:
 	    LoadEccParameter(&testSig.signature.ecdsa.signatureR, &c_TestEcDsa_r);
 	    LoadEccParameter(&testSig.signature.ecdsa.signatureS, &c_TestEcDsa_s);
 	    break;
-	  case ALG_ECSCHNORR_VALUE:
+	  case TPM_ALG_ECSCHNORR:
 	    LoadEccParameter(&testSig.signature.ecschnorr.signatureR,
 			     &c_TestEcSchnorr_r);
 	    LoadEccParameter(&testSig.signature.ecschnorr.signatureS,
 			     &c_TestEcSchnorr_s);
 	    break;
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 	    // don't have a test for SM2
 	    return TPM_RC_SUCCESS;
 	  default:
@@ -730,7 +730,7 @@ TestKDFa(
     static TPM2B_KDF_TEST_KEY   keyOut;
     UINT32                      counter = 0;
     //
-    CLEAR_BOTH(ALG_KDF1_SP800_108_VALUE);
+    CLEAR_BOTH(TPM_ALG_KDF1_SP800_108);
     keyOut.t.size = CryptKDFa(KDF_TEST_ALG, &c_kdfTestKeyIn.b, &c_kdfTestLabel.b,
 			      &c_kdfTestContextU.b, &c_kdfTestContextV.b,
 			      TEST_KDF_KEY_SIZE * 8, keyOut.t.buffer,
@@ -752,23 +752,23 @@ TestEcc(
     NOT_REFERENCED(toTest);
     switch(alg)
 	{
-	  case ALG_ECC_VALUE:
-	  case ALG_ECDH_VALUE:
+	  case TPM_ALG_ECC:
+	  case TPM_ALG_ECDH:
 	    // If this is in a loop then see if another test is going to deal with
 	    // this.
 	    // If toTest is not a self-test list
 	    if((toTest == &g_toTest)
 	       // or this is the only ECC test in the list
-	       || !(TEST_BIT(ALG_ECDSA_VALUE, *toTest)
-		    || TEST_BIT(ALG_ECSCHNORR, *toTest)
-		    || TEST_BIT(ALG_SM2_VALUE, *toTest)))
+	       || !(TEST_BIT(TPM_ALG_ECDSA, *toTest)
+		    || TEST_BIT(TPM_ALG_ECSCHNORR, *toTest)
+		    || TEST_BIT(TPM_ALG_SM2, *toTest)))
 		{
 		    result = TestECDH(alg, toTest);
 		}
 	    break;
-	  case ALG_ECDSA_VALUE:
-	  case ALG_ECSCHNORR_VALUE:
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_ECDSA:
+	  case TPM_ALG_ECSCHNORR:
+	  case TPM_ALG_SM2:
 	    result = TestEccSignAndVerify(alg, toTest);
 	    break;
 	  default:
@@ -797,9 +797,9 @@ TestAlgorithm(
 	      ALGORITHM_VECTOR        *toTest
 	      )
 {
-    TPM_ALG_ID              first = (alg == ALG_ERROR_VALUE) ? ALG_FIRST_VALUE : alg;
-    TPM_ALG_ID              last = (alg == ALG_ERROR_VALUE) ? ALG_LAST_VALUE : alg;
-    BOOL                    doTest = (alg != ALG_ERROR_VALUE);
+    TPM_ALG_ID              first = (alg == TPM_ALG_ERROR) ? TPM_ALG_FIRST : alg;
+    TPM_ALG_ID              last = (alg == TPM_ALG_ERROR) ? TPM_ALG_LAST : alg;
+    BOOL                    doTest = (alg != TPM_ALG_ERROR);
     TPM_RC                  result = TPM_RC_SUCCESS;
     if(toTest == NULL)
 	toTest = &g_toTest;
@@ -831,7 +831,7 @@ TestAlgorithm(
 		{
 		    // Symmetric block ciphers
 #if ALG_AES
-		  case ALG_AES_VALUE:
+		  case TPM_ALG_AES:
 // libtpms added begin
 #if SMAC_IMPLEMENTED && ALG_CMAC
                     if (doTest) {
@@ -845,33 +845,33 @@ TestAlgorithm(
 #if ALG_SM4
 		    // if SM4 is implemented, its test is like other block ciphers but there
 		    // aren't any test vectors for it yet
-		    //            case ALG_SM4_VALUE:
+		    //            case TPM_ALG_SM4:
 #endif
 #if ALG_CAMELLIA
-		  case ALG_CAMELLIA_VALUE:  // libtpms activated
+		  case TPM_ALG_CAMELLIA:  // libtpms activated
 #endif
 #if ALG_TDES
-                  case ALG_TDES_VALUE:      // libtpms added
+                  case TPM_ALG_TDES:      // libtpms added
 #endif
 		    // Symmetric modes
 #if !ALG_CFB
 #   error   CFB is required in all TPM implementations
 #endif // !TPM_ALG_CFB
-		  case ALG_CFB_VALUE:
+		  case TPM_ALG_CFB:
 		    if(doTest)
 			result = TestSymmetric(alg, toTest);
 		    break;
 #if ALG_CTR
-		  case ALG_CTR_VALUE:
+		  case TPM_ALG_CTR:
 #endif // TPM_ALG_CRT
 #if ALG_OFB
-		  case ALG_OFB_VALUE:
+		  case TPM_ALG_OFB:
 #endif // TPM_ALG_OFB
 #if ALG_CBC
-		  case ALG_CBC_VALUE:
+		  case TPM_ALG_CBC:
 #endif // TPM_ALG_CBC
 #if ALG_ECB
-		  case ALG_ECB_VALUE:
+		  case TPM_ALG_ECB:
 #endif
 		    if(doTest)
 			result = TestSymmetric(alg, toTest);
@@ -885,7 +885,7 @@ TestAlgorithm(
 #if !ALG_HMAC
 #   error   HMAC is required in all TPM implementations
 #endif
-		  case ALG_HMAC_VALUE:
+		  case TPM_ALG_HMAC:
 		    // Clear the bit that indicates that HMAC is required because
 		    // HMAC is used as the basic test for all hash algorithms.
 		    CLEAR_BOTH(alg);
@@ -908,50 +908,50 @@ TestAlgorithm(
 		    break;
 		    // RSA-dependent
 #if ALG_RSA
-		  case ALG_RSA_VALUE:
+		  case TPM_ALG_RSA:
 		    CLEAR_BOTH(alg);
 		    if(doTest)
-			result = TestRsa(ALG_NULL_VALUE, toTest);
+			result = TestRsa(TPM_ALG_NULL, toTest);
 		    else
-			SET_BOTH(ALG_NULL_VALUE);
+			SET_BOTH(TPM_ALG_NULL);
 		    break;
-		  case ALG_RSASSA_VALUE:
-		  case ALG_RSAES_VALUE:
-		  case ALG_RSAPSS_VALUE:
-		  case ALG_OAEP_VALUE:
-		  case ALG_NULL_VALUE:    // used or RSADP
+		  case TPM_ALG_RSASSA:
+		  case TPM_ALG_RSAES:
+		  case TPM_ALG_RSAPSS:
+		  case TPM_ALG_OAEP:
+		  case TPM_ALG_NULL:    // used or RSADP
 		    if(doTest)
 			result = TestRsa(alg, toTest);
 		    break;
-#endif // ALG_RSA_VALUE
+#endif // ALG_RSA
 #if ALG_KDF1_SP800_108
-		  case ALG_KDF1_SP800_108_VALUE:
+		  case TPM_ALG_KDF1_SP800_108:
 		    if(doTest)
 			result = TestKDFa(toTest);
 		    break;
-#endif // ALG_KDF1_SP800_108_VALUE
+#endif // ALG_KDF1_SP800_108
 #if ALG_ECC
 		    // ECC dependent but no tests
-		    //        case ALG_ECDAA_VALUE:
-		    //        case ALG_ECMQV_VALUE:
-		    //        case ALG_KDF1_SP800_56a_VALUE:
-		    //        case ALG_KDF2_VALUE:
-		    //        case ALG_MGF1_VALUE:
-		  case ALG_ECC_VALUE:
+		    //        case TPM_ALG_ECDAA:
+		    //        case TPM_ALG_ECMQV:
+		    //        case TPM_ALG_KDF1_SP800_56a:
+		    //        case TPM_ALG_KDF2:
+		    //        case TPM_ALG_MGF1:
+		  case TPM_ALG_ECC:
 		    CLEAR_BOTH(alg);
 		    if(doTest)
-			result = TestEcc(ALG_ECDH_VALUE, toTest);
+			result = TestEcc(TPM_ALG_ECDH, toTest);
 		    else
-			SET_BOTH(ALG_ECDH_VALUE);
+			SET_BOTH(TPM_ALG_ECDH);
 		    break;
-		  case ALG_ECDSA_VALUE:
-		  case ALG_ECDH_VALUE:
-		  case ALG_ECSCHNORR_VALUE:
-		    //            case ALG_SM2_VALUE:
+		  case TPM_ALG_ECDSA:
+		  case TPM_ALG_ECDH:
+		  case TPM_ALG_ECSCHNORR:
+		    //            case TPM_ALG_SM2:
 		    if(doTest)
 			result = TestEcc(alg, toTest);
 		    break;
-#endif // ALG_ECC_VALUE
+#endif // ALG_ECC
 		  default:
 		    CLEAR_BIT(alg, *toTest);
 		    break;

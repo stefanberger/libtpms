@@ -3,7 +3,7 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1370 2018-11-02 19:39:07Z kgoldman $	*/
+/*            $Id: CryptEccSignature.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -608,25 +608,25 @@ CryptEccSign(
     TEST(signature->sigAlg);
     switch(signature->sigAlg)
 	{
-	  case ALG_ECDSA_VALUE:
+	  case TPM_ALG_ECDSA:
 	    retVal = BnSignEcdsa(bnR, bnS, E, bnD, digest, rand);
 	    break;
 #if ALG_ECDAA
-	  case ALG_ECDAA_VALUE:
+	  case TPM_ALG_ECDAA:
 	    retVal = BnSignEcdaa(&signature->signature.ecdaa.signatureR, bnS, E,
 				 bnD, digest, scheme, signKey, rand);
 	    bnR = NULL;
 	    break;
 #endif
 #if ALG_ECSCHNORR
-	  case ALG_ECSCHNORR_VALUE:
+	  case TPM_ALG_ECSCHNORR:
 	    retVal = BnSignEcSchnorr(bnR, bnS, E, bnD, digest,
 				     signature->signature.ecschnorr.hash,
 				     rand);
 	    break;
 #endif
 #if ALG_SM2
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 	    retVal = BnSignEcSm2(bnR, bnS, E, bnD, digest, rand);
 	    break;
 #endif
@@ -908,12 +908,12 @@ CryptEccValidateSignature(
     //    // Make sure that the scheme is valid
     switch(signature->sigAlg)
 	{
-	  case ALG_ECDSA_VALUE:
+	  case TPM_ALG_ECDSA:
 #if ALG_ECSCHNORR
-	  case ALG_ECSCHNORR_VALUE:
+	  case TPM_ALG_ECSCHNORR:
 #endif
 #if ALG_SM2
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 #endif
 	    break;
 	  default:
@@ -933,18 +933,18 @@ CryptEccValidateSignature(
 	ERROR_RETURN(TPM_RC_SIGNATURE);
     switch(signature->sigAlg)
 	{
-	  case ALG_ECDSA_VALUE:
+	  case TPM_ALG_ECDSA:
 	    retVal = BnValidateSignatureEcdsa(bnR, bnS, E, ecQ, digest);
 	    break;
 #if ALG_ECSCHNORR
-	  case ALG_ECSCHNORR_VALUE:
+	  case TPM_ALG_ECSCHNORR:
 	    retVal = BnValidateSignatureEcSchnorr(bnR, bnS,
 						  signature->signature.any.hashAlg,
 						  E, ecQ, digest);
 	    break;
 #endif
 #if ALG_SM2
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 	    retVal = BnValidateSignatureEcSm2(bnR, bnS, E, ecQ, digest);
 	    break;
 #endif
