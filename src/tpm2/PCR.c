@@ -3,7 +3,7 @@
 /*			   PCR access and manipulation 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: PCR.c 1628 2020-05-27 19:35:29Z kgoldman $			*/
+/*            $Id: PCR.c 1658 2021-01-22 23:14:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -288,31 +288,14 @@ GetSavedPcrPointer(
     BYTE            *retVal;
     switch(alg)
 	{
-#if ALG_SHA1
-	  case TPM_ALG_SHA1:
-	    retVal = gc.pcrSave.sha1[pcrIndex];
-	    break;
-#endif
-#if ALG_SHA256
-	  case TPM_ALG_SHA256:
-	    retVal = gc.pcrSave.sha256[pcrIndex];
-	    break;
-#endif
-#if ALG_SHA384
-	  case TPM_ALG_SHA384:
-	    retVal = gc.pcrSave.sha384[pcrIndex];
-	    break;
-#endif
-#if ALG_SHA512
-	  case TPM_ALG_SHA512:
-	    retVal = gc.pcrSave.sha512[pcrIndex];
-	    break;
-#endif
-#if ALG_SM3_256
-	  case TPM_ALG_SM3_256:
-	    retVal = gc.pcrSave.sm3_256[pcrIndex];
-	    break;
-#endif
+#define HASH_CASE(HASH, Hash)						\
+	    case TPM_ALG_##HASH:					\
+	      retVal = gc.pcrSave.Hash[pcrIndex];			\
+	      break;
+
+	    FOR_EACH_HASH(HASH_CASE)
+#undef HASH_CASE
+
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	}
@@ -367,31 +350,14 @@ GetPcrPointer(
 	return NULL;
     switch(alg)
 	{
-#if ALG_SHA1
-	  case TPM_ALG_SHA1:
-	    pcr = s_pcrs[pcrNumber].sha1Pcr;
-	    break;
-#endif
-#if ALG_SHA256
-	  case TPM_ALG_SHA256:
-	    pcr = s_pcrs[pcrNumber].sha256Pcr;
-	    break;
-#endif
-#if ALG_SHA384
-	  case TPM_ALG_SHA384:
-	    pcr = s_pcrs[pcrNumber].sha384Pcr;
-	    break;
-#endif
-#if ALG_SHA512
-	  case TPM_ALG_SHA512:
-	    pcr = s_pcrs[pcrNumber].sha512Pcr;
-	    break;
-#endif
-#if ALG_SM3_256
-	  case TPM_ALG_SM3_256:
-	    pcr = s_pcrs[pcrNumber].sm3_256Pcr;
-	    break;
-#endif
+#define HASH_CASE(HASH, Hash)						\
+	    case TPM_ALG_##HASH:					\
+	      pcr = s_pcrs[pcrNumber].Hash##Pcr;			\
+	      break;
+
+	    FOR_EACH_HASH(HASH_CASE)
+#undef HASH_CASE
+
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;

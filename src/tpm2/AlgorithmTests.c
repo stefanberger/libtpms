@@ -108,36 +108,13 @@ TestHash(
     const TPM2B       *testDigest = NULL;
     //    TPM2B_TYPE(HMAC_BLOCK, DEFAULT_TEST_HASH_BLOCK_SIZE);
     pAssert(hashAlg != ALG_NULL_VALUE);
+#define HASH_CASE_FOR_TEST(HASH, hash)        case ALG_##HASH##_VALUE:	\
+    testDigest = &c_##HASH##_digest.b;					\
+    break;
     switch(hashAlg)
 	{
-#if ALG_SHA1
-	  case ALG_SHA1_VALUE:
-	    testDigest = &c_SHA1_digest.b;
-	    break;
-#endif
-#if ALG_SHA256
-	  case ALG_SHA256_VALUE:
-	    testDigest = &c_SHA256_digest.b;
-	    break;
-#endif
-#if ALG_SHA384
-	  case ALG_SHA384_VALUE:
-	    testDigest = &c_SHA384_digest.b;
-	    break;
-#endif
-#if ALG_SHA512
-	  case ALG_SHA512_VALUE:
-	    testDigest = &c_SHA512_digest.b;
-	    break;
-#endif
-#if ALG_SM3_256
-	  case ALG_SM3_256_VALUE:
-#error Missing test case for SM3  // libtpms added
-	    // There are currently no test vectors for SM3
-	    //            testDigest = &c_SM3_256_digest.b;
-	    testDigest = NULL;
-	    break;
-#endif
+	    FOR_EACH_HASH(HASH_CASE_FOR_TEST)
+
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	}
@@ -145,7 +122,7 @@ TestHash(
     CLEAR_BOTH(hashAlg);
 
     // If there is an algorithm without test vectors, then assume that things are OK.
-    if(testDigest == NULL)
+    if(testDigest == NULL || testDigest->size == 0)
 	return TPM_RC_SUCCESS;
 
     // Set the HMAC key to twice the digest size
@@ -920,25 +897,14 @@ TestAlgorithm(
 			// tested because this uses HMAC
 			SET_BOTH(DEFAULT_TEST_HASH);
 		    break;
-#if ALG_SHA1
-		  case ALG_SHA1_VALUE:
-#endif // TPM_ALG_SHA1
-#if ALG_SHA256
-		  case ALG_SHA256_VALUE:
-#endif // TPM_ALG_SHA256
-#if ALG_SHA384
-		  case ALG_SHA384_VALUE:
-#endif // TPM_ALG_SHA384
-#if ALG_SHA512
-		  case ALG_SHA512_VALUE:
-#endif // TPM_ALG_SHA512
-		    // if SM3 is implemented its test is like any other hash, but there
-		    // aren't any test vectors yet.
-#if ALG_SM3_256
-		    //            case ALG_SM3_256_VALUE:
-#endif // TPM_ALG_SM3_256
-		    if(doTest)
-			result = TestHash(alg, toTest);
+		    // Have to use two arguments for the macro even though only the first is used in the
+		    // expansion.
+#define HASH_CASE_TEST(HASH, hash)					\
+	            case ALG_##HASH##_VALUE:
+		    FOR_EACH_HASH(HASH_CASE_TEST)
+#undef HASH_CASE_TEST
+	                if(doTest)
+	                    result = TestHash(alg, toTest);
 		    break;
 		    // RSA-dependent
 #if ALG_RSA

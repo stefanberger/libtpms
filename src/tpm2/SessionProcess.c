@@ -3,7 +3,7 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: SessionProcess.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -502,26 +502,14 @@ ClearCpRpHashes(
 		COMMAND         *command
 		)
 {
-#if ALG_SHA1
-    command->sha1CpHash.t.size = 0;
-    command->sha1RpHash.t.size = 0;
-#endif
-#if ALG_SHA256
-    command->sha256CpHash.t.size = 0;
-    command->sha256RpHash.t.size = 0;
-#endif
-#if ALG_SHA384
-    command->sha384CpHash.t.size = 0;
-    command->sha384RpHash.t.size = 0;
-#endif
-#if ALG_SHA512
-    command->sha512CpHash.t.size = 0;
-    command->sha512RpHash.t.size = 0;
-#endif
-#if ALG_SM3_256
-    command->sm3_256CpHash.t.size = 0;
-    command->sm3_256RpHash.t.size = 0;
-#endif
+    // The macros expand according to the implemented hash algorithms. An IDE may
+    // complain that COMMAND does not contain SHA1CpHash or SHA1RpHash because of the
+    // complexity of the macro expansion where the data space is defined; but, if SHA1
+    // is implemented, it actually does  and the compiler is happy.
+#define CLEAR_CP_HASH(HASH, Hash)     command->Hash##CpHash.b.size = 0;
+    FOR_EACH_HASH(CLEAR_CP_HASH)
+#define CLEAR_RP_HASH(HASH, Hash)     command->Hash##RpHash.b.size = 0;
+	FOR_EACH_HASH(CLEAR_RP_HASH)
 }
 
 /* 6.4.4.2 GetCpHashPointer() */
@@ -532,32 +520,27 @@ GetCpHashPointer(
 		 TPMI_ALG_HASH    hashAlg
 		 )
 {
+    TPM2B_DIGEST     *retVal;
+    //
+    // Define the macro that will expand for each implemented algorithm in the switch
+    // statement below.
+#define GET_CP_HASH_POINTER(HASH, Hash)					\
+    case ALG_##HASH##_VALUE:						\
+      retVal = (TPM2B_DIGEST *)&command->Hash##CpHash;			\
+      break;
+
     switch(hashAlg)
 	{
-#if ALG_SHA1
-	  case TPM_ALG_SHA1:
-	    return (TPM2B_DIGEST *)&command->sha1CpHash;
-#endif
-#if ALG_SHA256
-	  case TPM_ALG_SHA256:
-	    return (TPM2B_DIGEST *)&command->sha256CpHash;
-#endif
-#if ALG_SHA384
-	  case TPM_ALG_SHA384:
-	    return (TPM2B_DIGEST *)&command->sha384CpHash;
-#endif
-#if ALG_SHA512
-	  case TPM_ALG_SHA512:
-	    return (TPM2B_DIGEST *)&command->sha512CpHash;
-#endif
-#if ALG_SM3_256
-	  case TPM_ALG_SM3_256:
-	    return (TPM2B_DIGEST *)&command->sm3_256CpHash;
-#endif
+	    // For each implemented hash, this will expand as defined above
+	    // by GET_CP_HASH_POINTER. Your IDE may complain that
+	    // 'struct "COMMAND" has no field "SHA1CpHash"' but the compiler says
+	    // it does, so...
+	    FOR_EACH_HASH(GET_CP_HASH_POINTER)
 	  default:
+	    retVal = NULL;
 	    break;
 	}
-    return NULL;
+    return retVal;
 }
 
 /* 6.4.4.3 GetRpHashPointer() */
@@ -568,32 +551,27 @@ GetRpHashPointer(
 		 TPMI_ALG_HASH    hashAlg
 		 )
 {
+    TPM2B_DIGEST    *retVal;
+    //
+    // Define the macro that will expand for each implemented algorithm in the switch
+    // statement below.
+#define GET_RP_HASH_POINTER(HASH, Hash)					\
+    case ALG_##HASH##_VALUE:						\
+      retVal = (TPM2B_DIGEST *)&command->Hash##RpHash;			\
+      break;
+
     switch(hashAlg)
 	{
-#if ALG_SHA1
-	  case TPM_ALG_SHA1:
-	    return (TPM2B_DIGEST *)&command->sha1RpHash;
-#endif
-#if ALG_SHA256
-	  case TPM_ALG_SHA256:
-	    return (TPM2B_DIGEST *)&command->sha256RpHash;
-#endif
-#if ALG_SHA384
-	  case TPM_ALG_SHA384:
-	    return (TPM2B_DIGEST *)&command->sha384RpHash;
-#endif
-#if ALG_SHA512
-	  case TPM_ALG_SHA512:
-	    return (TPM2B_DIGEST *)&command->sha512RpHash;
-#endif
-#if ALG_SM3_256
-	  case TPM_ALG_SM3_256:
-	    return (TPM2B_DIGEST *)&command->sm3_256RpHash;
-#endif
+	    // For each implemented hash, this will expand as defined above
+	    // by GET_RP_HASH_POINTER. Your IDE may complain that
+	    // 'struct "COMMAND" has no field 'SHA1RpHash'" but the compiler says
+	    // it does, so...
+	    FOR_EACH_HASH(GET_RP_HASH_POINTER)
 	  default:
+	    retVal = NULL;
 	    break;
 	}
-    return NULL;
+    return retVal;
 }
 
 /* 6.4.4.4 ComputeCpHash() */
