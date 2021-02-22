@@ -3,7 +3,7 @@
 /*			     TPM X509 RSA					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_RSA.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: X509_RSA.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -92,7 +92,7 @@ X509AddSigningAlgorithmRSA(
 	return 0;
     switch(scheme->scheme)
     {
-        case ALG_RSASSA_VALUE:
+        case TPM_ALG_RSASSA:
         {
 	    // if the hash is implemented but there is no PKCS1 OID defined
 	    // then this is not a valid signing combination.
@@ -102,14 +102,14 @@ X509AddSigningAlgorithmRSA(
 		return 1;
 	    return X509PushAlgorithmIdentifierSequence(ctx, hashDef->PKCS1);
         }
-        case ALG_RSAPSS_VALUE:
+        case TPM_ALG_RSAPSS:
             // leave if this is just an implementation check
             if(ctx == NULL)
                 return 1;
             // In the case of SHA1, everything is default and RFC4055 says that 
             // implementations that do signature generation MUST omit the parameter
             // when defaults are used. )-:
-            if(hashDef->hashAlg == ALG_SHA1_VALUE)
+            if(hashDef->hashAlg == TPM_ALG_SHA1)
             {
                 return X509PushAlgorithmIdentifierSequence(ctx, OID_RSAPSS);
             }

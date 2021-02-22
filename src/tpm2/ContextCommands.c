@@ -3,7 +3,7 @@
 /*			   Context Management	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ContextCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
+/*            $Id: ContextCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -209,7 +209,7 @@ TPM2_ContextSave(
     // Encrypt context blob
     CryptSymmetricEncrypt(out->context.contextBlob.t.buffer + integritySize,
 			  CONTEXT_ENCRYPT_ALG, CONTEXT_ENCRYPT_KEY_BITS,
-			  symKey.t.buffer, &iv, ALG_CFB_VALUE,
+			  symKey.t.buffer, &iv, TPM_ALG_CFB,
 			  out->context.contextBlob.t.size - integritySize,
 			  out->context.contextBlob.t.buffer + integritySize);
     // Compute integrity hash for the object
@@ -278,7 +278,7 @@ TPM2_ContextLoad(
     ComputeContextProtectionKey(&in->context, &symKey, &iv);
     // Decrypt context data in place
     CryptSymmetricDecrypt(buffer, CONTEXT_ENCRYPT_ALG, CONTEXT_ENCRYPT_KEY_BITS,
-			  symKey.t.buffer, &iv, ALG_CFB_VALUE, size, buffer);
+			  symKey.t.buffer, &iv, TPM_ALG_CFB, size, buffer);
     // See if the fingerprint value matches. If not, it is symptomatic of either
     // a broken TPM or that the TPM is under attack so go into failure mode.
     if(!MemoryEqual(buffer, &in->context.sequence, sizeof(in->context.sequence)))

@@ -3,7 +3,7 @@
 /*			X509 Support						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_spt.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: X509_spt.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -283,15 +283,15 @@ X509AddPublicKey(
     switch(object->publicArea.type)
 	{
 #if ALG_RSA
-	  case ALG_RSA_VALUE:
+	  case TPM_ALG_RSA:
 	    return X509AddPublicRSA(object, ctx);
 #endif
 #if ALG_ECC
-	  case ALG_ECC_VALUE:
+	  case TPM_ALG_ECC:
 	    return X509AddPublicECC(object, ctx);
 #endif
 #if ALG_SM2
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 	    break;
 #endif
 	  default:

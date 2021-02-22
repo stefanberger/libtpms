@@ -3,7 +3,7 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: CryptEccKeyExchange.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -249,16 +249,16 @@ CryptEcc2PhaseKeyExchange(
 	}
     switch(scheme)
 	{
-	  case ALG_ECDH_VALUE:
+	  case TPM_ALG_ECDH:
 	    return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
 	    break;
 #if ALG_ECMQV
-	  case ALG_ECMQV_VALUE:
+	  case TPM_ALG_ECMQV:
 	    return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
 #endif
 #if ALG_SM2
-	  case ALG_SM2_VALUE:
+	  case TPM_ALG_SM2:
 	    return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
 #endif
