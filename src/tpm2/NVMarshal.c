@@ -733,45 +733,45 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     algid = TPM_ALG_SHA1;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha1);
+    array_size = sizeof(data->Sha1);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha1, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha1, array_size,
                             buffer, size);
 #endif
 #if ALG_SHA256
     algid = TPM_ALG_SHA256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha256);
+    array_size = sizeof(data->Sha256);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha256, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha256, array_size,
                               buffer, size);
 #endif
 #if ALG_SHA384
     algid = TPM_ALG_SHA384;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha384);
+    array_size = sizeof(data->Sha384);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha384, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha384, array_size,
                              buffer, size);
 #endif
 #if ALG_SHA512
     algid = TPM_ALG_SHA512;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha512);
+    array_size = sizeof(data->Sha512);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha512, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha512, array_size,
                              buffer, size);
 #endif
 #if ALG_SM3_256
     algid = TPM_ALG_SM3_256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sm3_256);
+    array_size = sizeof(data->Sm3_256);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sm3_256, array_size,
+    written += Array_Marshal((BYTE *)&data->Sm3_256, array_size,
                              buffer, size);
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
@@ -851,32 +851,32 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
             switch (algid) {
 #if ALG_SHA1
             case TPM_ALG_SHA1:
-                needed_size = sizeof(data->sha1);
-                t = (BYTE *)&data->sha1;
+                needed_size = sizeof(data->Sha1);
+                t = (BYTE *)&data->Sha1;
             break;
 #endif
 #if ALG_SHA256
             case TPM_ALG_SHA256:
-                needed_size = sizeof(data->sha256);
-                t = (BYTE *)&data->sha256;
+                needed_size = sizeof(data->Sha256);
+                t = (BYTE *)&data->Sha256;
             break;
 #endif
 #if ALG_SHA384
             case TPM_ALG_SHA384:
-                needed_size = sizeof(data->sha384);
-                t = (BYTE *)&data->sha384;
+                needed_size = sizeof(data->Sha384);
+                t = (BYTE *)&data->Sha384;
             break;
 #endif
 #if ALG_SHA512
             case TPM_ALG_SHA512:
-                needed_size = sizeof(data->sha512);
-                t = (BYTE *)&data->sha512;
+                needed_size = sizeof(data->Sha512);
+                t = (BYTE *)&data->Sha512;
             break;
 #endif
 #if ALG_SM3_256
             case TPM_ALG_SM3_256:
-                needed_size = sizeof(data->sm3_256);
-                t = (BYTE *)&data->sm3_256;
+                needed_size = sizeof(data->Sm3_256);
+                t = (BYTE *)&data->Sm3_256;
             break;
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
@@ -949,45 +949,45 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     algid = TPM_ALG_SHA1;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha1Pcr);
+    array_size = sizeof(data->Sha1Pcr);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha1Pcr, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha1Pcr, array_size,
                             buffer, size);
 #endif
 #if ALG_SHA256
     algid = TPM_ALG_SHA256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha256Pcr);
+    array_size = sizeof(data->Sha256Pcr);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha256Pcr, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha256Pcr, array_size,
                               buffer, size);
 #endif
 #if ALG_SHA384
     algid = TPM_ALG_SHA384;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha384Pcr);
+    array_size = sizeof(data->Sha384Pcr);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha384Pcr, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha384Pcr, array_size,
                              buffer, size);
 #endif
 #if ALG_SHA512
     algid = TPM_ALG_SHA512;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sha512Pcr);
+    array_size = sizeof(data->Sha512Pcr);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sha512Pcr, array_size,
+    written += Array_Marshal((BYTE *)&data->Sha512Pcr, array_size,
                              buffer, size);
 #endif
 #if ALG_SM3_256
     algid = TPM_ALG_SM3_256;
     written += TPM_ALG_ID_Marshal(&algid, buffer, size);
 
-    array_size = sizeof(data->sm3_256Pcr);
+    array_size = sizeof(data->Sm3_256Pcr);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->sm3_256Pcr, array_size,
+    written += Array_Marshal((BYTE *)&data->Sm3_256Pcr, array_size,
                              buffer, size);
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
@@ -1033,32 +1033,32 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
             switch (algid) {
 #if ALG_SHA1
             case TPM_ALG_SHA1:
-                needed_size = sizeof(data->sha1Pcr);
-                t = (BYTE *)&data->sha1Pcr;
+                needed_size = sizeof(data->Sha1Pcr);
+                t = (BYTE *)&data->Sha1Pcr;
             break;
 #endif
 #if ALG_SHA256
             case TPM_ALG_SHA256:
-                needed_size = sizeof(data->sha256Pcr);
-                t = (BYTE *)&data->sha256Pcr;
+                needed_size = sizeof(data->Sha256Pcr);
+                t = (BYTE *)&data->Sha256Pcr;
             break;
 #endif
 #if ALG_SHA384
             case TPM_ALG_SHA384:
-                needed_size = sizeof(data->sha384Pcr);
-                t = (BYTE *)&data->sha384Pcr;
+                needed_size = sizeof(data->Sha384Pcr);
+                t = (BYTE *)&data->Sha384Pcr;
             break;
 #endif
 #if ALG_SHA512
             case TPM_ALG_SHA512:
-                needed_size = sizeof(data->sha512Pcr);
-                t = (BYTE *)&data->sha512Pcr;
+                needed_size = sizeof(data->Sha512Pcr);
+                t = (BYTE *)&data->Sha512Pcr;
             break;
 #endif
 #if ALG_SM3_256
             case TPM_ALG_SM3_256:
-                needed_size = sizeof(data->sm3_256Pcr);
-                t = (BYTE *)&data->sm3_256Pcr;
+                needed_size = sizeof(data->Sm3_256Pcr);
+                t = (BYTE *)&data->Sm3_256Pcr;
             break;
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
