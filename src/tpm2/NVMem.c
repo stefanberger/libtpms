@@ -3,7 +3,7 @@
 /*			 NV read and write access methods			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVMem.c 1603 2020-04-03 17:48:43Z kgoldman $			*/
+/*            $Id: NVMem.c 1658 2021-01-22 23:14:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -158,8 +158,9 @@ NvFileSize(
     if (filePos < 0)
         return -1;              // libtpms changed end
 
-    irc = fseek(s_NvFile, 0, SEEK_END);
-    assert(irc == 0);
+    int fseek_result = fseek(s_NvFile, 0, SEEK_END);
+    NOT_REFERENCED(fseek_result); // Fix compiler warning for NDEBUG
+    assert(fseek_result == 0);
     fileSize = ftell(s_NvFile);
     assert(fileSize >= 0);
     switch(leaveAt)
