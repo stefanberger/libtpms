@@ -3,7 +3,7 @@
 /*			Socket Interface to a TPM Simulator			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TcpServerPosix_fp.h 1528 2019-11-20 20:31:43Z kgoldman $	*/
+/*            $Id: TcpServerPosix_fp.h 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -71,7 +71,7 @@
 #include "CompilerDependencies.h"
 #include "BaseTypes.h"
 
-BOOL
+bool
 PlatformServer(
 	       SOCKET           s
 	       );
@@ -92,37 +92,37 @@ StartTcpServer(
 	       int              *PortNumber,
 	       int              *PortNumberPlatform
 	       );
-BOOL
+bool
 ReadBytes(
 	  SOCKET           s,
 	  char            *buffer,
 	  int              NumBytes
 	  );
-BOOL
+bool
 WriteBytes(
 	   SOCKET           s,
 	   char            *buffer,
 	   int              NumBytes
 	   );
-BOOL
+bool
 WriteUINT32(
 	    SOCKET           s,
 	    UINT32           val
 	    );
-BOOL
+bool
 ReadVarBytes(
 	     SOCKET           s,
 	     char            *buffer,
 	     UINT32          *BytesReceived,
 	     int              MaxLen
 	     );
-BOOL
+bool
 WriteVarBytes(
 	      SOCKET           s,
 	      char            *buffer,
 	      int              BytesToSend
 	      );
-BOOL
+bool
 TpmServer(
 	  SOCKET           s
 	  );
