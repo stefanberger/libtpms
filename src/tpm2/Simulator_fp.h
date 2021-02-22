@@ -3,7 +3,7 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Simulator_fp.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
+/*            $Id: Simulator_fp.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -63,7 +63,7 @@
 #ifndef    _SIMULATOR_FP_H_
 #define    _SIMULATOR_FP_H_
 
-#include "BaseTypes.h"
+#include <stdbool.h>
 
 #ifdef TPM_WINDOWS
 #include <windows.h>
@@ -88,7 +88,7 @@
    handler. */
 void
 _rpc__Signal_PowerOn(
-		     BOOL        isReset
+		     bool        isReset
 		     );
 /* D.2.2.2. Signal_Restart() */
 /* This function processes the clock restart indication. All it does is call the platform
@@ -187,9 +187,9 @@ _rpc__RsaKeyCacheControl(
 			 int              state
 			 );
 /* D.4.2.15.	_rpc__ACT_GetSignaled() */
-BOOL
+bool
 _rpc__ACT_GetSignaled(
-		      UINT32 actHandle
+		      uint32_t actHandle
 		      );
 
 /* D.2.3. From TPMCmds.c */
@@ -203,9 +203,9 @@ main(
 #endif /* libtpms added */
 /* libtpms added begin */
 void _rpc__Signal_SetTPMEstablished(void);
-BOOL _rpc__Signal_GetTPMEstablished(void);
+bool _rpc__Signal_GetTPMEstablished(void);
 void _rpc__Signal_ResetTPMEstablished(void);
-BOOL _rpc__Signal_IsPowerOn(void);
+bool _rpc__Signal_IsPowerOn(void);
 /* libtpms added end */
 
 #endif  // _SIMULATOR_FP_H_

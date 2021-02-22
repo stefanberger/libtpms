@@ -3,7 +3,7 @@
 /*			  Process the commands    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TPMCmdp.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: TPMCmdp.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -69,6 +69,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
+#include <stdbool.h>
 #include "TpmBuildSwitches.h"
 #ifdef TPM_WINDOWS
 #include <windows.h>
@@ -93,14 +94,14 @@
 #endif
 #include "TpmProfile.h"		/* kgold */
 
-static BOOL     s_isPowerOn = FALSE;
+static bool     s_isPowerOn = false;
 /* D.4.3. Functions */
 /* D.4.3.1. Signal_PowerOn() */
 /* This function processes a power-on indication. Among other things, it calls the _TPM_Init()
    handler. */
 void
 _rpc__Signal_PowerOn(
-		     BOOL        isReset
+		     bool        isReset
 		     )
 {
     // if power is on and this is not a call to do TPM reset then return
@@ -115,7 +116,7 @@ _rpc__Signal_PowerOn(
     // Power on and reset both lead to _TPM_Init()
     _plat__Signal_Reset();
     // Set state as power on
-    s_isPowerOn = TRUE;
+    s_isPowerOn = true;
 }
 #if 0 /* libtpms added */
 /* D.4.3.2. Signal_Restart() */
@@ -141,7 +142,7 @@ _rpc__Signal_PowerOff(
 	// Pass power off signal to platform
 	_plat__Signal_PowerOff();
     // This could be redundant, but...
-    s_isPowerOn = FALSE;
+    s_isPowerOn = false;
     return;
 }
 #if 0 /* libtpms added */
@@ -320,21 +321,21 @@ _rpc__RsaKeyCacheControl(
 
 /* D.4.2.15.	_rpc__ACT_GetSignaled() */
 /* This function is used to count the ACT second tick. */
-BOOL
+bool
 _rpc__ACT_GetSignaled(
-		      UINT32 actHandle
+		      uint32_t actHandle
 		      )
 {
     // If TPM power is on
     if (s_isPowerOn)
 	// Query the platform
 	return _plat__ACT_GetSignaled(actHandle - TPM_RH_ACT_0);
-    return FALSE;
+    return false;
 }
 #endif /* libtpms added */
 
 /* libtpms added begin */
-static BOOL tpmEstablished;
+static bool tpmEstablished;
 
 void
 _rpc__Signal_SetTPMEstablished(void)
@@ -349,13 +350,13 @@ _rpc__Signal_ResetTPMEstablished(void)
     tpmEstablished = FALSE;
 }
 
-BOOL
+bool
 _rpc__Signal_GetTPMEstablished(void)
 {
     return tpmEstablished;
 }
 
-BOOL
+bool
 _rpc__Signal_IsPowerOn(void)
 {
     return s_isPowerOn;
