@@ -3,7 +3,7 @@
 /*		Functions That Manage the Object Store of the TPM	  	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_fp.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Object_fp.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -105,7 +105,7 @@ ObjectGetHierarchy(
 		   OBJECT          *object         // IN :object
 		   );
 TPMI_RH_HIERARCHY
-GetHeriarchy(
+GetHieriarchy(
 	     TPMI_DH_OBJECT   handle         // IN :object handle
 	     );
 OBJECT *

@@ -81,7 +81,7 @@ TPM2_VerifySignature(
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, RC_VerifySignature_signature);
     // Command Output
-    hierarchy = GetHeriarchy(in->keyHandle);
+    hierarchy = GetHieriarchy(in->keyHandle);
     if(hierarchy == TPM_RH_NULL
        || signObject->publicArea.nameAlg == TPM_ALG_NULL)
 	{

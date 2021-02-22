@@ -3,7 +3,7 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1529 2019-11-21 23:29:01Z kgoldman $		*/
+/*            $Id: Object.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -241,13 +241,13 @@ ObjectGetHierarchy(
 	    return TPM_RH_NULL;
 	}
 }
-/* 8.6.3.11 GetHeriarchy() */
+/* 8.6.3.11 GetHierarchy() */
 /* This function returns the handle of the hierarchy to which a handle belongs. This function is
    similar to ObjectGetHierarchy() but this routine takes a handle while ObjectGetHierarchy() takes
-   an pointer to an object. */
+   a pointer to an object. */
 /* This function requires that handle references a loaded object. */
 TPMI_RH_HIERARCHY
-GetHeriarchy(
+GetHieriarchy(
 	     TPMI_DH_OBJECT   handle         // IN :object handle
 	     )
 {
