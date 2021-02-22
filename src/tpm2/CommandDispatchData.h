@@ -3,7 +3,7 @@
 /*			     Command DIspatch Data				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CommandDispatchData.h 1635 2020-06-12 21:48:27Z kgoldman $	*/
+/*            $Id: CommandDispatchData.h 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -81,7 +81,7 @@
 #   define _MARSHAL_T_      MARSHAL_t
 #endif
 
-const _UNMARSHAL_T_ UnmarshalArray[] = {
+const _UNMARSHAL_T_ unmarshalArray[] = {
 #define TPMI_DH_CONTEXT_H_UNMARSHAL             0
 					UNMARSHAL_DISPATCH(TPMI_DH_CONTEXT),
 #define TPMI_RH_AC_H_UNMARSHAL                  (TPMI_DH_CONTEXT_H_UNMARSHAL + 1)
@@ -262,8 +262,8 @@ const _UNMARSHAL_T_ UnmarshalArray[] = {
 };
 
 
-const _MARSHAL_T_ MarshalArray[] = {
-				    
+const _MARSHAL_T_ marshalArray[] = {
+
 #define UINT32_H_MARSHAL                        0
 				    MARSHAL_DISPATCH(UINT32),
 				    // RESPONSE_PARAMETER_FIRST_TYPE marks the end of the response handles.
