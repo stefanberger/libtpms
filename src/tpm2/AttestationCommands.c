@@ -3,7 +3,7 @@
 /*			   Attestation Commands  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AttestationCommands.c 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id: AttestationCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -348,7 +348,7 @@ TPM2_CertifyX509(
     INT16                    i;
     //
 #if CERTIFYX509_DEBUG
-    DebugFileOpen();
+    DebugFileInit();
     DebugDumpBuffer(in->partialCertificate.t.size, in->partialCertificate.t.buffer,
 		    "partialCertificate");
 #endif
