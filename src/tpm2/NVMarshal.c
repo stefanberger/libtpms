@@ -774,6 +774,9 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sm3_256, array_size,
                              buffer, size);
 #endif
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
+#error SHA3 and SM3 are not supported
+#endif
 
     /* end marker */
     algid = TPM_ALG_NULL;
@@ -875,6 +878,9 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
                 needed_size = sizeof(data->sm3_256);
                 t = (BYTE *)&data->sm3_256;
             break;
+#endif
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
+#error SHA3 and SM3 are not supported
 #endif
             case TPM_ALG_NULL:
                 /* end marker */
@@ -984,6 +990,9 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->sm3_256Pcr, array_size,
                              buffer, size);
 #endif
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
+#error SHA3 and SM3 are not supported
+#endif
 
     /* end marker */
     algid = TPM_ALG_NULL;
@@ -1051,6 +1060,9 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
                 needed_size = sizeof(data->sm3_256Pcr);
                 t = (BYTE *)&data->sm3_256Pcr;
             break;
+#endif
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
+#error SHA3 and SM3 are not supported
 #endif
             case TPM_ALG_NULL:
                 /* end marker */
