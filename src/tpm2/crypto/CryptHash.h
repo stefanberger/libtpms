@@ -88,16 +88,7 @@ typedef struct sequenceMethods {
     SMAC_DATA_METHOD          data;
     SMAC_END_METHOD           end;
 } SMAC_METHODS;
-
-#if 0   /* libtpms changed begin (undefined behavior of macro expansion) */
-#define SMAC_IMPLEMENTED (defined CC_MAC || defined CC_MAC_Start)
-#else
-# if defined TPM_CC_MAC || defined TPM_CC_MAC_Start
-#  define SMAC_IMPLEMENTED 1
-# else
-#  define SMAC_IMPLEMENTED 0
-# endif
-#endif  /* libtpms changed end */
+#define SMAC_IMPLEMENTED (CC_MAC || CC_MAC_Start)
 
 /* These definitions are here because the SMAC state is in the union of hash states. */
 
