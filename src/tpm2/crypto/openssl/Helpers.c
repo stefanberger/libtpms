@@ -67,6 +67,11 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 
+/* to enable RSA_check_key() on private keys set to != 0 */
+#ifndef DO_RSA_CHECK_KEY
+#define DO_RSA_CHECK_KEY 0
+#endif
+
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 TPM_RC
@@ -447,6 +452,29 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
     return retVal;
 }
 
+static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
+                          const BIGNUM *E, const BIGNUM *D)
+{
+    RSA *mykey;
+    static int disp;
+
+    if (!DO_RSA_CHECK_KEY)
+        return;
+    if (!disp) {
+        fprintf(stderr, "RSA key checking is enabled\n");
+        disp = 1;
+    }
+
+    mykey = RSA_new();
+    RSA_set0_factors(mykey, BN_dup(P), BN_dup(Q));
+    RSA_set0_key(mykey, BN_dup(N), BN_dup(E), BN_dup(D));
+    if (RSA_check_key(mykey) != 1) {
+        fprintf(stderr, "Detected bad RSA key. STOP.\n");
+        while (1);
+    }
+    RSA_free(mykey);
+}
+
 LIB_EXPORT TPM_RC
 InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
                          EVP_PKEY  **pkey      // OUT
@@ -497,6 +525,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE ||
         RSA_set0_key(key, NULL, NULL, D) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
+
+    DoRSACheckKey(P, Q, N, E, D);
+
     D = NULL;
 
 #if CRT_FORMAT_RSA == YES
