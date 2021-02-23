@@ -3,7 +3,7 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
+/*            $Id: CryptSym.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -74,18 +74,8 @@
 #define     KEY_BLOCK_SIZES(ALG, alg)					\
     static const INT16       alg##KeyBlockSizes[] = {			\
 						     ALG##_KEY_SIZES_BITS, -1, ALG##_BLOCK_SIZES };
-#if ALG_AES
-KEY_BLOCK_SIZES(AES, aes);
-#endif // ALG_AES
-#if ALG_SM4
-KEY_BLOCK_SIZES(SM4, sm4);
-#endif
-#if ALG_CAMELLIA
-KEY_BLOCK_SIZES(CAMELLIA, camellia);
-#endif
-#if ALG_TDES
-KEY_BLOCK_SIZES(TDES, tdes);
-#endif
+
+FOR_EACH_SYM(KEY_BLOCK_SIZES)
 
 /* 10.2.19.3	Initialization and Data Access Functions */
 /* 10.2.19.3.1	CryptSymInit() */
@@ -126,21 +116,18 @@ CryptGetSymmetricBlockSize(
 {
     const INT16    *sizes;
     INT16            i;
+#if 0	// libtpms added
 #define ALG_CASE(SYM, sym)  case TPM_ALG_##SYM: sizes = sym##KeyBlockSizes; break
+#endif	// libtpms added
     switch(symmetricAlg)
 	{
-#if ALG_AES
-	    ALG_CASE(AES, aes);
-#endif
-#if ALG_SM4
-	    ALG_CASE(SM4, sm4);
-#endif
-#if ALG_CAMELLIA
-	    ALG_CASE(CAMELLIA, camellia);
-#endif
-#if ALG_TDES
-	    ALG_CASE(TDES, tdes);
-#endif
+#define GET_KEY_BLOCK_POINTER(SYM, sym)					\
+	    case TPM_ALG_##SYM:						\
+	      sizes =  sym##KeyBlockSizes;				\
+	      break;
+	    // Get the pointer to the block size array
+	    FOR_EACH_SYM(GET_KEY_BLOCK_POINTER);
+
 	  default:
 	    return 0;
 	}
@@ -191,6 +178,7 @@ CryptSymmetricEncrypt(
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
     //
+    memset(&keySchedule, 0, sizeof(keySchedule));	// libtpms added; coverity
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
@@ -210,7 +198,13 @@ CryptSymmetricEncrypt(
 	iv = defaultIv;
     pIv = iv;
     // Create encrypt key schedule and set the encryption function pointer.
-    SELECT(ENCRYPT);
+    switch (algorithm)
+	{
+	    FOR_EACH_SYM(ENCRYPT_CASE)
+
+	  default:
+	    return TPM_RC_SYMMETRIC;
+	}
     switch(mode)
 	{
 #if ALG_CTR
@@ -333,6 +327,8 @@ CryptSymmetricDecrypt(
     TpmCryptSetSymKeyCall_t        encrypt;
     TpmCryptSetSymKeyCall_t        decrypt;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
+
+    memset(&keySchedule, 0, sizeof(keySchedule));	// libtpms added; coverity
     // These are used but the compiler can't tell because they are initialized
     // in case statements and it can't tell if they are always initialized
     // when needed, so... Comment these out if the compiler can tell or doesn't
@@ -369,13 +365,22 @@ CryptSymmetricDecrypt(
 	    // cipher block size
 	    if((dSize % blockSize) != 0)
 		return TPM_RC_SIZE;
-	    SELECT(DECRYPT);
+	    switch (algorithm)
+		{
+		    FOR_EACH_SYM(DECRYPT_CASE)
+		  default:
+		    return TPM_RC_SYMMETRIC;
+		}
 	    break;
 #endif
 	  default:
 	    // For the remaining stream ciphers, use encryption to decrypt
-	    SELECT(ENCRYPT);
-	    break;
+	    switch (algorithm)
+		{
+		    FOR_EACH_SYM(ENCRYPT_CASE)
+		  default:
+		    return TPM_RC_SYMMETRIC;
+		}
 	}
     // Now do the mode-dependent decryption
     switch(mode)
@@ -485,12 +490,12 @@ static void TDES_CTR(const BYTE *key,            // IN
     BYTE                   *pT;
 
     TDES_set_encrypt_key(key, keySizeInBits,
-                         (tpmKeyScheduleTDES *)&keySchedule.TDES);
+                         (tpmKeyScheduleTDES *)&keySchedule.tdes);
 
     for(; dSize > 0; dSize -= blockSize)
 	{
 	    // Encrypt the current value of the IV(counter)
-	    TDES_encrypt(iv, tmp, (tpmKeyScheduleTDES *)&keySchedule.TDES);
+	    TDES_encrypt(iv, tmp, (tpmKeyScheduleTDES *)&keySchedule.tdes);
 	    //increment the counter (counter is big-endian so start at end)
 	    for(i = blockSize - 1; i >= 0; i--)
 		if((iv[i] += 1) != 0)

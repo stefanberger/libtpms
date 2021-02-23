@@ -3,7 +3,7 @@
 /*	Message Authentication Codes Based on a Symmetric Block Cipher		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptCmac.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: CryptCmac.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2018					*/
+/*  (c) Copyright IBM Corp. and others, 2018 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -122,7 +122,13 @@ CryptCmacData(
     TpmCryptSetSymKeyCall_t  encrypt;
     //
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
-    SELECT(ENCRYPT);
+    // Set up the encryption values based on the algorithm
+    switch (algorithm)
+	{
+	    FOR_EACH_SYM(ENCRYPT_CASE)
+	  default:
+	    FAIL(FATAL_ERROR_INTERNAL);
+	}
     while(size > 0)
 	{
 	    if(cmacState->bcount == cmacState->iv.t.size)
@@ -163,7 +169,13 @@ CryptCmacEnd(
 
     subkey.t.size = cState->iv.t.size;
     // Encrypt a block of zero
-    SELECT(ENCRYPT);
+    // Set up the encryption values based on the algorithm
+    switch (algorithm)
+	{
+	    FOR_EACH_SYM(ENCRYPT_CASE)
+	  default:
+	    return 0;
+	}
     ENCRYPT(&keySchedule, subkey.t.buffer, subkey.t.buffer);
 
     // shift left by 1 and XOR with 0x0...87 if the MSb was 0
