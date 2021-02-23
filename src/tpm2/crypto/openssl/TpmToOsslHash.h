@@ -72,7 +72,7 @@
 #endif
 #include <openssl/ossl_typ.h>
 
-#define HASH_ALIGNMENT  RADIX_BYTES
+#define HASH_ALIGNMENT  RADIX_BYTES  /* libtpms: keep; not sure whether needed */
 
 /* B.2.2.1.2. Links to the OpenSSL HASH code */
 /* Redefine the internal name used for each of the hash state structures to the name used by the
