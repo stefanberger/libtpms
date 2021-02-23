@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			Debug Helper			.	 		*/
+/*			Debug Helper				 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: DebugHelpers.c 1528 2019-11-20 20:31:43Z kgoldman $		*/
+/*            $Id: DebugHelpers.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -71,8 +71,11 @@
 #include "DebugHelpers_fp.h"
 
 #if CERTIFYX509_DEBUG
-FILE                *fDebug = NULL;
 const char       *debugFileName = "DebugFile.txt";
+
+/* C.13.2.1.	fileOpen() */
+
+/* This exists to allow use of the safe version of fopen() with a MS runtime. */
 
 static FILE *
 fileOpen(
@@ -101,6 +104,7 @@ DebugFileInit(
 	      void
 	      )
 {
+    FILE	*f = NULL;
     time_t	t = time(NULL);
     //
     // Get current date and time.
@@ -112,24 +116,19 @@ DebugFileInit(
     timeString = ctime(&t);
 #   endif
     // Try to open the debug file
-    fDebug = fileOpen(debugFileName, "w");
-    if(fDebug)
+    f = fileOpen(debugFileName, "w");
+    if(f)
 	{
-	    fprintf(fDebug, "%s\n", timeString);
-	    fclose(fDebug);
+	    /* Initialize the contents with the time. */
+	    fprintf(f, "%s\n", timeString);
+	    fclose(f);
 	    return 0;
 	}
     return -1;
 }
 
-void
-DebugFileClose(
-	       void
-	       )
-{
-    if(fDebug)
-	fclose(fDebug);
-}
+/* C.13.2.3.	DebugDumpBuffer() */
+
 void
 DebugDumpBuffer(
 		int             size,
@@ -139,23 +138,23 @@ DebugDumpBuffer(
 {
     int             i;
     //
-    FILE *fDebug = fileOpen(debugFileName, "a");
-    if(!fDebug)
+    FILE *f = fileOpen(debugFileName, "a");
+    if(!f)
 	return;
     if(identifier)
-	fprintf(fDebug, "%s\n", identifier);
+	fprintf(f, "%s\n", identifier);
     if(buf)
 	{
 	    for(i = 0; i < size; i++)
 		{
 		    if(((i % 16) == 0) && (i))
-			fprintf(fDebug, "\n");
-		    fprintf(fDebug, " %02X", buf[i]);
+			fprintf(f, "\n");
+		    fprintf(f, " %02X", buf[i]);
 		}
 	    if((size % 16) != 0)
-		fprintf(fDebug, "\n");
+		fprintf(f, "\n");
 	}
-    fclose(fDebug);
+    fclose(f);
 }
 
 #endif // CERTIFYX509_DEBUG
