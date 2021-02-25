@@ -59,6 +59,7 @@
 /********************************************************************************/
 
 #include "Tpm.h"
+#include "ExpDCache_fp.h"
 #include "Helpers_fp.h"
 #include "TpmToOsslMath_fp.h"
 
@@ -501,12 +502,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     if(!rsaKey->attributes.privateExp)
         CryptRsaLoadPrivateExponent(rsaKey);
 
-    ctx = BN_CTX_new();
-    Q = BN_new();
-    Qr = BN_new();
     P = BN_bin2bn(rsaKey->sensitive.sensitive.rsa.t.buffer,
                   rsaKey->sensitive.sensitive.rsa.t.size, NULL);
-    if (ctx == NULL || Q == NULL || Qr == NULL || P == NULL)
+    if (P == NULL)
         ERROR_RETURN(TPM_RC_FAILURE)
 
     key = EVP_PKEY_get0_RSA(*pkey);
@@ -514,16 +512,25 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
         ERROR_RETURN(TPM_RC_FAILURE);
     RSA_get0_key(key, &N, &E, NULL);
 
-    /* Q = N/P; no remainder */
-    BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
-    BN_div(Q, Qr, N, P, ctx);
-    if(!BN_is_zero(Qr))
-        ERROR_RETURN(TPM_RC_BINDING);
-    BN_set_flags(Q, BN_FLG_CONSTTIME); // Q is secret
+    D = ExpDCacheFind(P, N, E, &Q);
+    if (D == NULL) {
+        ctx = BN_CTX_new();
+        Q = BN_new();
+        Qr = BN_new();
+        if (ctx == NULL || Q == NULL || Qr == NULL)
+            ERROR_RETURN(TPM_RC_FAILURE);
+        /* Q = N/P; no remainder */
+        BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
+        BN_div(Q, Qr, N, P, ctx);
+        if(!BN_is_zero(Qr))
+            ERROR_RETURN(TPM_RC_BINDING);
+        BN_set_flags(Q, BN_FLG_CONSTTIME); // Q is secret
 
-    // TODO(stefanb): consider caching D in the OBJECT
-    if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE ||
-        RSA_set0_key(key, NULL, NULL, D) != 1)
+        if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE)
+            ERROR_RETURN(TPM_RC_FAILURE);
+        ExpDCacheAdd(P, N, E, Q, D);
+    }
+    if (RSA_set0_key(key, NULL, NULL, D) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
     DoRSACheckKey(P, Q, N, E, D);

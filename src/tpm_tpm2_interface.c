@@ -59,6 +59,7 @@
 #include "tpm2/PlatformACT.h"
 #include "tpm2/PlatformData.h"
 #include "tpm2/Volatile.h"
+#include "tpm2/crypto/openssl/ExpDCache_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm12/tpm_nvfile.h" // TPM_NVRAM_Loaddata()
@@ -169,6 +170,7 @@ static void TPM2_Terminate(void)
     TPM_TearDown();
 
     _rpc__Signal_PowerOff();
+    ExpDCacheFree();
 }
 
 static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
