@@ -12,7 +12,8 @@ Build-Depends:
  dh-exec,
  gawk,
  libssl-dev,
- libtool
+ libtool,
+ pkg-config
 
 Package: libtpms0
 Architecture: any
