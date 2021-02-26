@@ -43,9 +43,12 @@ matrix:
         sudo make -j$(nproc) check &&
         git clone https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
-         sudo apt -y install devscripts equivs python-twisted libfuse-dev
-           libglib2.0-dev libgmp-dev expect libtasn1-dev socat findutils
-           tpm-tools gnutls-dev gnutls-bin &&
+         sudo apt -y install devscripts equivs python3-twisted expect
+           libtasn1-dev socat findutils gnutls-dev gnutls-bin
+           python3-setuptools python3-cryptography python3-pip &&
+         pip3 install --upgrade -v pip==20.3.4 &&
+         pip3 install --upgrade wheel &&
+         pip3 install --upgrade cryptography &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
          export SWTPM_TEST_EXPENSIVE=1 &&
          sudo make -j$(nproc) check &&
