@@ -2316,6 +2316,67 @@ skip_future_versions:
     return rc;
 }
 
+/* Local version of TPMT_SENSITIVE_Marshal handling public keys that don't have much in TPM_SENSITIVE */
+static UINT16
+NV_TPMT_SENSITIVE_Marshal(TPMT_SENSITIVE *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += TPM_ALG_ID_Marshal(&source->sensitiveType, buffer, size);
+    written += TPM2B_AUTH_Marshal(&source->authValue, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&source->seedValue, buffer, size);
+
+    switch (source->sensitiveType) {
+    case TPM_ALG_RSA:
+    case TPM_ALG_ECC:
+    case TPM_ALG_KEYEDHASH:
+    case TPM_ALG_SYMCIPHER:
+        written += TPMU_SENSITIVE_COMPOSITE_Marshal(&source->sensitive, buffer, size, source->sensitiveType);
+        break;
+    default:
+        /* we wrote these but they must have been 0 in this case */
+        pAssert(source->authValue.t.size == 0);
+        pAssert(source->seedValue.t.size == 0);
+        pAssert(source->sensitiveType == TPM_ALG_ERROR)
+        /* public keys */
+    }
+    return written;
+}
+
+/* local version of TPM_SENSITIVE_Unmarshal handling public keys that don't have much in TPMT_SENSITVE */
+static TPM_RC
+NV_TPMT_SENSITIVE_Unmarshal(TPMT_SENSITIVE *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        /* TPMI_ALG_PUBLIC_Unmarshal would test the sensitiveType; we don't want this */
+	rc = TPM_ALG_ID_Unmarshal(&target->sensitiveType, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM2B_AUTH_Unmarshal(&target->authValue, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM2B_DIGEST_Unmarshal(&target->seedValue, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        switch (target->sensitiveType) {
+        case TPM_ALG_RSA:
+        case TPM_ALG_ECC:
+        case TPM_ALG_KEYEDHASH:
+        case TPM_ALG_SYMCIPHER:
+	    rc = TPMU_SENSITIVE_COMPOSITE_Unmarshal(&target->sensitive, buffer, size, target->sensitiveType);
+	    break;
+	default:
+            pAssert(target->authValue.t.size == 0);
+            pAssert(target->seedValue.t.size == 0);
+            pAssert(target->sensitiveType == TPM_ALG_ERROR)
+	    /* nothing do to do */
+	}
+    }
+    return rc;
+}
+
 #define OBJECT_MAGIC 0x75be73af
 #define OBJECT_VERSION 3
 
@@ -2333,7 +2394,7 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
      * attributes are written in ANY_OBJECT_Marshal
      */
     written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
-    written += TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
+    written += NV_TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
 
 #if ALG_RSA
     has_block = TRUE;
@@ -2385,7 +2446,7 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         rc = TPMT_PUBLIC_Unmarshal(&data->publicArea, buffer, size, TRUE);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = TPMT_SENSITIVE_Unmarshal(&data->sensitive, buffer, size);
+        rc = NV_TPMT_SENSITIVE_Unmarshal(&data->sensitive, buffer, size);
     }
 
 #if ALG_RSA
