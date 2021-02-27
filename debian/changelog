@@ -1,3 +1,9 @@
+libtpms (0.8.1) RELEASED; urgency=medium
+
+  * Fixed a context save and suspend/resume problem when public keys are loaded
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 26 Feb 2021 21:16:00 -0500
+
 libtpms (0.8.0) RELEASED; urgency=medium
 
   * Stable release

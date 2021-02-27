@@ -112,13 +112,16 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Feb 26 2021 Stefan Berger - 0.8.1-1
+- Fixed a context save and suspend/resume problem when public keys are loaded
+
 * Wed Feb 24 2021 Stefan Berger - 0.8.0-1
 - Release of version 0.8.0 (rev. 162)
 
 * Fri Jul 19 2019 Stefan Berger - 0.7.0-1
 - Release of version 0.7.0 (rev. 150)
 
-* Mon Jan 14 2018 Stefan Berger - 0.6.0-1
+* Mon Jan 15 2018 Stefan Berger - 0.6.0-1
 - Release of version 0.6.0 with TPM 2.0 support
 
 * Mon Jun 30 2014 Stefan Berger - 0.5.2-1
