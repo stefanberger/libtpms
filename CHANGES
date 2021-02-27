@@ -1,5 +1,12 @@
 CHANGES - changes for libtpms
 
+version 0.6.4
+  - tpm2: Fix public key context save due to ANY_OBJECT_Marshal usage
+    This fixes a suspend/resume problem when public keys are
+    loaded
+  - tpm2: Address some Coverity issues (false positives)
+  - tpm1.2: Backported ASAN/UBSAN related fixes
+
 version 0.6.3
   - Fixed the set of PCRs belonging to the TCB group. This affects the
     pcrUpdateCounter in TPM2_Pcrread() responses, thus needs latest `swtpm`
