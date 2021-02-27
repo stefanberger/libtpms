@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Feb 26 2021 Stefan Berger - 0.6.4-1
+- Fixed a suspend/resume problem when public keys are loaded
+- tpm1.2/tpm2: Addressed UBSAN/ASAN related issues
+
 * Fri Jul 10 2020 Stefan Berger - 0.6.3-1
 - Fixed set of PCRs belonging to TCB group
 
