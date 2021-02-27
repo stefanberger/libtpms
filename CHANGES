@@ -1,5 +1,10 @@
 CHANGES - changes for libtpms
 
+version 0.8.1
+  - tpm2: Fix public key context save due to ANY_OBJECT_Marshal usage
+    This also fixed a context save and suspend/resume problem when public keys
+    are loaded (issue #195)
+
 version 0.8.0
   - NOTE: Downgrade to previous versions is not possible. See below.
   - Update to TPM 2 code release 159
