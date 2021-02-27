@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Deb 26 2021 Stefan Berger - 0.7.6-1
+- Fixed a suspend/resume problem when public keys are loaded
+- Addressed Coverity issues
+
 * Thu Feb 18 2021 Stefan Berger - 0.7.5-1
 - Addressed UBSAN and cppcheck detected issues
 - Return proper size of ECC Parameters to pass HLK tests

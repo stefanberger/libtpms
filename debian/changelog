@@ -1,3 +1,10 @@
+libtpms (0.7.6) RELEASED; urgency=medium
+
+  * Fixed a suspend/resume problem when public keys are loaded
+  * Addressed Coverity issues
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 26 Feb 2021 21:46:00 -0500
+
 libtpms (0.7.5) RELEASED; urgency=medium
 
   * Addressed UBSAN and cppcheck detected issues
