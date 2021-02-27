@@ -1,3 +1,10 @@
+libtpms (0.6.4) RELEASED; urgency=medium
+
+  * Fixed a suspend/resume problem when public keys are loaded
+  * tpm1.2/tpm2: Addressed UBSAN/ASAN related issues
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 26 Feb 2021 22:03:00 -0500
+
 libtpms (0.6.3-1) RELEASED; urgency=medium
 
   * Fixed set of PCRs belonging to TCB group
