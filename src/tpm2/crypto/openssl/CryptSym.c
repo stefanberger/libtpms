@@ -532,6 +532,7 @@ CryptSymmetricEncrypt(
     BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
     UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
     TPM_RC               retVal = TPM_RC_SUCCESS;
+    int                  ivLen;
 
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
@@ -596,6 +597,14 @@ CryptSymmetricEncrypt(
     if (EVP_EncryptFinal_ex(ctx, pOut + outlen1, &outlen2) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
+    if (ivInOut) {
+        ivLen = EVP_CIPHER_CTX_iv_length(ctx);
+        if (ivLen < 0 || (size_t)ivLen > sizeof(ivInOut->t.buffer))
+            ERROR_RETURN(TPM_RC_FAILURE);
+
+        ivInOut->t.size = ivLen;
+        memcpy(ivInOut->t.buffer, EVP_CIPHER_CTX_iv(ctx), ivInOut->t.size);
+    }
  Exit:
     if (retVal == TPM_RC_SUCCESS && pOut != dOut)
         memcpy(dOut, pOut, outlen1 + outlen2);
@@ -637,6 +646,7 @@ CryptSymmetricDecrypt(
     BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
     UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
     TPM_RC               retVal = TPM_RC_SUCCESS;
+    int                  ivLen;
 
     // These are used but the compiler can't tell because they are initialized
     // in case statements and it can't tell if they are always initialized
@@ -708,6 +718,15 @@ CryptSymmetricDecrypt(
         ERROR_RETURN(TPM_RC_FAILURE);
 
     pAssert((int)buffersize >= outlen1 + outlen2);
+
+    if (ivInOut) {
+        ivLen = EVP_CIPHER_CTX_iv_length(ctx);
+        if (ivLen < 0 || (size_t)ivLen > sizeof(ivInOut->t.buffer))
+            ERROR_RETURN(TPM_RC_FAILURE);
+
+        ivInOut->t.size = ivLen;
+        memcpy(ivInOut->t.buffer, EVP_CIPHER_CTX_iv(ctx), ivInOut->t.size);
+    }
 
  Exit:
     if (retVal == TPM_RC_SUCCESS) {
