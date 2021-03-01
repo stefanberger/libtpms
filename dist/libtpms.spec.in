@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Mar 01 2021 Stefan Berger - 0.7.7-1
+- tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
+
 * Fri Deb 26 2021 Stefan Berger - 0.7.6-1
 - Fixed a suspend/resume problem when public keys are loaded
 - Addressed Coverity issues

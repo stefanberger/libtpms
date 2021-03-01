@@ -1,3 +1,9 @@
+libtpms (0.7.7) RELEASED; urgency=high
+
+  * tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 01 Mar 2021 11:31:00 -0500
+
 libtpms (0.7.6) RELEASED; urgency=medium
 
   * Fixed a suspend/resume problem when public keys are loaded
