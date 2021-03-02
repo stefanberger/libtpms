@@ -85,7 +85,7 @@
 #define TPM_OWNER_EVICT_KEY_HANDLES      10            /* PA, BAL */
 
 /*
- * The largets auth session is DSAP; each such session consumes 119 bytes
+ * The largest auth session is DSAP; each such session consumes 119 bytes
  */
 #define TPM_MIN_AUTH_SESSIONS            16            /* SS, VA, BAL */
 

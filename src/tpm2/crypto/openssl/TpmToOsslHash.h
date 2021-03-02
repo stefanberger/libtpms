@@ -141,7 +141,7 @@ typedef const BYTE    *PCBYTE;
     (&(((BYTE *)(to))[offsetof(HASH_STATE, state)]),			\
      &(hashStateFrom)->state,						\
      (hashStateFrom)->def->contextSize)
-/* Copy from an external blob to an internal formate (with reformatting when necessary */
+/* Copy from an external blob to an internal format (with reformatting when necessary) */
 #define  HASH_STATE_IMPORT_METHOD_DEF					\
     void (HASH_STATE_IMPORT_METHOD)(PANY_HASH_STATE to,			\
 				    const BYTE *from,			\

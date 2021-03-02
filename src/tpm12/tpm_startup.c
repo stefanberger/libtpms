@@ -538,7 +538,7 @@ TPM_RESULT TPM_VolatileAll_Store(TPM_STORE_BUFFER *sbuffer,
 
    If the file does not exist (a normal startup), returns success.
 
-   0 on success or non-existant file
+   0 on success or non-existent file
    TPM_FAIL on failure to load (fatal), since it should never occur
 */
 

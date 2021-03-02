@@ -216,7 +216,7 @@ _plat__TimerRead(
 		 )
 {
 #ifdef HARDWARE_CLOCK
-#error      "need a defintion for reading the hardware clock"
+#error      "need a definition for reading the hardware clock"
     return HARDWARE_CLOCK
 #else
     clock64_t         timeDiff;

@@ -1042,7 +1042,7 @@ CryptGetSignHashAlg(
 #if ALG_ECC
 	    // If ECC is defined, ECDSA is mandatory
 #   ifndef  TPM_ALG_ECDSA
-#       error "ECDSA is requried for ECC"
+#       error "ECDSA is required for ECC"
 #   endif
 	  case TPM_ALG_ECDSA:
 	    // SM2 and ECSCHNORR are optional

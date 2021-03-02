@@ -14,7 +14,7 @@ int main(void)
 #define PD_PP_LIST_EXP_SIZE 14
     if (sizeof(pd.ppList) != PD_PP_LIST_EXP_SIZE) {
         fprintf(stderr,
-                "sizeof(PERSISTENT_DATA.ppList) does not have expecte size "
+                "sizeof(PERSISTENT_DATA.ppList) does not have expected size "
                 "of %u bytes but %zu bytes\n",
                 PD_PP_LIST_EXP_SIZE, sizeof(pd.ppList));
         return EXIT_FAILURE;
@@ -24,7 +24,7 @@ int main(void)
 #define PD_AUDIT_COMMANDS_EXP_SIZE 14
     if (sizeof(pd.auditCommands) != PD_AUDIT_COMMANDS_EXP_SIZE) {
         fprintf(stderr,
-                "sizeof(PERSISTENT_DATA.auditCommands) does not have expecte size "
+                "sizeof(PERSISTENT_DATA.auditCommands) does not have expected size "
                 "of %u bytes but %zu bytes\n",
                 PD_AUDIT_COMMANDS_EXP_SIZE, sizeof(pd.auditCommands));
         return EXIT_FAILURE;
@@ -60,7 +60,7 @@ int main(void)
      * NVRAM fits on all architectures
      */
 #if RSA_4096
-# error Unsuported RSA key size
+# error Unsupported RSA key size
 #elif RSA_3072
 # define OBJECT_EXP_SIZE 2600
 #elif RSA_2048

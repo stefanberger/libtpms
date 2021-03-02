@@ -29,7 +29,7 @@ migration.
 The B<tpmlib_state> parameter can be a logical 'or' of one or
 multiple of of the following: B<TPMLIB_STATE_PERMANENT>,
 B<TPMLIB_STATE_VOLATILE>, or B<TPMLIB_STATE_SAVE_STATE>.
-The B<flags> parameter is curretnly not used and should be set to 0.
+The B<flags> parameter is currently not used and should be set to 0.
 
 The first state blob that should be loaded is the permanent state,
 since for example the volatile state requires it to be available

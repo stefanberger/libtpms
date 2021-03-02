@@ -3764,7 +3764,7 @@ static TPM_RESULT TPM_GetCapability_CapOrd(TPM_STORE_BUFFER *capabilityResponse,
    Boolean value. TRUE means that the TPM supports the asymmetric algorithm for TPM_Sign, TPM_Seal,
    TPM_UnSeal and TPM_UnBind and related commands. FALSE indicates that the asymmetric algorithm is
    not supported for these types of commands. The TPM MAY return TRUE or FALSE for other than
-   asymmetric algoroithms that it supports. Unassigned and unsupported algorithm IDs return FALSE.
+   asymmetric algorithms that it supports. Unassigned and unsupported algorithm IDs return FALSE.
 */
 
 static TPM_RESULT TPM_GetCapability_CapAlg(TPM_STORE_BUFFER *capabilityResponse,

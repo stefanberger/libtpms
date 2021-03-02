@@ -136,7 +136,7 @@ The I<tpm_number> is always 0 and can be ignored.
 The I<name> parameter is either one of B<TPM_SAVESTATE_NAME>,
 B<TPM_VOLATILESTATE_NAME>, or B<TPM_PERMANENT_ALL_NAME> and indicates
 which one of the 3 types of state is supposed to be deleted.
-The I<mustExist> parameter indicates wheteher the given data must exist
+The I<mustExist> parameter indicates whether the given data must exist
 and the implementing function should return B<TPM_FAIL> if the data did
 not exist.
 
@@ -193,7 +193,7 @@ an error value otherwise.
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_FAIL>
 

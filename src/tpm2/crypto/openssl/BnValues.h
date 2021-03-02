@@ -258,7 +258,7 @@ typedef struct
 #define CurveGetG(C)        ((pointConst)&((C)->base))
 #define CurveGetGx(C)       ((C)->base.x)
 #define CurveGetGy(C)       ((C)->base.y)
-/* Convert bytes in initializers according to the endianess of the system. This is used for
+/* Convert bytes in initializers according to the endianness of the system. This is used for
    CryptEccData.c. */
 #define     BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)			\
     (    ((UINT32)(a) << 24)						\
@@ -288,7 +288,7 @@ typedef struct
 #endif
 
 /* These macros are used for data initialization of big number ECC constants These two macros
-   combine a macro for data definition with a macro for structure initilization. The a parameter is
+   combine a macro for data definition with a macro for structure initialization. The a parameter is
    a macro that gives numbers to each of the bytes of the initializer and defines where each of the
    numberd bytes will show up in the final structure. The b value is a structure that contains the
    requisite number of bytes in big endian order. S, the MJOIN and JOIND macros will combine a macro
