@@ -1093,7 +1093,7 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
 	    TPM_NVDataSensitive_Delete(tpm_nv_data_sensitive);
 	}
 	else if (rc == TPM_BADINDEX) {
-	    rc = TPM_SUCCESS;	/* non-existant index is not an error */
+	    rc = TPM_SUCCESS;	/* non-existent index is not an error */
 	}
     }
 #endif

@@ -77,8 +77,8 @@ The number of delegate entries.
 
 =item B<TPMPROP_TPM_SPACE_SAFETY_MARGIN>
 
-The space saftey margin used for the worst-case sizes of the savestate and
-volatile state blobs. This safety marging is not used for the size of the
+The space safety margin used for the worst-case sizes of the savestate and
+volatile state blobs. This safety margin is not used for the size of the
 permanent data blob.
 
 =item B<TPMPROP_TPM_MAX_NV_SPACE>
@@ -102,7 +102,7 @@ margin).
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_FAIL>
 

@@ -240,7 +240,7 @@ TPM2_SetPrimaryPolicy(
     if(in->authPolicy.t.size != CryptHashGetDigestSize(in->hashAlg))
 	return TPM_RCS_SIZE + RC_SetPrimaryPolicy_authPolicy;
     // The command need NV update for OWNER and ENDORSEMENT hierarchy, and
-    // might need orderlyState update for PLATFROM hierarchy.
+    // might need orderlyState update for PLATFORM hierarchy.
     // Check if NV is available.  A TPM_RC_NV_UNAVAILABLE or TPM_RC_NV_RATE
     // error may be returned at this point
     RETURN_IF_NV_IS_NOT_AVAILABLE;

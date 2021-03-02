@@ -111,7 +111,7 @@ ldd /usr/lib/libtpms.so   or  ldd /usr/lib64/libtpms.so
 	/lib64/ld-linux-x86-64.so.2 (0x0000003a1c000000)
 
 The fact that the libraries libgmp, libnspr4, libnssutil3, libnss3,
-libpc4, and libplds4 are linked agaist is an indication that the freebl
+libpc4, and libplds4 are linked against is an indication that the freebl
 library was used for linking.
 
 In case of openssl's libcrypto the output would be the following:

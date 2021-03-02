@@ -43,7 +43,7 @@ See I<TPMLIB_RegisterCallbacks>(3).
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_SIZE>
 

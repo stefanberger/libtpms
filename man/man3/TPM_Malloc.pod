@@ -32,7 +32,7 @@ the buffer is given in the I<size> parameter. The reallocated buffer will
 contain the data from the original buffer.
 
 Both functions have the restriction that the buffer they can allocate
-is limited to B<TPM_ALLOC_MAX> (64k) bytes. This size is sufficent
+is limited to B<TPM_ALLOC_MAX> (64k) bytes. This size is sufficient
 for all buffers needed by the TPM.
 
 Upon successful completion, the functions return B<TPM_SUCCESS>. In case the
@@ -48,7 +48,7 @@ either B<TPM_Malloc()> or B<TPM_Realloc()>.
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_SIZE>
 

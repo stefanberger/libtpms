@@ -1927,7 +1927,7 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
 	/* sanity check that the freebl library and TPM structure here are in sync */
 	if (flattenSize != sizeof(SHA1SaveContextStr)) {
 	    printf("TPM_Sha1Context_Load: Error, "
-		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from struture\n",
+		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from structure\n",
 		   flattenSize, (unsigned long)sizeof(SHA1SaveContextStr));
 	    rc = TPM_BAD_PARAM_SIZE;
 	}
@@ -2005,7 +2005,7 @@ TPM_RESULT TPM_Sha1Context_Store(TPM_STORE_BUFFER *sbuffer,
 	/* sanity check that the freebl library and TPM structure here are in sync */
 	if (flattenSize != sizeof(SHA1SaveContextStr)) {
 	    printf("TPM_Sha1Context_Store: Error (fatal), "
-		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from struture\n",
+		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from structure\n",
 		   flattenSize, (unsigned long)sizeof(SHA1SaveContextStr));
 	    rc = TPM_FAIL;
 	}

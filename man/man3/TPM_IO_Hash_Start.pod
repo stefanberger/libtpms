@@ -49,7 +49,7 @@ caller.
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_FAIL>
 

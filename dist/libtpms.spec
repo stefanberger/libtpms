@@ -193,7 +193,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 - Adding LICENSE, README and CHANGELOG file into tar ball and main rpm
 - Removing clean section
 - removed command to clean the build root
-- adding library version to the libries required for building and during
+- adding library version to the libraries required for building and during
   runtime
 - Extended Requires in devel package with {?_isa}
 

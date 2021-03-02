@@ -146,7 +146,7 @@ block_skip_write_pop(block_skip *bs, INT32 *size) {
 /*
  * This function must be called when unmarshalling a byte stream and
  * a compile-time optional block follows. In case the compile-time
- * optinal block is there but not in the byte stream, we log an error.
+ * optional block is there but not in the byte stream, we log an error.
  * In case the bytes stream contains the block, but we don't need it
  * we skip it. In the other cases we don't need to do anything since
  * the code is 'in sync' with the byte stream.
@@ -2939,7 +2939,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 
     written += UINT64_Marshal(&s_maxCounter, buffer, size); /* line 992 */
     /* the following need not be written; NvIndexCacheInit initializes them partly
-     * and NvIndexCacheInit() is alled during ExecuteCommand()
+     * and NvIndexCacheInit() is called during ExecuteCommand()
      * - s_cachedNvIndex
      * - s_cachedNvRef
      * - s_cachedNvRamRef
@@ -3758,7 +3758,7 @@ UINT32_Unmarshal_CheckConstant(BYTE **buffer, INT32 *size, UINT32 constant,
             break;
         }
         if (op) {
-            TPMLIB_LogTPM2Error("Unexpect value for %s; "
+            TPMLIB_LogTPM2Error("Unexpected value for %s; "
                                 "its value %d is not %s %d; "
                                 "(version: %u)\n",
                                 name, value, op, constant,
@@ -4259,7 +4259,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
     }
     if (rc == TPM_RC_SUCCESS) {
         /* get the size of the array on the source side
-           we can accomodate different sizes when rebuilding
+           we can accommodate different sizes when rebuilding
            but if it doesn't fit we'll error out and report the sizes */
         rc = UINT32_Unmarshal(&sourceside_size, buffer, size);
     }

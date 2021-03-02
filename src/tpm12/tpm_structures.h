@@ -903,7 +903,7 @@ typedef struct tdTPM_PUBKEY {
 #error "TPM_KEY_HANDLES must be less than 0x10000"
 #endif
 
-/* The TPM does not have to support any minumum number of owner evict keys.  Adjust this value to
+/* The TPM does not have to support any minimum number of owner evict keys.  Adjust this value to
    match the amount of NV space available.  An owner evict key consumes about 512 bytes.
 
    A value greater than (TPM_KEY_HANDLES - 2) is useless, as the TPM reserves 2 key slots for
@@ -1154,7 +1154,7 @@ typedef struct tdTPM_FAMILY_TABLE_ENTRY {
 #endif
     TPM_FAMILY_LABEL familyLabel;       /* A sequence number that software can map to a string of
                                            bytes that can be displayed of used by the applications.
-                                           This MUST not contain sensitive informations. */
+                                           This MUST not contain sensitive information. */
     TPM_FAMILY_ID familyID;             /* The family ID in use to tie values together. This is not
                                            a sensitive value. */
     TPM_FAMILY_VERIFICATION verificationCount;  /* The value inserted into delegation rows to
@@ -1874,7 +1874,7 @@ typedef struct tdTPM_STANY_FLAGS {
 
 #ifdef TPM_MIN_COUNTERS
 #if (TPM_MIN_COUNTERS < 4)
-#error "TPM_MIN_COUNTERS minumum is 4"
+#error "TPM_MIN_COUNTERS minimum is 4"
 #endif
 #endif
 

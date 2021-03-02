@@ -490,7 +490,7 @@ typedef UINT32           NV_REF;
 typedef BYTE            *NV_RAM_REF;
 
 /* 5.9.8.3	NV_PIN */
-/* This structure deals with the possible endianess differences between the canonical form of the
+/* This structure deals with the possible endianness differences between the canonical form of the
    TPMS_NV_PIN_COUNTER_PARAMETERS structure and the internal value. The structures allow the data in
    a PIN index to be read as an 8-octet value using NvReadUINT64Data(). That function will byte swap
    all the values on a little endian system. This will put the bytes with the 4-octet values in the
@@ -864,7 +864,7 @@ typedef struct orderly_data
 #endif // ACCUMULATE_SELF_HEAL_TIMER
 
 #ifndef __ACT_DISABLED	// libtpms added
-#error ACT not suported in ORDERLY_DATA!
+#error ACT not supported in ORDERLY_DATA!
     // These are the ACT Timeout values. They are saved with the other timers
 #define DefineActData(N)  ACT_STATE      ACT_##N;
     FOR_EACH_ACT(DefineActData)

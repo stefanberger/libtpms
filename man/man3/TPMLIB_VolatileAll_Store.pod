@@ -27,7 +27,7 @@ the number of bytes of state information in the I<buflen> variable.
 
 =item B<TPM_SUCCESS>
 
-The function completed sucessfully.
+The function completed successfully.
 
 =item B<TPM_FAIL>
 

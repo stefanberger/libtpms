@@ -10,7 +10,7 @@ version 0.8.0
     possible to downgrade from libtpms version 0.8.0 to some previous version.
     The seeds are now associated with an age so that older seeds use the old
     TPM 2 prime number generation code while newer seed use the newer code.
-  - Update to TPM 2 code relase 162
+  - Update to TPM 2 code release 162
     - ECC encryption / decryption is disabled
   - Fix support for elliptic curve due to missing unmarshalling code
   - Runtime filter supported elliptic curves supported by OpenSSL
