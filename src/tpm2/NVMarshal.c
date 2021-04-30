@@ -1262,7 +1262,7 @@ skip_future_versions:
 }
 
 #define STATE_RESET_DATA_MAGIC  0x01102332
-#define STATE_RESET_DATA_VERSION 3
+#define STATE_RESET_DATA_VERSION 4
 
 static TPM_RC
 STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
@@ -1295,15 +1295,38 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         rc = UINT16_Unmarshal(&array_size, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS &&
-        array_size != sizeof(data->contextArray)) {
+        array_size != ARRAY_SIZE(data->contextArray)) {
         TPMLIB_LogTPM2Error("STATE_RESET_DATA: Bad array size for contextArray; "
                             "expected %zu, got %u\n",
-                            sizeof(data->contextArray), array_size);
+                            ARRAY_SIZE(data->contextArray), array_size);
         rc = TPM_RC_BAD_PARAMETER;
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = Array_Unmarshal((BYTE *)&data->contextArray, array_size,
-                              buffer, size);
+        size_t i;
+        if (hdr.version <= 3) {
+            /* version <= 3 was writing an array of UINT8 */
+            UINT8 element;
+            for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
+                rc = UINT8_Unmarshal(&element, buffer, size);
+                data->contextArray[i] = element;
+            }
+            s_ContextSlotMask = 0xff;
+        } else {
+            /* version 4 and later an array of UINT16 */
+            for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
+                rc = UINT16_Unmarshal(&data->contextArray[i], buffer, size);
+            }
+            if (rc == TPM_RC_SUCCESS) {
+                rc = UINT16_Unmarshal(&s_ContextSlotMask, buffer, size);
+            }
+            if (rc == TPM_RC_SUCCESS) {
+                if (s_ContextSlotMask != 0xffff && s_ContextSlotMask != 0x00ff) {
+                    TPMLIB_LogTPM2Error("STATE_RESET_DATA: s_ContextSlotMask has bad value: 0x%04x\n",
+                                        s_ContextSlotMask);
+                    rc = TPM_RC_BAD_PARAMETER;
+                }
+            }
+        }
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&data->contextCounter, buffer, size);
@@ -1385,19 +1408,21 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     BOOL has_block;
     UINT16 array_size;
     BLOCK_SKIP_INIT;
+    size_t i;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 STATE_RESET_DATA_VERSION,
-                                STATE_RESET_DATA_MAGIC, 3);
+                                STATE_RESET_DATA_MAGIC, 4);
     written += TPM2B_PROOF_Marshal(&data->nullProof, buffer, size);
     written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
     written += UINT32_Marshal(&data->clearCount, buffer, size);
     written += UINT64_Marshal(&data->objectContextID, buffer, size);
 
-    array_size = sizeof(data->contextArray);
+    array_size = ARRAY_SIZE(data->contextArray);
     written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal((BYTE *)&data->contextArray, array_size,
-                              buffer, size);
+    for (i = 0; i < array_size; i++)
+        written += UINT16_Marshal(&data->contextArray[i], buffer, size);
+    written += UINT16_Marshal(&s_ContextSlotMask, buffer, size);
 
     written += UINT64_Marshal(&data->contextCounter, buffer, size);
     written += TPM2B_DIGEST_Marshal(&data->commandAuditDigest,

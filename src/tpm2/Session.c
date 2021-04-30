@@ -73,11 +73,12 @@ ContextIdSetOldest(
 {
     CONTEXT_SLOT    lowBits;
     CONTEXT_SLOT    entry;
-    CONTEXT_SLOT    smallest = ((CONTEXT_SLOT)~0);
+    CONTEXT_SLOT    smallest = CONTEXT_SLOT_MASKED(~0);	// libtpms changed
     UINT32  i;
+    pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
     // Set oldestSaveContext to a value indicating none assigned
     s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
-    lowBits = (CONTEXT_SLOT)gr.contextCounter;
+    lowBits = CONTEXT_SLOT_MASKED(gr.contextCounter);	// libtpms changed
     for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
 	{
 	    entry = gr.contextArray[i];
@@ -87,9 +88,9 @@ ContextIdSetOldest(
 		    // Use a less than or equal in case the oldest
 		    // is brand new (= lowBits-1) and equal to our initial
 		    // value for smallest.
-		    if(((CONTEXT_SLOT)(entry - lowBits)) <= smallest)
+		    if(CONTEXT_SLOT_MASKED(entry - lowBits) <= smallest)	// libtpms changed
 			{
-			    smallest = (entry - lowBits);
+			    smallest = CONTEXT_SLOT_MASKED(entry - lowBits);	// libtpms changed
 			    s_oldestSavedSession = i;
 			}
 		}
@@ -140,6 +141,9 @@ SessionStartup(
 	    gr.contextCounter = MAX_LOADED_SESSIONS + 1;
 	    // Initialize oldest saved session
 	    s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
+
+	    // Initialize the context slot mask for UINT16
+	    s_ContextSlotMask = 0xffff;	// libtpms added
 	}
     return TRUE;
 }
@@ -199,14 +203,16 @@ SequenceNumberForSavedContextIsValid(
 				      // structure to be validated
 				      )
 {
-#define MAX_CONTEXT_GAP ((UINT64)((CONTEXT_SLOT) ~0) + 1)
+#define MAX_CONTEXT_GAP ((UINT64)(CONTEXT_SLOT_MASKED(~0) + 1)) /* libtpms changed */
+    pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
+
     TPM_HANDLE           handle = context->savedHandle & HR_HANDLE_MASK;
     if(// Handle must be with the range of active sessions
        handle >= MAX_ACTIVE_SESSIONS
        // the array entry must be for a saved context
        || gr.contextArray[handle] <= MAX_LOADED_SESSIONS
        // the array entry must agree with the sequence number
-       || gr.contextArray[handle] != (CONTEXT_SLOT)context->sequence
+       || gr.contextArray[handle] != CONTEXT_SLOT_MASKED(context->sequence) // libtpms changed
        // the provided sequence number has to be less than the current counter
        || context->sequence > gr.contextCounter
        // but not so much that it could not be a valid sequence number
@@ -287,7 +293,7 @@ ContextIdSessionCreate(
 	    // saved context. If the value to be assigned would make the same as an
 	    // existing context, then we can't use it because of the ambiguity it would
 	    // create.
-	    if((CONTEXT_SLOT)gr.contextCounter
+	    if(CONTEXT_SLOT_MASKED(gr.contextCounter) // libtpms changed
 	       == gr.contextArray[s_oldestSavedSession])
 		return TPM_RC_CONTEXT_GAP;
 	}
@@ -298,7 +304,7 @@ ContextIdSessionCreate(
 		{
 		    // indicate that the session associated with this handle
 		    // references a loaded session
-		    gr.contextArray[*handle] = (CONTEXT_SLOT)(sessionIndex + 1);
+		    gr.contextArray[*handle] = CONTEXT_SLOT_MASKED(sessionIndex + 1); // libtpms changed
 		    return TPM_RC_SUCCESS;
 		}
 	}
@@ -446,12 +452,13 @@ SessionContextSave(
     UINT32                      contextIndex;
     CONTEXT_SLOT                slotIndex;
     pAssert(SessionIsLoaded(handle));
+    pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
     // check to see if the gap is already maxed out
     // Need to have a saved session
     if(s_oldestSavedSession < MAX_ACTIVE_SESSIONS
        // if the oldest saved session has the same value as the low bits
        // of the contextCounter, then the GAP is maxed out.
-       && gr.contextArray[s_oldestSavedSession] == (CONTEXT_SLOT)gr.contextCounter)
+       && gr.contextArray[s_oldestSavedSession] == CONTEXT_SLOT_MASKED(gr.contextCounter)) // libtpms changed
 	return TPM_RC_CONTEXT_GAP;
     // if the caller wants the context counter, set it
     if(contextID != NULL)
@@ -463,7 +470,7 @@ SessionContextSave(
     // contextID value.
     slotIndex = gr.contextArray[contextIndex] - 1;
     // Set the contextID for the contextArray
-    gr.contextArray[contextIndex] = (CONTEXT_SLOT)gr.contextCounter;
+    gr.contextArray[contextIndex] = CONTEXT_SLOT_MASKED(gr.contextCounter); // libtpms changed
     // Increment the counter
     gr.contextCounter++;
     // In the unlikely event that the 64-bit context counter rolls over...
@@ -476,7 +483,7 @@ SessionContextSave(
 	}
     // if the low-order bits wrapped, need to advance the value to skip over
     // the values used to indicate that a session is loaded
-    if(((CONTEXT_SLOT)gr.contextCounter) == 0)
+    if(CONTEXT_SLOT_MASKED(gr.contextCounter) == 0) // libtpms changed
 	gr.contextCounter += MAX_LOADED_SESSIONS + 1;
     // If no other sessions are saved, this is now the oldest.
     if(s_oldestSavedSession >= MAX_ACTIVE_SESSIONS)
@@ -504,6 +511,7 @@ SessionContextLoad(
 {
     UINT32              contextIndex;
     CONTEXT_SLOT        slotIndex;
+    pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
     pAssert(HandleGetType(*handle) == TPM_HT_POLICY_SESSION
 	    || HandleGetType(*handle) == TPM_HT_HMAC_SESSION);
     // Don't bother looking if no openings
@@ -525,7 +533,7 @@ SessionContextLoad(
     // context that we can safely load is the oldest one.
     if(s_oldestSavedSession < MAX_ACTIVE_SESSIONS
        && s_freeSessionSlots == 1
-       && (CONTEXT_SLOT)gr.contextCounter == gr.contextArray[s_oldestSavedSession]
+       && CONTEXT_SLOT_MASKED(gr.contextCounter) == gr.contextArray[s_oldestSavedSession] // libtpms changed
        && contextIndex != s_oldestSavedSession)
 	return TPM_RC_CONTEXT_GAP;
     pAssert(contextIndex < MAX_ACTIVE_SESSIONS);
