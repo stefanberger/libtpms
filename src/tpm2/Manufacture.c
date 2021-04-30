@@ -86,6 +86,9 @@ TPM_Manufacture(
 		)
 {
     TPM_SU          orderlyShutdown;
+
+    // Initialize the context slot mask for UINT16
+    s_ContextSlotMask = 0xffff;	// libtpms added
 #if RUNTIME_SIZE_CHECKS
     // Call the function to verify the sizes of values that result from different
     // compile options.

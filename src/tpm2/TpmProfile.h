@@ -219,7 +219,7 @@
 #define MAX_ACTIVE_SESSIONS             64
 #endif
 #ifndef CONTEXT_SLOT
-#define CONTEXT_SLOT                    UINT8   /* libtpms: use 'old' type */
+#define CONTEXT_SLOT                    UINT16   /* libtpms: changed from UINT8 in v0.9.0 */
 #endif
 #ifndef MAX_LOADED_SESSIONS
 #define MAX_LOADED_SESSIONS             3

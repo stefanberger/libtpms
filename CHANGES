@@ -1,5 +1,11 @@
 CHANGES - changes for libtpms
 
+version 0.9.0:
+  - NOTE: Downgrade to previous versions is not possible. See below.
+  - The size of the context gap has been adjusted to 0xffff from 0xff.
+    As a consequence of this the volatile state's format (STATE_RESET_DATA)
+    has changed and cannot be downgraded.
+
 version 0.8.0
   - NOTE: Downgrade to previous versions is not possible. See below.
   - Update to TPM 2 code release 159

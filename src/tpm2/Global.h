@@ -996,6 +996,28 @@ typedef struct state_reset_data
 } STATE_RESET_DATA;
 EXTERN STATE_RESET_DATA gr;
 
+										// libtpms added begin
+/* The s_ContextSlotMask masks CONTEXT_SLOT values; this variable can have
+ * only two valid values, 0xff or 0xffff. The former is used to simulate
+ * a CONTEXT_SLOT defined as UINT8, the latter is used for the CONTEXT_SLOT
+ * when it is a UINT16. The original TPM 2 code uses a cast to CONTEXT_SLOT
+ * to truncate larger values and has been modified to use CONTEXT_SLOT_MASKED
+ * to achieve the same effect with the above two values.
+ *
+ * Using CONTEXT_SLOT_MASKED we make sure that when we write values into
+ * gr.contextArray that these values are properly masked/truncated so that
+ * when we read values from gr.contextArray that we don't have to mask
+ * them again.
+ *
+ * s_ContextSlotMask may only be initialized to 0xff when resuming an older
+ * state from the time when CONTEXT_SLOT was UINT8, otherwise it must be set
+ * to 0xffff. We set it to 0xffff in SessionStartup(SU_CLEAR) and to be
+ * able to save the TPM state really early (and restore it) also in
+ * TPM_Manufacture().
+ */
+EXTERN CONTEXT_SLOT s_ContextSlotMask;
+#define CONTEXT_SLOT_MASKED(val) ((CONTEXT_SLOT)(val) & s_ContextSlotMask)	// libtpms added end
+
 /* 5.9.12 NV Layout */
 /* The NV data organization is */
 /* a) a PERSISTENT_DATA structure */

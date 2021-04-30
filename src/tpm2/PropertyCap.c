@@ -185,7 +185,10 @@ TPMPropertyIsDefined(
 	  case TPM_PT_CONTEXT_GAP_MAX:
 	    // maximum allowed difference (unsigned) between the contextID
 	    // values of two saved session contexts
+#if 0
 	    *value = ((UINT32)1 << (sizeof(CONTEXT_SLOT) * 8)) - 1;
+#endif
+	    *value = s_ContextSlotMask; // libtpms added; the mask is either 0xff (old state) or 0xffff
 	    break;
 	  case TPM_PT_NV_COUNTERS_MAX:
 	    // maximum number of NV indexes that are allowed to have the
