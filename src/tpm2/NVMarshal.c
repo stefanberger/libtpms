@@ -3485,16 +3485,20 @@ skip_hardware_clock:
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "Volatile State", "version 3 or later");
-        rc = VolatileState_TailV3_Unmarshal(buffer, size);
-
-        BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
-                        "Volatile State", "version 4 or later");
+        if (rc == TPM_RC_SUCCESS) {
+            rc = VolatileState_TailV3_Unmarshal(buffer, size);
+        }
+        if (rc == TPM_RC_SUCCESS) {
+            BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
+                            "Volatile State", "version 4 or later");
+        }
         if (rc == TPM_RC_SUCCESS) {
             rc = VolatileState_TailV4_Unmarshal(buffer, size);
         }
-
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "Volatile State", "version 5 or later");
+        if (rc == TPM_RC_SUCCESS) {
+            BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                            "Volatile State", "version 5 or later");
+        }
         /* future versions append here */
     }
 
@@ -4048,10 +4052,14 @@ skip_num_policy_pcr_group:
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "PERSISTENT_DATA", "version 3 or later");
-        rc = TPML_PCR_SELECTION_Unmarshal(&shadow.pcrAllocated, buffer, size);
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPML_PCR_SELECTION_Unmarshal(&shadow.pcrAllocated, buffer, size);
+        }
 
-        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "PERSISTENT_DATA", "version 4 or later");
+        if (rc == TPM_RC_SUCCESS) {
+            BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                            "PERSISTENT_DATA", "version 4 or later");
+        }
         /* future versions nest-append here */
     }
 
