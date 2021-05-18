@@ -305,9 +305,11 @@ if test "x$enable_hardening" != "xno"; then
 	AC_SUBST([HARDENING_LDFLAGS])
 fi
 
-CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
-CFLAGS="$CFLAGS -Wmissing-prototypes"
-LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
+AM_CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign -Wmissing-prototypes"
+AM_LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
+
+AC_SUBST([AM_CFLAGS])
+AC_SUBST([AM_LDFLAGS])
 
 AC_CONFIG_FILES(Makefile                   \
 		dist/libtpms.spec          \
@@ -330,10 +332,10 @@ if test -z "$with_tpm2"; then
 fi
 
 echo
-echo "CFLAGS=$CFLAGS"
+echo "AM_CFLAGS=$AM_CFLAGS"
 echo "HARDENING_CFLAGS=$HARDENING_CFLAGS"
 echo "HARDENING_LDFLAGS=$HARDENING_LDFLAGS"
-echo "LDFLAGS=$LDFLAGS"
+echo "AM_LDFLAGS=$AM_LDFLAGS"
 echo
 echo "Version to build        : $PACKAGE_VERSION"
 echo "Crypto library          : $cryptolib"

@@ -4,17 +4,19 @@
 # For the license, see the LICENSE file in the root directory.
 #
 
+AM_CFLAGS = @AM_CFLAGS@
+AM_LDFLAGS = @AM_LDFLAGS@ $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER) 
+
 lib_LTLIBRARIES=libtpms.la
 
 common_CFLAGS = -include tpm_library_conf.h \
                 -I$(top_srcdir)/include/libtpms \
 		-I$(top_builddir)/include/libtpms \
+		$(AM_CFLAGS) \
                 $(HARDENING_CFLAGS) \
                $(SANITIZERS) \
                $(FUZZER)
 
-
-LDFLAGS += $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
 
 #
 # TPM1.2
@@ -576,16 +578,16 @@ libtpms_la_SOURCES = \
 libtpms_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_la_LDFLAGS = -version-info $(LIBTPMS_VERSION_INFO) \
-                     -no-undefined
+                     -no-undefined $(AM_LDFLAGS)
 
 if HAVE_VERSION_SCRIPT
 libtpms_la_LDFLAGS += -Wl,--version-script=$(srcdir)/libtpms.syms
 endif
 
-LDFLAGS_ARCH  = $(findstring -m32, $(CFLAGS))
-LDFLAGS_ARCH += $(findstring -m64, $(CFLAGS))
-LDFLAGS_ARCH += $(findstring -m32, $(LDFLAGS))
-LDFLAGS_ARCH += $(findstring -m64, $(LDFLAGS))
+LDFLAGS_ARCH  = $(findstring -m32, $(AM_CFLAGS))
+LDFLAGS_ARCH += $(findstring -m64, $(AM_CFLAGS))
+LDFLAGS_ARCH += $(findstring -m32, $(AM_LDFLAGS))
+LDFLAGS_ARCH += $(findstring -m64, $(AM_LDFLAGS))
 
 check-local: SHELL?="/usr/bin/env bash"
 check-local:
