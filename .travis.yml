@@ -50,10 +50,7 @@ matrix:
          sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python3-twisted expect
            libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2
-           python3-setuptools python3-cryptography python3-pip &&
-         pip3 install --upgrade pip &&
-         pip3 install --upgrade wheel &&
-         pip3 install --upgrade cryptography &&
+           python3-setuptools libjson-glib-dev &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
          export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
          sudo make -j$(nproc) check &&
@@ -74,10 +71,7 @@ matrix:
          sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python3-twisted expect
            libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2
-           python3-setuptools python3-cryptography python3-pip &&
-         pip3 install --upgrade pip &&
-         pip3 install --upgrade wheel &&
-         pip3 install --upgrade cryptography &&
+           python3-setuptools libjson-glib-dev &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
          export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
          sudo make -j$(nproc) check &&
