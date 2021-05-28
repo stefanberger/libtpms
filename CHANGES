@@ -5,6 +5,8 @@ version 0.9.0:
   - The size of the context gap has been adjusted to 0xffff from 0xff.
     As a consequence of this the volatile state's format (STATE_RESET_DATA)
     has changed and cannot be downgraded.
+  - Applied work-around for Win 2016 & 2019 server related to
+    TPM2_ContextLoad (issue #217)
 
 version 0.8.0
   - NOTE: Downgrade to previous versions is not possible. See below.
