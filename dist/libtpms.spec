@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Jun 01 2021 Stefan Berger - 0.8.3-1
+- tpm2: Work-around for Windows 2016 & 2019 bug related to ContextLoad
+
 * Mon Mar 01 2021 Stefan Berger - 0.8.2-1
 - tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
 
