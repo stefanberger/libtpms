@@ -79,7 +79,7 @@ extern "C" {
     UINT16
     Array_Marshal(BYTE *sourceBuffer, UINT16 sourceSize, BYTE **buffer, INT32 *size);
     UINT16
-    TPM2B_Marshal(TPM2B *source, BYTE **buffer, INT32 *size);
+    TPM2B_Marshal(TPM2B *source, UINT32 maxSize, BYTE **buffer, INT32 *size); // libtpms changed
     UINT16
     TPM_KEY_BITS_Marshal(TPM_KEY_BITS *source, BYTE **buffer, INT32 *size);
     UINT16
