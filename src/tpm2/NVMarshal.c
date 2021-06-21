@@ -255,7 +255,7 @@ UINT16
 TPM2B_PROOF_Marshal(TPM2B_PROOF *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    written += TPM2B_Marshal(&source->b, buffer, size);
+    written += TPM2B_Marshal(&source->b, sizeof(source->t.buffer), buffer, size);
     return written;
 }
 
@@ -1328,7 +1328,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
                                 STATE_RESET_DATA_VERSION,
                                 STATE_RESET_DATA_MAGIC, 1);
     written += TPM2B_PROOF_Marshal(&data->nullProof, buffer, size);
-    written += TPM2B_Marshal(&data->nullSeed.b, buffer, size);
+    written += TPM2B_Marshal(&data->nullSeed.b, sizeof(data->nullSeed.t.buffer), buffer, size);
     written += UINT32_Marshal(&data->clearCount, buffer, size);
     written += UINT64_Marshal(&data->objectContextID, buffer, size);
 
@@ -2108,7 +2108,7 @@ TPM2B_HASH_BLOCK_Marshal(TPM2B_HASH_BLOCK *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
-    written = TPM2B_Marshal(&data->b, buffer, size);
+    written = TPM2B_Marshal(&data->b, sizeof(data->t.buffer), buffer, size);
 
     return written;
 }
@@ -2973,9 +2973,9 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 
     /* tie the volatile state to the EP,SP, and PPSeed */
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
-    written += TPM2B_Marshal(&pd.EPSeed.b, buffer, size);
-    written += TPM2B_Marshal(&pd.SPSeed.b, buffer, size);
-    written += TPM2B_Marshal(&pd.PPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&pd.EPSeed.b, sizeof(pd.EPSeed.t.buffer), buffer, size);
+    written += TPM2B_Marshal(&pd.SPSeed.b, sizeof(pd.SPSeed.t.buffer), buffer, size);
+    written += TPM2B_Marshal(&pd.PPSeed.b, sizeof(pd.PPSeed.t.buffer), buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size); /* v4 */
 
@@ -3776,9 +3776,9 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += TPM2B_AUTH_Marshal(&data->ownerAuth, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->endorsementAuth, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->lockoutAuth, buffer, size);
-    written += TPM2B_Marshal(&data->EPSeed.b, buffer, size);
-    written += TPM2B_Marshal(&data->SPSeed.b, buffer, size);
-    written += TPM2B_Marshal(&data->PPSeed.b, buffer, size);
+    written += TPM2B_Marshal(&data->EPSeed.b, sizeof(data->EPSeed.t.buffer), buffer, size);
+    written += TPM2B_Marshal(&data->SPSeed.b, sizeof(data->SPSeed.t.buffer), buffer, size);
+    written += TPM2B_Marshal(&data->PPSeed.b, sizeof(data->PPSeed.t.buffer), buffer, size);
     written += TPM2B_PROOF_Marshal(&data->phProof, buffer, size);
     written += TPM2B_PROOF_Marshal(&data->shProof, buffer, size);
     written += TPM2B_PROOF_Marshal(&data->ehProof, buffer, size);
