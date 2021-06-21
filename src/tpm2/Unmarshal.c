@@ -136,6 +136,7 @@ TPM2B_Unmarshal(TPM2B *target, UINT16 targetSize, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->size > targetSize) {
 	    rc = TPM_RC_SIZE;
+	    target->size = 0; // libtpms added
 	}
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -1686,6 +1687,7 @@ TPMS_PCR_SELECTION_Unmarshal(TPMS_PCR_SELECTION *target, BYTE **buffer, INT32 *s
 	if ((target->sizeofSelect < PCR_SELECT_MIN) ||
 	    (target->sizeofSelect > PCR_SELECT_MAX)) {
 	    rc = TPM_RC_VALUE;
+	    target->sizeofSelect = 0; // libtpms added
 	}
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -1862,6 +1864,7 @@ TPML_CC_Unmarshal(TPML_CC *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_CAP_CC) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -1902,6 +1905,7 @@ TPML_CCA_Unmarshal(TPML_CCA *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_CAP_CC) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -1925,6 +1929,7 @@ TPML_ALG_Unmarshal(TPML_ALG *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_ALG_LIST_SIZE) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -1948,6 +1953,7 @@ TPML_HANDLE_Unmarshal(TPML_HANDLE *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_CAP_HANDLES) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -1976,11 +1982,13 @@ TPML_DIGEST_Unmarshal(TPML_DIGEST *target, BYTE **buffer, INT32 *size)
 	/* TPM side is hard coded to 2 minimum */
 	if (target->count < 2) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > 8) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2003,6 +2011,7 @@ TPML_DIGEST_VALUES_Unmarshal(TPML_DIGEST_VALUES *target, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > HASH_COUNT) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2025,6 +2034,7 @@ TPML_PCR_SELECTION_Unmarshal(TPML_PCR_SELECTION *target, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > HASH_COUNT) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2050,6 +2060,7 @@ TPML_ALG_PROPERTY_Unmarshal(TPML_ALG_PROPERTY *target, BYTE **buffer, INT32 *siz
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_CAP_ALGS) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2072,6 +2083,7 @@ TPML_TAGGED_TPM_PROPERTY_Unmarshal(TPML_TAGGED_TPM_PROPERTY  *target, BYTE **buf
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_TPM_PROPERTIES) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2094,6 +2106,7 @@ TPML_TAGGED_PCR_PROPERTY_Unmarshal(TPML_TAGGED_PCR_PROPERTY *target, BYTE **buff
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_PCR_PROPERTIES) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2116,6 +2129,7 @@ TPML_ECC_CURVE_Unmarshal(TPML_ECC_CURVE *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_ECC_CURVES) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2138,6 +2152,7 @@ TPML_TAGGED_POLICY_Unmarshal(TPML_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS) {
 	if (target->count > MAX_TAGGED_POLICIES) {
 	    rc = TPM_RC_SIZE;
+	    target->count = 0; // libtpms added
 	}
     }
     for (i = 0 ; (rc == TPM_RC_SUCCESS) && (i < target->count) ; i++) {
@@ -2787,6 +2802,7 @@ TPM2B_SENSITIVE_CREATE_Unmarshal(TPM2B_SENSITIVE_CREATE *target, BYTE **buffer, 
     if (rc == TPM_RC_SUCCESS) {
 	if (target->size != startSize - *size) {
 	    rc = TPM_RC_SIZE;
+	    target->size = 0; // libtpms added
 	}
     }
     return rc;
@@ -3546,6 +3562,7 @@ TPM2B_ECC_POINT_Unmarshal(TPM2B_ECC_POINT *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->size != startSize - *size) {
 	    rc = TPM_RC_SIZE;
+	    target->size = 0; // libtpms added
 	}
     }
     return rc;
@@ -4069,6 +4086,7 @@ TPM2B_PUBLIC_Unmarshal(TPM2B_PUBLIC *target, BYTE **buffer, INT32 *size, BOOL al
     if (rc == TPM_RC_SUCCESS) {
 	if (target->size != startSize - *size) {
 	    rc = TPM_RC_SIZE;
+	    target->size = 0; // libtpms added
 	}
     }
     return rc;
@@ -4164,6 +4182,7 @@ TPM2B_SENSITIVE_Unmarshal(TPM2B_SENSITIVE *target, BYTE **buffer, INT32 *size)
 	if (rc == TPM_RC_SUCCESS) {
 	    if (target->size != startSize - *size) {
 		rc = TPM_RC_SIZE;
+		target->size = 0; // libtpms added
 	    }
 	}
     }
@@ -4239,6 +4258,7 @@ TPMS_NV_PUBLIC_Unmarshal(TPMS_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->dataSize > MAX_NV_INDEX_SIZE) {
 	    rc = TPM_RC_SIZE;
+	    target->dataSize = 0; // libtpms added
 	}
     }
     return rc;
@@ -4269,6 +4289,7 @@ TPM2B_NV_PUBLIC_Unmarshal(TPM2B_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	if (target->size != startSize - *size) {
 	    rc = TPM_RC_SIZE;
+	    target->size = 0; // libtpms added
 	}
     }
     return rc;
