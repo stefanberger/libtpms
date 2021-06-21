@@ -3,11 +3,11 @@
 #
 # See the LICENSE file for the license associated with this file.
 
-AC_INIT([libtpms], [0.9.0])
-AC_PREREQ(2.12)
+AC_INIT([libtpms],[0.9.0])
+AC_PREREQ([2.69])
 AC_CONFIG_SRCDIR(Makefile.am)
 AC_CONFIG_AUX_DIR([.])
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
@@ -28,7 +28,7 @@ AC_SUBST([LIBTPMS_VERSION_INFO])
 
 DEBUG=""
 AC_MSG_CHECKING([for debug-enabled build])
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [create a debug build]),
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],[create a debug build]),
   [if test "$enableval" = "yes"; then
      DEBUG="yes"
      AC_MSG_RESULT([yes])
@@ -69,8 +69,7 @@ AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 
 
 AC_ARG_WITH([tpm2],
-	AC_HELP_STRING([--with-tpm2],
-		       [build libtpms with TPM2 support]),
+	AS_HELP_STRING([--with-tpm2],[build libtpms with TPM2 support]),
 	[],
 	[with_tpm2=yes]
 )
@@ -87,8 +86,7 @@ AS_IF([test "x$with_tpm2" = xyes], [
 AC_SUBST(cryptolib, $cryptolib)
 
 AC_ARG_WITH([openssl],
-            AC_HELP_STRING([--with-openssl],
-                           [build libtpms with openssl library]),
+            AS_HELP_STRING([--with-openssl],[build libtpms with openssl library]),
               [AC_CHECK_LIB(crypto,
                             [AES_set_encrypt_key],
                             [],
@@ -250,12 +248,11 @@ LT_INIT
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT
 
 #AM_GNU_GETTEXT_VERSION([0.15])
 #AM_GNU_GETTEXT([external])
 
-AC_HEADER_STDC
 AC_C_CONST
 AC_C_INLINE
 
