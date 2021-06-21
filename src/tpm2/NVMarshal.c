@@ -1528,6 +1528,7 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
                                 "allocated %zu\n",
                                 (size_t)data->size, (size_t)data->allocated);
             rc = TPM_RC_SIZE;
+            data->size = 0;
         }
     }
 
