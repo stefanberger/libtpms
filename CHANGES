@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.7.8
+ - tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
+ - tpm2: Restore original value in buffer if unmarshalled one was illegal
+
 version 0.7.7
  - CryptSym: fix AES output IV
    A CVE has been filed for this bugfix. Unfortunately multi-step encrypted
