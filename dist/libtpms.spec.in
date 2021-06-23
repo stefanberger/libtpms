@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Jun 23 2021 Stefan Berger - 0.7.8-1
+- tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
+
 * Mon Mar 01 2021 Stefan Berger - 0.7.7-1
 - tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
 
