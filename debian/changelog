@@ -1,3 +1,9 @@
+libtpms (0.7.8) RELEASED; urgency=medium
+
+  * tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Wed, 23 Jun 2021 09:00:00 -0500
+
 libtpms (0.7.7) RELEASED; urgency=high
 
   * tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
