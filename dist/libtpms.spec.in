@@ -78,11 +78,11 @@ Libtpms header files and documentation.
 %define _with_openssl --with-openssl
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 %define _enable_debug --enable-debug
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 CFLAGS=-O0
 %endif
 ./autogen.sh \
@@ -112,7 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
-* Mon Jun 01 2021 Stefan Berger - 0.8.3-1
+* Wed Jun 23 2021 Stefan Berger - 0.8.4-1
+- tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
+
+* Tue Jun 01 2021 Stefan Berger - 0.8.3-1
 - tpm2: Work-around for Windows 2016 & 2019 bug related to ContextLoad
 
 * Mon Mar 01 2021 Stefan Berger - 0.8.2-1
