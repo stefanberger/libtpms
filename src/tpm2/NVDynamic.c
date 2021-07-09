@@ -352,7 +352,7 @@ NvRamNext(
     if(currentAddr + sizeof(NV_RAM_HEADER) > RAM_ORDERLY_END)
 	return NULL;
     // read the header of the next entry
-    MemoryCopy(&header, currentAddr, sizeof(NV_RAM_HEADER));
+    memcpy(&header, currentAddr, sizeof(NV_RAM_HEADER)); // libtpms: do not use MemoryCopy to avoid gcc warning
     // if the size field is zero, then we have hit the end of the list
     if(header.size == 0)
 	// leave the *iter pointing at the end of the list
