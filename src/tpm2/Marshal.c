@@ -1187,15 +1187,15 @@ TPMI_TDES_KEY_BITS_Marshal(TPMI_TDES_KEY_BITS *source, BYTE **buffer, INT32 *siz
     return written;
 }
 
-#if 0		// libtpms added
+#if ALG_CAMELLIA
 UINT16
 TPMI_CAMELLIA_KEY_BITS_Marshal(TPMI_CAMELLIA_KEY_BITS *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     written += TPM_KEY_BITS_Marshal(source, buffer, size);
     return written;
-}			// libtpms added end
-#endif		// libtpms added
+}
+#endif         // libtpms added end
 
 /* Table 2:128 - Definition of TPMU_SYM_KEY_BITS Union (StructuresTable()) */
 
