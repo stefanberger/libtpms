@@ -59,6 +59,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     uint32_t rlength;
     uint32_t rtotal = 0;
     TPM_RESULT res;
+    unsigned char *vol_buffer = NULL;
+    uint32_t vol_buffer_len;
+    unsigned char *perm_buffer = NULL;
+    uint32_t perm_buffer_len;
     unsigned char startup[] = {
         0x80, 0x01, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x01, 0x44, 0x00, 0x00
     };
@@ -92,8 +96,34 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     if (res != TPM_SUCCESS)
         die("Error: TPMLIB_Process(fuzz-command) failed\n");
 
+    /* state suspend */
+    res = TPMLIB_GetState(TPMLIB_STATE_VOLATILE, &vol_buffer, &vol_buffer_len);
+    if (res != TPM_SUCCESS)
+        die("Error: TPMLIB_GetState(TPMLIB_STATE_VOLATILE) failed\n");
+
+    res = TPMLIB_GetState(TPMLIB_STATE_PERMANENT, &perm_buffer, &perm_buffer_len);
+    if (res != TPM_SUCCESS)
+        die("Error: TPMLIB_GetState(TPMLIB_STATE_PERMANENT) failed\n");
+
+    TPMLIB_Terminate();
+
+    /* state resume */
+    res = TPMLIB_SetState(TPMLIB_STATE_PERMANENT, perm_buffer, perm_buffer_len);
+    if (res != TPM_SUCCESS)
+        die("Error: TPMLIB_SetState(TPMLIB_STATE_PERMANENT) failed\n");
+
+    res = TPMLIB_SetState(TPMLIB_STATE_VOLATILE, vol_buffer, vol_buffer_len);
+    if (res != TPM_SUCCESS)
+        die("Error: TPMLIB_SetState(TPMLIB_STATE_VOLATILE) failed\n");
+
+    res = TPMLIB_MainInit();
+    if (res != TPM_SUCCESS)
+        die("Error: TPMLIB_MainInit() to resume with the state failed\n");
+
     TPMLIB_Terminate();
     TPM_Free(rbuffer);
+    TPM_Free(vol_buffer);
+    TPM_Free(perm_buffer);
 
     return 0;
 }
