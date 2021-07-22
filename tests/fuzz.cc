@@ -9,6 +9,13 @@
 #include <libtpms/tpm_error.h>
 #include <libtpms/tpm_memory.h>
 
+
+static void die(const char *msg)
+{
+    fprintf(stderr, "%s", msg);
+    assert(false);
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     unsigned char *rbuffer = NULL;
@@ -20,19 +27,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     };
 
     res = TPMLIB_ChooseTPMVersion(TPMLIB_TPM_VERSION_2);
-    assert(res == TPM_SUCCESS);
+    if (res != TPM_SUCCESS)
+        die("Could not choose the TPM version\n");
 
     res = TPMLIB_MainInit();
     if (res != TPM_SUCCESS)
-        fprintf(stderr, "Error: TPMLIB_MainInit() failed\n");
+        die("Error: TPMLIB_MainInit() failed\n");
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, startup, sizeof(startup));
     if (res != TPM_SUCCESS)
-        fprintf(stderr, "Error: TPMLIB_Process(Startup) failed\n");
+        die("Error: TPMLIB_Process(Startup) failed\n");
 
     res = TPMLIB_Process(&rbuffer, &rlength, &rtotal, (unsigned char*)data, size);
     if (res != TPM_SUCCESS)
-        fprintf(stderr, "Error: TPMLIB_Process(fuzz-command) failed\n");
+        die("Error: TPMLIB_Process(fuzz-command) failed\n");
 
     TPMLIB_Terminate();
     TPM_Free(rbuffer);
