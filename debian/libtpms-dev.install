@@ -1,5 +1,5 @@
-#! /usr/bin/dh-exec
-usr/lib/*/*.so
-usr/lib/*/pkgconfig/
 /usr/include/libtpms/*.h
+/usr/lib/*/*.a
+/usr/lib/*/*.so
+/usr/lib/*/pkgconfig/
 /usr/share/man/man3/*.3
