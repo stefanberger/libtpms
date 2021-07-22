@@ -8,6 +8,7 @@
 #include <libtpms/tpm_library.h>
 #include <libtpms/tpm_error.h>
 #include <libtpms/tpm_memory.h>
+#include <libtpms/tpm_nvfilename.h>
 
 
 static void die(const char *msg)
@@ -37,11 +38,23 @@ static TPM_RESULT mytpm_io_getphysicalpresence(TPM_BOOL *phyPres,
     return TPM_SUCCESS;
 }
 
+static unsigned char *permall;
+static uint32_t permall_length;
+
 static TPM_RESULT mytpm_nvram_loaddata(unsigned char **data,
                                        uint32_t *length,
                                        uint32_t tpm_number,
                                        const char *name)
 {
+    if (!strcmp(name, TPM_PERMANENT_ALL_NAME)) {
+        if (permall) {
+            *data = NULL;
+            assert(TPM_Malloc(data, permall_length) == TPM_SUCCESS);
+            memcpy(*data, permall, permall_length);
+            *length = permall_length;
+            return TPM_SUCCESS;
+        }
+    }
     return TPM_RETRY;
 }
 
@@ -50,6 +63,13 @@ static TPM_RESULT mytpm_nvram_storedata(const unsigned char *data,
                                         uint32_t tpm_number,
                                         const char *name)
 {
+    if (!strcmp(name, TPM_PERMANENT_ALL_NAME)) {
+        free(permall);
+        permall = NULL;
+        assert(TPM_Malloc(&permall, length) == TPM_SUCCESS);
+        memcpy(permall, data, length);
+        permall_length = length;
+    }
     return TPM_SUCCESS;
 }
 
@@ -124,6 +144,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     TPM_Free(rbuffer);
     TPM_Free(vol_buffer);
     TPM_Free(perm_buffer);
+    TPM_Free(permall);
+    permall = NULL;
 
     return 0;
 }
