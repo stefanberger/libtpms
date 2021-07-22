@@ -217,14 +217,16 @@ B<libtpms/tpm_error.h>
  	return TPM_SUCCESS;
  }
 
- static TPM_RESULT tpm_io_getlocality(TPM_MODIFIER_INDICATOR *locModif)
+ static TPM_RESULT mytpm_io_getlocality(TPM_MODIFIER_INDICATOR *locModif,
+                                        uint32_t tpm_number)
  {
  	*locModif = locality;
 
  	return TPM_SUCCESS:
  }
 
- static TPM_RESULT mytpm_io_getphysicalpresence(TPM_BOOL *phyPres)
+ static TPM_RESULT mytpm_io_getphysicalpresence(TPM_BOOL *physicalPresence,
+                                                uint32_t tpm_number)
  {
  	*physicalPresence = FALSE;
 
@@ -253,7 +255,7 @@ B<libtpms/tpm_error.h>
 
      [...]
 
-     if (TPMLIB_RegisterCallbacks(cbs) != TPM_SUCCESS) {
+     if (TPMLIB_RegisterCallbacks(&cbs) != TPM_SUCCESS) {
          fprintf(stderr, "Could not register the callbacks.\n");
          return 1;
      }
