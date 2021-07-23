@@ -284,7 +284,8 @@ FindEmptyObjectSlot(
 		    if(handle)
 			*handle = i + TRANSIENT_FIRST;
 		    // Initialize the object attributes
-		    MemorySet(&object->attributes, 0, sizeof(OBJECT_ATTRIBUTES));
+		    // MemorySet(&object->attributes, 0, sizeof(OBJECT_ATTRIBUTES));
+		    MemorySet(object, 0, sizeof(*object)); // libtpms added: Initialize the whole object
 		    return object;
 		}
 	}
