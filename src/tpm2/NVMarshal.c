@@ -4244,6 +4244,12 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
                                      datasize, buffer, size);
         }
         offset += nrh.size;
+        if (offset + sizeof(NV_RAM_HEADER) > array_size) {
+            /* nothing will fit anymore and there won't be a 0-sized
+             * terminating node (@1).
+             */
+            break;
+        }
     }
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
@@ -4285,6 +4291,16 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
          * we read 'into' nrh and copy to nrhp at end
          */
         nrhp = array + offset;
+
+        if (offset + sizeof(NV_RAM_HEADER) > sourceside_size) {
+            /* this case can occur with the previous entry filling up the
+             * space; in this case there will not be a 0-sized terminating
+             * node (see @1 above). We clear the rest of our space.
+             */
+            if (array_size > offset)
+                memset(nrhp, 0, array_size - offset);
+            break;
+        }
 
         /* write the NVRAM header;
            nrh->size holds the complete size including data;
