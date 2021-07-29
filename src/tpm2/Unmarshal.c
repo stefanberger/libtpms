@@ -2605,8 +2605,15 @@ TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *siz
     }
     if (rc == TPM_RC_SUCCESS) {
 	switch (*target) {
+#if AES_128	// libtpms added
 	  case 128:
+#endif		// libtpms added begin
+#if AES_192
+	  case 192:
+#endif
+#if AES_256	// libtpms added end
 	  case 256:
+#endif		// libtpms added
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
