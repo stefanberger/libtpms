@@ -2629,7 +2629,15 @@ TPMI_CAMELLIA_KEY_BITS_Unmarshal(TPMI_CAMELLIA_KEY_BITS *target, BYTE **buffer, 
     }
     if (rc == TPM_RC_SUCCESS) {
 	switch (*target) {
+#if CAMELLIA_128	// libtpms added
 	  case 128:
+#endif			// libtpms added begin
+#if CAMELLIA_192
+	  case 192:
+#endif
+#if CAMELLIA_256
+	  case 256:
+#endif			// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
