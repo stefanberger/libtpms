@@ -501,7 +501,8 @@ PointFromOssl(
     if(y == NULL)
 	FAIL(FATAL_ERROR_ALLOCATION);
     // If this returns false, then the point is at infinity
-#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L	// libtpms added
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)					// libtpms added begin
     OK = EC_POINT_get_affine_coordinates(E->G, pIn, x, y, E->CTX);
 #else									// libtpms added begin
     OK = EC_POINT_get_affine_coordinates_GFp(E->G, pIn, x, y, E->CTX);
@@ -535,7 +536,8 @@ EcPointInitialized(
 	    if(E == NULL)
 		FAIL(FATAL_ERROR_ALLOCATION);
 	    P = EC_POINT_new(E->G);
-#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L	// libtpms added begin
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)					// libtpms added begin
 	    if(!EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX))
 #else									// libtpms added end
 	    if(!EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
@@ -592,11 +594,12 @@ BnCurveInitialize(
 	    VERIFY(P != NULL);
 	    
 	    // Need to use this in case Montgomery method is being used
-#if defined(OPENSSL_API_COMPAT) && OPENSSL_API_COMPAT >= 0x10200000L
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(LIBRESSL_VERSION_NUMBER)						// libtpms added begin
 	    VERIFY(EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, CTX));
-#else
+#else										// libtpms added end
 	    VERIFY(EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
-#endif
+#endif										// libtpms added
 	    // Now set the generator
 	    VERIFY(EC_GROUP_set_generator(E->G, P, bnN, bnH));
 	    
