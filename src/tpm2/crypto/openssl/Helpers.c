@@ -67,6 +67,10 @@
 
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+# include <openssl/core_names.h>
+# include <openssl/param_build.h>
+#endif
 
 /* to enable RSA_check_key() on private keys set to != 0 */
 #ifndef DO_RSA_CHECK_KEY
@@ -407,6 +411,63 @@ ComputePrivateExponentD(
     return pOK;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+static int
+BuildRSAKeyBN(EVP_PKEY **ppkey,
+              const BIGNUM *N, const BIGNUM *E, const BIGNUM *D,
+              const BIGNUM *P, const BIGNUM *Q,
+              const BIGNUM *DP, const BIGNUM *DQ, const BIGNUM *QInv)
+{
+    OSSL_PARAM_BLD *bld = NULL;
+    EVP_PKEY_CTX *ctx = NULL;
+    OSSL_PARAM *params = NULL;
+    int selection;
+    int ret = 0;
+
+    if (N && E && D) {
+        selection = EVP_PKEY_KEYPAIR;
+    } else if (N && E) {
+        selection = EVP_PKEY_PUBLIC_KEY;
+    } else {
+        return 0;
+    }
+
+    if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL)) == NULL ||
+        (bld = OSSL_PARAM_BLD_new()) == NULL)
+        goto error;
+
+    if (N && OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, N) != 1)
+        goto error;
+    if (E && OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, E) != 1)
+        goto error;
+    if (D && OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_D, D) != 1)
+        goto error;
+    if (P && Q && DP && DQ && QInv &&
+        (OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_FACTOR1, P) != 1 ||
+         OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_FACTOR2, Q) != 1 ||
+         OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_EXPONENT1, DP) != 1 ||
+         OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_EXPONENT2, DQ) != 1 ||
+         OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_COEFFICIENT1, QInv) != 1))
+        goto error;
+
+    if ((params = OSSL_PARAM_BLD_to_param(bld)) == NULL ||
+        EVP_PKEY_fromdata_init(ctx) != 1 ||
+        EVP_PKEY_fromdata(ctx, ppkey, selection, params) != 1)
+        goto error;
+
+    ret = 1;
+
+error:
+    OSSL_PARAM_BLD_free(bld);
+    OSSL_PARAM_free(params);
+    EVP_PKEY_CTX_free(ctx);
+
+    return ret;
+}
+
+#endif /*  OPENSSL_VERSION_NUMBER >= 0x30000000L */
+
 /* Build an RSA key from the given BIGUMs. The caller must always free
  * the passed BIGNUMs.
  */
@@ -546,6 +607,50 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
     return retVal;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
+                          const BIGNUM *E, const BIGNUM *D)
+{
+    EVP_PKEY_CTX *ctx;
+    EVP_PKEY *pkey = NULL;
+    static int disp;
+    int ret;
+
+    if (!DO_RSA_CHECK_KEY)
+        return;
+    if (!disp) {
+        fprintf(stderr, "RSA key checking is enabled (OSSL 3)\n");
+        disp = 1;
+    }
+
+    if (BuildRSAKeyBN(&pkey, N, E, D, NULL, NULL, NULL, NULL, NULL) != 1)
+        goto error;
+
+    ctx = EVP_PKEY_CTX_new_from_pkey(NULL, pkey, NULL);
+
+    if ((ret = EVP_PKEY_public_check(ctx)) != 1) {
+        fprintf(stderr, "Detected bad public RSA key. STOP. ret=%d\n", ret);
+        while (1);
+    }
+
+    if ((ret = EVP_PKEY_private_check(ctx)) != 1) {
+        fprintf(stderr, "Detected bad private RSA key. STOP. ret=%d\n", ret);
+        while (1);
+    }
+
+    EVP_PKEY_CTX_free(ctx);
+    EVP_PKEY_free(pkey);
+
+    return;
+
+error:
+    fprintf(stderr, "Could not construct RSA key. STOP.\n");
+    while (1);
+}
+
+#else /* OPENSSL_VERSION_NUMBER >= 0x30000000L */
+
 static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
                           const BIGNUM *E, const BIGNUM *D)
 {
@@ -568,6 +673,8 @@ static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
     }
     RSA_free(mykey);
 }
+
+#endif /* ! OPENSSL_VERSION_NUMBER >= 0x30000000L */
 
 LIB_EXPORT TPM_RC
 InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
