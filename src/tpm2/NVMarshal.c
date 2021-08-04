@@ -3760,6 +3760,40 @@ static const struct _entry {
     { COMPILE_CONSTANT(TPM_MAX_DERIVATION_BITS, EQ) },
     { COMPILE_CONSTANT(PROOF_SIZE, EQ) },
     { COMPILE_CONSTANT(HASH_COUNT, EQ) },
+
+    /* added for PA_COMPILE_CONSTANTS_VERSION == 3 */
+    { COMPILE_CONSTANT(AES_128, LE) },
+    { COMPILE_CONSTANT(AES_192, LE) },
+    { COMPILE_CONSTANT(AES_256, LE) },
+    { COMPILE_CONSTANT(SM4_128, LE) },
+    { COMPILE_CONSTANT(ALG_CAMELLIA, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_128, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_192, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_256, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_256, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_384, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_512, LE) },
+    { COMPILE_CONSTANT(RSA_1024, LE) },
+    { COMPILE_CONSTANT(RSA_2048, LE) },
+    { COMPILE_CONSTANT(RSA_3072, LE) },
+    { COMPILE_CONSTANT(RSA_4096, LE) },
+    { COMPILE_CONSTANT(RSA_16384, LE) },
+    { COMPILE_CONSTANT(RH_ACT_0, LE) },
+    { COMPILE_CONSTANT(RH_ACT_1, LE) },
+    { COMPILE_CONSTANT(RH_ACT_2, LE) },
+    { COMPILE_CONSTANT(RH_ACT_3, LE) },
+    { COMPILE_CONSTANT(RH_ACT_4, LE) },
+    { COMPILE_CONSTANT(RH_ACT_5, LE) },
+    { COMPILE_CONSTANT(RH_ACT_6, LE) },
+    { COMPILE_CONSTANT(RH_ACT_7, LE) },
+    { COMPILE_CONSTANT(RH_ACT_8, LE) },
+    { COMPILE_CONSTANT(RH_ACT_9, LE) },
+    { COMPILE_CONSTANT(RH_ACT_A, LE) },
+    { COMPILE_CONSTANT(RH_ACT_B, LE) },
+    { COMPILE_CONSTANT(RH_ACT_C, LE) },
+    { COMPILE_CONSTANT(RH_ACT_D, LE) },
+    { COMPILE_CONSTANT(RH_ACT_E, LE) },
+    { COMPILE_CONSTANT(RH_ACT_F, LE) },
 };
 
 static TPM_RC
@@ -3804,7 +3838,7 @@ UINT32_Unmarshal_CheckConstant(BYTE **buffer, INT32 *size, UINT32 constant,
 }
 
 #define PA_COMPILE_CONSTANTS_MAGIC 0xc9ea6431
-#define PA_COMPILE_CONSTANTS_VERSION 2
+#define PA_COMPILE_CONSTANTS_VERSION 3
 
 /* Marshal compile-time constants related to persistent-all state */
 static UINT32
@@ -3856,6 +3890,10 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
         case 2:
             /* PA_COMPILE_CONSTANTS_VERSION 1 and 2 had 88 entries */
             exp_array_size = 88;
+            break;
+        case 3:
+            /* PA_COMPILE_CONSTANTS_VERSION 3 had 104 entries */
+            exp_array_size = 120;
             break;
         default:
             /* we don't suport anything newer - no downgrade */
