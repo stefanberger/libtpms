@@ -3843,6 +3843,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
     unsigned i;
     NV_HEADER hdr;
     UINT32 array_size;
+    UINT32 exp_array_size;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3850,17 +3851,33 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
                                  PA_COMPILE_CONSTANTS_MAGIC);
     }
     if (rc == TPM_RC_SUCCESS) {
+        switch (hdr.version) {
+        case 1:
+        case 2:
+            /* PA_COMPILE_CONSTANTS_VERSION 1 and 2 had 88 entries */
+            exp_array_size = 88;
+            break;
+        default:
+            /* we don't suport anything newer - no downgrade */
+            TPMLIB_LogTPM2Error("Unsupported PA_COMPILE_CONSTANTS version %d. "
+                                "Supporting up to version %d.\n",
+                                hdr.version, PA_COMPILE_CONSTANTS_VERSION);
+            rc = TPM_RC_BAD_VERSION;
+        }
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&array_size, buffer, size);
     }
 
     if (rc == TPM_RC_SUCCESS &&
-        array_size != ARRAY_SIZE(pa_compile_constants)) {
-        TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS has non-matching number of "
-                            "elements; found %u, expected %zu\n",
-                            array_size, ARRAY_SIZE(pa_compile_constants));
+        array_size != exp_array_size) {
+        TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS v%d has non-matching number of "
+                            "elements; found %u, expected %u\n",
+                            hdr.version, array_size, exp_array_size);
     }
 
-    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(pa_compile_constants); i++)
+    for (i = 0; rc == TPM_RC_SUCCESS && i < exp_array_size; i++)
         rc = UINT32_Unmarshal_CheckConstant(
                                   buffer, size, pa_compile_constants[i].constant,
                                   pa_compile_constants[i].name,
