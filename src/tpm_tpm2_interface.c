@@ -368,13 +368,15 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     "}";
     const char *tpmfeatures_temp =
     "\"TPMFeatures\":{"
-        "\"RSAKeySizes\":[%s]"
+        "\"RSAKeySizes\":[%s],"
+        "\"CamelliaKeySizes\":[%s]"
     "}";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
     char *tpmfeatures = NULL;
     char rsakeys[32];
+    char camelliakeys[16];
     size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
@@ -410,7 +412,14 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
                      RSA_4096 ? ",4096" : "");
         if (n >= sizeof(rsakeys))
             goto error;
-        if (asprintf(&tpmfeatures, tpmfeatures_temp, rsakeys) < 0)
+        n = snprintf(camelliakeys, sizeof(camelliakeys), "%s%s%s",
+                     CAMELLIA_128 ? "128" : "",
+                     CAMELLIA_192 ? ",192" : "",
+                     CAMELLIA_256 ? ",256" : "");
+        if (n >= sizeof(camelliakeys))
+            goto error;
+        if (asprintf(&tpmfeatures, tpmfeatures_temp,
+                     rsakeys, camelliakeys) < 0)
             goto error;
         if (asprintf(&buffer, fmt,  printed ? "," : "",
                      tpmfeatures, "%s%s%s") < 0)
