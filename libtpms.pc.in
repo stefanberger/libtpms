@@ -4,6 +4,9 @@ libdir=@libdir@
 includedir=@includedir@
 cryptolib=@cryptolib@
 
+with_tpm1=@WITH_TPM1@
+with_tpm2=@WITH_TPM2@
+
 Name: libtpms
 Version: @VERSION@
 Description: libtpms
