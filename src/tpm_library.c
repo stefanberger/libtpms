@@ -79,9 +79,15 @@ static const struct tags_and_indices {
 };
 
 static const struct tpm_interface *const tpm_iface[] = {
+#if WITH_TPM1
     &TPM12Interface,
+#else
+    &DisabledInterface,
+#endif
 #if WITH_TPM2
     &TPM2Interface,
+#else
+    &DisabledInterface,
 #endif
     NULL,
 };
@@ -102,36 +108,38 @@ uint32_t TPMLIB_GetVersion(void)
 
 TPM_RESULT TPMLIB_ChooseTPMVersion(TPMLIB_TPMVersion ver)
 {
-    TPM_RESULT ret = TPM_SUCCESS;
-
     /* TPMLIB_Terminate will reset previous choice */
     if (tpmvers_locked)
         return TPM_FAIL;
 
     switch (ver) {
+#if WITH_TPM1
     case TPMLIB_TPM_VERSION_1_2:
         if (tpmvers_choice != 0)
             ClearAllCachedState();
 
         tpmvers_choice = 0; // entry 0 in tpm_iface
-        break;
-    case TPMLIB_TPM_VERSION_2:
+        return TPM_SUCCESS;
+#endif
 #if WITH_TPM2
+    case TPMLIB_TPM_VERSION_2:
         if (tpmvers_choice != 1)
             ClearAllCachedState();
 
         tpmvers_choice = 1; // entry 1 in tpm_iface
-        break;
+        return TPM_SUCCESS;
 #endif
     default:
-        ret = TPM_FAIL;
+        return TPM_FAIL;
     }
-
-    return ret;
 }
 
 TPM_RESULT TPMLIB_MainInit(void)
 {
+    if (!tpm_iface[tpmvers_choice]) {
+        return TPM_FAIL;
+    }
+
     tpmvers_locked = TRUE;
 
     return tpm_iface[tpmvers_choice]->MainInit();

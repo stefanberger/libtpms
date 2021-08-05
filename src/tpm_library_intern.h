@@ -85,6 +85,7 @@ struct tpm_interface {
                            unsigned char **buffer, uint32_t *buflen);
 };
 
+extern const struct tpm_interface DisabledInterface;
 extern const struct tpm_interface TPM12Interface;
 extern const struct tpm_interface TPM2Interface;
 

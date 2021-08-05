@@ -67,6 +67,10 @@ m4_if(
 
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 
+AC_ARG_WITH([tpm1],
+    AS_HELP_STRING([--with-tpm1], [build libtpms with TPM 1.2 support]), [], [with_tpm1=yes])
+AM_CONDITIONAL([WITH_TPM1], [test "x$with_tpm1" != "xno"])
+AS_IF([test "x$with_tpm1" != "xno"], [AC_DEFINE([WITH_TPM1], [1], [With TPM 1.2 support])])
 
 AC_ARG_WITH([tpm2],
 	AS_HELP_STRING([--with-tpm2],[build libtpms with TPM2 support]),
@@ -337,6 +341,7 @@ echo
 echo "Version to build        : $PACKAGE_VERSION"
 echo "Crypto library          : $cryptolib"
 echo "Debug build             : $enable_debug"
+echo "With TPM1.2 support     : $with_tpm1"
 echo "With TPM2 support       : $with_tpm2"
 echo "HAVE_VERSION_SCRIPT     : $have_version_script"
 echo "Use openssl crypto for  : $use_openssl_functions_for"

@@ -6,8 +6,11 @@
 
 AM_CFLAGS = @AM_CFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER) 
+noinst_LTLIBRARIES =
+noinst_HEADERS =
 
-lib_LTLIBRARIES=libtpms.la
+lib_LTLIBRARIES = libtpms.la
+libtpms_la_LIBADD =
 
 common_CFLAGS = -include tpm_library_conf.h \
                 -I$(top_srcdir)/include/libtpms \
@@ -22,13 +25,14 @@ common_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
 # let the default NVRAM write to disk
 common_CFLAGS += -DTPM_NV_DISK
 
+if WITH_TPM1
 #
 # TPM1.2
 #
 
-noinst_LTLIBRARIES = libtpms_tpm12.la
+noinst_LTLIBRARIES += libtpms_tpm12.la
 
-libtpms_la_LIBADD = libtpms_tpm12.la
+libtpms_la_LIBADD += libtpms_tpm12.la
 
 libtpms_tpm12_la_LIBADD =
 
@@ -93,7 +97,7 @@ libtpms_tpm12_la_SOURCES = \
 	tpm_tpm12_interface.c \
 	tpm_tpm12_tis.c
 
-noinst_HEADERS = \
+noinst_HEADERS += \
 	tpm12/tpm_admin.h \
 	tpm12/tpm_audit.h \
 	tpm12/tpm_auth.h \
@@ -163,6 +167,8 @@ libtpms_tpm12_la_LIBADD += -lcrypto
 endif # LIBTPMS_USE_OPENSSL
 
 endif # LIBTPMS_USE_FREEBL
+
+endif # WITH_TPM1
 
 # TPM2
 #
@@ -559,6 +565,9 @@ libtpms_tpm2_la_CFLAGS += \
 	-I $(srcdir)/tpm2/crypto \
 	-I $(srcdir)/tpm2/crypto/openssl
 
+
+libtpms_tpm2_la_LIBADD += -lcrypto
+
 endif # LIBTPMS_USE_OPENSSL
 
 endif # WITH_TPM2
@@ -568,6 +577,7 @@ endif # WITH_TPM2
 #
 
 libtpms_la_SOURCES = \
+	disabled_interface.c \
 	tpm_debug.c \
 	tpm_library.c \
 	tpm_memory.c \
