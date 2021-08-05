@@ -60,7 +60,7 @@
 # include <openssl/evp.h>
 #endif
 
-#include "tpm12/tpm_debug.h"
+#include "tpm_debug.h"
 #include "tpm_error.h"
 #include "tpm_library.h"
 #include "tpm_library_intern.h"

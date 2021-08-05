@@ -42,6 +42,7 @@
 
 #include <limits.h>
 #include "tpm_constants.h"
+#include "tpm_memory.h"
 #include "tpm_types.h"
 #include "tpm_nvram_const.h"
 

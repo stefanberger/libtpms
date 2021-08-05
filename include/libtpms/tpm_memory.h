@@ -46,6 +46,12 @@
 extern "C" {
 #endif
 
+/* This value is used to limit memory allocation to prevent resource overload. */
+
+#ifndef TPM_ALLOC_MAX
+#define TPM_ALLOC_MAX  0x20000  /* 128k bytes */
+#endif
+
 TPM_RESULT TPM_Malloc(unsigned char **buffer, uint32_t size);
 TPM_RESULT TPM_Realloc(unsigned char **buffer, uint32_t size);
 void       TPM_Free(unsigned char *buffer);

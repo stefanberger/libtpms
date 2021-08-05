@@ -58,7 +58,6 @@
 #include "tpm_debug.h"
 #include "tpm_error.h"
 #include "tpm_memory.h"
-#include "tpm_nvram.h"
 
 #include "tpm_nvfile.h"
 
@@ -100,7 +99,7 @@ char state_directory[FILENAME_MAX];
 TPM_RESULT TPM_NVRAM_Init(void)
 {
     TPM_RESULT  rc = 0;
-    char        *tpm_state_path;
+    char        *tpm_state_path = NULL;
     size_t      length;
 
 #ifdef TPM_LIBTPMS_CALLBACKS

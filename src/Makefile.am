@@ -17,6 +17,10 @@ common_CFLAGS = -include tpm_library_conf.h \
                $(SANITIZERS) \
                $(FUZZER)
 
+# build with libtpms callback support
+common_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
+# let the default NVRAM write to disk
+common_CFLAGS += -DTPM_NV_DISK
 
 #
 # TPM1.2
@@ -40,10 +44,6 @@ libtpms_tpm12_la_CFLAGS += -DTPM_VOLATILE_LOAD
 libtpms_tpm12_la_CFLAGS += -DTPM_ENABLE_ACTIVATE
 # build with AES support for symmetric crypto
 libtpms_tpm12_la_CFLAGS += -DTPM_AES
-# build with libtpms callback support
-libtpms_tpm12_la_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
-# let the default NVRAM write to disk
-libtpms_tpm12_la_CFLAGS += -DTPM_NV_DISK
 # build a POSIX type of TPM
 libtpms_tpm12_la_CFLAGS += -DTPM_POSIX
 # build without maintenance commands
@@ -60,7 +60,6 @@ libtpms_tpm12_la_SOURCES = \
 	tpm12/tpm_cryptoh.c \
 	tpm12/tpm_counter.c \
 	tpm12/tpm_daa.c \
-	tpm12/tpm_debug.c \
 	tpm12/tpm_delegate.c \
 	tpm12/tpm_digest.c \
 	tpm12/tpm_error.c \
@@ -71,10 +70,8 @@ libtpms_tpm12_la_SOURCES = \
 	tpm12/tpm_key.c \
 	tpm12/tpm_load.c \
 	tpm12/tpm_maint.c \
-	tpm12/tpm_memory.c \
 	tpm12/tpm_migration.c \
 	tpm12/tpm_nonce.c \
-	tpm12/tpm_nvfile.c \
 	tpm12/tpm_nvram.c \
 	tpm12/tpm_openssl_helpers.c \
 	tpm12/tpm_owner.c \
@@ -106,7 +103,7 @@ noinst_HEADERS = \
 	tpm12/tpm_crypto.h \
 	tpm12/tpm_cryptoh.h \
 	tpm12/tpm_daa.h \
-	tpm12/tpm_debug.h \
+	tpm_debug.h \
 	tpm12/tpm_delegate.h \
 	tpm12/tpm_digest.h \
 	tpm12/tpm_global.h \
@@ -120,7 +117,7 @@ noinst_HEADERS = \
 	tpm12/tpm_maint.h \
 	tpm12/tpm_migration.h \
 	tpm12/tpm_nonce.h \
-	tpm12/tpm_nvfile.h \
+	tpm_nvfile.h \
 	tpm12/tpm_nvram_const.h \
 	tpm12/tpm_nvram.h \
 	tpm12/tpm_openssl_helpers.h \
@@ -182,8 +179,6 @@ libtpms_tpm2_la_CFLAGS = $(common_CFLAGS)
 
 libtpms_tpm2_la_CFLAGS += -D_POSIX_
 libtpms_tpm2_la_CFLAGS += -DTPM_POSIX
-# build with libtpms callback support
-libtpms_tpm2_la_CFLAGS += -DTPM_LIBTPMS_CALLBACKS
 
 libtpms_tpm2_la_SOURCES = \
 	tpm2/ACT_spt.c \
@@ -573,7 +568,10 @@ endif # WITH_TPM2
 #
 
 libtpms_la_SOURCES = \
-	tpm_library.c
+	tpm_debug.c \
+	tpm_library.c \
+	tpm_memory.c \
+	tpm_nvfile.c
 
 libtpms_la_CFLAGS = $(common_CFLAGS)
 

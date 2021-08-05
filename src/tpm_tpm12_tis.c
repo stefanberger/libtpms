@@ -46,7 +46,7 @@
 
 #include "tpm12/tpm_crypto.h"
 #include "tpm12/tpm_cryptoh.h"
-#include "tpm12/tpm_debug.h"
+#include "tpm_debug.h"
 #include "tpm_error.h"
 #include "tpm12/tpm_digest.h"
 #include "tpm12/tpm_global.h"

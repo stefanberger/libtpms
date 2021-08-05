@@ -45,7 +45,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "tpm12/tpm_debug.h"
+#include "tpm_debug.h"
 #include "tpm_error.h"
 #include "tpm12/tpm_init.h"
 #include "tpm_library_intern.h"
@@ -53,7 +53,7 @@
 #include "tpm12/tpm_startup.h"
 #include "tpm12/tpm_global.h"
 #include "tpm12/tpm_permanent.h"
-#include "tpm12/tpm_nvfile.h"
+#include "tpm_nvfile.h"
 
 static TPM_RESULT TPM12_MainInit(void)
 {
