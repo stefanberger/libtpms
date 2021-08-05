@@ -70,7 +70,10 @@ AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 AC_ARG_WITH([tpm1],
     AS_HELP_STRING([--with-tpm1], [build libtpms with TPM 1.2 support]), [], [with_tpm1=yes])
 AM_CONDITIONAL([WITH_TPM1], [test "x$with_tpm1" != "xno"])
-AS_IF([test "x$with_tpm1" != "xno"], [AC_DEFINE([WITH_TPM1], [1], [With TPM 1.2 support])])
+AS_IF([test "x$with_tpm1" != "xno"], [
+    AC_DEFINE([WITH_TPM1], [1], [With TPM 1.2 support])
+    AC_SUBST([WITH_TPM1], [1])
+])
 
 AC_ARG_WITH([tpm2],
 	AS_HELP_STRING([--with-tpm2],[build libtpms with TPM2 support]),
@@ -80,6 +83,7 @@ AC_ARG_WITH([tpm2],
 AS_IF([test "x$with_tpm2" = xyes], [
 	AC_MSG_RESULT([Building with TPM2 support])
 	AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
+	AC_SUBST([WITH_TPM2], [1])
 	AM_CONDITIONAL(WITH_TPM2, true)
 	cryptolib=openssl
 ], [
