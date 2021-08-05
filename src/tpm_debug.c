@@ -39,9 +39,6 @@
 
 #include <stdio.h>
 
-#include "tpm_commands.h"
-#include "tpm_load.h"
-
 #include "tpm_debug.h"
 #undef printf
 

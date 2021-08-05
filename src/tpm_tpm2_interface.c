@@ -62,7 +62,7 @@
 #include "tpm2/crypto/openssl/ExpDCache_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
-#include "tpm12/tpm_nvfile.h" // TPM_NVRAM_Loaddata()
+#include "tpm_nvfile.h" // TPM_NVRAM_Loaddata()
 #include "tpm_error.h"
 #include "tpm_library_intern.h"
 #include "tpm_nvfilename.h"

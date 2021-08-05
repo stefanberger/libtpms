@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "tpm_constants.h"
 #include "tpm_debug.h"
 #include "tpm_error.h"
 
