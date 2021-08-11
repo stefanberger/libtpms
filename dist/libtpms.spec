@@ -78,11 +78,11 @@ Libtpms header files and documentation.
 %define _with_openssl --with-openssl
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 %define _enable_debug --enable-debug
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 CFLAGS=-O0
 %endif
 ./autogen.sh \
@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Sep 01 2021 Stefan Berger - 0.7.9-1
+- tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
+- tpm2: Initialize a whole OBJECT before using it
+
 * Wed Jun 23 2021 Stefan Berger - 0.7.8-1
 - tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
 
