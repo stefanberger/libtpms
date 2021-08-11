@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.7.9
+ - tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
+ - tpm2: Initialize a whole OBJECT before using it
+
 version 0.7.8
  - tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
  - tpm2: Restore original value in buffer if unmarshalled one was illegal
