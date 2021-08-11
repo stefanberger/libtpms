@@ -1,3 +1,16 @@
+libtpms (0.6.6) RELEASED; urgency=medium
+
+  * tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
+  * tpm2: Initialize a whole OBJECT before using it
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Wed, 01 Sep 2021 09:00:00 -0500
+
+libtpms (0.6.5) RELEASED; urgency=medium
+
+  * tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Wed, 23 Jun 2021 09:00:00 -0500
+
 libtpms (0.6.4) RELEASED; urgency=medium
 
   * Fixed a suspend/resume problem when public keys are loaded
