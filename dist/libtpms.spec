@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Sep 01 2021 Stefan Berger - 0.8.5-1
+- tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
+- tpm2: Initialize a whole OBJECT before using it
+
 * Wed Jun 23 2021 Stefan Berger - 0.8.4-1
 - tpm2: Reset too large size indicators in TPM2B to avoid access beyond buffer
 
