@@ -99,6 +99,7 @@ IsDAExempted(
 	  case TPM_HT_NV_INDEX:
 	      {
 		  NV_INDEX            *nvIndex = NvGetIndexInfo(handle, NULL);
+		  pAssert(nvIndex != NULL);
 		  result = IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, NO_DA);
 		  break;
 	      }
@@ -460,6 +461,7 @@ IsAuthPolicyAvailable(
 	    // An NV Index.
 	      {
 		  NV_INDEX         *nvIndex = NvGetIndexInfo(handle, NULL);
+		  pAssert(nvIndex != NULL);
 		  TPMA_NV           nvAttributes = nvIndex->publicArea.attributes;
 		  //
 		  // If the policy size is not zero, check if policy can be used.
@@ -986,6 +988,7 @@ CheckPolicyAuthSession(
 		return TPM_RC_POLICY_FAIL;
 	    // Get the index data
 	    nvIndex = NvGetIndexInfo(s_associatedHandles[sessionIndex], &locator);
+	    pAssert(nvIndex != NULL);
 	    // Make sure that the TPMA_WRITTEN_ATTRIBUTE has the desired state
 	    if((IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, WRITTEN))
 	       != (session->attributes.nvWrittenState == SET))

@@ -173,6 +173,7 @@ NvIsPinPassIndex(
     if(HandleGetType(index) == TPM_HT_NV_INDEX)
 	{
 	    NV_INDEX                *nvIndex = NvGetIndexInfo(index, NULL);
+	    pAssert(nvIndex != NULL);
 	    return IsNvPinPassIndex(nvIndex->publicArea.attributes);
 	}
     return FALSE;

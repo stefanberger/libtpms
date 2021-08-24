@@ -547,6 +547,7 @@ TPM2_PolicyNV(
 	    nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
 	    // Common read access checks. NvReadAccessChecks() may return
 	    // TPM_RC_NV_AUTHORIZATION, TPM_RC_NV_LOCKED, or TPM_RC_NV_UNINITIALIZED
+	    pAssert(nvIndex != NULL);
 	    result = NvReadAccessChecks(in->authHandle,
 					in->nvIndex,
 					nvIndex->publicArea.attributes);
@@ -1130,6 +1131,7 @@ TPM2_PolicyAuthorizeNV(
 	    // Common read access checks. NvReadAccessChecks() returns
 	    // TPM_RC_NV_AUTHORIZATION, TPM_RC_NV_LOCKED, or TPM_RC_NV_UNINITIALIZED
 	    // error may be returned at this point
+	    pAssert(nvIndex != NULL);
 	    result = NvReadAccessChecks(in->authHandle, in->nvIndex,
 					nvIndex->publicArea.attributes);
 	    if(result != TPM_RC_SUCCESS)

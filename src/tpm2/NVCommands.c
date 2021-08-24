@@ -224,6 +224,7 @@ TPM2_NV_UndefineSpace(
 {
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
+    pAssert(nvIndex != NULL);
     // Input Validation
     // This command can't be used to delete an index with TPMA_NV_POLICY_DELETE SET
     if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, POLICY_DELETE))
@@ -250,6 +251,7 @@ TPM2_NV_UndefineSpaceSpecial(
     TPM_RC           result;
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
+    pAssert(nvIndex != NULL);
     // Input Validation
     // This operation only applies when the TPMA_NV_POLICY_DELETE attribute is SET
     if(!IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, POLICY_DELETE))
@@ -275,6 +277,7 @@ TPM2_NV_ReadPublic(
 		   )
 {
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, NULL);
+    pAssert(nvIndex != NULL);
     // Command Output
     // Copy index public data to output
     out->nvPublic.nvPublic = nvIndex->publicArea;
@@ -292,6 +295,7 @@ TPM2_NV_Write(
 	      )
 {
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, NULL);
+    pAssert(nvIndex != NULL);
     TPMA_NV          attributes = nvIndex->publicArea.attributes;
     TPM_RC           result;
     // Input Validation
@@ -341,6 +345,7 @@ TPM2_NV_Increment(
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     UINT64           countValue;
+    pAssert(nvIndex != NULL);
     // Input Validation
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
@@ -394,6 +399,7 @@ TPM2_NV_Extend(
     TPM2B_DIGEST            oldDigest;
     TPM2B_DIGEST            newDigest;
     HASH_STATE              hashState;
+    pAssert(nvIndex != NULL);
     // Input Validation
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
@@ -443,6 +449,7 @@ TPM2_NV_SetBits(
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     UINT64           oldValue;
     UINT64           newValue;
+    pAssert(nvIndex != NULL);
     // Input Validation
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
@@ -477,6 +484,7 @@ TPM2_NV_WriteLock(
     TPM_RC           result;
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
+    pAssert(nvIndex != NULL);
     TPMA_NV          nvAttributes = nvIndex->publicArea.attributes;
     // Input Validation:
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
@@ -539,6 +547,7 @@ TPM2_NV_Read(
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     TPM_RC           result;
+    pAssert(nvIndex != NULL);
     // Input Validation
     // Common read access checks. NvReadAccessChecks() may return
     // TPM_RC_NV_AUTHORIZATION, TPM_RC_NV_LOCKED, or TPM_RC_NV_UNINITIALIZED
@@ -576,6 +585,7 @@ TPM2_NV_ReadLock(
     // The referenced index has been checked multiple times before this is called
     // so it must be present and will be loaded into cache
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
+    pAssert(nvIndex == NULL);
     TPMA_NV          nvAttributes = nvIndex->publicArea.attributes;
     // Input Validation
     // Common read access checks. NvReadAccessChecks() may return
@@ -612,6 +622,7 @@ TPM2_NV_ChangeAuth(
 {
     NV_REF           locator;
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
+    pAssert(nvIndex != NULL);
     // Input Validation
     // Remove trailing zeros and make sure that the result is not larger than the
     // digest of the nameAlg.
@@ -645,6 +656,7 @@ TPM2_NV_Certify(
 	return TPM_RCS_SCHEME + RC_NV_Certify_inScheme;
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
+    pAssert(nvIndex != NULL);
     result = NvReadAccessChecks(in->authHandle, in->nvIndex,
 				nvIndex->publicArea.attributes);
     if(result != TPM_RC_SUCCESS)

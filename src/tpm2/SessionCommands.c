@@ -133,6 +133,7 @@ TPM2_StartAuthSession(
 	    // a PIN index can't be a bind object
 	      {
 		  NV_INDEX       *nvIndex = NvGetIndexInfo(in->bind, NULL);
+		  pAssert(nvIndex != NULL);
 		  if(IsNvPinPassIndex(nvIndex->publicArea.attributes)
 		     || IsNvPinFailIndex(nvIndex->publicArea.attributes))
 		      return TPM_RCS_HANDLE + RC_StartAuthSession_bind;

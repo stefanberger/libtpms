@@ -380,7 +380,7 @@ EntityGetAuthPolicy(
 	    // authPolicy for a NV index
 	      {
 		  NV_INDEX        *nvIndex = NvGetIndexInfo(handle, NULL);
-		  pAssert(nvIndex != 0);
+		  pAssert(nvIndex != NULL);
 		  *authPolicy = nvIndex->publicArea.authPolicy;
 		  hashAlg = nvIndex->publicArea.nameAlg;
 	      }

@@ -835,6 +835,7 @@ NvWriteIndexAttributes(
     if(IS_ATTRIBUTE(attributes, TPMA_NV, ORDERLY))
 	{
 	    NV_RAM_REF      ram = NvRamGetIndex(handle);
+	    pAssert(ram != 0);
 	    NvWriteRamIndexAttributes(ram, attributes);
 	    result = TPM_RC_SUCCESS;
 	}
@@ -1047,6 +1048,7 @@ NvGetNameByIndexHandle(
 		       )
 {
     NV_INDEX             *nvIndex = NvGetIndexInfo(handle, NULL);
+    pAssert(nvIndex != NULL);
     return NvGetIndexName(nvIndex, name);
 }
 /* 8.4.5.15 NvDefineIndex() */
