@@ -114,6 +114,45 @@ function do_tdes() {
     done
 }
 
+function do_sm4() {
+    local data="$1"
+    local osslflag="$2"
+
+    for keysize in 128; do
+        tmp=SM4_KEY_${keysize}
+        key=$(eval echo \$$tmp)
+        for mode in ecb cbc cfb ofb ctr; do
+            cipher="sm4-${mode}"
+            bs=$((128 / 8))
+            iv=""
+            ivparm=""
+            case $mode in
+            ecb)
+                ;;
+            ctr)
+                v=255
+                for ((c=0; c < bs; c++)); do
+                   iv="$(printf "%02x" $v)${iv}"
+                   v=$((v - 1))
+                done
+                ivparm="-iv ${iv}"
+                ;;
+            *)
+                for ((c=0; c < bs; c++)); do
+                   iv="${iv}$(printf "%02x" $c)"
+                done
+                ivparm="-iv ${iv}"
+                ;;
+            esac
+            echo -n "$cipher: "
+            openssl enc -e -K "${key}" ${ivparm} -${cipher} -in <(echo -en "$data") ${osslflag} | \
+                od -t x1 -w128 -An | \
+                sed -n 's/ \([a-f0-9]\{2\}\)/ 0x\1/pg'
+        done
+    done
+}
+
+
 AES_KEY_128='2b7e151628aed2a6abf7158809cf4f3c'
 AES_KEY_192='8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b'
 AES_KEY_256='603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4'
@@ -145,3 +184,12 @@ CAMELLIA_DATA_IN=${AES_DATA_IN}
 echo "----- CAMELLIA -----"
 do_camellia "${CAMELLIA_DATA_IN}" ""
 echo "--------------------"
+
+if [ -n "$(openssl enc -ciphers | grep sm4)" ]; then
+    SM4_KEY_128='0123456789abcdeffedcba9876543210'
+    SM4_DATA_IN='\xaa\xaa\xaa\xaa\xbb\xbb\xbb\xbb\xcc\xcc\xcc\xcc\xdd\xdd\xdd\xdd\xee\xee\xee\xee\xff\xff\xff\xff\xaa\xaa\xaa\xaa\xbb\xbb\xbb\xbb'
+
+    echo "-------- SM4 -------"
+    do_sm4 "${SM4_DATA_IN}" ""
+    echo "--------------------"
+fi
