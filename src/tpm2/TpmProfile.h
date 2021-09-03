@@ -334,7 +334,7 @@
 #define ALG_AES                         ALG_YES
 #endif
 #ifndef ALG_CAMELLIA
-#define ALG_CAMELLIA                    ALG_NO       /* libtpms: NO */
+#define ALG_CAMELLIA                    ALG_YES       /* libtpms: YES since v0.9 */
 #endif
 #ifndef ALG_CBC
 #define ALG_CBC                         ALG_YES
