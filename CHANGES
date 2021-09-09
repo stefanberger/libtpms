@@ -1,5 +1,8 @@
 CHANGES - changes for libtpms
 
+version 0.8.6:
+ - tpm2: Marshal event sequence objects' hash state
+
 version 0.8.5:
  - tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
  - tpm2: Initialize a whole OBJECT before using it
