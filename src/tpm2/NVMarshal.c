@@ -2157,7 +2157,7 @@ HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
 }
 
 #define HASH_OBJECT_MAGIC 0xb874fe38
-#define HASH_OBJECT_VERSION 2
+#define HASH_OBJECT_VERSION 3
 
 static UINT16
 HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
@@ -2173,7 +2173,8 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPMI_ALG_HASH_Marshal(&data->nameAlg, buffer, size);
     written += TPMA_OBJECT_Marshal(&data->objectAttributes, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->auth, buffer, size);
-    if (data->attributes.hashSeq == SET) {
+    if (data->attributes.hashSeq == SET ||
+        data->attributes.eventSeq == SET /* since v3 */) {
         array_size = ARRAY_SIZE(data->state.hashState);
         written += UINT16_Marshal(&array_size, buffer, size);
         for (i = 0; i < array_size; i++) {
@@ -2221,7 +2222,9 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
         rc = TPM2B_AUTH_Unmarshal(&data->auth, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (data->attributes.hashSeq == SET) {
+        /* hashSeq was always written correctly; eventSeq only appeared in v3 */
+        if (data->attributes.hashSeq == SET ||
+            (data->attributes.eventSeq == SET && hdr.version >= 3)) {
             if (rc == TPM_RC_SUCCESS) {
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
