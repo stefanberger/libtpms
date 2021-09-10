@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Sep 10 2021 Stefan Berger - 0.6.7-1
+- tpm2: Marshal event sequence objects' hash state
+
 * Wed Sep 01 2021 Stefan Berger - 0.6.6-1
 - tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
 - tpm2: Initialize a whole OBJECT before using it

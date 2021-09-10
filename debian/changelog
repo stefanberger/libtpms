@@ -1,3 +1,9 @@
+libtpms (0.6.7) RELEASED; urgency=medium
+
+  * tpm2: Marshal event sequence objects' hash state
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 10 Sep 2021 09:00:00 -0500
+
 libtpms (0.6.6) RELEASED; urgency=medium
 
   * tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
