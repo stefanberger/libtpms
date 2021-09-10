@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.7.10:
+ - tpm2: Marshal event sequence objects' hash state
+ - tpm2: Fixes for building and running with OpenSSL 3.0
+
 version 0.7.9
  - tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
  - tpm2: Initialize a whole OBJECT before using it
