@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Sep 20 2021 Stefan Berger - 0.7.10-1
+- tpm2: Marshal event sequence objects' hash state
+- tpm2: Fixes for building and running with OpenSSL 3.0
+
 * Wed Sep 01 2021 Stefan Berger - 0.7.9-1
 - tpm2: NVMarshal: Handle index orderly RAM without 0-sized terminating node
 - tpm2: Initialize a whole OBJECT before using it
@@ -122,7 +126,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 * Mon Mar 01 2021 Stefan Berger - 0.7.7-1
 - tpm2: CryptSym: fix AES output IV; a CVE has been filed for this issue
 
-* Fri Deb 26 2021 Stefan Berger - 0.7.6-1
+* Fri Feb 26 2021 Stefan Berger - 0.7.6-1
 - Fixed a suspend/resume problem when public keys are loaded
 - Addressed Coverity issues
 
