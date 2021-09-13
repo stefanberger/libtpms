@@ -7,6 +7,8 @@ version 0.9.0:
     has changed and cannot be downgraded.
   - Applied work-around for Win 2016 & 2019 server related to
     TPM2_ContextLoad (issue #217)
+  - Check for several more compile-time constants
+  - Enabled Camellia symmetric key encryption algorithm
 
 version 0.8.0
   - NOTE: Downgrade to previous versions is not possible. See below.

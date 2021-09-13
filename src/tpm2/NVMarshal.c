@@ -2245,7 +2245,7 @@ HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
 }
 
 #define HASH_OBJECT_MAGIC 0xb874fe38
-#define HASH_OBJECT_VERSION 2
+#define HASH_OBJECT_VERSION 3
 
 static UINT16
 HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
@@ -2261,7 +2261,8 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPMI_ALG_HASH_Marshal(&data->nameAlg, buffer, size);
     written += TPMA_OBJECT_Marshal(&data->objectAttributes, buffer, size);
     written += TPM2B_AUTH_Marshal(&data->auth, buffer, size);
-    if (data->attributes.hashSeq == SET) {
+    if (data->attributes.hashSeq == SET ||
+        data->attributes.eventSeq == SET /* since v3 */) {
         array_size = ARRAY_SIZE(data->state.hashState);
         written += UINT16_Marshal(&array_size, buffer, size);
         for (i = 0; i < array_size; i++) {
@@ -2309,7 +2310,9 @@ HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
         rc = TPM2B_AUTH_Unmarshal(&data->auth, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (data->attributes.hashSeq == SET) {
+        /* hashSeq was always written correctly; eventSeq only appeared in v3 */
+        if (data->attributes.hashSeq == SET ||
+            (data->attributes.eventSeq == SET && hdr.version >= 3)) {
             if (rc == TPM_RC_SUCCESS) {
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
@@ -3760,6 +3763,40 @@ static const struct _entry {
     { COMPILE_CONSTANT(TPM_MAX_DERIVATION_BITS, EQ) },
     { COMPILE_CONSTANT(PROOF_SIZE, EQ) },
     { COMPILE_CONSTANT(HASH_COUNT, EQ) },
+
+    /* added for PA_COMPILE_CONSTANTS_VERSION == 3 */
+    { COMPILE_CONSTANT(AES_128, LE) },
+    { COMPILE_CONSTANT(AES_192, LE) },
+    { COMPILE_CONSTANT(AES_256, LE) },
+    { COMPILE_CONSTANT(SM4_128, LE) },
+    { COMPILE_CONSTANT(ALG_CAMELLIA, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_128, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_192, LE) },
+    { COMPILE_CONSTANT(CAMELLIA_256, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_256, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_384, LE) },
+    { COMPILE_CONSTANT(ALG_SHA3_512, LE) },
+    { COMPILE_CONSTANT(RSA_1024, LE) },
+    { COMPILE_CONSTANT(RSA_2048, LE) },
+    { COMPILE_CONSTANT(RSA_3072, LE) },
+    { COMPILE_CONSTANT(RSA_4096, LE) },
+    { COMPILE_CONSTANT(RSA_16384, LE) },
+    { COMPILE_CONSTANT(RH_ACT_0, LE) },
+    { COMPILE_CONSTANT(RH_ACT_1, LE) },
+    { COMPILE_CONSTANT(RH_ACT_2, LE) },
+    { COMPILE_CONSTANT(RH_ACT_3, LE) },
+    { COMPILE_CONSTANT(RH_ACT_4, LE) },
+    { COMPILE_CONSTANT(RH_ACT_5, LE) },
+    { COMPILE_CONSTANT(RH_ACT_6, LE) },
+    { COMPILE_CONSTANT(RH_ACT_7, LE) },
+    { COMPILE_CONSTANT(RH_ACT_8, LE) },
+    { COMPILE_CONSTANT(RH_ACT_9, LE) },
+    { COMPILE_CONSTANT(RH_ACT_A, LE) },
+    { COMPILE_CONSTANT(RH_ACT_B, LE) },
+    { COMPILE_CONSTANT(RH_ACT_C, LE) },
+    { COMPILE_CONSTANT(RH_ACT_D, LE) },
+    { COMPILE_CONSTANT(RH_ACT_E, LE) },
+    { COMPILE_CONSTANT(RH_ACT_F, LE) },
 };
 
 static TPM_RC
@@ -3804,7 +3841,7 @@ UINT32_Unmarshal_CheckConstant(BYTE **buffer, INT32 *size, UINT32 constant,
 }
 
 #define PA_COMPILE_CONSTANTS_MAGIC 0xc9ea6431
-#define PA_COMPILE_CONSTANTS_VERSION 2
+#define PA_COMPILE_CONSTANTS_VERSION 3
 
 /* Marshal compile-time constants related to persistent-all state */
 static UINT32
@@ -3843,6 +3880,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
     unsigned i;
     NV_HEADER hdr;
     UINT32 array_size;
+    UINT32 exp_array_size;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3850,17 +3888,37 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
                                  PA_COMPILE_CONSTANTS_MAGIC);
     }
     if (rc == TPM_RC_SUCCESS) {
+        switch (hdr.version) {
+        case 1:
+        case 2:
+            /* PA_COMPILE_CONSTANTS_VERSION 1 and 2 had 88 entries */
+            exp_array_size = 88;
+            break;
+        case 3:
+            /* PA_COMPILE_CONSTANTS_VERSION 3 had 104 entries */
+            exp_array_size = 120;
+            break;
+        default:
+            /* we don't suport anything newer - no downgrade */
+            TPMLIB_LogTPM2Error("Unsupported PA_COMPILE_CONSTANTS version %d. "
+                                "Supporting up to version %d.\n",
+                                hdr.version, PA_COMPILE_CONSTANTS_VERSION);
+            rc = TPM_RC_BAD_VERSION;
+        }
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&array_size, buffer, size);
     }
 
     if (rc == TPM_RC_SUCCESS &&
-        array_size != ARRAY_SIZE(pa_compile_constants)) {
-        TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS has non-matching number of "
-                            "elements; found %u, expected %zu\n",
-                            array_size, ARRAY_SIZE(pa_compile_constants));
+        array_size != exp_array_size) {
+        TPMLIB_LogTPM2Error("PA_COMPILE_CONSTANTS v%d has non-matching number of "
+                            "elements; found %u, expected %u\n",
+                            hdr.version, array_size, exp_array_size);
     }
 
-    for (i = 0; rc == TPM_RC_SUCCESS && i < ARRAY_SIZE(pa_compile_constants); i++)
+    for (i = 0; rc == TPM_RC_SUCCESS && i < exp_array_size; i++)
         rc = UINT32_Unmarshal_CheckConstant(
                                   buffer, size, pa_compile_constants[i].constant,
                                   pa_compile_constants[i].name,
