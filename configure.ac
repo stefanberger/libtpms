@@ -291,6 +291,7 @@ if test "x$enable_hardening" != "xno"; then
 fi
 
 CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign"
+CFLAGS="$CFLAGS -Wno-deprecated-declarations"
 LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
 
 AC_CONFIG_FILES(Makefile                   \
