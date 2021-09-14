@@ -213,10 +213,19 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 	AC_CHECK_LIB([crypto], [EVP_PKEY_verify_init],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_PKEY_verify],, not_found=1)
 	AC_CHECK_LIB([crypto], [EVP_get_digestbyname],, not_found=1)
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set0_rsa_oaep_label],, not_found=1)
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_padding],, not_found=1)
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_oaep_md],, not_found=1)
-	AX_CHECK_DEFINE([<openssl/evp.h>], [EVP_PKEY_CTX_set_signature_md],, not_found=1)
+	# OpenSSL 3.0 turned some #defines into functions
+	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set0_rsa_oaep_label],,
+	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set0_rsa_oaep_label],, not_found=1)
+	)
+	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_padding],,
+	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_padding],, not_found=1)
+	)
+	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_oaep_md],,
+	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_oaep_md],, not_found=1)
+	)
+	AX_CHECK_DEFINE([<openssl/evp.h>], [EVP_PKEY_CTX_set_signature_md],,
+	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_signature_md],, not_found=1)
+	)
 	if test "x$not_found" = "x0"; then
 		use_openssl_functions_rsa=1
 		use_openssl_functions_for="${use_openssl_functions_for}RSA "
