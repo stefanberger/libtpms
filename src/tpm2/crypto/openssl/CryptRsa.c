@@ -1362,11 +1362,11 @@ CryptRsaDecrypt(
                 if (tmp == NULL)
                     ERROR_RETURN(TPM_RC_FAILURE);
                 memcpy(tmp, label->buffer, label->size);
-            }
 
-            if (EVP_PKEY_CTX_set0_rsa_oaep_label(ctx, tmp, label->size) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
-            tmp = NULL;
+                if (EVP_PKEY_CTX_set0_rsa_oaep_label(ctx, tmp, label->size) <= 0)
+                    ERROR_RETURN(TPM_RC_FAILURE);
+                tmp = NULL;
+            }
             break;
 	  default:
             ERROR_RETURN(TPM_RC_SCHEME);
