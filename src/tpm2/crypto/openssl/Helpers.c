@@ -492,7 +492,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BIGNUM       *dQ = BN_new();
     BIGNUM       *qInv = BN_new();
 #endif
-    RSA          *key;
+    RSA          *key = NULL;
     BN_CTX       *ctx = NULL;
     TPM_RC        retVal = InitOpenSSLRSAPublicKey(rsaKey, pkey);
 
@@ -507,7 +507,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     if (P == NULL)
         ERROR_RETURN(TPM_RC_FAILURE)
 
-    key = EVP_PKEY_get0_RSA(*pkey);
+    key = EVP_PKEY_get1_RSA(*pkey);
     if (key == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
     RSA_get0_key(key, &N, &E, NULL);
@@ -554,6 +554,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BN_clear_free(P);
     BN_clear_free(Q);
     BN_free(Qr);
+    RSA_free(key); // undo reference from EVP_PKEY_get1_RSA()
 
     if (retVal != TPM_RC_SUCCESS) {
         BN_clear_free(D);
