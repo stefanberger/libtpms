@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Sep 17 2021 Stefan Berger - 0.8.7-1
+- tpm2: Fixes for building and running with OpenSSL 3.0
+
 * Fri Sep 10 2021 Stefan Berger - 0.8.6-1
 - tpm2: Marshal event sequence objects' hash state
 
