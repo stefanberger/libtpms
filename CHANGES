@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.8.7:
+ - tpm2: Adapted code for compiling with OpenSSL 3.0
+ - build-sys: Adapted for silent building with OpenSSL 3.0
+
 version 0.8.6:
  - tpm2: Marshal event sequence objects' hash state
 
