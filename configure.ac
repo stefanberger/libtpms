@@ -154,6 +154,8 @@ openssl)
         AC_DEFINE([USE_OPENSSL_CRYPTO_LIBRARY],
                   [1],
                   [use openssl crypto library])
+	LIBCRYPTO_EXTRA_CFLAGS="-DOPENSSL_SUPPRESS_DEPRECATED"
+	AC_SUBST([LIBCRYPTO_EXTRA_CFLAGS])
 	;;
 esac
 
@@ -320,7 +322,7 @@ if test "x$enable_hardening" != "xno"; then
 fi
 
 AM_CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign -Wmissing-prototypes"
-AM_CFLAGS="$AM_CFLAGS -Wno-deprecated-declarations"
+AM_CFLAGS="$AM_CFLAGS"
 AM_LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
 
 AC_SUBST([AM_CFLAGS])
