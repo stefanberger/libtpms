@@ -485,6 +485,40 @@ error_free_ned:
     return 0;
 }
 
+static int
+ObjectGetPublicParameters(OBJECT      *key,     // IN
+                          BIGNUM     **N,       // OUT
+                          BIGNUM     **E        // OUT
+                         )
+{
+    BN_ULONG eval;
+
+    *E = BN_new();
+    if (*E == NULL)
+        return 0;
+
+    if(key->publicArea.parameters.rsaDetail.exponent != 0)
+        eval = key->publicArea.parameters.rsaDetail.exponent;
+    else
+        eval = RSA_DEFAULT_PUBLIC_EXPONENT;
+
+    if (BN_set_word(*E, eval) != 1)
+        goto error;
+
+    *N = BN_bin2bn(key->publicArea.unique.rsa.b.buffer,
+                   key->publicArea.unique.rsa.b.size, NULL);
+    if (*N == NULL)
+        goto error;
+
+    return 1;
+
+error:
+    BN_free(*E);
+    *E = NULL;
+
+    return 0;
+}
+
 LIB_EXPORT TPM_RC
 InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
                         EVP_PKEY   **pkey     // OUT
@@ -492,23 +526,9 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
 {
     TPM_RC      retVal;
     BIGNUM     *N = NULL;
-    BIGNUM     *E = BN_new();
-    BN_ULONG    eval;
+    BIGNUM     *E = NULL;
 
-    if (E == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
-
-    if(key->publicArea.parameters.rsaDetail.exponent != 0)
-        eval = key->publicArea.parameters.rsaDetail.exponent;
-    else
-        eval = RSA_DEFAULT_PUBLIC_EXPONENT;
-
-    if (BN_set_word(E, eval) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
-
-    N = BN_bin2bn(key->publicArea.unique.rsa.b.buffer,
-                  key->publicArea.unique.rsa.b.size, NULL);
-    if (N == NULL ||
+    if (ObjectGetPublicParameters(key, &N, &E) != 1 ||
         BuildRSAKey(pkey, N, E, NULL, NULL, NULL, NULL, NULL, NULL) != 1)
         ERROR_RETURN(TPM_RC_FAILURE)
 
