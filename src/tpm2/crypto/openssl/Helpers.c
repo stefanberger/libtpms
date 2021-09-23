@@ -684,11 +684,11 @@ static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
 
 LIB_EXPORT TPM_RC
 InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
-                         EVP_PKEY  **pkey      // OUT
+                         EVP_PKEY  **ppkey     // OUT
                         )
 {
-    const BIGNUM *N = NULL;
-    const BIGNUM *E = NULL;
+    BIGNUM       *N = NULL;
+    BIGNUM       *E = NULL;
     BIGNUM       *P = NULL;
     BIGNUM       *Q = NULL;
     BIGNUM       *Qr = NULL;
@@ -698,12 +698,11 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BIGNUM       *dQ = BN_new();
     BIGNUM       *qInv = BN_new();
 #endif
-    RSA          *key = NULL;
     BN_CTX       *ctx = NULL;
-    TPM_RC        retVal = InitOpenSSLRSAPublicKey(rsaKey, pkey);
+    TPM_RC        retVal;
 
-    if (retVal != TPM_RC_SUCCESS)
-        return retVal;
+    if (ObjectGetPublicParameters(rsaKey, &N, &E) != 1)
+        return TPM_RC_FAILURE;
 
     if(!rsaKey->attributes.privateExp)
         CryptRsaLoadPrivateExponent(rsaKey);
@@ -712,11 +711,6 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
                   rsaKey->sensitive.sensitive.rsa.t.size, NULL);
     if (P == NULL)
         ERROR_RETURN(TPM_RC_FAILURE)
-
-    key = EVP_PKEY_get1_RSA(*pkey);
-    if (key == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
-    RSA_get0_key(key, &N, &E, NULL);
 
     D = ExpDCacheFind(P, N, E, &Q);
     if (D == NULL) {
@@ -735,22 +729,19 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
             ERROR_RETURN(TPM_RC_FAILURE);
         ExpDCacheAdd(P, N, E, Q, D);
     }
-    if (RSA_set0_key(key, NULL, NULL, D) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
 
     DoRSACheckKey(P, Q, N, E, D);
-
-    D = NULL;
 
 #if CRT_FORMAT_RSA == YES
     /* CRT parameters are not absolutely needed but may speed up ops */
     dP = BigInitialized(dP, (bigConst)&rsaKey->privateExponent.dP);
     dQ = BigInitialized(dQ, (bigConst)&rsaKey->privateExponent.dQ);
     qInv = BigInitialized(qInv, (bigConst)&rsaKey->privateExponent.qInv);
-    if (dP == NULL || dQ == NULL || qInv == NULL ||
-        RSA_set0_crt_params(key, dP, dQ, qInv) != 1)
+    if (dP == NULL || dQ == NULL || qInv == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
 #endif
+    if (BuildRSAKey(ppkey, N, E, D, P, Q, dP, dQ, qInv, 0) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
 
     retVal = TPM_RC_SUCCESS;
 
@@ -759,17 +750,18 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BN_clear_free(P);
     BN_clear_free(Q);
     BN_free(Qr);
-    RSA_free(key); // undo reference from EVP_PKEY_get1_RSA()
+    BN_free(N);
+    BN_free(E);
+    BN_clear_free(D);
+#if CRT_FORMAT_RSA == YES
+    BN_clear_free(dP);
+    BN_clear_free(dQ);
+    BN_clear_free(qInv);
+#endif
 
     if (retVal != TPM_RC_SUCCESS) {
-        BN_clear_free(D);
-#if CRT_FORMAT_RSA == YES
-        BN_clear_free(dP);
-        BN_clear_free(dQ);
-        BN_clear_free(qInv);
-#endif
-        EVP_PKEY_free(*pkey);
-        *pkey = NULL;
+        EVP_PKEY_free(*ppkey);
+        *ppkey = NULL;
     }
 
     return retVal;
