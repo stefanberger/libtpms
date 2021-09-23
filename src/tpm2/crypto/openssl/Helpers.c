@@ -408,20 +408,99 @@ ComputePrivateExponentD(
     return pOK;
 }
 
+/* Build an RSA key from the given BIGUMs. The caller must always free
+ * the passed BIGNUMs.
+ */
+static int
+BuildRSAKey(EVP_PKEY **ppkey, // OUT
+            const BIGNUM *N, const BIGNUM *E, const BIGNUM *D,
+            const BIGNUM *P, const BIGNUM *Q,
+            const BIGNUM *DP, const BIGNUM *DQ, const BIGNUM *QInv,
+            int flags)
+{
+    BIGNUM *p, *q, *dP, *dQ, *qInv;
+    BIGNUM *n = BN_dup(N);
+    BIGNUM *e = BN_dup(E);
+    BIGNUM *d = BN_dup(D);
+    RSA *rsa;
+
+    if ((N && !n) || (E && !e) || (D && !d))
+        goto error_free_ned;
+
+    if (P && Q && DP && DQ && QInv) {
+        p = BN_dup(P);
+        q = BN_dup(Q);
+        dP = BN_dup(DP);
+        dQ = BN_dup(DQ);
+        qInv = BN_dup(QInv);
+        if (!p || !q || !dP || !dQ || !qInv)
+            goto error_free_bn;
+    } else {
+        p = q = dP = dQ = qInv = NULL;
+    }
+
+    rsa = RSA_new();
+    if (!rsa)
+        goto error_free_bn;
+
+    if (RSA_set0_key(rsa, n, e, d) != 1)
+        goto error;
+
+    n = e = d = NULL;
+
+    if (p) {
+        if (RSA_set0_factors(rsa, p, q) != 1)
+            goto error_free_rsa;
+        p = q = NULL;
+
+        if (RSA_set0_crt_params(rsa, dP, dQ, qInv) != 1)
+            goto error_free_rsa;
+        dP = dQ = qInv = NULL;
+    }
+
+    if (flags)
+        RSA_set_flags(rsa, flags);
+
+    *ppkey = EVP_PKEY_new();
+    if (*ppkey == NULL ||
+        EVP_PKEY_assign_RSA(*ppkey, rsa) != 1)
+        goto error;
+
+    return 1;
+
+error:
+    EVP_PKEY_free(*ppkey);
+    *ppkey = NULL;
+
+error_free_rsa:
+    RSA_free(rsa);
+
+error_free_bn:
+    BN_clear_free(p);
+    BN_clear_free(q);
+    BN_clear_free(dP);
+    BN_clear_free(dQ);
+    BN_clear_free(qInv);
+
+error_free_ned:
+    BN_free(n);
+    BN_free(e);
+    BN_clear_free(d);
+
+    return 0;
+}
+
 LIB_EXPORT TPM_RC
 InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
                         EVP_PKEY   **pkey     // OUT
                        )
 {
     TPM_RC      retVal;
-    RSA        *rsakey = RSA_new();
     BIGNUM     *N = NULL;
     BIGNUM     *E = BN_new();
     BN_ULONG    eval;
 
-    *pkey = EVP_PKEY_new();
-
-    if (rsakey == NULL || *pkey == NULL || E == NULL)
+    if (E == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
 
     if(key->publicArea.parameters.rsaDetail.exponent != 0)
@@ -435,17 +514,17 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
     N = BN_bin2bn(key->publicArea.unique.rsa.b.buffer,
                   key->publicArea.unique.rsa.b.size, NULL);
     if (N == NULL ||
-        RSA_set0_key(rsakey, N, E, NULL) != 1 ||
-        EVP_PKEY_assign_RSA(*pkey, rsakey) == 0)
+        BuildRSAKey(pkey, N, E, NULL, NULL, NULL, NULL, NULL, NULL,
+                    0) != 1)
         ERROR_RETURN(TPM_RC_FAILURE)
-
-    RSA_set_flags(rsakey, RSA_FLAG_NO_BLINDING);
 
     retVal = TPM_RC_SUCCESS;
 
  Exit:
+    BN_free(N);
+    BN_free(E);
+
     if (retVal != TPM_RC_SUCCESS) {
-        RSA_free(rsakey);
         EVP_PKEY_free(*pkey);
         *pkey = NULL;
     }
