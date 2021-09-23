@@ -77,6 +77,16 @@
 #define DO_RSA_CHECK_KEY 0
 #endif
 
+
+// Prototypes for older and newer OpenSSL implementation support
+#if USE_OPENSSL_FUNCTIONS_RSA
+static int
+BuildRSAKey(EVP_PKEY **ppkey, // OUT
+            const BIGNUM *N, const BIGNUM *E, const BIGNUM *D,
+            const BIGNUM *P, const BIGNUM *Q,
+            const BIGNUM *DP, const BIGNUM *DQ, const BIGNUM *QInv);
+#endif
+
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 TPM_RC
@@ -413,11 +423,14 @@ ComputePrivateExponentD(
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 
+/* Build an RSA key from the given BIGUMs. The caller must always free
+ * the passed BIGNUMs.
+ */
 static int
-BuildRSAKeyBN(EVP_PKEY **ppkey,
-              const BIGNUM *N, const BIGNUM *E, const BIGNUM *D,
-              const BIGNUM *P, const BIGNUM *Q,
-              const BIGNUM *DP, const BIGNUM *DQ, const BIGNUM *QInv)
+BuildRSAKey(EVP_PKEY **ppkey,
+            const BIGNUM *N, const BIGNUM *E, const BIGNUM *D,
+            const BIGNUM *P, const BIGNUM *Q,
+            const BIGNUM *DP, const BIGNUM *DQ, const BIGNUM *QInv)
 {
     OSSL_PARAM_BLD *bld = NULL;
     EVP_PKEY_CTX *ctx = NULL;
@@ -466,7 +479,7 @@ error:
     return ret;
 }
 
-#endif /*  OPENSSL_VERSION_NUMBER >= 0x30000000L */
+#else /* OPENSSL_VERSION_NUMBER >= 0x30000000L */
 
 /* Build an RSA key from the given BIGUMs. The caller must always free
  * the passed BIGNUMs.
@@ -546,6 +559,8 @@ error_free_ned:
     return 0;
 }
 
+#endif /* ! OPENSSL_VERSION_NUMBER >= 0x30000000L */
+
 static int
 ObjectGetPublicParameters(OBJECT      *key,     // IN
                           BIGNUM     **N,       // OUT
@@ -624,7 +639,7 @@ static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
         disp = 1;
     }
 
-    if (BuildRSAKeyBN(&pkey, N, E, D, NULL, NULL, NULL, NULL, NULL) != 1)
+    if (BuildRSAKey(&pkey, N, E, D, NULL, NULL, NULL, NULL, NULL) != 1)
         goto error;
 
     ctx = EVP_PKEY_CTX_new_from_pkey(NULL, pkey, NULL);
