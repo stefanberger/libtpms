@@ -109,7 +109,7 @@
 #define SHA512_OID(NAME)
 #endif
 #ifndef ALG_SM3_256
-#   define ALG_SM3_256 NO
+#   define ALG_SM3_256 YES
 #endif
 #if ALG_SM3_256
 #define SM3_256_OID(NAME) MAKE_OID(NAME##SM3_256)

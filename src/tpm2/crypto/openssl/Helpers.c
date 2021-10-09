@@ -359,10 +359,15 @@ static const struct hnames {
         .hashAlg  = ALG_SHA512_VALUE,
     }, {
 #endif
+#if ALG_SM3_256
+        .name     = "sm3",
+        .hashAlg  = ALG_SM3_256_VALUE,
+    }, {
+#endif
         .name     = NULL,
     }
 };
-#if HASH_COUNT != ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512
+#if HASH_COUNT != ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512 + ALG_SM3_256
 # error Missing entry in hnames array!
 #endif
 
@@ -622,3 +627,83 @@ OpenSSLCryptRsaGenerateKey(
 }
 
 #endif // USE_OPENSSL_FUNCTIONS_RSA
+#if ALG_SM4
+static int SetSM4Key(const uint8_t *key, SM4_KEY *ks, int direction)
+{
+    int rc = 0;
+    UINT8 iv[MAX_SM4_BLOCK_SIZE_BYTES] = { 0 };
+    const EVP_CIPHER *sm4Cipher = EVP_sm4_ecb();
+    *ks = EVP_CIPHER_CTX_new();
+    if (*ks == NULL) {
+        return SM4_FAIL;
+    }
+    if (direction == SM4_ENCRYPT) {
+        rc = EVP_EncryptInit_ex(*ks, sm4Cipher, NULL, key, iv);
+    } else {
+        rc = EVP_DecryptInit_ex(*ks, sm4Cipher, NULL, key, iv);       
+    }
+    if (rc != SM4_SUCCESS) {
+        return SM4_FAIL; 
+    }
+    return SM4_SUCCESS;
+}
+int SM4_set_encrypt_key(const uint8_t *key, SM4_KEY *ks)
+{
+    return SetSM4Key(key, ks, SM4_ENCRYPT);
+}
+int SM4_set_decrypt_key(const uint8_t *key, SM4_KEY *ks)
+{
+    return SetSM4Key(key, ks, SM4_DECRYPT);
+}
+static void SM4EncryptDecrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks, int direction)
+{
+    int outLen = SM4_BLOCK_SIZES;
+    int rc = 0;
+    if (direction == SM4_ENCRYPT) {
+        rc = EVP_EncryptUpdate(*ks, out, &outLen, in, SM4_BLOCK_SIZES);
+    } else {
+        rc = EVP_DecryptUpdate(*ks, out, &outLen, in, SM4_BLOCK_SIZES);        
+    }
+    pAssert(rc != SM4_SUCCESS || outLen != SM4_BLOCK_SIZES); 
+}
+void SM4_encrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks)
+{
+    SM4EncryptDecrypt(in, out, ks, SM4_ENCRYPT);
+}
+void SM4_decrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks)
+{
+    SM4EncryptDecrypt(in, out, ks, SM4_DECRYPT);
+}
+void SM4_final(const SM4_KEY *ks)
+{
+    if (*ks != NULL) {
+        EVP_CIPHER_CTX_cleanup(*ks);
+    }
+}
+#endif
+
+#if ALG_SM3_256
+int sm3_init(SM3_TPM_CTX *c)
+{
+    *c = EVP_MD_CTX_new();
+    if (*c == NULL) {
+        return SM3_FAIL;
+    }
+    return EVP_DigestInit_ex(*c, EVP_sm3(), NULL);
+}
+int sm3_update(SM3_TPM_CTX *c, const void *data, size_t len)
+{
+    return EVP_DigestUpdate(*c, data, len);
+}
+int sm3_final(unsigned char *md, SM3_TPM_CTX *c)
+{
+    uint32_t len = SM3_256_DIGEST_SIZE;
+    int ret = EVP_DigestFinal_ex(*c, md, &len);
+    if (ret != SM3_SUCCESS || len != SM3_256_DIGEST_SIZE) {
+        ret = SM3_FAIL;
+    }
+    EVP_MD_CTX_destroy(*c);
+    *c = NULL;
+    return ret;
+}
+#endif
