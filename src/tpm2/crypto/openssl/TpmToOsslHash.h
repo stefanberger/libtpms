@@ -67,6 +67,7 @@
 #define HASH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/sha.h>
+\
 
 #if ALG_SM3_256
 #   if defined(OPENSSL_NO_SM3) || OPENSSL_VERSION_NUMBER < 0x10101010L
@@ -75,25 +76,9 @@
 #    endif           // libtpms added end
 #       undef ALG_SM3_256
 #       define ALG_SM3_256  ALG_NO
-#   elif OPENSSL_VERSION_NUMBER >= 0x10200000L
-#       include <openssl/sm3.h>
 #   else
-// OpenSSL 1.1.1 keeps smX.h headers in the include/crypto directory,
-// and they do not get installed as part of the libssl package
-#       define SM3_LBLOCK      (64/4)
-
-# error Check support for this version of SM3 in OpenSSL (libtpms)
-typedef struct SM3state_st {
-    unsigned int A, B, C, D, E, F, G, H;
-    unsigned int Nl, Nh;
-    unsigned int data[SM3_LBLOCK];
-    unsigned int num;
-} SM3_CTX;
-
-int sm3_init(SM3_CTX *c);
-int sm3_update(SM3_CTX *c, const void *data, size_t len);
-int sm3_final(unsigned char *md, SM3_CTX *c);
-#   endif // OpenSSL < 1.2
+    #include "Sm3Helper_fp.h"
+#endif
 #endif // ALG_SM3_256
 
 #include <openssl/ossl_typ.h>
@@ -108,9 +93,11 @@ int sm3_final(unsigned char *md, SM3_CTX *c);
 #define tpmHashStateSHA256_t      SHA256_CTX
 #define tpmHashStateSHA384_t      SHA512_CTX
 #define tpmHashStateSHA512_t      SHA512_CTX
-#define tpmHashStateSM3_256_t     SM3_CTX
+#define tpmHashStateSM3_256_t     SM3_TPM_CTX
+#if 0
 #if ALG_SM3_256
 #   error "The version of OpenSSL used by this code does not support SM3"
+#endif
 #endif
 /*     The defines below are only needed when compiling CryptHash.c or CryptSmac.c. This isolation
        is primarily to avoid name space collision. However, if there is a real collision, it will

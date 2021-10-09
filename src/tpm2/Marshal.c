@@ -1178,8 +1178,16 @@ TPMI_AES_KEY_BITS_Marshal(TPMI_AES_KEY_BITS *source, BYTE **buffer, INT32 *size)
     written += TPM_KEY_BITS_Marshal(source, buffer, size);
     return written;
 }
-
-UINT16			// libtpms added begin
+#if ALG_SM4           // libtpms added begin
+UINT16
+TPMI_SM4_KEY_BITS_Marshal(TPMI_SM4_KEY_BITS *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM_KEY_BITS_Marshal(source, buffer, size);
+    return written;
+}
+#endif           // libtpms added end
+UINT16
 TPMI_TDES_KEY_BITS_Marshal(TPMI_TDES_KEY_BITS *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
