@@ -18,7 +18,8 @@ common_CFLAGS = -include tpm_library_conf.h \
 		$(AM_CFLAGS) \
                 $(HARDENING_CFLAGS) \
                $(SANITIZERS) \
-               $(FUZZER)
+               $(FUZZER) \
+               $(LIBCRYPTO_EXTRA_CFLAGS)
 
 # build with libtpms callback support
 common_CFLAGS += -DTPM_LIBTPMS_CALLBACKS

@@ -78,11 +78,11 @@ Libtpms header files and documentation.
 %define _with_openssl --with-openssl
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 %define _enable_debug --enable-debug
 %endif
 
-%if %{build_type} == debug
+%if "%{build_type}" == "debug"
 CFLAGS=-O0
 %endif
 ./autogen.sh \
@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Sep 29 2021 Stefan Berger - 0.9.0-1
+- Release of version 0.9.0 (rev. 164)
+
 * Wed Feb 24 2021 Stefan Berger - 0.8.0-1
 - Release of version 0.8.0 (rev. 162)
 

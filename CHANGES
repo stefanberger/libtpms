@@ -9,6 +9,16 @@ version 0.9.0:
     TPM2_ContextLoad (issue #217)
   - Check for several more compile-time constants
   - Enabled Camellia symmetric key encryption algorithm
+  - tpm2: CryptSym: fix AES output IV
+  - tpm2: Added a cache for private exponent D and prime Q
+  - tpm2: bug fixes related to state marshalling
+  - tpm2: Consume padding bytes in TPM2_ContextLoad() (Win2k19, issue #217)
+  - tests: Improvements on the fuzzer
+  - tpm2: Switch to UINT16 for CONTEXT_SLOT and 64k context gap
+  - tpm2: Update to TPM 2 spec rev 164
+  - build-sys: Enable building --without-tpm1
+  - tpm2: Marshal event sequence objects' hash state
+  - tpm2: Fixes for build and runtime when using OpenSSL 3.0
 
 version 0.8.0
   - NOTE: Downgrade to previous versions is not possible. See below.
