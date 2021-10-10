@@ -106,6 +106,16 @@ AC_ARG_WITH([openssl],
               ]
 )
 
+AC_ARG_WITH([openssl-smX],
+    AS_HELP_STRING([--with-openssl-smX], [libtpms supports SM3 and SM4, default not support]), [with_openssl_sm=yes], [with_openssl_sm=no])
+AS_IF([test "x$with_openssl_sm" != "xno"], [
+    AC_DEFINE([ALG_SM3_256], [1], ["Support SM3"])
+	AC_DEFINE([ALG_SM4], [1], ["Support SM4"])
+])
+AS_IF([test "x$with_openssl_sm" = "xno"], [
+    AC_DEFINE([ALG_SM3_256], [0], ["not Support SM3"])
+	AC_DEFINE([ALG_SM4], [0], ["not Support SM4"])
+])
 case "$cryptolib" in
 freebl)
 	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, true)

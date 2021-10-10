@@ -58,12 +58,12 @@
 /*										*/
 /********************************************************************************/
 
+#include "config.h"
 #include "Tpm.h"
 #include "ExpDCache_fp.h"
 #include "Helpers_fp.h"
 #include "TpmToOsslMath_fp.h"
 
-#include "config.h"
 
 #include <openssl/evp.h>
 #include <openssl/rsa.h>

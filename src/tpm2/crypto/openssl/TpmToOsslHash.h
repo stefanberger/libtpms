@@ -67,7 +67,6 @@
 #define HASH_LIB_OSSL
 #include <openssl/evp.h>
 #include <openssl/sha.h>
-\
 
 #if ALG_SM3_256
 #   if defined(OPENSSL_NO_SM3) || OPENSSL_VERSION_NUMBER < 0x10101010L
