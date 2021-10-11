@@ -96,7 +96,7 @@ const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS + 1] = {
 #if ALG_SM4 && SM4_128 // libtpms activated
     {TPM_ALG_SM4, 128, key_SM4128, 16, sizeof(dataIn_SM4128), dataIn_SM4128,
      {dataOut_SM4128_CTR, dataOut_SM4128_OFB, dataOut_SM4128_CBC,
-      dataOut_SM4128_CFB, dataOut_AES128_ECB}},
+      dataOut_SM4128_CFB, dataOut_SM4128_ECB}},
 #endif
 // libtpms added begin
 #if ALG_TDES && TDES_128

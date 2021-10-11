@@ -238,8 +238,12 @@ extern "C" {
     TPM2B_ATTEST_Marshal(TPM2B_ATTEST *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMI_AES_KEY_BITS_Marshal(TPMI_AES_KEY_BITS *source, BYTE **buffer, INT32 *size);
-    UINT16			// libtpms added
-    TPMI_TDES_KEY_BITS_Marshal(TPMI_TDES_KEY_BITS *source, BYTE **buffer, INT32 *size);
+#if ALG_SM4 			// libtpms added begin
+    UINT16
+    TPMI_SM4_KEY_BITS_Marshal(TPMI_SM4_KEY_BITS *source, BYTE **buffer, INT32 *size);
+#endif
+    UINT16
+    TPMI_TDES_KEY_BITS_Marshal(TPMI_TDES_KEY_BITS *source, BYTE **buffer, INT32 *size); // libtpms added end
     UINT16
     TPMI_CAMELLIA_KEY_BITS_Marshal(TPMI_CAMELLIA_KEY_BITS *source, BYTE **buffer, INT32 *size);
     UINT16

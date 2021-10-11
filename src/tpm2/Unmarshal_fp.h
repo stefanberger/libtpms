@@ -295,6 +295,10 @@ extern "C" {
 #endif /* libtpms added */
     LIB_EXPORT TPM_RC
     TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *size);
+#if ALG_SM4  /* libtpms added begin */
+    TPM_RC
+    TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *size);
+#endif  /* libtpms added end */
     LIB_EXPORT TPM_RC
     TPMI_CAMELLIA_KEY_BITS_Unmarshal(TPMI_CAMELLIA_KEY_BITS *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC /* libtpms added */
