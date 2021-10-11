@@ -359,10 +359,15 @@ static const struct hnames {
         .hashAlg  = ALG_SHA512_VALUE,
     }, {
 #endif
+#if ALG_SM3_256
+        .name     = "sm3",
+        .hashAlg  = ALG_SM3_256_VALUE,
+    }, {
+#endif
         .name     = NULL,
     }
 };
-#if HASH_COUNT != ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512
+#if HASH_COUNT != ALG_SHA1 + ALG_SHA256 + ALG_SHA384 + ALG_SHA512 + ALG_SM3_256
 # error Missing entry in hnames array!
 #endif
 
@@ -623,3 +628,28 @@ OpenSSLCryptRsaGenerateKey(
 }
 
 #endif // USE_OPENSSL_FUNCTIONS_RSA
+#if ALG_SM3_256
+int sm3_init(SM3_TPM_CTX *c)
+{
+    *c = EVP_MD_CTX_new();
+    if (*c == NULL) {
+        return SM3_FAIL;
+    }
+    return EVP_DigestInit_ex(*c, EVP_sm3(), NULL);
+}
+int sm3_update(SM3_TPM_CTX *c, const void *data, size_t len)
+{
+    return EVP_DigestUpdate(*c, data, len);
+}
+int sm3_final(unsigned char *md, SM3_TPM_CTX *c)
+{
+    uint32_t len = SM3_256_DIGEST_SIZE;
+    int ret = EVP_DigestFinal_ex(*c, md, &len);
+    if (ret != SM3_SUCCESS || len != SM3_256_DIGEST_SIZE) {
+        ret = SM3_FAIL;
+    }
+    EVP_MD_CTX_destroy(*c);
+    *c = NULL;
+    return ret;
+}
+#endif

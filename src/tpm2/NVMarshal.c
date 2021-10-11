@@ -774,8 +774,8 @@ PCR_SAVE_Marshal(PCR_SAVE *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->Sm3_256, array_size,
                              buffer, size);
 #endif
-#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
-#error SHA3 and SM3 are not supported
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512
+#error SHA3 are not supported
 #endif
 
     /* end marker */
@@ -879,8 +879,8 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
                 t = (BYTE *)&data->Sm3_256;
             break;
 #endif
-#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
-#error SHA3 and SM3 are not supported
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512
+#error SHA3 are not supported
 #endif
             case TPM_ALG_NULL:
                 /* end marker */
@@ -990,8 +990,8 @@ PCR_Marshal(PCR *data, BYTE **buffer, INT32 *size)
     written += Array_Marshal((BYTE *)&data->Sm3_256Pcr, array_size,
                              buffer, size);
 #endif
-#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
-#error SHA3 and SM3 are not supported
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512
+#error SHA3 are not supported
 #endif
 
     /* end marker */
@@ -1061,8 +1061,8 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
                 t = (BYTE *)&data->Sm3_256Pcr;
             break;
 #endif
-#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
-#error SHA3 and SM3 are not supported
+#if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512
+#error SHA3 are not supported
 #endif
             case TPM_ALG_NULL:
                 /* end marker */
@@ -2026,7 +2026,145 @@ skip_future_versions:
     return rc;
 }
 #endif
+#if ALG_SM3_256
 
+#define HASH_STATE_SM3_256_MAGIC 0x10854a09
+#define HASH_STATE_SM3_256_VERSION 2
+
+#include "Sm3Helper_fp.h"
+static inline UINT16
+SM3_WORD_Marshal(SM3_WORD *data, BYTE **buffer, INT32 *size)
+{
+    return UINT32_Marshal(data, buffer, size);
+}
+
+static inline UINT16
+SM3_WORD_Unmarshal(SM3_WORD *data, BYTE **buffer, INT32 *size)
+{
+    return UINT32_Unmarshal(data, buffer, size);
+}
+static UINT16
+tpmHashStateSM3_256_Marshal(tpmHashStateSM3_256_t *data, BYTE **buffer, INT32 *size,
+                           UINT16 hashAlg)
+{
+    UINT16 written = 0;
+    UINT16 array_size;
+    SM3_CTX *sm3_ctx = NULL;
+    BLOCK_SKIP_INIT;
+
+    sm3_ctx = EVP_MD_CTX_md_data(*data);
+    written = NV_HEADER_Marshal(buffer, size,
+                                HASH_STATE_SM3_256_VERSION,
+                                HASH_STATE_SM3_256_MAGIC, 1);
+    written += SM3_WORD_Marshal(&sm3_ctx->A, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->B, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->C, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->D, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->E, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->F, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->G, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->H, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->Nl, buffer, size);
+    written += SM3_WORD_Marshal(&sm3_ctx->Nh, buffer, size);
+    /* data must be written as array */
+    array_size = sizeof(sm3_ctx->data);
+    written += UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal((BYTE *)&sm3_ctx->data[0], array_size, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->num, buffer, size);
+    written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
+    /* future versions append below this line */
+
+    BLOCK_SKIP_WRITE_POP(size);
+
+    BLOCK_SKIP_WRITE_CHECK;
+
+    return written;
+}
+static UINT16
+tpmHashStateSM3_256_Unmarshal(tpmHashStateSM3_256_t *data, BYTE **buffer, INT32 *size,
+                             UINT16 hashAlg)
+{
+    UINT16 rc = TPM_RC_SUCCESS;
+    UINT16 array_size;
+    NV_HEADER hdr;
+    SM3_CTX *sm3_ctx = NULL;
+    
+    (*data) = EVP_MD_CTX_new();
+    if ((*data) == NULL) {
+        rc = TPM_RC_FAILURE;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        EVP_DigestInit_ex(*data, EVP_sm3(), NULL);
+        sm3_ctx = EVP_MD_CTX_md_data(*data);
+    }
+    
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 HASH_STATE_SM3_256_VERSION,
+                                 HASH_STATE_SM3_256_MAGIC);
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->A, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->B, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->C, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->D, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->E, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->F, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->G, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->H, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->Nl, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SM3_WORD_Unmarshal(&sm3_ctx->Nh, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        array_size != sizeof(sm3_ctx->data)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SM3_256: Bad array size for data; "
+                            "expected %zu, got %u\n",
+                            sizeof(sm3_ctx->data), array_size);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = Array_Unmarshal((BYTE *)&sm3_ctx->data[0], array_size,
+                             buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT32_Unmarshal(&sm3_ctx->num, buffer, size);
+    }
+
+    /* version 2 starts having indicator for next versions that we can skip;
+       this allows us to downgrade state */
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
+        BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+                        "HASH_STATE_SM3_256", "version 3 or later");
+        /* future versions nest-append here */
+    }
+
+skip_future_versions:
+
+    return rc;
+}
+#endif
 #define ANY_HASH_STATE_MAGIC 0x349d494b
 #define ANY_HASH_STATE_VERSION 2
 
@@ -2063,6 +2201,12 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
         written += tpmHashStateSHA512_Marshal(&data->Sha512, buffer, size,
                                               ALG_SHA512_VALUE);
         break;
+#endif
+#if ALG_SM3_256
+    case ALG_SM3_256_VALUE:
+    written += tpmHashStateSM3_256_Marshal(&data->Sm3_256, buffer, size,
+                                              ALG_SM3_256_VALUE);
+    break;
 #endif
     default:
         break;
@@ -2112,6 +2256,12 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     case ALG_SHA512_VALUE:
         rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size,
                                           ALG_SHA512_VALUE);
+        break;
+#endif
+#if ALG_SM3_256
+    case ALG_SM3_256_VALUE:
+        rc = tpmHashStateSM3_256_Unmarshal(&data->Sm3_256, buffer, size,
+                                          ALG_SM3_256_VALUE);
         break;
 #endif
     }
