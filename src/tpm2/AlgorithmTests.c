@@ -845,7 +845,7 @@ TestAlgorithm(
 #if ALG_SM4
 		    // if SM4 is implemented, its test is like other block ciphers but there
 		    // aren't any test vectors for it yet
-		    //            case TPM_ALG_SM4:
+		  case TPM_ALG_SM4: /* libtpms changed */
 #endif
 #if ALG_CAMELLIA
 		  case TPM_ALG_CAMELLIA:  // libtpms activated
