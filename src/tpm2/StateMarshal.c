@@ -38,7 +38,6 @@
 
 #include <stdlib.h>
 
-#include "config.h"
 
 #include "StateMarshal.h"
 #include "Volatile.h"

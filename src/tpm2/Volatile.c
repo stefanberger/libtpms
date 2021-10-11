@@ -45,7 +45,6 @@
 #endif
 #include <string.h>
 
-#include "config.h"
 
 #include "assert.h"
 #include "NVMarshal.h"
