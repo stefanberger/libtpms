@@ -2031,18 +2031,6 @@ skip_future_versions:
 #define HASH_STATE_SM3_256_MAGIC 0x10854a09
 #define HASH_STATE_SM3_256_VERSION 2
 
-#include "Sm3Helper_fp.h"
-static inline UINT16
-SM3_WORD_Marshal(SM3_WORD *data, BYTE **buffer, INT32 *size)
-{
-    return UINT32_Marshal(data, buffer, size);
-}
-
-static inline UINT16
-SM3_WORD_Unmarshal(SM3_WORD *data, BYTE **buffer, INT32 *size)
-{
-    return UINT32_Unmarshal(data, buffer, size);
-}
 static UINT16
 tpmHashStateSM3_256_Marshal(tpmHashStateSM3_256_t *data, BYTE **buffer, INT32 *size,
                            UINT16 hashAlg)
@@ -2056,16 +2044,16 @@ tpmHashStateSM3_256_Marshal(tpmHashStateSM3_256_t *data, BYTE **buffer, INT32 *s
     written = NV_HEADER_Marshal(buffer, size,
                                 HASH_STATE_SM3_256_VERSION,
                                 HASH_STATE_SM3_256_MAGIC, 1);
-    written += SM3_WORD_Marshal(&sm3_ctx->A, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->B, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->C, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->D, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->E, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->F, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->G, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->H, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->Nl, buffer, size);
-    written += SM3_WORD_Marshal(&sm3_ctx->Nh, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->A, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->B, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->C, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->D, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->E, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->F, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->G, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->H, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->Nl, buffer, size);
+    written += UINT32_Marshal(&sm3_ctx->Nh, buffer, size);
     /* data must be written as array */
     array_size = sizeof(sm3_ctx->data);
     written += UINT16_Marshal(&array_size, buffer, size);
@@ -2105,34 +2093,34 @@ tpmHashStateSM3_256_Unmarshal(tpmHashStateSM3_256_t *data, BYTE **buffer, INT32 
     }
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->A, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->A, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->B, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->B, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->C, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->C, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->D, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->D, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->E, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->E, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->F, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->F, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->G, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->G, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->H, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->H, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->Nl, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->Nl, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = SM3_WORD_Unmarshal(&sm3_ctx->Nh, buffer, size);
+        rc = UINT32_Unmarshal(&sm3_ctx->Nh, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);

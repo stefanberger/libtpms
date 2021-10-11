@@ -76,7 +76,24 @@
 #       undef ALG_SM3_256
 #       define ALG_SM3_256  ALG_NO
 #   else
-    #include "Sm3Helper_fp.h"
+#   include <openssl/evp.h>
+
+#   define SM3_LBLOCK      (64/4)
+#   define SM3_SUCCESS 1
+#   define SM3_FAIL 0
+
+typedef struct SM3state_st {
+    unsigned int A, B, C, D, E, F, G, H;
+    unsigned int Nl, Nh;
+    unsigned int data[SM3_LBLOCK];
+    unsigned int num;
+} SM3_CTX;
+
+typedef EVP_MD_CTX* SM3_TPM_CTX;
+
+int sm3_init(SM3_TPM_CTX *c);
+int sm3_update(SM3_TPM_CTX *c, const void *data, size_t len);
+int sm3_final(unsigned char *md, SM3_TPM_CTX *c);
 #endif
 #endif // ALG_SM3_256
 
