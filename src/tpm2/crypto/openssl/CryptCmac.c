@@ -119,7 +119,8 @@ CryptCmacData(
     BYTE                    *key = cmacState->symKey.t.buffer;
     UINT16                   keySizeInBits = cmacState->keySizeBits;
     tpmCryptKeySchedule_t    keySchedule;
-    TpmCryptSetSymKeyCall_t  encrypt;
+    TpmCryptSetSymKeyCall_t  encrypt; 
+    TpmCryptSymFinal_t       final;
     //
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
     // Set up the encryption values based on the algorithm
@@ -142,6 +143,8 @@ CryptCmacData(
 	            cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
 	        }
 	}
+    if (final)
+        FINAL(&keySchedule);
 }
 
 /* 10.2.6.3.3	CryptCmacEnd() */
@@ -162,6 +165,7 @@ CryptCmacEnd(
     UINT16                   keySizeInBits = cState->keySizeBits;
     tpmCryptKeySchedule_t    keySchedule;
     TpmCryptSetSymKeyCall_t  encrypt;
+    TpmCryptSymFinal_t       final;
     TPM2B_IV                 subkey = {{0, {0}}};
     BOOL                     xorVal;
     UINT16                   i;
@@ -203,7 +207,8 @@ CryptCmacEnd(
     ENCRYPT(&keySchedule, cState->iv.t.buffer, cState->iv.t.buffer);
     i = (UINT16)MIN(cState->iv.t.size, outSize);
     MemoryCopy(outBuffer, cState->iv.t.buffer, i);
-
+    if (final)
+        FINAL(&keySchedule);
     return i;
 }
 

@@ -175,6 +175,7 @@ CryptSymmetricEncrypt(
     tpmCryptKeySchedule_t        keySchedule;
     INT16                blockSize;
     TpmCryptSetSymKeyCall_t        encrypt;
+    TpmCryptSymFinal_t       final;	
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
     //
@@ -294,8 +295,12 @@ CryptSymmetricEncrypt(
 	    break;
 #endif
 	  default:
+	  	if (final)
+        	FINAL(&keySchedule);
 	    return TPM_RC_FAILURE;
 	}
+	if (final)
+        FINAL(&keySchedule);
     return TPM_RC_SUCCESS;
 }
 /* 10.2.20.5.1 CryptSymmetricDecrypt() */
@@ -326,6 +331,7 @@ CryptSymmetricDecrypt(
     BYTE                *iv;
     TpmCryptSetSymKeyCall_t        encrypt;
     TpmCryptSetSymKeyCall_t        decrypt;
+	TpmCryptSymFinal_t       final;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
 
     memset(&keySchedule, 0, sizeof(keySchedule));	// libtpms added; coverity
@@ -466,8 +472,12 @@ CryptSymmetricDecrypt(
 	    break;
 #endif
 	  default:
+	    if (final)
+        	FINAL(&keySchedule);
 	    return TPM_RC_FAILURE;
 	}
+	if (final)
+        FINAL(&keySchedule);
     return TPM_RC_SUCCESS;
 }
 
