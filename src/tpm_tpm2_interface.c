@@ -370,6 +370,9 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     "\"TPMFeatures\":{"
         "\"RSAKeySizes\":[%s],"
         "\"CamelliaKeySizes\":[%s]"
+#if ALG_SM4
+        ", \"SM4KeySizes\":[128]"
+#endif
     "}";
     char *fmt = NULL, *buffer;
     bool printed = false;
