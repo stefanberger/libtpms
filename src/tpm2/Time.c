@@ -136,7 +136,16 @@ TimeClockUpdate(
 	    go.clockSafe = YES;
 	    // update the time
 	    go.clock = newTime;
+
+	    /* libtpms: Changing the clock alone does not cause the permanent
+	     *          state to be written to storage, there must be other
+	     *          reasons as well.
+	     */
+	    UPDATE_TYPE old_g_updateNV = g_updateNV;	// libtpms added
+
 	    NvWrite(NV_ORDERLY_DATA, sizeof(go), &go);
+
+	    g_updateNV = old_g_updateNV;		// libtpms added
 	}
     else
 	// No NV update needed so just update
