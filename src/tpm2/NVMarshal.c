@@ -3880,7 +3880,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
     unsigned i;
     NV_HEADER hdr;
     UINT32 array_size;
-    UINT32 exp_array_size;
+    UINT32 exp_array_size = 0;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
