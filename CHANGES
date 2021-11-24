@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.9.1:
+  - tpm2: Do not write permanent state if only clock changed
+  - tpm2: Fix "maybe-uninitialized" warning
+
 version 0.9.0:
   - NOTE: Downgrade to previous versions is not possible. See below.
   - The size of the context gap has been adjusted to 0xffff from 0xff.
