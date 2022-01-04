@@ -1422,6 +1422,11 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(&array_size, buffer, size);
     for (i = 0; i < array_size; i++)
         written += UINT16_Marshal(&data->contextArray[i], buffer, size);
+
+    if (s_ContextSlotMask != 0x00ff && s_ContextSlotMask != 0xffff) {
+        /* TPM wasn't initialized, so s_ContextSlotMask wasn't set */
+        s_ContextSlotMask = 0xffff;
+    }
     written += UINT16_Marshal(&s_ContextSlotMask, buffer, size);
 
     written += UINT64_Marshal(&data->contextCounter, buffer, size);
