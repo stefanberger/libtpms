@@ -1,3 +1,9 @@
+libtpms (0.9.2) RELEASED; urgency=medium
+
+  * tpm2: When writing state initialize s_ContextSlotMask if not set
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Thu, 06 Jan 2022 09:00:00 -0500
+
 libtpms (0.9.1) RELEASED; urgency=medium
 
   * tpm2: Do not write permanent state if only clock changed
