@@ -128,7 +128,7 @@
 #endif
 #   define __pragma(x)
     /* libtpms added begin */
-#   if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR >= 2)
+#   if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)
 #     define REVERSE_ENDIAN_16(_Number) __builtin_bswap16(_Number)
 #     define REVERSE_ENDIAN_32(_Number) __builtin_bswap32(_Number)
 #     define REVERSE_ENDIAN_64(_Number) __builtin_bswap64(_Number)
