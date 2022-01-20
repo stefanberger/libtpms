@@ -352,6 +352,8 @@ noinst_HEADERS += \
 	tpm2/ECC_Parameters_fp.h \
 	tpm2/ECDH_KeyGen_fp.h \
 	tpm2/ECDH_ZGen_fp.h \
+	tpm2/ECC_Decrypt_fp.h \
+	tpm2/ECC_Encrypt_fp.h \
 	tpm2/EC_Ephemeral_fp.h \
 	tpm2/EncryptDecrypt2_fp.h \
 	tpm2/EncryptDecrypt_fp.h \
@@ -531,6 +533,7 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/CryptDes.c \
 	tpm2/crypto/openssl/CryptEccKeyExchange.c \
 	tpm2/crypto/openssl/CryptEccMain.c \
+	tpm2/crypto/openssl/CryptEccCrypt.c \
 	tpm2/crypto/openssl/CryptEccSignature.c \
 	tpm2/crypto/openssl/CryptHash.c \
 	tpm2/crypto/openssl/CryptPrime.c \
