@@ -563,10 +563,10 @@
 #define CC_Duplicate                        CC_YES
 #endif
 #ifndef CC_ECC_Decrypt
-#define CC_ECC_Decrypt                      (CC_NO && ALG_ECC)
+#define CC_ECC_Decrypt                      (CC_YES && ALG_ECC)
 #endif
 #ifndef CC_ECC_Encrypt
-#define CC_ECC_Encrypt                      (CC_NO && ALG_ECC)
+#define CC_ECC_Encrypt                      (CC_YES && ALG_ECC)
 #endif
 #ifndef CC_ECC_Parameters
 #define CC_ECC_Parameters                   (CC_YES && ALG_ECC)
