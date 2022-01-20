@@ -21,7 +21,7 @@ int main(void)
     }
 
     /* Check size of auditCommands that expands with new commands */
-#define PD_AUDIT_COMMANDS_EXP_SIZE 14
+#define PD_AUDIT_COMMANDS_EXP_SIZE 15
     if (sizeof(pd.auditCommands) != PD_AUDIT_COMMANDS_EXP_SIZE) {
         fprintf(stderr,
                 "sizeof(PERSISTENT_DATA.auditCommands) does not have expected size "
