@@ -4664,8 +4664,10 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 }
                 if (rc == TPM_RC_SUCCESS) {
                     rc = NV_INDEX_Unmarshal(&nvi, buffer, size);
-                    NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
-                    offset += sizeof(nvi);
+                    if (rc == TPM_RC_SUCCESS) {
+                        NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
+                        offset += sizeof(nvi);
+                    }
                 }
                 if (rc == TPM_RC_SUCCESS) {
                     rc = UINT32_Unmarshal(&datasize, buffer, size);
