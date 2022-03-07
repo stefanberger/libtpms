@@ -1,5 +1,10 @@
 CHANGES - changes for libtpms
 
+version 0.9.3:
+  - build-sys: Add probing for -fstack-protector
+  - tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size
+    (OSSL 3)
+
 version 0.9.2:
   - tpm2: When writing state initialize s_ContextSlotMask if not set
 
