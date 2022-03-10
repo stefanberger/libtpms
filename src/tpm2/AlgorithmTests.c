@@ -628,6 +628,54 @@ LoadEccPoint(
     MemoryCopy2B(&point->x.b, (TPM2B *)x, sizeof(point->x.t.buffer));
     MemoryCopy2B(&point->y.b, (TPM2B *)y, sizeof(point->y.t.buffer));
 }
+
+static void
+EccKeyInitialize(
+            OBJECT          *testObject
+            )
+{
+    LoadEccPoint(&testObject->publicArea.unique.ecc, &c_ecTestPublicKey_X,
+                 &c_ecTestPublicKey_Y);
+    MemoryCopy2B(&testObject->sensitive.sensitive.ecc.b, &c_ecTestPrivateKey.b,
+                 sizeof(testObject->sensitive.sensitive.ecc.t.buffer));
+    testObject->publicArea.parameters.eccDetail.curveID = c_testEncCurve;
+}
+/* test ecc encrypt and decrypt with standard test data from GB/T 32918.5-2017 */
+static TPM_RC
+TestEccEncryptDecrypt(
+		      TPM_ALG_ID           scheme,            // IN: the scheme
+		      ALGORITHM_VECTOR    *toTest             //
+		      )
+{
+    TPM_RC              result = TPM_RC_SUCCESS;
+    OBJECT              testObject;
+    TPMT_KDF_SCHEME     eccScheme;
+    TPM2B_MAX_BUFFER    testInput;
+    TPMS_ECC_POINT      C1;
+    TPM2B_MAX_BUFFER    C2;
+    TPM2B_DIGEST        C3;
+    TPM2B_MAX_BUFFER    testOutput;
+
+    CLEAR_BOTH(scheme);
+    EccKeyInitialize(&testObject);
+    eccScheme.scheme = scheme;
+    eccScheme.details.mgf1.hashAlg = DEFAULT_TEST_HASH;
+    memcpy(testInput.t.buffer, c_ecTestPlaintext, sizeof(c_ecTestPlaintext));
+    testInput.t.size = sizeof(c_ecTestPlaintext);
+    if(TPM_RC_SUCCESS != CryptEccEncrypt(&testObject, &eccScheme,
+                    &testInput, &C1, &C2, &C3)) {
+    SELF_TEST_FAILURE;
+    }
+    if(TPM_RC_SUCCESS != CryptEccDecrypt(&testObject, &eccScheme,
+                    &testOutput, &C1, &C2, &C3)) {
+    SELF_TEST_FAILURE;
+    }
+    if(!MemoryEqual(testOutput.t.buffer, c_ecTestPlaintext,sizeof(c_ecTestPlaintext))) {
+    SELF_TEST_FAILURE;
+    }
+    return result;
+}
+
 /* 10.2.1.6.3 TestECDH() */
 /* This test does a KVT on a point multiply. */
 static TPM_RC
@@ -761,7 +809,8 @@ TestEcc(
 	       // or this is the only ECC test in the list
 	       || !(TEST_BIT(TPM_ALG_ECDSA, *toTest)
 		    || TEST_BIT(TPM_ALG_ECSCHNORR, *toTest)
-		    || TEST_BIT(TPM_ALG_SM2, *toTest)))
+		    || TEST_BIT(TPM_ALG_SM2, *toTest)
+		    || TEST_BIT(TPM_ALG_KDF2, *toTest)))
 		{
 		    result = TestECDH(alg, toTest);
 		}
@@ -770,6 +819,9 @@ TestEcc(
 	  case TPM_ALG_ECSCHNORR:
 	  case TPM_ALG_SM2:
 	    result = TestEccSignAndVerify(alg, toTest);
+	    break;
+	  case TPM_ALG_KDF2:
+	    result = TestEccEncryptDecrypt(alg, toTest);
 	    break;
 	  default:
 	    SELF_TEST_FAILURE;
@@ -935,8 +987,11 @@ TestAlgorithm(
 		    //        case TPM_ALG_ECDAA:
 		    //        case TPM_ALG_ECMQV:
 		    //        case TPM_ALG_KDF1_SP800_56a:
-		    //        case TPM_ALG_KDF2:
 		    //        case TPM_ALG_MGF1:
+		  case TPM_ALG_KDF2:
+		    if(doTest)
+		    result = TestEcc(TPM_ALG_KDF2, toTest);
+		    break;
 		  case TPM_ALG_ECC:
 		    CLEAR_BOTH(alg);
 		    if(doTest)
