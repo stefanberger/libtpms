@@ -426,8 +426,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
 
     /* Q = N/P; no remainder */
     BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
-    BN_div(Q, Qr, N, P, ctx);
-    if(!BN_is_zero(Qr))
+    if (!BN_div(Q, Qr, N, P, ctx) || !BN_is_zero(Qr))
         ERROR_RETURN(TPM_RC_BINDING);
     BN_set_flags(Q, BN_FLG_CONSTTIME); // Q is secret
 
