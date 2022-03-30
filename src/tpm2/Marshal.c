@@ -2195,7 +2195,7 @@ UINT16
 TPM2B_NV_PUBLIC_Marshal(TPM2B_NV_PUBLIC *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    BYTE *sizePtr;
+    BYTE *sizePtr = NULL;
 
     if (buffer != NULL) {
 	sizePtr = *buffer;
