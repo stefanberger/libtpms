@@ -148,6 +148,7 @@ ExecuteCommand(
     if(g_DRTMHandle != TPM_RH_UNASSIGNED)
 	ObjectTerminateEvent();
     // Get command buffer size and command buffer.
+    command.tag = 0;				// libtpms added: Coverity
     command.parameterBuffer = request;
     command.parameterSize = requestSize;
     // Parse command header: tag, commandSize and command.code.
