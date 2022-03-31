@@ -1116,7 +1116,9 @@ TPM2_PolicyAuthorizeNV(
     NV_REF                   locator;
     NV_INDEX                *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     TPM2B_NAME               name;
-    TPMT_HA                  policyInNv;
+    TPMT_HA                  policyInNv = {
+                                 .hashAlg = 0, // libpms added: Coverity
+                             };
     BYTE                     nvTemp[sizeof(TPMT_HA)];
     BYTE                    *buffer = nvTemp;
     INT32                    size;
