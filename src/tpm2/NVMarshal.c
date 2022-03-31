@@ -806,7 +806,7 @@ pcrbanks_algs_active(const TPML_PCR_SELECTION *pcrAllocated)
     for(i = 0; i < pcrAllocated->count; i++) {
         for (j = 0; j < pcrAllocated->pcrSelections[i].sizeofSelect; j++) {
             if (pcrAllocated->pcrSelections[i].pcrSelect[j]) {
-                algs_active |= 1 << pcrAllocated->pcrSelections[i].hash;
+                algs_active |= ((UINT64)1 << pcrAllocated->pcrSelections[i].hash);
                 break;
             }
         }
@@ -4664,8 +4664,10 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 }
                 if (rc == TPM_RC_SUCCESS) {
                     rc = NV_INDEX_Unmarshal(&nvi, buffer, size);
-                    NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
-                    offset += sizeof(nvi);
+                    if (rc == TPM_RC_SUCCESS) {
+                        NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
+                        offset += sizeof(nvi);
+                    }
                 }
                 if (rc == TPM_RC_SUCCESS) {
                     rc = UINT32_Unmarshal(&datasize, buffer, size);
