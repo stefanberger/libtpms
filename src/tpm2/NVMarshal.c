@@ -4613,7 +4613,9 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     NV_REF entryRef = NV_USER_DYNAMIC;
     UINT32 entrysize;
     UINT64 offset, o = 0;
-    NV_INDEX nvi;
+    NV_INDEX nvi = {
+        .publicArea.attributes = 0, // Coverity
+    };
     UINT64 maxCount;
     TPM_HANDLE handle;
     OBJECT obj;
