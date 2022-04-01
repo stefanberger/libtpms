@@ -123,6 +123,8 @@ TPM_RESULT TPM_NVRAM_Init(void)
             rc = TPM_FAIL;
         }
     }
+#else
+# error TPM_NV_DISK must be defined
 #endif
     /* check that the directory name plus a file name will not overflow FILENAME_MAX */
     if (rc == 0) {
