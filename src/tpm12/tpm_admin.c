@@ -96,7 +96,7 @@ TPM_RESULT TPM_LimitedSelfTestCommon(void)
     uint32_t	tv_sec;
     uint32_t	tv_usec;
 
-    printf(" TPM_LimitedSelfTestCommon:\n");
+    TPMLIB_LogPrintf(" TPM_LimitedSelfTestCommon:\n");
 #if 0
     if (rc == 0) {
 	rc = TPM_Sbuffer_Test();
@@ -127,7 +127,7 @@ TPM_RESULT TPM_LimitedSelfTestTPM(tpm_state_t *tpm_state)
     uint32_t		decLength;
     
     
-    printf(" TPM_LimitedSelfTestTPM:\n");
+    TPMLIB_LogPrintf(" TPM_LimitedSelfTestTPM:\n");
     TPM_SizedBuffer_Init(&encData);		/* freed @1 */
 
     /* 8. The TPM MUST check the following: */	
@@ -167,7 +167,7 @@ TPM_RESULT TPM_LimitedSelfTestTPM(tpm_state_t *tpm_state)
 	/* verify */
 	if (rc == 0) {
 	    if (decLength != TPM_NONCE_SIZE) {
-		printf("TPM_LimitedSelfTestTPM: Error, decrypt length %u should be %u\n",
+		TPMLIB_LogPrintf("TPM_LimitedSelfTestTPM: Error, decrypt length %u should be %u\n",
 		       decLength, TPM_NONCE_SIZE);
 		rc = TPM_FAILEDSELFTEST;
 	    }
@@ -208,11 +208,11 @@ TPM_RESULT TPM_LimitedSelfTestTPM(tpm_state_t *tpm_state)
     }
     /* set the TPM test state */
     if ((rc == 0) && (tpm_state->testState != TPM_TEST_STATE_FAILURE)) {
-	printf("  TPM_LimitedSelfTestTPM: Set testState to %u \n", TPM_TEST_STATE_LIMITED);
+	TPMLIB_LogPrintf("  TPM_LimitedSelfTestTPM: Set testState to %u \n", TPM_TEST_STATE_LIMITED);
 	tpm_state->testState = TPM_TEST_STATE_LIMITED;
     }
     else {
-	printf("  TPM_LimitedSelfTestTPM: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("  TPM_LimitedSelfTestTPM: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return rc;
@@ -227,17 +227,17 @@ TPM_RESULT TPM_ContinueSelfTestCmd(tpm_state_t *tpm_state)
     TPM_RESULT	rc = 0;
 
     /* NOTE all done by limited self test */
-    printf(" TPM_ContinueSelfTestCmd:\n");
+    TPMLIB_LogPrintf(" TPM_ContinueSelfTestCmd:\n");
     if (rc != 0) {
 	rc = TPM_FAILEDSELFTEST;
     }
     /* set the TPM test state */
     if (rc == 0) {
-	printf("  TPM_ContinueSelfTestCmd: Set testState to %u \n", TPM_TEST_STATE_FULL);
+	TPMLIB_LogPrintf("  TPM_ContinueSelfTestCmd: Set testState to %u \n", TPM_TEST_STATE_FULL);
 	tpm_state->testState = TPM_TEST_STATE_FULL;
     }
     else {
-	printf("  TPM_ContinueSelfTestCmd: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("  TPM_ContinueSelfTestCmd: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return rc;
@@ -254,7 +254,7 @@ TPM_RESULT TPM_SelfTestFullCmd(tpm_state_t *tpm_state)
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_SelfTestFullCmd\n");
+    TPMLIB_LogPrintf(" TPM_SelfTestFullCmd\n");
     if (rc == 0) {
 	rc = TPM_LimitedSelfTestTPM(tpm_state);
     }
@@ -295,7 +295,7 @@ TPM_RESULT TPM_Process_SelfTestFull(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SelfTestFull: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SelfTestFull: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -326,7 +326,7 @@ TPM_RESULT TPM_Process_SelfTestFull(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SelfTestFull: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_SelfTestFull: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -347,7 +347,7 @@ TPM_RESULT TPM_Process_SelfTestFull(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-	printf("TPM_Process_SelfTestFull: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SelfTestFull: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -447,7 +447,7 @@ TPM_RESULT TPM_Process_ContinueSelfTest(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ContinueSelfTest: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ContinueSelfTest: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -478,7 +478,7 @@ TPM_RESULT TPM_Process_ContinueSelfTest(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ContinueSelfTest: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_ContinueSelfTest: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -510,7 +510,7 @@ TPM_RESULT TPM_Process_ContinueSelfTest(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-	printf("TPM_Process_ContinueSelfTest: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ContinueSelfTest: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -579,7 +579,7 @@ TPM_RESULT TPM_Process_GetTestResult(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	outData;	/* The outData this is manufacturer specific */
     
-    printf("TPM_Process_GetTestResult: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetTestResult: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&outData);	/* freed @1 */
     /*
       get inputs
@@ -611,7 +611,7 @@ TPM_RESULT TPM_Process_GetTestResult(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetTestResult: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_GetTestResult: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -632,7 +632,7 @@ TPM_RESULT TPM_Process_GetTestResult(tpm_state_t *tpm_state,
 	outData.size = snprintf((char *)(outData.buffer), len,
 	                        "Shutdown %08x\n", tpm_state->testState);
 	if (outData.size >= len) {
-	    printf("TPM_Process_GetTestResult: Error (fatal), buffer too small\n");
+	    TPMLIB_LogPrintf("TPM_Process_GetTestResult: Error (fatal), buffer too small\n");
 	    returnCode = TPM_FAIL;
 	}
     }
@@ -641,7 +641,7 @@ TPM_RESULT TPM_Process_GetTestResult(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetTestResult: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetTestResult: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -718,7 +718,7 @@ TPM_RESULT TPM_Process_SetOwnerInstall(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SetOwnerInstall: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -752,7 +752,7 @@ TPM_RESULT TPM_Process_SetOwnerInstall(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetOwnerInstall: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -762,12 +762,12 @@ TPM_RESULT TPM_Process_SetOwnerInstall(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* 1. If the TPM has a current owner, this command immediately returns with TPM_SUCCESS. */
 	if (tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_Process_SetOwnerInstall: Already current owner\n");
+	    TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Already current owner\n");
 	}
 	/* If the TPM does not have a current owner */
 	else {
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_SetOwnerInstall: No current owner\n");
+		TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: No current owner\n");
 		/* 2.  The TPM validates the assertion of physical presence. The TPM then sets the
 		   value of TPM_PERMANENT_FLAGS -> ownership to the value in state.
 		*/
@@ -775,12 +775,12 @@ TPM_RESULT TPM_Process_SetOwnerInstall(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (!physicalPresence) {
-		    printf("TPM_Process_SetOwnerInstall: Error, physicalPresence is FALSE\n");
+		    TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Error, physicalPresence is FALSE\n");
 		    returnCode = TPM_BAD_PRESENCE;
 		}
 	    }
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_SetOwnerInstall: Setting ownership to %02x\n", state);
+		TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Setting ownership to %02x\n", state);
 		TPM_SetCapability_Flag(&writeAllNV,				/* altered */
 				       &(tpm_state->tpm_permanent_flags.ownership),	/* flag */
 				       state);						/* value */
@@ -796,7 +796,7 @@ TPM_RESULT TPM_Process_SetOwnerInstall(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetOwnerInstall: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetOwnerInstall: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -874,7 +874,7 @@ TPM_RESULT TPM_Process_OwnerSetDisable(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_OwnerSetDisable: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OwnerSetDisable: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -919,7 +919,7 @@ TPM_RESULT TPM_Process_OwnerSetDisable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OwnerSetDisable: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_OwnerSetDisable: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -957,7 +957,7 @@ TPM_RESULT TPM_Process_OwnerSetDisable(tpm_state_t *tpm_state,
     /* 2. The TPM SHALL set the TPM_PERMANENT_FLAGS -> disable flag to the value in the
        disableState parameter. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OwnerSetDisable: Setting disable to %u\n", disableState);
+	TPMLIB_LogPrintf("TPM_Process_OwnerSetDisable: Setting disable to %u\n", disableState);
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.disable),	/* flag */
 			       disableState);					/* value */
@@ -971,7 +971,7 @@ TPM_RESULT TPM_Process_OwnerSetDisable(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OwnerSetDisable: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OwnerSetDisable: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1054,7 +1054,7 @@ TPM_RESULT TPM_Process_PhysicalEnable(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_PhysicalEnable: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PhysicalEnable: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1085,7 +1085,7 @@ TPM_RESULT TPM_Process_PhysicalEnable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PhysicalEnable: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalEnable: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -1098,13 +1098,13 @@ TPM_RESULT TPM_Process_PhysicalEnable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_PhysicalEnable: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalEnable: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
     /* 2. The TPM SHALL set the TPM_PERMANENT_FLAGS.disable value to FALSE. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PhysicalEnable: Setting disable to FALSE\n");
+	TPMLIB_LogPrintf("TPM_Process_PhysicalEnable: Setting disable to FALSE\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.disable),	/* flag */
 			       FALSE);						/* value */
@@ -1118,7 +1118,7 @@ TPM_RESULT TPM_Process_PhysicalEnable(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PhysicalEnable: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PhysicalEnable: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1185,7 +1185,7 @@ TPM_RESULT TPM_Process_PhysicalDisable(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_PhysicalDisable: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PhysicalDisable: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1217,7 +1217,7 @@ TPM_RESULT TPM_Process_PhysicalDisable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PhysicalDisable: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalDisable: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -1230,13 +1230,13 @@ TPM_RESULT TPM_Process_PhysicalDisable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_PhysicalDisable: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalDisable: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
     /* 2. The TPM SHALL set the TPM_PERMANENT_FLAGS.disable value to TRUE. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PhysicalDisable: Setting disable to TRUE\n");
+	TPMLIB_LogPrintf("TPM_Process_PhysicalDisable: Setting disable to TRUE\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.disable ),	/* flag */
 			       TRUE);						/* value */
@@ -1250,7 +1250,7 @@ TPM_RESULT TPM_Process_PhysicalDisable(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PhysicalDisable: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PhysicalDisable: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1320,7 +1320,7 @@ TPM_RESULT TPM_Process_PhysicalSetDeactivated(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_PhysicalSetDeactivated: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1331,7 +1331,7 @@ TPM_RESULT TPM_Process_PhysicalSetDeactivated(tpm_state_t *tpm_state,
 	returnCode = TPM_LoadBool(&state, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PhysicalSetDeactivated: state %02x\n", state);
+	TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: state %02x\n", state);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -1359,7 +1359,7 @@ TPM_RESULT TPM_Process_PhysicalSetDeactivated(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PhysicalSetDeactivated: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1373,14 +1373,14 @@ TPM_RESULT TPM_Process_PhysicalSetDeactivated(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_PhysicalSetDeactivated: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
     /* 2. The TPM SHALL set the TPM_PERMANENT_FLAGS.deactivated flag to the value in the state
        parameter. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PhysicalSetDeactivated: Setting deactivated to %u\n", state);
+	TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: Setting deactivated to %u\n", state);
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.deactivated),	/* flag */
 			       state);						/* value */
@@ -1394,7 +1394,7 @@ TPM_RESULT TPM_Process_PhysicalSetDeactivated(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PhysicalSetDeactivated: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PhysicalSetDeactivated: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1477,7 +1477,7 @@ TPM_RESULT TPM_Process_SetTempDeactivated(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
    
-    printf("TPM_Process_SetTempDeactivated: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1522,7 +1522,7 @@ TPM_RESULT TPM_Process_SetTempDeactivated(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetTempDeactivated: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1538,13 +1538,13 @@ TPM_RESULT TPM_Process_SetTempDeactivated(tpm_state_t *tpm_state,
     /* a. If TPM_PERMANENT_FLAGS -> operator is FALSE return TPM_NOOPERATOR */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
 	if (!tpm_state->tpm_permanent_flags.tpmOperator) {
-	    printf("TPM_Process_SetTempDeactivated: Error, no operator\n");
+	    TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Error, no operator\n");
 	    returnCode = TPM_NOOPERATOR;
 	}
     }
     /* b. Validate command and parameters using operatorAuth, on error return TPM_AUTHFAIL */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf(" TPM_Process_SetTempDeactivated: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf(" TPM_Process_SetTempDeactivated: authHandle %08x\n", authHandle);
 	/* get the session data */
 	returnCode =
 	    TPM_AuthSessions_GetData(&auth_session_data,
@@ -1577,14 +1577,14 @@ TPM_RESULT TPM_Process_SetTempDeactivated(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_SetTempDeactivated: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
 #endif
     /* 3. The TPM SHALL set the TPM_STCLEAR_FLAGS.deactivated flag to the value TRUE. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SetTempDeactivated: Setting deactivated to TRUE\n");
+	TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Setting deactivated to TRUE\n");
 	tpm_state->tpm_stclear_flags.deactivated = TRUE;
     }
     /*
@@ -1592,7 +1592,7 @@ TPM_RESULT TPM_Process_SetTempDeactivated(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetTempDeactivated: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetTempDeactivated: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1686,7 +1686,7 @@ TPM_RESULT TPM_Process_SetOperatorAuth(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SetOperatorAuth: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetOperatorAuth: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1720,7 +1720,7 @@ TPM_RESULT TPM_Process_SetOperatorAuth(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetOperatorAuth: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SetOperatorAuth: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1734,7 +1734,7 @@ TPM_RESULT TPM_Process_SetOperatorAuth(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_SetOperatorAuth: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_SetOperatorAuth: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
@@ -1742,7 +1742,7 @@ TPM_RESULT TPM_Process_SetOperatorAuth(tpm_state_t *tpm_state,
 	/* 2. The TPM SHALL set the TPM_PERSISTENT_DATA -> operatorAuth */
 	TPM_Digest_Copy(tpm_state->tpm_permanent_data.operatorAuth, operatorAuth);
 	/* 3. The TPM SHALL set TPM_PERMANENT_FLAGS -> operator to TRUE */
-	printf("TPM_Process_SetOperatorAuth: Setting operator to TRUE\n");
+	TPMLIB_LogPrintf("TPM_Process_SetOperatorAuth: Setting operator to TRUE\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.tpmOperator),	/* flag */
 			       TRUE);						/* value */
@@ -1756,7 +1756,7 @@ TPM_RESULT TPM_Process_SetOperatorAuth(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetOperatorAuth: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetOperatorAuth: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1841,7 +1841,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ResetLockValue: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1886,7 +1886,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ResetLockValue: Error, command has %u extra bytes\n", paramSize);
+	    TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Error, command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -1900,7 +1900,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
     /* 1. If TPM_STCLEAR_DATA -> disableResetLock is TRUE return TPM_AUTHFAIL */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_stclear_data.disableResetLock) {
-	    printf("TPM_Process_ResetLockValue: Error, command locked out\n");
+	    TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Error, command locked out\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }	 
@@ -1934,7 +1934,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
 	}
 	/* 2. If the the command and parameters validation using ownerAuth fails */
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_ResetLockValue: Error, disabling ordinal\n");
+	    TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Error, disabling ordinal\n");
 	    /* a. Set TPM_STCLEAR_DATA -> disableResetLock to TRUE */
 	    tpm_state->tpm_stclear_data.disableResetLock = TRUE;
 	    /* b. Restart the TPM dictionary attack lock out period */
@@ -1946,7 +1946,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
     /* a. The mechanism is vendor specific and can include time outs, reboots, and other mitigation
        strategies */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ResetLockValue: Resetting the failure counter\n");
+	TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Resetting the failure counter\n");
 	/* clear the authorization failure counter */
 	tpm_state->tpm_stclear_data.authFailCount = 0;
     }
@@ -1955,7 +1955,7 @@ TPM_RESULT TPM_Process_ResetLockValue(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ResetLockValue: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ResetLockValue: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

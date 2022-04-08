@@ -165,7 +165,7 @@ BigInitialized(
 #   define BIGNUM_PRINT(label, bn, eol)
 #   define DEBUG_PRINT(x)
 #else
-#   define DEBUG_PRINT(x)   printf("%s", x)
+#   define DEBUG_PRINT(x)   TPMLIB_LogPrintf("%s", x)
 #   define BIGNUM_PRINT(label, bn, eol) BIGNUM_print((label), (bn), (eol))
 
 static
@@ -179,14 +179,14 @@ void BIGNUM_print(
     int              i;
     int              notZero = FALSE;
     if(label != NULL)
-	printf("%s", label);
+	TPMLIB_LogPrintf("%s", label);
     if(a == NULL)
 	{
-	    printf("NULL");
+	    TPMLIB_LogPrintf("NULL");
 	    goto done;
 	}
     if (a->neg)
-	printf("-");
+	TPMLIB_LogPrintf("-");
     for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
 	{
 	    int         j;
@@ -196,14 +196,14 @@ void BIGNUM_print(
 		    BYTE    b = (BYTE)((l >> j) & 0xFF);
 		    notZero = notZero || (b != 0);
 		    if(notZero)
-			printf("%02x", b);
+			TPMLIB_LogPrintf("%02x", b);
 		}
 	    if(!notZero)
-		printf("0");
+		TPMLIB_LogPrintf("0");
 	}
  done:
     if(eol)
-	printf("\n");
+	TPMLIB_LogPrintf("\n");
     return;
 }
 #endif

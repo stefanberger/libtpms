@@ -95,7 +95,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,
 
 void TPM_BoundData_Init(TPM_BOUND_DATA *tpm_bound_data)
 {
-    printf(" TPM_BoundData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_BoundData_Init:\n");
     TPM_StructVer_Init(&(tpm_bound_data->ver));
     tpm_bound_data->payload = TPM_PT_BIND;
     tpm_bound_data->payloadDataSize = 0;
@@ -119,7 +119,7 @@ TPM_RESULT TPM_BoundData_Load(TPM_BOUND_DATA *tpm_bound_data,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_BoundData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_BoundData_Load:\n");
     if (rc == 0) {
 	rc = TPM_StructVer_Load(&(tpm_bound_data->ver), stream, stream_size);
     }
@@ -159,7 +159,7 @@ TPM_RESULT TPM_BoundData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_BoundData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_BoundData_Store:\n");
     if (rc == 0) {
 	rc = TPM_StructVer_Store(sbuffer, &(tpm_bound_data->ver));
     }
@@ -185,7 +185,7 @@ TPM_RESULT TPM_BoundData_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_BoundData_Delete(TPM_BOUND_DATA *tpm_bound_data)
 {
-    printf(" TPM_BoundData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_BoundData_Delete:\n");
     if (tpm_bound_data != NULL) {
 	free(tpm_bound_data->payloadData);
 	TPM_BoundData_Init(tpm_bound_data);
@@ -206,7 +206,7 @@ void TPM_BoundData_Delete(TPM_BOUND_DATA *tpm_bound_data)
 
 void TPM_SealedData_Init(TPM_SEALED_DATA *tpm_sealed_data)
 {
-    printf(" TPM_SealedData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_Init:\n");
     tpm_sealed_data->payload = TPM_PT_SEAL;
     TPM_Secret_Init(tpm_sealed_data->authData);
     TPM_Secret_Init(tpm_sealed_data->tpmProof);
@@ -231,7 +231,7 @@ TPM_RESULT TPM_SealedData_Load(TPM_SEALED_DATA *tpm_sealed_data,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_SealedData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_Load:\n");
     /* load payload */
     if (rc == 0) {
 	rc = TPM_Load8(&(tpm_sealed_data->payload), stream, stream_size);
@@ -265,7 +265,7 @@ TPM_RESULT TPM_SealedData_Store(TPM_STORE_BUFFER *sbuffer,
 				const TPM_SEALED_DATA *tpm_sealed_data)
 {
     TPM_RESULT		rc = 0;
-    printf(" TPM_SealedData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_Store:\n");
     /* store payload */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append(sbuffer, &(tpm_sealed_data->payload), sizeof(TPM_PAYLOAD_TYPE));
@@ -300,7 +300,7 @@ TPM_RESULT TPM_SealedData_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_SealedData_Delete(TPM_SEALED_DATA *tpm_sealed_data)
 {
-    printf(" TPM_SealedData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_Delete:\n");
     if (tpm_sealed_data != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_sealed_data->data));
 	TPM_SealedData_Init(tpm_sealed_data);
@@ -319,7 +319,7 @@ TPM_RESULT TPM_SealedData_GenerateEncData(TPM_SIZED_BUFFER *enc_data,
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;		/* TPM_SEALED_DATA serialization */
 
-    printf(" TPM_SealedData_GenerateEncData\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_GenerateEncData\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize the TPM_SEALED_DATA */
     if (rc == 0) {
@@ -349,7 +349,7 @@ TPM_RESULT TPM_SealedData_DecryptEncData(TPM_SEALED_DATA *tpm_sealed_data,	/* re
     unsigned char	*stream;
     uint32_t		stream_size;
     
-    printf(" TPM_SealedData_DecryptEncData:\n");
+    TPMLIB_LogPrintf(" TPM_SealedData_DecryptEncData:\n");
     /* allocate space for the decrypted data */
     if (rc == 0) {
 	rc = TPM_RSAPrivateDecryptMalloc(&decryptData,		/* decrypted data */
@@ -384,7 +384,7 @@ TPM_RESULT TPM_SealedData_DecryptEncData(TPM_SEALED_DATA *tpm_sealed_data,	/* re
 void TPM_StoredData_Init(TPM_STORED_DATA *tpm_stored_data,
 			 unsigned int version)
 {
-    printf(" TPM_StoredData_Init: v%u\n", version);
+    TPMLIB_LogPrintf(" TPM_StoredData_Init: v%u\n", version);
     if (version == 1) {
 	TPM_StructVer_Init(&(tpm_stored_data->ver));
     }
@@ -426,7 +426,7 @@ TPM_RESULT TPM_StoredData_Load(TPM_STORED_DATA *tpm_stored_data,
 	else {
 	    *version = 2;
 	}
-	printf(" TPM_StoredData_Load: v%u\n", *version);
+	TPMLIB_LogPrintf(" TPM_StoredData_Load: v%u\n", *version);
     }	 
     /* 1.1 load ver */
     if ((rc == 0) && (*version == 1)) {
@@ -488,7 +488,7 @@ TPM_RESULT TPM_StoredData_StoreClearData(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_StoredData_StoreClearData: v%u\n", version);
+    TPMLIB_LogPrintf(" TPM_StoredData_StoreClearData: v%u\n", version);
     /* 1.1 store ver */
     if ((rc == 0) && (version == 1)) {
 	rc = TPM_StructVer_Store(sbuffer, &(tpm_stored_data->ver));
@@ -536,7 +536,7 @@ TPM_RESULT TPM_StoredData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_StoredData_Store: v%u\n", version);
+    TPMLIB_LogPrintf(" TPM_StoredData_Store: v%u\n", version);
     if (rc == 0) {
 	rc = TPM_StoredData_StoreClearData(sbuffer, tpm_stored_data, version);
     }
@@ -559,7 +559,7 @@ TPM_RESULT TPM_StoredData_Store(TPM_STORE_BUFFER *sbuffer,
 void TPM_StoredData_Delete(TPM_STORED_DATA *tpm_stored_data,
 			   unsigned int version)
 {
-    printf(" TPM_StoredData_Delete: v%u\n", version);
+    TPMLIB_LogPrintf(" TPM_StoredData_Delete: v%u\n", version);
     if (tpm_stored_data != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_stored_data->sealInfo));
 	TPM_SizedBuffer_Delete(&(tpm_stored_data->encData));
@@ -584,10 +584,10 @@ TPM_RESULT TPM_StoredData_CheckTag(TPM_STORED_DATA12 *tpm_stored_data12)
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_StoredData_CheckTag:\n");
+    TPMLIB_LogPrintf(" TPM_StoredData_CheckTag:\n");
     if (rc == 0) {
 	if (tpm_stored_data12->tag != TPM_TAG_STORED_DATA12) {
-	    printf("TPM_StoredData_CheckTag: Error, tag expected %04x found %04hx\n",
+	    TPMLIB_LogPrintf("TPM_StoredData_CheckTag: Error, tag expected %04x found %04hx\n",
 		   TPM_TAG_STORED_DATA12, tpm_stored_data12->tag);
 	    rc = TPM_BAD_VERSION;
 	}
@@ -606,7 +606,7 @@ TPM_RESULT TPM_StoredData_GenerateDigest(TPM_DIGEST tpm_digest,
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;	/* TPM_STORED_DATA serialization */
     
-    printf(" TPM_StoredData_GenerateDigest:\n");
+    TPMLIB_LogPrintf(" TPM_StoredData_GenerateDigest:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize the TPM_STORED_DATA excluding the encData fields */
     if (rc == 0) {
@@ -642,7 +642,7 @@ static TPM_RESULT TPM_SealCryptCommon(BYTE **o1,	/* freed by caller */
     BYTE		*x1;			/* XOR string, MGF1 output */
     TPM_DIGEST		ctr;			/* symmetric key algorithm CTR */
 
-    printf(" TPM_SealCryptCommon:\n");
+    TPMLIB_LogPrintf(" TPM_SealCryptCommon:\n");
     x1 = NULL;					/* freed @1 */
 
     /* allocate for the output o1 */
@@ -654,7 +654,7 @@ static TPM_RESULT TPM_SealCryptCommon(BYTE **o1,	/* freed by caller */
     }
     switch (adipEncScheme) {
       case TPM_ET_XOR:
-	printf("  TPM_SealCryptCommon: TPM_ET_XOR\n");
+	TPMLIB_LogPrintf("  TPM_SealCryptCommon: TPM_ET_XOR\n");
 	if (rc == TPM_SUCCESS) {
 	    /* i. Use MGF1 to create string X1 of length sealedDataSize. The inputs to MGF1 are;
 	       authLastnonceEven, nonceOdd, "XOR", and authHandle -> sharedSecret. The four
@@ -680,7 +680,7 @@ static TPM_RESULT TPM_SealCryptCommon(BYTE **o1,	/* freed by caller */
 	}
 	break;
       case TPM_ET_AES128_CTR:
-	printf("  TPM_SealCryptCommon: TPM_ET_AES128_CTR\n");
+	TPMLIB_LogPrintf("  TPM_SealCryptCommon: TPM_ET_AES128_CTR\n");
 	/* i. Create o1 by encrypting d1 -> data using the algorithm indicated by inData ->
 	   et */
 	/* ii. Key is from authHandle -> sharedSecret */
@@ -704,7 +704,7 @@ static TPM_RESULT TPM_SealCryptCommon(BYTE **o1,	/* freed by caller */
 	}
 	break;
       default:
-	printf("TPM_SealCryptCommon: Error, unsupported adipEncScheme %02x\n", adipEncScheme);
+	TPMLIB_LogPrintf("TPM_SealCryptCommon: Error, unsupported adipEncScheme %02x\n", adipEncScheme);
 	rc = TPM_INAPPROPRIATE_ENC;
 	break;
     }
@@ -782,7 +782,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
 					   result of the TPM_Seal operation. Returned as
 					   SealedData */
     
-    printf("TPM_Process_Seal: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Seal: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&pcrInfo);			/* freed @1 */
     TPM_SizedBuffer_Init(&inData);			/* freed @2 */
     TPM_StoredData_Init(&s1StoredData, v1PcrVersion);	/* freed @3, default is v1 */
@@ -801,7 +801,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get encAuth parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Seal: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_Seal: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Authdata_Load(encAuth, &command, &paramSize);
     }
     /* get pcrInfo parameter */
@@ -813,7 +813,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
 	returnCode = TPM_SizedBuffer_Load(&inData, &command, &paramSize);
     }	
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Seal: Sealing %u bytes\n", inData.size);
+	TPMLIB_LogPrintf("TPM_Process_Seal: Sealing %u bytes\n", inData.size);
     }	
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -848,7 +848,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Seal: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Seal: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -898,7 +898,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
     /* 2. If the inDataSize is 0 the TPM returns TPM_BAD_PARAMETER */
     if (returnCode == TPM_SUCCESS) {
 	if (inData.size == 0) {
-	    printf("TPM_Process_Seal: Error, inDataSize is 0\n");
+	    TPMLIB_LogPrintf("TPM_Process_Seal: Error, inDataSize is 0\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -906,7 +906,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
        TPM_KEY_STORAGE, the TPM must return the error code TPM_INVALID_KEYUSAGE. */
     if (returnCode == TPM_SUCCESS) {
 	if (key->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_Seal: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
+	    TPMLIB_LogPrintf("TPM_Process_Seal: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
 		   key->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -915,7 +915,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
        TPM_INVALID_KEY_USAGE. */
     if (returnCode == TPM_SUCCESS) {
 	if (key->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_Seal: Error, key keyFlags %08x indicates migratable\n",
+	    TPMLIB_LogPrintf("TPM_Process_Seal: Error, key keyFlags %08x indicates migratable\n",
 		   key->keyFlags);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -943,7 +943,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
 	/* b. Set S1 -> et to 0 */
 	/* 8. Set S1 -> encDataSize to 0 */
 	/* 9. Set S1 -> encData to all zeros */
-	printf("TPM_Process_Seal: V%u\n", v1PcrVersion);
+	TPMLIB_LogPrintf("TPM_Process_Seal: V%u\n", v1PcrVersion);
 	TPM_StoredData_Init(&s1StoredData, v1PcrVersion);
 	/* 10. Set S1 -> sealInfoSize to pcrInfoSize */
 	/* NOTE This step is unnecessary.  If pcrInfoSize is 0, sealInfoSize is already initialized
@@ -952,7 +952,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
     }
     /* 11. If pcrInfoSize is not 0 then */
     if ((returnCode == TPM_SUCCESS) && (pcrInfo.size != 0)) {
-	printf("TPM_Process_Seal: Creating PCR digest\n");
+	TPMLIB_LogPrintf("TPM_Process_Seal: Creating PCR digest\n");
 	/* assign the stream, so pcrInfo is not altered */
 	stream = pcrInfo.buffer;
 	stream_size = pcrInfo.size;
@@ -1070,7 +1070,7 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Seal: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Seal: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1197,7 +1197,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     TPM_DIGEST			a1Auth;
     BYTE			*o1DecryptedData;
     
-    printf("TPM_Process_Sealx: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Sealx: Ordinal Entry\n");
     s1_11 = (TPM_STORED_DATA *)&s1StoredData;	/* 1.1 version to avoid casts */
     TPM_SizedBuffer_Init(&pcrInfo);		/* freed @1 */
     TPM_SizedBuffer_Init(&inData);		/* freed @2 */
@@ -1226,7 +1226,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
 	returnCode = TPM_SizedBuffer_Load(&inData, &command, &paramSize);
     }	
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Sealx: Sealing %u bytes\n", inData.size);
+	TPMLIB_LogPrintf("TPM_Process_Sealx: Sealing %u bytes\n", inData.size);
 	TPM_PrintFourLimit("TPM_Process_Sealx: Sealing data", inData.buffer, inData.size);
     }	
     /* save the ending point of inParam's for authorization and auditing */
@@ -1262,7 +1262,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Sealx: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Sealx: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1312,7 +1312,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     /* 2. If the inDataSize is 0 the TPM returns TPM_BAD_PARAMETER */
     if (returnCode == TPM_SUCCESS) {
 	if (inData.size == 0) {
-	    printf("TPM_Process_Sealx: Error, inDataSize is 0\n");
+	    TPMLIB_LogPrintf("TPM_Process_Sealx: Error, inDataSize is 0\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1320,7 +1320,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
        TPM_KEY_STORAGE, the TPM must return the error code TPM_INVALID_KEYUSAGE. */
     if (returnCode == TPM_SUCCESS) {
 	if (key->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_Sealx: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
+	    TPMLIB_LogPrintf("TPM_Process_Sealx: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
 		   key->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1329,7 +1329,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
        TPM_INVALID_KEY_USAGE. */
     if (returnCode == TPM_SUCCESS) {
 	if (key->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_Sealx: Error, key keyFlags %08x indicates migratable\n",
+	    TPMLIB_LogPrintf("TPM_Process_Sealx: Error, key keyFlags %08x indicates migratable\n",
 		   key->keyFlags);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1344,7 +1344,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
        tpm_seal_info member, which is a TPM_PCR_INFO_LONG */
     /* 9. If pcrInfoSize is not 0 then */
     if ((returnCode == TPM_SUCCESS) && (pcrInfo.size != 0)) {
-	printf("TPM_Process_Sealx: Setting sealInfo to pcrInfo\n");
+	TPMLIB_LogPrintf("TPM_Process_Sealx: Setting sealInfo to pcrInfo\n");
 	/* initializing the s -> TPM_PCR_INFO_LONG cache to the contents of pcrInfo */
 	/* a. Validate pcrInfo as a valid TPM_PCR_INFO_LONG structure, return TPM_BADINDEX on
 	   error */
@@ -1378,7 +1378,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     /* NOTE: Done at TPM_SealedData_Init() */
     /* 11.Create a1 by decrypting encAuth according to the ADIP indicated by authHandle. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Sealx: Decrypting encAuth\n");
+	TPMLIB_LogPrintf("TPM_Process_Sealx: Decrypting encAuth\n");
 	returnCode = TPM_AuthSessionData_Decrypt(a1Auth,	/* a1 even */
 						 NULL,		/* a1 odd (2nd encAuth) */
 						 encAuth,	/* encAuthEven */
@@ -1414,7 +1414,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     /* b. Key is from authHandle -> sharedSecret */
     /* c. CTR is SHA-1 of (authLastNonceEven || nonceOdd) */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Sealx: decrypting inData\n");
+	TPMLIB_LogPrintf("TPM_Process_Sealx: decrypting inData\n");
 	returnCode = TPM_SealCryptCommon(&o1DecryptedData,		/* freed by caller */
 					 auth_session_data->adipEncScheme,
 					 &inData,
@@ -1450,7 +1450,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     /* 19. Set S1 -> encDataSize to the size of s3 */
     /* 20. Set S1 -> encData to s3 */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Sealx: Encrypting sealed data\n");
+	TPMLIB_LogPrintf("TPM_Process_Sealx: Encrypting sealed data\n");
 	returnCode = TPM_SealedData_GenerateEncData(&(s1StoredData.encData), &s2SealedData, key);
     }
     /*
@@ -1458,7 +1458,7 @@ TPM_RESULT TPM_Process_Sealx(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Sealx: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Sealx: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1593,7 +1593,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
     uint32_t			secretSize = 0; /* Decrypted data that had been sealed */
     BYTE			*secret = NULL;
 
-    printf("TPM_Process_Unseal: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Unseal: Ordinal Entry\n");
     TPM_StoredData_Init(&inData, v1StoredDataVersion);	/* freed @1, default is v1 */
     TPM_SealedData_Init(&d1SealedData); 		/* freed @2 */
     o1Encrypted = NULL;					/* freed @3 */
@@ -1610,11 +1610,11 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get inData parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Unseal: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_Unseal: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_StoredData_Load(&inData, &v1StoredDataVersion, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Unseal: inData is v%u\n", v1StoredDataVersion);
+	TPMLIB_LogPrintf("TPM_Process_Unseal: inData is v%u\n", v1StoredDataVersion);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -1648,7 +1648,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH2_COMMAND)) {
-	printf("TPM_Process_Unseal: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_Unseal: authHandle %08x\n", authHandle);
     }
     /* get the 'below the line' authorization parameters */
     if (returnCode == TPM_SUCCESS) {
@@ -1660,11 +1660,11 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Unseal: dataAuthHandle %08x\n", dataAuthHandle); 
+	TPMLIB_LogPrintf("TPM_Process_Unseal: dataAuthHandle %08x\n", dataAuthHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Unseal: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1718,7 +1718,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
     /* if there are no parent auth parameters */
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH2_COMMAND)) {
 	if (parentKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_Unseal: Error, parent key authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, parent key authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -1726,7 +1726,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
        TPM_KEY_STORAGE, the TPM MUST return the error code TPM_INVALID_KEYUSAGE. */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_Unseal: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, key keyUsage %04hx must be TPM_KEY_STORAGE\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1736,7 +1736,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_Unseal: Error, key keyFlags %08x indicates migratable\n",
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, key keyFlags %08x indicates migratable\n",
 		   parentKey->keyFlags);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1755,7 +1755,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
        TPM_NOTSEALED_BLOB on error */
     if (returnCode == TPM_SUCCESS) {
 	/* 5. Create d1 by decrypting S2 -> encData using the key pointed to by parentHandle */
-	printf("TPM_Process_Unseal: Decrypting encData\n");
+	TPMLIB_LogPrintf("TPM_Process_Unseal: Decrypting encData\n");
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_SealedData_DecryptEncData(&d1SealedData,	/* TPM_SEALED_DATA */
 						       &(inData.encData),
@@ -1766,9 +1766,9 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	/* NOTE Done during TPM_SealedData_DecryptEncData() */
 	/* b. d1 -> tpmProof MUST match TPM_PERMANENT_DATA -> tpmProof */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_Unseal: Sealed data size %u\n", d1SealedData.data.size);
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Sealed data size %u\n", d1SealedData.data.size);
 	    TPM_PrintFour("TPM_Process_Unseal: Sealed data", d1SealedData.data.buffer);
-	    printf("TPM_Process_Unseal: Checking tpmProof\n");
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Checking tpmProof\n");
 	    returnCode = TPM_Secret_Compare(d1SealedData.tpmProof,
 					    tpm_state->tpm_permanent_data.tpmProof);
 	}
@@ -1783,13 +1783,13 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	}
 	/* f. d1 -> storedDigest MUST match h1 */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_Unseal: Checking storedDigest\n");
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: Checking storedDigest\n");
 	    returnCode = TPM_Digest_Compare(d1SealedData.storedDigest, h1StoredDataDigest);
 	}
 	/* g. d1 -> payload MUST be TPM_PT_SEAL */
 	if (returnCode == TPM_SUCCESS) {
 	    if (d1SealedData.payload != TPM_PT_SEAL) {
-		printf("TPM_Process_Unseal: Error, payload %02x not TPM_PT_SEAL\n",
+		TPMLIB_LogPrintf("TPM_Process_Unseal: Error, payload %02x not TPM_PT_SEAL\n",
 		       d1SealedData.payload);
 		returnCode = TPM_NOTSEALED_BLOB;
 	    }
@@ -1802,7 +1802,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
     /* 7. If S2 -> sealInfo is not 0 then */
     /* NOTE: Done by _CheckDigest() */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Unseal: Checking PCR digest\n");
+	TPMLIB_LogPrintf("TPM_Process_Unseal: Checking PCR digest\n");
 	/* a. If V1 is 1 then */
 	if (v1StoredDataVersion == 1) {
 	    /* i. Validate that S2 -> pcrInfo is a valid TPM_PCR_INFO structure */
@@ -1866,7 +1866,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	    /* a. If tag is not TPM_TAG_RQU_AUTH2_COMMAND, return TPM_AUTHFAIL */
 	    if (returnCode == TPM_SUCCESS) {
 		if (tag != TPM_TAG_RQU_AUTH2_COMMAND) {
-		    printf("TPM_Process_Unseal: Error, sealed with encryption but auth-1\n");
+		    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, sealed with encryption but auth-1\n");
 		    returnCode = TPM_AUTHFAIL;
 		}
 	    }
@@ -1875,7 +1875,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	    if (returnCode == TPM_SUCCESS) {
 		if ((auth_session_data->protocolID != TPM_PID_OSAP) &&
 		    (auth_session_data->protocolID != TPM_PID_DSAP)) {
-		    printf("TPM_Process_Unseal: Error, sealed with encryption but OIAP\n");
+		    TPMLIB_LogPrintf("TPM_Process_Unseal: Error, sealed with encryption but OIAP\n");
 		    returnCode = TPM_BAD_MODE;
 		}
 	    }	    
@@ -1891,7 +1891,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	    if (returnCode == TPM_SUCCESS) {
 		/* entity type MSB is ADIP encScheme */
 		adipEncScheme = (s2StoredData->et >> 8) & 0x00ff;
-		printf("TPM_Process_Unseal: Encrypting the output, encScheme %02x\n",
+		TPMLIB_LogPrintf("TPM_Process_Unseal: Encrypting the output, encScheme %02x\n",
 		       adipEncScheme);
 		returnCode = TPM_SealCryptCommon(&o1Encrypted,
 						 adipEncScheme,
@@ -1906,7 +1906,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
 	}
 	/* 10. else */
 	else {
-	    printf("TPM_Process_Unseal: No output encryption\n");
+	    TPMLIB_LogPrintf("TPM_Process_Unseal: No output encryption\n");
 	    /* a. Set o1 to d1 -> data */
 	    secretSize = d1SealedData.data.size;
 	    secret = d1SealedData.data.buffer;
@@ -1918,7 +1918,7 @@ TPM_RESULT TPM_Process_Unseal(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Unseal: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Unseal: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2058,7 +2058,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     size_t		outDataSize = 0;	/* The length of the returned decrypted data */
     BYTE		*outData = NULL;	/* The resulting decrypted data. */
     
-    printf("TPM_Process_UnBind: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_UnBind: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inData);		/* freed @1 */
     TPM_BoundData_Init(&tpm_bound_data);	/* freed @3 */
     /*
@@ -2072,11 +2072,11 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get areaToSignSize and areaToSign parameters */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_UnBind: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_UnBind: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_SizedBuffer_Load(&inData, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_UnBind: UnBinding %u bytes\n", inData.size);
+	TPMLIB_LogPrintf("TPM_Process_UnBind: UnBinding %u bytes\n", inData.size);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -2111,7 +2111,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_UnBind: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2126,7 +2126,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     /* 1. If the inDataSize is 0 the TPM returns TPM_BAD_PARAMETER */
     if (returnCode == TPM_SUCCESS) {
 	if (inData.size == 0) {
-	    printf("TPM_Process_UnBind: Error, inDataSize is 0\n");
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Error, inDataSize is 0\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -2139,7 +2139,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)){
 	if (key->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_UnBind: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -2175,7 +2175,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
        TPM_KEY_BIND or TPM_KEY_LEGACY, the TPM must return the error code TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if ((key->keyUsage != TPM_KEY_BIND) && (key->keyUsage != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_UnBind: Error, invalid keyUsage %04hx\n", (key->keyUsage));
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Error, invalid keyUsage %04hx\n", (key->keyUsage));
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -2198,7 +2198,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
 	   -> keyUsage equals TPM_KEY_LEGACY), */
 	if ((key->algorithmParms.encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) &&
 	    (key->keyUsage == TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_UnBind: Legacy key\n");
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Legacy key\n");
 	    /* a. The payload does not have TPM specific markers to validate, so no consistency
 	       check can be performed. */
 	    /* b. Set the output parameter outData to the value of the decrypted value of
@@ -2211,7 +2211,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
 	}
 	/* 6. else */
 	else {
-	    printf("TPM_Process_UnBind: Payload is TPM_BOUND_DATA structure\n");
+	    TPMLIB_LogPrintf("TPM_Process_UnBind: Payload is TPM_BOUND_DATA structure\n");
 	    /* a. Interpret the decrypted data under the assumption that it is a TPM_BOUND_DATA
 	       structure, and validate that the payload type is TPM_PT_BIND */
 	    if (returnCode == TPM_SUCCESS) {
@@ -2223,7 +2223,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (tpm_bound_data.payload != TPM_PT_BIND) {
-		    printf("TPM_Process_UnBind: Error, "
+		    TPMLIB_LogPrintf("TPM_Process_UnBind: Error, "
 			   "TPM_BOUND_DATA->payload %02x not TPM_PT_BIND\n",
 			   tpm_bound_data.payload);
 		    returnCode = TPM_INVALID_STRUCTURE;
@@ -2245,7 +2245,7 @@ TPM_RESULT TPM_Process_UnBind(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_UnBind: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_UnBind: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2370,7 +2370,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
     
-    printf("TPM_Process_CreateWrapKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Ordinal Entry\n");
     TPM_Key_Init(&keyInfo);
     TPM_Key_Init(&wrappedKey);
     TPM_PCRInfo_Init(&wrappedPCRInfo);
@@ -2385,7 +2385,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get dataUsageAuth parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateWrapKey: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Authdata_Load(dataUsageAuth, &command, &paramSize);
     }
     /* get dataMigrationAuth parameter */
@@ -2429,7 +2429,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateWrapKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2480,19 +2480,19 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     /* 3. If the TPM is not designed to create a key of the type requested in keyInfo, return the
        error code TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateWrapKey: Checking key properties\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Checking key properties\n");
 	returnCode = TPM_Key_CheckProperties(&ver, &keyInfo, 0,
 					     tpm_state->tpm_permanent_flags.FIPS);
     }	     
     /* Get the TPM_RSA_KEY_PARMS associated with keyInfo */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateWrapKey: key parameters v = %d\n", ver);
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: key parameters v = %d\n", ver);
 	returnCode = TPM_KeyParms_GetRSAKeyParms(&keyInfoRSAParms, &(keyInfo.algorithmParms));
     }	     
     /* 4. Verify that parentHandle->keyUsage equals TPM_KEY_STORAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_CreateWrapKey: Error, parent keyUsage not TPM_KEY_STORAGE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Error, parent keyUsage not TPM_KEY_STORAGE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }	 
@@ -2500,7 +2500,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
        FALSE then return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if ((parentKey->keyFlags & TPM_MIGRATABLE) && !(keyInfo.keyFlags & TPM_MIGRATABLE)) {
-	    printf("TPM_Process_CreateWrapKey: Error, parent not migratable\n");
+	    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Error, parent not migratable\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }	 
@@ -2510,7 +2510,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((keyInfo.keyUsage == TPM_KEY_IDENTITY) ||
 	    (keyInfo.keyUsage == TPM_KEY_AUTHCHANGE)) {
-	    printf("TPM_Process_CreateWrapKey: Error, Invalid key usage %04x\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Error, Invalid key usage %04x\n",
 		   keyInfo.keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -2518,7 +2518,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     /* b. If keyInfo -> keyFlags -> migrateAuthority is TRUE then return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (keyInfo.keyFlags & TPM_MIGRATEAUTHORITY) {
-	    printf("TPM_Process_CreateWrapKey: Error, Invalid key flags %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Error, Invalid key flags %08x\n",
 		   keyInfo.keyFlags);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -2568,7 +2568,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     /* 13. Generate asymmetric key according to algorithm information in keyInfo */
     /* 14. Fill in the wrappedKey structure with information from the newly generated key. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateWrapKey: Generating key\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Generating key\n");
 	returnCode = TPM_Key_GenerateRSA(&wrappedKey,
 					 tpm_state,
 					 parentKey,
@@ -2599,7 +2599,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
 	    TPM_Secret_Copy(wrappedStoreAsymkey->migrationAuth,
 			    tpm_state->tpm_permanent_data.tpmProof);
 	}
-	printf("TPM_Process_CreateWrapKey: wrappedKey.PCRInfoSize %d\n", wrappedKey.pcrInfo.size);
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: wrappedKey.PCRInfoSize %d\n", wrappedKey.pcrInfo.size);
     }	 
     /* 15. If keyInfo->PCRInfoSize is non-zero. */
     /* a. If V1 is 1 */
@@ -2621,7 +2621,7 @@ TPM_RESULT TPM_Process_CreateWrapKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateWrapKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateWrapKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2734,7 +2734,7 @@ TPM_RESULT TPM_Process_LoadKey(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_KEY_HANDLE	inKeyHandle;	/* Internal TPM handle where decrypted key was loaded. */
 
-    printf("TPM_Process_LoadKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadKey: Ordinal Entry\n");
     inKey = NULL;			/* freed @1 */
     /*
       get inputs
@@ -2748,7 +2748,7 @@ TPM_RESULT TPM_Process_LoadKey(tpm_state_t *tpm_state,
     /* Allocate space for inKey.  The key cannot be a local variable, since it persists in key
        storage after the command completes. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKey: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_LoadKey: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Malloc((unsigned char **)&inKey, sizeof(TPM_KEY));	/* freed @1 */
     }
     /* get inKey parameter */
@@ -2792,7 +2792,7 @@ TPM_RESULT TPM_Process_LoadKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2825,7 +2825,7 @@ TPM_RESULT TPM_Process_LoadKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2969,7 +2969,7 @@ TPM_RESULT TPM_Process_LoadKey2(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_KEY_HANDLE	inKeyHandle;	/* Internal TPM handle where decrypted key was loaded. */
 
-    printf("TPM_Process_LoadKey2: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadKey2: Ordinal Entry\n");
     inKey = NULL;			/* freed @1 */
     /*
       get inputs
@@ -2983,7 +2983,7 @@ TPM_RESULT TPM_Process_LoadKey2(tpm_state_t *tpm_state,
     /* Allocate space for inKey.  The key cannot be a local variable, since it persists in key
        storage after the command completes. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKey2: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_LoadKey2: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Malloc((unsigned char **)&inKey, sizeof(TPM_KEY));	/* freed @1 */
     }
     /* get inKey parameter */
@@ -3027,7 +3027,7 @@ TPM_RESULT TPM_Process_LoadKey2(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadKey2: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadKey2: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3060,7 +3060,7 @@ TPM_RESULT TPM_Process_LoadKey2(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadKey2: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadKey2: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3157,7 +3157,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
     TPM_BOOL			parentPCRUsage;
     int				ver;
 
-    printf("TPM_LoadKeyCommon:\n");
+    TPMLIB_LogPrintf("TPM_LoadKeyCommon:\n");
     *key_added = FALSE; /* key has been added to handle list */
     /* Verify that parentHandle points to a valid key.	Get the TPM_KEY associated with parentHandle
      */
@@ -3171,7 +3171,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
     /* check TPM_AUTH_DATA_USAGE authDataUsage */
     if ((rc == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (parentKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_LoadKeyCommon: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_LoadKeyCommon: Error, authorization required\n");
 	    rc = TPM_AUTHFAIL;
 	}
     }
@@ -3206,7 +3206,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
     /* 2. If parentHandle -> keyUsage is NOT TPM_KEY_STORAGE return TPM_INVALID_KEYUSAGE */
     if (rc == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_LoadKeyCommon: Error, "
+	    TPMLIB_LogPrintf("TPM_LoadKeyCommon: Error, "
 		   "parentHandle -> keyUsage should be TPM_KEY_STORAGE, is %04x\n",
 		   parentKey->keyUsage);
 	    rc = TPM_INVALID_KEYUSAGE;
@@ -3216,7 +3216,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
        error code TPM_BAD_KEY_PROPERTY.	 */
     if (rc == TPM_SUCCESS) {
 	rc = TPM_Key_CheckProperties(&ver, inKey, 0, tpm_state->tpm_permanent_flags.FIPS);
-	printf("TPM_LoadKeyCommon: key parameters v = %d\n", ver);
+	TPMLIB_LogPrintf("TPM_LoadKeyCommon: key parameters v = %d\n", ver);
     }
     /* 4. The TPM MUST handle both TPM_KEY and TPM_KEY12 structures.
        This step is done at TPM_Key_Load()
@@ -3249,14 +3249,14 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
     if (rc == TPM_SUCCESS) {
 	if ((inKey->keyUsage == TPM_KEY_IDENTITY) &&
 	    (inKey->keyFlags & TPM_MIGRATABLE)) {
-	    printf("TPM_LoadKeyCommon: Error, identity key is migratable\n");
+	    TPMLIB_LogPrintf("TPM_LoadKeyCommon: Error, identity key is migratable\n");
 	    rc = TPM_INVALID_KEYUSAGE;
 	}
     }
     /* c.  If inKey -> keyUsage is TPM_KEY_AUTHCHANGE, return TPM_INVALID_KEYUSAGE */
     if (rc == TPM_SUCCESS) {
 	if (inKey->keyUsage == TPM_KEY_AUTHCHANGE) {
-	    printf("TPM_LoadKeyCommon: Error, keyUsage is TPM_KEY_AUTHCHANGE\n");
+	    TPMLIB_LogPrintf("TPM_LoadKeyCommon: Error, keyUsage is TPM_KEY_AUTHCHANGE\n");
 	    rc = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -3267,7 +3267,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
 	    rc = TPM_Secret_Compare(tpm_state->tpm_permanent_data.tpmProof,
 				   inKey->tpm_store_asymkey->migrationAuth);
 	    if (rc != 0) {
-		printf("TPM_LoadKeyCommon: Error, tpmProof mismatch\n");
+		TPMLIB_LogPrintf("TPM_LoadKeyCommon: Error, tpmProof mismatch\n");
 		rc = TPM_INVALID_KEYUSAGE;
 	    }
 	}
@@ -3321,7 +3321,7 @@ static TPM_RESULT TPM_LoadKeyCommon(TPM_KEY_HANDLE	*inKeyHandle,	/* output */
 					      0);			/* keyControl */
     }
     if (rc == TPM_SUCCESS) {
-	printf(" TPM_LoadKeyCommon: Loaded key handle %08x\n", *inKeyHandle);
+	TPMLIB_LogPrintf(" TPM_LoadKeyCommon: Loaded key handle %08x\n", *inKeyHandle);
 	/* remember that the handle has been added to handle list, so it can be deleted on error */
 	*key_added = TRUE;
 	
@@ -3387,7 +3387,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
     const unsigned char		*pubkeyStreamBuffer;	/* output */
     uint32_t			pubkeyStreamLength;
 
-    printf("TPM_Process_GetPubKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetPubKey: Ordinal Entry\n");
     TPM_Sbuffer_Init(&pubkeyStream);		/* freed @1 */
     /*
       get inputs
@@ -3399,7 +3399,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
     /* save the starting point of inParam's for authorization and auditing */
     inParamStart = command;
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetPubKey: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_GetPubKey: keyHandle %08x\n", keyHandle);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -3434,7 +3434,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetPubKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetPubKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3448,7 +3448,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
     */
     /* get the key corresponding to the keyHandle parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetPubKey: Key handle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_GetPubKey: Key handle %08x\n", keyHandle);
 	returnCode = TPM_KeyHandleEntries_GetKey(&key, &parentPCRStatus, tpm_state, keyHandle,
 						 TRUE,		/* read-only */
 						 FALSE,		/* do not ignore PCRs */
@@ -3493,12 +3493,12 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
 #ifdef TPM_V12
 	if ((key->authDataUsage != TPM_NO_READ_PUBKEY_AUTH) &&
 	    (key->authDataUsage != TPM_AUTH_NEVER)) {
-	    printf("TPM_Process_GetPubKey: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_GetPubKey: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
 #else	/* TPM 1.1 does not have TPM_NO_READ_PUBKEY_AUTH */
 	if (key->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_GetPubKey: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_GetPubKey: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
 #endif
@@ -3509,7 +3509,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
 	if ((keyHandle == TPM_KH_SRK) &&
 	    /* a. If TPM_PERMANENT_FLAGS -> readSRKPub is FALSE then return TPM_INVALID_KEYHANDLE */
 	    !tpm_state->tpm_permanent_flags.readSRKPub) {
-	    printf("TPM_Process_GetPubKey: "
+	    TPMLIB_LogPrintf("TPM_Process_GetPubKey: "
 		   "Error, keyHandle is TPM_KH_SRK and readSRKPub is FALSE\n");
 	    returnCode = TPM_INVALID_KEYHANDLE;
 	}
@@ -3533,7 +3533,7 @@ TPM_RESULT TPM_Process_GetPubKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetPubKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetPubKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

@@ -165,7 +165,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	random;		/* Random data to XOR with result. */
     TPM_STORE_BUFFER	archive;	/* Encrypted key archive. */
 
-    printf("TPM_Process_CreateMaintenanceArchive: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&random);	/* freed @1 */
     TPM_Key_Init(&a1);			/* freed @2 */
     TPM_Sbuffer_Init(&archive);		/* freed @3 */
@@ -214,7 +214,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateMaintenanceArchive: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -231,7 +231,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
        TPM SHALL return TPM_DISABLED_CMD and exit this capability. */
     if (returnCode == TPM_SUCCESS) {
 	if (!tpm_state->tpm_permanent_flags.allowMaintenance) {
-	    printf("TPM_Process_CreateMaintenanceArchive: Error allowMaintenance FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: Error allowMaintenance FALSE\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
@@ -263,7 +263,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* since there is no keyUsage, algorithmID seems like a way to check for an empty key */
 	if (tpm_state->tpm_permanent_data.manuMaintPub.algorithmParms.algorithmID != TPM_ALG_RSA) {
-	    printf("TPM_Process_CreateMaintenanceArchive: manuMaintPub key not found\n");
+	    TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: manuMaintPub key not found\n");
 	    returnCode = TPM_KEYNOTFOUND;
 	}
     }
@@ -354,7 +354,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
     }
     /* 14. Set TPM_PERMANENT_FLAGS -> maintenanceDone to TRUE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMaintenanceArchive: Set maintenanceDone\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: Set maintenanceDone\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.maintenanceDone),	/* flag */
 			       TRUE);						/* value */
@@ -372,7 +372,7 @@ TPM_RESULT TPM_Process_CreateMaintenanceArchive(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateMaintenanceArchive: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateMaintenanceArchive: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -503,7 +503,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     /* Vendor specific arguments */
 
-    printf("TPM_Process_LoadMaintenanceArchive: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&archive);		/* freed @1 */
     TPM_Key_Init(&newSrk);			/* freed @2 */
     x1InnerWrap = NULL;				/* freed @3 */
@@ -554,7 +554,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadMaintenanceArchive: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -598,14 +598,14 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     /* The TPM_SIZED_BUFFER archive contains a TPM_KEY with a TPM_MIGRATE_ASYMKEY that will become
        the new SRK */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadMaintenanceArchive: Deserializing TPM_KEY parameter\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Deserializing TPM_KEY parameter\n");
 	stream = archive.buffer;
 	stream_size = archive.size;
 	returnCode = TPM_Key_Load(&newSrk, &stream, &stream_size);
     }
     /* decrypt the TPM_KEY -> encData to x1 using the current SRK */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadMaintenanceArchive: Decrypting TPM_KEY -> encData with SRK\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Decrypting TPM_KEY -> encData with SRK\n");
 	returnCode = TPM_RSAPrivateDecryptMalloc(&x1InnerWrap,
 						 &x1InnerWrap_size,
 						 newSrk.encData.buffer,
@@ -615,7 +615,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     /* allocate memory for r1 based on x1 XOR encrypted data */
     if (returnCode == TPM_SUCCESS) {
 	TPM_PrintFour("TPM_Process_LoadMaintenanceArchive: x1", x1InnerWrap);
-	printf("TPM_Process_LoadMaintenanceArchive: x1 size %u\n", x1InnerWrap_size);
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: x1 size %u\n", x1InnerWrap_size);
 	returnCode = TPM_Malloc(&r1InnerWrapKey, x1InnerWrap_size);
     }
     /* allocate memory for o1 based on x1 XOR encrypted data */
@@ -631,7 +631,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
 		 TPM_SECRET_SIZE);				/* long seedlen */
 	TPM_PrintFour("TPM_Process_LoadMaintenanceArchive: r1 -", r1InnerWrapKey);
 	/* decrypt x1 to o1 using XOR encryption secret */
-	printf("TPM_Process_LoadMaintenanceArchive: XOR Decrypting TPM_KEY SRK parameter\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: XOR Decrypting TPM_KEY SRK parameter\n");
 	TPM_XOR(o1Oaep, x1InnerWrap, r1InnerWrapKey, x1InnerWrap_size);
 	TPM_PrintFour("TPM_Process_LoadMaintenanceArchive: o1 -", o1Oaep);
     }
@@ -686,7 +686,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     }
     /* 7. Set TPM_PERMANENT_FLAGS -> maintenanceDone to TRUE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadMaintenanceArchive: Set maintenanceDone\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Set maintenanceDone\n");
 	TPM_SetCapability_Flag(&writeAllNV2,				  	/* altered */
 			       &(tpm_state->tpm_permanent_flags.maintenanceDone),	/* flag */
 			       TRUE);						/* value */
@@ -700,7 +700,7 @@ TPM_RESULT TPM_Process_LoadMaintenanceArchive(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadMaintenanceArchive: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadMaintenanceArchive: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -811,7 +811,7 @@ TPM_RESULT TPM_Process_KillMaintenanceFeature(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_KillMaintenanceFeature: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_KillMaintenanceFeature: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -850,7 +850,7 @@ TPM_RESULT TPM_Process_KillMaintenanceFeature(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_KillMaintenanceFeature: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_KillMaintenanceFeature: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -887,7 +887,7 @@ TPM_RESULT TPM_Process_KillMaintenanceFeature(tpm_state_t *tpm_state,
     }
     /* 2. Set the TPM_PERMANENT_FLAGS.allowMaintenance flag to FALSE.  */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_KillMaintenanceFeature: Clear allowMaintenance\n");
+	TPMLIB_LogPrintf("TPM_Process_KillMaintenanceFeature: Clear allowMaintenance\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.allowMaintenance),	/* flag */
 			       FALSE);						/* value */
@@ -901,7 +901,7 @@ TPM_RESULT TPM_Process_KillMaintenanceFeature(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_KillMaintenanceFeature: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_KillMaintenanceFeature: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1014,7 +1014,7 @@ TPM_RESULT TPM_Process_LoadManuMaintPub(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_DIGEST		checksum;	/* Digest of pubKey and antiReplay  */
 
-    printf("TPM_Process_LoadManuMaintPub: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadManuMaintPub: Ordinal Entry\n");
     TPM_Pubkey_Init(&pubKey);		/* freed @1 */
     TPM_Sbuffer_Init(&pubKeySerial);	/* freed @2 */
     /*
@@ -1054,7 +1054,7 @@ TPM_RESULT TPM_Process_LoadManuMaintPub(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadManuMaintPub: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadManuMaintPub: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1065,7 +1065,7 @@ TPM_RESULT TPM_Process_LoadManuMaintPub(tpm_state_t *tpm_state,
     /* The first valid TPM_LoadManuMaintPub command received by a TPM SHALL */
     if (returnCode == TPM_SUCCESS) {
 	if (!tpm_state->tpm_permanent_data.allowLoadMaintPub) {
-	    printf("TPM_Process_LoadManuMaintPub: Error, command already run\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadManuMaintPub: Error, command already run\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
@@ -1108,7 +1108,7 @@ TPM_RESULT TPM_Process_LoadManuMaintPub(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadManuMaintPub: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadManuMaintPub: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1196,7 +1196,7 @@ TPM_RESULT TPM_Process_ReadManuMaintPub(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_DIGEST		checksum;	/* Digest of pubKey and antiReplay */
 
-    printf("TPM_Process_ReadManuMaintPub: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ReadManuMaintPub: Ordinal Entry\n");
     TPM_Sbuffer_Init(&pubKeySerial);	/* freed @1 */
     /*
       get inputs
@@ -1231,7 +1231,7 @@ TPM_RESULT TPM_Process_ReadManuMaintPub(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ReadManuMaintPub: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ReadManuMaintPub: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1258,7 +1258,7 @@ TPM_RESULT TPM_Process_ReadManuMaintPub(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ReadManuMaintPub: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ReadManuMaintPub: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

@@ -78,9 +78,9 @@ TPM_RESULT TPM_SaveState_Load(tpm_state_t *tpm_state,
     unsigned char		*stream_start = *stream;	/* copy for integrity check */
     uint32_t			stream_size_start = *stream_size;
     
-    printf(" TPM_SaveState_Load:\n");
+    TPMLIB_LogPrintf(" TPM_SaveState_Load:\n");
     if (rc == 0) {
-	printf("  TPM_SaveState_Load: Loading PCR's\n");
+	TPMLIB_LogPrintf("  TPM_SaveState_Load: Loading PCR's\n");
     }
     /* 1. Store PCR contents except for */
     /* a. If the PCR attribute pcrReset is TRUE */
@@ -117,14 +117,14 @@ TPM_RESULT TPM_SaveState_Load(tpm_state_t *tpm_state,
     /* sanity check the stream size */
     if (rc == 0) {
 	if (*stream_size != TPM_DIGEST_SIZE) {
-	    printf("TPM_SaveState_Load: Error (fatal) stream size %u not %u\n",
+	    TPMLIB_LogPrintf("TPM_SaveState_Load: Error (fatal) stream size %u not %u\n",
 		   *stream_size, TPM_DIGEST_SIZE);
 	    rc = TPM_FAIL;
 	}
     }
     /* check the integrity digest */
     if (rc == 0) {
-	printf("  TPM_SaveState_Load: Checking integrity digest\n");
+	TPMLIB_LogPrintf("  TPM_SaveState_Load: Checking integrity digest\n");
 	rc = TPM_SHA1_Check(*stream, 	/* currently points to integrity digest */
 			    stream_size_start - TPM_DIGEST_SIZE, stream_start,
 			    0, NULL);
@@ -150,9 +150,9 @@ TPM_RESULT TPM_SaveState_Store(TPM_STORE_BUFFER *sbuffer,
     uint32_t 			length;
     TPM_DIGEST			tpm_digest;
 
-    printf(" TPM_SaveState_Store:\n");
+    TPMLIB_LogPrintf(" TPM_SaveState_Store:\n");
     if (rc == 0) {
-	printf("  TPM_SaveState_Store: Storing PCR's\n");
+	TPMLIB_LogPrintf("  TPM_SaveState_Store: Storing PCR's\n");
     }
     /* NOTE: Actions from TPM_SaveState */
     /* 1. Store TPM_STCLEAR_DATA -> PCR contents except for */
@@ -203,7 +203,7 @@ TPM_RESULT TPM_SaveState_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* append the integrity digest to the stream */
     if (rc == 0) {
-	printf(" TPM_SaveState_Store: Appending integrity digest\n");
+	TPMLIB_LogPrintf(" TPM_SaveState_Store: Appending integrity digest\n");
 	rc = TPM_Sbuffer_Append(sbuffer, tpm_digest, TPM_DIGEST_SIZE);
     }
     return rc;
@@ -232,7 +232,7 @@ void TPM_SaveState_IsSaveKey(TPM_BOOL *save,
 	*save = FALSE;
     }
     if (*save) {
-	printf(" TPM_SaveState_IsSaveKey: Save key handle %08x\n", tpm_key_handle_entry->handle);
+	TPMLIB_LogPrintf(" TPM_SaveState_IsSaveKey: Save key handle %08x\n", tpm_key_handle_entry->handle);
     }
     return;
 }
@@ -251,7 +251,7 @@ TPM_RESULT TPM_SaveState_NVLoad(tpm_state_t *tpm_state)
     unsigned char	*stream_start = NULL;
     uint32_t		stream_size;
     
-    printf(" TPM_SaveState_NVLoad:\n");
+    TPMLIB_LogPrintf(" TPM_SaveState_NVLoad:\n");
     if (rc == 0) {
 	/* load from NVRAM.  Returns TPM_RETRY on non-existent file. */
 	rc = TPM_NVRAM_LoadData(&stream,			/* freed @1 */
@@ -264,7 +264,7 @@ TPM_RESULT TPM_SaveState_NVLoad(tpm_state_t *tpm_state)
 	stream_start = stream;			/* save starting point for free() */
 	rc = TPM_SaveState_Load(tpm_state, &stream, &stream_size);
 	if (rc != 0) {
-	    printf("TPM_SaveState_NVLoad: Error (fatal) loading deserializing saved state\n");
+	    TPMLIB_LogPrintf("TPM_SaveState_NVLoad: Error (fatal) loading deserializing saved state\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -283,7 +283,7 @@ TPM_RESULT TPM_SaveState_NVStore(tpm_state_t *tpm_state)
     const unsigned char *buffer;
     uint32_t		length;
 
-    printf(" TPM_SaveState_NVStore:\n");
+    TPMLIB_LogPrintf(" TPM_SaveState_NVStore:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize relevant data from tpm_state  to be written to NV */
     if (rc == 0) {
@@ -293,9 +293,9 @@ TPM_RESULT TPM_SaveState_NVStore(tpm_state_t *tpm_state)
     }
     /* validate the length of the stream */
     if (rc == 0) {
-	printf("   TPM_SaveState_NVStore: Require %u bytes\n", length);
+	TPMLIB_LogPrintf("   TPM_SaveState_NVStore: Require %u bytes\n", length);
 	if (length > TPM_MAX_SAVESTATE_SPACE) {
-	    printf("TPM_SaveState_NVStore: Error, No space, need %u max %u\n",
+	    TPMLIB_LogPrintf("TPM_SaveState_NVStore: Error, No space, need %u max %u\n",
 		   length, TPM_MAX_SAVESTATE_SPACE);
 	    rc = TPM_NOSPACE;
 	}
@@ -323,7 +323,7 @@ TPM_RESULT TPM_SaveState_NVDelete(tpm_state_t *tpm_state,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_SaveState_NVDelete:\n");
+    TPMLIB_LogPrintf(" TPM_SaveState_NVDelete:\n");
     if (rc == 0) {
 	/* remove the saved state */
 	rc = TPM_NVRAM_DeleteName(tpm_state->tpm_number,
@@ -353,7 +353,7 @@ TPM_RESULT TPM_VolatileAll_Load(tpm_state_t *tpm_state,
     unsigned char		*stream_start = *stream;	/* copy for integrity check */
     uint32_t			stream_size_start = *stream_size;
 
-    printf(" TPM_VolatileAll_Load:\n");
+    TPMLIB_LogPrintf(" TPM_VolatileAll_Load:\n");
     /* check format tag */
     /* In the future, if multiple formats are supported, this check will be replaced by a 'switch'
        on the tag */
@@ -396,12 +396,12 @@ TPM_RESULT TPM_VolatileAll_Load(tpm_state_t *tpm_state,
     }
     /* Context for SHA1 functions */
     if (rc == 0) {
-	printf("  TPM_VolatileAll_Load: Loading SHA ordinal context\n");
+	TPMLIB_LogPrintf("  TPM_VolatileAll_Load: Loading SHA ordinal context\n");
 	rc = TPM_Sha1Context_Load(&(tpm_state->sha1_context), stream, stream_size);
     }
     /* Context for TIS SHA1 functions */
     if (rc == 0) {
-	printf("  TPM_VolatileAll_Load: Loading TIS context\n");
+	TPMLIB_LogPrintf("  TPM_VolatileAll_Load: Loading TIS context\n");
 	rc = TPM_Sha1Context_Load(&(tpm_state->sha1_context_tis), stream, stream_size);
     }
     /* TPM_TRANSHANDLE */
@@ -420,14 +420,14 @@ TPM_RESULT TPM_VolatileAll_Load(tpm_state_t *tpm_state,
     /* sanity check the stream size */
     if (rc == 0) {
 	if (*stream_size != TPM_DIGEST_SIZE) {
-	    printf("TPM_VolatileAll_Load: Error (fatal) stream size %u not %u\n",
+	    TPMLIB_LogPrintf("TPM_VolatileAll_Load: Error (fatal) stream size %u not %u\n",
 		   *stream_size, TPM_DIGEST_SIZE);
 	    rc = TPM_FAIL;
 	}
     }
     /* check the integrity digest */
     if (rc == 0) {
-	printf("  TPM_VolatileAll_Load: Checking integrity digest\n");
+	TPMLIB_LogPrintf("  TPM_VolatileAll_Load: Checking integrity digest\n");
 	rc = TPM_SHA1_Check(*stream, 	/* currently points to integrity digest */
 			    stream_size_start - TPM_DIGEST_SIZE, stream_start,
 			    0, NULL);
@@ -455,7 +455,7 @@ TPM_RESULT TPM_VolatileAll_Store(TPM_STORE_BUFFER *sbuffer,
     uint32_t 			length;
     TPM_DIGEST			tpm_digest;
 
-    printf(" TPM_VolatileAll_Store:\n");
+    TPMLIB_LogPrintf(" TPM_VolatileAll_Store:\n");
     /* overall format tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_VSTATE_V1);
@@ -496,12 +496,12 @@ TPM_RESULT TPM_VolatileAll_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* Context for SHA1 functions */
     if (rc == 0) {
-	printf("  TPM_VolatileAll_Store: Storing SHA ordinal context\n");
+	TPMLIB_LogPrintf("  TPM_VolatileAll_Store: Storing SHA ordinal context\n");
 	rc = TPM_Sha1Context_Store(sbuffer, tpm_state->sha1_context);
     }
     /* Context for TIS SHA1 functions */
     if (rc == 0) {
-	printf("  TPM_VolatileAll_Store: Storing TIS context\n");
+	TPMLIB_LogPrintf("  TPM_VolatileAll_Store: Storing TIS context\n");
 	rc = TPM_Sha1Context_Store(sbuffer, tpm_state->sha1_context_tis);
     }
     /* TPM_TRANSHANDLE */
@@ -527,7 +527,7 @@ TPM_RESULT TPM_VolatileAll_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* append the integrity digest to the stream */
     if (rc == 0) {
-	printf(" TPM_VolatileAll_Store: Appending integrity digest\n");
+	TPMLIB_LogPrintf(" TPM_VolatileAll_Store: Appending integrity digest\n");
 	rc = TPM_Sbuffer_Append(sbuffer, tpm_digest, TPM_DIGEST_SIZE);
     }
     return rc;
@@ -550,7 +550,7 @@ TPM_RESULT TPM_VolatileAll_NVLoad(tpm_state_t *tpm_state)
     unsigned char	*stream_start = NULL;
     uint32_t		stream_size;
     
-    printf(" TPM_VolatileAll_NVLoad:\n");
+    TPMLIB_LogPrintf(" TPM_VolatileAll_NVLoad:\n");
     if (rc == 0) {
 	/* load from NVRAM.  Returns TPM_RETRY on non-existent file. */
 	rc = TPM_NVRAM_LoadData(&stream,			/* freed @1 */
@@ -563,7 +563,7 @@ TPM_RESULT TPM_VolatileAll_NVLoad(tpm_state_t *tpm_state)
 	    rc = 0;
 	}
 	else if (rc != 0) {
-	    printf("TPM_VolatileAll_NVLoad: Error (fatal) loading %s\n", TPM_VOLATILESTATE_NAME);
+	    TPMLIB_LogPrintf("TPM_VolatileAll_NVLoad: Error (fatal) loading %s\n", TPM_VOLATILESTATE_NAME);
 	    rc = TPM_FAIL;
 	}
     }
@@ -572,12 +572,12 @@ TPM_RESULT TPM_VolatileAll_NVLoad(tpm_state_t *tpm_state)
 	stream_start = stream;			/* save starting point for free() */
 	rc = TPM_VolatileAll_Load(tpm_state, &stream, &stream_size);
 	if (rc != 0) {
-	    printf("TPM_VolatileAll_NVLoad: Error (fatal) loading deserializing state\n");
+	    TPMLIB_LogPrintf("TPM_VolatileAll_NVLoad: Error (fatal) loading deserializing state\n");
 	    rc = TPM_FAIL;
 	}
     }
     if (rc != 0) {
-	printf("  TPM_VolatileAll_NVLoad: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("  TPM_VolatileAll_NVLoad: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
 	
     }
@@ -596,7 +596,7 @@ TPM_RESULT TPM_VolatileAll_NVStore(tpm_state_t *tpm_state)
     const unsigned char *buffer;
     uint32_t		length;
 
-    printf(" TPM_VolatileAll_NVStore:\n");
+    TPMLIB_LogPrintf(" TPM_VolatileAll_NVStore:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize relevant data from tpm_state  to be written to NV */
     if (rc == 0) {
@@ -606,9 +606,9 @@ TPM_RESULT TPM_VolatileAll_NVStore(tpm_state_t *tpm_state)
     }
     /* validate the length of the stream */
     if (rc == 0) {
-	printf("   TPM_VolatileAll_NVStore: Require %u bytes\n", length);
+	TPMLIB_LogPrintf("   TPM_VolatileAll_NVStore: Require %u bytes\n", length);
 	if (length > TPM_MAX_VOLATILESTATE_SPACE) {
-	    printf("TPM_VolatileAll_NVStore: Error, No space, need %u max %u\n",
+	    TPMLIB_LogPrintf("TPM_VolatileAll_NVStore: Error, No space, need %u max %u\n",
 		   length, TPM_MAX_VOLATILESTATE_SPACE);
 	    rc = TPM_NOSPACE;
 	}
@@ -633,7 +633,7 @@ TPM_RESULT TPM_Parameters_Load(unsigned char **stream,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Parameters_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Parameters_Load:\n");
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_TPM_PARAMETERS_V1,
 			  stream, stream_size);
@@ -714,7 +714,7 @@ TPM_RESULT TPM_Parameters_Check8(uint8_t expected,
     if (rc == 0) {
 	rc = TPM_Load8(&tmp8, stream, stream_size);
 	if (tmp8 != expected) {
-	    printf("TPM_Parameters_Check8: Error (fatal) %s received %u expect %u\n",
+	    TPMLIB_LogPrintf("TPM_Parameters_Check8: Error (fatal) %s received %u expect %u\n",
 		   parameter, tmp8, expected);
 	    rc = TPM_FAIL;
 	}
@@ -733,7 +733,7 @@ TPM_RESULT TPM_Parameters_Check16(uint16_t expected,
     if (rc == 0) {
 	rc = TPM_Load16(&tmp16, stream, stream_size);
 	if (tmp16 != expected) {
-	    printf("TPM_Parameters_Check16: Error (fatal) %s received %u expect %u\n",
+	    TPMLIB_LogPrintf("TPM_Parameters_Check16: Error (fatal) %s received %u expect %u\n",
 		   parameter, tmp16, expected);
 	    rc = TPM_FAIL;
 	}
@@ -752,7 +752,7 @@ TPM_RESULT TPM_Parameters_Check32(uint32_t expected,
     if (rc == 0) {
 	rc = TPM_Load32(&tmp32, stream, stream_size);
 	if (tmp32 != expected) {
-	    printf("TPM_Parameters_Check32: Error (fatal) %s received %u expect %u\n",
+	    TPMLIB_LogPrintf("TPM_Parameters_Check32: Error (fatal) %s received %u expect %u\n",
 		   parameter, tmp32, expected);
 	    rc = TPM_FAIL;
 	}
@@ -764,7 +764,7 @@ TPM_RESULT TPM_Parameters_Store(TPM_STORE_BUFFER *sbuffer)
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Parameters_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Parameters_Store:\n");
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_TPM_PARAMETERS_V1);
     }
@@ -849,7 +849,7 @@ TPM_RESULT TPM_Process_Reset(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_Reset: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Reset: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -880,7 +880,7 @@ TPM_RESULT TPM_Process_Reset(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Reset: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Reset: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -904,7 +904,7 @@ TPM_RESULT TPM_Process_Reset(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-	printf("TPM_Process_Reset: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Reset: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -996,7 +996,7 @@ TPM_RESULT TPM_Process_Startup(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_Startup: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Startup: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1026,7 +1026,7 @@ TPM_RESULT TPM_Process_Startup(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Startup: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Startup: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1037,7 +1037,7 @@ TPM_RESULT TPM_Process_Startup(tpm_state_t *tpm_state,
 	/* 1. If TPM_STANY_FLAGS -> postInitialise is FALSE,  */
 	if (!(tpm_state->tpm_stany_flags.postInitialise)) {
 	    /* a. Then the TPM MUST return TPM_INVALID_POSTINIT, and exit this capability */
-	    printf("TPM_Process_Startup: Error, postInitialise is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_Startup: Error, postInitialise is FALSE\n");
 	    returnCode = TPM_INVALID_POSTINIT;
 	}
     }
@@ -1046,7 +1046,7 @@ TPM_RESULT TPM_Process_Startup(tpm_state_t *tpm_state,
 	if (tpm_state->testState == TPM_TEST_STATE_FAILURE) {
 	    /* a. TPM_STANY_FLAGS -> postInitialize is still set to FALSE */
 	    tpm_state->tpm_stany_flags.postInitialise = FALSE;
-	    printf("TPM_Process_Startup: Error, shutdown is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_Startup: Error, shutdown is TRUE\n");
 	    /* b. The TPM returns TPM_FAILEDSELFTEST */
 	    returnCode = TPM_FAILEDSELFTEST;
 	}
@@ -1088,7 +1088,7 @@ TPM_RESULT TPM_Process_Startup(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-	printf("TPM_Process_Startup: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Startup: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1131,7 +1131,7 @@ TPM_RESULT TPM_Startup_Clear(tpm_state_t *tpm_state)
 {	
     TPM_RESULT		returnCode = TPM_SUCCESS;	
     
-    printf("TPM_Startup_Clear:\n");	
+    TPMLIB_LogPrintf("TPM_Startup_Clear:\n");	
     /* 2. If stType = TPM_ST_CLEAR */	
     if (returnCode == TPM_SUCCESS) {	
 	/* a. Ensure that sessions associated with resources TPM_RT_CONTEXT, TPM_RT_AUTH,
@@ -1204,7 +1204,7 @@ TPM_RESULT TPM_Startup_State(tpm_state_t *tpm_state)
 {
     TPM_RESULT		returnCode = TPM_SUCCESS;
     
-    printf("TPM_Startup_State:\n");
+    TPMLIB_LogPrintf("TPM_Startup_State:\n");
     if (returnCode == TPM_SUCCESS) {
 	/* a. If the TPM has no state to restore the TPM MUST set the internal state such that it
 	   returns TPM_FAILEDSELFTEST to all subsequent commands */
@@ -1232,9 +1232,9 @@ TPM_RESULT TPM_Startup_State(tpm_state_t *tpm_state)
     /* g. The TPM resumes normal operation. If the TPM is unable to resume normal operation, it
        SHALL enter the TPM failure mode. */
     if (returnCode != TPM_SUCCESS) {
-	printf("TPM_Startup_State: Error restoring state\n");
+	TPMLIB_LogPrintf("TPM_Startup_State: Error restoring state\n");
 	returnCode = TPM_FAILEDSELFTEST;
-	printf("  TPM_Startup_State: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("  TPM_Startup_State: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return returnCode;
@@ -1247,7 +1247,7 @@ TPM_RESULT TPM_Startup_Deactivated(tpm_state_t *tpm_state)
 {
     TPM_RESULT		returnCode = TPM_SUCCESS;
     
-    printf("TPM_Startup_Deactivated:\n");
+    TPMLIB_LogPrintf("TPM_Startup_Deactivated:\n");
     if (returnCode == TPM_SUCCESS) {
 	/* a. Invalidate sessions */
 	/* i. Ensure that all resources associated with saved and active sessions are invalidated */
@@ -1268,7 +1268,7 @@ TPM_RESULT TPM_Startup_Any(tpm_state_t *tpm_state)
 {
     TPM_RESULT		returnCode = TPM_SUCCESS;
     
-    printf("TPM_Startup_Any:\n");	
+    TPMLIB_LogPrintf("TPM_Startup_Any:\n");	
     /* TPM_STANY_FLAGS MUST reset on TPM_Startup(any) */
     TPM_StanyFlags_Init(&(tpm_state->tpm_stany_flags));
     /* 5. The TPM MUST ensure that state associated with TPM_SaveState is invalidated */
@@ -1321,7 +1321,7 @@ TPM_RESULT TPM_Process_SaveState(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SaveState: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SaveState: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1352,7 +1352,7 @@ TPM_RESULT TPM_Process_SaveState(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SaveState: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SaveState: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1373,7 +1373,7 @@ TPM_RESULT TPM_Process_SaveState(tpm_state_t *tpm_state,
 	   there's no point in saving the state, because it would be immediately invalidated during
 	   the transport response.  Return an error to indicate that the state was not saved. */
 	if (transportInternal != NULL) {
-	    printf("TPM_Process_SaveState: Error, called from transport session\n");
+	    TPMLIB_LogPrintf("TPM_Process_SaveState: Error, called from transport session\n");
 	    returnCode = TPM_NO_WRAP_TRANSPORT;
 	}
     }
@@ -1413,7 +1413,7 @@ TPM_RESULT TPM_Process_SaveState(tpm_state_t *tpm_state,
     /* store the state in NVRAM */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SaveState: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SaveState: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

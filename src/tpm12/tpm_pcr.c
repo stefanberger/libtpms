@@ -74,7 +74,7 @@ TPM_RESULT TPM_Locality_Set(TPM_LOCALITY_SELECTION *tpm_locality_selection,	/* B
 										*/
 {
     TPM_RESULT	rc = 0;
-    printf(" TPM_Locality_Set:\n");
+    TPMLIB_LogPrintf(" TPM_Locality_Set:\n");
     switch (tpm_modifier_indicator) {
       case 0:
 	*tpm_locality_selection = TPM_LOC_ZERO;
@@ -94,7 +94,7 @@ TPM_RESULT TPM_Locality_Set(TPM_LOCALITY_SELECTION *tpm_locality_selection,	/* B
       default:
 	/* This should never occur.  The code that sets TPM_STANY_FLAGS should screen out bad values
 	   */
-	printf("TPM_Locality_Set: Error (fatal), tpm_modifier_indicator %u out of range\n",
+	TPMLIB_LogPrintf("TPM_Locality_Set: Error (fatal), tpm_modifier_indicator %u out of range\n",
 	       tpm_modifier_indicator);
 	rc = TPM_FAIL;
     }
@@ -114,7 +114,7 @@ TPM_RESULT TPM_Locality_Check(TPM_LOCALITY_SELECTION tpm_locality_selection,	/* 
 {
 
     TPM_RESULT	rc = 0;
-    printf(" TPM_Locality_Check:\n");
+    TPMLIB_LogPrintf(" TPM_Locality_Check:\n");
     switch (localityModifier) {
       case 0:
 	if ((tpm_locality_selection & TPM_LOC_ZERO) == 0) {
@@ -144,12 +144,12 @@ TPM_RESULT TPM_Locality_Check(TPM_LOCALITY_SELECTION tpm_locality_selection,	/* 
       default:
 	/* This should never occur.  The code that sets TPM_STANY_FLAGS should screen out bad values
 	 */
-	printf("TPM_Locality_Check: Error (fatal), localityModifier %u out of range\n",
+	TPMLIB_LogPrintf("TPM_Locality_Check: Error (fatal), localityModifier %u out of range\n",
 	       localityModifier);
 	rc = TPM_FAIL;
     }
     if (rc != 0) {
-	printf("TPM_Locality_Check: Error, "
+	TPMLIB_LogPrintf("TPM_Locality_Check: Error, "
 	       "localityModifier %u tpm_locality_selection %02x\n",
 	       localityModifier, tpm_locality_selection);
     }
@@ -161,13 +161,13 @@ TPM_RESULT TPM_LocalitySelection_CheckLegal(TPM_LOCALITY_SELECTION tpm_locality_
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_LocalitySelection_CheckLegal: TPM_LOCALITY_SELECTION %02x\n",
+    TPMLIB_LogPrintf(" TPM_LocalitySelection_CheckLegal: TPM_LOCALITY_SELECTION %02x\n",
 	   tpm_locality_selection);
     /* if any extra bits are set, illegal value */
     if ((tpm_locality_selection & ~TPM_LOC_ALL) ||
 	/* This value MUST not be zero (0). (can never be satisfied) */
 	(tpm_locality_selection == 0)) {
-	printf("TPM_LocalitySelection_CheckLegal: Error, bad locality selection %02x\n",
+	TPMLIB_LogPrintf("TPM_LocalitySelection_CheckLegal: Error, bad locality selection %02x\n",
 	       tpm_locality_selection);
 	rc = TPM_INVALID_STRUCTURE;
     }
@@ -178,10 +178,10 @@ TPM_RESULT TPM_LocalityModifier_CheckLegal(TPM_MODIFIER_INDICATOR localityModifi
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_LocalityModifier_CheckLegal: TPM_MODIFIER_INDICATOR %08x\n", localityModifier);
+    TPMLIB_LogPrintf(" TPM_LocalityModifier_CheckLegal: TPM_MODIFIER_INDICATOR %08x\n", localityModifier);
     /* if past the maximum, illegal value */
     if (localityModifier > TPM_LOC_MAX) {
-	printf("TPM_LocalityModifier_CheckLegal: Error, bad locality modifier %u\n",
+	TPMLIB_LogPrintf("TPM_LocalityModifier_CheckLegal: Error, bad locality modifier %u\n",
 	       localityModifier);
 	rc = TPM_BAD_LOCALITY;
     }
@@ -210,7 +210,7 @@ TPM_RESULT TPM_PCR_CheckRange(TPM_PCRINDEX index)
     TPM_RESULT	rc = 0;
 
     if (index >= TPM_NUM_PCR) {
-	printf("TPM_PCR_CheckRange: Error, PCR index was %u should be <= %u\n",
+	TPMLIB_LogPrintf("TPM_PCR_CheckRange: Error, PCR index was %u should be <= %u\n",
 	       index, TPM_NUM_PCR);
 	rc = TPM_BADINDEX;
     }
@@ -227,7 +227,7 @@ void TPM_PCR_Init(TPM_PCRVALUE *tpm_pcrs,		/* points to the TPM PCR array */
 		  const TPM_PCR_ATTRIBUTES *tpm_pcr_attributes,
 		  size_t pcrIndex)
 {
-    printf("  TPM_PCR_Init: pcrIndex %lu\n", (unsigned long)pcrIndex);
+    TPMLIB_LogPrintf("  TPM_PCR_Init: pcrIndex %lu\n", (unsigned long)pcrIndex);
     
 #if defined TPM_PCCLIENT		/* These values are from the PC Client specification */ 
     tpm_pcr_attributes = tpm_pcr_attributes;
@@ -340,7 +340,7 @@ TPM_RESULT TPM_PCR_Store(TPM_PCRVALUE *tpm_pcrs,
 
 void TPM_SelectSize_Init(TPM_SELECT_SIZE *tpm_select_size)
 {
-    printf(" TPM_SelectSize_Init:\n");
+    TPMLIB_LogPrintf(" TPM_SelectSize_Init:\n");
     tpm_select_size->major = TPM_MAJOR;
     tpm_select_size->minor = TPM_MINOR;
     tpm_select_size->reqSize = TPM_NUM_PCR/CHAR_BIT;
@@ -361,7 +361,7 @@ TPM_RESULT TPM_SelectSize_Load(TPM_SELECT_SIZE *tpm_select_size,
 			       uint32_t *stream_size)
 {
     TPM_RESULT		rc = 0;
-    printf(" TPM_SelectSize_Load:\n");
+    TPMLIB_LogPrintf(" TPM_SelectSize_Load:\n");
     /* load major */
     if (rc == 0) {
 	rc = TPM_Load8(&(tpm_select_size->major), stream, stream_size);
@@ -369,7 +369,7 @@ TPM_RESULT TPM_SelectSize_Load(TPM_SELECT_SIZE *tpm_select_size,
     /* This SHALL indicate the major version of the TPM. This MUST be 0x01 */
     if (rc == 0) {
 	if (tpm_select_size->major != 0x01) {
-	    printf("TPM_SelectSize_Load: Error, major %02x should be 01\n", tpm_select_size->major);
+	    TPMLIB_LogPrintf("TPM_SelectSize_Load: Error, major %02x should be 01\n", tpm_select_size->major);
 	    rc = TPM_BAD_PARAMETER;
 	}
     }
@@ -381,7 +381,7 @@ TPM_RESULT TPM_SelectSize_Load(TPM_SELECT_SIZE *tpm_select_size,
     if (rc == 0) {
 	if ((tpm_select_size->minor != 0x01) &&
 	    (tpm_select_size->minor != 0x02)) {
-	    printf("TPM_SelectSize_Load: Error, minor %02x should be 01\n", tpm_select_size->minor);
+	    TPMLIB_LogPrintf("TPM_SelectSize_Load: Error, minor %02x should be 01\n", tpm_select_size->minor);
 	    rc = TPM_BAD_PARAMETER;
 	}
     }
@@ -430,7 +430,7 @@ void TPM_PCRAttributes_Init(TPM_PCR_ATTRIBUTES *tpm_pcr_attributes)
 {
     size_t	i;
     
-    printf(" TPM_PCRAttributes_Init:\n");
+    TPMLIB_LogPrintf(" TPM_PCRAttributes_Init:\n");
     for (i = 0 ; i < TPM_NUM_PCR ; i++) {
 #if defined TPM_PCCLIENT		/* These values are from the PC Client specification */
 #if TPM_NUM_PCR != 24
@@ -492,9 +492,9 @@ void TPM_PCRInfo_Trace(const char *message,
 		       TPM_PCR_SELECTION pcrSelection,
 		       TPM_COMPOSITE_HASH digestAtRelease)
 {
-    printf("%s\n", message);
-    printf("\tsizeOfSelect %hu\n", pcrSelection.sizeOfSelect);
-    printf("\tpcrSelect %02x %02x %02x\n", 
+    TPMLIB_LogPrintf("%s\n", message);
+    TPMLIB_LogPrintf("\tsizeOfSelect %hu\n", pcrSelection.sizeOfSelect);
+    TPMLIB_LogPrintf("\tpcrSelect %02x %02x %02x\n", 
 	   pcrSelection.pcrSelect[0],
 	   pcrSelection.pcrSelect[1],
 	   pcrSelection.pcrSelect[2]);
@@ -517,7 +517,7 @@ void TPM_PCRs_Init(TPM_PCRVALUE *tpm_pcrs,		/* points to the TPM PCR array */
 {
     size_t	i;
 
-    printf(" TPM_PCRs_Init:\n");
+    TPMLIB_LogPrintf(" TPM_PCRs_Init:\n");
     for (i = 0 ; i < TPM_NUM_PCR ; i++) {
 	TPM_PCR_Init(tpm_pcrs, tpm_pcr_attributes, i);	/* initialize a single PCR */
     }
@@ -532,7 +532,7 @@ TPM_RESULT TPM_PCRs_Load(TPM_PCRVALUE *tpm_pcrs,		/* points to the TPM PCR array
     TPM_RESULT	rc = 0;
     size_t	i;
 
-    printf(" TPM_PCRs_Load:\n");
+    TPMLIB_LogPrintf(" TPM_PCRs_Load:\n");
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_PCR) ; i++) {
 	/* FALSE: Saved by TPM_SaveState
 	   TRUE: MUST not be part of any state stored by TPM_SaveState */
@@ -550,7 +550,7 @@ TPM_RESULT TPM_PCRs_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     size_t	i;
 
-    printf(" TPM_PCRs_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRs_Store:\n");
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_PCR) ; i++) {
 	/* FALSE: Saved by TPM_SaveState
 	   TRUE: MUST not be part of any state stored by TPM_SaveState */
@@ -592,7 +592,7 @@ TPM_RESULT TPM_PCRComposite_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRComposite_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRComposite_Store:\n");
     
     /* store TPM_PCR_SELECTION select */
     if (rc == 0) {
@@ -616,7 +616,7 @@ TPM_RESULT TPM_PCRComposite_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_PCRComposite_Delete(TPM_PCR_COMPOSITE *tpm_pcr_composite)
 {
-    printf(" TPM_PCRComposite_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_PCRComposite_Delete:\n");
     if (tpm_pcr_composite != NULL) {
 	TPM_PCRSelection_Delete(&(tpm_pcr_composite->select));
 	TPM_SizedBuffer_Delete(&(tpm_pcr_composite->pcrValue));
@@ -645,7 +645,7 @@ TPM_RESULT TPM_PCRComposite_Set(TPM_PCR_COMPOSITE *tpm_pcr_composite,
     TPM_PCRINDEX	pcr_num;	/* selected PCR being copied */
     size_t		comp_num;	/* index into composite */
 
-    printf(" TPM_PCRComposite_Set:\n");
+    TPMLIB_LogPrintf(" TPM_PCRComposite_Set:\n");
     /* test sizeOfSelect value */
     if (rc == 0) {
 	rc = TPM_PCRSelection_CheckRange(tpm_pcr_selection);
@@ -668,7 +668,7 @@ TPM_RESULT TPM_PCRComposite_Set(TPM_PCR_COMPOSITE *tpm_pcr_composite,
     }
     /* allocate memory for the pcrValue member (a TPM_PCRVALUE for each selected PCR) */
     if ((rc == 0) && (pcrs > 0)) {
-	printf("  TPM_PCRComposite_Set: Digesting %lu pcrs\n", (unsigned long)pcrs);
+	TPMLIB_LogPrintf("  TPM_PCRComposite_Set: Digesting %lu pcrs\n", (unsigned long)pcrs);
 	rc = TPM_SizedBuffer_Allocate(&(tpm_pcr_composite->pcrValue), pcrs * sizeof(TPM_PCRVALUE));
     }
     /* Next iterate through all bytes in tpm_pcr_selection and copy to TPM_PCR_COMPOSITE */
@@ -677,7 +677,7 @@ TPM_RESULT TPM_PCRComposite_Set(TPM_PCR_COMPOSITE *tpm_pcr_composite,
 	    /* iterate through all bits in each byte */
 	    for (j = 0x0001 ; j != (0x0001 << CHAR_BIT) ; j <<= 1, pcr_num++) {
 		if (tpm_pcr_selection->pcrSelect[i] & j) {	/* if the bit is set in the map */
-		    printf("  TPM_PCRComposite_Set: Adding PCR %u\n", pcr_num);
+		    TPMLIB_LogPrintf("  TPM_PCRComposite_Set: Adding PCR %u\n", pcr_num);
 		    /* append the the PCR value to TPM_PCR_COMPOSITE.pcrValue */
 		    /* NOTE: Ignore return code since range checked by
 		       TPM_PCRSelection_CheckRange() */
@@ -723,7 +723,7 @@ TPM_RESULT TPM_PCRInfoShort_Load(TPM_PCR_INFO_SHORT *tpm_pcr_info_short,
     TPM_RESULT	rc = 0;
     TPM_BOOL 	pcrUsage = TRUE;
     
-    printf(" TPM_PCRInfoShort_Load:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_Load:\n");
     /* load pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Load(&(tpm_pcr_info_short->pcrSelection), stream, stream_size);
@@ -778,7 +778,7 @@ TPM_RESULT TPM_PCRInfoShort_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     TPM_BOOL 	pcrUsage = TRUE;
 
-    printf(" TPM_PCRInfoShort_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_Store:\n");
     /* store pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Store(sbuffer, &(tpm_pcr_info_short->pcrSelection));
@@ -818,7 +818,7 @@ TPM_RESULT TPM_PCRInfoShort_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_PCRInfoShort_Delete(TPM_PCR_INFO_SHORT *tpm_pcr_info_short)
 {
-    printf(" TPM_PCRInfoShort_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_Delete:\n");
     if (tpm_pcr_info_short != NULL) {
 	TPM_PCRSelection_Delete(&(tpm_pcr_info_short->pcrSelection));
 	TPM_PCRInfoShort_Init(tpm_pcr_info_short);
@@ -834,12 +834,12 @@ TPM_RESULT TPM_PCRInfoShort_Create(TPM_PCR_INFO_SHORT **tpm_pcr_info_short)
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoShort_Create:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_Create:\n");
     /* This function should never be called when the TPM_PCR_INFO_SHORT structure has already been
        loaded.	This indicates an internal error. */
     if (rc == 0) {
 	if (*tpm_pcr_info_short != NULL) {
-	    printf("TPM_PCRInfoShort_Create: Error (fatal), TPM_PCR_INFO_SHORT already loaded\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoShort_Create: Error (fatal), TPM_PCR_INFO_SHORT already loaded\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -860,7 +860,7 @@ TPM_RESULT TPM_PCRInfoShort_LoadFromBuffer(TPM_PCR_INFO_SHORT *tpm_pcr_info_shor
     unsigned char *stream;
     uint32_t stream_size;
 
-    printf(" TPM_PCRInfoShort_LoadFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_LoadFromBuffer:\n");
     if (rc == 0) {
 	TPM_PCRInfoShort_Init(tpm_pcr_info_short);
 	stream = tpm_sized_buffer->buffer;
@@ -883,7 +883,7 @@ TPM_RESULT TPM_PCRInfoShort_CreateFromBuffer(TPM_PCR_INFO_SHORT **tpm_pcr_info_s
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoShort_CreateFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CreateFromBuffer:\n");
     /* if there is no TPM_PCR_INFO_SHORT - done */
     if (rc == 0) {
 	if (tpm_sized_buffer->size == 0) {
@@ -908,7 +908,7 @@ TPM_RESULT TPM_PCRInfoShort_Copy(TPM_PCR_INFO_SHORT *dest_tpm_pcr_info_short,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoShort_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_Copy:\n");
     /* copy TPM_PCR_SELECTION pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Copy(&(dest_tpm_pcr_info_short->pcrSelection),
@@ -936,7 +936,7 @@ TPM_RESULT TPM_PCRInfoShort_CopyInfo(TPM_PCR_INFO_SHORT *dest_tpm_pcr_info_short
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoShort_CopyInfo:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CopyInfo:\n");
     /* 4. To set IS from IN */
     /* a. Set IS -> pcrSelection to IN -> pcrSelection */
     if (rc == 0) {
@@ -965,7 +965,7 @@ TPM_RESULT TPM_PCRInfoShort_CopyInfoLong(TPM_PCR_INFO_SHORT *dest_tpm_pcr_info_s
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoShort_CopyInfoLong:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CopyInfoLong:\n");
     /* 5. To set IS from IL */
     /* a. Set IS -> pcrSelection to IL -> releasePCRSelection */
     if (rc == 0) {
@@ -995,7 +995,7 @@ TPM_RESULT TPM_PCRInfoShort_CreateFromInfo(TPM_PCR_INFO_SHORT **dest_tpm_pcr_inf
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoShort_CreateFromInfo:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CreateFromInfo:\n");
     if (rc == 0) {
 	/* if there is no source, leave the destination NULL */
 	if (src_tpm_pcr_info == NULL) {
@@ -1025,7 +1025,7 @@ TPM_RESULT TPM_PCRInfoShort_CreateFromInfoLong(TPM_PCR_INFO_SHORT **dest_tpm_pcr
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoShort_CreateFromInfoLong:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CreateFromInfoLong:\n");
     /* if there is no source, leave the destination NULL */
     if (rc == 0) {
 	if (src_tpm_pcr_info_long == NULL) {
@@ -1057,7 +1057,7 @@ TPM_RESULT TPM_PCRInfoShort_CreateFromKey(TPM_PCR_INFO_SHORT **dest_tpm_pcr_info
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoShort_CreateFromKey:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CreateFromKey:\n");
     if (rc == 0) {
 	if (((TPM_KEY12 *)tpm_key)->tag != TPM_TAG_KEY12) {	/* TPM_KEY */
 	    rc = TPM_PCRInfoShort_CreateFromInfo(dest_tpm_pcr_info_short,
@@ -1082,10 +1082,10 @@ TPM_RESULT TPM_PCRInfoShort_GenerateDigest(TPM_DIGEST tpm_digest,		/* output dig
     TPM_RESULT		rc = 0;
     TPM_PCR_SELECTION	*tpm_pcr_selection;
 
-    printf(" TPM_PCRInfoShort_GenerateDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_GenerateDigest:\n");
     if (rc == 0) {
 	if (tpm_pcr_info_short == NULL) {
-	    printf("TPM_PCRInfoShort_GenerateDigest: Error (fatal), TPM_PCR_INFO_SHORT is NULL\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoShort_GenerateDigest: Error (fatal), TPM_PCR_INFO_SHORT is NULL\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -1110,7 +1110,7 @@ TPM_RESULT TPM_PCRInfoShort_CheckDigest(TPM_PCR_INFO_SHORT *tpm_pcr_info_short,
     TPM_COMPOSITE_HASH	tpm_composite_hash;
     TPM_BOOL		pcrUsage;	/* TRUE if PCR's are specified */
 	
-    printf(" TPM_PCRInfoShort_CheckDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_CheckDigest:\n");
     /* returns FALSE if tpm_pcr_info_short is NULL or selection bitmap is zero */
     if (rc == 0) {
 	rc = TPM_PCRInfoShort_GetPCRUsage(&pcrUsage, tpm_pcr_info_short);
@@ -1127,7 +1127,7 @@ TPM_RESULT TPM_PCRInfoShort_CheckDigest(TPM_PCR_INFO_SHORT *tpm_pcr_info_short,
 	rc = TPM_Digest_Compare(tpm_composite_hash,
 				tpm_pcr_info_short->digestAtRelease);
 	if (rc != 0) {
-	    printf("TPM_PCRInfoShort_CheckDigest: Error, wrong digestAtRelease value\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoShort_CheckDigest: Error, wrong digestAtRelease value\n");
 	    rc = TPM_WRONGPCRVAL;
 	}
     }
@@ -1153,7 +1153,7 @@ TPM_RESULT TPM_PCRInfoShort_GetPCRUsage(TPM_BOOL *pcrUsage,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoShort_GetPCRUsage\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoShort_GetPCRUsage\n");
     if (rc == 0) {
 	/* if a loaded key had no pcrInfoShort, the structure remains NULL */
 	if (tpm_pcr_info_short == NULL) {
@@ -1165,7 +1165,7 @@ TPM_RESULT TPM_PCRInfoShort_GetPCRUsage(TPM_BOOL *pcrUsage,
 	rc = TPM_PCRSelection_GetPCRUsage(pcrUsage, &(tpm_pcr_info_short->pcrSelection), 0);
     }
     if (rc == 0) {
-	printf("  TPM_PCRInfoShort_GetPCRUsage: Result %d\n", *pcrUsage);
+	TPMLIB_LogPrintf("  TPM_PCRInfoShort_GetPCRUsage: Result %d\n", *pcrUsage);
     }
     return rc;
 }
@@ -1197,7 +1197,7 @@ TPM_RESULT TPM_PCRInfo_Load(TPM_PCR_INFO *tpm_pcr_info,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_PCRInfo_Load:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Load:\n");
     /* load pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Load(&(tpm_pcr_info->pcrSelection), stream, stream_size);
@@ -1226,7 +1226,7 @@ TPM_RESULT TPM_PCRInfo_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfo_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Store:\n");
     /* store pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Store(sbuffer, &(tpm_pcr_info->pcrSelection));
@@ -1254,7 +1254,7 @@ TPM_RESULT TPM_PCRInfo_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_PCRInfo_Delete(TPM_PCR_INFO *tpm_pcr_info)
 {
-    printf(" TPM_PCRInfo_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Delete:\n");
     if (tpm_pcr_info != NULL) {
 	TPM_PCRSelection_Delete(&(tpm_pcr_info->pcrSelection));
 	TPM_PCRInfo_Init(tpm_pcr_info);
@@ -1270,12 +1270,12 @@ TPM_RESULT TPM_PCRInfo_Create(TPM_PCR_INFO **tpm_pcr_info)
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfo_Create:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Create:\n");
     /* This function should never be called when the TPM_PCR_INFO structure has already been loaded.
        This indicates an internal error. */
     if (rc == 0) {
 	if (*tpm_pcr_info != NULL) {
-	    printf("TPM_PCRInfo_Create: Error (fatal), TPM_PCR_INFO already loaded\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfo_Create: Error (fatal), TPM_PCR_INFO already loaded\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -1296,7 +1296,7 @@ TPM_RESULT TPM_PCRInfo_LoadFromBuffer(TPM_PCR_INFO *tpm_pcr_info,
     unsigned char *stream;
     uint32_t stream_size;
 
-    printf(" TPM_PCRInfo_LoadFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_LoadFromBuffer:\n");
     if (rc == 0) {
 	TPM_PCRInfo_Init(tpm_pcr_info);
 	stream = tpm_sized_buffer->buffer;
@@ -1321,7 +1321,7 @@ TPM_RESULT TPM_PCRInfo_CreateFromBuffer(TPM_PCR_INFO **tpm_pcr_info,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfo_CreateFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_CreateFromBuffer:\n");
     /* if there is no TPM_PCR_INFO - done */
     if (rc == 0) {
 	if (tpm_sized_buffer->size == 0) {
@@ -1347,7 +1347,7 @@ TPM_RESULT TPM_PCRInfo_Copy(TPM_PCR_INFO *dest_tpm_pcr_info,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfo_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Copy:\n");
     /* copy TPM_PCR_SELECTION pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRSelection_Copy(&(dest_tpm_pcr_info->pcrSelection),
@@ -1377,7 +1377,7 @@ TPM_RESULT TPM_PCRInfo_CopyInfoLong(TPM_PCR_INFO *dest_tpm_pcr_info,
     TPM_BOOL selectMatch;
     TPM_BOOL localityMatch;
 
-    printf(" TPM_PCRInfo_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_Copy:\n");
     /* 9. To set IN from IL */
     /* a. Set IN -> pcrSelection to IL -> releasePCRSelection */
     if (rc == 0) {
@@ -1423,7 +1423,7 @@ TPM_RESULT TPM_PCRInfo_CreateFromInfo(TPM_PCR_INFO **dest_tpm_pcr_info,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfo_CreateFromInfo:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_CreateFromInfo:\n");
     /* if there is no source, leave the destination NULL */
     if (rc == 0) {
 	if (src_tpm_pcr_info == NULL) {
@@ -1453,7 +1453,7 @@ TPM_RESULT TPM_PCRInfo_CreateFromInfoLong(TPM_PCR_INFO **dest_tpm_pcr_info,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfo_CreateFromInfoLong:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_CreateFromInfoLong:\n");
     /* if there is no source, leave the destination NULL */
     if (rc == 0) {
 	if (src_tpm_pcr_info_long == NULL) {
@@ -1486,7 +1486,7 @@ TPM_RESULT TPM_PCRInfo_CreateFromKey(TPM_PCR_INFO **dest_tpm_pcr_info,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfo_CreateFromKey:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_CreateFromKey:\n");
     if (rc == 0) {
 	if (((TPM_KEY12 *)tpm_key)->tag != TPM_TAG_KEY12) {	/* TPM_KEY */
 	    rc = TPM_PCRInfo_CreateFromInfo(dest_tpm_pcr_info, tpm_key->tpm_pcr_info);
@@ -1509,10 +1509,10 @@ TPM_RESULT TPM_PCRInfo_GenerateDigest(TPM_DIGEST tpm_digest,		/* output digest *
     TPM_RESULT		rc = 0;
     TPM_PCR_SELECTION	*tpm_pcr_selection;
 
-    printf(" TPM_PCRInfo_GenerateDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_GenerateDigest:\n");
     if (rc == 0) {
 	if (tpm_pcr_info == NULL) {
-	    printf("TPM_PCRInfo_GenerateDigest: Error (fatal), TPM_PCR_INFO is NULL\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfo_GenerateDigest: Error (fatal), TPM_PCR_INFO is NULL\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -1537,7 +1537,7 @@ TPM_RESULT TPM_PCRInfo_CheckDigest(TPM_PCR_INFO *tpm_pcr_info,
     TPM_COMPOSITE_HASH	tpm_composite_hash;
     TPM_BOOL		pcrUsage;	/* TRUE if PCR's are specified */
 	
-    printf(" TPM_PCRInfo_CheckDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_CheckDigest:\n");
     /* Calculate a TPM_COMPOSITE_HASH of the PCR selected by tpm_pcr_info -> pcrSelection */
     if (rc == 0) {
 	rc = TPM_PCRInfo_GetPCRUsage(&pcrUsage, tpm_pcr_info, 0);
@@ -1552,7 +1552,7 @@ TPM_RESULT TPM_PCRInfo_CheckDigest(TPM_PCR_INFO *tpm_pcr_info,
 	rc = TPM_Digest_Compare(tpm_composite_hash,
 				tpm_pcr_info->digestAtRelease);
 	if (rc != 0) {
-	    printf("TPM_PCRInfo_CheckDigest: Error, wrong digestAtRelease value\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfo_CheckDigest: Error, wrong digestAtRelease value\n");
 	    rc = TPM_WRONGPCRVAL;
 	}
     }
@@ -1569,7 +1569,7 @@ TPM_RESULT TPM_PCRInfo_SetDigestAtCreation(TPM_PCR_INFO *tpm_pcr_info,
 {
     TPM_RESULT		rc = 0;
 	
-    printf(" TPM_PCRInfo_SetDigestAtCreation:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfo_SetDigestAtCreation:\n");
     if (rc == 0) {
 	rc = TPM_PCRInfo_GenerateDigest(tpm_pcr_info->digestAtCreation, tpm_pcr_info, tpm_pcrs);
     }
@@ -1588,7 +1588,7 @@ TPM_RESULT TPM_PCRInfo_GetPCRUsage(TPM_BOOL *pcrUsage,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfo_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
+    TPMLIB_LogPrintf(" TPM_PCRInfo_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
     if (rc == 0) {
 	/* if a loaded key had no pcrInfo, the structure remains NULL */
 	if (tpm_pcr_info == NULL) {
@@ -1600,7 +1600,7 @@ TPM_RESULT TPM_PCRInfo_GetPCRUsage(TPM_BOOL *pcrUsage,
 	rc = TPM_PCRSelection_GetPCRUsage(pcrUsage, &(tpm_pcr_info->pcrSelection), start_index);
     }
     if (rc == 0) {
-	printf("  TPM_PCRInfo_GetPCRUsage: Result %d\n", *pcrUsage);
+	TPMLIB_LogPrintf("  TPM_PCRInfo_GetPCRUsage: Result %d\n", *pcrUsage);
     }
     return rc;
 }
@@ -1618,7 +1618,7 @@ TPM_RESULT TPM_PCRInfo_GetPCRUsage(TPM_BOOL *pcrUsage,
 
 void TPM_PCRInfoLong_Init(TPM_PCR_INFO_LONG *tpm_pcr_info_long)
 {
-    printf(" TPM_PCRInfoLong_Init:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Init:\n");
 /*     tpm_pcr_info_long->tag = TPM_TAG_PCR_INFO_LONG; */
     tpm_pcr_info_long->localityAtCreation = TPM_LOC_ZERO;
     tpm_pcr_info_long->localityAtRelease = TPM_LOC_ALL;
@@ -1645,7 +1645,7 @@ TPM_RESULT TPM_PCRInfoLong_Load(TPM_PCR_INFO_LONG *tpm_pcr_info_long,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_PCRInfoLong_Load:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_PCR_INFO_LONG, stream, stream_size);
@@ -1696,7 +1696,7 @@ TPM_RESULT TPM_PCRInfoLong_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_PCRInfoLong_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_PCR_INFO_LONG);
@@ -1741,7 +1741,7 @@ TPM_RESULT TPM_PCRInfoLong_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_PCRInfoLong_Delete(TPM_PCR_INFO_LONG *tpm_pcr_info_long)
 {
-    printf(" TPM_PCRInfoLong_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Delete:\n");
     if (tpm_pcr_info_long != NULL) {
 	TPM_PCRSelection_Delete(&(tpm_pcr_info_long->creationPCRSelection));
 	TPM_PCRSelection_Delete(&(tpm_pcr_info_long->releasePCRSelection));
@@ -1758,12 +1758,12 @@ TPM_RESULT TPM_PCRInfoLong_Create(TPM_PCR_INFO_LONG **tpm_pcr_info_long)
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoLong_Create:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Create:\n");
     /* This function should never be called when the TPM_PCR_INFO_LONG structure has already been
        loaded.	This indicates an internal error. */
     if (rc == 0) {
 	if (*tpm_pcr_info_long != NULL) {
-	    printf("TPM_PCRInfoLong_Create: Error (fatal), TPM_PCR_INFO_LONG already loaded\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoLong_Create: Error (fatal), TPM_PCR_INFO_LONG already loaded\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -1784,7 +1784,7 @@ TPM_RESULT TPM_PCRInfoLong_LoadFromBuffer(TPM_PCR_INFO_LONG *tpm_pcr_info_long,
     unsigned char *stream;
     uint32_t stream_size;
 
-    printf(" TPM_PCRInfoLong_LoadFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_LoadFromBuffer:\n");
     if (rc == 0) {
 	TPM_PCRInfoLong_Init(tpm_pcr_info_long);
 	stream = tpm_sized_buffer->buffer;
@@ -1809,7 +1809,7 @@ TPM_RESULT TPM_PCRInfoLong_CreateFromBuffer(TPM_PCR_INFO_LONG **tpm_pcr_info_lon
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoLong_CreateFromBuffer:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_CreateFromBuffer:\n");
     /* if there is no TPM_PCR_INFO_LONG - done */
     if (rc == 0) {
 	if (tpm_sized_buffer->size == 0) {
@@ -1834,7 +1834,7 @@ TPM_RESULT TPM_PCRInfoLong_Copy(TPM_PCR_INFO_LONG *dest_tpm_pcr_info_long,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRInfoLong_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_Copy:\n");
     if (rc == 0) {
 	/* copy the localityAtCreation, localityAtRelease */
 	dest_tpm_pcr_info_long->localityAtCreation = src_tpm_pcr_info_long->localityAtCreation;
@@ -1871,7 +1871,7 @@ TPM_RESULT TPM_PCRInfoLong_CreateFromInfoLong(TPM_PCR_INFO_LONG **dest_tpm_pcr_i
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoLong_CreateFromInfoLong:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_CreateFromInfoLong:\n");
     if (rc == 0) {
 	/* if there is no source, leave the destination NULL */
 	if (src_tpm_pcr_info_long == NULL) {
@@ -1900,10 +1900,10 @@ TPM_RESULT TPM_PCRInfoLong_GenerateDigest(TPM_DIGEST tpm_digest,		/* output dige
     TPM_RESULT		rc = 0;
     TPM_PCR_SELECTION	*tpm_pcr_selection;
 
-    printf(" TPM_PCRInfoLong_GenerateDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_GenerateDigest:\n");
     if (rc == 0) {
 	if (tpm_pcr_info_long == NULL) {
-	    printf("TPM_PCRInfoLong_GenerateDigest: Error (fatal), TPM_PCR_INFO_LONG is NULL\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoLong_GenerateDigest: Error (fatal), TPM_PCR_INFO_LONG is NULL\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -1928,7 +1928,7 @@ TPM_RESULT TPM_PCRInfoLong_CheckDigest(TPM_PCR_INFO_LONG *tpm_pcr_info_long,
     TPM_COMPOSITE_HASH	tpm_composite_hash;
     TPM_BOOL		pcrUsage;	/* TRUE if PCR's are specified */
 	
-    printf(" TPM_PCRInfoLong_CheckDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_CheckDigest:\n");
     /* returns FALSE if tpm_pcr_info_long is NULL or selection bitmap is zero */
     if (rc == 0) {
 	rc = TPM_PCRInfoLong_GetPCRUsage(&pcrUsage, tpm_pcr_info_long, 0);
@@ -1945,7 +1945,7 @@ TPM_RESULT TPM_PCRInfoLong_CheckDigest(TPM_PCR_INFO_LONG *tpm_pcr_info_long,
 	rc = TPM_Digest_Compare(tpm_composite_hash,
 				tpm_pcr_info_long->digestAtRelease);
 	if (rc != 0) {
-	    printf("TPM_PCRInfoLong_CheckDigest: Error, wrong digestAtRelease value\n");
+	    TPMLIB_LogPrintf("TPM_PCRInfoLong_CheckDigest: Error, wrong digestAtRelease value\n");
 	    rc = TPM_WRONGPCRVAL;
 	}
     }
@@ -1970,7 +1970,7 @@ TPM_RESULT TPM_PCRInfoLong_SetDigestAtCreation(TPM_PCR_INFO_LONG *tpm_pcr_info_l
 {
     TPM_RESULT		rc = 0;
 	
-    printf(" TPM_PCRInfoLong_SetDigestAtCreation:\n");
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_SetDigestAtCreation:\n");
     if (rc == 0) {
 	rc = TPM_PCRInfoLong_GenerateDigest(tpm_pcr_info_long->digestAtCreation,
 					    tpm_pcr_info_long,
@@ -1992,7 +1992,7 @@ TPM_RESULT TPM_PCRInfoLong_GetPCRUsage(TPM_BOOL *pcrUsage,
     TPM_RESULT	rc = 0;
     TPM_BOOL	done = FALSE;
 
-    printf(" TPM_PCRInfoLong_GetPCRUsage: Start %lu\n", (unsigned long)start_index);;
+    TPMLIB_LogPrintf(" TPM_PCRInfoLong_GetPCRUsage: Start %lu\n", (unsigned long)start_index);;
     if (rc == 0) {
 	/* if a loaded key had no pcrInfo, the structure remains NULL */
 	if (tpm_pcr_info_long == NULL) {
@@ -2005,7 +2005,7 @@ TPM_RESULT TPM_PCRInfoLong_GetPCRUsage(TPM_BOOL *pcrUsage,
 					  &(tpm_pcr_info_long->releasePCRSelection), start_index);
     }
     if (rc == 0) {
-	printf("  TPM_PCRInfoLong_GetPCRUsage: Result %d\n", *pcrUsage);
+	TPMLIB_LogPrintf("  TPM_PCRInfoLong_GetPCRUsage: Result %d\n", *pcrUsage);
     }
     return rc;
 }
@@ -2019,7 +2019,7 @@ void TPM_PCRSelection_Init(TPM_PCR_SELECTION *tpm_pcr_selection)
 {
     size_t i;
 
-    printf(" TPM_PCRSelection_Init:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_Init:\n");
     tpm_pcr_selection->sizeOfSelect = TPM_NUM_PCR/CHAR_BIT;
     for (i = 0 ; i < (TPM_NUM_PCR/CHAR_BIT) ; i++) {
 	tpm_pcr_selection->pcrSelect[i] = 0;
@@ -2043,7 +2043,7 @@ TPM_RESULT TPM_PCRSelection_Load(TPM_PCR_SELECTION *tpm_pcr_selection,
     TPM_RESULT	rc = 0;
     size_t	i;
     
-    printf(" TPM_PCRSelection_Load:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_Load:\n");
     /* load sizeOfSelect */
     if (rc == 0) {
 	rc = TPM_Load16(&(tpm_pcr_selection->sizeOfSelect), stream, stream_size);
@@ -2076,7 +2076,7 @@ TPM_RESULT TPM_PCRSelection_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_PCRSelection_Store:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_Store:\n");
     /* NOTE: Cannot use TPM_SizedBuffer_Store since the first parameter is a uint16_t */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, tpm_pcr_selection->sizeOfSelect);
@@ -2101,7 +2101,7 @@ TPM_RESULT TPM_PCRSelection_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_PCRSelection_Delete(TPM_PCR_SELECTION *tpm_pcr_selection)
 {
-    printf(" TPM_PCRSelection_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_Delete:\n");
     if (tpm_pcr_selection != NULL) {
 	TPM_PCRSelection_Init(tpm_pcr_selection);
     }
@@ -2120,7 +2120,7 @@ TPM_RESULT TPM_PCRSelection_Copy(TPM_PCR_SELECTION *destination, TPM_PCR_SELECTI
     TPM_RESULT	rc = 0;
     size_t	i;
     
-    printf(" TPM_PCRSelection_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_Copy:\n");
     if (rc == 0) {
 	rc = TPM_PCRSelection_CheckRange(source);
     }
@@ -2154,7 +2154,7 @@ TPM_RESULT TPM_PCRSelection_GenerateDigest(TPM_DIGEST tpm_digest, /* output dige
     TPM_RESULT		rc = 0;
     TPM_PCR_COMPOSITE	tpm_pcr_composite;	/* structure to be hashed */
 
-    printf(" TPM_PCRSelection_GenerateDigest:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_GenerateDigest:\n");
     TPM_PCRComposite_Init(&tpm_pcr_composite);		/* freed @1 */
     rc = TPM_PCRSelection_GenerateDigest2(tpm_digest,
 					  &tpm_pcr_composite,
@@ -2186,7 +2186,7 @@ TPM_RESULT TPM_PCRSelection_GenerateDigest2(TPM_DIGEST tpm_digest, /* output dig
     TPM_RESULT		rc = 0;
     TPM_BOOL		pcrUsage;
 
-    printf(" TPM_PCRSelection_GenerateDigest2:\n");
+    TPMLIB_LogPrintf(" TPM_PCRSelection_GenerateDigest2:\n");
     /* assemble the TPM_PCR_COMPOSITE structure */
     if (rc == 0) {
 	rc = TPM_PCRComposite_Set(tpm_pcr_composite, tpm_pcr_selection, tpm_pcrs);
@@ -2195,7 +2195,7 @@ TPM_RESULT TPM_PCRSelection_GenerateDigest2(TPM_DIGEST tpm_digest, /* output dig
 	rc = TPM_PCRSelection_GetPCRUsage(&pcrUsage, tpm_pcr_selection, 0);
     }
     if (rc == 0) {
-	printf("  TPM_PCRSelection_GenerateDigest2: pcrUsage %02x\n", pcrUsage);
+	TPMLIB_LogPrintf("  TPM_PCRSelection_GenerateDigest2: pcrUsage %02x\n", pcrUsage);
 	if (pcrUsage) {
 	    /* serialize and hash TPM_PCR_COMPOSITE */
 	    if (rc == 0) {
@@ -2225,7 +2225,7 @@ TPM_RESULT TPM_PCRSelection_GetPCRUsage(TPM_BOOL *pcrUsage,
     TPM_RESULT	rc = 0;
     size_t	i;
     
-    printf(" TPM_PCRSelection_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
+    TPMLIB_LogPrintf(" TPM_PCRSelection_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
     if (rc == 0) {
 	rc = TPM_PCRSelection_CheckRange(tpm_pcr_selection);
     }
@@ -2252,7 +2252,7 @@ TPM_RESULT TPM_PCRSelection_CheckRange(const TPM_PCR_SELECTION *tpm_pcr_selectio
     TPM_RESULT	rc = 0;
 
     if (tpm_pcr_selection->sizeOfSelect > (TPM_NUM_PCR/CHAR_BIT)) {
-	printf("TPM_PCRSelection_CheckRange: Error, sizeOfSelect %u must be 0 - %u\n",
+	TPMLIB_LogPrintf("TPM_PCRSelection_CheckRange: Error, sizeOfSelect %u must be 0 - %u\n",
 	       tpm_pcr_selection->sizeOfSelect, TPM_NUM_PCR/CHAR_BIT);
 	rc = TPM_INVALID_PCR_INFO;
     }
@@ -2320,7 +2320,7 @@ void TPM_PCRSelection_LessThan(TPM_BOOL *lessThan,
 
 void TPM_QuoteInfo_Init(TPM_QUOTE_INFO *tpm_quote_info)
 {
-    printf(" TPM_QuoteInfo_Init:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo_Init:\n");
     TPM_StructVer_Init(&(tpm_quote_info->version));
     memcpy(&(tpm_quote_info->fixed), "QUOT", 4);
     TPM_Digest_Init(tpm_quote_info->digestValue);
@@ -2347,7 +2347,7 @@ TPM_RESULT TPM_QuoteInfo_Load(TPM_QUOTE_INFO *tpm_quote_info,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_QuoteInfo_Load:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo_Load:\n");
     /* load version */
     if (rc == 0) {
 	rc = TPM_StructVer_Load(&(tpm_quote_info->version), stream, stream_size);
@@ -2383,7 +2383,7 @@ TPM_RESULT TPM_QuoteInfo_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_QuoteInfo_Store:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo_Store:\n");
     /* store version */
     if (rc == 0) {
 	rc = TPM_StructVer_Store(sbuffer, &(tpm_quote_info->version));
@@ -2414,7 +2414,7 @@ TPM_RESULT TPM_QuoteInfo_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_QuoteInfo_Delete(TPM_QUOTE_INFO *tpm_quote_info)
 {
-    printf(" TPM_QuoteInfo_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo_Delete:\n");
     if (tpm_quote_info != NULL) {
 	TPM_QuoteInfo_Init(tpm_quote_info);
     }
@@ -2434,7 +2434,7 @@ void TPM_QuoteInfo_Delete(TPM_QUOTE_INFO *tpm_quote_info)
 
 void TPM_QuoteInfo2_Init(TPM_QUOTE_INFO2 *tpm_quote_info2)
 {
-    printf(" TPM_QuoteInfo2_Init:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo2_Init:\n");
     memcpy(tpm_quote_info2->fixed, "QUT2", 4);
     TPM_Nonce_Init(tpm_quote_info2->externalData);
     TPM_PCRInfoShort_Init(&(tpm_quote_info2->infoShort));
@@ -2458,7 +2458,7 @@ TPM_RESULT TPM_QuoteInfo2_Load(TPM_QUOTE_INFO2 *tpm_quote_info2,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_QuoteInfo2_Load:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo2_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_QUOTE_INFO2, stream, stream_size);
@@ -2490,7 +2490,7 @@ TPM_RESULT TPM_QuoteInfo2_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_QuoteInfo2_Store:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo2_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_QUOTE_INFO2);
@@ -2521,7 +2521,7 @@ TPM_RESULT TPM_QuoteInfo2_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_QuoteInfo2_Delete(TPM_QUOTE_INFO2 *tpm_quote_info2)
 {
-    printf(" TPM_QuoteInfo2_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_QuoteInfo2_Delete:\n");
     if (tpm_quote_info2 != NULL) {
 	TPM_PCRInfoShort_Delete(&(tpm_quote_info2->infoShort));
 	TPM_QuoteInfo2_Init(tpm_quote_info2);
@@ -2566,7 +2566,7 @@ TPM_RESULT TPM_Process_PcrRead(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_PCRVALUE	outDigest;
     
-    printf("TPM_Process_PcrRead: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PcrRead: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -2600,7 +2600,7 @@ TPM_RESULT TPM_Process_PcrRead(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PcrRead: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_PcrRead: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2612,7 +2612,7 @@ TPM_RESULT TPM_Process_PcrRead(tpm_state_t *tpm_state,
     /* 2. Set outDigest to TPM_STCLEAR_DATA -> PCR[pcrIndex] */
     /* NOTE Done by TPM_PCR_Load() */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PcrRead: pcrIndex %u\n", pcrIndex);
+	TPMLIB_LogPrintf("TPM_Process_PcrRead: pcrIndex %u\n", pcrIndex);
 	returnCode = TPM_PCR_Load(outDigest,
 				  tpm_state->tpm_stclear_data.PCRS,
 				  pcrIndex);
@@ -2625,7 +2625,7 @@ TPM_RESULT TPM_Process_PcrRead(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PcrRead: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PcrRead: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2725,7 +2725,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
 					   values. */
     TPM_SIZED_BUFFER	sig;		/* The signed data blob. */
 
-    printf("TPM_Process_Quote: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Quote: Ordinal Entry\n");
     TPM_PCRSelection_Init(&targetPCR);		/* freed @1 */
     TPM_PCRComposite_Init(&pcrData);		/* freed @2 */
     TPM_QuoteInfo_Init(&q1QuoteInfo);		/* freed @3 */
@@ -2741,7 +2741,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get externalData parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Quote: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_Quote: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Nonce_Load(externalData, &command, &paramSize);
     }
     /* get targetPCR parameter */
@@ -2781,11 +2781,11 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf("TPM_Process_Quote: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_Quote: authHandle %08x\n", authHandle);
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Quote: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Quote: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2806,7 +2806,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (sigKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_Quote: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_Quote: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -2843,7 +2843,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_Quote: Error, invalid sigKey sigScheme %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_Quote: Error, invalid sigKey sigScheme %04hx\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INAPPROPRIATE_SIG;
 	}
@@ -2854,7 +2854,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
 	if ((sigKey->keyUsage != TPM_KEY_SIGNING) &&
 	    ((sigKey->keyUsage) != TPM_KEY_IDENTITY) &&
 	    ((sigKey->keyUsage) != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_Quote: Error, keyUsage %04hx is invalid\n", sigKey->keyUsage);
+	    TPMLIB_LogPrintf("TPM_Process_Quote: Error, keyUsage %04hx is invalid\n", sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -2899,7 +2899,7 @@ TPM_RESULT TPM_Process_Quote(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Quote: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Quote: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3036,7 +3036,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     TPM_CAP_VERSION_INFO	versionInfo;	/* The version info */
     TPM_SIZED_BUFFER		sig;		/* The signed data blob. */
 
-    printf("TPM_Process_Quote2: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Quote2: Ordinal Entry\n");
     TPM_PCRSelection_Init(&targetPCR);						/* freed @1 */
     TPM_CapVersionInfo_Set(&versionInfo, &(tpm_state->tpm_permanent_data));	/* freed @2 */
     TPM_SizedBuffer_Init(&sig);							/* freed @3 */
@@ -3054,7 +3054,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get externalData */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Quote2: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_Quote2: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Nonce_Load(externalData, &command, &paramSize);
     }
     /* get targetPCR parameter */
@@ -3067,7 +3067,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
 	returnCode = TPM_LoadBool(&addVersion, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_Quote2: addVersion %02x\n", addVersion);
+	TPMLIB_LogPrintf("TPM_Process_Quote2: addVersion %02x\n", addVersion);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -3101,11 +3101,11 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf("TPM_Process_Quote2: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_Quote2: authHandle %08x\n", authHandle);
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Quote2: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Quote2: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3126,7 +3126,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (sigKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_Quote2: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_Quote2: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -3163,7 +3163,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_Quote2: Error, inappropriate signature scheme %04x\n",
+	    TPMLIB_LogPrintf("TPM_Process_Quote2: Error, inappropriate signature scheme %04x\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INAPPROPRIATE_SIG;
 	}
@@ -3174,7 +3174,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
 	if ((sigKey->keyUsage != TPM_KEY_SIGNING) &&
 	    ((sigKey->keyUsage) != TPM_KEY_IDENTITY) &&
 	    ((sigKey->keyUsage) != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_Quote2: Error, keyUsage %04hx is invalid\n", sigKey->keyUsage);
+	    TPMLIB_LogPrintf("TPM_Process_Quote2: Error, keyUsage %04hx is invalid\n", sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -3255,7 +3255,7 @@ TPM_RESULT TPM_Process_Quote2(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Quote2: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Quote2: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3351,7 +3351,7 @@ TPM_RESULT TPM_ExtendCommon(TPM_PCRVALUE outDigest,	/* The PCR value after execu
     TPM_PCRVALUE		currentPcrValue;
     TPM_DIGEST			h1;
     
-    printf("TPM_ExtendCommon: pcrNum %u\n", pcrNum);
+    TPMLIB_LogPrintf("TPM_ExtendCommon: pcrNum %u\n", pcrNum);
     /* 1. Validate that pcrNum represents a legal PCR number. On error, return TPM_BADINDEX. */
     if (rc == 0) {
 	rc = TPM_PCR_CheckRange(pcrNum);
@@ -3387,7 +3387,7 @@ TPM_RESULT TPM_ExtendCommon(TPM_PCRVALUE outDigest,	/* The PCR value after execu
 	    /* if not locality 4, must not be at the reset value */
 	    TPM_Digest_IsZero(&isZero, currentPcrValue);
 	    if (isZero) {
-		printf("TPM_ExtendCommon: Error, "
+		TPMLIB_LogPrintf("TPM_ExtendCommon: Error, "
 		       "pcrNum %u and locality %u and PCR at reset value\n",
 		       pcrNum, tpm_state->tpm_stany_flags.localityModifier);
 		rc = TPM_BAD_LOCALITY;
@@ -3470,7 +3470,7 @@ TPM_RESULT TPM_Process_Extend(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_PCRVALUE	outDigest;	/* The PCR value after execution of the command. */
 
-    printf("TPM_Process_Extend: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Extend: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -3509,7 +3509,7 @@ TPM_RESULT TPM_Process_Extend(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_Extend: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_Extend: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3526,7 +3526,7 @@ TPM_RESULT TPM_Process_Extend(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_Extend: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_Extend: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3632,7 +3632,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
     uint16_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_PcrReset: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PcrReset: Ordinal Entry\n");
     TPM_PCRSelection_Init(&pcrSelection);	/* freed @1 */
     /*
       get inputs
@@ -3668,7 +3668,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PcrReset: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_PcrReset: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3682,13 +3682,13 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
     /* b. pcrSelection -> pcrSelect is non-zero */
     /* NOTE: TPM_PCRSelection_GetPCRUsage() range checks pcrSelection */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PcrReset: Getting input PCR usage\n");
+	TPMLIB_LogPrintf("TPM_Process_PcrReset: Getting input PCR usage\n");
 	returnCode = TPM_PCRSelection_GetPCRUsage(&pcrUsage, &pcrSelection, 0);
     }
     /* c. On errors return TPM_INVALID_PCR_INFO */
     if (returnCode == TPM_SUCCESS) {
 	if (!pcrUsage) {
-	    printf("TPM_Process_PcrReset: Error, pcrSelect is zero\n");
+	    TPMLIB_LogPrintf("TPM_Process_PcrReset: Error, pcrSelect is zero\n");
 	    returnCode = TPM_INVALID_PCR_INFO;
 	}
     }
@@ -3709,7 +3709,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
 	    if (pcrSelection.pcrSelect[i] & j) {	/* if the bit is set in the selection map */
 		/* a. If pcrAttrib[pcrIndex].pcrReset is FALSE */
 		if (!(tpm_permanent_data->pcrAttrib[pcr_num].pcrReset)) {
-		    printf("TPM_Process_PcrReset: Error, PCR %u not resettable\n", pcr_num);
+		    TPMLIB_LogPrintf("TPM_Process_PcrReset: Error, PCR %u not resettable\n", pcr_num);
 		    /* a. Return TPM_NOTRESETABLE */
 		    returnCode = TPM_NOTRESETABLE;
 		}
@@ -3721,7 +3721,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
 			TPM_Locality_Check(tpm_permanent_data->pcrAttrib[pcr_num].pcrResetLocal,
 					   localityModifier);
 		    if (returnCode != TPM_SUCCESS) {
-			printf("TPM_Process_PcrReset: Error, PCR %u bad pcrResetLocal %02x\n",
+			TPMLIB_LogPrintf("TPM_Process_PcrReset: Error, PCR %u bad pcrResetLocal %02x\n",
 			       pcr_num, tpm_permanent_data->pcrAttrib[pcr_num].pcrResetLocal);
 			returnCode = TPM_NOTLOCAL;
 		    }
@@ -3737,7 +3737,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
 	    /* iterate through all bits in each selection byte */
 	    for (j = 0x0001 ; j != (0x0001 << CHAR_BIT) ; j <<= 1, pcr_num++) {
 		if (pcrSelection.pcrSelect[i] & j) {	/* if the bit is set in the selection map */
-		    printf("TPM_Process_PcrReset: Resetting PCR %u\n", pcr_num);
+		    TPMLIB_LogPrintf("TPM_Process_PcrReset: Resetting PCR %u\n", pcr_num);
 		    /* a. The PCR MAY only reset to 0x00...00 or 0xFF...FF */
 		    /* b. The logic to determine which value to use MUST be described by a platform
 		       specific specification
@@ -3757,7 +3757,7 @@ TPM_RESULT TPM_Process_PcrReset(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PcrReset: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PcrReset: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

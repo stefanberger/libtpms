@@ -72,7 +72,7 @@ TPM_RESULT TPM12_IO_Hash_Start(void)
     TPM_PCRVALUE	zeroPCR;
     TPM_BOOL		altered = FALSE;	/* TRUE if the structure has been changed */
 
-    printf("\nTPM_IO_Hash_Start: Ordinal Entry\n");
+    TPMLIB_LogPrintf("\nTPM_IO_Hash_Start: Ordinal Entry\n");
     TPM_Digest_Init(zeroPCR);
 
     /* Prior to receiving the TPM_HASH_START command the TPM must have received a TPM_Startup
@@ -80,7 +80,7 @@ TPM_RESULT TPM12_IO_Hash_Start(void)
        the TPM treats this as an error */
     if (rc == 0) {
 	if (tpm_state->tpm_stany_flags.postInitialise) {
-	    printf("TPM_IO_Hash_Start: Error, postInitialise is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_IO_Hash_Start: Error, postInitialise is TRUE\n");
 	    rc = TPM_INVALID_POSTINIT;
 	}
     }
@@ -135,8 +135,8 @@ TPM_RESULT TPM12_IO_Hash_Start(void)
        b) MUST release locality.
     */
     if (rc != 0) {
-	printf("TPM_IO_Hash_Start: Error, (fatal)\n");
-	printf("  TPM_IO_Hash_Start: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("TPM_IO_Hash_Start: Error, (fatal)\n");
+	TPMLIB_LogPrintf("  TPM_IO_Hash_Start: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return rc;
@@ -150,12 +150,12 @@ TPM_RESULT TPM12_IO_Hash_Data(const unsigned char *data,
     TPM_RESULT 		rc = 0;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
 
-    printf("\nTPM_IO_Hash_Data: Ordinal Entry\n");
+    TPMLIB_LogPrintf("\nTPM_IO_Hash_Data: Ordinal Entry\n");
     /* (1) Transform tempLocation per SHA-1 with data received from this command. */
     /* (2) Repeat for each TPM_HASH_DATA LPC command received. */
     if (rc == 0) {
 	if (tpm_state->sha1_context_tis == NULL) {
-	    printf("TPM_IO_Hash_Data: Error, no existing SHA1 thread\n");
+	    TPMLIB_LogPrintf("TPM_IO_Hash_Data: Error, no existing SHA1 thread\n");
 	    rc = TPM_SHA_THREAD;
 	}
     }
@@ -169,8 +169,8 @@ TPM_RESULT TPM12_IO_Hash_Data(const unsigned char *data,
        b) MUST release locality.
     */
     if (rc != 0) {
-	printf("TPM_IO_Hash_Data: Error, (fatal)\n");
-	printf("  TPM_IO_Hash_Data: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("TPM_IO_Hash_Data: Error, (fatal)\n");
+	TPMLIB_LogPrintf("  TPM_IO_Hash_Data: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return rc;
@@ -185,10 +185,10 @@ TPM_RESULT TPM12_IO_Hash_End(void)
     TPM_DIGEST 		extendDigest;
     tpm_state_t		*tpm_state = tpm_instances[0];	/* TPM global state */
 
-    printf("\nTPM_IO_Hash_End: Ordinal Entry\n");
+    TPMLIB_LogPrintf("\nTPM_IO_Hash_End: Ordinal Entry\n");
     if (rc == 0) {
 	if (tpm_state->sha1_context_tis == NULL) {
-	    printf("TPM_IO_Hash_End: Error, no existing SHA1 thread\n");
+	    TPMLIB_LogPrintf("TPM_IO_Hash_End: Error, no existing SHA1 thread\n");
 	    rc = TPM_SHA_THREAD;
 	}
     }
@@ -218,8 +218,8 @@ TPM_RESULT TPM12_IO_Hash_End(void)
        b) MUST release locality.
     */
     if (rc != 0) {
-	printf("TPM_IO_Hash_End: Error, (fatal)\n");
-	printf("  TPM_IO_Hash_End: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("TPM_IO_Hash_End: Error, (fatal)\n");
+	TPMLIB_LogPrintf("  TPM_IO_Hash_End: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     TPM_SHA1Delete(&(tpm_state->sha1_context_tis));
@@ -241,8 +241,8 @@ TPM_RESULT TPM12_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
        b) MUST release locality.
     */
     if (rc != 0) {
-	printf("TPM_IO_TpmEstablished_Get: Error, (fatal)\n");
-	printf("  TPM_IO_TpmEstablished_Get: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("TPM_IO_TpmEstablished_Get: Error, (fatal)\n");
+	TPMLIB_LogPrintf("  TPM_IO_TpmEstablished_Get: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return 0;

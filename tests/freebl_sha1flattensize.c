@@ -35,14 +35,14 @@ int main(void)
 
     context = SHA1_NewContext();
     if (!context) {
-        printf("Could not create SHA1 context.\n");
+        TPMLIB_LogPrintf("Could not create SHA1 context.\n");
         return EXIT_FAILURE;
     }
     SHA1_Begin(context);
 
     libFlattenSize = SHA1_FlattenSize(context);
     if (libFlattenSize != EXPECTED_LIB_FLATTENSIZE) {
-        printf("SHA1 flatten size is %d, expected %d\n",
+        TPMLIB_LogPrintf("SHA1 flatten size is %d, expected %d\n",
                libFlattenSize,
                EXPECTED_LIB_FLATTENSIZE);
         return EXIT_FAILURE;

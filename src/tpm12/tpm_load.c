@@ -99,7 +99,7 @@ TPM_RESULT TPM_Load32(uint32_t *tpm_uint32,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < sizeof(uint32_t)) {
-            printf("TPM_Load32: Error, stream_size %u less than %lu\n",
+            TPMLIB_LogPrintf("TPM_Load32: Error, stream_size %u less than %lu\n",
                    *stream_size, (unsigned long)sizeof(uint32_t));
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -128,7 +128,7 @@ TPM_RESULT TPM_Load16(uint16_t *tpm_uint16,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < sizeof(uint16_t)) {
-            printf("TPM_Load16: Error, stream_size %u less than %lu\n",
+            TPMLIB_LogPrintf("TPM_Load16: Error, stream_size %u less than %lu\n",
                    *stream_size, (unsigned long)sizeof(uint16_t));
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -150,7 +150,7 @@ TPM_RESULT TPM_Load8(uint8_t *tpm_uint8,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < sizeof(uint8_t)) {
-            printf("TPM_Load8: Error, stream_size %u less than %lu\n",
+            TPMLIB_LogPrintf("TPM_Load8: Error, stream_size %u less than %lu\n",
                    *stream_size, (unsigned long)sizeof(uint8_t));
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -176,7 +176,7 @@ TPM_RESULT TPM_LoadBool(TPM_BOOL *tpm_bool,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < sizeof(TPM_BOOL)) {
-            printf("TPM_LoadBool: Error, stream_size %u less than %lu\n",
+            TPMLIB_LogPrintf("TPM_LoadBool: Error, stream_size %u less than %lu\n",
                    *stream_size, (unsigned long)sizeof(TPM_BOOL));
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -189,7 +189,7 @@ TPM_RESULT TPM_LoadBool(TPM_BOOL *tpm_bool,
     }
     if (rc == 0) {
         if ((*tpm_bool != TRUE) && (*tpm_bool != FALSE)) {
-            printf("TPM_LoadBool: Error, illegal value %02x\n", *tpm_bool);
+            TPMLIB_LogPrintf("TPM_LoadBool: Error, illegal value %02x\n", *tpm_bool);
             rc = TPM_BAD_PARAMETER;
         }
     }
@@ -208,7 +208,7 @@ TPM_RESULT TPM_Loadn(BYTE *data,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < data_length) {
-            printf("TPM_Loadn: Error, stream_size %u less than %lu\n",
+            TPMLIB_LogPrintf("TPM_Loadn: Error, stream_size %u less than %lu\n",
                    *stream_size, (unsigned long)data_length);
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -234,10 +234,10 @@ TPM_RESULT TPM_LoadLong(unsigned long *result,
     TPM_RESULT          rc = 0;
     size_t		i;		/* byte iterator */
 
-    printf(" TPM_LoadLong:\n");
+    TPMLIB_LogPrintf(" TPM_LoadLong:\n");
     if (rc == 0) {
         if (stream_size > sizeof(unsigned long)) {
-            printf(" TPM_LoadLong: Error, stream size %u too large\n", stream_size);
+            TPMLIB_LogPrintf(" TPM_LoadLong: Error, stream size %u too large\n", stream_size);
             rc = TPM_BAD_PARAM_SIZE;
         }
     }
@@ -249,7 +249,7 @@ TPM_RESULT TPM_LoadLong(unsigned long *result,
 	       0 */
 	    *result |= (unsigned long)(((unsigned long)stream[i]) << ((stream_size - 1 - i) * 8));
 	}
-	printf(" TPM_LoadLong: Result %08lx\n", *result);
+	TPMLIB_LogPrintf(" TPM_LoadLong: Result %08lx\n", *result);
     }
     return rc;
 }
@@ -300,7 +300,7 @@ TPM_RESULT TPM_CheckTag(TPM_STRUCTURE_TAG expectedTag,
     }
     if (rc == 0) {
         if (tag != expectedTag) {
-            printf("TPM_CheckTag: Error, tag expected %04x found %04hx\n", expectedTag, tag);
+            TPMLIB_LogPrintf("TPM_CheckTag: Error, tag expected %04x found %04hx\n", expectedTag, tag);
             rc = TPM_INVALID_STRUCTURE;
         }
     }

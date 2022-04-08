@@ -89,7 +89,7 @@
 
 void TPM_Authdata_Init(TPM_AUTHDATA tpm_authdata)
 {
-    printf(" TPM_Authdata_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Authdata_Init:\n");
     memset(tpm_authdata, 0, TPM_AUTHDATA_SIZE);
     return;
 }
@@ -108,12 +108,12 @@ TPM_RESULT TPM_Authdata_Load(TPM_AUTHDATA tpm_authdata,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Authdata_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Authdata_Load:\n");
 
     /* check stream_size */
     if (rc == 0) {
 	if (*stream_size < TPM_AUTHDATA_SIZE) {
-	    printf("TPM_Authdata_Load: Error, stream_size %u less than %u\n",
+	    TPMLIB_LogPrintf("TPM_Authdata_Load: Error, stream_size %u less than %u\n",
 		   *stream_size, TPM_DIGEST_SIZE);
 	    rc = TPM_BAD_PARAM_SIZE;
 	}
@@ -139,7 +139,7 @@ TPM_RESULT TPM_Authdata_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Authdata_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Authdata_Store:\n");
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append(sbuffer, tpm_authdata, TPM_AUTHDATA_SIZE);	
     }
@@ -163,7 +163,7 @@ TPM_RESULT TPM_AuthParams_Get(TPM_AUTHHANDLE *authHandle,	/* The authorization h
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_AuthParams_Get:\n");
+    TPMLIB_LogPrintf(" TPM_AuthParams_Get:\n");
     /* get authHandle parameter */
     if (rc == 0) {
 	rc = TPM_Load32(authHandle, command, paramSize);
@@ -202,7 +202,7 @@ TPM_RESULT TPM_AuthParams_Set(TPM_STORE_BUFFER *response,
     TPM_RESULT		rc = 0;
     TPM_AUTHDATA	resAuth;	/* The authorization digest for the returned parameters */
 
-    printf(" TPM_AuthParams_Set:\n");
+    TPMLIB_LogPrintf(" TPM_AuthParams_Set:\n");
     /* generate new nonceEven */
     if (rc == 0) {
 	rc = TPM_Nonce_Generate(auth_session_data->nonceEven);
@@ -241,7 +241,7 @@ TPM_RESULT TPM_Authdata_Generate(TPM_AUTHDATA resAuth,		/* result */
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Authdata_Generate:\n");
+    TPMLIB_LogPrintf(" TPM_Authdata_Generate:\n");
     if (rc == 0) {
 	TPM_PrintFour("  TPM_Authdata_Generate: outParamDigest", outParamDigest);
 	TPM_PrintFour("  TPM_Authdata_Generate: usageAuth (key)", usageAuth);
@@ -279,7 +279,7 @@ TPM_RESULT TPM_Authdata_Check(tpm_state_t	*tpm_state,
     TPM_RESULT		rc = 0;
     TPM_BOOL		valid;
     
-    printf(" TPM_Authdata_Check:\n");
+    TPMLIB_LogPrintf(" TPM_Authdata_Check:\n");
     if (rc == 0) {
 	TPM_PrintFour("  TPM_Authdata_Check: inParamDigest", inParamDigest);
 	TPM_PrintFour("  TPM_Authdata_Check: usageAuth (key)", hmacKey);
@@ -299,7 +299,7 @@ TPM_RESULT TPM_Authdata_Check(tpm_state_t	*tpm_state,
     }
     if (rc == 0) {
 	if (!valid) {
-	    printf("TPM_Authdata_Check: Error, authorization failed\n");
+	    TPMLIB_LogPrintf("TPM_Authdata_Check: Error, authorization failed\n");
 	    /* record the authorization failure */
 	    rc = TPM_Authdata_Fail(tpm_state);
 	    /* TPM_Authdata_Fail() fatal TPM_FAIL error takes precedence, else TPM_AUTHFAIL */
@@ -353,7 +353,7 @@ TPM_RESULT TPM_Authdata_Fail(tpm_state_t *tpm_state)
 	/* Each failure increments the counter.	 No need to check for overflow.	 Unless
 	   TPM_LOCKOUT_THRESHOLD is absurdly large, the left shift overflows first.  */
 	tpm_state->tpm_stclear_data.authFailCount++;
-	printf("  TPM_Authdata_Fail: New authFailCount %u\n",
+	TPMLIB_LogPrintf("  TPM_Authdata_Fail: New authFailCount %u\n",
 	       tpm_state->tpm_stclear_data.authFailCount);
 	/* Test if past the failure threshold.	Each time authorization fails, this test is made.
 	   Once in dictionary attack mitigation, there will be no authdata check until the
@@ -367,7 +367,7 @@ TPM_RESULT TPM_Authdata_Fail(tpm_state_t *tpm_state)
 	if (tpm_state->tpm_stclear_data.authFailCount > TPM_LOCKOUT_THRESHOLD) {
 	    /* the current authorization failure time is the start time */
 	    rc = TPM_GetTimeOfDay(&(tpm_state->tpm_stclear_data.authFailTime), &tv_usec);
-	    printf("   TPM_Authdata_Fail: Past limit, authFailTime %u\n",
+	    TPMLIB_LogPrintf("   TPM_Authdata_Fail: Past limit, authFailTime %u\n",
 		   tpm_state->tpm_stclear_data.authFailTime);
 	}
     }
@@ -389,12 +389,12 @@ TPM_RESULT TPM_Authdata_GetState(TPM_DA_STATE *state,
     uint32_t		waitTime;		/* in seconds, timeout based on threshold_diff */
     uint32_t		timeDiff;		/* in seconds, how far along is timeout */
 
-    printf("  TPM_Authdata_GetState:\n");
+    TPMLIB_LogPrintf("  TPM_Authdata_GetState:\n");
     *state = TPM_DA_STATE_INACTIVE;		/* default value */
     
     /* if there is an attack in progress */
     if (tpm_state->tpm_stclear_data.authFailCount > TPM_LOCKOUT_THRESHOLD) {
-	printf("   TPM_Authdata_GetState: In timeout, authFailCount %u threshold %u\n",
+	TPMLIB_LogPrintf("   TPM_Authdata_GetState: In timeout, authFailCount %u threshold %u\n",
 	       tpm_state->tpm_stclear_data.authFailCount, TPM_LOCKOUT_THRESHOLD);
 	/* get the current time */
 	if (rc == 0) {
@@ -404,7 +404,7 @@ TPM_RESULT TPM_Authdata_GetState(TPM_DA_STATE *state,
 	}
 	/* calculate how much time to wait */
 	if (rc == 0) {
-	    printf("   TPM_Authdata_GetState: currentTime %u authFailTime %u\n",
+	    TPMLIB_LogPrintf("   TPM_Authdata_GetState: currentTime %u authFailTime %u\n",
 		   currentTime, tpm_state->tpm_stclear_data.authFailTime);
 	    /* how many failures over the threshold.  The -1 makes threshold_diff 0 based, so the
 	       first waitTime is 1 sec.	 */
@@ -422,10 +422,10 @@ TPM_RESULT TPM_Authdata_GetState(TPM_DA_STATE *state,
 			    currentTime) + 1;
 	    }
 	    /* if not past the timeout, return an error */
-	    printf("   TPM_Authdata_GetState: waitTime %u timeDiff %u\n",
+	    TPMLIB_LogPrintf("   TPM_Authdata_GetState: waitTime %u timeDiff %u\n",
 		   waitTime, timeDiff);
 	    if (waitTime > timeDiff) {
-		printf("TPM_Authdata_GetState: Error, timeout not complete\n");
+		TPMLIB_LogPrintf("TPM_Authdata_GetState: Error, timeout not complete\n");
 		*state = TPM_DA_STATE_ACTIVE;
 		*timeLeft = waitTime - timeDiff;
 	    }
@@ -447,7 +447,7 @@ TPM_RESULT TPM_Authdata_CheckState(tpm_state_t *tpm_state)
     TPM_DA_STATE	state;
     uint32_t		timeLeft;
     
-    printf("  TPM_Authdata_CheckState:\n");
+    TPMLIB_LogPrintf("  TPM_Authdata_CheckState:\n");
     /* Get the dictionary attack mitigation state */
     if (rc == 0) {
 	rc = TPM_Authdata_GetState(&state, &timeLeft, tpm_state);
@@ -477,7 +477,7 @@ TPM_RESULT TPM_Authdata_CheckState(tpm_state_t *tpm_state)
 
 void TPM_ChangeauthValidate_Init(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_validate)
 {
-    printf(" TPM_ChangeauthValidate_Init:\n");
+    TPMLIB_LogPrintf(" TPM_ChangeauthValidate_Init:\n");
     TPM_Secret_Init(tpm_changeauth_validate->newAuthSecret);
     TPM_Nonce_Init(tpm_changeauth_validate->n1);
     return;
@@ -499,7 +499,7 @@ TPM_RESULT TPM_ChangeauthValidate_Load(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_v
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ChangeauthValidate_Load:\n");
+    TPMLIB_LogPrintf(" TPM_ChangeauthValidate_Load:\n");
     /* load newAuthSecret */
     if (rc == 0) {
 	rc = TPM_Secret_Load(tpm_changeauth_validate->newAuthSecret, stream, stream_size);
@@ -523,7 +523,7 @@ TPM_RESULT TPM_ChangeauthValidate_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ChangeauthValidate_Store:\n");
+    TPMLIB_LogPrintf(" TPM_ChangeauthValidate_Store:\n");
     /* store newAuthSecret */
     if (rc == 0) {
 	rc = TPM_Secret_Store(sbuffer, tpm_changeauth_validate->newAuthSecret);
@@ -547,7 +547,7 @@ TPM_RESULT TPM_ChangeauthValidate_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_ChangeauthValidate_Delete(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_validate)
 {
-    printf(" TPM_ChangeauthValidate_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_ChangeauthValidate_Delete:\n");
     if (tpm_changeauth_validate != NULL) {
 	TPM_ChangeauthValidate_Init(tpm_changeauth_validate);
     }
@@ -567,7 +567,7 @@ void TPM_ChangeauthValidate_Delete(TPM_CHANGEAUTH_VALIDATE *tpm_changeauth_valid
 
 void TPM_DaInfo_Init(TPM_DA_INFO *tpm_da_info)
 {
-    printf(" TPM_DaInfo_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfo_Init:\n");
 /*     tpm_da_info->tag = TPM_TAG_DA_INFO; */
     tpm_da_info->state = TPM_DA_STATE_INACTIVE;
     tpm_da_info->currentCount = 0;
@@ -591,7 +591,7 @@ TPM_RESULT TPM_DaInfo_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DaInfo_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfo_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DA_INFO);
@@ -640,7 +640,7 @@ TPM_RESULT TPM_DaInfo_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DaInfo_Delete(TPM_DA_INFO *tpm_da_info)
 {
-    printf(" TPM_DaInfo_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfo_Delete:\n");
     if (tpm_da_info != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_da_info->vendorData));
 	TPM_DaInfo_Init(tpm_da_info);
@@ -659,7 +659,7 @@ TPM_RESULT TPM_DaInfo_Set(TPM_DA_INFO *tpm_da_info,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DaInfo_Set:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfo_Set:\n");
     /* state: Dynamic.	The actual state of the dictionary attack mitigation logic. */
     /* actionDependValue: Dynamic.  Action being taken when the dictionary attack mitigation logic
        is active.  E.g., when actionAtThreshold is TPM_DA_ACTION_TIMEOUT, this is the lockout time
@@ -677,7 +677,7 @@ TPM_RESULT TPM_DaInfo_Set(TPM_DA_INFO *tpm_da_info,
 	}
 	/* with the doubling, this should never overflow.  So overflow indicates a serious error */
 	else {
-	    printf("TPM_DaInfo_Set: Error (fatal), authFailCount overflow %08x\n",
+	    TPMLIB_LogPrintf("TPM_DaInfo_Set: Error (fatal), authFailCount overflow %08x\n",
 		   tpm_state->tpm_stclear_data.authFailCount);
 	    rc = TPM_FAIL;
 	}
@@ -698,7 +698,7 @@ TPM_RESULT TPM_DaInfo_Set(TPM_DA_INFO *tpm_da_info,
 
 void TPM_DaInfoLimited_Init(TPM_DA_INFO_LIMITED *tpm_da_info_limited)
 {
-    printf(" TPM_DaInfoLimited_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfoLimited_Init:\n");
 /*     tpm_da_info_limited->tag = TPM_TAG_DA_INFO_LIMITED; */
     tpm_da_info_limited->state = TPM_DA_STATE_INACTIVE;
     /* TPM_DA_ACTION_TYPE is a trivial structure, in-line here */
@@ -719,7 +719,7 @@ TPM_RESULT TPM_DaInfoLimited_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DaInfoLimited_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfoLimited_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DA_INFO_LIMITED);
@@ -756,7 +756,7 @@ TPM_RESULT TPM_DaInfoLimited_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DaInfoLimited_Delete(TPM_DA_INFO_LIMITED *tpm_da_info_limited)
 {
-    printf(" TPM_DaInfoLimited_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfoLimited_Delete:\n");
     if (tpm_da_info_limited != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_da_info_limited->vendorData));
 	TPM_DaInfoLimited_Init(tpm_da_info_limited);
@@ -776,7 +776,7 @@ TPM_RESULT TPM_DaInfoLimited_Set(TPM_DA_INFO_LIMITED *tpm_da_info_limited,
     TPM_RESULT		rc = 0;
     uint32_t		timeLeft;
 
-    printf(" TPM_DaInfoLimited_Set:\n");
+    TPMLIB_LogPrintf(" TPM_DaInfoLimited_Set:\n");
     /* Dynamic.	 The actual state of the dictionary attack mitigation logic. */
     if (rc == 0) {
 	rc = TPM_Authdata_GetState(&(tpm_da_info_limited->state), &timeLeft, tpm_state);
@@ -876,7 +876,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     TPM_DIGEST			outParamDigest;
     TPM_SIZED_BUFFER		outData;	/* The modified, encrypted entity. */
 
-    printf("TPM_Process_ChangeAuth: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&encData);	/* freed @1 */
     TPM_SizedBuffer_Init(&outData);	/* freed @2 */
     b1DecryptData = NULL;		/* freed @3 */
@@ -893,12 +893,12 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get protocolID parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuth: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Load16(&protocolID, &command, &paramSize);
     }
     /* get newAuth parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuth: protocolID %04hx\n", protocolID);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: protocolID %04hx\n", protocolID);
 	returnCode = TPM_Authdata_Load(newAuth, &command, &paramSize);
     }
     /* get entityType parameter */
@@ -910,7 +910,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 	returnCode = TPM_SizedBuffer_Load(&encData, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuth: encDataSize %u\n", encData.size);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: encDataSize %u\n", encData.size);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -945,7 +945,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     }
     /* get the 'below the line' authorization parameters */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuth: parentAuthHandle %08x\n", parentAuthHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: parentAuthHandle %08x\n", parentAuthHandle);
 	returnCode = TPM_AuthParams_Get(&entityAuthHandle,
 					&entityAuthHandleValid,
 					entitynonceOdd,
@@ -954,11 +954,11 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuth: entityAuthHandle %08x\n", entityAuthHandle); 
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: entityAuthHandle %08x\n", entityAuthHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ChangeAuth: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -981,7 +981,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((entityType != TPM_ET_DATA) &&
 	    (entityType != TPM_ET_KEY)) {
-	    printf("TPM_Process_ChangeAuth: Error, bad entityType %04x\n", entityType);
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Error, bad entityType %04x\n", entityType);
 	    returnCode = TPM_WRONG_ENTITYTYPE;
 	}
     }	 
@@ -1025,7 +1025,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     /* 4.If protocolID is not TPM_PID_ADCP, the TPM MUST return TPM_BAD_PARAMETER. */
     if (returnCode == TPM_SUCCESS) {
 	if (protocolID != TPM_PID_ADCP) {
-	    printf("TPM_Process_ChangeAuth: Error, bad protocolID\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Error, bad protocolID\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1059,7 +1059,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 	  TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_ChangeAuth: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Error, keyUsage %04hx is invalid\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1075,7 +1075,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 						 parentKey);
     }
     if ((returnCode == TPM_SUCCESS) && (entityType == TPM_ET_KEY)) {
-	printf("TPM_Process_ChangeAuth: entityType is TPM_ET_KEY\n");
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: entityType is TPM_ET_KEY\n");
 	/* 10. The TPM MUST validate that b1 is a valid TPM structure, either a TPM_STORE_ASYMKEY or
 	   a TPM_SEALED_DATA */
 	if (returnCode == TPM_SUCCESS) {
@@ -1116,7 +1116,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 	}    
     }
     else if ((returnCode == TPM_SUCCESS) && (entityType == TPM_ET_DATA)) {
-	printf("TPM_Process_ChangeAuth: entityType is TPM_ET_DATA\n");
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: entityType is TPM_ET_DATA\n");
 	/* 10. The TPM MUST validate that b1 is a valid TPM structure, either a TPM_STORE_ASYMKEY or
 	   a TPM_SEALED_DATA */
 	if (returnCode == TPM_SUCCESS) {
@@ -1125,7 +1125,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
 	    returnCode = TPM_SealedData_Load(&sealEntity, &stream, &stream_size);
 	}
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_ChangeAuth: Checking tpmProof\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Checking tpmProof\n");
 	    returnCode = TPM_Secret_Compare(sealEntity.tpmProof,
 					    tpm_state->tpm_permanent_data.tpmProof);
 	}	 
@@ -1169,7 +1169,7 @@ TPM_RESULT TPM_Process_ChangeAuth(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ChangeAuth: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuth: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1294,7 +1294,7 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
     uint32_t			outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST			outParamDigest;
 
-    printf("TPM_Process_ChangeAuthOwner: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1306,7 +1306,7 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
     }
     /* get newAuth parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthOwner: protocolID %04hx\n", protocolID);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: protocolID %04hx\n", protocolID);
 	returnCode = TPM_Authdata_Load(newAuth, &command, &paramSize);
     }
     /* get entityType parameter */
@@ -1346,7 +1346,7 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ChangeAuthOwner: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1385,7 +1385,7 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
     /* 3. If protocolID is not TPM_PID_ADCP, the TPM MUST return TPM_BAD_PARAMETER. */
     if (returnCode == TPM_SUCCESS) {
 	if (protocolID != TPM_PID_ADCP) {
-	    printf("TPM_Process_ChangeAuthOwner: Error, bad protocolID\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: Error, bad protocolID\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1393,16 +1393,16 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
        TPM_WRONG_ENTITYTYPE if not. */
     if (returnCode == TPM_SUCCESS) {
 	if (entityType == TPM_ET_OWNER) {
-	    printf("TPM_Process_ChangeAuthOwner: entityType TPM_ET_OWNER\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: entityType TPM_ET_OWNER\n");
 	    entityAuth = &(tpm_state->tpm_permanent_data.ownerAuth);
 	}
 	else if (entityType == TPM_ET_SRK) {
-	    printf("TPM_Process_ChangeAuthOwner: entityType TPM_ET_SRK\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: entityType TPM_ET_SRK\n");
 	    entityAuth = &(tpm_state->tpm_permanent_data.srk.tpm_store_asymkey->usageAuth);
 	}
 	else {
 	    entityAuth = NULL;		/* just to quiet the compiler */
-	    printf("TPM_Process_ChangeAuthOwner: Error, wrong entityType %04x\n", entityType);
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: Error, wrong entityType %04x\n", entityType);
 	    returnCode = TPM_WRONG_ENTITYTYPE;
 	}
     }
@@ -1446,7 +1446,7 @@ TPM_RESULT TPM_Process_ChangeAuthOwner(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ChangeAuthOwner: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthOwner: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1576,7 +1576,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
 					   Actually tempKey and k1 are the same.  The encData is
 					   present but not returned in the response. */
 
-    printf("TPM_Process_ChangeAuthAsymStart: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Ordinal Entry\n");
     TPM_KeyParms_Init(&tempKeyParms);		/* freed @1 */
     TPM_CertifyInfo_Init(&certifyInfo);		/* freed @2 */
     TPM_SizedBuffer_Init(&sig);			/* freed @3 */
@@ -1591,7 +1591,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     /* save the starting point of inParam's for authorization and auditing */
     inParamStart = command;
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymStart: idHandle %08x\n", idHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: idHandle %08x\n", idHandle);
 	/* get antiReplay parameter */
 	returnCode = TPM_Nonce_Load(antiReplay, &command, &paramSize);
     }
@@ -1632,7 +1632,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ChangeAuthAsymStart: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1654,14 +1654,14 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (idKey->keyUsage != TPM_KEY_IDENTITY) {
-	    printf("TPM_Process_ChangeAuthAsymStart: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Error, keyUsage %04hx is invalid\n",
 		   idKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)){
 	if (idKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_ChangeAuthAsymStart: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -1738,7 +1738,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* This must immediately follow the successful malloc, so the _Delete / free work */
 	TPM_Key_Init(tempKey);
-	printf(" TPM_Process_ChangeAuthAsymStart: Creating ephemeral key\n");
+	TPMLIB_LogPrintf(" TPM_Process_ChangeAuthAsymStart: Creating ephemeral key\n");
 	returnCode = TPM_Key_GenerateRSA(tempKey,
 					 tpm_state,
 					 NULL,				/* encData cleartext */
@@ -1760,7 +1760,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
 						      0);	/* keyControl not used */
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymStart: Ephemeral key handle %08x\n", ephHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Ephemeral key handle %08x\n", ephHandle);
 	/* remember that the handle has been added to handle list, so it can be deleted on error */
 	key_added = TRUE;
     }
@@ -1770,7 +1770,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     /* 9. The TPM SHALL fill in certifyInfo using k1 for the information. The certifyInfo -> data
        field is supplied by the antiReplay. */
     if (returnCode == TPM_SUCCESS) {
-	printf(" TPM_Process_ChangeAuthAsymStart: Creating certifyInfo\n");
+	TPMLIB_LogPrintf(" TPM_Process_ChangeAuthAsymStart: Creating certifyInfo\n");
 	TPM_Nonce_Copy(certifyInfo.data, antiReplay);
 	returnCode = TPM_CertifyInfo_Set(&certifyInfo, tempKey);
     }
@@ -1781,7 +1781,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
 						(TPM_STORE_FUNCTION_T)TPM_CertifyInfo_Store);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymStart: Signing certifyInfo digest\n");
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Signing certifyInfo digest\n");
 	returnCode = TPM_RSASignToSizedBuffer(&sig,		/* signature */
 					      h1Digest,		/* message */
 					      TPM_DIGEST_SIZE,	/* message size */
@@ -1792,7 +1792,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymStart(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ChangeAuthAsymStart: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymStart: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1960,7 +1960,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
 					   changeProof value */
     TPM_DIGEST		changeProof;	/* Proof that AuthData has changed. */
 
-    printf("TPM_Process_ChangeAuthAsymFinish: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&encNewAuth);			/* freed @1 */
     TPM_SizedBuffer_Init(&encData);			/* freed @2 */
     TPM_SizedBuffer_Init(&outData);			/* freed @3 */
@@ -1977,13 +1977,13 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     }
     /* get ephHandle parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymFinish: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Load32(&ephHandle, &command, &paramSize);
     }
     /* save the starting point of inParam's for authorization and auditing */
     inParamStart = command;
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymFinish: ephHandle %08x\n", ephHandle);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: ephHandle %08x\n", ephHandle);
 	/* get entityType parameter */
 	returnCode = TPM_Load16(&entityType, &command, &paramSize);
     }
@@ -2000,7 +2000,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
 	returnCode = TPM_SizedBuffer_Load(&encData, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymFinish: encDataSize %u\n", encData.size);
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: encDataSize %u\n", encData.size);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -2035,7 +2035,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2058,7 +2058,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)){
 	if (parentKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -2116,7 +2116,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* FIXME currently only TPM_KEY supported */
 	if (entityType != TPM_ET_KEY) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error, bad entityType %04x\n", entityType);
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error, bad entityType %04x\n", entityType);
 	    returnCode = TPM_WRONG_ENTITYTYPE;
 	}
     }	 
@@ -2124,7 +2124,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error, keyUsage %04hx is invalid\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -2156,7 +2156,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (ephKey->keyUsage != TPM_KEY_AUTHCHANGE) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error: "
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error: "
 		   "ephHandle does not point to TPM_KEY_AUTHCHANGE\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
@@ -2188,7 +2188,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!valid) {
-	    printf("TPM_Process_ChangeAuthAsymFinish: Error, authenticating newAuthLink\n");
+	    TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Error, authenticating newAuthLink\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -2215,7 +2215,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     /* 11. The TPM MUST destroy the TPM_KEY_AUTHCHANGE key associated with the authorization
        session. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ChangeAuthAsymFinish: Deleting ephemeral key\n");
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Deleting ephemeral key\n");
 	TPM_Key_Delete(ephKey);		/* free the key resources */
 	free(ephKey);			/* free the key itself */
 	/* remove entry from the key handle entries list */
@@ -2227,7 +2227,7 @@ TPM_RESULT TPM_Process_ChangeAuthAsymFinish(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ChangeAuthAsymFinish: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ChangeAuthAsymFinish: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

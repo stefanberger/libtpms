@@ -113,29 +113,29 @@ TPM_RESULT TPM_MainInit(void)
     }
     /* initialize the TPM to host interface */
     if (rc == 0) {
-        printf("TPM_MainInit: Initialize the TPM to host interface\n");
+        TPMLIB_LogPrintf("TPM_MainInit: Initialize the TPM to host interface\n");
         rc = TPM_IO_Init();
     }
     /* initialize cryptographic functions */
     if (rc == 0) {
-        printf("TPM_MainInit: Initialize the TPM crypto support\n");
+        TPMLIB_LogPrintf("TPM_MainInit: Initialize the TPM crypto support\n");
         rc = TPM_Crypto_Init();
     }
     /* initialize NVRAM static variables.  This must be called before the global TPM state is
        loaded */
     if (rc == 0) {
-        printf("TPM_MainInit: Initialize the TPM NVRAM\n");
+        TPMLIB_LogPrintf("TPM_MainInit: Initialize the TPM NVRAM\n");
         rc = TPM_NVRAM_Init();
     }
     /* run the initial subset of self tests once */
     if (rc == 0) {
-        printf("TPM_MainInit: Run common limited self tests\n");
+        TPMLIB_LogPrintf("TPM_MainInit: Run common limited self tests\n");
         /* an error is a fatal error, causes a shutdown of the TPM */
         testRc = TPM_LimitedSelfTestCommon();
     }   
     /* initialize the global structure for the TPM */
     for (i = 0 ; (rc == 0) && (i < TPMS_MAX) ; i++) {
-        printf("TPM_MainInit: Initializing global TPM %lu\n", (unsigned long)i);
+        TPMLIB_LogPrintf("TPM_MainInit: Initializing global TPM %lu\n", (unsigned long)i);
         /* Need to malloc and init a TPM state if this is the first time through or if the
            state was saved in the array.  Otherwise, the malloc'ed structure from the previous
            time through the loop can be reused. */
@@ -183,14 +183,14 @@ TPM_RESULT TPM_MainInit(void)
         /* if permanent state was loaded successfully (or stored successfully for TPM 0 the first
            time) */
         if (rc == 0) {
-            printf("TPM_MainInit: Creating global TPM instance %lu\n", (unsigned long)i);
+            TPMLIB_LogPrintf("TPM_MainInit: Creating global TPM instance %lu\n", (unsigned long)i);
             /* set the testState for the TPM based on the common selftest result */
             if (testRc != 0) {
                 /* a. When the TPM detects a failure during any self-test, it SHOULD delete values
                    preserved by TPM_SaveState. */
                 TPM_SaveState_NVDelete(tpm_state,
                                        FALSE);        /* ignore error if the state does not exist */
-		printf("  TPM_MainInit: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+		TPMLIB_LogPrintf("  TPM_MainInit: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
                 tpm_state->testState = TPM_TEST_STATE_FAILURE;
             }
             /* save state in array */
@@ -202,7 +202,7 @@ TPM_RESULT TPM_MainInit(void)
         /* If there was the non-fatal error TPM_RETRY, the instance does not exist.  If instance > 0
            does not exist, the array entry is set to NULL.  Continue */
         else if (rc == TPM_RETRY) {
-            printf("TPM_MainInit: Not Creating global TPM %lu\n", (unsigned long)i);
+            TPMLIB_LogPrintf("TPM_MainInit: Not Creating global TPM %lu\n", (unsigned long)i);
             tpm_instances[i] = NULL;    /* flag that the instance does not exist */
             rc = 0;                     /* Instance does not exist, not fatal error */
         }
@@ -213,7 +213,7 @@ TPM_RESULT TPM_MainInit(void)
              (tpm_instances[i]->testState != TPM_TEST_STATE_FAILURE) ;  /* don't continue if already
                                                                            error */
          i++) {
-        printf("TPM_MainInit: Run limited self tests on TPM %lu\n", (unsigned long)i);
+        TPMLIB_LogPrintf("TPM_MainInit: Run limited self tests on TPM %lu\n", (unsigned long)i);
         testRc = TPM_LimitedSelfTestTPM(tpm_instances[i]);
         if (testRc != 0) {
             /* a. When the TPM detects a failure during any self-test, it SHOULD delete values
@@ -238,14 +238,14 @@ static TPM_RESULT TPM_CheckTypes(void)
     /* These should be removed at compile time */
     if (rc == 0) {
         if (sizeof(uint16_t) != 2) {
-            printf("TPM_CheckTypes: Error (fatal), uint16_t size %lu not supported\n",
+            TPMLIB_LogPrintf("TPM_CheckTypes: Error (fatal), uint16_t size %lu not supported\n",
                    (unsigned long)sizeof(uint16_t));
             rc = TPM_FAIL;
         }
     }    
     if (rc == 0) {
         if (sizeof(uint32_t) != 4) {
-            printf("TPM_CheckTypes: Error (fatal), uint32_t size %lu not supported\n",
+            TPMLIB_LogPrintf("TPM_CheckTypes: Error (fatal), uint32_t size %lu not supported\n",
                    (unsigned long)sizeof(uint32_t));
             rc = TPM_FAIL;
         }
@@ -253,7 +253,7 @@ static TPM_RESULT TPM_CheckTypes(void)
     if (rc == 0) {
         if ((sizeof(time_t) != 4) &&    /* for 32-bit machines */
             (sizeof(time_t) != 8)) {    /* for 64-bit machines */
-            printf("TPM_CheckTypes: Error (fatal), time_t size %lu not supported\n",
+            TPMLIB_LogPrintf("TPM_CheckTypes: Error (fatal), time_t size %lu not supported\n",
                    (unsigned long)sizeof(time_t));
             rc = TPM_FAIL;
         }
@@ -274,7 +274,7 @@ static TPM_RESULT TPM_CheckTypes(void)
 
 void TPM_StanyFlags_Init(TPM_STANY_FLAGS *tpm_stany_flags)
 {
-    printf(" TPM_StanyFlags_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StanyFlags_Init:\n");
     tpm_stany_flags->postInitialise = TRUE;
     tpm_stany_flags->localityModifier = 0;
     tpm_stany_flags->transportExclusive = 0;
@@ -299,7 +299,7 @@ TPM_RESULT TPM_StanyFlags_Load(TPM_STANY_FLAGS *tpm_stany_flags,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StanyFlags_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StanyFlags_Load:\n");
     /* check tag */
     if (rc == 0) {
         rc = TPM_CheckTag(TPM_TAG_STANY_FLAGS, stream, stream_size);
@@ -338,7 +338,7 @@ TPM_RESULT TPM_StanyFlags_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StanyFlags_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StanyFlags_Store:\n");
     /* store tag */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_STANY_FLAGS);
@@ -379,7 +379,7 @@ TPM_RESULT TPM_StanyFlags_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_StclearFlags_Init(TPM_STCLEAR_FLAGS *tpm_stclear_flags)
 {
-    printf(" TPM_StclearFlags_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StclearFlags_Init:\n");
     /* tpm_stclear_flags->deactivated; no default state */
     tpm_stclear_flags->disableForceClear = FALSE;
     tpm_stclear_flags->physicalPresence = FALSE;
@@ -403,7 +403,7 @@ TPM_RESULT TPM_StclearFlags_Load(TPM_STCLEAR_FLAGS *tpm_stclear_flags,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StclearFlags_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StclearFlags_Load:\n");
     /* check tag */
     if (rc == 0) {
         rc = TPM_CheckTag(TPM_TAG_STCLEAR_FLAGS, stream, stream_size);
@@ -442,7 +442,7 @@ TPM_RESULT TPM_StclearFlags_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT          rc = 0;
     
-    printf(" TPM_StclearFlags_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StclearFlags_Store:\n");
     /* store tag */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_STCLEAR_FLAGS);
@@ -485,7 +485,7 @@ TPM_RESULT TPM_StclearFlags_StoreBitmap(uint32_t *tpm_bitmap,
     TPM_RESULT  rc = 0;
     uint32_t	pos = 0;        /* position in bitmap */
     
-    printf(" TPM_StclearFlags_StoreBitmap:\n");
+    TPMLIB_LogPrintf(" TPM_StclearFlags_StoreBitmap:\n");
     *tpm_bitmap = 0;
     /* store deactivated */
     if (rc == 0) {
@@ -524,7 +524,7 @@ TPM_RESULT TPM_StanyData_Init(TPM_STANY_DATA *tpm_stany_data)
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_StanyData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StanyData_Init:\n");
     if (rc == 0) {
         /* The tpm_stany_data->currentTicks holds the time of day at initialization.  Both nonce
            generation and current time of day can return an error */
@@ -550,7 +550,7 @@ TPM_RESULT TPM_StanyData_Load(TPM_STANY_DATA *tpm_stany_data,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StanyData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StanyData_Load:\n");
     tpm_stany_data = tpm_stany_data;
     /* check tag */
     if (rc == 0) {
@@ -574,7 +574,7 @@ TPM_RESULT TPM_StanyData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StanyData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StanyData_Store:\n");
     tpm_stany_data = tpm_stany_data;
     /* store tag */
     if (rc == 0) {
@@ -598,7 +598,7 @@ TPM_RESULT TPM_StanyData_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_StanyData_Delete(TPM_STANY_DATA *tpm_stany_data)
 {
-    printf(" TPM_StanyData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_StanyData_Delete:\n");
     /* nothing to free */
     tpm_stany_data = tpm_stany_data;
     return;
@@ -621,14 +621,14 @@ void TPM_StclearData_Init(TPM_STCLEAR_DATA *tpm_stclear_data,
                           TPM_PCR_ATTRIBUTES *pcrAttrib,
                           TPM_BOOL pcrInit)
 {
-    printf(" TPM_StclearData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_Init:\n");
     TPM_Nonce_Init(tpm_stclear_data->contextNonceKey);
     tpm_stclear_data->countID = TPM_COUNT_ID_NULL;      /* NULL value - unselected counter */
     tpm_stclear_data->ownerReference = TPM_KH_OWNER;
     tpm_stclear_data->disableResetLock = FALSE;
     /* initialize PCR's */
     if (pcrInit) {
-        printf("TPM_StclearData_Init: Initializing PCR's\n");
+        TPMLIB_LogPrintf("TPM_StclearData_Init: Initializing PCR's\n");
         TPM_PCRs_Init(tpm_stclear_data->PCRS, pcrAttrib);
     }
 #if  (TPM_REVISION >= 103)      /* added for rev 103 */
@@ -661,20 +661,20 @@ TPM_RESULT TPM_StclearData_Load(TPM_STCLEAR_DATA *tpm_stclear_data,
     TPM_RESULT          rc = 0;
     TPM_STRUCTURE_TAG   tag = 0;
 
-    printf(" TPM_StclearData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_Load:\n");
     /* get tag */
     if (rc == 0) {      
         rc = TPM_Load16(&tag, stream, stream_size);
     }
     /* check tag */
     if (rc == 0) {
-	printf("  TPM_StclearData_Load: stream version %04hx\n", tag);
+	TPMLIB_LogPrintf("  TPM_StclearData_Load: stream version %04hx\n", tag);
 	switch (tag) {
 	  case TPM_TAG_STCLEAR_DATA:
 	  case TPM_TAG_STCLEAR_DATA_V2:
 	    break;
 	  default:
-            printf("TPM_StclearData_Load: Error (fatal), version %04x unsupported\n", tag);
+            TPMLIB_LogPrintf("TPM_StclearData_Load: Error (fatal), version %04x unsupported\n", tag);
             rc = TPM_FAIL;
 	    break;
 	}
@@ -771,7 +771,7 @@ TPM_RESULT TPM_StclearData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT          rc = 0;
 
-    printf(" TPM_StclearData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_Store:\n");
     /* store tag */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_STCLEAR_DATA_V2);
@@ -863,7 +863,7 @@ void TPM_StclearData_Delete(TPM_STCLEAR_DATA *tpm_stclear_data,
                             TPM_PCR_ATTRIBUTES *pcrAttrib,
                             TPM_BOOL pcrInit)
 {
-    printf(" TPM_StclearData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_Delete:\n");
     if (tpm_stclear_data != NULL) {
         TPM_StclearData_SessionDelete(tpm_stclear_data);/* authorization, transport, and DAA
                                                            sessions */
@@ -881,7 +881,7 @@ void TPM_StclearData_Delete(TPM_STCLEAR_DATA *tpm_stclear_data,
 
 void TPM_StclearData_SessionInit(TPM_STCLEAR_DATA *tpm_stclear_data)
 {
-    printf(" TPM_StclearData_SessionInit:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_SessionInit:\n");
     /* active sessions */
     TPM_AuthSessions_Init(tpm_stclear_data->authSessions);
     TPM_TransportSessions_Init(tpm_stclear_data->transSessions);
@@ -901,7 +901,7 @@ void TPM_StclearData_SessionInit(TPM_STCLEAR_DATA *tpm_stclear_data)
 
 void TPM_StclearData_SessionDelete(TPM_STCLEAR_DATA *tpm_stclear_data)
 {
-    printf(" TPM_StclearData_SessionDelete:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_SessionDelete:\n");
     /* active and saved authorization sessions, the authSessions table and the 3 contextList
        entries */
     TPM_StclearData_AuthSessionDelete(tpm_stclear_data);
@@ -920,7 +920,7 @@ void TPM_StclearData_SessionDelete(TPM_STCLEAR_DATA *tpm_stclear_data)
 
 void TPM_StclearData_AuthSessionDelete(TPM_STCLEAR_DATA *tpm_stclear_data)
 {
-    printf(" TPM_StclearData_AuthSessionDelete:\n");
+    TPMLIB_LogPrintf(" TPM_StclearData_AuthSessionDelete:\n");
     /* active sessions */
     TPM_AuthSessions_Delete(tpm_stclear_data->authSessions);
     /* saved sessions */
@@ -939,7 +939,7 @@ TPM_RESULT TPM_InitCmd(tpm_state_t *tpm_state)
     TPM_RESULT  rc = 0;
     uint32_t	tpm_number;
     
-    printf(" TPM_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Init:\n");
     /* Release all resources for the TPM and reinitialize */
     if (rc == TPM_SUCCESS) {
         tpm_number = tpm_state->tpm_number;     /* save the TPM value */
@@ -952,7 +952,7 @@ TPM_RESULT TPM_InitCmd(tpm_state_t *tpm_state)
         /* Returns TPM_RETRY on non-existent file */
         rc = TPM_PermanentAll_NVLoad(tpm_state);	/* reload the state */
         if (rc == TPM_RETRY) {
-            printf("TPM_Init: Error (fatal), non-existent instance\n");
+            TPMLIB_LogPrintf("TPM_Init: Error (fatal), non-existent instance\n");
             rc = TPM_FAIL;
         }
     }
@@ -989,14 +989,14 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
     void                        *used_handle_entry;     /* place holder for discarded entry */
     TPM_BOOL                    done;
     
-    printf(" TPM_Handle_GenerateHandle: handle %08x, keepHandle %u\n",
+    TPMLIB_LogPrintf(" TPM_Handle_GenerateHandle: handle %08x, keepHandle %u\n",
            *tpm_handle, keepHandle);
     /* if the input value must be used */
     if (keepHandle) {
         /* 0 is illegal and cannot be kept */
         if (rc == 0) {
             if (*tpm_handle == 0) {
-                printf("TPM_Handle_GenerateHandle: Error, cannot keep handle 0\n");
+                TPMLIB_LogPrintf("TPM_Handle_GenerateHandle: Error, cannot keep handle 0\n");
                 rc = TPM_BAD_HANDLE;
             }
         }
@@ -1004,7 +1004,7 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
         if (rc == 0) {
             if (isKeyHandle) {
                 if ((*tpm_handle & 0xff000000) == 0x40000000) {
-                    printf("TPM_Handle_GenerateHandle: Error, cannot keep reserved key handle\n");
+                    TPMLIB_LogPrintf("TPM_Handle_GenerateHandle: Error, cannot keep reserved key handle\n");
                     rc = TPM_BAD_HANDLE;
                 }
             }
@@ -1016,7 +1016,7 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
                                      *tpm_handle);              /* search for handle */
             /* success mean the handle has already been assigned */
             if (getRc == 0) {
-                printf("TPM_Handle_GenerateHandle: Error handle already in use\n");
+                TPMLIB_LogPrintf("TPM_Handle_GenerateHandle: Error handle already in use\n");
                 rc = TPM_BAD_HANDLE;
             }
         }
@@ -1036,7 +1036,7 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
             /* if the random value is 0, reject it immediately */
             if (rc == 0) {
                 if (*tpm_handle == 0) {
-                    printf("  TPM_Handle_GenerateHandle: Random value 0 rejected\n");
+                    TPMLIB_LogPrintf("  TPM_Handle_GenerateHandle: Random value 0 rejected\n");
                     continue;
                 }
             }
@@ -1044,7 +1044,7 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
             if (rc == 0) {
                 if (isKeyHandle) {
                     if ((*tpm_handle & 0xff000000) == 0x40000000) {
-                        printf("  TPM_Handle_GenerateHandle: Random value %08x rejected\n",
+                        TPMLIB_LogPrintf("  TPM_Handle_GenerateHandle: Random value %08x rejected\n",
                                *tpm_handle);
                         *tpm_handle = 0;                /* ignore the assigned value */
                         continue;
@@ -1057,19 +1057,19 @@ TPM_RESULT TPM_Handle_GenerateHandle(TPM_HANDLE *tpm_handle,
                                          tpm_handle_entries,    /* handle array */
                                          *tpm_handle);          /* search for handle */
                 if (getRc != 0) {               /* not found, done */
-                    printf("  TPM_Handle_GenerateHandle: Assigned Handle %08x\n",
+                    TPMLIB_LogPrintf("  TPM_Handle_GenerateHandle: Assigned Handle %08x\n",
                            *tpm_handle);
                     done = TRUE;
                 }
                 else {                          /* found, try again */
                     *tpm_handle = 0;            /* ignore the assigned value */
-                    printf("  TPM_Handle_GenerateHandle: Handle %08x already used\n",
+                    TPMLIB_LogPrintf("  TPM_Handle_GenerateHandle: Handle %08x already used\n",
                            *tpm_handle);
                 }
             }
         }
         if (!done) {
-            printf("TPM_Handle_GenerateHandle: Error (fatal), random number generator failed\n");
+            TPMLIB_LogPrintf("TPM_Handle_GenerateHandle: Error (fatal), random number generator failed\n");
             rc = TPM_FAIL;      
         }
     }
@@ -1099,7 +1099,7 @@ TPM_RESULT TPM_Process_Init(tpm_state_t *tpm_state,
     TPM_RESULT  rcf = 0;                        /* fatal error precluding response */
     TPM_RESULT  returnCode = TPM_SUCCESS;       /* command return code */
     
-    printf("TPM_Process_Init: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_Init: Ordinal Entry\n");
     ordinal = ordinal;                          /* not used */
     command = command;                          /* not used */
     transportInternal = transportInternal;      /* not used */
@@ -1114,7 +1114,7 @@ TPM_RESULT TPM_Process_Init(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
         if (paramSize != 0) {
-            printf("TPM_Process_Init: Error, command has %u extra bytes\n",
+            TPMLIB_LogPrintf("TPM_Process_Init: Error, command has %u extra bytes\n",
                    paramSize);
             returnCode = TPM_BAD_PARAM_SIZE;
         }
@@ -1127,7 +1127,7 @@ TPM_RESULT TPM_Process_Init(tpm_state_t *tpm_state,
         returnCode = TPM_InitCmd(tpm_state);
 #else
         tpm_state = tpm_state;  /* to quiet the compiler */
-        printf("TPM_Process_Init: Error, bad ordinal\n");
+        TPMLIB_LogPrintf("TPM_Process_Init: Error, bad ordinal\n");
         returnCode = TPM_BAD_ORDINAL;
 #endif
     }
@@ -1135,7 +1135,7 @@ TPM_RESULT TPM_Process_Init(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-        printf("TPM_Process_Init: Ordinal returnCode %08x %u\n",
+        TPMLIB_LogPrintf("TPM_Process_Init: Ordinal returnCode %08x %u\n",
                returnCode, returnCode);
         rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

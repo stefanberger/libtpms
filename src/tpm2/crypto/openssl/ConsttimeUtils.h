@@ -93,10 +93,10 @@ static inline void assert_ossl_num_bytes(const BIGNUM *a,
     }
     len -= i;
     if (num_bytes != (unsigned int)len) {
-        printf("%s: Expected %u bytes but found %d (caller: %s)\n", __func__, num_bytes, len, caller);
+        TPMLIB_LogPrintf("%s: Expected %u bytes but found %d (caller: %s)\n", __func__, num_bytes, len, caller);
     } else {
         if (verbose)
-            printf("%s: check passed; num_bytes = %d (caller: %s)\n",__func__, num_bytes, caller);
+            TPMLIB_LogPrintf("%s: check passed; num_bytes = %d (caller: %s)\n",__func__, num_bytes, caller);
     }
     assert(num_bytes == (unsigned int)len);
 }

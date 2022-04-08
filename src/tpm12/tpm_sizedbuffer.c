@@ -78,7 +78,7 @@ TPM_RESULT TPM_SizedBuffer_Load(TPM_SIZED_BUFFER *tpm_sized_buffer,     /* resul
 {
     TPM_RESULT  rc = 0;
     
-    printf("  TPM_SizedBuffer_Load:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Load:\n");
     if (rc == 0) {
         rc = TPM_Load32(&(tpm_sized_buffer->size), stream, stream_size);
     }
@@ -111,7 +111,7 @@ TPM_RESULT TPM_SizedBuffer_Set(TPM_SIZED_BUFFER *tpm_sized_buffer,
 {
     TPM_RESULT  rc = 0;
     
-    printf("  TPM_SizedBuffer_Set:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Set:\n");
     /* allocate memory for the buffer, and copy the buffer */
     if (rc == 0) {
         if (size > 0) {
@@ -161,7 +161,7 @@ TPM_RESULT TPM_SizedBuffer_SetStructure(TPM_SIZED_BUFFER *tpm_sized_buffer,
     TPM_RESULT          rc = 0;
     TPM_STORE_BUFFER    sbuffer;        /* serialized tpmStructure */
 
-    printf("  TPM_SizedBuffer_SetStructure:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_SetStructure:\n");
     TPM_Sbuffer_Init(&sbuffer);                         /* freed @1 */
     /* serialize the structure */
     if (rc == 0) {
@@ -196,7 +196,7 @@ TPM_RESULT TPM_SizedBuffer_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_SizedBuffer_Store:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Store:\n");
     /* append the size */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append32(sbuffer, tpm_sized_buffer->size);
@@ -210,7 +210,7 @@ TPM_RESULT TPM_SizedBuffer_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_SizedBuffer_Delete(TPM_SIZED_BUFFER *tpm_sized_buffer)
 {
-    printf("  TPM_SizedBuffer_Delete:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Delete:\n");
     if (tpm_sized_buffer != NULL) {
         free(tpm_sized_buffer->buffer);
         TPM_SizedBuffer_Init(tpm_sized_buffer);
@@ -229,7 +229,7 @@ TPM_RESULT TPM_SizedBuffer_Allocate(TPM_SIZED_BUFFER *tpm_sized_buffer,
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_SizedBuffer_Allocate: Size %u\n", size);
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Allocate: Size %u\n", size);
     tpm_sized_buffer->size = size;
     rc = TPM_Malloc(&(tpm_sized_buffer->buffer), size);
     return rc;
@@ -247,10 +247,10 @@ TPM_RESULT TPM_SizedBuffer_GetBool(TPM_BOOL *tpm_bool,
     
     if (tpm_sized_buffer->size == sizeof(TPM_BOOL)) {
         *tpm_bool = *(TPM_BOOL *)tpm_sized_buffer->buffer;
-        printf("  TPM_SizedBuffer_GetBool: bool %02x\n", *tpm_bool);
+        TPMLIB_LogPrintf("  TPM_SizedBuffer_GetBool: bool %02x\n", *tpm_bool);
     }
     else {
-        printf("TPM_SizedBuffer_GetBool: Error, buffer size %08x is not a BOOL\n",
+        TPMLIB_LogPrintf("TPM_SizedBuffer_GetBool: Error, buffer size %08x is not a BOOL\n",
                tpm_sized_buffer->size);
         rc = TPM_BAD_PARAMETER;
     }
@@ -271,7 +271,7 @@ TPM_RESULT TPM_SizedBuffer_GetUint32(uint32_t *uint32,
     
     if (rc == 0) {
         if (tpm_sized_buffer->size != sizeof(uint32_t)) {
-            printf("TPM_GetUint32: Error, buffer size %08x is not a uint32_t\n",
+            TPMLIB_LogPrintf("TPM_GetUint32: Error, buffer size %08x is not a uint32_t\n",
                    tpm_sized_buffer->size);
             rc = TPM_BAD_PARAMETER;
         }
@@ -293,7 +293,7 @@ TPM_RESULT TPM_SizedBuffer_Append32(TPM_SIZED_BUFFER *tpm_sized_buffer,
 {
     TPM_RESULT rc = 0;
 
-    printf("  TPM_SizedBuffer_Append32: Current size %u uint32 %08x\n",
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Append32: Current size %u uint32 %08x\n",
            tpm_sized_buffer->size, uint32);
     /* allocate space for another uint32_t */
     if (rc == 0) {
@@ -325,7 +325,7 @@ TPM_RESULT TPM_SizedBuffer_Remove32(TPM_SIZED_BUFFER *tpm_sized_buffer,
     unsigned char	*from;
     unsigned char	*to;
         
-    printf("  TPM_SizedBuffer_Remove32: Current size %u uint32 %08x\n",
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Remove32: Current size %u uint32 %08x\n",
            tpm_sized_buffer->size, uint32);
 
     stream = tpm_sized_buffer->buffer;
@@ -354,7 +354,7 @@ TPM_RESULT TPM_SizedBuffer_Remove32(TPM_SIZED_BUFFER *tpm_sized_buffer,
         }
     }
     if (!found) {
-        printf("TPM_SizedBuffer_Remove32: Error, value not found\n");
+        TPMLIB_LogPrintf("TPM_SizedBuffer_Remove32: Error, value not found\n");
         rc = TPM_BAD_HANDLE;
     }
     return rc;
@@ -366,7 +366,7 @@ TPM_RESULT TPM_SizedBuffer_Remove32(TPM_SIZED_BUFFER *tpm_sized_buffer,
 
 void TPM_SizedBuffer_Zero(TPM_SIZED_BUFFER *tpm_sized_buffer)
 {
-    printf("  TPM_SizedBuffer_Zero:\n");
+    TPMLIB_LogPrintf("  TPM_SizedBuffer_Zero:\n");
     if (tpm_sized_buffer->buffer != NULL) {
         memset(tpm_sized_buffer->buffer, 0, tpm_sized_buffer->size);
     }

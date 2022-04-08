@@ -50,7 +50,7 @@
 
 void TPM_Digest_Init(TPM_DIGEST tpm_digest)
 {
-    printf("  TPM_Digest_Init:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Init:\n");
     memset(tpm_digest, 0, TPM_DIGEST_SIZE);
     return;
 }
@@ -68,7 +68,7 @@ TPM_RESULT TPM_Digest_Load(TPM_DIGEST tpm_digest,
 {
     TPM_RESULT	rc = 0;
 
-    printf("  TPM_Digest_Load:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Load:\n");
     rc = TPM_Loadn(tpm_digest, TPM_DIGEST_SIZE, stream, stream_size);
     return rc;
 }
@@ -86,20 +86,20 @@ TPM_RESULT TPM_Digest_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf("  TPM_Digest_Store:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Store:\n");
     rc = TPM_Sbuffer_Append(sbuffer, tpm_digest, TPM_DIGEST_SIZE);	
     return rc;
 }
 
 void TPM_Digest_Set(TPM_DIGEST tpm_digest)
 {
-    printf("  TPM_Digest_Set:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Set:\n");
     memset(tpm_digest, 0xff, TPM_DIGEST_SIZE);
 }
 
 void TPM_Digest_Copy(TPM_DIGEST destination, const TPM_DIGEST source)
 {
-    printf("  TPM_Digest_Copy:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Copy:\n");
     memcpy(destination, source, TPM_DIGEST_SIZE);
     return;
 }
@@ -108,7 +108,7 @@ void TPM_Digest_XOR(TPM_DIGEST out, const TPM_DIGEST in1, const TPM_DIGEST in2)
 {
     size_t i;
     
-    printf(" TPM_Digest_XOR:\n");
+    TPMLIB_LogPrintf(" TPM_Digest_XOR:\n");
     for (i = 0 ; i < TPM_DIGEST_SIZE ; i++) {
 	out[i] = in1[i] ^ in2[i];
     }
@@ -122,10 +122,10 @@ TPM_RESULT TPM_Digest_Compare(const TPM_DIGEST expect, const TPM_DIGEST actual)
 {
     TPM_RESULT	rc = 0;
 
-    printf("  TPM_Digest_Compare:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_Compare:\n");
     rc = memcmp(expect, actual, TPM_DIGEST_SIZE);
     if (rc != 0) {
-	printf("TPM_Digest_Compare: Error comparing digest\n");
+	TPMLIB_LogPrintf("TPM_Digest_Compare: Error comparing digest\n");
 	TPM_PrintFour("   TPM_Digest_Compare: Expect", expect);
 	TPM_PrintFour("   TPM_Digest_Compare: Actual", actual);
 	rc = TPM_AUTHFAIL;
@@ -137,7 +137,7 @@ void TPM_Digest_IsZero(TPM_BOOL *isZero, TPM_DIGEST tpm_digest)
 {
     size_t i;
 
-    printf("  TPM_Digest_IsZero:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_IsZero:\n");
     for (i = 0, *isZero = TRUE ; (i < TPM_DIGEST_SIZE) && *isZero ; i++) {
 	if (tpm_digest[i] != 0) {
 	    *isZero = FALSE;
@@ -151,7 +151,7 @@ void TPM_Digest_IsMinusOne(TPM_BOOL *isMinusOne, TPM_DIGEST tpm_digest)
 {
     size_t i;
 
-    printf("  TPM_Digest_IsMinusOne:\n");
+    TPMLIB_LogPrintf("  TPM_Digest_IsMinusOne:\n");
     for (i = 0, *isMinusOne = TRUE ; (i < TPM_DIGEST_SIZE) && *isMinusOne ; i++) {
 	if (tpm_digest[i] != 0xff) {
 	    *isMinusOne = FALSE;

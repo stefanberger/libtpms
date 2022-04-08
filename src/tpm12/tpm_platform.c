@@ -76,7 +76,7 @@ TPM_RESULT TPM_IO_GetLocality(TPM_MODIFIER_INDICATOR *localityModifier,
 
     if (rc == 0) {
         *localityModifier = 0;
-        printf("  TPM_IO_GetLocality: localityModifier %u\n", *localityModifier);
+        TPMLIB_LogPrintf("  TPM_IO_GetLocality: localityModifier %u\n", *localityModifier);
         rc = TPM_LocalityModifier_CheckLegal(*localityModifier);
     }
     return rc;
@@ -131,14 +131,14 @@ TPM_RESULT TPM_IO_GPIO_Write(TPM_NV_INDEX nvIndex,
     tpm_number = tpm_number;	/* to silence the compiler */
 
 #if defined TPM_PCCLIENT                /* These values are from the PC Client specification */
-    printf(" TPM_IO_GPIO_Write: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_IO_GPIO_Write: nvIndex %08x\n", nvIndex);
     TPM_PrintAll(" TPM_IO_GPIO_Write: Stub", data, dataSize);
     /* #elif Add other platform specific values here */
 #else                                   /* This is the default case for the main specification */
     nvIndex = nvIndex;          /* unused parameter, to quiet the compiler */
     dataSize = dataSize;
     data = data;
-    printf("TPM_IO_GPIO_Write: Error (fatal), platform does not support GPIO\n");
+    TPMLIB_LogPrintf("TPM_IO_GPIO_Write: Error (fatal), platform does not support GPIO\n");
     rc = TPM_FAIL;      /* Should never get here.  The invalid address be detected earlier */
 #endif
     return rc;
@@ -158,14 +158,14 @@ TPM_RESULT TPM_IO_GPIO_Read(TPM_NV_INDEX nvIndex,
     tpm_number = tpm_number;	/* to silence the compiler */
 
 #if defined TPM_PCCLIENT                /* These values are from the PC Client specification */
-    printf(" TPM_IO_GPIO_Read: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_IO_GPIO_Read: nvIndex %08x\n", nvIndex);
     memset(data, 0, dataSize);
     /* #elif Add other platform specific values here */
 #else                                   /* This is the default case for the main specification */
     nvIndex = nvIndex;;         /* unused parameter, to quiet the compiler */
     dataSize = dataSize;;
     data = data;
-    printf("TPM_IO_GPIO_Read: Error (fatal), platform does not support GPIO\n");
+    TPMLIB_LogPrintf("TPM_IO_GPIO_Read: Error (fatal), platform does not support GPIO\n");
     rc = TPM_FAIL;      /* Should never get here.  The invalid address be detected earlier */
 #endif
     return rc;

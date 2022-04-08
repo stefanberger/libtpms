@@ -69,7 +69,7 @@ TPM_RESULT TPM_Global_Init(tpm_state_t *tpm_state)
 {
     TPM_RESULT rc = 0;
     
-    printf("TPM_Global_Init: TPMs %lu\n",
+    TPMLIB_LogPrintf("TPM_Global_Init: TPMs %lu\n",
            (unsigned long)sizeof(tpm_instances)/sizeof(tpm_state_t *));
     /* initialize the TPM_STANY_FLAGS structure */
     if (rc == 0) {
@@ -79,48 +79,48 @@ TPM_RESULT TPM_Global_Init(tpm_state_t *tpm_state)
            nn.permall file names */
         tpm_state->tpm_number = TPM_ILLEGAL_INSTANCE_HANDLE;
         /* initialize the TPM_PERMANENT_FLAGS structure */
-        printf("TPM_Global_Init: Initializing TPM_PERMANENT_FLAGS\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_PERMANENT_FLAGS\n");
         TPM_PermanentFlags_Init(&(tpm_state->tpm_permanent_flags));
         /* initialize the TPM_STCLEAR_FLAGS structure */
-        printf("TPM_Global_Init: Initializing TPM_STCLEAR_FLAGS\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_STCLEAR_FLAGS\n");
         TPM_StclearFlags_Init(&(tpm_state->tpm_stclear_flags));
         /* initialize the TPM_STANY_FLAGS structure */
-        printf("TPM_Global_Init: Initializing TPM_STANY_FLAGS\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_STANY_FLAGS\n");
         TPM_StanyFlags_Init(&(tpm_state->tpm_stany_flags));
         /* initialize TPM_PERMANENT_DATA structure */
-        printf("TPM_Global_Init: Initializing TPM_PERMANENT_DATA\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_PERMANENT_DATA\n");
         rc = TPM_PermanentData_Init(&(tpm_state->tpm_permanent_data), TRUE);
     }
     if (rc == 0) {
 	/* initialize TPM_STCLEAR_DATA structure */
-        printf("TPM_Global_Init: Initializing TPM_STCLEAR_DATA\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_STCLEAR_DATA\n");
         TPM_StclearData_Init(&(tpm_state->tpm_stclear_data),
                              tpm_state->tpm_permanent_data.pcrAttrib,
                              TRUE);     /* initialize the PCR's */
 	/* initialize TPM_STANY_DATA structure */
-        printf("TPM_Global_Init: Initializing TPM_STANY_DATA\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_STANY_DATA\n");
         rc = TPM_StanyData_Init(&(tpm_state->tpm_stany_data));
     }
     /* initialize the TPM_KEY_HANDLE_LIST structure */
     if (rc == 0) {
-        printf("TPM_Global_Init: Initializing TPM_KEY_HANDLE_LIST\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_KEY_HANDLE_LIST\n");
         TPM_KeyHandleEntries_Init(tpm_state->tpm_key_handle_entries);
 	/* initialize the SHA1 thread context */
 	tpm_state->sha1_context = NULL;
 	/* initialize the TIS SHA1 thread context */
 	tpm_state->sha1_context_tis = NULL;
 	tpm_state->transportHandle = 0;
-        printf("TPM_Global_Init: Initializing TPM_NV_INDEX_ENTRIES\n");
+        TPMLIB_LogPrintf("TPM_Global_Init: Initializing TPM_NV_INDEX_ENTRIES\n");
 	TPM_NVIndexEntries_Init(&(tpm_state->tpm_nv_index_entries));
     }
     /* comes up in limited operation mode */
     /* shutdown is set on a self test failure, before calling TPM_Global_Init() */
     if (rc == 0) {
-	printf("  TPM_Global_Init: Set testState to %u \n", TPM_TEST_STATE_LIMITED);
+	TPMLIB_LogPrintf("  TPM_Global_Init: Set testState to %u \n", TPM_TEST_STATE_LIMITED);
 	tpm_state->testState = TPM_TEST_STATE_LIMITED;
     }
     else {
-	printf("  TPM_Global_Init: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
+	TPMLIB_LogPrintf("  TPM_Global_Init: Set testState to %u \n", TPM_TEST_STATE_FAILURE);
 	tpm_state->testState = TPM_TEST_STATE_FAILURE;
     }
     return rc;
@@ -141,7 +141,7 @@ TPM_RESULT TPM_Global_Load(tpm_state_t *tpm_state)
 {
     TPM_RESULT rc = 0;
 
-    printf("TPM_Global_Load:\n");
+    TPMLIB_LogPrintf("TPM_Global_Load:\n");
     /* TPM_PERMANENT_DATA, TPM_PERMANENT_FLAGS, owner evict keys, and NV defined space. */
     if (rc == 0) {
 	rc = TPM_PermanentAll_NVLoad(tpm_state);
@@ -161,7 +161,7 @@ TPM_RESULT TPM_Global_Store(tpm_state_t *tpm_state)
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_Global_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Global_Store:\n");
     if (rc == 0) {
 	rc = TPM_PermanentAll_NVStore(tpm_state, TRUE, 0);
     }
@@ -183,22 +183,22 @@ TPM_RESULT TPM_Global_Store(tpm_state_t *tpm_state)
 
 void TPM_Global_Delete(tpm_state_t *tpm_state)
 {
-    printf(" TPM_Global_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_Global_Delete:\n");
     if (tpm_state != NULL) {
 	/* TPM_PERMANENT_FLAGS have no allocated memory or secrets */
 	/* TPM_STCLEAR_FLAGS have no allocated memory or secrets */
 	/* TPM_STANY_FLAGS have no allocated memory or secrets */
-	printf("  TPM_Global_Delete: Deleting TPM_PERMANENT_DATA\n");
+	TPMLIB_LogPrintf("  TPM_Global_Delete: Deleting TPM_PERMANENT_DATA\n");
 	TPM_PermanentData_Delete(&(tpm_state->tpm_permanent_data), TRUE);
-	printf("  TPM_Global_Delete: Deleting TPM_STCLEAR_DATA\n");
+	TPMLIB_LogPrintf("  TPM_Global_Delete: Deleting TPM_STCLEAR_DATA\n");
 	TPM_StclearData_Delete(&(tpm_state->tpm_stclear_data),
 			       tpm_state->tpm_permanent_data.pcrAttrib,
 			       TRUE);       /* reset the PCR's */
-	printf("  TPM_Global_Delete: Deleting TPM_STANY_DATA\n");
+	TPMLIB_LogPrintf("  TPM_Global_Delete: Deleting TPM_STANY_DATA\n");
 	TPM_StanyData_Delete(&(tpm_state->tpm_stany_data));
-	printf("  TPM_Global_Delete: Deleting key handle entries\n");
+	TPMLIB_LogPrintf("  TPM_Global_Delete: Deleting key handle entries\n");
 	TPM_KeyHandleEntries_Delete(tpm_state->tpm_key_handle_entries);
-	printf("  TPM_Global_Delete: Deleting SHA1 contexts\n");
+	TPMLIB_LogPrintf("  TPM_Global_Delete: Deleting SHA1 contexts\n");
 	TPM_SHA1Delete(&(tpm_state->sha1_context));
 	TPM_SHA1Delete(&(tpm_state->sha1_context_tis));
 	TPM_NVIndexEntries_Delete(&(tpm_state->tpm_nv_index_entries));
@@ -223,10 +223,10 @@ TPM_RESULT TPM_Global_GetPhysicalPresence(TPM_BOOL *physicalPresence,
     *physicalPresence = FALSE;
 
     /* is CMD physical presence enabled */
-    printf("  TPM_Global_GetPhysicalPresence: physicalPresenceCMDEnable is %02x\n",
+    TPMLIB_LogPrintf("  TPM_Global_GetPhysicalPresence: physicalPresenceCMDEnable is %02x\n",
 	   tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable);
     if (tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable) {
-	printf("  TPM_Global_GetPhysicalPresence: physicalPresence flag is %02x\n",
+	TPMLIB_LogPrintf("  TPM_Global_GetPhysicalPresence: physicalPresence flag is %02x\n",
 	       tpm_state->tpm_stclear_flags.physicalPresence);
 	/* if enabled, check for physicalPresence set by the command ordinal */
 	*physicalPresence = tpm_state->tpm_stclear_flags.physicalPresence;
@@ -235,17 +235,17 @@ TPM_RESULT TPM_Global_GetPhysicalPresence(TPM_BOOL *physicalPresence,
     /* if the software flag is true, result is true, no need to check the hardware */
     /* if the TPM_STCLEAR_FLAGS flag is FALSE, check the hardware */
     if (!(*physicalPresence)) {
-	printf("  TPM_Global_GetPhysicalPresence: physicalPresenceHWEnable is %02x\n",
+	TPMLIB_LogPrintf("  TPM_Global_GetPhysicalPresence: physicalPresenceHWEnable is %02x\n",
 	       tpm_state->tpm_permanent_flags.physicalPresenceHWEnable);
         /* if physicalPresenceHWEnable is FALSE, the hardware signal is disabled */
         if (tpm_state->tpm_permanent_flags.physicalPresenceHWEnable) {
             /* if enabled, check the hardware signal */
             rc = TPM_IO_GetPhysicalPresence(physicalPresence, tpm_state->tpm_number);
-	    printf("  TPM_Global_GetPhysicalPresence: physicalPresence HW is %02x\n",
+	    TPMLIB_LogPrintf("  TPM_Global_GetPhysicalPresence: physicalPresence HW is %02x\n",
 		   *physicalPresence);
         }
     }
-    printf("  TPM_Global_GetPhysicalPresence: physicalPresence is %02x\n",
+    TPMLIB_LogPrintf("  TPM_Global_GetPhysicalPresence: physicalPresence is %02x\n",
 	   *physicalPresence);
     return rc;
 }

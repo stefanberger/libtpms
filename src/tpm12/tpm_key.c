@@ -88,7 +88,7 @@ static TPM_RESULT TPM_Key_CheckTag(TPM_KEY12 *tpm_key12);
 
 void TPM_Key_Init(TPM_KEY *tpm_key)
 {
-    printf(" TPM_Key_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Key_Init:\n");
     TPM_StructVer_Init(&(tpm_key->ver));
     tpm_key->keyUsage = TPM_KEY_UNINITIALIZED;
     tpm_key->keyFlags = 0;
@@ -108,7 +108,7 @@ void TPM_Key_Init(TPM_KEY *tpm_key)
 
 void TPM_Key_InitTag12(TPM_KEY *tpm_key)
 {
-    printf(" TPM_Key_InitTag12:\n");
+    TPMLIB_LogPrintf(" TPM_Key_InitTag12:\n");
     ((TPM_KEY12 *)tpm_key)->tag = TPM_TAG_KEY12;
     ((TPM_KEY12 *)tpm_key)->fill = 0x0000;
     return;
@@ -149,12 +149,12 @@ TPM_RESULT TPM_Key_Set(TPM_KEY *tpm_key,		/* output created key */
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;
      
-    printf(" TPM_Key_Set:\n");
+    TPMLIB_LogPrintf(" TPM_Key_Set:\n");
     TPM_Sbuffer_Init(&sbuffer);
     /* version must be TPM_KEY or TPM_KEY12 */
     if (rc == 0) {
 	if ((ver != 1) && (ver != 2)) {
-	    printf("TPM_Key_Set: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_Key_Set: Error (fatal), "
 		   "TPM_KEY version %d is not 1 or 2\n", ver);
 	    rc = TPM_FAIL;	/* should never occur */
 	}
@@ -163,14 +163,14 @@ TPM_RESULT TPM_Key_Set(TPM_KEY *tpm_key,		/* output created key */
        both */
     if (rc == 0) {
 	if ((ver == 1) && (tpm_pcr_info_long != NULL)) {
-	    printf("TPM_Key_Set: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_Key_Set: Error (fatal), "
 		   "TPM_KEY and TPM_PCR_INFO_LONG both specified\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
     if (rc == 0) {
 	if ((ver == 2) && (tpm_pcr_info != NULL)) {
-	    printf("TPM_Key_Set: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_Key_Set: Error (fatal), "
 		   "TPM_KEY12 and TPM_PCR_INFO both specified\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
@@ -224,14 +224,14 @@ TPM_RESULT TPM_Key_Set(TPM_KEY *tpm_key,		/* output created key */
     }
     if (rc == 0) {
 	if (tpm_store_asymkey == NULL) {
-	    printf("TPM_Key_Set: Error (fatal), No TPM_STORE_ASYMKEY supplied\n");
+	    TPMLIB_LogPrintf("TPM_Key_Set: Error (fatal), No TPM_STORE_ASYMKEY supplied\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
     /* sanity check, currently no need to set TPM_MIGRATE_ASYMKEY */
     if (rc == 0) {
 	if (tpm_migrate_asymkey != NULL) {
-	    printf("TPM_Key_Set: Error (fatal), TPM_MIGRATE_ASYMKEY supplied\n");
+	    TPMLIB_LogPrintf("TPM_Key_Set: Error (fatal), TPM_MIGRATE_ASYMKEY supplied\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -322,7 +322,7 @@ TPM_RESULT TPM_Key_Load(TPM_KEY *tpm_key,	/* result */
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Key_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Key_Load:\n");
     /* load public data, and create PCR cache */
     if (rc == 0) {
 	rc = TPM_Key_LoadPubData(tpm_key, FALSE, stream, stream_size);
@@ -351,7 +351,7 @@ TPM_RESULT TPM_Key_LoadClear(TPM_KEY *tpm_key,		/* result */
     TPM_RESULT		rc = 0;
     uint32_t		storeAsymkeySize;
     
-    printf(" TPM_Key_LoadClear:\n");
+    TPMLIB_LogPrintf(" TPM_Key_LoadClear:\n");
     /* load public data */
     if (rc == 0) {
 	rc = TPM_Key_LoadPubData(tpm_key, isEK, stream, stream_size);
@@ -387,7 +387,7 @@ TPM_RESULT TPM_Key_LoadPubData(TPM_KEY *tpm_key,	/* result */
 {
     TPM_RESULT		rc = 0;
    
-    printf(" TPM_Key_LoadPubData:\n");
+    TPMLIB_LogPrintf(" TPM_Key_LoadPubData:\n");
     /* peek at the first byte */
     if (rc == 0) {
 	/* TPM_KEY[0] is major (non zero) */
@@ -468,7 +468,7 @@ TPM_RESULT TPM_Key_StorePubData(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Key_StorePubData:\n");
+    TPMLIB_LogPrintf(" TPM_Key_StorePubData:\n");
     
     if (rc == 0) {
 	/* store ver */
@@ -537,7 +537,7 @@ TPM_RESULT TPM_Key_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Key_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Key_Store:\n");
     /* store the pubData */
     if (rc == 0) {
 	rc = TPM_Key_StorePubData(sbuffer, FALSE, tpm_key); 
@@ -567,7 +567,7 @@ TPM_RESULT TPM_Key_StoreClear(TPM_STORE_BUFFER *sbuffer,
     const unsigned char *asymBuffer;
     uint32_t		asymLength;
     
-    printf(" TPM_Key_StoreClear:\n");
+    TPMLIB_LogPrintf(" TPM_Key_StoreClear:\n");
     TPM_Sbuffer_Init(&asymSbuffer);			/* freed @1 */
     /* store the pubData */
     if (rc == 0) {
@@ -617,7 +617,7 @@ TPM_RESULT TPM_Key_StorePubkey(TPM_STORE_BUFFER *pubkeyStream,			/* output */
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Key_StorePubkey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_StorePubkey:\n");
     /* the first part is a TPM_KEY_PARMS */
     if (rc == 0) {
 	rc = TPM_KeyParms_Store(pubkeyStream, &(tpm_key->algorithmParms));
@@ -649,7 +649,7 @@ TPM_RESULT TPM_Key_StorePubkey(TPM_STORE_BUFFER *pubkeyStream,			/* output */
 void TPM_Key_Delete(TPM_KEY *tpm_key)
 {
     if (tpm_key != NULL) {
-	printf(" TPM_Key_Delete:\n");
+	TPMLIB_LogPrintf(" TPM_Key_Delete:\n");
 	TPM_KeyParms_Delete(&(tpm_key->algorithmParms));
 	/* pcrInfo */
 	TPM_SizedBuffer_Delete(&(tpm_key->pcrInfo));
@@ -683,7 +683,7 @@ TPM_RESULT TPM_Key_CheckStruct(int *ver, TPM_KEY *tpm_key)
 	*ver = 1;
 	rc = TPM_StructVer_CheckVer(&(tpm_key->ver));	/* check for TPM_KEY */
 	if (rc == 0) {					/* if found TPM_KEY */
-	    printf(" TPM_Key_CheckStruct: TPM_KEY version %u.%u\n",
+	    TPMLIB_LogPrintf(" TPM_Key_CheckStruct: TPM_KEY version %u.%u\n",
 		   tpm_key->ver.major, tpm_key->ver.minor);
 	}
     }
@@ -691,10 +691,10 @@ TPM_RESULT TPM_Key_CheckStruct(int *ver, TPM_KEY *tpm_key)
 	*ver = 2;
 	rc = TPM_Key_CheckTag((TPM_KEY12 *)tpm_key);
 	if (rc == 0) {
-	    printf(" TPM_Key_CheckStruct: TPM_KEY12\n");
+	    TPMLIB_LogPrintf(" TPM_Key_CheckStruct: TPM_KEY12\n");
 	}
 	else {	/* not TPM_KEY or TPM_KEY12 */
-	    printf("TPM_Key_CheckStruct: Error checking structure, bytes 0:3 %02x %02x %02x %02x\n",
+	    TPMLIB_LogPrintf("TPM_Key_CheckStruct: Error checking structure, bytes 0:3 %02x %02x %02x %02x\n",
 		   tpm_key->ver.major, tpm_key->ver.minor,
 		   tpm_key->ver.revMajor, tpm_key->ver.revMinor);
 	    rc = TPM_BAD_KEY_PROPERTY;
@@ -712,14 +712,14 @@ static TPM_RESULT TPM_Key_CheckTag(TPM_KEY12 *tpm_key12)
 
     if (rc == 0) {
 	if (tpm_key12->tag != TPM_TAG_KEY12) {
-	    printf("TPM_Key_CheckTag: Error, TPM_KEY12 tag %04x should be TPM_TAG_KEY12\n",
+	    TPMLIB_LogPrintf("TPM_Key_CheckTag: Error, TPM_KEY12 tag %04x should be TPM_TAG_KEY12\n",
 		   tpm_key12->tag);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
     }
     if (rc == 0) {
 	if (tpm_key12->fill != 0x0000) {
-	    printf("TPM_Key_CheckTag: Error, TPM_KEY12 fill %04x should be 0x0000\n",
+	    TPMLIB_LogPrintf("TPM_Key_CheckTag: Error, TPM_KEY12 fill %04x should be 0x0000\n",
 		   tpm_key12->fill);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -743,7 +743,7 @@ TPM_RESULT TPM_Key_CheckProperties(int *ver,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Key_CheckProperties:\n");
+    TPMLIB_LogPrintf(" TPM_Key_CheckProperties:\n");
     /* check the version */
     if (rc == 0) {
 	rc = TPM_Key_CheckStruct(ver, tpm_key);
@@ -752,13 +752,13 @@ TPM_RESULT TPM_Key_CheckProperties(int *ver,
     if ((rc == 0) && FIPS) {
 	/* b.  If keyInfo -> authDataUsage specifies TPM_AUTH_NEVER return TPM_NOTFIPS */
 	if (tpm_key->authDataUsage == TPM_AUTH_NEVER) {
-	    printf("TPM_Key_CheckProperties: Error, FIPS authDataUsage TPM_AUTH_NEVER\n");
+	    TPMLIB_LogPrintf("TPM_Key_CheckProperties: Error, FIPS authDataUsage TPM_AUTH_NEVER\n");
 	    rc = TPM_NOTFIPS;
 	}
     }
     /* most of the work is done by TPM_KeyParms_CheckProperties() */
     if (rc == 0) {
-	printf("  TPM_Key_CheckProperties: authDataUsage %02x\n", tpm_key->authDataUsage);
+	TPMLIB_LogPrintf("  TPM_Key_CheckProperties: authDataUsage %02x\n", tpm_key->authDataUsage);
 	rc = TPM_KeyParms_CheckProperties(&(tpm_key->algorithmParms),
 					  tpm_key->keyUsage,
 					  keyLength,	/* in bits */
@@ -783,17 +783,17 @@ TPM_RESULT TPM_Key_LoadStoreAsymKey(TPM_KEY *tpm_key,
     
     /* This function should never be called when the TPM_STORE_ASYMKEY structure has already been
        loaded.	This indicates an internal error. */
-    printf(" TPM_Key_LoadStoreAsymKey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_LoadStoreAsymKey:\n");
     if (rc == 0) {
 	if (tpm_key->tpm_store_asymkey != NULL) {
-	    printf("TPM_Key_LoadStoreAsymKey: Error (fatal), TPM_STORE_ASYMKEY already loaded\n");
+	    TPMLIB_LogPrintf("TPM_Key_LoadStoreAsymKey: Error (fatal), TPM_STORE_ASYMKEY already loaded\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
     /* If the stream size is 0, there is an internal error. */
     if (rc == 0) {
 	if (*stream_size == 0) {
-	    printf("TPM_Key_LoadStoreAsymKey: Error (fatal), stream size is 0\n");
+	    TPMLIB_LogPrintf("TPM_Key_LoadStoreAsymKey: Error (fatal), stream size is 0\n");
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -821,12 +821,12 @@ TPM_RESULT TPM_Key_GetStoreAsymkey(TPM_STORE_ASYMKEY **tpm_store_asymkey,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Key_GetStoreAsymkey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetStoreAsymkey:\n");
     if (rc == 0) {
 	/* return the cached structure */
 	*tpm_store_asymkey = tpm_key->tpm_store_asymkey;
 	if (tpm_key->tpm_store_asymkey == NULL) {
-	    printf("TPM_Key_GetStoreAsymkey: Error (fatal), no cache\n");
+	    TPMLIB_LogPrintf("TPM_Key_GetStoreAsymkey: Error (fatal), no cache\n");
 	    rc = TPM_FAIL;	/* indicate no cache */
 	}
     }
@@ -841,12 +841,12 @@ TPM_RESULT TPM_Key_GetMigrateAsymkey(TPM_MIGRATE_ASYMKEY **tpm_migrate_asymkey,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Key_GetMigrateAsymkey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetMigrateAsymkey:\n");
     if (rc == 0) {
 	/* return the cached structure */
 	*tpm_migrate_asymkey = tpm_key->tpm_migrate_asymkey;
 	if (tpm_key->tpm_migrate_asymkey == NULL) {
-	    printf("TPM_Key_GetMigrateAsymkey: Error (fatal), no cache\n");
+	    TPMLIB_LogPrintf("TPM_Key_GetMigrateAsymkey: Error (fatal), no cache\n");
 	    rc = TPM_FAIL;	/* indicate no cache */
 	}
     }
@@ -864,12 +864,12 @@ TPM_RESULT TPM_Key_GetUsageAuth(TPM_SECRET **usageAuth,
     TPM_STORE_ASYMKEY *tpm_store_asymkey;
     TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey;
     
-    printf(" TPM_Key_GetUsageAuth:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetUsageAuth:\n");
     /* check that the TPM_KEY_USAGE indicates a valid key */ 
     if (rc == 0) {
 	if ((tpm_key == NULL) ||
 	    (tpm_key->keyUsage == TPM_KEY_UNINITIALIZED)) {
-	    printf("TPM_Key_GetUsageAuth: Error, key not initialized\n");
+	    TPMLIB_LogPrintf("TPM_Key_GetUsageAuth: Error, key not initialized\n");
 	    rc = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -891,7 +891,7 @@ TPM_RESULT TPM_Key_GetUsageAuth(TPM_SECRET **usageAuth,
 	}
     }
     if (rc != 0) {
-	printf("TPM_Key_GetUsageAuth: Error (fatal), "
+	TPMLIB_LogPrintf("TPM_Key_GetUsageAuth: Error (fatal), "
 	       "could not get TPM_STORE_ASYMKEY or TPM_MIGRATE_ASYMKEY\n");
 	rc = TPM_FAIL;	/* should never occur */
     }
@@ -911,7 +911,7 @@ TPM_RESULT TPM_Key_GetPublicKey(uint32_t	*nbytes,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Key_GetPublicKey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetPublicKey:\n");
     if (rc == 0) {
 	*nbytes = tpm_key->pubKey.size;
 	*narr = tpm_key->pubKey.buffer;
@@ -930,7 +930,7 @@ TPM_RESULT TPM_Key_GetPrimeFactorP(uint32_t 		*pbytes,
     TPM_RESULT	rc = 0;
     TPM_STORE_ASYMKEY	*tpm_store_asymkey;
     
-    printf(" TPM_Key_GetPrimeFactorP:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetPrimeFactorP:\n");
     if (rc == 0) {
 	rc = TPM_Key_GetStoreAsymkey(&tpm_store_asymkey, tpm_key);
     }
@@ -951,7 +951,7 @@ TPM_RESULT TPM_Key_GetPrivateKey(uint32_t	*dbytes,
     TPM_RESULT	rc = 0;
     TPM_STORE_ASYMKEY	*tpm_store_asymkey;
     
-    printf(" TPM_Key_GetPrivateKey:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetPrivateKey:\n");
     if (rc == 0) {
 	rc = TPM_Key_GetStoreAsymkey(&tpm_store_asymkey, tpm_key);
     }
@@ -971,7 +971,7 @@ TPM_RESULT TPM_Key_GetExponent(uint32_t		*ebytes,
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Key_GetExponent:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetExponent:\n");
     if (rc == 0) {
 	rc = TPM_KeyParms_GetExponent(ebytes, earr, &(tpm_key->algorithmParms));
     }
@@ -989,7 +989,7 @@ TPM_RESULT TPM_Key_GetPCRUsage(TPM_BOOL *pcrUsage,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Key_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
+    TPMLIB_LogPrintf(" TPM_Key_GetPCRUsage: Start %lu\n", (unsigned long)start_index);
     if (((TPM_KEY12 *)tpm_key)->tag != TPM_TAG_KEY12) { /* TPM_KEY */
 	rc = TPM_PCRInfo_GetPCRUsage(pcrUsage, tpm_key->tpm_pcr_info, start_index);
     }
@@ -1008,7 +1008,7 @@ TPM_RESULT TPM_Key_GetLocalityAtRelease(TPM_LOCALITY_SELECTION *localityAtReleas
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Key_GetLocalityAtRelease:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GetLocalityAtRelease:\n");
     if (((TPM_KEY12 *)tpm_key)->tag != TPM_TAG_KEY12) { /* TPM_KEY */
 	/* locality not used for TPM_PCR_INFO */
 	*localityAtRelease = TPM_LOC_ALL;
@@ -1067,7 +1067,7 @@ TPM_RESULT TPM_Key_GenerateRSA(TPM_KEY *tpm_key,		/* output created key */
     unsigned char	*q = NULL;	/* prime factor */
     unsigned char	*d = NULL;	/* private key */
     
-    printf(" TPM_Key_GenerateRSA:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GenerateRSA:\n");
     /* extract the TPM_RSA_KEY_PARMS from TPM_KEY_PARMS */
     if (rc == 0) {
 	rc = TPM_KeyParms_GetRSAKeyParms(&tpm_rsa_key_parms, tpm_key_parms);
@@ -1154,7 +1154,7 @@ TPM_RESULT TPM_Key_GeneratePubkeyDigest(TPM_DIGEST tpm_digest,
     const unsigned char *pubkeyStreamBuffer;	
     uint32_t		pubkeyStreamLength;
 
-    printf(" TPM_Key_GeneratePubkeyDigest:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GeneratePubkeyDigest:\n");
     TPM_Sbuffer_Init(&pubkeyStream);		/* freed @1 */
     /* serialize a TPM_PUBKEY derived from the TPM_KEY */
     if (rc == 0) {
@@ -1208,7 +1208,7 @@ TPM_RESULT TPM_Key_GeneratePubDataDigest(TPM_KEY *tpm_key)
     TPM_STORE_BUFFER	sbuffer;	/* TPM_KEY serialization */
     TPM_STORE_ASYMKEY	*tpm_store_asymkey;
     
-    printf(" TPM_Key_GeneratePubDataDigest:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GeneratePubDataDigest:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize the TPM_KEY excluding the encData fields */
     if (rc == 0) {
@@ -1239,7 +1239,7 @@ TPM_RESULT TPM_Key_CheckPubDataDigest(TPM_KEY *tpm_key)
     TPM_STORE_ASYMKEY	*tpm_store_asymkey;
     TPM_DIGEST		tpm_digest;	/* calculated pubDataDigest */
     
-    printf(" TPM_Key_CheckPubDataDigest:\n");
+    TPMLIB_LogPrintf(" TPM_Key_CheckPubDataDigest:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize the TPM_KEY excluding the encData fields */
     if (rc == 0) {
@@ -1270,7 +1270,7 @@ TPM_RESULT TPM_Key_GenerateEncData(TPM_KEY *tpm_key,
     TPM_RESULT		rc = 0;
     TPM_STORE_ASYMKEY	*tpm_store_asymkey;
 
-    printf(" TPM_Key_GenerateEncData;\n");
+    TPMLIB_LogPrintf(" TPM_Key_GenerateEncData;\n");
     /* get the TPM_STORE_ASYMKEY structure */
     if (rc == 0) {
 	rc = TPM_Key_GetStoreAsymkey(&tpm_store_asymkey, tpm_key);
@@ -1298,7 +1298,7 @@ TPM_RESULT TPM_Key_DecryptEncData(TPM_KEY *tpm_key,	/* result */
     unsigned char	*stream;
     uint32_t		stream_size;
 
-    printf(" TPM_Key_DecryptEncData\n");
+    TPMLIB_LogPrintf(" TPM_Key_DecryptEncData\n");
     /* allocate space for the decrypted data */
     if (rc == 0) {
 	rc = TPM_RSAPrivateDecryptMalloc(&decryptData,			/* decrypted data */
@@ -1334,7 +1334,7 @@ TPM_RESULT TPM_Key_CheckPCRDigest(TPM_KEY *tpm_key,
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Key_GeneratePCRDigest:\n");
+    TPMLIB_LogPrintf(" TPM_Key_GeneratePCRDigest:\n");
     if (((TPM_KEY12 *)tpm_key)->tag != TPM_TAG_KEY12) { /* TPM_KEY */
 	/* i. Calculate H1 a TPM_COMPOSITE_HASH of the PCR selected by LK -> pcrInfo ->
 	   releasePCRSelection */
@@ -1356,7 +1356,7 @@ TPM_RESULT TPM_Key_CheckPCRDigest(TPM_KEY *tpm_key,
     }
     /* 4. Allow use of the key */
     if (rc != 0) {
-	printf("TPM_Key_CheckPCRDigest: Error, wrong digestAtRelease value\n");
+	TPMLIB_LogPrintf("TPM_Key_CheckPCRDigest: Error, wrong digestAtRelease value\n");
 	rc = TPM_WRONGPCRVAL;
     }
     return rc;
@@ -1386,10 +1386,10 @@ TPM_RESULT TPM_Key_CheckRestrictDelegate(TPM_KEY *tpm_key,
 {
     TPM_RESULT	rc = 0;
     
-    printf("TPM_Key_CheckRestrictDelegate:\n");
+    TPMLIB_LogPrintf("TPM_Key_CheckRestrictDelegate:\n");
     if (rc == 0) {
 	if (tpm_key == NULL) {
-	    printf("TPM_Key_CheckRestrictDelegate: Error (fatal), key NULL\n");
+	    TPMLIB_LogPrintf("TPM_Key_CheckRestrictDelegate: Error (fatal), key NULL\n");
 	    rc = TPM_FAIL;	/* internal error, should never occur */
 	}
     }
@@ -1412,7 +1412,7 @@ TPM_RESULT TPM_Key_CheckRestrictDelegate(TPM_KEY *tpm_key,
 		  ((restrictDelegate & TPM_CMK_DELEGATE_MIGRATE) &&
 		   (tpm_key->keyUsage == TPM_KEY_MIGRATE))
 		  )) {
-		printf("TPM_Key_CheckRestrictDelegate: Error, "
+		TPMLIB_LogPrintf("TPM_Key_CheckRestrictDelegate: Error, "
 		       "invalid keyUsage %04hx restrictDelegate %08x\n",
 		       tpm_key->keyUsage, restrictDelegate);
 		rc = TPM_INVALID_KEYUSAGE;
@@ -1442,7 +1442,7 @@ TPM_RESULT TPM_KeyFlags_Load(TPM_KEY_FLAGS *tpm_key_flags,	/* result */
     /* check TPM_KEY_FLAGS validity, look for extra bits set */
     if (rc == 0) {
 	if (*tpm_key_flags & ~TPM_KEY_FLAGS_MASK) {
-	    printf("TPM_KeyFlags_Load: Error, illegal keyFlags value %08x\n",
+	    TPMLIB_LogPrintf("TPM_KeyFlags_Load: Error, illegal keyFlags value %08x\n",
 		   *tpm_key_flags);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -1456,7 +1456,7 @@ TPM_RESULT TPM_KeyFlags_Load(TPM_KEY_FLAGS *tpm_key_flags,	/* result */
 
 void TPM_KeyParms_Init(TPM_KEY_PARMS *tpm_key_parms)
 {
-    printf(" TPM_KeyParms_Init:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_Init:\n");
     tpm_key_parms->algorithmID = 0;
     tpm_key_parms->encScheme = TPM_ES_NONE;
     tpm_key_parms->sigScheme = TPM_SS_NONE;
@@ -1477,7 +1477,7 @@ TPM_RESULT TPM_KeyParms_SetRSA(TPM_KEY_PARMS *tpm_key_parms,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_KeyParms_SetRSA:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_SetRSA:\n");
     /* copy the TPM_KEY_PARMS members */
     if (rc == 0) {
 	tpm_key_parms->algorithmID = algorithmID;
@@ -1515,7 +1515,7 @@ TPM_RESULT TPM_KeyParms_Copy(TPM_KEY_PARMS *tpm_key_parms_dest,
 {
     TPM_RESULT rc = 0;
     
-    printf(" TPM_KeyParms_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_Copy:\n");
     if (rc == 0) {
 	tpm_key_parms_dest->algorithmID = tpm_key_parms_src->algorithmID;
 	tpm_key_parms_dest->encScheme	= tpm_key_parms_src->encScheme;
@@ -1551,7 +1551,7 @@ TPM_RESULT TPM_KeyParms_Load(TPM_KEY_PARMS *tpm_key_parms,	/* result */
     unsigned char	*parms_stream;
     uint32_t		parms_stream_size;
     
-    printf(" TPM_KeyParms_Load:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_Load:\n");
     /* load algorithmID */
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_key_parms->algorithmID), stream, stream_size);
@@ -1593,7 +1593,7 @@ TPM_RESULT TPM_KeyParms_Load(TPM_KEY_PARMS *tpm_key_parms,	/* result */
 	  case TPM_ALG_AES192:
 	  case TPM_ALG_AES256:
 	  default:
-	    printf("TPM_KeyParms_Load: Cannot handle algorithmID %08x\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_Load: Cannot handle algorithmID %08x\n",
 		   tpm_key_parms->algorithmID);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	    break;
@@ -1609,7 +1609,7 @@ TPM_RESULT TPM_KeyParms_GetExponent(uint32_t		*ebytes,
     TPM_RESULT		rc = 0;
     TPM_RSA_KEY_PARMS	*tpm_rsa_key_parms;
     
-    printf(" TPM_KeyParms_GetExponent:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_GetExponent:\n");
     if (rc == 0) {
 	rc = TPM_KeyParms_GetRSAKeyParms(&tpm_rsa_key_parms, tpm_key_parms);
     }
@@ -1628,7 +1628,7 @@ TPM_RESULT TPM_KeyParms_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_KeyParms_Store:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_Store:\n");
     /* store algorithmID */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_key_parms->algorithmID); 
@@ -1657,7 +1657,7 @@ TPM_RESULT TPM_KeyParms_Store(TPM_STORE_BUFFER *sbuffer,
 	  case TPM_ALG_AES192:
 	  case TPM_ALG_AES256:
 	  default:
-	    printf("TPM_KeyParms_Store: Cannot handle algorithmID %08x\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_Store: Cannot handle algorithmID %08x\n",
 		   tpm_key_parms->algorithmID);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	    break;
@@ -1674,7 +1674,7 @@ TPM_RESULT TPM_KeyParms_Store(TPM_STORE_BUFFER *sbuffer,
     
 void TPM_KeyParms_Delete(TPM_KEY_PARMS *tpm_key_parms)
 {
-    printf(" TPM_KeyParms_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_Delete:\n");
     if (tpm_key_parms != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_key_parms->parms));
 	TPM_RSAKeyParms_Delete(tpm_key_parms->tpm_rsa_key_parms);
@@ -1695,11 +1695,11 @@ TPM_RESULT TPM_KeyParms_GetRSAKeyParms(TPM_RSA_KEY_PARMS **tpm_rsa_key_parms,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_KeyParms_GetRSAKeyParms:\n");
+    TPMLIB_LogPrintf(" TPM_KeyParms_GetRSAKeyParms:\n");
     /* algorithmID must be RSA */
     if (rc == 0) {
 	if (tpm_key_parms->algorithmID != TPM_ALG_RSA) {
-	    printf("TPM_KeyParms_GetRSAKeyParms: Error, incorrect algorithmID %08x\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_GetRSAKeyParms: Error, incorrect algorithmID %08x\n",
 		   tpm_key_parms->algorithmID);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -1707,7 +1707,7 @@ TPM_RESULT TPM_KeyParms_GetRSAKeyParms(TPM_RSA_KEY_PARMS **tpm_rsa_key_parms,
     /* if the TPM_RSA_KEY_PARMS structure has not been cached, deserialize it */
     if (rc == 0) {
 	if (tpm_key_parms->tpm_rsa_key_parms == NULL) {
-	    printf("TPM_KeyParms_GetRSAKeyParms: Error (fatal), cache is NULL\n");
+	    TPMLIB_LogPrintf("TPM_KeyParms_GetRSAKeyParms: Error (fatal), cache is NULL\n");
 	    /* This should never occur.	 The cache is loaded when the TPM_KEY_PARMS is loaded. */
 	    rc = TPM_FAIL;
 	}
@@ -1734,13 +1734,13 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
     TPM_RESULT	rc = 0;
     TPM_RSA_KEY_PARMS *tpm_rsa_key_parms = NULL;/* used if algorithmID indicates RSA */
 
-    printf("  TPM_KeyParms_CheckProperties: keyUsage %04hx\n", tpm_key_usage);
-    printf("  TPM_KeyParms_CheckProperties: sigScheme %04hx\n", tpm_key_parms->sigScheme);
-    printf("  TPM_KeyParms_CheckProperties: encScheme %04hx\n", tpm_key_parms->encScheme);
+    TPMLIB_LogPrintf("  TPM_KeyParms_CheckProperties: keyUsage %04hx\n", tpm_key_usage);
+    TPMLIB_LogPrintf("  TPM_KeyParms_CheckProperties: sigScheme %04hx\n", tpm_key_parms->sigScheme);
+    TPMLIB_LogPrintf("  TPM_KeyParms_CheckProperties: encScheme %04hx\n", tpm_key_parms->encScheme);
     if (rc == 0) {
 	/* the code currently only supports RSA */
 	if (tpm_key_parms->algorithmID != TPM_ALG_RSA) {
-	    printf("TPM_KeyParms_CheckProperties: Error, algorithmID not TPM_ALG_RSA\n");
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, algorithmID not TPM_ALG_RSA\n");
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
     }
@@ -1752,14 +1752,14 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
     /* check key length if specified as input parameter */
     if ((rc == 0) && (keyLength != 0)) {
 	if (tpm_rsa_key_parms->keyLength != keyLength) {	/* in bits */
-	    printf("TPM_KeyParms_CheckProperties: Error, Bad keyLength should be %u, was %u\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, Bad keyLength should be %u, was %u\n",
 		   keyLength, tpm_rsa_key_parms->keyLength);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
     }
     if (rc == 0) {
 	if (tpm_rsa_key_parms->keyLength > TPM_RSA_KEY_LENGTH_MAX) {	/* in bits */
-	    printf("TPM_KeyParms_CheckProperties: Error, Bad keyLength max %u, was %u\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, Bad keyLength max %u, was %u\n",
 		   TPM_RSA_KEY_LENGTH_MAX, tpm_rsa_key_parms->keyLength);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -1768,7 +1768,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
     /* kgold - Support only 2 primes */
     if (rc == 0) {
 	if (tpm_rsa_key_parms->numPrimes != 2) {
-	    printf("TPM_KeyParms_CheckProperties: Error, numPrimes %u should be 2\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, numPrimes %u should be 2\n",
 		   tpm_rsa_key_parms->numPrimes);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -1777,13 +1777,13 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
     if ((rc == 0) && FIPS) {
 	/* a.  If keyInfo -> keySize is less than 1024 return TPM_NOTFIPS */
 	if (tpm_rsa_key_parms->keyLength < 1024) {
-	    printf("TPM_KeyParms_CheckProperties: Error, Invalid FIPS key length %u\n",
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, Invalid FIPS key length %u\n",
 		   tpm_rsa_key_parms->keyLength);
 	    rc = TPM_NOTFIPS;
 	}
 	/* c.  If keyInfo -> keyUsage specifies TPM_KEY_LEGACY return TPM_NOTFIPS */
 	else if (tpm_key_usage == TPM_KEY_LEGACY) {
-	    printf("TPM_KeyParms_CheckProperties: Error, FIPS authDataUsage TPM_AUTH_NEVER\n");
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, FIPS authDataUsage TPM_AUTH_NEVER\n");
 	    rc = TPM_NOTFIPS;
 	}
     }
@@ -1791,12 +1791,12 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
     if (rc == 0) {
 	switch (tpm_key_usage) {
 	  case TPM_KEY_UNINITIALIZED:
-	    printf("TPM_KeyParms_CheckProperties: Error, keyUsage TPM_KEY_UNINITIALIZED\n");
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, keyUsage TPM_KEY_UNINITIALIZED\n");
 	    rc = TPM_BAD_KEY_PROPERTY;
 	    break;
 	  case TPM_KEY_SIGNING:
 	    if (tpm_key_parms->encScheme != TPM_ES_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Signing encScheme %04hx is not TPM_ES_NONE\n",
 		       tpm_key_parms->encScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1809,7 +1809,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    else if (tpm_key_parms->sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) {
 
 #endif	
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Signing sigScheme %04hx is not DER, SHA1, INFO\n",
 		       tpm_key_parms->sigScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1817,26 +1817,26 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    break;
 	  case TPM_KEY_STORAGE:
 	    if (tpm_key_parms->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Storage encScheme %04hx is not TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		       tpm_key_parms->encScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->sigScheme != TPM_SS_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Storage sigScheme %04hx is not TPM_SS_NONE\n",
 		       tpm_key_parms->sigScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->algorithmID != TPM_ALG_RSA) { /*constant condition*/
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Storage algorithmID %08x is not TPM_ALG_RSA\n",
 		       tpm_key_parms->algorithmID);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    /* interoperable TPM only supports 2048 */
 	    else if (tpm_rsa_key_parms->keyLength < 2048) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Storage keyLength %d is less than 2048\n",
 		       tpm_rsa_key_parms->keyLength);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1847,26 +1847,26 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    break;
 	  case TPM_KEY_IDENTITY:
 	    if (tpm_key_parms->encScheme != TPM_ES_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Identity encScheme %04hx is not TPM_ES_NONE\n",
 		       tpm_key_parms->encScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Identity sigScheme %04hx is not %04x\n",
 		       tpm_key_parms->sigScheme, TPM_SS_RSASSAPKCS1v15_SHA1);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->algorithmID != TPM_ALG_RSA) { /*constant condition*/
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Identity algorithmID %08x is not TPM_ALG_RSA\n",
 		       tpm_key_parms->algorithmID);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    /* interoperable TPM only supports 2048 */
 	    else if (tpm_rsa_key_parms->keyLength < 2048) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Identity keyLength %d is less than 2048\n",
 		       tpm_rsa_key_parms->keyLength);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1877,19 +1877,19 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    break;
 	  case TPM_KEY_AUTHCHANGE:
 	    if (tpm_key_parms->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Authchange encScheme %04hx is not TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		       tpm_key_parms->encScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->sigScheme != TPM_SS_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Authchange sigScheme %04hx is not TPM_SS_NONE\n",
 		       tpm_key_parms->sigScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_rsa_key_parms->keyLength < 512) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Authchange keyLength %d is less than 512\n",
 		       tpm_rsa_key_parms->keyLength);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1898,14 +1898,14 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	  case TPM_KEY_BIND:
 	    if ((tpm_key_parms->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) &&
 		(tpm_key_parms->encScheme != TPM_ES_RSAESPKCSv15)) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Bind encScheme %04hx is not %04x or %04x\n",
 		       tpm_key_parms->encScheme,
 		       TPM_ES_RSAESOAEP_SHA1_MGF1, TPM_ES_RSAESPKCSv15);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->sigScheme != TPM_SS_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Bind sigScheme %04hx is not TPM_SS_NONE\n",
 		       tpm_key_parms->sigScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1914,7 +1914,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	  case TPM_KEY_LEGACY:
 	    if ((tpm_key_parms->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) &&
 		(tpm_key_parms->encScheme != TPM_ES_RSAESPKCSv15)) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Legacy encScheme %04hx is not %04x or %04x\n",
 		       tpm_key_parms->encScheme,
 		       TPM_ES_RSAESOAEP_SHA1_MGF1, TPM_ES_RSAESPKCSv15);
@@ -1922,7 +1922,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    }
 	    else if ((tpm_key_parms->sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 		     (tpm_key_parms->sigScheme != TPM_SS_RSASSAPKCS1v15_DER)) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Legacy sigScheme %04hx is not %04x or %04x\n",
 		       tpm_key_parms->sigScheme,
 		       TPM_SS_RSASSAPKCS1v15_SHA1, TPM_SS_RSASSAPKCS1v15_DER);
@@ -1931,26 +1931,26 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    break;
 	  case TPM_KEY_MIGRATE:
 	    if (tpm_key_parms->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Migrate encScheme %04hx is not TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		       tpm_key_parms->encScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->sigScheme != TPM_SS_NONE) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Migrate sigScheme %04hx is not TPM_SS_NONE\n",
 		       tpm_key_parms->sigScheme);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    else if (tpm_key_parms->algorithmID != TPM_ALG_RSA) { /*constant condition*/
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Migrate algorithmID %08x is not TPM_ALG_RSA\n",
 		       tpm_key_parms->algorithmID);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
 	    /* interoperable TPM only supports 2048 */
 	    else if (tpm_rsa_key_parms->keyLength < 2048) {
-		printf("TPM_KeyParms_CheckProperties: Error, "
+		TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, "
 		       "Migrate keyLength %d is less than 2048\n",
 		       tpm_rsa_key_parms->keyLength);
 		rc = TPM_BAD_KEY_PROPERTY;
@@ -1960,7 +1960,7 @@ TPM_RESULT TPM_KeyParms_CheckProperties(TPM_KEY_PARMS *tpm_key_parms,
 	    }
 	    break;
 	  default:
-	    printf("TPM_KeyParms_CheckProperties: Error, Unknown keyUsage %04hx\n", tpm_key_usage);
+	    TPMLIB_LogPrintf("TPM_KeyParms_CheckProperties: Error, Unknown keyUsage %04hx\n", tpm_key_usage);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	    break;
 	}
@@ -1974,10 +1974,10 @@ TPM_RESULT TPM_KeyParams_CheckDefaultExponent(TPM_SIZED_BUFFER *exponent)
     uint32_t	i;
     
     if ((rc == 0) && (exponent->size != 0)) {	 /* 0 is the default */
-	printf("  TPM_KeyParams_CheckDefaultExponent: exponent size %u\n", exponent->size);
+	TPMLIB_LogPrintf("  TPM_KeyParams_CheckDefaultExponent: exponent size %u\n", exponent->size);
 	if (rc == 0) {
 	    if (exponent->size < 3) {		 
-		printf("TPM_KeyParams_CheckDefaultExponent: Error, exponent size is %u\n",
+		TPMLIB_LogPrintf("TPM_KeyParams_CheckDefaultExponent: Error, exponent size is %u\n",
 		       exponent->size);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
@@ -1985,7 +1985,7 @@ TPM_RESULT TPM_KeyParams_CheckDefaultExponent(TPM_SIZED_BUFFER *exponent)
 	if (rc == 0) {
 	    for (i = 3 ; i < exponent->size ; i++) {
 		if (exponent->buffer[i] != 0) {
-		    printf("TPM_KeyParams_CheckDefaultExponent: Error, exponent[%u] is %02x\n",
+		    TPMLIB_LogPrintf("TPM_KeyParams_CheckDefaultExponent: Error, exponent[%u] is %02x\n",
 			   i, exponent->buffer[i]);
 		    rc = TPM_BAD_KEY_PROPERTY;
 		}
@@ -1995,7 +1995,7 @@ TPM_RESULT TPM_KeyParams_CheckDefaultExponent(TPM_SIZED_BUFFER *exponent)
 	    if ((exponent->buffer[0] != tpm_default_rsa_exponent[0]) ||
 		(exponent->buffer[1] != tpm_default_rsa_exponent[1]) ||
 		(exponent->buffer[2] != tpm_default_rsa_exponent[2])) {
-		printf("TPM_KeyParams_CheckDefaultExponent: Error, exponent is %02x %02x %02x\n",
+		TPMLIB_LogPrintf("TPM_KeyParams_CheckDefaultExponent: Error, exponent is %02x %02x %02x\n",
 		       exponent->buffer[2], exponent->buffer[1], exponent->buffer[0]);
 		rc = TPM_BAD_KEY_PROPERTY;
 	    }
@@ -2010,7 +2010,7 @@ TPM_RESULT TPM_KeyParams_CheckDefaultExponent(TPM_SIZED_BUFFER *exponent)
 
 void TPM_StoreAsymkey_Init(TPM_STORE_ASYMKEY *tpm_store_asymkey)
 {
-    printf(" TPM_StoreAsymkey_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_Init:\n");
     tpm_store_asymkey->payload = TPM_PT_ASYM;
     TPM_Secret_Init(tpm_store_asymkey->usageAuth);
     TPM_Secret_Init(tpm_store_asymkey->migrationAuth);
@@ -2039,7 +2039,7 @@ TPM_RESULT TPM_StoreAsymkey_Load(TPM_STORE_ASYMKEY *tpm_store_asymkey,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_StoreAsymkey_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_Load:\n");
     /* load payload */
     if ((rc == 0) && !isEK) {
 	rc = TPM_Load8(&(tpm_store_asymkey->payload), stream, stream_size);
@@ -2054,7 +2054,7 @@ TPM_RESULT TPM_StoreAsymkey_Load(TPM_STORE_ASYMKEY *tpm_store_asymkey,
 	    /* TPM_CMK_ConvertMigration payload */
 	    (tpm_store_asymkey->payload != TPM_PT_MIGRATE_EXTERNAL)
 	    ) {
-	    printf("TPM_StoreAsymkey_Load: Error, invalid payload %02x\n",
+	    TPMLIB_LogPrintf("TPM_StoreAsymkey_Load: Error, invalid payload %02x\n",
 		   tpm_store_asymkey->payload);
 	    rc = TPM_INVALID_STRUCTURE;
 	}
@@ -2110,7 +2110,7 @@ static TPM_RESULT TPM_StoreAsymkey_LoadTest(TPM_KEY *tpm_key)
     uint32_t		q1bytes;
     uint32_t		d1bytes;
 
-    printf(" TPM_StoreAsymkey_LoadTest:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_LoadTest:\n");
     /* actual data */
     if (rc == 0) {
 	narr = tpm_key->pubKey.key;
@@ -2142,7 +2142,7 @@ static TPM_RESULT TPM_StoreAsymkey_LoadTest(TPM_KEY *tpm_key)
     /* compare q */
     if (rc == 0) {
 	if (qbytes != q1bytes) {
-	    printf("TPM_StoreAsymkey_LoadTest: Error (fatal), qbytes %u q1bytes %u\n",
+	    TPMLIB_LogPrintf("TPM_StoreAsymkey_LoadTest: Error (fatal), qbytes %u q1bytes %u\n",
 		   qbytes, q1bytes);
 	    rc = TPM_FAIL;
 	}
@@ -2150,14 +2150,14 @@ static TPM_RESULT TPM_StoreAsymkey_LoadTest(TPM_KEY *tpm_key)
     if (rc == 0) {
 	irc = memcmp(qarr, q1arr, qbytes);
 	if (irc != 0) {
-	    printf("TPM_StoreAsymkey_LoadTest: Error (fatal), qarr mismatch\n");
+	    TPMLIB_LogPrintf("TPM_StoreAsymkey_LoadTest: Error (fatal), qarr mismatch\n");
 	    rc = TPM_FAIL;
 	}
     }
     /* compare d */
     if (rc == 0) {
 	if (dbytes != d1bytes) {
-	    printf("TPM_StoreAsymkey_LoadTest: Error (fatal), dbytes %u d1bytes %u\n",
+	    TPMLIB_LogPrintf("TPM_StoreAsymkey_LoadTest: Error (fatal), dbytes %u d1bytes %u\n",
 		   dbytes, d1bytes);
 	    rc = TPM_FAIL;
 	}
@@ -2165,7 +2165,7 @@ static TPM_RESULT TPM_StoreAsymkey_LoadTest(TPM_KEY *tpm_key)
     if (rc == 0) {
 	irc = memcmp(darr, d1arr, dbytes);
 	if (irc != 0) {
-	    printf("TPM_StoreAsymkey_LoadTest: Error (fatal), darr mismatch\n");
+	    TPMLIB_LogPrintf("TPM_StoreAsymkey_LoadTest: Error (fatal), darr mismatch\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -2181,7 +2181,7 @@ TPM_RESULT TPM_StoreAsymkey_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_StoreAsymkey_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_Store:\n");
     /* store payload */
     if ((rc == 0) && !isEK) {
 	rc = TPM_Sbuffer_Append(sbuffer, &(tpm_store_asymkey->payload), sizeof(TPM_PAYLOAD_TYPE));
@@ -2207,7 +2207,7 @@ TPM_RESULT TPM_StoreAsymkey_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_StoreAsymkey_Delete(TPM_STORE_ASYMKEY *tpm_store_asymkey)
 {
-    printf(" TPM_StoreAsymkey_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_Delete:\n");
     if (tpm_store_asymkey != NULL) {
 	TPM_Secret_Delete(tpm_store_asymkey->usageAuth);
 	TPM_Secret_Delete(tpm_store_asymkey->migrationAuth);
@@ -2224,7 +2224,7 @@ TPM_RESULT TPM_StoreAsymkey_GenerateEncData(TPM_SIZED_BUFFER *encData,
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;		/* TPM_STORE_ASYMKEY serialization */
 
-    printf(" TPM_StoreAsymkey_GenerateEncData;\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_GenerateEncData;\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize the TPM_STORE_ASYMKEY member */
     if (rc == 0) {
@@ -2246,7 +2246,7 @@ TPM_RESULT TPM_StoreAsymkey_GetPrimeFactorP(uint32_t 		*pbytes,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_StoreAsymkey_GetPrimeFactorP:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_GetPrimeFactorP:\n");
     if (rc == 0) {
 	*pbytes = tpm_store_asymkey->privKey.p_key.size;
 	*parr = tpm_store_asymkey->privKey.p_key.buffer;
@@ -2273,7 +2273,7 @@ void TPM_StoreAsymkey_GetO1Size(uint32_t		*o1_size,
 	       TPM_DIGEST_SIZE +		/* OAEP pHash */
 	       TPM_DIGEST_SIZE +		/* OAEP seed */
 	       1;				/* OAEP 0x01 byte */
-    printf(" TPM_StoreAsymkey_GetO1Size: key size %u o1 size %u\n",
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_GetO1Size: key size %u o1 size %u\n",
 	   tpm_store_asymkey->privKey.p_key.size, *o1_size);
 }
 
@@ -2299,7 +2299,7 @@ TPM_RESULT TPM_StoreAsymkey_CheckO1Size(uint32_t o1_size,
 	 TPM_DIGEST_SIZE +		/* OAEP pHash */
 	 TPM_DIGEST_SIZE +				/* OAEP seed */
 	 1)) {				/* OAEP 0x01 byte */
-	printf("  TPM_StoreAsymkey_CheckO1Size: Error (fatal) k1k2_length %d too large for o1 %u\n",
+	TPMLIB_LogPrintf("  TPM_StoreAsymkey_CheckO1Size: Error (fatal) k1k2_length %d too large for o1 %u\n",
 	       k1k2_length, o1_size);
 	rc = TPM_FAIL;
     }
@@ -2329,7 +2329,7 @@ TPM_RESULT TPM_StoreAsymkey_StoreO1(BYTE		*o1,
     const unsigned char *tpm_migrate_asymkey_buffer;	
     uint32_t		tpm_migrate_asymkey_length;
     
-    printf(" TPM_StoreAsymkey_StoreO1:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_StoreO1:\n");
     TPM_Sbuffer_Init(&k1k2_sbuffer);			/* freed @1 */
     TPM_MigrateAsymkey_Init(&tpm_migrate_asymkey);	/* freed @2 */
     TPM_Sbuffer_Init(&tpm_migrate_asymkey_sbuffer);	/* freed @3 */
@@ -2423,7 +2423,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
     const unsigned char		*k1k2_buffer;
     uint32_t			k1k2_length;
     
-    printf(" TPM_StoreAsymkey_LoadO1:\n");
+    TPMLIB_LogPrintf(" TPM_StoreAsymkey_LoadO1:\n");
     TPM_MigrateAsymkey_Init(&tpm_migrate_asymkey);	/* freed @1 */
     TPM_Sbuffer_Init(&k1k2_sbuffer);			/* freed @2 */
     tpm_migrate_asymkey_buffer = NULL;			/* freed @3 */
@@ -2434,7 +2434,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
     if (rc == 0) {
 	TPM_PrintFour("  TPM_StoreAsymkey_LoadO1: o1 -", o1);
 	/* 5. Create m1, seed and pHash by OAEP decoding o1 */
-	printf("  TPM_StoreAsymkey_LoadO1: Depadding\n");
+	TPMLIB_LogPrintf("  TPM_StoreAsymkey_LoadO1: Depadding\n");
 	rc = TPM_RSA_padding_check_PKCS1_OAEP(tpm_migrate_asymkey_buffer,	/* out: to */
 					      &tpm_migrate_asymkey_length,	/* out: to length */
 					      o1_size,				/* to size */
@@ -2443,7 +2443,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
 					      seed);	
 	TPM_PrintFour("  TPM_StoreAsymkey_LoadO1: tpm_migrate_asymkey_buffer -",
 		      tpm_migrate_asymkey_buffer);
-	printf("  TPM_StoreAsymkey_LoadO1: tpm_migrate_asymkey_length %u\n",
+	TPMLIB_LogPrintf("  TPM_StoreAsymkey_LoadO1: tpm_migrate_asymkey_length %u\n",
 	       tpm_migrate_asymkey_length);
 	TPM_PrintFour("  TPM_StoreAsymkey_LoadO1: - pHash", pHash);
 	TPM_PrintFour("  TPM_StoreAsymkey_LoadO1: - seed", seed);
@@ -2453,7 +2453,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
 	stream = tpm_migrate_asymkey_buffer;
 	stream_size = tpm_migrate_asymkey_length;
 	rc = TPM_MigrateAsymkey_Load(&tpm_migrate_asymkey, &stream, &stream_size);
-	printf("  TPM_StoreAsymkey_LoadO1: partPrivKey length %u\n",
+	TPMLIB_LogPrintf("  TPM_StoreAsymkey_LoadO1: partPrivKey length %u\n",
 	       tpm_migrate_asymkey.partPrivKey.size);
 	TPM_PrintFourLimit("  TPM_StoreAsymkey_LoadO1: partPrivKey -",
 		      tpm_migrate_asymkey.partPrivKey.buffer,
@@ -2475,7 +2475,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
 	TPM_Digest_Copy(tpm_store_asymkey->migrationAuth, pHash);
 	TPM_Digest_Copy(tpm_store_asymkey->pubDataDigest, tpm_migrate_asymkey.pubDataDigest);
 	TPM_Sbuffer_Get(&k1k2_sbuffer, &k1k2_buffer, &k1k2_length);
-	printf("  TPM_StoreAsymkey_LoadO1: k1k2 length %u\n", k1k2_length);
+	TPMLIB_LogPrintf("  TPM_StoreAsymkey_LoadO1: k1k2 length %u\n", k1k2_length);
 	TPM_PrintFourLimit("  TPM_StoreAsymkey_LoadO1: k1k2", k1k2_buffer, k1k2_length);
 	rc = TPM_SizedBuffer_Load(&(tpm_store_asymkey->privKey.p_key),
 				  (unsigned char **)&k1k2_buffer, &k1k2_length);
@@ -2500,7 +2500,7 @@ TPM_RESULT TPM_StoreAsymkey_LoadO1(TPM_STORE_ASYMKEY	*tpm_store_asymkey,	/* outp
 
 void TPM_MigrateAsymkey_Init(TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey)
 {
-    printf(" TPM_MigrateAsymkey_Init:\n");
+    TPMLIB_LogPrintf(" TPM_MigrateAsymkey_Init:\n");
     tpm_migrate_asymkey->payload = TPM_PT_MIGRATE;
     TPM_Secret_Init(tpm_migrate_asymkey->usageAuth);
     TPM_Digest_Init(tpm_migrate_asymkey->pubDataDigest);
@@ -2524,7 +2524,7 @@ TPM_RESULT TPM_MigrateAsymkey_Load(TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_MigrateAsymkey_Load:\n");
+    TPMLIB_LogPrintf(" TPM_MigrateAsymkey_Load:\n");
     /* load payload */
     if (rc == 0) {
 	rc = TPM_Load8(&(tpm_migrate_asymkey->payload), stream, stream_size);
@@ -2534,7 +2534,7 @@ TPM_RESULT TPM_MigrateAsymkey_Load(TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey,
 	if ((tpm_migrate_asymkey->payload != TPM_PT_MIGRATE) &&
 	    (tpm_migrate_asymkey->payload != TPM_PT_MAINT) &&
 	    (tpm_migrate_asymkey->payload != TPM_PT_CMK_MIGRATE)) {
-	    printf("TPM_MigrateAsymkey_Load: Error illegal payload %02x\n",
+	    TPMLIB_LogPrintf("TPM_MigrateAsymkey_Load: Error illegal payload %02x\n",
 		   tpm_migrate_asymkey->payload);
 	    rc = TPM_INVALID_STRUCTURE;
 	}
@@ -2565,7 +2565,7 @@ TPM_RESULT TPM_MigrateAsymkey_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_MigrateAsymkey_Store:\n");
+    TPMLIB_LogPrintf(" TPM_MigrateAsymkey_Store:\n");
     /* store payload */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append(sbuffer, &(tpm_migrate_asymkey->payload), sizeof(TPM_PAYLOAD_TYPE));
@@ -2596,7 +2596,7 @@ TPM_RESULT TPM_MigrateAsymkey_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_MigrateAsymkey_Delete(TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey)
 {
-    printf(" TPM_MigrateAsymkey_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_MigrateAsymkey_Delete:\n");
     if (tpm_migrate_asymkey != NULL) {
 	TPM_Secret_Delete(tpm_migrate_asymkey->usageAuth);
 	TPM_SizedBuffer_Zero(&(tpm_migrate_asymkey->partPrivKey));
@@ -2612,7 +2612,7 @@ void TPM_MigrateAsymkey_Delete(TPM_MIGRATE_ASYMKEY *tpm_migrate_asymkey)
 
 void TPM_StorePrivkey_Init(TPM_STORE_PRIVKEY *tpm_store_privkey)
 {
-    printf(" TPM_StorePrivkey_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StorePrivkey_Init:\n");
     TPM_SizedBuffer_Init(&(tpm_store_privkey->d_key));
     TPM_SizedBuffer_Init(&(tpm_store_privkey->p_key));
     TPM_SizedBuffer_Init(&(tpm_store_privkey->q_key));
@@ -2641,7 +2641,7 @@ TPM_RESULT TPM_StorePrivkey_Convert(TPM_STORE_ASYMKEY *tpm_store_asymkey,	/* I/O
     uint32_t		dbytes;
 
     
-    printf(" TPM_StorePrivkey_Convert:\n");
+    TPMLIB_LogPrintf(" TPM_StorePrivkey_Convert:\n");
     if (rc == 0) {
 	TPM_PrintFour("  TPM_StorePrivkey_Convert: p",	tpm_store_asymkey->privKey.p_key.buffer);
 	nbytes = pubKey->size;
@@ -2682,7 +2682,7 @@ TPM_RESULT TPM_StorePrivkey_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_StorePrivkey_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StorePrivkey_Store:\n");
     if (rc == 0) {
 	TPM_PrintFour("  TPM_StorePrivkey_Store: p",  tpm_store_privkey->p_key.buffer);
 	rc = TPM_SizedBuffer_Store(sbuffer, &(tpm_store_privkey->p_key));
@@ -2692,7 +2692,7 @@ TPM_RESULT TPM_StorePrivkey_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_StorePrivkey_Delete(TPM_STORE_PRIVKEY *tpm_store_privkey)
 {
-    printf(" TPM_StorePrivkey_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_StorePrivkey_Delete:\n");
     if (tpm_store_privkey != NULL) {
 	TPM_SizedBuffer_Zero(&(tpm_store_privkey->d_key));
 	TPM_SizedBuffer_Zero(&(tpm_store_privkey->p_key));
@@ -2712,7 +2712,7 @@ void TPM_StorePrivkey_Delete(TPM_STORE_PRIVKEY *tpm_store_privkey)
 
 void TPM_Pubkey_Init(TPM_PUBKEY *tpm_pubkey)
 {
-    printf(" TPM_Pubkey_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Init:\n");
     TPM_KeyParms_Init(&(tpm_pubkey->algorithmParms));
     TPM_SizedBuffer_Init(&(tpm_pubkey->pubKey));
     return;
@@ -2724,7 +2724,7 @@ TPM_RESULT TPM_Pubkey_Load(TPM_PUBKEY *tpm_pubkey,	/* result */
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Pubkey_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Load:\n");
     /* load algorithmParms */
     if (rc == 0) {
 	rc = TPM_KeyParms_Load(&(tpm_pubkey->algorithmParms), stream, stream_size);
@@ -2744,7 +2744,7 @@ TPM_RESULT TPM_Pubkey_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Pubkey_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Store:\n");
     if (rc == 0) {
 	rc = TPM_KeyParms_Store(sbuffer, &(tpm_pubkey->algorithmParms));
     }
@@ -2756,7 +2756,7 @@ TPM_RESULT TPM_Pubkey_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_Pubkey_Delete(TPM_PUBKEY *tpm_pubkey)
 {
-    printf(" TPM_Pubkey_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Delete:\n");
     if (tpm_pubkey != NULL) {
 	TPM_KeyParms_Delete(&(tpm_pubkey->algorithmParms));
 	TPM_SizedBuffer_Delete(&(tpm_pubkey->pubKey));
@@ -2770,7 +2770,7 @@ TPM_RESULT TPM_Pubkey_Set(TPM_PUBKEY *tpm_pubkey,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Pubkey_Set:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Set:\n");
     if (rc == 0) {
 	/* add TPM_KEY_PARMS algorithmParms */
 	rc = TPM_KeyParms_Copy(&(tpm_pubkey->algorithmParms),
@@ -2789,7 +2789,7 @@ TPM_RESULT TPM_Pubkey_Copy(TPM_PUBKEY *dest_tpm_pubkey,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Pubkey_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_Copy:\n");
     /* copy TPM_KEY_PARMS algorithmParms */
     if (rc == 0) {
 	rc = TPM_KeyParms_Copy(&(dest_tpm_pubkey->algorithmParms),
@@ -2814,7 +2814,7 @@ TPM_RESULT TPM_Pubkey_GetExponent(uint32_t	*ebytes,
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Pubkey_GetExponent:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_GetExponent:\n");
     if (rc == 0) {
 	rc = TPM_KeyParms_GetExponent(ebytes, earr, &(tpm_pubkey->algorithmParms));
     }
@@ -2830,7 +2830,7 @@ TPM_RESULT TPM_Pubkey_GetPublicKey(uint32_t		*nbytes,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Pubkey_GetPublicKey:\n");
+    TPMLIB_LogPrintf(" TPM_Pubkey_GetPublicKey:\n");
     if (rc == 0) {
 	*nbytes = tpm_pubkey->pubKey.size;
 	*narr = tpm_pubkey->pubKey.buffer;
@@ -2850,7 +2850,7 @@ TPM_RESULT TPM_Pubkey_GetPublicKey(uint32_t		*nbytes,
 
 void TPM_RSAKeyParms_Init(TPM_RSA_KEY_PARMS *tpm_rsa_key_parms)
 {
-    printf(" TPM_RSAKeyParms_Init:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_Init:\n");
     tpm_rsa_key_parms->keyLength = 0;
     tpm_rsa_key_parms->numPrimes = 0;
     TPM_SizedBuffer_Init(&(tpm_rsa_key_parms->exponent));
@@ -2868,7 +2868,7 @@ TPM_RESULT TPM_RSAKeyParms_Load(TPM_RSA_KEY_PARMS *tpm_rsa_key_parms,	/* result 
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_RSAKeyParms_Load:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_Load:\n");
     /* load keyLength */
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_rsa_key_parms->keyLength), stream, stream_size);
@@ -2892,7 +2892,7 @@ TPM_RESULT TPM_RSAKeyParms_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_RSAKeyParms_Store:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_Store:\n");
     /* store keyLength */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_rsa_key_parms->keyLength); 
@@ -2915,7 +2915,7 @@ TPM_RESULT TPM_RSAKeyParms_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_RSAKeyParms_Delete(TPM_RSA_KEY_PARMS *tpm_rsa_key_parms)
 {
-    printf(" TPM_RSAKeyParms_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_Delete:\n");
     if (tpm_rsa_key_parms != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_rsa_key_parms->exponent));
 	TPM_RSAKeyParms_Init(tpm_rsa_key_parms);
@@ -2933,7 +2933,7 @@ TPM_RESULT TPM_RSAKeyParms_Copy(TPM_RSA_KEY_PARMS *tpm_rsa_key_parms_dest,
 {
     TPM_RESULT rc = 0;
     
-    printf(" TPM_RSAKeyParms_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_Copy:\n");
     if (rc == 0) {
 	tpm_rsa_key_parms_dest->keyLength = tpm_rsa_key_parms_src->keyLength;
 	tpm_rsa_key_parms_dest->numPrimes = tpm_rsa_key_parms_src->numPrimes;
@@ -2949,7 +2949,7 @@ TPM_RESULT TPM_RSAKeyParms_New(TPM_RSA_KEY_PARMS **tpm_rsa_key_parms)
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_RSAKeyParms_New:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_New:\n");
     if (rc == 0) {
 	rc = TPM_Malloc((unsigned char **)tpm_rsa_key_parms, sizeof(TPM_RSA_KEY_PARMS));
     }	 
@@ -2970,7 +2970,7 @@ TPM_RESULT TPM_RSAKeyParms_GetExponent(uint32_t		*ebytes,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_RSAKeyParms_GetExponent:\n");
+    TPMLIB_LogPrintf(" TPM_RSAKeyParms_GetExponent:\n");
     if (tpm_rsa_key_parms->exponent.size != 0) {
 	*ebytes = tpm_rsa_key_parms->exponent.size;
 	*earr = tpm_rsa_key_parms->exponent.buffer;
@@ -3014,7 +3014,7 @@ TPM_RESULT TPM_KeyHandleEntry_Load(TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entry,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_KeyHandleEntry_Load:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntry_Load:\n");
     /* load handle */
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_key_handle_entry->handle), stream, stream_size); 
@@ -3052,7 +3052,7 @@ TPM_RESULT TPM_KeyHandleEntry_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_KeyHandleEntry_Store:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntry_Store:\n");
     /* store handle */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_key_handle_entry->handle); 
@@ -3083,7 +3083,7 @@ void TPM_KeyHandleEntry_Delete(TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entry)
 {
     if (tpm_key_handle_entry != NULL) {
 	if (tpm_key_handle_entry->handle != 0) {
-	    printf(" TPM_KeyHandleEntry_Delete: Deleting %08x\n", tpm_key_handle_entry->handle);
+	    TPMLIB_LogPrintf(" TPM_KeyHandleEntry_Delete: Deleting %08x\n", tpm_key_handle_entry->handle);
 	    TPM_Key_Delete(tpm_key_handle_entry->key);
 	    free(tpm_key_handle_entry->key);
 	}
@@ -3103,11 +3103,11 @@ TPM_RESULT TPM_KeyHandleEntry_FlushSpecific(tpm_state_t *tpm_state,
     TPM_AUTHHANDLE	authHandle = 0;		/* dummy parameter */
     TPM_BOOL		continueAuthSession;	/* dummy parameter */
     
-    printf(" TPM_KeyHandleEntry_FlushSpecific:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntry_FlushSpecific:\n");
     if (rc == 0) {
 	/* Internal error, should never happen */
 	if (tpm_key_handle_entry->key == NULL) {
-	    printf("TPM_KeyHandleEntry_FlushSpecific: Error (fatal), key is NULL\n");
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntry_FlushSpecific: Error (fatal), key is NULL\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -3121,7 +3121,7 @@ TPM_RESULT TPM_KeyHandleEntry_FlushSpecific(tpm_state_t *tpm_state,
 					 TPM_ET_KEYHANDLE,		/* TPM_ENTITY_TYPE */
 					 &(tpm_key_handle_entry->key->
 					   tpm_store_asymkey->pubDataDigest)); /* entityDigest */
-	printf(" TPM_KeyHandleEntry_FlushSpecific: Flushing key handle %08x\n",
+	TPMLIB_LogPrintf(" TPM_KeyHandleEntry_FlushSpecific: Flushing key handle %08x\n",
 	       tpm_key_handle_entry->handle);
 	/* free the TPM_KEY resources, free the key itself, and remove entry from the key handle
 	   entries list */
@@ -3142,7 +3142,7 @@ void TPM_KeyHandleEntries_Init(TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entries)
 {
     size_t i;
     
-    printf(" TPM_KeyHandleEntries_Init:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_Init:\n");
     for (i = 0 ; i < TPM_KEY_HANDLES ; i++) {
 	TPM_KeyHandleEntry_Init(&(tpm_key_handle_entries[i]));
     }
@@ -3157,7 +3157,7 @@ void TPM_KeyHandleEntries_Delete(TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entries)
 {
     size_t i;
     
-    printf(" TPM_KeyHandleEntries_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_Delete:\n");
     for (i = 0 ; i < TPM_KEY_HANDLES ; i++) {
 	TPM_KeyHandleEntry_Delete(&(tpm_key_handle_entries[i]));
     }
@@ -3188,12 +3188,12 @@ TPM_RESULT TPM_KeyHandleEntries_Load(tpm_state_t *tpm_state,
     /* get the count of keys in the stream */
     if (rc == 0) {
 	rc = TPM_Load32(&keyCount, stream, stream_size);
-	printf("  TPM_KeyHandleEntries_Load: %u keys to be loaded\n", keyCount);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_Load: %u keys to be loaded\n", keyCount);
     }
     /* sanity check that keyCount not greater than key slots */
     if (rc == 0) {
 	if (keyCount > TPM_KEY_HANDLES) {
-	    printf("TPM_KeyHandleEntries_Load: Error (fatal)"
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_Load: Error (fatal)"
 		   " key handles in stream %u greater than %d\n",
 		   keyCount, TPM_KEY_HANDLES);
 	    rc = TPM_FAIL;
@@ -3207,7 +3207,7 @@ TPM_RESULT TPM_KeyHandleEntries_Load(tpm_state_t *tpm_state,
 	    rc = TPM_KeyHandleEntry_Load(&tpm_key_handle_entry, stream, stream_size);
 	}
 	if (rc == 0) {
-	    printf("  TPM_KeyHandleEntries_Load: Loading key handle %08x\n",
+	    TPMLIB_LogPrintf("  TPM_KeyHandleEntries_Load: Loading key handle %08x\n",
 		   tpm_key_handle_entry.handle);
 	    /* Add the entry to the list.  Keep the handle.  If the suggested value could not be
 	       accepted, this is a "should never happen" fatal error.  It means that the save key
@@ -3249,7 +3249,7 @@ TPM_RESULT TPM_KeyHandleEntries_Store(TPM_STORE_BUFFER *sbuffer,
     if (rc == 0) {
 	start = 0;
 	keyCount = 0;
-	printf("  TPM_KeyHandleEntries_Store: Counting keys to be stored\n");
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_Store: Counting keys to be stored\n");
     }
     while ((rc == 0) &&
 	   /* returns TPM_RETRY when at the end of the table, terminates loop */
@@ -3265,12 +3265,12 @@ TPM_RESULT TPM_KeyHandleEntries_Store(TPM_STORE_BUFFER *sbuffer,
     }
     /* store the number of entries to save */
     if (rc == 0) {
-	printf("  TPM_KeyHandleEntries_Store: %u keys to be stored\n", keyCount);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_Store: %u keys to be stored\n", keyCount);
 	rc = TPM_Sbuffer_Append32(sbuffer, keyCount);
     }
     /* for each key handle entry */
     if (rc == 0) {
-	printf("  TPM_KeyHandleEntries_Store: Storing keys\n");
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_Store: Storing keys\n");
 	start = 0;
     }
     while ((rc == 0) &&
@@ -3309,7 +3309,7 @@ TPM_RESULT TPM_KeyHandleEntries_StoreHandles(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     uint16_t	i, loadedCount;
     
-    printf(" TPM_KeyHandleEntries_StoreHandles:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_StoreHandles:\n");
     if (rc == 0) {
 	loadedCount = 0;
 	/* count the number of loaded handles */
@@ -3341,14 +3341,14 @@ TPM_RESULT TPM_KeyHandleEntries_DeleteHandle(TPM_KEY_HANDLE_ENTRY *tpm_key_handl
     TPM_RESULT	rc = 0;
     TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entry;
     
-    printf(" TPM_KeyHandleEntries_DeleteHandle: %08x\n", tpm_key_handle);
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_DeleteHandle: %08x\n", tpm_key_handle);
     /* search for the handle */
     if (rc == 0) {
 	rc = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 					   tpm_key_handle_entries,
 					   tpm_key_handle);
 	if (rc != 0) {
-	    printf("TPM_KeyHandleEntries_DeleteHandle: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_DeleteHandle: Error, key handle %08x not found\n",
 		   tpm_key_handle);
 	}
     }
@@ -3368,10 +3368,10 @@ void TPM_KeyHandleEntries_IsSpace(TPM_BOOL *isSpace,
 				  uint32_t *index,
 				  const TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entries)
 {
-    printf(" TPM_KeyHandleEntries_IsSpace:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_IsSpace:\n");
     for (*index = 0, *isSpace = FALSE ; *index < TPM_KEY_HANDLES ; (*index)++) {
 	if (tpm_key_handle_entries[*index].key == NULL) {	/* if the index is empty */
-	    printf("  TPM_KeyHandleEntries_IsSpace: Found space at %u\n", *index);
+	    TPMLIB_LogPrintf("  TPM_KeyHandleEntries_IsSpace: Found space at %u\n", *index);
 	    *isSpace = TRUE;
 	    break;
 	}
@@ -3388,7 +3388,7 @@ void TPM_KeyHandleEntries_GetSpace(uint32_t *space,
 {
     uint32_t i;
 
-    printf(" TPM_KeyHandleEntries_GetSpace:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetSpace:\n");
     for (*space = 0 , i = 0 ; i < TPM_KEY_HANDLES ; i++) {
 	if (tpm_key_handle_entries[i].key == NULL) {	/* if the index is empty */
 	    (*space)++;
@@ -3418,7 +3418,7 @@ void TPM_KeyHandleEntries_IsEvictSpace(TPM_BOOL *isSpace,
 	    }
 	}
     }
-    printf(" TPM_KeyHandleEntries_IsEvictSpace: evictable space, minimum %u free %u\n",
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_IsEvictSpace: evictable space, minimum %u free %u\n",
 	   minSpace, evictSpace);
     if (evictSpace >= minSpace) {
 	*isSpace = TRUE;
@@ -3446,7 +3446,7 @@ TPM_RESULT TPM_KeyHandleEntries_AddKeyEntry(TPM_KEY_HANDLE *tpm_key_handle,		/* 
     TPM_RESULT			rc = 0;
     TPM_KEY_HANDLE_ENTRY	tpm_key_handle_entry;
 
-    printf(" TPM_KeyHandleEntries_AddKeyEntry:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_AddKeyEntry:\n");
     tpm_key_handle_entry.key = tpm_key;
     tpm_key_handle_entry.parentPCRStatus = parentPCRStatus;
     tpm_key_handle_entry.keyControl = keyControl;
@@ -3482,12 +3482,12 @@ TPM_RESULT TPM_KeyHandleEntries_AddEntry(TPM_KEY_HANDLE *tpm_key_handle,		/* i/o
     uint32_t			index;
     TPM_BOOL			isSpace;
     
-    printf(" TPM_KeyHandleEntries_AddEntry: handle %08x, keepHandle %u\n",
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_AddEntry: handle %08x, keepHandle %u\n",
 	   *tpm_key_handle, keepHandle);
     /* check for valid TPM_KEY */
     if (rc == 0) {
 	if (tpm_key_handle_entry->key == NULL) {	/* should never occur */
-	    printf("TPM_KeyHandleEntries_AddEntry: Error (fatal), NULL TPM_KEY\n");
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_AddEntry: Error (fatal), NULL TPM_KEY\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -3495,7 +3495,7 @@ TPM_RESULT TPM_KeyHandleEntries_AddEntry(TPM_KEY_HANDLE *tpm_key_handle,		/* i/o
     if (rc == 0) {
 	TPM_KeyHandleEntries_IsSpace(&isSpace, &index, tpm_key_handle_entries);
 	if (!isSpace) {
-	    printf("TPM_KeyHandleEntries_AddEntry: Error, key handle entries full\n");
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_AddEntry: Error, key handle entries full\n");
 	    rc = TPM_NOSPACE;
 	}
     }
@@ -3511,7 +3511,7 @@ TPM_RESULT TPM_KeyHandleEntries_AddEntry(TPM_KEY_HANDLE *tpm_key_handle,		/* i/o
 	tpm_key_handle_entries[index].key = tpm_key_handle_entry->key;
 	tpm_key_handle_entries[index].keyControl = tpm_key_handle_entry->keyControl;
 	tpm_key_handle_entries[index].parentPCRStatus = tpm_key_handle_entry->parentPCRStatus;
-	printf("  TPM_KeyHandleEntries_AddEntry: Index %u key handle %08x key pointer %p\n",
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_AddEntry: Index %u key handle %08x key pointer %p\n",
 	       index, tpm_key_handle_entries[index].handle, tpm_key_handle_entries[index].key);
     }
     return rc;
@@ -3528,7 +3528,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetEntry(TPM_KEY_HANDLE_ENTRY **tpm_key_handle_e
     size_t	i;
     TPM_BOOL	found;
 
-    printf(" TPM_KeyHandleEntries_GetEntry: Get entry for handle %08x\n", tpm_key_handle);
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetEntry: Get entry for handle %08x\n", tpm_key_handle);
     for (i = 0, found = FALSE ; (i < TPM_KEY_HANDLES) && !found ; i++) {
 	/* first test for matching handle.  Then check for non-NULL to insure that entry is valid */
 	if ((tpm_key_handle_entries[i].handle == tpm_key_handle) &&
@@ -3538,11 +3538,11 @@ TPM_RESULT TPM_KeyHandleEntries_GetEntry(TPM_KEY_HANDLE_ENTRY **tpm_key_handle_e
 	}
     }
     if (!found) {
-	printf("  TPM_KeyHandleEntries_GetEntry: key handle %08x not found\n", tpm_key_handle);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_GetEntry: key handle %08x not found\n", tpm_key_handle);
 	rc = TPM_INVALID_KEYHANDLE;
     }
     else {
-	printf("  TPM_KeyHandleEntries_GetEntry: key handle %08x found\n", tpm_key_handle);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_GetEntry: key handle %08x found\n", tpm_key_handle);
     }
     return rc;
 }
@@ -3566,7 +3566,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetNextEntry(TPM_KEY_HANDLE_ENTRY **tpm_key_hand
 {
     TPM_RESULT	rc = TPM_RETRY;
 
-    printf(" TPM_KeyHandleEntries_GetNextEntry: Start %lu\n", (unsigned long)start);
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetNextEntry: Start %lu\n", (unsigned long)start);
     for (*current = start ; *current < TPM_KEY_HANDLES ; (*current)++) {
 	if (tpm_key_handle_entries[*current].key != NULL) {
 	    *tpm_key_handle_entry = &(tpm_key_handle_entries[*current]);
@@ -3604,7 +3604,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetKey(TPM_KEY **tpm_key,
     TPM_BOOL		validatePcrs = TRUE;
     TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entry;
 
-    printf(" TPM_KeyHandleEntries_GetKey: For handle %08x\n", tpm_key_handle);
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetKey: For handle %08x\n", tpm_key_handle);
     /* If it's one of the special handles, return the TPM_KEY */
     if (rc == 0) {
 	switch (tpm_key_handle) {
@@ -3615,7 +3615,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetKey(TPM_KEY **tpm_key,
 		found = TRUE;
 	    }
 	    else {
-		printf(" TPM_KeyHandleEntries_GetKey: Error, SRK handle with no owner\n");
+		TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetKey: Error, SRK handle with no owner\n");
 		rc = TPM_KEYNOTFOUND;
 	    }
 	    break;
@@ -3623,14 +3623,14 @@ TPM_RESULT TPM_KeyHandleEntries_GetKey(TPM_KEY **tpm_key,
 				   TPM_OwnerReadInternalPub */
 	    if (rc == 0) {
 		if (!allowEK) {
-		    printf(" TPM_KeyHandleEntries_GetKey: Error, EK handle not allowed\n");
+		    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetKey: Error, EK handle not allowed\n");
 		    rc = TPM_KEYNOTFOUND;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_data.endorsementKey.keyUsage ==
 		    TPM_KEY_UNINITIALIZED) {
-		    printf(" TPM_KeyHandleEntries_GetKey: Error, EK handle but no EK\n");
+		    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_GetKey: Error, EK handle but no EK\n");
 		    rc = TPM_KEYNOTFOUND;
 		}
 	    }
@@ -3645,7 +3645,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetKey(TPM_KEY **tpm_key,
 	  case TPM_KH_TRANSPORT: /* handle points to the EstablishTransport static authorization */
 	  case TPM_KH_OPERATOR: /* handle points to the Operator auth */
 	  case TPM_KH_ADMIN:	/* handle points to the delegation administration auth */
-	    printf("TPM_KeyHandleEntries_GetKey: Error, Unsupported key handle %08x\n",
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_GetKey: Error, Unsupported key handle %08x\n",
 		   tpm_key_handle);
 	    rc = TPM_INVALID_RESOURCE;
 	    break;
@@ -3660,7 +3660,7 @@ TPM_RESULT TPM_KeyHandleEntries_GetKey(TPM_KEY **tpm_key,
 					   tpm_state->tpm_key_handle_entries,
 					   tpm_key_handle);
 	if (rc != 0) {
-	    printf("TPM_KeyHandleEntries_GetKey: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_GetKey: Error, key handle %08x not found\n",
 		   tpm_key_handle);
 	}
     }
@@ -3700,14 +3700,14 @@ TPM_RESULT TPM_KeyHandleEntries_SetParentPCRStatus(TPM_KEY_HANDLE_ENTRY *tpm_key
     TPM_RESULT	rc = 0;
     TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entry;
 
-    printf(" TPM_KeyHandleEntries_SetParentPCRStatus: Handle %08x\n", tpm_key_handle);
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_SetParentPCRStatus: Handle %08x\n", tpm_key_handle);
     /* get the entry for the handle from the table */
     if (rc == 0) {
 	rc = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 					   tpm_key_handle_entries,
 					   tpm_key_handle);
 	if (rc != 0) {
-	    printf("TPM_KeyHandleEntries_SetParentPCRStatus: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_SetParentPCRStatus: Error, key handle %08x not found\n",
 		   tpm_key_handle);
 	}
     }
@@ -3731,14 +3731,14 @@ TPM_RESULT TPM_KeyHandleEntries_OwnerEvictLoad(TPM_KEY_HANDLE_ENTRY *tpm_key_han
     TPM_KEY_HANDLE_ENTRY tpm_key_handle_entry;	/* each entry as read from the stream */
     TPM_TAG		ownerEvictVersion;
 
-    printf(" TPM_KeyHandleEntries_OwnerEvictLoad:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_OwnerEvictLoad:\n");
     /* get the owner evict version number */
     if (rc == 0) {
 	rc = TPM_Load16(&ownerEvictVersion, stream, stream_size); 
     }
     if (rc == 0) {
 	if (ownerEvictVersion != TPM_TAG_NVSTATE_OE_V1) {
-	    printf("TPM_KeyHandleEntries_OwnerEvictLoad: "
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_OwnerEvictLoad: "
 		   "Error (fatal) unsupported version tag %04x\n",
 		   ownerEvictVersion);
 	    rc = TPM_FAIL;
@@ -3751,20 +3751,20 @@ TPM_RESULT TPM_KeyHandleEntries_OwnerEvictLoad(TPM_KEY_HANDLE_ENTRY *tpm_key_han
     /* sanity check that keyCount not greater than key slots */
     if (rc == 0) {
 	if (keyCount > TPM_OWNER_EVICT_KEY_HANDLES) {
-	    printf("TPM_KeyHandleEntries_OwnerEvictLoad: Error (fatal)"
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_OwnerEvictLoad: Error (fatal)"
 		   " key handles in stream %u greater than %d\n",
 		   keyCount, TPM_OWNER_EVICT_KEY_HANDLES);
 	    rc = TPM_FAIL;
 	}
     }    
     if (rc == 0) {
-	printf("  TPM_KeyHandleEntries_OwnerEvictLoad: Count %hu\n", keyCount);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_OwnerEvictLoad: Count %hu\n", keyCount);
     }
     for (i = 0 ; (rc == 0) && (i < keyCount) ; i++) {
 	/* Must init each time through.  This just resets the structure members.  It does not free
 	   the key that is in the structure after the first time through.  That key has been added
 	   (copied) to the key handle entries array. */
-	printf("  TPM_KeyHandleEntries_OwnerEvictLoad: Loading key %hu\n", i);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_OwnerEvictLoad: Loading key %hu\n", i);
 	TPM_KeyHandleEntry_Init(&tpm_key_handle_entry);	/* freed @2 on error */
 	if (rc == 0) {
 	    rc = TPM_KeyHandleEntry_Load(&tpm_key_handle_entry, stream, stream_size);
@@ -3798,7 +3798,7 @@ TPM_RESULT TPM_KeyHandleEntries_OwnerEvictStore(TPM_STORE_BUFFER *sbuffer,
     uint16_t 	count;
     uint16_t	i;		/* the uint16_t corresponds to the standard getcap */
 
-    printf(" TPM_KeyHandleEntries_OwnerEvictStore:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_OwnerEvictStore:\n");
     /* append the owner evict version number to the stream */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_NVSTATE_OE_V1); 
@@ -3834,7 +3834,7 @@ TPM_KeyHandleEntries_OwnerEvictGetCount(uint16_t *count,
     TPM_RESULT	rc = 0;
     uint16_t	i;		/* the uint16_t corresponds to the standard getcap */
 
-    printf(" TPM_KeyHandleEntries_OwnerEvictGetCount:\n");
+    TPMLIB_LogPrintf(" TPM_KeyHandleEntries_OwnerEvictGetCount:\n");
     /* count the number of loaded owner evict handles */
     if (rc == 0) {
 	for (i = 0 , *count = 0 ; i < TPM_KEY_HANDLES ; i++) {
@@ -3846,12 +3846,12 @@ TPM_KeyHandleEntries_OwnerEvictGetCount(uint16_t *count,
 		}
 	    }
 	}
-	printf("  TPM_KeyHandleEntries_OwnerEvictGetCount: Count %hu\n", *count);
+	TPMLIB_LogPrintf("  TPM_KeyHandleEntries_OwnerEvictGetCount: Count %hu\n", *count);
     }
     /* sanity check */
     if (rc == 0) {
 	if (*count > TPM_OWNER_EVICT_KEY_HANDLES) {
-	    printf("TPM_KeyHandleEntries_OwnerEvictGetCount: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_KeyHandleEntries_OwnerEvictGetCount: Error (fatal), "
 		   "count greater that max %u\n", TPM_OWNER_EVICT_KEY_HANDLES);
 	    rc = TPM_FAIL;	/* should never occur */
 	}
@@ -3924,7 +3924,7 @@ TPM_RESULT TPM_Process_ReadPubek(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER	pubEndorsementKeyStream;
     TPM_DIGEST		checksum;
     
-    printf("TPM_Process_ReadPubek: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ReadPubek: Ordinal Entry\n");
     TPM_Sbuffer_Init(&pubEndorsementKeyStream);		/* freed @1 */
     /*
       get inputs
@@ -3962,7 +3962,7 @@ TPM_RESULT TPM_Process_ReadPubek(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ReadPubek: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ReadPubek: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3972,17 +3972,17 @@ TPM_RESULT TPM_Process_ReadPubek(tpm_state_t *tpm_state,
     */
     /* 1. If TPM_PERMANENT_FLAGS -> readPubek is FALSE return TPM_DISABLED_CMD. */
     if (returnCode == TPM_SUCCESS) {
-	printf(" TPM_Process_ReadPubek: readPubek %02x\n",
+	TPMLIB_LogPrintf(" TPM_Process_ReadPubek: readPubek %02x\n",
 	       tpm_state->tpm_permanent_flags.readPubek);
 	if (!tpm_state->tpm_permanent_flags.readPubek) {
-	    printf("TPM_Process_ReadPubek: Error, readPubek is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_ReadPubek: Error, readPubek is FALSE\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
     /* 2. If no EK is present the TPM MUST return TPM_NO_ENDORSEMENT */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_permanent_data.endorsementKey.keyUsage == TPM_KEY_UNINITIALIZED) {
-	    printf("TPM_Process_ReadPubek: Error, no EK is present\n");
+	    TPMLIB_LogPrintf("TPM_Process_ReadPubek: Error, no EK is present\n");
 	    returnCode = TPM_NO_ENDORSEMENT;
 	}
     }
@@ -3997,7 +3997,7 @@ TPM_RESULT TPM_Process_ReadPubek(tpm_state_t *tpm_state,
 				&(tpm_state->tpm_permanent_data.endorsementKey));	/* input */
     }
     if (returnCode == TPM_SUCCESS) {
-	printf(" TPM_Process_ReadPubek: pubEndorsementKey length %u\n",
+	TPMLIB_LogPrintf(" TPM_Process_ReadPubek: pubEndorsementKey length %u\n",
 	       pubEndorsementKeyStreamLength);
 	/* create the checksum */
 	returnCode = TPM_SHA1(checksum,
@@ -4015,7 +4015,7 @@ TPM_RESULT TPM_Process_ReadPubek(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ReadPubek: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ReadPubek: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4111,7 +4111,7 @@ TPM_RESULT TPM_Process_CreateRevocableEK(tpm_state_t *tpm_state,
     TPM_PUBKEY		pubEndorsementKey;	/* The public endorsement key */
     TPM_DIGEST		checksum;		/* Hash of pubEndorsementKey and antiReplay */
 
-    printf("TPM_Process_CreateRevocableEK: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateRevocableEK: Ordinal Entry\n");
     /* get pointers */
     endorsementKey = &(tpm_state->tpm_permanent_data.endorsementKey);
     /* so that Delete's are safe */
@@ -4136,7 +4136,7 @@ TPM_RESULT TPM_Process_CreateRevocableEK(tpm_state_t *tpm_state,
     }
     /* get inputEKreset parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateRevocableEK: generateReset %02x\n", generateReset);
+	TPMLIB_LogPrintf("TPM_Process_CreateRevocableEK: generateReset %02x\n", generateReset);
 	/* an email clarification says that this parameter is still present (but ignored) if
 	   generateReset is TRUE */
 	returnCode = TPM_Nonce_Load(inputEKreset, &command, &paramSize);
@@ -4168,7 +4168,7 @@ TPM_RESULT TPM_Process_CreateRevocableEK(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateRevocableEK: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateRevocableEK: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4212,7 +4212,7 @@ TPM_RESULT TPM_Process_CreateRevocableEK(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateRevocableEK: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateRevocableEK: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4309,7 +4309,7 @@ TPM_RESULT TPM_Process_CreateEndorsementKeyPair(tpm_state_t *tpm_state,
     TPM_PUBKEY		pubEndorsementKey;	/* The public endorsement key */
     TPM_DIGEST		checksum;		/* Hash of pubEndorsementKey and antiReplay */
     
-    printf("TPM_Process_CreateEndorsementKeyPair: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateEndorsementKeyPair: Ordinal Entry\n");
     /* get pointers */
     endorsementKey = &(tpm_state->tpm_permanent_data.endorsementKey);
     /* so that Delete's are safe */
@@ -4352,7 +4352,7 @@ TPM_RESULT TPM_Process_CreateEndorsementKeyPair(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateEndorsementKeyPair: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateEndorsementKeyPair: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4384,7 +4384,7 @@ TPM_RESULT TPM_Process_CreateEndorsementKeyPair(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateEndorsementKeyPair: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateEndorsementKeyPair: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4453,12 +4453,12 @@ TPM_RESULT TPM_CreateEndorsementKeyPair_Common(TPM_KEY *endorsementKey,		/* outp
     const unsigned char *pubEndorsementKeyBuffer;
     uint32_t		pubEndorsementKeyLength;
 
-    printf("TPM_CreateEndorsementKeyPair_Common:\n");
+    TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common:\n");
     TPM_Sbuffer_Init(&pubEndorsementKeySerial);		/* freed @1 */
     /* 1. If an EK already exists, return TPM_DISABLED_CMD */
     if (returnCode == TPM_SUCCESS) {
 	if (endorsementKey->keyUsage != TPM_KEY_UNINITIALIZED) {
-	    printf("TPM_CreateEndorsementKeyPair_Common: Error, key already initialized\n");
+	    TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common: Error, key already initialized\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
@@ -4477,7 +4477,7 @@ TPM_RESULT TPM_CreateEndorsementKeyPair_Common(TPM_KEY *endorsementKey,		/* outp
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (tpm_rsa_key_parms->keyLength != TPM_KEY_RSA_NUMBITS) {	/* in bits */
-		    printf("TPM_CreateEndorsementKeyPair_Common: Error, "
+		    TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common: Error, "
 			   "Bad keyLength should be %u, was %u\n",
 			   TPM_KEY_RSA_NUMBITS, tpm_rsa_key_parms->keyLength);
 		    returnCode = TPM_BAD_KEY_PROPERTY;
@@ -4486,7 +4486,7 @@ TPM_RESULT TPM_CreateEndorsementKeyPair_Common(TPM_KEY *endorsementKey,		/* outp
 	    /* kgold - Support only 2 primes */
 	    if (returnCode == TPM_SUCCESS) {
 		if (tpm_rsa_key_parms->numPrimes != 2) {
-		    printf("TPM_CreateEndorsementKeyPair_Common: Error, "
+		    TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common: Error, "
 			   "Bad numPrimes should be 2, was %u\n",
 			   tpm_rsa_key_parms->numPrimes);
 		    returnCode = TPM_BAD_KEY_PROPERTY;
@@ -4500,7 +4500,7 @@ TPM_RESULT TPM_CreateEndorsementKeyPair_Common(TPM_KEY *endorsementKey,		/* outp
 	   the key MUST be comparable to RSA 2048 */
 	else {
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_CreateEndorsementKeyPair_Common: Error, "
+		TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common: Error, "
 		       "algorithmID %08x not supported\n",
 		       keyInfo->algorithmID);
 		returnCode = TPM_BAD_KEY_PROPERTY;
@@ -4522,7 +4522,7 @@ TPM_RESULT TPM_CreateEndorsementKeyPair_Common(TPM_KEY *endorsementKey,		/* outp
     if (returnCode == TPM_SUCCESS) {
 	if (keyInfo->encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
 	    returnCode = TPM_BAD_KEY_PROPERTY;
-	    printf("TPM_CreateEndorsementKeyPair_Common: Error, "
+	    TPMLIB_LogPrintf("TPM_CreateEndorsementKeyPair_Common: Error, "
 		   "encScheme %08x must be TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		   keyInfo->encScheme);
 	}
@@ -4627,7 +4627,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_RevokeTrust: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -4664,7 +4664,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_RevokeTrust: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4676,7 +4676,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
        TPM_PERMANENTEK on error */
     if (returnCode == TPM_SUCCESS) {
 	if (!tpm_state->tpm_permanent_flags.enableRevokeEK) {
-	    printf("TPM_Process_RevokeTrust: Error, enableRevokeEK is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Error, enableRevokeEK is FALSE\n");
 	    returnCode = TPM_PERMANENTEK;
 	}  
     }
@@ -4685,7 +4685,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_Nonce_Compare(tpm_state->tpm_permanent_data.EKReset, EKReset);
 	if (returnCode != 0) {
-	    printf("TPM_Process_RevokeTrust: Error, EKReset mismatch\n");
+	    TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Error, EKReset mismatch\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -4695,7 +4695,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_RevokeTrust: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
@@ -4719,7 +4719,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	/* 8. Invalidate the EK and any internal state associated with the EK */
-	printf("TPM_Process_RevokeTrust: Deleting endorsement key\n");
+	TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Deleting endorsement key\n");
 	TPM_Key_Delete(&(tpm_state->tpm_permanent_data.endorsementKey));
 	TPM_SetCapability_Flag(&writeAllNV3,				/* altered  (dummy) */
 			       &(tpm_state->tpm_permanent_flags.CEKPUsed),	/* flag */
@@ -4734,7 +4734,7 @@ TPM_RESULT TPM_Process_RevokeTrust(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_RevokeTrust: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_RevokeTrust: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4818,7 +4818,7 @@ TPM_RESULT TPM_Process_DisablePubekRead(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_DisablePubekRead: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DisablePubekRead: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -4857,7 +4857,7 @@ TPM_RESULT TPM_Process_DisablePubekRead(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DisablePubekRead: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DisablePubekRead: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4898,7 +4898,7 @@ TPM_RESULT TPM_Process_DisablePubekRead(tpm_state_t *tpm_state,
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.readPubek),	/* flag */
 			       FALSE);						/* value */
-	printf("TPM_Process_DisablePubekRead: readPubek now %02x\n",
+	TPMLIB_LogPrintf("TPM_Process_DisablePubekRead: readPubek now %02x\n",
 	       tpm_state->tpm_permanent_flags.readPubek);
 	/* save the permanent flags structure to NVRAM */
 	returnCode = TPM_PermanentAll_NVStore(tpm_state,
@@ -4910,7 +4910,7 @@ TPM_RESULT TPM_Process_DisablePubekRead(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DisablePubekRead: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DisablePubekRead: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5006,7 +5006,7 @@ TPM_RESULT TPM_Process_OwnerReadPubek(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_STORE_BUFFER	pubEndorsementKeyStream;	/* The public endorsement key */
 
-    printf("TPM_Process_OwnerReadPubek: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OwnerReadPubek: Ordinal Entry\n");
     TPM_Sbuffer_Init(&pubEndorsementKeyStream); /* freed @1 */
     /*
       get inputs
@@ -5046,7 +5046,7 @@ TPM_RESULT TPM_Process_OwnerReadPubek(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OwnerReadPubek: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_OwnerReadPubek: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5094,7 +5094,7 @@ TPM_RESULT TPM_Process_OwnerReadPubek(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OwnerReadPubek: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OwnerReadPubek: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5196,7 +5196,7 @@ TPM_RESULT TPM_Process_EvictKey(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_EvictKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_EvictKey: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -5230,7 +5230,7 @@ TPM_RESULT TPM_Process_EvictKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_EvictKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_EvictKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5245,19 +5245,19 @@ TPM_RESULT TPM_Process_EvictKey(tpm_state_t *tpm_state,
     /* evict the key stored in the specified handle */
     /* get the TPM_KEY_HANDLE_ENTRY */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_EvictKey: Evicting handle %08x\n", evictHandle);
+	TPMLIB_LogPrintf("TPM_Process_EvictKey: Evicting handle %08x\n", evictHandle);
 	returnCode = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 						   tpm_state->tpm_key_handle_entries,
 						   evictHandle);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_EvictKey: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_Process_EvictKey: Error, key handle %08x not found\n",
 		   evictHandle);
 	}
     }
     /* If tpm_key_handle_entry -> ownerEvict is TRUE return TPM_KEY_OWNER_CONTROL */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_key_handle_entry->keyControl & TPM_KEY_CONTROL_OWNER_EVICT) {
-	    printf("TPM_Process_EvictKey: Error, keyHandle specifies owner evict\n");
+	    TPMLIB_LogPrintf("TPM_Process_EvictKey: Error, keyHandle specifies owner evict\n");
 	    returnCode = TPM_KEY_OWNER_CONTROL;
 	}
     }
@@ -5270,7 +5270,7 @@ TPM_RESULT TPM_Process_EvictKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_EvictKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_EvictKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5356,7 +5356,7 @@ TPM_RESULT TPM_Process_OwnerReadInternalPub(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_OwnerReadInternalPub: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -5370,7 +5370,7 @@ TPM_RESULT TPM_Process_OwnerReadInternalPub(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&keyHandle, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OwnerReadInternalPub: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: keyHandle %08x\n", keyHandle);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -5405,7 +5405,7 @@ TPM_RESULT TPM_Process_OwnerReadInternalPub(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OwnerReadInternalPub: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5444,18 +5444,18 @@ TPM_RESULT TPM_Process_OwnerReadInternalPub(tpm_state_t *tpm_state,
 	/* 2. If keyHandle is TPM_KH_EK */
 	if (keyHandle == TPM_KH_EK) {
 	    /* a. Set publicPortion to PUBEK */
-	    printf("TPM_Process_OwnerReadInternalPub: Reading EK\n");
+	    TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Reading EK\n");
 	    readKey = &(tpm_state->tpm_permanent_data.endorsementKey);
 	}
 	/* 3. Else If keyHandle is TPM_KH_SRK */
 	else if (keyHandle == TPM_KH_SRK) {
 	    /* a. Set publicPortion to the TPM_PUBKEY of the SRK */
-	    printf("TPM_Process_OwnerReadInternalPub: Reading SRK\n");
+	    TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Reading SRK\n");
 	    readKey = &(tpm_state->tpm_permanent_data.srk);
 	}
 	/* 4. Else return TPM_BAD_PARAMETER */
 	else {
-	    printf("TPM_Process_OwnerReadInternalPub: Error, invalid keyHandle %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Error, invalid keyHandle %08x\n",
 		   keyHandle);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
@@ -5465,7 +5465,7 @@ TPM_RESULT TPM_Process_OwnerReadInternalPub(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OwnerReadInternalPub: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OwnerReadInternalPub: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

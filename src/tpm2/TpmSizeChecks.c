@@ -123,21 +123,21 @@ TpmSizeChecks(
             UINT16                    max_rsa_key_bytes = MAX_RSA_KEY_BYTES;
             if((max_rsa_key_bytes / 2) != (sizeof(p->sensitive.rsa.t.buffer) / 5))
 		{
-		    printf("Sensitive part of TPMT_SENSITIVE is undersized. May be caused"
+		    TPMLIB_LogPrintf("Sensitive part of TPMT_SENSITIVE is undersized. May be caused"
 			   " by use of wrong version of Part 2.\n");
 		    PASS = FALSE;
 		}
         }
 #if TABLE_DRIVEN_MARSHAL
-        printf("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
+        TPMLIB_LogPrintf("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
 #endif
 
-        printf("Size of OBJECT = %zu\n", sizeof(OBJECT));
-        printf("Size of components in TPMT_SENSITIVE = %zu\n", sizeof(TPMT_SENSITIVE));
-        printf("    TPMI_ALG_PUBLIC                 %zu\n", sizeof(TPMI_ALG_PUBLIC));
-        printf("    TPM2B_AUTH                      %zu\n", sizeof(TPM2B_AUTH));
-        printf("    TPM2B_DIGEST                    %zu\n", sizeof(TPM2B_DIGEST));
-        printf("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
+        TPMLIB_LogPrintf("Size of OBJECT = %zu\n", sizeof(OBJECT));
+        TPMLIB_LogPrintf("Size of components in TPMT_SENSITIVE = %zu\n", sizeof(TPMT_SENSITIVE));
+        TPMLIB_LogPrintf("    TPMI_ALG_PUBLIC                 %zu\n", sizeof(TPMI_ALG_PUBLIC));
+        TPMLIB_LogPrintf("    TPM2B_AUTH                      %zu\n", sizeof(TPM2B_AUTH));
+        TPMLIB_LogPrintf("    TPM2B_DIGEST                    %zu\n", sizeof(TPM2B_DIGEST));
+        TPMLIB_LogPrintf("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
                sizeof(TPMU_SENSITIVE_COMPOSITE));
     }
     // Make sure that the size of the context blob is large enough for the largest
@@ -168,13 +168,13 @@ TpmSizeChecks(
 
         if(MAX_CONTEXT_SIZE < biggestContext)
 	    {
-		printf("MAX_CONTEXT_SIZE needs to be increased to at least to %d (%d)\n",
+		TPMLIB_LogPrintf("MAX_CONTEXT_SIZE needs to be increased to at least to %d (%d)\n",
 		       biggestContext, MAX_CONTEXT_SIZE);
 		PASS = FALSE;
 	    }
 	else if (MAX_CONTEXT_SIZE > biggestContext)
 	    {
-		printf("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
+		TPMLIB_LogPrintf("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
 		       biggestContext, MAX_CONTEXT_SIZE);
 	    }
     }
@@ -192,12 +192,12 @@ TpmSizeChecks(
         SET_ATTRIBUTE(u.attributes, TPMA_OBJECT, fixedTPM);
         if(u.uint32Value != 2)
 	    {
-		printf("The bit allocation in a TPMA_OBJECT is not as expected");
+		TPMLIB_LogPrintf("The bit allocation in a TPMA_OBJECT is not as expected");
 		PASS = FALSE;
 	    }
         if(aSize != uSize)  // comparison of two sizeof() values annoys compiler
 	    {
-		printf("A TPMA_OBJECT is not the expected size.");
+		TPMLIB_LogPrintf("A TPMA_OBJECT is not the expected size.");
 		PASS = FALSE;
 	    }
     }
@@ -211,7 +211,7 @@ TpmSizeChecks(
 			FOR_EACH_ACT(CASE_ACT_NUMBER)
 			    if(!_plat__ACT_GetImplemented(act))
 				{
-				    printf("TPM_RH_ACT_%1X is not implemented by platform\n",
+				    TPMLIB_LogPrintf("TPM_RH_ACT_%1X is not implemented by platform\n",
 					   act);
 				    PASS = FALSE;
 				}

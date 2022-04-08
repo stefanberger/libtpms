@@ -67,7 +67,7 @@
 
 void TPM_AuditEventIn_Init(TPM_AUDIT_EVENT_IN *tpm_audit_event_in)
 {
-    printf(" TPM_AuditEventIn_Init:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventIn_Init:\n");
     TPM_Digest_Init(tpm_audit_event_in->inputParms);
     TPM_CounterValue_Init(&(tpm_audit_event_in->auditCount));
     return;
@@ -84,7 +84,7 @@ TPM_RESULT TPM_AuditEventIn_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AuditEventIn_Store:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventIn_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_AUDIT_EVENT_IN); 
@@ -111,7 +111,7 @@ TPM_RESULT TPM_AuditEventIn_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_AuditEventIn_Delete(TPM_AUDIT_EVENT_IN *tpm_audit_event_in)
 {
-    printf(" TPM_AuditEventIn_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventIn_Delete:\n");
     if (tpm_audit_event_in != NULL) {
 	TPM_AuditEventIn_Init(tpm_audit_event_in);
     }
@@ -131,7 +131,7 @@ void TPM_AuditEventIn_Delete(TPM_AUDIT_EVENT_IN *tpm_audit_event_in)
 
 void TPM_AuditEventOut_Init(TPM_AUDIT_EVENT_OUT *tpm_audit_event_out)
 {
-    printf(" TPM_AuditEventOut_Init:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventOut_Init:\n");
     TPM_Digest_Init(tpm_audit_event_out->outputParms);
     TPM_CounterValue_Init(&(tpm_audit_event_out->auditCount));
     return;
@@ -148,7 +148,7 @@ TPM_RESULT TPM_AuditEventOut_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AuditEventOut_Store:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventOut_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_AUDIT_EVENT_OUT); 
@@ -175,7 +175,7 @@ TPM_RESULT TPM_AuditEventOut_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_AuditEventOut_Delete(TPM_AUDIT_EVENT_OUT *tpm_audit_event_out)
 {
-    printf(" TPM_AuditEventOut_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_AuditEventOut_Delete:\n");
     if (tpm_audit_event_out != NULL) {
 	TPM_AuditEventOut_Init(tpm_audit_event_out);
     }
@@ -201,7 +201,7 @@ TPM_RESULT TPM_OrdinalAuditStatus_Init(TPM_PERMANENT_DATA *tpm_permanent_data)
     TPM_BOOL		auditDefault;	/* result for an ordinal */
     TPM_BOOL 		altered;
     
-    printf(" TPM_OrdinalAuditStatus_Init:\n");
+    TPMLIB_LogPrintf(" TPM_OrdinalAuditStatus_Init:\n");
 
     for (ord = 0 ; (rc == 0) && (ord < TPM_ORDINALS_MAX) ; ord++) {
 	/* get the default audit state from the ordinals table */
@@ -235,7 +235,7 @@ TPM_RESULT TPM_OrdinalAuditStatus_Store(TPM_SIZED_BUFFER *ordinalList,
     TPM_COMMAND_CODE	ord;
     TPM_BOOL		auditStatus;
     
-    printf(" TPM_OrdinalAuditStatus_Store\n");
+    TPMLIB_LogPrintf(" TPM_OrdinalAuditStatus_Store\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */	
     /* scan through the ordinals array */
     for (ord = startOrdinal ; (rc == 0) && (ord < TPM_ORDINALS_MAX) ; ord++ ) {
@@ -304,14 +304,14 @@ TPM_RESULT TPM_OrdinalAuditStatus_GetAuditStatus(TPM_BOOL *auditStatus,
 	    *auditStatus = tpm_permanent_data->tscOrdinalAuditStatus & TSC_RESET_ESTAB_AUDIT;
 	}
 	else {
-	    printf("TPM_OrdinalAuditStatus_GetAuditStatus: Error (fatal) "
+	    TPMLIB_LogPrintf("TPM_OrdinalAuditStatus_GetAuditStatus: Error (fatal) "
 		   "ordinal %08x out of range\n", ordinal);
 	    rc = TPM_FAIL;	/* should never occur, always called with ordinal processing */
 	}
     }
     /* trace the ordinals with auditing enabled */
     if ((rc == 0) && *auditStatus) {
-	printf("  TPM_OrdinalAuditStatus_GetAuditStatus: ordinal %08x status %02x\n",
+	TPMLIB_LogPrintf("  TPM_OrdinalAuditStatus_GetAuditStatus: ordinal %08x status %02x\n",
 	       ordinal, *auditStatus);
     }
     return rc;
@@ -341,7 +341,7 @@ TPM_RESULT TPM_OrdinalAuditStatus_SetAuditStatus(TPM_BOOL *altered,
 
     *altered = FALSE;			/* default, returned on error */
 #if 0
-    printf(" TPM_OrdinalAuditStatus_SetAuditStatus: ordinal %08x status %02x\n",
+    TPMLIB_LogPrintf(" TPM_OrdinalAuditStatus_SetAuditStatus: ordinal %08x status %02x\n",
 	   ordinal, auditStatus);
 #endif
     /* If trying to set, screen against the 'never audit' ordinal table */
@@ -349,7 +349,7 @@ TPM_RESULT TPM_OrdinalAuditStatus_SetAuditStatus(TPM_BOOL *altered,
 	TPM_OrdinalTable_GetAuditable(&auditable, ordinal);
 	/* if it is a 'never audit' ordinal, it can not be set */
 	if (!auditable) {
-	    printf("TPM_OrdinalAuditStatus_SetAuditStatus: "
+	    TPMLIB_LogPrintf("TPM_OrdinalAuditStatus_SetAuditStatus: "
 		   "Error, cannot audit ordinal %08x\n", ordinal);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -409,7 +409,7 @@ TPM_RESULT TPM_OrdinalAuditStatus_SetAuditStatus(TPM_BOOL *altered,
 	    }
 	}
 	else {
-	    printf("TPM_OrdinalAuditStatus_SetAuditStatus: Error ordinal %08x out of range\n",
+	    TPMLIB_LogPrintf("TPM_OrdinalAuditStatus_SetAuditStatus: Error ordinal %08x out of range\n",
 		   ordinal);
 	    rc = TPM_BADINDEX;
 	}
@@ -435,7 +435,7 @@ TPM_RESULT TPM_AuditDigest_ExtendIn(tpm_state_t *tpm_state,
     const unsigned char *eventIn_buffer;	/* serialized buffer */
     uint32_t		eventIn_length;		/* serialization length */
     
-    printf(" TPM_AuditDigest_ExtendIn:\n");
+    TPMLIB_LogPrintf(" TPM_AuditDigest_ExtendIn:\n");
     TPM_AuditEventIn_Init(&tpm_audit_event_in);		/* freed @1 */
     TPM_Sbuffer_Init(&eventIn_sbuffer);			/* freed @2 */
 
@@ -486,7 +486,7 @@ TPM_RESULT TPM_AuditDigest_ExtendOut(tpm_state_t *tpm_state,
     const unsigned char *eventOut_buffer;	/* serialized buffer */
     uint32_t		eventOut_length;	/* serialization length */
     
-    printf(" TPM_AuditDigest_ExtendOut:\n");
+    TPMLIB_LogPrintf(" TPM_AuditDigest_ExtendOut:\n");
     TPM_AuditEventOut_Init(&tpm_audit_event_out);	/* freed @1 */
     TPM_Sbuffer_Init(&eventOut_sbuffer);		/* freed @2 */
 
@@ -572,7 +572,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
 					   audited ordinals */
     TPM_SIZED_BUFFER	ordList;	/* List of ordinals that are audited. */
 
-    printf("TPM_Process_GetAuditDigest: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&ordList);	/* freed @1 */
     /*
       get inputs
@@ -584,7 +584,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&startOrdinal, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetAuditDigest: startOrdinal %08x\n", startOrdinal);
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: startOrdinal %08x\n", startOrdinal);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -610,7 +610,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetAuditDigest: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -623,7 +623,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
 	TPM_Digest_Copy(auditDigest, tpm_state->tpm_stclear_data.auditDigest);
 	/* 2. The TPM sets counterValue to TPM_PERMANENT_DATA -> auditMonotonicCounter */
 	/* NOTE Since there is only one, use it directly on the output */
-	printf("TPM_Process_GetAuditDigest: Counter value %08x\n",
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: Counter value %08x\n",
 	       tpm_state->tpm_permanent_data.auditMonotonicCounter.counter);
 	/* 3. The TPM creates an ordered list of audited ordinals. The list starts at startOrdinal
 	   listing each ordinal that is audited. */
@@ -635,7 +635,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
 						  startOrdinal);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetAuditDigest: ordSize %u\n", ordList.size);
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: ordSize %u\n", ordList.size);
 	/* 4. If the ordered list does not fit in the output buffer the TPM sets more to TRUE */
 	more = FALSE;
     }
@@ -644,7 +644,7 @@ TPM_RESULT TPM_Process_GetAuditDigest(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetAuditDigest: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigest: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -769,7 +769,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     TPM_DIGEST			ordinalDigest;	/* Digest of all audited ordinals */
     TPM_SIZED_BUFFER		sig;		/* The signature of the area */
 
-    printf("TPM_Process_GetAuditDigestSigned: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Ordinal Entry\n");
     TPM_SignInfo_Init(&d1SignInfo);		/* freed @1 */
     TPM_SizedBuffer_Init(&d3SizedBuffer);	/* freed @2 */
     TPM_Sbuffer_Init(&d2Sbuffer);		/* freed @3 */
@@ -785,7 +785,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get closeAudit parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetAuditDigestSigned: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_LoadBool(&closeAudit, &command, &paramSize);
     }
     /* get antiReplay parameter */
@@ -825,7 +825,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetAuditDigestSigned: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -847,7 +847,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)){
 	if (sigKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_GetAuditDigestSigned: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -885,7 +885,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
 	if ((sigKey->keyUsage != TPM_KEY_SIGNING) &&
 	    (sigKey->keyUsage != TPM_KEY_IDENTITY) &&
 	    (sigKey->keyUsage != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_GetAuditDigestSigned: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Error, keyUsage %04hx is invalid\n",
 		   sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -896,7 +896,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_GetAuditDigestSigned: Error, invalid sigScheme %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Error, invalid sigScheme %04hx\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -972,7 +972,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
 	/* b. Else */
 	else {
 	    /* i. Return TPM_INVALID_KEYUSAGE */
-	    printf("TPM_Process_GetAuditDigestSigned: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Error, "
 		   "cannot closeAudit with keyUsage %04hx\n", sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -982,7 +982,7 @@ TPM_RESULT TPM_Process_GetAuditDigestSigned(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetAuditDigestSigned: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetAuditDigestSigned: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1102,7 +1102,7 @@ TPM_RESULT TPM_Process_SetOrdinalAuditStatus(tpm_state_t *tpm_state,
     uint32_t			outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST			outParamDigest;
 
-    printf("TPM_Process_SetOrdinalAuditStatus: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetOrdinalAuditStatus: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1117,7 +1117,7 @@ TPM_RESULT TPM_Process_SetOrdinalAuditStatus(tpm_state_t *tpm_state,
 	returnCode = TPM_LoadBool(&auditState, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SetOrdinalAuditStatus: ordinalToAudit %08x auditState %02x\n",
+	TPMLIB_LogPrintf("TPM_Process_SetOrdinalAuditStatus: ordinalToAudit %08x auditState %02x\n",
 	       ordinalToAudit, auditState);
     }
     /* save the ending point of inParam's for authorization and auditing */
@@ -1153,7 +1153,7 @@ TPM_RESULT TPM_Process_SetOrdinalAuditStatus(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetOrdinalAuditStatus: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SetOrdinalAuditStatus: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1217,7 +1217,7 @@ TPM_RESULT TPM_Process_SetOrdinalAuditStatus(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetOrdinalAuditStatus: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetOrdinalAuditStatus: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

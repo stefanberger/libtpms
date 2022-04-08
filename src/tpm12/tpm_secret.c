@@ -49,7 +49,7 @@
 
 void TPM_Secret_Init(TPM_SECRET tpm_secret)
 {
-    printf("  TPM_Secret_Init:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Init:\n");
     memset(tpm_secret, 0, TPM_SECRET_SIZE);
     return;
 }
@@ -69,7 +69,7 @@ TPM_RESULT TPM_Secret_Load(TPM_SECRET tpm_secret,
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Secret_Load:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Load:\n");
     rc = TPM_Loadn(tpm_secret, TPM_SECRET_SIZE, stream, stream_size);
     return rc;
 }
@@ -87,7 +87,7 @@ TPM_RESULT TPM_Secret_Store(TPM_STORE_BUFFER *sbuffer,
 {
      TPM_RESULT rc = 0;
 
-     printf("  TPM_Secret_Store:\n");
+     TPMLIB_LogPrintf("  TPM_Secret_Store:\n");
      rc = TPM_Sbuffer_Append(sbuffer, tpm_secret, TPM_SECRET_SIZE);     
      return rc;
 }
@@ -104,7 +104,7 @@ TPM_RESULT TPM_Secret_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_Secret_Delete(TPM_SECRET tpm_secret)
 {
-    printf("  TPM_Secret_Delete:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Delete:\n");
     if (tpm_secret != NULL) {
         TPM_Secret_Init(tpm_secret);
     }
@@ -116,7 +116,7 @@ void TPM_Secret_Delete(TPM_SECRET tpm_secret)
 
 void TPM_Secret_Copy(TPM_SECRET destination, const TPM_SECRET source)
 {
-    printf("  TPM_Secret_Copy:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Copy:\n");
     memcpy(destination, source, TPM_SECRET_SIZE);
     return;
 }
@@ -130,10 +130,10 @@ TPM_RESULT TPM_Secret_Compare(TPM_SECRET expect, const TPM_SECRET actual)
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Secret_Compare:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Compare:\n");
     rc = memcmp(expect, actual, TPM_SECRET_SIZE);
     if (rc != 0) {
-        printf("TPM_Secret_Compare: Error comparing secret\n");
+        TPMLIB_LogPrintf("TPM_Secret_Compare: Error comparing secret\n");
         rc = TPM_AUTHFAIL;
     }
     return rc;
@@ -146,7 +146,7 @@ TPM_RESULT TPM_Secret_Generate(TPM_SECRET tpm_secret)
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Secret_Generate:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_Generate:\n");
     rc = TPM_Random(tpm_secret, TPM_SECRET_SIZE);
     return rc;
 }
@@ -158,7 +158,7 @@ void TPM_Secret_XOR(TPM_SECRET output, TPM_SECRET input1, TPM_SECRET input2)
 {
     size_t i;
 
-    printf("  TPM_Secret_XOR:\n");
+    TPMLIB_LogPrintf("  TPM_Secret_XOR:\n");
     for (i = 0 ; i < TPM_SECRET_SIZE ; i++) {
         output[i] = input1[i] ^ input2[i];
     }

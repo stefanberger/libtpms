@@ -92,7 +92,7 @@ TPM_RESULT TPM_Sbuffer_Load(TPM_STORE_BUFFER *sbuffer,
     /* check stream_size */
     if (rc == 0) {
         if (*stream_size < length) {
-            printf("TPM_Sbuffer_Load: Error, stream_size %u less than %u\n",
+            TPMLIB_LogPrintf("TPM_Sbuffer_Load: Error, stream_size %u less than %u\n",
                    *stream_size, length);
             rc = TPM_BAD_PARAM_SIZE;
         }
@@ -171,7 +171,7 @@ TPM_RESULT TPM_Sbuffer_Set(TPM_STORE_BUFFER *sbuffer,
 
     if (rc == 0) {
 	if (sbuffer == NULL) {
-	    printf("TPM_Sbuffer_Set: Error (fatal), sbuffer is NULL\n");
+	    TPMLIB_LogPrintf("TPM_Sbuffer_Set: Error (fatal), sbuffer is NULL\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -179,7 +179,7 @@ TPM_RESULT TPM_Sbuffer_Set(TPM_STORE_BUFFER *sbuffer,
 	if (buffer != NULL) {
 	    if (rc == 0) {
 		if (length > total) {
-		    printf("TPM_Sbuffer_Set: Error (fatal), length %u > total %u\n",
+		    TPMLIB_LogPrintf("TPM_Sbuffer_Set: Error (fatal), length %u > total %u\n",
 			   length, total);
 		    rc = TPM_FAIL;
 		}
@@ -226,7 +226,7 @@ TPM_RESULT TPM_Sbuffer_Append(TPM_STORE_BUFFER *sbuffer,
                 /* cast safe as current is always greater than start */
                 current_length = (size_t)(sbuffer->buffer_current - sbuffer->buffer);
                 if ((current_length + data_length) > TPM_ALLOC_MAX) {
-                    printf("TPM_Sbuffer_Append: "
+                    TPMLIB_LogPrintf("TPM_Sbuffer_Append: "
                            "Error, size %lu + %lu greater than maximum allowed\n",
                            (unsigned long)current_length, (unsigned long)data_length);
                     rc = TPM_SIZE;
@@ -243,7 +243,7 @@ TPM_RESULT TPM_Sbuffer_Append(TPM_STORE_BUFFER *sbuffer,
                 if (new_size > TPM_ALLOC_MAX) {
                     new_size = TPM_ALLOC_MAX;
                 }
-                printf("   TPM_Sbuffer_Append: data_length %lu, growing from %lu to %lu\n",
+                TPMLIB_LogPrintf("   TPM_Sbuffer_Append: data_length %lu, growing from %lu to %lu\n",
                        (unsigned long)data_length,
                        (unsigned long)current_size,
                        (unsigned long)new_size);
@@ -363,7 +363,7 @@ TPM_RESULT TPM_Sbuffer_StoreInitialResponse(TPM_STORE_BUFFER *response,
     TPM_RESULT  rc = 0;
     TPM_TAG     response_tag;
     
-    printf(" TPM_Sbuffer_StoreInitialResponse: returnCode %08x\n", returnCode);
+    TPMLIB_LogPrintf(" TPM_Sbuffer_StoreInitialResponse: returnCode %08x\n", returnCode);
     if (rc == 0) {
         if (request_tag == TPM_TAG_RQU_COMMAND) {
             response_tag = TPM_TAG_RSP_COMMAND;
@@ -415,11 +415,11 @@ TPM_RESULT TPM_Sbuffer_StoreFinalResponse(TPM_STORE_BUFFER *sbuffer,
     const unsigned char *buffer;
     uint32_t 		length;
 
-    printf(" TPM_Sbuffer_StoreFinalResponse: returnCode %08x\n", returnCode);
+    TPMLIB_LogPrintf(" TPM_Sbuffer_StoreFinalResponse: returnCode %08x\n", returnCode);
     /* determine whether the response would exceed the output buffer size */
     TPM_Sbuffer_Get(sbuffer, &buffer, &length);
     if (length > TPM12_GetBufferSize()) {
-	printf("TPM_Sbuffer_StoreFinalResponse: Error, response buffer %u exceeds max %u\n",
+	TPMLIB_LogPrintf("TPM_Sbuffer_StoreFinalResponse: Error, response buffer %u exceeds max %u\n",
 	       length, TPM12_GetBufferSize());
 	returnCode = TPM_SIZE;
     }
@@ -430,7 +430,7 @@ TPM_RESULT TPM_Sbuffer_StoreFinalResponse(TPM_STORE_BUFFER *sbuffer,
         /* TPM_FAIL is reserved for "should never occur" errors that indicate a software or hardware
            failure */
         if ((returnCode == TPM_FAIL) && (tpm_state != NULL)) {
-	    printf("  TPM_Sbuffer_StoreFinalResponse: Set testState to %u \n",
+	    TPMLIB_LogPrintf("  TPM_Sbuffer_StoreFinalResponse: Set testState to %u \n",
 		   TPM_TEST_STATE_FAILURE);
             tpm_state->testState = TPM_TEST_STATE_FAILURE;
         }
@@ -496,7 +496,7 @@ TPM_RESULT TPM_Sbuffer_Test(void)
     unsigned char count;
     unsigned char data[256];    /* dummy data */
     
-    printf(" TPM_Sbuffer_Test:\n");
+    TPMLIB_LogPrintf(" TPM_Sbuffer_Test:\n");
     TPM_Sbuffer_Init(&sbuffer);
     total_count = 0;
     while ((total_count != TPM_ALLOC_MAX) && rc == 0) {
@@ -504,7 +504,7 @@ TPM_RESULT TPM_Sbuffer_Test(void)
             rc = TPM_Random(&count, 1);
         }
         if (rc == 0) {
-            printf(" TPM_Sbuffer_Test: count %u\n", count);
+            TPMLIB_LogPrintf(" TPM_Sbuffer_Test: count %u\n", count);
             /* last time through */
             if (total_count + count > TPM_ALLOC_MAX) {
                 count = TPM_ALLOC_MAX - total_count;
@@ -514,7 +514,7 @@ TPM_RESULT TPM_Sbuffer_Test(void)
         if (rc == 0) {
             total_count += count;
         }
-        printf(" TPM_Sbuffer_Test: total_count %lu\n", (unsigned long)total_count);
+        TPMLIB_LogPrintf(" TPM_Sbuffer_Test: total_count %lu\n", (unsigned long)total_count);
     }
     TPM_Sbuffer_Delete(&sbuffer);
     return rc;
@@ -557,7 +557,7 @@ TPM_RESULT TPM_Bitmap_Load(TPM_BOOL *tpm_bool,
     
     if (rc == 0) {
         if ((*pos) >= (sizeof(uint32_t) * CHAR_BIT)) {
-            printf("TPM_Bitmap_Load: Error (fatal), loading from position %u\n", *pos);
+            TPMLIB_LogPrintf("TPM_Bitmap_Load: Error (fatal), loading from position %u\n", *pos);
             rc = TPM_FAIL;      /* should never occur */
         }
     }   
@@ -583,7 +583,7 @@ TPM_RESULT TPM_Bitmap_Store(uint32_t *tpm_bitmap,
     
     if (rc == 0) {
         if ((*pos) >= (sizeof(uint32_t) * CHAR_BIT)) {
-            printf("TPM_Bitmap_Store: Error (fatal), storing to position %u\n", *pos);
+            TPMLIB_LogPrintf("TPM_Bitmap_Store: Error (fatal), storing to position %u\n", *pos);
             rc = TPM_FAIL;      /* should never occur */
         }
     }   

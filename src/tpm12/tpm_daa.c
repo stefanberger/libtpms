@@ -63,7 +63,7 @@ void TPM_DaaSessions_Init(TPM_DAA_SESSION_DATA *daaSessions)
 {
     size_t i;
     
-    printf(" TPM_DaaSessions_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_Init:\n");
     for (i = 0 ; i < TPM_MIN_DAA_SESSIONS ; i++) {
 	TPM_DaaSessionData_Init(&(daaSessions[i]));
     }
@@ -88,20 +88,20 @@ TPM_RESULT TPM_DaaSessions_Load(TPM_DAA_SESSION_DATA *daaSessions,
     size_t		i;
     uint32_t		activeCount;
 
-    printf(" TPM_DaaSessions_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_Load:\n");
     /* load active count */
     if (rc == 0) {
 	rc = TPM_Load32(&activeCount, stream, stream_size);
     }
     if (rc == 0) {
 	if (activeCount > TPM_MIN_DAA_SESSIONS) {
-	    printf("TPM_DaaSessions_Load: Error (fatal) %u sessions, %u slots\n",
+	    TPMLIB_LogPrintf("TPM_DaaSessions_Load: Error (fatal) %u sessions, %u slots\n",
 		   activeCount, TPM_MIN_DAA_SESSIONS);
 	    rc = TPM_FAIL;
 	}
     }    
     if (rc == 0) {
-	printf(" TPM_DaaSessions_Load: Loading %u sessions\n", activeCount);
+	TPMLIB_LogPrintf(" TPM_DaaSessions_Load: Loading %u sessions\n", activeCount);
     }
     /* load DAA sessions */
     for (i = 0 ; (rc == 0) && (i < activeCount) ; i++) {
@@ -128,7 +128,7 @@ TPM_RESULT TPM_DaaSessions_Store(TPM_STORE_BUFFER *sbuffer,
     if (rc == 0) {
 	TPM_DaaSessions_GetSpace(&space, daaSessions);
 	activeCount = TPM_MIN_DAA_SESSIONS - space;
-	printf(" TPM_DaaSessions_Store: Storing %u sessions\n", activeCount);
+	TPMLIB_LogPrintf(" TPM_DaaSessions_Store: Storing %u sessions\n", activeCount);
 	rc = TPM_Sbuffer_Append32(sbuffer, activeCount);
     }
     /* store DAA sessions */
@@ -148,7 +148,7 @@ void TPM_DaaSessions_Delete(TPM_DAA_SESSION_DATA *daaSessions)
 {
     size_t i;
     
-    printf(" TPM_DaaSessions_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_Delete:\n");
     for (i = 0 ; i < TPM_MIN_DAA_SESSIONS ; i++) {
 	TPM_DaaSessionData_Delete(&(daaSessions[i]));
     }
@@ -164,10 +164,10 @@ void TPM_DaaSessions_IsSpace(TPM_BOOL *isSpace,
 			     uint32_t *index,
 			     TPM_DAA_SESSION_DATA *daaSessions)
 {
-    printf(" TPM_DaaSessions_IsSpace:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_IsSpace:\n");
     for (*index = 0, *isSpace = FALSE ; *index < TPM_MIN_DAA_SESSIONS ; (*index)++) {
 	if (!((daaSessions[*index]).valid)) {
-	    printf("  TPM_DaaSessions_IsSpace: Found space at %u\n", *index);
+	    TPMLIB_LogPrintf("  TPM_DaaSessions_IsSpace: Found space at %u\n", *index);
 	    *isSpace = TRUE;
 	    break;
 	}	    
@@ -184,7 +184,7 @@ void TPM_DaaSessions_GetSpace(uint32_t *space,
 {
     uint32_t i;
 
-    printf(" TPM_DaaSessions_GetSpace:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_GetSpace:\n");
     for (*space = 0 , i = 0 ; i < TPM_MIN_DAA_SESSIONS ; i++) {
 	if (!((daaSessions[i]).valid)) {
 	    (*space)++;
@@ -206,7 +206,7 @@ TPM_RESULT TPM_DaaSessions_StoreHandles(TPM_STORE_BUFFER *sbuffer,
     uint16_t	i;
     uint32_t	space;
     
-    printf(" TPM_DaaSessions_StoreHandles:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_StoreHandles:\n");
     /* get the number of loaded handles */
     if (rc == 0) {
 	TPM_DaaSessions_GetSpace(&space, daaSessions);
@@ -240,7 +240,7 @@ TPM_RESULT TPM_DaaSessions_GetNewHandle(TPM_DAA_SESSION_DATA **tpm_daa_session_d
     uint32_t			index;
     TPM_BOOL			isSpace;
     
-    printf(" TPM_DaaSessions_GetNewHandle:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_GetNewHandle:\n");
     *daaHandle = FALSE;
     /* is there an empty entry, get the location index */
     if (rc == 0) {
@@ -248,7 +248,7 @@ TPM_RESULT TPM_DaaSessions_GetNewHandle(TPM_DAA_SESSION_DATA **tpm_daa_session_d
 				&index,		/* if space available, index into array */
 				daaSessions);	/* array */
 	if (!isSpace) {
-	    printf("TPM_DaaSessions_GetNewHandle: Error, no space in daaSessions table\n");
+	    TPMLIB_LogPrintf("TPM_DaaSessions_GetNewHandle: Error, no space in daaSessions table\n");
 	    rc = TPM_RESOURCES;
 	}
     }
@@ -260,7 +260,7 @@ TPM_RESULT TPM_DaaSessions_GetNewHandle(TPM_DAA_SESSION_DATA **tpm_daa_session_d
 				       (TPM_GETENTRY_FUNCTION_T)TPM_DaaSessions_GetEntry);
     }
     if (rc == 0) {
-	printf("  TPM_DaaSessions_GetNewHandle: Assigned handle %08x\n", *daaHandle);
+	TPMLIB_LogPrintf("  TPM_DaaSessions_GetNewHandle: Assigned handle %08x\n", *daaHandle);
 	*tpm_daa_session_data = &(daaSessions[index]);
 	TPM_DaaSessionData_Init(*tpm_daa_session_data); /* should be redundant since
 								      terminate should have done
@@ -290,7 +290,7 @@ TPM_RESULT TPM_DaaSessions_GetEntry(TPM_DAA_SESSION_DATA **tpm_daa_session_data,
     size_t	i;
     TPM_BOOL	found;
     
-    printf(" TPM_DaaSessions_GetEntry: daaHandle %08x\n", daaHandle);
+    TPMLIB_LogPrintf(" TPM_DaaSessions_GetEntry: daaHandle %08x\n", daaHandle);
     for (i = 0, found = FALSE ; (i < TPM_MIN_DAA_SESSIONS) && !found ; i++) {
 	if ((daaSessions[i].valid) &&		   
 	    (daaSessions[i].daaHandle == daaHandle)) {	  /* found */
@@ -299,7 +299,7 @@ TPM_RESULT TPM_DaaSessions_GetEntry(TPM_DAA_SESSION_DATA **tpm_daa_session_data,
 	}
     }
     if (!found) {
-	printf("  TPM_DaaSessions_GetEntry: session handle %08x not found\n",
+	TPMLIB_LogPrintf("  TPM_DaaSessions_GetEntry: session handle %08x not found\n",
 	       daaHandle);
 	rc = TPM_BAD_HANDLE;
     }
@@ -323,11 +323,11 @@ TPM_RESULT TPM_DaaSessions_AddEntry(TPM_HANDLE *tpm_handle,			/* i/o */
     uint32_t			index;
     TPM_BOOL			isSpace;
     
-    printf(" TPM_DaaSessions_AddEntry:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessions_AddEntry:\n");
     /* check for valid TPM_DAA_SESSION_DATA */
     if (rc == 0) {
 	if (tpm_daa_session_data == NULL) {	/* NOTE: should never occur */
-	    printf("TPM_DaaSessions_AddEntry: Error (fatal), NULL TPM_DAA_SESSION_DATA\n");
+	    TPMLIB_LogPrintf("TPM_DaaSessions_AddEntry: Error (fatal), NULL TPM_DAA_SESSION_DATA\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -335,7 +335,7 @@ TPM_RESULT TPM_DaaSessions_AddEntry(TPM_HANDLE *tpm_handle,			/* i/o */
     if (rc == 0) {
 	TPM_DaaSessions_IsSpace(&isSpace, &index, daaSessions);
 	if (!isSpace) {
-	    printf("TPM_DaaSessions_AddEntry: Error, session entries full\n");
+	    TPMLIB_LogPrintf("TPM_DaaSessions_AddEntry: Error, session entries full\n");
 	    rc = TPM_RESOURCES;
 	}
     }
@@ -349,7 +349,7 @@ TPM_RESULT TPM_DaaSessions_AddEntry(TPM_HANDLE *tpm_handle,			/* i/o */
     if (rc == 0) {
 	TPM_DaaSessionData_Copy(&(daaSessions[index]), *tpm_handle, tpm_daa_session_data);
 	daaSessions[index].valid = TRUE;
-	printf("  TPM_DaaSessions_AddEntry: Index %u handle %08x\n",
+	TPMLIB_LogPrintf("  TPM_DaaSessions_AddEntry: Index %u handle %08x\n",
 	       index, daaSessions[index].daaHandle);
     }
     return rc;
@@ -365,7 +365,7 @@ TPM_RESULT TPM_DaaSessions_TerminateHandle(TPM_DAA_SESSION_DATA *daaSessions,
     TPM_RESULT	rc = 0;
     TPM_DAA_SESSION_DATA *tpm_daa_session_data;
 
-    printf(" TPM_DaaSessions_TerminateHandle: daaHandle %08x\n", daaHandle);
+    TPMLIB_LogPrintf(" TPM_DaaSessions_TerminateHandle: daaHandle %08x\n", daaHandle);
     /* get the TPM_DAA_SESSION_DATA associated with the TPM_HANDLE */
     if (rc == 0) {
 	rc = TPM_DaaSessions_GetEntry(&tpm_daa_session_data,	/* returns entry in array */
@@ -392,7 +392,7 @@ TPM_RESULT TPM_DaaSessions_TerminateHandle(TPM_DAA_SESSION_DATA *daaSessions,
 
 void TPM_DaaSessionData_Init(TPM_DAA_SESSION_DATA *tpm_daa_session_data)
 {
-    printf(" TPM_DaaSessionData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessionData_Init:\n");
     TPM_DAAIssuer_Init(&(tpm_daa_session_data->DAA_issuerSettings));
     TPM_DAATpm_Init(&(tpm_daa_session_data->DAA_tpmSpecific));
     TPM_DAAContext_Init(&(tpm_daa_session_data->DAA_session));
@@ -418,7 +418,7 @@ TPM_RESULT TPM_DaaSessionData_Load(TPM_DAA_SESSION_DATA *tpm_daa_session_data,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DaaSessionData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessionData_Load:\n");
     /* load DAA_issuerSettings */
     if (rc == 0) {
 	rc = TPM_DAAIssuer_Load(&(tpm_daa_session_data->DAA_issuerSettings), stream, stream_size);
@@ -457,7 +457,7 @@ TPM_RESULT TPM_DaaSessionData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DaaSessionData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessionData_Store:\n");
     /* store DAA_issuerSettings */
     if (rc == 0) {
 	rc = TPM_DAAIssuer_Store(sbuffer, &(tpm_daa_session_data->DAA_issuerSettings));
@@ -492,7 +492,7 @@ TPM_RESULT TPM_DaaSessionData_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DaaSessionData_Delete(TPM_DAA_SESSION_DATA *tpm_daa_session_data)
 {
-    printf(" TPM_DaaSessionData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessionData_Delete:\n");
     if (tpm_daa_session_data != NULL) {
 	TPM_DAAIssuer_Delete(&(tpm_daa_session_data->DAA_issuerSettings));
 	TPM_DAATpm_Delete(&(tpm_daa_session_data->DAA_tpmSpecific));
@@ -533,9 +533,9 @@ TPM_RESULT TPM_DaaSessionData_CheckStage(TPM_DAA_SESSION_DATA *tpm_daa_session_d
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_DaaSessionData_CheckStage:\n");
+    TPMLIB_LogPrintf(" TPM_DaaSessionData_CheckStage:\n");
     if (tpm_daa_session_data->DAA_session.DAA_stage != stage) {
-	printf("TPM_DaaSessionData_CheckStage: Error, stage expected %u actual %u\n",
+	TPMLIB_LogPrintf("TPM_DaaSessionData_CheckStage: Error, stage expected %u actual %u\n",
 	       tpm_daa_session_data->DAA_session.DAA_stage, stage);
 	rc = TPM_DAA_STAGE;
     }
@@ -555,7 +555,7 @@ TPM_RESULT TPM_DaaSessionData_CheckStage(TPM_DAA_SESSION_DATA *tpm_daa_session_d
 
 void TPM_DAAIssuer_Init(TPM_DAA_ISSUER *tpm_daa_issuer)
 {
-    printf(" TPM_DAAIssuer_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAAIssuer_Init:\n");
     
     TPM_Digest_Init(tpm_daa_issuer->DAA_digest_R0);
     TPM_Digest_Init(tpm_daa_issuer->DAA_digest_R1);
@@ -583,7 +583,7 @@ TPM_RESULT TPM_DAAIssuer_Load(TPM_DAA_ISSUER *tpm_daa_issuer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAIssuer_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAAIssuer_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DAA_ISSUER, stream, stream_size);
@@ -631,7 +631,7 @@ TPM_RESULT TPM_DAAIssuer_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAIssuer_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAAIssuer_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DAA_ISSUER);
@@ -680,7 +680,7 @@ TPM_RESULT TPM_DAAIssuer_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAAIssuer_Delete(TPM_DAA_ISSUER *tpm_daa_issuer)
 {
-    printf(" TPM_DAAIssuer_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAAIssuer_Delete:\n");
     if (tpm_daa_issuer != NULL) {
 	TPM_DAAIssuer_Init(tpm_daa_issuer);
     }
@@ -694,7 +694,7 @@ void TPM_DAAIssuer_Delete(TPM_DAA_ISSUER *tpm_daa_issuer)
 void TPM_DAAIssuer_Copy(TPM_DAA_ISSUER *dest_daa_issuer,
 			TPM_DAA_ISSUER *src_daa_issuer)
 {
-    printf(" TPM_DAAIssuer_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_DAAIssuer_Copy:\n");
     
     TPM_Digest_Copy(dest_daa_issuer->DAA_digest_R0, src_daa_issuer->DAA_digest_R0);
     TPM_Digest_Copy(dest_daa_issuer->DAA_digest_R1, src_daa_issuer->DAA_digest_R1);
@@ -720,7 +720,7 @@ void TPM_DAAIssuer_Copy(TPM_DAA_ISSUER *dest_daa_issuer,
 
 void TPM_DAATpm_Init(TPM_DAA_TPM *tpm_daa_tpm)
 {
-    printf(" TPM_DAATpm_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAATpm_Init:\n");
     TPM_Digest_Init(tpm_daa_tpm->DAA_digestIssuer);
     TPM_Digest_Init(tpm_daa_tpm->DAA_digest_v0);
     TPM_Digest_Init(tpm_daa_tpm->DAA_digest_v1);
@@ -745,7 +745,7 @@ TPM_RESULT TPM_DAATpm_Load(TPM_DAA_TPM *tpm_daa_tpm,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAATpm_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAATpm_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DAA_TPM, stream, stream_size);
@@ -784,7 +784,7 @@ TPM_RESULT TPM_DAATpm_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAATpm_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAATpm_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DAA_TPM);
@@ -823,7 +823,7 @@ TPM_RESULT TPM_DAATpm_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAATpm_Delete(TPM_DAA_TPM *tpm_daa_tpm)
 {
-    printf(" TPM_DAATpm_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAATpm_Delete:\n");
     if (tpm_daa_tpm != NULL) {
 	TPM_DAATpm_Init(tpm_daa_tpm);
     }
@@ -836,7 +836,7 @@ void TPM_DAATpm_Delete(TPM_DAA_TPM *tpm_daa_tpm)
 
 void TPM_DAATpm_Copy(TPM_DAA_TPM *dest_daa_tpm, TPM_DAA_TPM *src_daa_tpm)
 {
-    printf(" TPM_DAATpm_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_DAATpm_Copy:\n");
     TPM_Digest_Copy(dest_daa_tpm->DAA_digestIssuer, src_daa_tpm->DAA_digestIssuer);
     TPM_Digest_Copy(dest_daa_tpm->DAA_digest_v0, src_daa_tpm->DAA_digest_v0);
     TPM_Digest_Copy(dest_daa_tpm->DAA_digest_v1, src_daa_tpm->DAA_digest_v1);
@@ -858,7 +858,7 @@ void TPM_DAATpm_Copy(TPM_DAA_TPM *dest_daa_tpm, TPM_DAA_TPM *src_daa_tpm)
 
 void TPM_DAAContext_Init(TPM_DAA_CONTEXT *tpm_daa_context)
 {
-    printf(" TPM_DAAContext_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAAContext_Init:\n");
     TPM_Digest_Init(tpm_daa_context->DAA_digestContext);
     TPM_Digest_Init(tpm_daa_context->DAA_digest);
     TPM_Nonce_Init(tpm_daa_context->DAA_contextSeed);
@@ -884,7 +884,7 @@ TPM_RESULT TPM_DAAContext_Load(TPM_DAA_CONTEXT *tpm_daa_context,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAContext_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAAContext_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DAA_CONTEXT, stream, stream_size);
@@ -928,7 +928,7 @@ TPM_RESULT TPM_DAAContext_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAContext_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAAContext_Store:\n");
     /* store tag  */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DAA_CONTEXT);
@@ -972,7 +972,7 @@ TPM_RESULT TPM_DAAContext_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAAContext_Delete(TPM_DAA_CONTEXT *tpm_daa_context)
 {
-    printf(" TPM_DAAContext_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAAContext_Delete:\n");
     if (tpm_daa_context != NULL) {
 	TPM_DAAContext_Init(tpm_daa_context);
     }
@@ -985,7 +985,7 @@ void TPM_DAAContext_Delete(TPM_DAA_CONTEXT *tpm_daa_context)
 
 void TPM_DAAContext_Copy(TPM_DAA_CONTEXT *dest_daa_context, TPM_DAA_CONTEXT *src_daa_context)
 {
-    printf(" TPM_DAAContext_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_DAAContext_Copy:\n");
     TPM_Digest_Copy(dest_daa_context->DAA_digestContext, src_daa_context->DAA_digestContext);
     TPM_Digest_Copy(dest_daa_context->DAA_digest, src_daa_context->DAA_digest);
     TPM_Nonce_Copy(dest_daa_context->DAA_contextSeed, src_daa_context->DAA_contextSeed);
@@ -1009,7 +1009,7 @@ void TPM_DAAContext_Copy(TPM_DAA_CONTEXT *dest_daa_context, TPM_DAA_CONTEXT *src
 
 void TPM_DAAJoindata_Init(TPM_DAA_JOINDATA *tpm_daa_joindata)
 {
-    printf(" TPM_DAAJoindata_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAAJoindata_Init:\n");
     memset(tpm_daa_joindata->DAA_join_u0, 0, sizeof(tpm_daa_joindata->DAA_join_u0));
     memset(tpm_daa_joindata->DAA_join_u1, 0, sizeof(tpm_daa_joindata->DAA_join_u1));
     TPM_Digest_Init(tpm_daa_joindata->DAA_digest_n0);
@@ -1032,7 +1032,7 @@ TPM_RESULT TPM_DAAJoindata_Load(TPM_DAA_JOINDATA *tpm_daa_joindata,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAJoindata_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAAJoindata_Load:\n");
     /* load DAA_join_u0 */
     if (rc == 0) {
 	rc = TPM_Loadn(tpm_daa_joindata->DAA_join_u0,
@@ -1063,7 +1063,7 @@ TPM_RESULT TPM_DAAJoindata_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAAJoindata_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAAJoindata_Store:\n");
     /* store DAA_join_u0 */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append(sbuffer, tpm_daa_joindata->DAA_join_u0,
@@ -1092,7 +1092,7 @@ TPM_RESULT TPM_DAAJoindata_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAAJoindata_Delete(TPM_DAA_JOINDATA *tpm_daa_joindata)
 {
-    printf(" TPM_DAAJoindata_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAAJoindata_Delete:\n");
     if (tpm_daa_joindata != NULL) {
 	TPM_DAAJoindata_Init(tpm_daa_joindata);
     }
@@ -1105,7 +1105,7 @@ void TPM_DAAJoindata_Delete(TPM_DAA_JOINDATA *tpm_daa_joindata)
 
 void TPM_DAAJoindata_Copy(TPM_DAA_JOINDATA *dest_daa_joindata, TPM_DAA_JOINDATA *src_daa_joindata)
 {
-    printf(" TPM_DAAJoindata_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_DAAJoindata_Copy:\n");
     memcpy(dest_daa_joindata->DAA_join_u0, src_daa_joindata->DAA_join_u0,
 	   sizeof(src_daa_joindata->DAA_join_u0));
     memcpy(dest_daa_joindata->DAA_join_u1, src_daa_joindata->DAA_join_u1,
@@ -1127,7 +1127,7 @@ void TPM_DAAJoindata_Copy(TPM_DAA_JOINDATA *dest_daa_joindata, TPM_DAA_JOINDATA 
 
 void TPM_DAABlob_Init(TPM_DAA_BLOB *tpm_daa_blob)
 {
-    printf(" TPM_DAABlob_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAABlob_Init:\n");
     tpm_daa_blob->resourceType = 0; 
     memset(tpm_daa_blob->label, 0, sizeof(tpm_daa_blob->label));
     TPM_Digest_Init(tpm_daa_blob->blobIntegrity);
@@ -1152,7 +1152,7 @@ TPM_RESULT TPM_DAABlob_Load(TPM_DAA_BLOB *tpm_daa_blob,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAABlob_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAABlob_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DAA_BLOB, stream, stream_size);
@@ -1191,7 +1191,7 @@ TPM_RESULT TPM_DAABlob_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAABlob_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAABlob_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DAA_BLOB);
@@ -1230,7 +1230,7 @@ TPM_RESULT TPM_DAABlob_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAABlob_Delete(TPM_DAA_BLOB *tpm_daa_blob)
 {
-    printf(" TPM_DAABlob_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAABlob_Delete:\n");
     if (tpm_daa_blob != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_daa_blob->additionalData));
 	TPM_SizedBuffer_Delete(&(tpm_daa_blob->sensitiveData));
@@ -1252,7 +1252,7 @@ void TPM_DAABlob_Delete(TPM_DAA_BLOB *tpm_daa_blob)
 
 void TPM_DAASensitive_Init(TPM_DAA_SENSITIVE *tpm_daa_sensitive)
 {
-    printf(" TPM_DAASensitive_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DAASensitive_Init:\n");
     TPM_SizedBuffer_Init(&(tpm_daa_sensitive->internalData));
     return;
 }
@@ -1273,7 +1273,7 @@ TPM_RESULT TPM_DAASensitive_Load(TPM_DAA_SENSITIVE *tpm_daa_sensitive,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAASensitive_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DAASensitive_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DAA_SENSITIVE, stream, stream_size);
@@ -1296,7 +1296,7 @@ TPM_RESULT TPM_DAASensitive_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DAASensitive_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DAASensitive_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DAA_SENSITIVE);
@@ -1319,7 +1319,7 @@ TPM_RESULT TPM_DAASensitive_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DAASensitive_Delete(TPM_DAA_SENSITIVE *tpm_daa_sensitive)
 {
-    printf(" TPM_DAASensitive_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DAASensitive_Delete:\n");
     if (tpm_daa_sensitive != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_daa_sensitive->internalData));
 	TPM_DAASensitive_Init(tpm_daa_sensitive);
@@ -1344,7 +1344,7 @@ TPM_RESULT TPM_DAAJoin_Stage00(tpm_state_t *tpm_state,
     uint32_t		count;
     TPM_HANDLE		daaHandle = 0;		/* no preassigned handle */
     
-    printf("TPM_DAAJoin_Stage00:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage00:\n");
     if (rc == 0) {
 	/* a. Determine that sufficient resources are available to perform a TPM_DAA_Join. */
 	/* i. The TPM MUST support sufficient resources to perform one (1)
@@ -1371,7 +1371,7 @@ TPM_RESULT TPM_DAAJoin_Stage00(tpm_state_t *tpm_state,
 	/* f. Verify that sizeOf(inputData0) == sizeof(DAA_tpmSpecific -> DAA_count) and return
 	   error TPM_DAA_INPUT_DATA0 on mismatch */
 	if (inputData0->size != sizeof((*tpm_daa_session_data)->DAA_tpmSpecific.DAA_count)) {
-	    printf("TPM_DAAJoin_Stage00: Error, inputData0 size %u should be %lu\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage00: Error, inputData0 size %u should be %lu\n",
 		   inputData0->size,
 		   (unsigned long)sizeof((*tpm_daa_session_data)->DAA_tpmSpecific.DAA_count));
 	    rc = TPM_DAA_INPUT_DATA0;
@@ -1387,9 +1387,9 @@ TPM_RESULT TPM_DAAJoin_Stage00(tpm_state_t *tpm_state,
 	}
     }
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage00: count %u\n", count);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage00: count %u\n", count);
 	if (count == 0) {
-	    printf("TPM_DAAJoin_Stage00: Error, count is zero\n");
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage00: Error, count is zero\n");
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -1406,7 +1406,7 @@ TPM_RESULT TPM_DAAJoin_Stage00(tpm_state_t *tpm_state,
 	(*tpm_daa_session_data)->DAA_session.DAA_stage = 1;
 	/* k. Assign session handle for TPM_DAA_Join */
 	/* NOTE Done by TPM_DaaSessions_GetNewHandle() */
-	printf("TPM_DAAJoin_Stage00: handle %08x\n", (*tpm_daa_session_data)->daaHandle);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage00: handle %08x\n", (*tpm_daa_session_data)->daaHandle);
 	/* l. set outputData = new session handle */
 	/* i. The handle in outputData is included the output HMAC. */
 	rc = TPM_SizedBuffer_Append32(outputData, (*tpm_daa_session_data)->daaHandle);
@@ -1424,7 +1424,7 @@ TPM_RESULT TPM_DAAJoin_Stage01(tpm_state_t *tpm_state,
     TPM_RESULT		rc = 0;
     TPM_DIGEST		signedDataDigest;
 
-    printf("TPM_DAAJoin_Stage01:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01:\n");
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==1. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -1436,14 +1436,14 @@ TPM_RESULT TPM_DAAJoin_Stage01(tpm_state_t *tpm_state,
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
 	if (inputData0->size != DAA_SIZE_issuerModulus) {
-	    printf("TPM_DAAJoin_Stage01: Error, bad input0 size %u\n", inputData0->size);
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: Error, bad input0 size %u\n", inputData0->size);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
     if (rc == 0) {
 	/* d. If DAA_session -> DAA_scratch == NULL: */
 	if (tpm_daa_session_data->DAA_session.DAA_scratch_null) {
-	    printf("TPM_DAAJoin_Stage01: DAA_scratch null\n");
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: DAA_scratch null\n");
 	    if (rc == 0) {
 		/* i. Set DAA_session -> DAA_scratch = inputData0 */
 		tpm_daa_session_data->DAA_session.DAA_scratch_null = FALSE;
@@ -1467,13 +1467,13 @@ TPM_RESULT TPM_DAAJoin_Stage01(tpm_state_t *tpm_state,
 	}
 	/* e. Else (If DAA_session -> DAA_scratch != NULL): */
 	else {
-	    printf("TPM_DAAJoin_Stage01: DAA_scratch not null\n");
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: DAA_scratch not null\n");
 	    /* i. Set signedData = inputData0 */
 	    /* ii. Verify that sizeOf(inputData1) == DAA_SIZE_issuerModulus and return error
 	       TPM_DAA_INPUT_DATA1 on mismatch */
 	    if (rc == 0) {
 		if (inputData1->size != DAA_SIZE_issuerModulus) {
-		    printf("TPM_DAAJoin_Stage01: Error, bad input1 size %u\n", inputData1->size);
+		    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: Error, bad input1 size %u\n", inputData1->size);
 		    rc = TPM_DAA_INPUT_DATA1;
 		}
 	    }
@@ -1482,13 +1482,13 @@ TPM_RESULT TPM_DAAJoin_Stage01(tpm_state_t *tpm_state,
 	       a signature on signedData using TPM_SS_RSASSAPKCS1v15_SHA1 (RSA PKCS1.5 with SHA-1),
 	       and return error TPM_DAA_ISSUER_VALIDITY on mismatch */
 	    if (rc == 0) {
-		printf("TPM_DAAJoin_Stage01: Digesting signedData\n");
+		TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: Digesting signedData\n");
 		rc = TPM_SHA1(signedDataDigest,
 			      inputData0->size, inputData0->buffer,
 			      0, NULL);
 	    }
 	    if (rc == 0) {
-		printf("TPM_DAAJoin_Stage01: Verifying signature\n");
+		TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: Verifying signature\n");
 		rc = TPM_RSAVerify(inputData1->buffer,			/* signature */
 				   inputData1->size,
 				   TPM_SS_RSASSAPKCS1v15_INFO,		/* signature scheme */
@@ -1499,7 +1499,7 @@ TPM_RESULT TPM_DAAJoin_Stage01(tpm_state_t *tpm_state,
 				   tpm_default_rsa_exponent,		/* public exponent */
 				   3);
 		if (rc != 0) {
-		    printf("TPM_DAAJoin_Stage01: Error, bad signature\n");
+		    TPMLIB_LogPrintf("TPM_DAAJoin_Stage01: Error, bad signature\n");
 		    rc = TPM_DAA_ISSUER_VALIDITY;
 		}
 	    }
@@ -1540,7 +1540,7 @@ TPM_RESULT TPM_DAAJoin_Stage02(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER	signedDataSbuffer;
     TPM_DIGEST		signedDataDigest;
 
-    printf("TPM_DAAJoin_Stage02:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage02:\n");
     outputData = outputData;			/* not used */
     tpm_state = tpm_state;			/* not used */
     TPM_Sbuffer_Init(&signedDataSbuffer);	/* freed @1*/
@@ -1565,7 +1565,7 @@ TPM_RESULT TPM_DAAJoin_Stage02(tpm_state_t *tpm_state,
     }
     if (rc == 0) {
 	if (stream_size != 0) {
-	    printf("TPM_DAAJoin_Stage02: Error, bad input0 size %u\n", inputData0->size);
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage02: Error, bad input0 size %u\n", inputData0->size);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -1573,7 +1573,7 @@ TPM_RESULT TPM_DAAJoin_Stage02(tpm_state_t *tpm_state,
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
 	if (inputData1->size != DAA_SIZE_issuerModulus) {
-	    printf("TPM_DAAJoin_Stage02: Error, bad input1 size %u\n", inputData1->size);
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage02: Error, bad input1 size %u\n", inputData1->size);
 	    rc = TPM_DAA_INPUT_DATA1;
 	}
     }
@@ -1590,11 +1590,11 @@ TPM_RESULT TPM_DAAJoin_Stage02(tpm_state_t *tpm_state,
     /* signature on signedData using TPM_SS_RSASSAPKCS1v15_SHA1 (RSA PKCS1.5 with SHA-1), and return
        error TPM_DAA_ISSUER_VALIDITY on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage02: Digesting signedData\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage02: Digesting signedData\n");
 	rc = TPM_SHA1Sbuffer(signedDataDigest, &signedDataSbuffer);
     }
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage02: Verifying signature\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage02: Verifying signature\n");
 	rc = TPM_RSAVerify(inputData1->buffer,			/* signature */
 			   inputData1->size,
 			   TPM_SS_RSASSAPKCS1v15_INFO,		/* signature scheme */
@@ -1605,7 +1605,7 @@ TPM_RESULT TPM_DAAJoin_Stage02(tpm_state_t *tpm_state,
 			   tpm_default_rsa_exponent,		/* public exponent */
 			   3);
 	if (rc != 0) {
-	    printf("TPM_DAAJoin_Stage02: Error, bad signature\n");
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage02: Error, bad signature\n");
 	    rc = TPM_DAA_ISSUER_VALIDITY;
 	}
     }
@@ -1640,7 +1640,7 @@ TPM_RESULT TPM_DAAJoin_Stage03(tpm_state_t *tpm_state,
     unsigned char	*stream;
     uint32_t		stream_size;
 
-    printf("TPM_DAAJoin_Stage03:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage03:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==3. Return TPM_DAA_STAGE and flush handle on
@@ -1656,7 +1656,7 @@ TPM_RESULT TPM_DAAJoin_Stage03(tpm_state_t *tpm_state,
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
 	if (inputData0->size != sizeof(tpm_daa_session_data->DAA_tpmSpecific.DAA_count)) {
-	    printf("TPM_DAAJoin_Stage03: Error, inputData0 size %u should be %lu\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage03: Error, inputData0 size %u should be %lu\n",
 		   inputData0->size,
 		   (unsigned long)sizeof(tpm_daa_session_data->DAA_tpmSpecific.DAA_count));
 	    rc = TPM_DAA_INPUT_DATA0;
@@ -1703,7 +1703,7 @@ TPM_RESULT TPM_DAAJoin_Stage04(tpm_state_t *tpm_state,
     TPM_BIGNUM		fBignum = NULL;	/* freed @3 */
     TPM_BIGNUM		rBignum = NULL;	/* freed @4 */
 		
-    printf("TPM_DAAJoin_Stage04:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage04:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==4. Return TPM_DAA_STAGE and flush handle on
@@ -1719,7 +1719,7 @@ TPM_RESULT TPM_DAAJoin_Stage04(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_R0) == DAA_issuerSettings -> DAA_digest_R0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage04: Checking DAA_generic_R0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage04: Checking DAA_generic_R0\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_R0,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_R0 */
 			    0, NULL);
@@ -1731,7 +1731,7 @@ TPM_RESULT TPM_DAAJoin_Stage04(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage04: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage04: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -1741,12 +1741,12 @@ TPM_RESULT TPM_DAAJoin_Stage04(tpm_state_t *tpm_state,
     }
     /* h. Set X = DAA_generic_R0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage04: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage04: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* i. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage04: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage04: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* j. Set f = SHA-1(DAA_tpmSpecific -> DAA_rekey || DAA_tpmSpecific -> DAA_count || 0) ||
@@ -1793,7 +1793,7 @@ TPM_RESULT TPM_DAAJoin_Stage05(tpm_state_t *tpm_state,
     TPM_BIGNUM		f1Bignum = NULL;	/* freed @4 */
     TPM_BIGNUM		zBignum = NULL;		/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage05:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage05:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==5. Return TPM_DAA_STAGE and flush handle on
@@ -1809,7 +1809,7 @@ TPM_RESULT TPM_DAAJoin_Stage05(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_R1) == DAA_issuerSettings -> DAA_digest_R1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage05: Checking DAA_generic_R1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage05: Checking DAA_generic_R1\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_R1,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_R1 */
 			    0, NULL);
@@ -1821,7 +1821,7 @@ TPM_RESULT TPM_DAAJoin_Stage05(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage05: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage05: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -1831,12 +1831,12 @@ TPM_RESULT TPM_DAAJoin_Stage05(tpm_state_t *tpm_state,
     }
     /* h. Set X = DAA_generic_R1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage05: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage05: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* i. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage05: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage05: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* j. Set f = SHA-1(DAA_tpmSpecific -> DAA_rekey || DAA_tpmSpecific -> DAA_count || 0) ||
@@ -1852,7 +1852,7 @@ TPM_RESULT TPM_DAAJoin_Stage05(tpm_state_t *tpm_state,
     }
     /* l. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage05: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage05: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -1891,7 +1891,7 @@ TPM_RESULT TPM_DAAJoin_Stage06(tpm_state_t *tpm_state,
     TPM_BIGNUM		zBignum = NULL;	/* freed @3 */
     TPM_BIGNUM		yBignum = NULL;	/* freed @4 */
 
-    printf("TPM_DAAJoin_Stage06:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage06:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==6. Return TPM_DAA_STAGE and flush handle on
@@ -1907,7 +1907,7 @@ TPM_RESULT TPM_DAAJoin_Stage06(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_S0) == DAA_issuerSettings -> DAA_digest_S0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Checking DAA_generic_S0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Checking DAA_generic_S0\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_S0,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_S0 */
 			    0, NULL);
@@ -1919,7 +1919,7 @@ TPM_RESULT TPM_DAAJoin_Stage06(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -1929,24 +1929,24 @@ TPM_RESULT TPM_DAAJoin_Stage06(tpm_state_t *tpm_state,
     }
     /* h. Set X = DAA_generic_S0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* i. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* j. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
     }
     /* k. Set Y = DAA_joinSession -> DAA_join_u0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage06: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage06: Creating Y\n");
 	rc = TPM_bin2bn(&yBignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u0,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u0));
@@ -1985,7 +1985,7 @@ TPM_RESULT TPM_DAAJoin_Stage07(tpm_state_t *tpm_state,
     TPM_BIGNUM		yBignum = NULL;	/* freed @3 */
     TPM_BIGNUM		zBignum = NULL;	/* freed @4 */
 
-    printf("TPM_DAAJoin_Stage07:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage07:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==7. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2000,7 +2000,7 @@ TPM_RESULT TPM_DAAJoin_Stage07(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_S1) == DAA_issuerSettings -> DAA_digest_S1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Checking DAA_generic_S1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Checking DAA_generic_S1\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_S1,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_S1 */
 			    0, NULL);
@@ -2012,7 +2012,7 @@ TPM_RESULT TPM_DAAJoin_Stage07(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -2022,24 +2022,24 @@ TPM_RESULT TPM_DAAJoin_Stage07(tpm_state_t *tpm_state,
     }
     /* h. Set X = DAA_generic_S1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* i. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* j. Set Y = DAA_joinSession -> DAA_join_u1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Creating Y\n");
 	rc = TPM_bin2bn(&yBignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u1,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u1));
     }
     /* k. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -2056,7 +2056,7 @@ TPM_RESULT TPM_DAAJoin_Stage07(tpm_state_t *tpm_state,
     /* m. Set DAA_session -> DAA_digest to the SHA-1 (DAA_session -> DAA_scratch || DAA_tpmSpecific
        -> DAA_count || DAA_joinSession -> DAA_digest_n0) */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage07: Computing DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage07: Computing DAA_digest\n");
 	nCount = htonl(tpm_daa_session_data->DAA_tpmSpecific.DAA_count);
 	rc = TPM_SHA1(tpm_daa_session_data->DAA_session.DAA_digest, 
 		      sizeof(tpm_daa_session_data->DAA_session.DAA_scratch),
@@ -2095,7 +2095,7 @@ TPM_RESULT TPM_DAAJoin_Stage08(tpm_state_t *tpm_state,
     uint32_t		NELength;
     TPM_DIGEST		outDigest;
     
-    printf("TPM_DAAJoin_Stage08:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage08:\n");
     /* a. Verify that DAA_session ->DAA_stage==8. Return TPM_DAA_STAGE and flush handle on
        mismatch */
     /* NOTE Done by common code */
@@ -2108,7 +2108,7 @@ TPM_RESULT TPM_DAAJoin_Stage08(tpm_state_t *tpm_state,
     /* d. Verify inputSize0 == DAA_SIZE_NE and return error TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
 	if (inputData0->size != DAA_SIZE_NE) {
-	    printf("TPM_DAAJoin_Stage08: Error, inputData0 size %u should be %u\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage08: Error, inputData0 size %u should be %u\n",
 		   inputData0->size, DAA_SIZE_NE);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
@@ -2155,7 +2155,7 @@ TPM_RESULT TPM_DAAJoin_Stage09_Sign_Stage2(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;	/* freed @4 */
     TPM_BIGNUM		rBignum = NULL;	/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage09_Sign_Stage2:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==9. Return TPM_DAA_STAGE and flush handle on
@@ -2171,7 +2171,7 @@ TPM_RESULT TPM_DAAJoin_Stage09_Sign_Stage2(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_R0) == DAA_issuerSettings -> DAA_digest_R0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage09_Sign_Stage2: Checking DAA_generic_R0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2: Checking DAA_generic_R0\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_R0,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_R0 */
 			    0, NULL);
@@ -2183,7 +2183,7 @@ TPM_RESULT TPM_DAAJoin_Stage09_Sign_Stage2(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage09_Sign_Stage2: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -2198,7 +2198,7 @@ TPM_RESULT TPM_DAAJoin_Stage09_Sign_Stage2(tpm_state_t *tpm_state,
     /* i. Obtain DAA_SIZE_r0 bytes using the MGF1 function and label them Y.  "r0" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating Y\n");
 	rc = TPM_MGF1_GenerateArray(&Y,			/* returned MGF1 array */
 				    DAA_SIZE_r0,		/* size of Y */
 				    /* length of the entire seed */
@@ -2214,12 +2214,12 @@ TPM_RESULT TPM_DAAJoin_Stage09_Sign_Stage2(tpm_state_t *tpm_state,
     }
     /* j. Set X = DAA_generic_R0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* k. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage09_Sign_Stage2: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* l. Set DAA_session -> DAA_scratch = (X^Y) mod n */
@@ -2258,7 +2258,7 @@ TPM_RESULT TPM_DAAJoin_Stage10_Sign_Stage3(tpm_state_t *tpm_state,
     TPM_BIGNUM		zBignum = NULL;	/* freed @4 */
     TPM_BIGNUM		yBignum = NULL;	/* freed @5*/
 
-    printf("TPM_DAAJoin_Stage10_Sign_Stage3:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==10. Return TPM_DAA_STAGE and flush handle on mismatch
@@ -2274,7 +2274,7 @@ TPM_RESULT TPM_DAAJoin_Stage10_Sign_Stage3(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_R1) == DAA_issuerSettings -> DAA_digest_R1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Checking DAA_generic_R1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Checking DAA_generic_R1\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_R1,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_R1 */
 			    0, NULL);
@@ -2286,7 +2286,7 @@ TPM_RESULT TPM_DAAJoin_Stage10_Sign_Stage3(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -2297,7 +2297,7 @@ TPM_RESULT TPM_DAAJoin_Stage10_Sign_Stage3(tpm_state_t *tpm_state,
     /* h. Obtain DAA_SIZE_r1 bytes using the MGF1 function and label them Y.  "r1" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating Y\n");
 	rc = TPM_MGF1_GenerateArray(&Y,			/* returned MGF1 array */
 				    DAA_SIZE_r1,		/* size of Y */
 				    /* length of the entire seed */
@@ -2313,17 +2313,17 @@ TPM_RESULT TPM_DAAJoin_Stage10_Sign_Stage3(tpm_state_t *tpm_state,
     }
     /* i. Set X = DAA_generic_R1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* j. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* k. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage10_Sign_Stage3: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -2363,7 +2363,7 @@ TPM_RESULT TPM_DAAJoin_Stage11_Sign_Stage4(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;	/* freed @4 */
     TPM_BIGNUM		zBignum = NULL;	/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage11_Sign_Stage4:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==11. Return TPM_DAA_STAGE and flush handle on
@@ -2379,7 +2379,7 @@ TPM_RESULT TPM_DAAJoin_Stage11_Sign_Stage4(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_S0) == DAA_issuerSettings -> DAA_digest_S0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Checking DAA_generic_S0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Checking DAA_generic_S0\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_S0,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_S0 */
 			    0, NULL);
@@ -2391,7 +2391,7 @@ TPM_RESULT TPM_DAAJoin_Stage11_Sign_Stage4(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -2402,7 +2402,7 @@ TPM_RESULT TPM_DAAJoin_Stage11_Sign_Stage4(tpm_state_t *tpm_state,
     /* h. Obtain DAA_SIZE_r2 bytes using the MGF1 function and label them Y.  "r2" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating Y\n");
 	rc = TPM_MGF1_GenerateArray(&Y,			/* returned MGF1 array */
 				    DAA_SIZE_r2,		/* size of Y */
 				    /* length of the entire seed */
@@ -2418,17 +2418,17 @@ TPM_RESULT TPM_DAAJoin_Stage11_Sign_Stage4(tpm_state_t *tpm_state,
     }
     /* i. Set X = DAA_generic_S0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* j. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* k. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage11_Sign_Stage4: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -2468,7 +2468,7 @@ TPM_RESULT TPM_DAAJoin_Stage12(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;	/* freed @4 */
     TPM_BIGNUM		zBignum = NULL;	/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage12:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage12:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==12. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2483,7 +2483,7 @@ TPM_RESULT TPM_DAAJoin_Stage12(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_S1) == DAA_issuerSettings -> DAA_digest_S1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Checking DAA_generic_S1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Checking DAA_generic_S1\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_S1,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_S1 */
 			    0, NULL);
@@ -2495,7 +2495,7 @@ TPM_RESULT TPM_DAAJoin_Stage12(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -2506,7 +2506,7 @@ TPM_RESULT TPM_DAAJoin_Stage12(tpm_state_t *tpm_state,
     /* h. Obtain DAA_SIZE_r3 bytes using the MGF1 function and label them Y.  "r3" || DAA_session ->
        DAA_contextSeed) is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Creating Y\n");
 	rc = TPM_MGF1_GenerateArray(&Y,			/* returned MGF1 array */
 				    DAA_SIZE_r3,		/* size of Y */
 				    /* length of the entire seed */
@@ -2522,17 +2522,17 @@ TPM_RESULT TPM_DAAJoin_Stage12(tpm_state_t *tpm_state,
     }
     /* i. Set X = DAA_generic_S1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* j. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* k. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage12: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage12: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -2579,7 +2579,7 @@ TPM_RESULT TPM_DAAJoin_Stage13_Sign_Stage6(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;		/* freed @3 */
     TPM_BIGNUM		w1Bignum = NULL;	/* freed @4 */
 
-    printf("TPM_DAAJoin_Stage13_Sign_Stage6:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6:\n");
     tpm_state = tpm_state;			/* not used */
     outputData = outputData;			/* not used */
     /* a. Verify that DAA_session->DAA_stage==13. Return TPM_DAA_STAGE and flush handle on
@@ -2595,7 +2595,7 @@ TPM_RESULT TPM_DAAJoin_Stage13_Sign_Stage6(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_gamma) == DAA_issuerSettings -> DAA_digest_gamma and return
        error TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage13_Sign_Stage6: Checking DAA_generic_gamma\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Checking DAA_generic_gamma\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_gamma,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_gamma */
 			    0, NULL);
@@ -2606,26 +2606,26 @@ TPM_RESULT TPM_DAAJoin_Stage13_Sign_Stage6(tpm_state_t *tpm_state,
     /* f. Verify that inputSize1 == DAA_SIZE_w and return error TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
 	if (inputData1->size !=	 DAA_SIZE_w) {
-	    printf("TPM_DAAJoin_Stage13_Sign_Stage6: Error, inputData1 size %u should be %u\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Error, inputData1 size %u should be %u\n",
 		   inputData0->size, DAA_SIZE_w);
 	    rc = TPM_DAA_INPUT_DATA1;
 	}
     }
     /* g. Set w = inputData1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating w\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating w\n");
 	rc = TPM_bin2bn(&wBignum, inputData1->buffer, inputData1->size);
     }
     /* FIXME added Set q = DAA_issuerSettings -> DAA_generic_q */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating q from DAA_generic_q\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating q from DAA_generic_q\n");
 	rc = TPM_bin2bn(&qBignum,
 			tpm_daa_session_data->DAA_issuerSettings.DAA_generic_q,
 			sizeof(tpm_daa_session_data->DAA_issuerSettings.DAA_generic_q));
     }
     /* FIXME Set n = DAA_generic_gamma */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData0->buffer, inputData0->size);
     }
     /* h. Set w1 = w^( DAA_issuerSettings -> DAA_generic_q) mod (DAA_generic_gamma) */
@@ -2640,7 +2640,7 @@ TPM_RESULT TPM_DAAJoin_Stage13_Sign_Stage6(tpm_state_t *tpm_state,
     }
     /* i. If w1 != 1 (unity), return error TPM_DAA_WRONG_W */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage13_Sign_Stage6: Testing w1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage13_Sign_Stage6: Testing w1\n");
 	rc = TPM_BN_is_one(w1Bignum);
     }
     /* j. Set DAA_session -> DAA_scratch = w */
@@ -2674,7 +2674,7 @@ TPM_RESULT TPM_DAAJoin_Stage14_Sign_Stage7(tpm_state_t *tpm_state,
 
     unsigned int	numBytes;	/* for debug */
 
-    printf("TPM_DAAJoin_Stage14_Sign_Stage7:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==14. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2689,7 +2689,7 @@ TPM_RESULT TPM_DAAJoin_Stage14_Sign_Stage7(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_gamma) == DAA_issuerSettings -> DAA_digest_gamma and return
        error TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: Checking DAA_generic_gamma\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: Checking DAA_generic_gamma\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_gamma,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_gamma */
 			    0, NULL);
@@ -2701,32 +2701,32 @@ TPM_RESULT TPM_DAAJoin_Stage14_Sign_Stage7(tpm_state_t *tpm_state,
        SHA-1(DAA_tpmSpecific -> DAA_rekey || DAA_tpmSpecific -> DAA_count || 1 ) mod
        DAA_issuerSettings -> DAA_generic_q. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating f\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating f\n");
 	rc = TPM_ComputeF(&fBignum, tpm_daa_session_data);	/* freed @1 */
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, fBignum);
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: f. f size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: f. f size %u\n", numBytes);
     }
     /* FIXME Set W = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating W\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating W\n");
 	rc = TPM_bin2bn(&wBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, wBignum);
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: W size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: W size %u\n", numBytes);
     }
     /* FIXME Set n = DAA_generic_gamma */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData0->buffer, inputData0->size);
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, nBignum);
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: n size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: n size %u\n", numBytes);
     }
     /* g. Set E = ((DAA_session -> DAA_scratch)^f) mod (DAA_generic_gamma). */
     /* FIXME E = (w^f) mod n */
@@ -2740,7 +2740,7 @@ TPM_RESULT TPM_DAAJoin_Stage14_Sign_Stage7(tpm_state_t *tpm_state,
     }
     /* h. Set outputData = E */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage14_Sign_Stage7: Output E\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage14_Sign_Stage7: Output E\n");
 	rc = TPM_bn2binMalloc(&(outputData->buffer),
 			      &(outputData->size),
 			      eBignum, 0);
@@ -2772,7 +2772,7 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;		/* freed @9 */
     TPM_BIGNUM		wBignum = NULL;		/* freed @10 */
 
-    printf("TPM_DAAJoin_Stage15_Sign_Stage8:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==15. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2787,7 +2787,7 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_gamma) == DAA_issuerSettings -> DAA_digest_gamma and return
        error TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Checking DAA_generic_gamma\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Checking DAA_generic_gamma\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_gamma,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_gamma */
 			    0, NULL);
@@ -2798,7 +2798,7 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     /* f. Obtain DAA_SIZE_r0 bytes using the MGF1 function and label them r0.  "r0" || DAA_session
        -> DAA_contextSeed) is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating r0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating r0\n");
 	rc = TPM_MGF1_GenerateArray(&r0,			/* returned MGF1 array */
 				    DAA_SIZE_r0,		/* size of Y */
 				    /* length of the entire seed */
@@ -2815,7 +2815,7 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     /* g. Obtain DAA_SIZE_r1 bytes using the MGF1 function and label them r1.  "r1" || DAA_session
        -> DAA_contextSeedis the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating r1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating r1\n");
 	rc = TPM_MGF1_GenerateArray(&r1,			/* returned MGF1 array */
 				    DAA_SIZE_r1,		/* size of Y */
 				    /* length of the entire seed */
@@ -2831,7 +2831,7 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     }
     /* FIXME Set q = DAA_generic_q */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating n from DAA_generic_q\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating n from DAA_generic_q\n");
 	rc = TPM_bin2bn(&qBignum,
 			tpm_daa_session_data->DAA_issuerSettings.DAA_generic_q,
 			sizeof(tpm_daa_session_data->DAA_issuerSettings.DAA_generic_q));
@@ -2853,12 +2853,12 @@ TPM_RESULT TPM_DAAJoin_Stage15_Sign_Stage8(tpm_state_t *tpm_state,
     }
     /* FIXME Set n = DAA_generic_gamma */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating n1 from DAA_generic_gamma\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating n1 from DAA_generic_gamma\n");
 	rc = TPM_bin2bn(&nBignum, inputData0->buffer, inputData0->size);
     }
     /* FIXME Set w = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating w from DAA_scratch\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage15_Sign_Stage8: Creating w from DAA_scratch\n");
 	rc = TPM_bin2bn(&wBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -2907,7 +2907,7 @@ TPM_RESULT TPM_DAAJoin_Stage16_Sign_Stage9(tpm_state_t *tpm_state,
     TPM_RESULT		rc = 0;
     unsigned char	*nt = NULL;		/* freed @1 */
 
-    printf("TPM_DAAJoin_Stage16_Sign_Stage9:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage16_Sign_Stage9:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==16. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2922,7 +2922,7 @@ TPM_RESULT TPM_DAAJoin_Stage16_Sign_Stage9(tpm_state_t *tpm_state,
        mismatch */
     if (rc == 0) {
 	if (inputData0->size != TPM_DIGEST_SIZE) {
-	    printf("TPM_DAAJoin_Stage16_Sign_Stage9: Error, inputData0 size %u should be %u\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage16_Sign_Stage9: Error, inputData0 size %u should be %u\n",
 		   inputData0->size, TPM_DIGEST_SIZE);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
@@ -2966,7 +2966,7 @@ TPM_RESULT TPM_DAAJoin_Stage17_Sign_Stage11(tpm_state_t *tpm_state,
     TPM_BIGNUM		s0Bignum = NULL;	/* freed @4 */
     TPM_BIGNUM		cBignum = NULL;		/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage17_Sign_Stage11:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage17_Sign_Stage11:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==17. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -2980,7 +2980,7 @@ TPM_RESULT TPM_DAAJoin_Stage17_Sign_Stage11(tpm_state_t *tpm_state,
     /* d. Obtain DAA_SIZE_r0 bytes using the MGF1 function and label them r0.  "r0" || DAA_session
        -> DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage17_Sign_Stage11: Creating r0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage17_Sign_Stage11: Creating r0\n");
 	rc = TPM_MGF1_GenerateArray(&r0,			/* returned MGF1 array */
 				    DAA_SIZE_r0,		/* size of Y */
 				    /* length of the entire seed */
@@ -3006,7 +3006,7 @@ TPM_RESULT TPM_DAAJoin_Stage17_Sign_Stage11(tpm_state_t *tpm_state,
     }
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage17_Sign_Stage11: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage17_Sign_Stage11: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* g. Set s0 = r0 + (DAA_session -> DAA_digest) * f0 in Z. Compute over the integers.  The
@@ -3047,7 +3047,7 @@ TPM_RESULT TPM_DAAJoin_Stage18_Sign_Stage12(tpm_state_t *tpm_state,
     TPM_BIGNUM		s1Bignum = NULL;	/* freed @5 */
     TPM_BIGNUM		cBignum = NULL;		/* freed @6 */
 
-    printf("TPM_DAAJoin_Stage18_Sign_Stage12:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage18_Sign_Stage12:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==18. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3061,7 +3061,7 @@ TPM_RESULT TPM_DAAJoin_Stage18_Sign_Stage12(tpm_state_t *tpm_state,
     /* d. Obtain DAA_SIZE_r1 bytes using the MGF1 function and label them r1.  "r1" || DAA_session
        -> DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage18_Sign_Stage12: Creating r1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage18_Sign_Stage12: Creating r1\n");
 	rc = TPM_MGF1_GenerateArray(&r1,			/* returned MGF1 array */
 				    DAA_SIZE_r1,		/* size of Y */
 				    /* length of the entire seed */
@@ -3088,7 +3088,7 @@ TPM_RESULT TPM_DAAJoin_Stage18_Sign_Stage12(tpm_state_t *tpm_state,
     }
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage18_Sign_Stage12: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage18_Sign_Stage12: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* g. Set s1 = r1 + (DAA_session -> DAA_digest)* f1 in Z. Compute over the integers.  The
@@ -3129,7 +3129,7 @@ TPM_RESULT TPM_DAAJoin_Stage19(tpm_state_t *tpm_state,
     TPM_BIGNUM		cBignum = NULL;		/* freed @4 */
     TPM_BIGNUM		u0Bignum = NULL;	/* freed @5 */
 
-    printf("TPM_DAAJoin_Stage19:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage19:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==19. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3143,7 +3143,7 @@ TPM_RESULT TPM_DAAJoin_Stage19(tpm_state_t *tpm_state,
     /* d. Obtain DAA_SIZE_r2 bytes using the MGF1 function and label them r2. "r2" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage19: Creating r2\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage19: Creating r2\n");
 	rc = TPM_MGF1_GenerateArray(&r2,			/* returned MGF1 array */
 				    DAA_SIZE_r2,		/* size of Y */
 				    /* length of the entire seed */
@@ -3161,12 +3161,12 @@ TPM_RESULT TPM_DAAJoin_Stage19(tpm_state_t *tpm_state,
        2^DAA_power1 (Erase all but the lowest DAA_power1 bits of s2) */
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage19: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage19: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* FIXME Set u0 = DAA_joinSession -> DAA_join_u0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage19: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage19: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
 	rc = TPM_bin2bn(&u0Bignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u0,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u0));
@@ -3216,7 +3216,7 @@ TPM_RESULT TPM_DAAJoin_Stage20(tpm_state_t *tpm_state,
 
     unsigned int	numBytes;	/* just for debug */
 
-    printf("TPM_DAAJoin_Stage20:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage20:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==20. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3230,7 +3230,7 @@ TPM_RESULT TPM_DAAJoin_Stage20(tpm_state_t *tpm_state,
     /* d. Obtain DAA_SIZE_r2 bytes using the MGF1 function and label them r2.  "r2" || DAA_session
        -> DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage20: Creating r2\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage20: Creating r2\n");
 	rc = TPM_MGF1_GenerateArray(&r2,			/* returned MGF1 array */
 				    DAA_SIZE_r2,		/* size of Y */
 				    /* length of the entire seed */
@@ -3247,12 +3247,12 @@ TPM_RESULT TPM_DAAJoin_Stage20(tpm_state_t *tpm_state,
     /* e. Set s12 = r2 + (DAA_session -> DAA_digest)*( DAA_joinSession -> DAA_join_u0)	*/
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage20: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage20: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* FIXME Set u0 = DAA_joinSession -> DAA_join_u0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage20: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage20: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
 	rc = TPM_bin2bn(&u0Bignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u0,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u0));
@@ -3267,7 +3267,7 @@ TPM_RESULT TPM_DAAJoin_Stage20(tpm_state_t *tpm_state,
     /* FIXME for debug */
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, s12Bignum);
-	printf("TPM_DAAJoin_Stage20: e. s12 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage20: e. s12 size %u\n", numBytes);
     }
     /* f. Shift s12 right by DAA_power1 bit (discard the lowest DAA_power1 bits). */
     if (rc == 0) {
@@ -3275,7 +3275,7 @@ TPM_RESULT TPM_DAAJoin_Stage20(tpm_state_t *tpm_state,
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, s12sBignum);
-	printf("TPM_DAAJoin_Stage20: f. s12 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage20: f. s12 size %u\n", numBytes);
     }
     /* g. Set DAA_session -> DAA_scratch = s12 */
     if (rc == 0) {
@@ -3314,7 +3314,7 @@ TPM_RESULT TPM_DAAJoin_Stage21(tpm_state_t *tpm_state,
 
     unsigned int	numBytes;	/* just for debug */
 
-    printf("TPM_DAAJoin_Stage21:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage21:\n");
     tpm_state = tpm_state;			/* not used */
     /* a. Verify that DAA_session ->DAA_stage==21. Return TPM_DAA_STAGE and flush handle on
        mismatch	 */
@@ -3328,7 +3328,7 @@ TPM_RESULT TPM_DAAJoin_Stage21(tpm_state_t *tpm_state,
     /* d. Obtain DAA_SIZE_r3 bytes using the MGF1 function and label them r3.  "r3" || DAA_session
        -> DAA_contextSeed) is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage21: Creating r3\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: Creating r3\n");
 	rc = TPM_MGF1_GenerateArray(&r3,			/* returned MGF1 array */
 				    DAA_SIZE_r3,		/* size of r3 */
 				    /* length of the entire seed */
@@ -3345,23 +3345,23 @@ TPM_RESULT TPM_DAAJoin_Stage21(tpm_state_t *tpm_state,
     /* just for debug */
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, r3Bignum);
-	printf("TPM_DAAJoin_Stage21: r3 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: r3 size %u\n", numBytes);
     }
     /* e. Set s3 = r3 + (DAA_session -> DAA_digest)*( DAA_joinSession -> DAA_join_u1) + (DAA_session
        -> DAA_scratch). */
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage21: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* just for debug */
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, cBignum);
-	printf("TPM_DAAJoin_Stage21: c size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: c size %u\n", numBytes);
     }
     /* FIXME Set u1 = DAA_joinSession -> DAA_join_u1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage21: Creating u1 from DAA_joinSession -> DAA_join_u1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: Creating u1 from DAA_joinSession -> DAA_join_u1\n");
 	rc = TPM_bin2bn(&u1Bignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u1,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u1));
@@ -3369,18 +3369,18 @@ TPM_RESULT TPM_DAAJoin_Stage21(tpm_state_t *tpm_state,
     /* just for debug */
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, u1Bignum);
-	printf("TPM_DAAJoin_Stage21: u1 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: u1 size %u\n", numBytes);
     }
     /* FIXME Set s12 = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage21: Creating s12 from DAA_session -> DAA_scratch\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: Creating s12 from DAA_session -> DAA_scratch\n");
 	rc = TPM_bin2bn(&s12Bignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, s12Bignum);
-	printf("TPM_DAAJoin_Stage21: s12 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: s12 size %u\n", numBytes);
     }
     /* s3 = r3 + c * u1 + s12 */
     if (rc == 0) {
@@ -3392,7 +3392,7 @@ TPM_RESULT TPM_DAAJoin_Stage21(tpm_state_t *tpm_state,
     }	 
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, s3Bignum);
-	printf("TPM_DAAJoin_Stage21: s3 size %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage21: s3 size %u\n", numBytes);
     }
     /* f. Set DAA_session -> DAA_scratch = NULL */
     if (rc == 0) {
@@ -3431,7 +3431,7 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
     
     unsigned int	numBytes;	/* just for debug */
 
-    printf("TPM_DAAJoin_Stage22:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage22:\n");
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @6 */
     /* a. Verify that DAA_session ->DAA_stage==22. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3445,28 +3445,28 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
     /* d. Verify inputSize0 == DAA_SIZE_v0 and return error TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
 	if (inputData0->size != DAA_SIZE_v0) {
-	    printf("TPM_DAAJoin_Stage22: Error, inputData0 size %u should be %u\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Error, inputData0 size %u should be %u\n",
 		   inputData0->size, DAA_SIZE_v0);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
     /* e. Set u2 = inputData0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage22: Creating u2\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Creating u2\n");
 	rc = TPM_bin2bn(&u2Bignum, inputData0->buffer, inputData0->size);
     }
     /* f. Set v0 = u2 + (DAA_joinSession -> DAA_join_u0) mod 2^DAA_power1 (Erase all but the lowest
        DAA_power1 bits of v0). */
     /* FIXME Set u0 = DAA_joinSession -> DAA_join_u0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage22: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Creating u0 from DAA_joinSession -> DAA_join_u0\n");
 	rc = TPM_bin2bn(&u0Bignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u0,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u0));
     }
     /* FIXME factor this? */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage22: Calculate v0\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Calculate v0\n");
 	rc = TPM_BN_new(&v0Bignum);
     }
     /* v0 = u2 + u0 */
@@ -3475,7 +3475,7 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, v0Bignum);
-	printf("TPM_DAAJoin_Stage22: f. v0 size before mask %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: f. v0 size before mask %u\n", numBytes);
     }
     /* v0 = v0 mod 2^DAA_power1 */
     if (rc == 0) {
@@ -3483,7 +3483,7 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
     }
     if (rc == 0) {
 	rc = TPM_BN_num_bytes(&numBytes, v0Bignum);
-	printf("TPM_DAAJoin_Stage22: f. v0 size after mask %u\n", numBytes);
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: f. v0 size after mask %u\n", numBytes);
     }
     /* g. Set DAA_tpmSpecific -> DAA_digest_v0 = SHA-1(v0) */
     if (rc == 0) {
@@ -3495,7 +3495,7 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
     /* h. Set v10 = u2 + (DAA_joinSession -> DAA_join_u0) in Z. Compute over the integers.
        The computation is not reduced with a modulus. */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage22: Calculate v10\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Calculate v10\n");
 	rc = TPM_BN_new(&v10Bignum);
     }
     /* v0 = u2 + u0 */
@@ -3517,7 +3517,7 @@ TPM_RESULT TPM_DAAJoin_Stage22(tpm_state_t *tpm_state,
        TPM_PERMANENT_DATA -> daaBlobKey */
     /* Create a TPM_DAA_SENSITIVE structure */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage22: Create TPM_DAA_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage22: Create TPM_DAA_SENSITIVE\n");
 	/* Set TPM_DAA_SENSITIVE -> internalData to v0Bignum */
 	rc = TPM_bn2binMalloc(&(tpm_daa_sensitive.internalData.buffer),
 			      &(tpm_daa_sensitive.internalData.size),
@@ -3558,7 +3558,7 @@ TPM_RESULT TPM_DAAJoin_Stage23(tpm_state_t *tpm_state,
     TPM_BIGNUM		v10Bignum = NULL;	/* freed @4 */
     TPM_DAA_SENSITIVE	tpm_daa_sensitive;
 
-    printf("TPM_DAAJoin_Stage23:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage23:\n");
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @5 */
     /* a. Verify that DAA_session ->DAA_stage==23. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3573,27 +3573,27 @@ TPM_RESULT TPM_DAAJoin_Stage23(tpm_state_t *tpm_state,
     /* mismatch */
     if (rc == 0) {
 	if (inputData0->size != DAA_SIZE_v1) {
-	    printf("TPM_DAAJoin_Stage23: Error, inputData0 size %u should be %u\n",
+	    TPMLIB_LogPrintf("TPM_DAAJoin_Stage23: Error, inputData0 size %u should be %u\n",
 		   inputData0->size, DAA_SIZE_v1);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
     /* e. Set u3 = inputData0 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage23: Creating u3\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage23: Creating u3\n");
 	rc = TPM_bin2bn(&u3Bignum, inputData0->buffer, inputData0->size);
     }
     /* f. Set v1 = u3 + DAA_joinSession -> DAA_join_u1 + DAA_session -> DAA_scratch */
     /* FIXME Set u1 = DAA_joinSession -> DAA_join_u1 */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage23: Creating u1 from DAA_joinSession -> DAA_join_u1\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage23: Creating u1 from DAA_joinSession -> DAA_join_u1\n");
 	rc = TPM_bin2bn(&u1Bignum,
 			tpm_daa_session_data->DAA_joinSession.DAA_join_u1,
 			sizeof(tpm_daa_session_data->DAA_joinSession.DAA_join_u1));
     }
     /* FIXME Set v10 = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage23: Creating v10\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage23: Creating v10\n");
 	rc = TPM_bin2bn(&v10Bignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -3619,7 +3619,7 @@ TPM_RESULT TPM_DAAJoin_Stage23(tpm_state_t *tpm_state,
        TPM_PERMANENT_DATA -> daaBlobKey */
     /* Create a TPM_DAA_SENSITIVE structure */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage23: Create TPM_DAA_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage23: Create TPM_DAA_SENSITIVE\n");
 	/* Set TPM_DAA_SENSITIVE -> internalData to v1Bignum */
 	rc = TPM_bn2binMalloc(&(tpm_daa_sensitive.internalData.buffer),
 			      &(tpm_daa_sensitive.internalData.size),
@@ -3660,7 +3660,7 @@ TPM_RESULT TPM_DAAJoin_Stage24(tpm_state_t *tpm_state,
     TPM_RESULT		rc = 0;
     TPM_DAA_SENSITIVE	tpm_daa_sensitive;
 
-    printf("TPM_DAAJoin_Stage24:\n");
+    TPMLIB_LogPrintf("TPM_DAAJoin_Stage24:\n");
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @1 */
     /* a. Verify that DAA_session ->DAA_stage==24. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3674,7 +3674,7 @@ TPM_RESULT TPM_DAAJoin_Stage24(tpm_state_t *tpm_state,
     /* d. set outputData = enc(DAA_tpmSpecific) using TPM_PERMANENT_DATA -> daaBlobKey */
     /* Create a TPM_DAA_SENSITIVE structure */
     if (rc == 0) {
-	printf("TPM_DAAJoin_Stage24 Create TPM_DAA_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_DAAJoin_Stage24 Create TPM_DAA_SENSITIVE\n");
 	/* Set TPM_DAA_SENSITIVE -> internalData to DAA_tpmSpecific */
 	rc = TPM_SizedBuffer_SetStructure(&(tpm_daa_sensitive.internalData),
 					  &(tpm_daa_session_data->DAA_tpmSpecific),
@@ -3703,7 +3703,7 @@ TPM_RESULT TPM_DAASign_Stage00(tpm_state_t *tpm_state,
     uint32_t		stream_size;
     TPM_HANDLE		daaHandle = 0;		/* no preassigned handle */
     
-    printf("TPM_DAASign_Stage00:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage00:\n");
     /* a. Determine that sufficient resources are available to perform a TPM_DAA_Sign. */
     /* i. The TPM MUST support sufficient resources to perform one (1)
        TPM_DAA_Join/TPM_DAA_Sign. The TPM MAY support addition TPM_DAA_Join/ TPM_DAA_Sign
@@ -3735,7 +3735,7 @@ TPM_RESULT TPM_DAASign_Stage00(tpm_state_t *tpm_state,
        TPM_DAA_INPUT_DATA0 if not. */
     if (rc == 0) {
 	if (stream_size != 0) {
-	    printf("TPM_DAASign_Stage00: Error, bad input0 size %u\n", inputData0->size);
+	    TPMLIB_LogPrintf("TPM_DAASign_Stage00: Error, bad input0 size %u\n", inputData0->size);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -3743,7 +3743,7 @@ TPM_RESULT TPM_DAASign_Stage00(tpm_state_t *tpm_state,
 	/* d. set all fields in DAA_session = NULL */
 	/* e. Assign new handle for session */
 	/* NOTE Done by TPM_DaaSessions_GetNewHandle() */
-	printf("TPM_DAASign_Stage00: handle %08x\n", (*tpm_daa_session_data)->daaHandle);
+	TPMLIB_LogPrintf("TPM_DAASign_Stage00: handle %08x\n", (*tpm_daa_session_data)->daaHandle);
 	/* f. Set outputData to new handle */
 	/* i. The handle in outputData is included the output HMAC. */
 	rc = TPM_SizedBuffer_Append32(outputData, (*tpm_daa_session_data)->daaHandle);
@@ -3764,7 +3764,7 @@ TPM_RESULT TPM_DAASign_Stage01(tpm_state_t *tpm_state,
     unsigned char	*stream;
     uint32_t		stream_size;
 
-    printf("TPM_DAASign_Stage01:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage01:\n");
     outputData = outputData;			/* not used */
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @1 */
     /* a. Verify that DAA_session ->DAA_stage==1. Return TPM_DAA_STAGE and flush handle on
@@ -3820,7 +3820,7 @@ TPM_RESULT TPM_DAASign_Stage05(tpm_state_t *tpm_state,
     TPM_BIGNUM		nBignum = NULL;	/* freed @4 */
     TPM_BIGNUM		zBignum = NULL;	/* freed @5 */
 
-    printf("TPM_DAASign_Stage05:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage05:\n");
     tpm_state = tpm_state;		/* not used */
     /* a. Verify that DAA_session ->DAA_stage==5. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -3835,7 +3835,7 @@ TPM_RESULT TPM_DAASign_Stage05(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_generic_S1) == DAA_issuerSettings -> DAA_digest_S1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05: Checking DAA_generic_S1\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05: Checking DAA_generic_S1\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_S1,	/* expect */
 			    inputData0->size, inputData0->buffer,	/* DAA_generic_S1 */
 			    0, NULL);
@@ -3847,7 +3847,7 @@ TPM_RESULT TPM_DAASign_Stage05(tpm_state_t *tpm_state,
     /* g. Verify that SHA-1(DAA_generic_n) == DAA_issuerSettings -> DAA_digest_n and return error
        TPM_DAA_INPUT_DATA1 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05: Checking DAA_digest_n\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05: Checking DAA_digest_n\n");
 	rc = TPM_SHA1_Check(tpm_daa_session_data->DAA_issuerSettings.DAA_digest_n,	/* expect */
 			    inputData1->size, inputData1->buffer,	/* DAA_generic_n */
 			    0, NULL);
@@ -3858,7 +3858,7 @@ TPM_RESULT TPM_DAASign_Stage05(tpm_state_t *tpm_state,
     /* h. Obtain DAA_SIZE_r4 bytes using the MGF1 function and label them Y.  "r4" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05: Creating Y\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05: Creating Y\n");
 	rc = TPM_MGF1_GenerateArray(&Y,			/* returned MGF1 array */
 				    DAA_SIZE_r4,		/* size of Y */
 				    /* length of the entire seed */
@@ -3874,17 +3874,17 @@ TPM_RESULT TPM_DAASign_Stage05(tpm_state_t *tpm_state,
     }
     /* i. Set X = DAA_generic_S1 */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05 Creating X\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05 Creating X\n");
 	rc = TPM_bin2bn(&xBignum, inputData0->buffer, inputData0->size);
     }
     /* j. Set n = DAA_generic_n */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05: Creating n\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05: Creating n\n");
 	rc = TPM_bin2bn(&nBignum, inputData1->buffer, inputData1->size);
     }
     /* k. Set Z = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage05: Creating Z\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage05: Creating Z\n");
 	rc = TPM_bin2bn(&zBignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -3933,7 +3933,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
     TPM_KEY_HANDLE	keyHandle;
     TPM_KEY		*identityKey = NULL;		/* the key specified by keyHandle */
 
-    printf("TPM_DAASign_Stage10:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage10:\n");
     /* a. Verify that DAA_session ->DAA_stage==10. Return TPM_DAA_STAGE and flush handle on
        mismatch */
     /* NOTE Done by common code */
@@ -3957,19 +3957,19 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
     }
     if (rc == 0) {
 	if (stream_size != 0) {
-	    printf("TPM_DAASign_Stage10: Error, bad input0 size %u\n", inputData0->size);
+	    TPMLIB_LogPrintf("TPM_DAASign_Stage10: Error, bad input0 size %u\n", inputData0->size);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
     if (rc == 0) {
-	printf("TPM_DAASign_Stage10: selector %u\n", selector);
+	TPMLIB_LogPrintf("TPM_DAASign_Stage10: selector %u\n", selector);
 	switch (selector) {
 	  case 1:
 	    /* f. If selector == 1, verify that inputSize1 == sizeOf(TPM_DIGEST), and return error
 	       TPM_DAA_INPUT_DATA1 on mismatch */
 	    if (rc == 0) {
 		if (inputData1->size != TPM_DIGEST_SIZE) {
-		    printf("TPM_DAASign_Stage10: Error, bad input1 size %u\n", inputData1->size);
+		    TPMLIB_LogPrintf("TPM_DAASign_Stage10: Error, bad input1 size %u\n", inputData1->size);
 		    rc = TPM_DAA_INPUT_DATA1;
 		}
 	    }
@@ -4001,7 +4001,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
 	    /* validate inputData1 */
 	    if (rc == 0) {
 		if (stream_size != 0) {
-		    printf("TPM_DAASign_Stage10: Error, bad input1 size %u\n", inputData1->size);
+		    TPMLIB_LogPrintf("TPM_DAASign_Stage10: Error, bad input1 size %u\n", inputData1->size);
 		    rc = TPM_DAA_INPUT_DATA1;
 		}
 	    }
@@ -4019,7 +4019,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
 	    /* validate that it's an AIK */
 	    if (rc == 0) {
 		if (identityKey->keyUsage != TPM_KEY_IDENTITY) {
-		    printf("TPM_DAASign_Stage10: Error, "
+		    TPMLIB_LogPrintf("TPM_DAASign_Stage10: Error, "
 			   "key keyUsage %04hx must be TPM_KEY_IDENTITY\n", identityKey->keyUsage);
 		    rc = TPM_DAA_INPUT_DATA1;
 		}
@@ -4035,7 +4035,7 @@ TPM_RESULT TPM_DAASign_Stage10(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  default:
-	    printf("TPM_DAASign_Stage10: Error, bad selector %u\n", selector);
+	    TPMLIB_LogPrintf("TPM_DAASign_Stage10: Error, bad selector %u\n", selector);
 	    rc = TPM_DAA_INPUT_DATA0;
 	    break;
 	}
@@ -4064,7 +4064,7 @@ TPM_RESULT TPM_DAASign_Stage13(tpm_state_t *tpm_state,
     TPM_BIGNUM		v0Bignum = NULL;	/* freed @5 */
     TPM_DAA_SENSITIVE	tpm_daa_sensitive;
 
-    printf("TPM_DAASign_Stage13:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage13:\n");
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @6 */
     /* a. Verify that DAA_session ->DAA_stage==13. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -4077,7 +4077,7 @@ TPM_RESULT TPM_DAASign_Stage13(tpm_state_t *tpm_state,
     /* NOTE Done by common code */
     /* d. Set DAA_private_v0= unwrap(inputData0) using TPM_PERMANENT_DATA -> daaBlobKey */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage13: unwrapping to v0\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage13: unwrapping to v0\n");
 	rc = TPM_ComputeDecrypt(&tpm_daa_sensitive,	/* output */
 				tpm_state,		/* decryption and HMAC keys */
 				inputData0,		/* encrypted stream */
@@ -4089,7 +4089,7 @@ TPM_RESULT TPM_DAASign_Stage13(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_private_v0) == DAA_tpmSpecific -> DAA_digest_v0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage13: Checking v0\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage13: Checking v0\n");
 	rc = TPM_SHA1_SizedBufferCheck(tpm_daa_session_data->DAA_tpmSpecific.DAA_digest_v0,
 				       &(tpm_daa_sensitive.internalData),
 				       (DAA_power1 + 7) / 8);
@@ -4100,7 +4100,7 @@ TPM_RESULT TPM_DAASign_Stage13(tpm_state_t *tpm_state,
     /* f. Obtain DAA_SIZE_r2 bytes from the MGF1 function and label them r2.  "r2" || DAA_session ->
        DAA_contextSeed) is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage13 Creating r2\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage13 Creating r2\n");
 	rc = TPM_MGF1_GenerateArray(&r2,			/* returned MGF1 array */
 				    DAA_SIZE_r2,		/* size of Y */
 				    /* length of the entire seed */
@@ -4118,7 +4118,7 @@ TPM_RESULT TPM_DAASign_Stage13(tpm_state_t *tpm_state,
     /* (erase all but the lowest DAA_power1 bits of s2) */
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage13: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage13: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* FIXME Set v0 = DAA_private_v0 */
@@ -4169,7 +4169,7 @@ TPM_RESULT TPM_DAASign_Stage14(tpm_state_t *tpm_state,
     TPM_BIGNUM		v0Bignum = NULL;	/* freed @6 */
     TPM_DAA_SENSITIVE	tpm_daa_sensitive;
 
-    printf("TPM_DAASign_Stage14:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage14:\n");
     outputData = outputData;			/* not used */
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @7 */
     /* a. Verify that DAA_session ->DAA_stage==14. Return TPM_DAA_STAGE and flush handle on
@@ -4194,7 +4194,7 @@ TPM_RESULT TPM_DAASign_Stage14(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_private_v0) == DAA_tpmSpecific -> DAA_digest_v0 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage14: Checking v0\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage14: Checking v0\n");
 	rc = TPM_SHA1_SizedBufferCheck(tpm_daa_session_data->DAA_tpmSpecific.DAA_digest_v0,
 				       &(tpm_daa_sensitive.internalData),
 				       (DAA_power1 + 7) / 8);
@@ -4205,7 +4205,7 @@ TPM_RESULT TPM_DAASign_Stage14(tpm_state_t *tpm_state,
     /* f. Obtain DAA_SIZE_r2 bytes from the MGF1 function and label them r2.  "r2" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage14: Creating r2\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage14: Creating r2\n");
 	rc = TPM_MGF1_GenerateArray(&r2,			/* returned MGF1 array */
 				    DAA_SIZE_r2,		/* size of Y */
 				    /* length of the entire seed */
@@ -4222,7 +4222,7 @@ TPM_RESULT TPM_DAASign_Stage14(tpm_state_t *tpm_state,
     /* g. Set s12 = r2 + (DAA_session -> DAA_digest)*(DAA_private_v0). */
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage14: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage14: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* FIXME Set v0 = DAA_private_v0 */
@@ -4277,7 +4277,7 @@ TPM_RESULT TPM_DAASign_Stage15(tpm_state_t *tpm_state,
     TPM_BIGNUM		s12Bignum = NULL;	/* freed @6 */
     TPM_DAA_SENSITIVE	tpm_daa_sensitive;
 
-    printf("TPM_DAASign_Stage15:\n");
+    TPMLIB_LogPrintf("TPM_DAASign_Stage15:\n");
     TPM_DAASensitive_Init(&tpm_daa_sensitive);	/* freed @7 */
     /* a. Verify that DAA_session ->DAA_stage==15. Return TPM_DAA_STAGE and flush handle on
        mismatch */
@@ -4301,7 +4301,7 @@ TPM_RESULT TPM_DAASign_Stage15(tpm_state_t *tpm_state,
     /* e. Verify that SHA-1(DAA_private_v1) == DAA_tpmSpecific -> DAA_digest_v1 and return error
        TPM_DAA_INPUT_DATA0 on mismatch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage15: Checking v1\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage15: Checking v1\n");
 	rc = TPM_SHA1_SizedBufferCheck(tpm_daa_session_data->DAA_tpmSpecific.DAA_digest_v1,
 				       &(tpm_daa_sensitive.internalData),
 				       DAA_SIZE_v1);
@@ -4312,7 +4312,7 @@ TPM_RESULT TPM_DAASign_Stage15(tpm_state_t *tpm_state,
     /* f. Obtain DAA_SIZE_r4 bytes from the MGF1 function and label them r4.  "r4" || DAA_session ->
        DAA_contextSeed is the Z seed. */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage15: Creating r4\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage15: Creating r4\n");
 	rc = TPM_MGF1_GenerateArray(&r4,			/* returned MGF1 array */
 				    DAA_SIZE_r4,		/* size of Y */
 				    /* length of the entire seed */
@@ -4330,7 +4330,7 @@ TPM_RESULT TPM_DAASign_Stage15(tpm_state_t *tpm_state,
        DAA_scratch). */
     /* FIXME Set c = DAA_session -> DAA_digest */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage15: Creating c from DAA_session -> DAA_digest\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage15: Creating c from DAA_session -> DAA_digest\n");
 	rc = TPM_bin2bn(&cBignum, tpm_daa_session_data->DAA_session.DAA_digest, TPM_DIGEST_SIZE);
     }
     /* FIXME Set v1 = DAA_private_v1 */
@@ -4341,7 +4341,7 @@ TPM_RESULT TPM_DAASign_Stage15(tpm_state_t *tpm_state,
     }
     /* FIXME Set s12 = DAA_session -> DAA_scratch */
     if (rc == 0) {
-	printf("TPM_DAASign_Stage15: Creating s12 from DAA_session -> DAA_scratch\n");
+	TPMLIB_LogPrintf("TPM_DAASign_Stage15: Creating s12 from DAA_session -> DAA_scratch\n");
 	rc = TPM_bin2bn(&s12Bignum,
 			tpm_daa_session_data->DAA_session.DAA_scratch,
 			sizeof(tpm_daa_session_data->DAA_session.DAA_scratch));
@@ -4392,7 +4392,7 @@ TPM_RESULT TPM_DAADigestContext_GenerateDigestJoin(TPM_DIGEST tpm_digest,
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;	/* TPM_STORED_DATA serialization */
     
-    printf(" TPM_DAADigestContext_GenerateDigestJoin:\n");
+    TPMLIB_LogPrintf(" TPM_DAADigestContext_GenerateDigestJoin:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize DAA_tpmSpecific */
     if (rc == 0) {
@@ -4421,7 +4421,7 @@ TPM_RESULT TPM_DAADigestContext_CheckDigestJoin(TPM_DAA_SESSION_DATA *tpm_daa_se
     TPM_RESULT		rc = 0;
     TPM_DIGEST		tpm_digest;	/* actual digest */
     
-    printf(" TPM_DAADigestContext_CheckDigestJoin:\n");
+    TPMLIB_LogPrintf(" TPM_DAADigestContext_CheckDigestJoin:\n");
     if (rc == 0) {
 	rc = TPM_DAADigestContext_GenerateDigestJoin(tpm_digest, tpm_daa_session_data);
     }
@@ -4453,7 +4453,7 @@ TPM_RESULT TPM_ComputeF(TPM_BIGNUM *fBignum,		/* freed by caller */
     TPM_BIGNUM		dividend;	/* digest0 || digest1 as a BIGNUM */
     TPM_BIGNUM		modulus;	/* DAA_generic_q as a BIGNUM */
     
-    printf(" TPM_ComputeF:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeF:\n");
     modulus = NULL;			/* freed @1 */
     dividend = NULL;			/* freed @2 */
     if (rc == 0) {
@@ -4461,7 +4461,7 @@ TPM_RESULT TPM_ComputeF(TPM_BIGNUM *fBignum,		/* freed by caller */
     }
     /* SHA1(DAA_tpmSpecific -> DAA_rekey || DAA_tpmSpecific -> DAA_count || 0) */
     if (rc == 0) {
-	printf("  TPM_ComputeF: Calculate digest0\n");
+	TPMLIB_LogPrintf("  TPM_ComputeF: Calculate digest0\n");
 	nCount = htonl(tpm_daa_session_data->DAA_tpmSpecific.DAA_count);
 	rc = TPM_SHA1(digest0,
 		      TPM_DIGEST_SIZE, tpm_daa_session_data->DAA_tpmSpecific.DAA_rekey,
@@ -4471,7 +4471,7 @@ TPM_RESULT TPM_ComputeF(TPM_BIGNUM *fBignum,		/* freed by caller */
     }
     /* SHA1(DAA_tpmSpecific -> DAA_rekey || DAA_tpmSpecific -> DAA_count || 1 ) */
     if (rc == 0) {
-	printf("  TPM_ComputeF: Calculate digest1\n");
+	TPMLIB_LogPrintf("  TPM_ComputeF: Calculate digest1\n");
 	rc = TPM_SHA1(digest1,
 		      TPM_DIGEST_SIZE, tpm_daa_session_data->DAA_tpmSpecific.DAA_rekey,
 		      sizeof(uint32_t), &nCount,
@@ -4515,7 +4515,7 @@ TPM_RESULT TPM_ComputeAexpPmodn(BYTE *DAA_scratch,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_ComputeAexpPmodn:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeAexpPmodn:\n");
     if (rc == 0) {
 	rc = TPM_BN_new(rBignum);
     }
@@ -4544,9 +4544,9 @@ TPM_RESULT TPM_ComputeZxAexpPmodn(BYTE *DAA_scratch,
     TPM_RESULT	rc = 0;
     TPM_BIGNUM	rBignum = NULL;		/* freed @1 */
     
-    printf(" TPM_ComputeZxAexpPmodn:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeZxAexpPmodn:\n");
     if (rc == 0) {
-	printf("  TPM_ComputeZxAexpPmodn: Calculate R = A ^ P mod n\n");
+	TPMLIB_LogPrintf("  TPM_ComputeZxAexpPmodn: Calculate R = A ^ P mod n\n");
 	rc = TPM_ComputeAexpPmodn(NULL,		/* DAA_scratch */
 				  0,
 				  &rBignum,	/* R */
@@ -4555,7 +4555,7 @@ TPM_RESULT TPM_ComputeZxAexpPmodn(BYTE *DAA_scratch,
 				  nBignum);
     }
     if (rc == 0) {
-	printf("  TPM_ComputeZxAexpPmodn: Calculate R = Z * R mod n\n");
+	TPMLIB_LogPrintf("  TPM_ComputeZxAexpPmodn: Calculate R = Z * R mod n\n");
 	rc = TPM_BN_mod_mul(rBignum, zBignum, rBignum, nBignum);
     }
     /* store the result in DAA_scratch */
@@ -4577,7 +4577,7 @@ TPM_RESULT TPM_ComputeApBmodn(TPM_BIGNUM *rBignum, /* freed by caller */
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_ComputeApBmodn:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeApBmodn:\n");
     if (rc == 0) {
 	rc = TPM_BN_new(rBignum);	/* freed by caller */
     }
@@ -4598,7 +4598,7 @@ TPM_RESULT TPM_ComputeApBxC(TPM_BIGNUM *rBignum,	/* freed by caller */
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_ComputeApBxC:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeApBxC:\n");
     if (rc == 0) {
 	rc = TPM_BN_new(rBignum);	/* freed by caller */
     }
@@ -4624,7 +4624,7 @@ TPM_RESULT TPM_ComputeApBxCpD(TPM_BIGNUM *rBignum, /* freed by caller */
 			      TPM_BIGNUM dBignum)
 {
     TPM_RESULT		rc = 0;
-    printf(" TPM_ComputeApBxCpD:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeApBxCpD:\n");
     /* R = A + B * C */
     if (rc == 0) {
 	rc = TPM_ComputeApBxC(rBignum,	/* freed by caller */
@@ -4649,7 +4649,7 @@ TPM_RESULT TPM_ComputeDAAScratch(BYTE *DAA_scratch,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ComputeDAAScratch:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeDAAScratch:\n");
     if (rc == 0) {
 	rc = TPM_bn2binArray(DAA_scratch, DAA_scratch_size, bn);
     }
@@ -4672,7 +4672,7 @@ TPM_RESULT TPM_ComputeEnlarge(unsigned char **out,	/* freed by caller */
 
     if (rc == 0) {
 	if (outSize <= inSize) {
-	    printf("TPM_ComputeEnlarge: Error (fatal), inSize %u outSize %u\n", inSize, outSize);
+	    TPMLIB_LogPrintf("TPM_ComputeEnlarge: Error (fatal), inSize %u outSize %u\n", inSize, outSize);
 	    rc = TPM_FAIL;
 	}
     }
@@ -4733,7 +4733,7 @@ TPM_RESULT TPM_ComputeEncrypt(TPM_SIZED_BUFFER *outputData,
     TPM_DAA_BLOB	tpm_daa_blob;
     TPM_STORE_BUFFER	daaSensitiveSbuffer;
     
-    printf(" TPM_ComputeEncrypt:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeEncrypt:\n");
     TPM_DAABlob_Init(&tpm_daa_blob);		/* freed @1 */
     TPM_Sbuffer_Init(&daaSensitiveSbuffer);	/* freed @2 */
 
@@ -4743,7 +4743,7 @@ TPM_RESULT TPM_ComputeEncrypt(TPM_SIZED_BUFFER *outputData,
     }
     /* Create a TPM_DAA_BLOB structure */
     if (rc == 0) {
-	printf("  TPM_ComputeEncrypt: Create TPM_DAA_BLOB\n");
+	TPMLIB_LogPrintf("  TPM_ComputeEncrypt: Create TPM_DAA_BLOB\n");
 	tpm_daa_blob.resourceType = resourceType;
 	/* Set TPM_DAA_BLOB -> sensitiveData to the encryption of serialized TPM_DAA_SENSITIVE */
 	rc = TPM_SymmetricKeyData_EncryptSbuffer
@@ -4791,7 +4791,7 @@ TPM_RESULT TPM_ComputeDecrypt(TPM_DAA_SENSITIVE *tpm_daa_sensitive,
     unsigned char	*sensitiveStream;
     uint32_t		sensitiveStreamSize;
     
-    printf(" TPM_ComputeDecrypt:\n");
+    TPMLIB_LogPrintf(" TPM_ComputeDecrypt:\n");
     TPM_DAABlob_Init(&tpm_daa_blob);		/* freed @1 */
     sensitiveStream = NULL;			/* freed @2 */
     /* deserialize inputData to a TPM_DAA_BLOB */
@@ -4802,7 +4802,7 @@ TPM_RESULT TPM_ComputeDecrypt(TPM_DAA_SENSITIVE *tpm_daa_sensitive,
     }
     if (rc == 0) {
 	if (stream_size != 0) {
-	    printf("TPM_ComputeDecrypt: Error, bad blob input size %u\n", inputData->size);
+	    TPMLIB_LogPrintf("TPM_ComputeDecrypt: Error, bad blob input size %u\n", inputData->size);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -4817,7 +4817,7 @@ TPM_RESULT TPM_ComputeDecrypt(TPM_DAA_SENSITIVE *tpm_daa_sensitive,
     /* check resourceType */
     if (rc == 0) {
 	if (tpm_daa_blob.resourceType != resourceType) {
-	    printf("TPM_ComputeDecrypt: Error, resourceType %08x\n", tpm_daa_blob.resourceType);
+	    TPMLIB_LogPrintf("TPM_ComputeDecrypt: Error, resourceType %08x\n", tpm_daa_blob.resourceType);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -4837,7 +4837,7 @@ TPM_RESULT TPM_ComputeDecrypt(TPM_DAA_SENSITIVE *tpm_daa_sensitive,
     }
     if (rc == 0) {
 	if (stream_size != 0) {
-	    printf("TPM_ComputeDecrypt: Error, bad sensitive input size %u\n", sensitiveStreamSize);
+	    TPMLIB_LogPrintf("TPM_ComputeDecrypt: Error, bad sensitive input size %u\n", sensitiveStreamSize);
 	    rc = TPM_DAA_INPUT_DATA0;
 	}
     }
@@ -4864,7 +4864,7 @@ TPM_RESULT TPM_SHA1_BignumGenerate(TPM_DIGEST tpm_digest,
 	rc = TPM_bn2binMalloc(&bin, &bytes, bn, 0);	/* freed @1 */
     }
     if (rc == 0) {
-	printf(" TPM_SHA1_BignumGenerate: enlarge to %u bytes, is %u bytes\n", size, bytes);
+	TPMLIB_LogPrintf(" TPM_SHA1_BignumGenerate: enlarge to %u bytes, is %u bytes\n", size, bytes);
 	if (bytes != size) {
 	    /* canonicalize the array size */
 	    if (rc == 0) {
@@ -4902,7 +4902,7 @@ TPM_RESULT TPM_SHA1_SizedBufferCheck(TPM_DIGEST tpm_digest,
     TPM_RESULT	rc = 0;
 
     if (rc == 0) {
-	printf(" TPM_SHA1_SizedBufferCheck: enlarge to %u bytes, is %u bytes\n",
+	TPMLIB_LogPrintf(" TPM_SHA1_SizedBufferCheck: enlarge to %u bytes, is %u bytes\n",
 	       size, tpm_sized_buffer->size);
 	if (tpm_sized_buffer->size != size) {
 	    /* canonicalize the array size */
@@ -4972,7 +4972,7 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	outputData;	/* Data produced by this capability */
 
-    printf("TPM_Process_DAAJoin: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DAAJoin: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inputData0);	/* freed @1 */
     TPM_SizedBuffer_Init(&inputData1);	/* freed @2 */
     TPM_SizedBuffer_Init(&outputData);	/* freed @3 */
@@ -4987,11 +4987,11 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get stage */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DAAJoin: daaHandle %08x\n", daaHandle);
+	TPMLIB_LogPrintf("TPM_Process_DAAJoin: daaHandle %08x\n", daaHandle);
 	returnCode = TPM_Load8(&stage, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DAAJoin: stage %u\n", stage);
+	TPMLIB_LogPrintf("TPM_Process_DAAJoin: stage %u\n", stage);
 	/* For stages after stage 0, daaHandle is an input.  Mark it valid so it can be terminated
 	   on error. */
 	if (stage > 0) {
@@ -5037,7 +5037,7 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DAAJoin: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DAAJoin: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5244,7 +5244,7 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
 					     &outputData);
 	    break;
 	  default :
-	    printf("TPM_Process_DAAJoin: Error, Illegal stage\n");
+	    TPMLIB_LogPrintf("TPM_Process_DAAJoin: Error, Illegal stage\n");
 	    returnCode = TPM_DAA_STAGE;
 	}
     }
@@ -5260,7 +5260,7 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
 	  handle. */
     if (returnCode == TPM_SUCCESS) {
 	if (stage == 24) {
-	    printf("TPM_Process_DAAJoin: Stage 24, terminating DAA session %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DAAJoin: Stage 24, terminating DAA session %08x\n",
 		   tpm_daa_session_data->daaHandle);
 	    TPM_DaaSessionData_Delete(tpm_daa_session_data);
 	}
@@ -5273,7 +5273,7 @@ TPM_RESULT TPM_Process_DAAJoin(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DAAJoin: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DAAJoin: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5390,7 +5390,7 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	outputData;	/* Data produced by this capability */
 
-    printf("TPM_Process_DAASign: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DAASign: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inputData0);	/* freed @1 */
     TPM_SizedBuffer_Init(&inputData1);	/* freed @2 */
     TPM_SizedBuffer_Init(&outputData);	/* freed @3 */
@@ -5405,11 +5405,11 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get stage */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DAASign: daaHandle %08x\n", daaHandle);
+	TPMLIB_LogPrintf("TPM_Process_DAASign: daaHandle %08x\n", daaHandle);
 	returnCode = TPM_Load8(&stage, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DAASign: stage %u\n", stage);
+	TPMLIB_LogPrintf("TPM_Process_DAASign: stage %u\n", stage);
 	/* For stages after stage 0, daaHandle is an input.  Mark it valid so it can be terminated
 	   on error. */
 	if (stage > 0) {
@@ -5455,7 +5455,7 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DAASign: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DAASign: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5634,7 +5634,7 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
 					     &inputData0);
 	    break;
 	  default :
-	    printf("TPM_Process_DAASign: Error, Illegal stage\n");
+	    TPMLIB_LogPrintf("TPM_Process_DAASign: Error, Illegal stage\n");
 	    returnCode = TPM_DAA_STAGE;
 	}
     }
@@ -5648,7 +5648,7 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
        handle. */
     if (returnCode == TPM_SUCCESS) {
 	if (stage == 15) {
-	    printf("TPM_Process_DAASign: Stage 15, terminating DAA session %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DAASign: Stage 15, terminating DAA session %08x\n",
 		   tpm_daa_session_data->daaHandle);
 	    TPM_DaaSessionData_Delete(tpm_daa_session_data);
 	}
@@ -5661,7 +5661,7 @@ TPM_RESULT TPM_Process_DAASign(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DAASign: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DAASign: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

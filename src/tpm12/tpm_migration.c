@@ -70,7 +70,7 @@
 
 void TPM_Migrationkeyauth_Init(TPM_MIGRATIONKEYAUTH *tpm_migrationkeyauth)
 {
-    printf(" TPM_Migrationkeyauth_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Migrationkeyauth_Init:\n");
     TPM_Pubkey_Init(&(tpm_migrationkeyauth->migrationKey));
     tpm_migrationkeyauth->migrationScheme = 0; 
     TPM_Digest_Init(tpm_migrationkeyauth->digest); 
@@ -93,7 +93,7 @@ TPM_RESULT TPM_Migrationkeyauth_Load(TPM_MIGRATIONKEYAUTH *tpm_migrationkeyauth,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Migrationkeyauth_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Migrationkeyauth_Load:\n");
     /* load migrationKey */
     if (rc == 0) {
 	rc = TPM_Pubkey_Load(&(tpm_migrationkeyauth->migrationKey), stream, stream_size);
@@ -120,7 +120,7 @@ TPM_RESULT TPM_Migrationkeyauth_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_Migrationkeyauth_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Migrationkeyauth_Store:\n");
     /* store migrationKey */
     if (rc == 0) {
 	rc = TPM_Pubkey_Store(sbuffer, &(tpm_migrationkeyauth->migrationKey));
@@ -147,7 +147,7 @@ TPM_RESULT TPM_Migrationkeyauth_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_Migrationkeyauth_Delete(TPM_MIGRATIONKEYAUTH *tpm_migrationkeyauth)
 {
-    printf(" TPM_Migrationkeyauth_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_Migrationkeyauth_Delete:\n");
     if (tpm_migrationkeyauth != NULL) {
 	TPM_Pubkey_Delete(&(tpm_migrationkeyauth->migrationKey));
 	TPM_Migrationkeyauth_Init(tpm_migrationkeyauth);
@@ -168,7 +168,7 @@ void TPM_Migrationkeyauth_Delete(TPM_MIGRATIONKEYAUTH *tpm_migrationkeyauth)
 
 void TPM_MsaComposite_Init(TPM_MSA_COMPOSITE *tpm_msa_composite)
 {
-    printf(" TPM_MsaComposite_Init:\n");
+    TPMLIB_LogPrintf(" TPM_MsaComposite_Init:\n");
     tpm_msa_composite->MSAlist = 0;
     tpm_msa_composite->migAuthDigest = NULL;
     return;
@@ -191,7 +191,7 @@ TPM_RESULT TPM_MsaComposite_Load(TPM_MSA_COMPOSITE *tpm_msa_composite,
     TPM_RESULT		rc = 0;
     uint32_t		i;
 
-    printf(" TPM_MsaComposite_Load:\n");
+    TPMLIB_LogPrintf(" TPM_MsaComposite_Load:\n");
     /* load MSAlist */
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_msa_composite->MSAlist), stream, stream_size);
@@ -199,7 +199,7 @@ TPM_RESULT TPM_MsaComposite_Load(TPM_MSA_COMPOSITE *tpm_msa_composite,
     /* MSAlist MUST be one (1) or greater. */
     if (rc == 0) {
 	if (tpm_msa_composite->MSAlist == 0) {
-	    printf("TPM_MsaComposite_Load: Error, MSAlist is zero\n");
+	    TPMLIB_LogPrintf("TPM_MsaComposite_Load: Error, MSAlist is zero\n");
 	    rc = TPM_INVALID_STRUCTURE;
 	}
     }
@@ -228,7 +228,7 @@ TPM_RESULT TPM_MsaComposite_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
     uint32_t		i;
 
-    printf(" TPM_MsaComposite_Store:\n");
+    TPMLIB_LogPrintf(" TPM_MsaComposite_Store:\n");
     /* store MSAlist */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_msa_composite->MSAlist);
@@ -251,7 +251,7 @@ TPM_RESULT TPM_MsaComposite_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_MsaComposite_Delete(TPM_MSA_COMPOSITE *tpm_msa_composite)
 {
-    printf(" TPM_MsaComposite_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_MsaComposite_Delete:\n");
     if (tpm_msa_composite != NULL) {
 	free(tpm_msa_composite->migAuthDigest);
 	TPM_MsaComposite_Init(tpm_msa_composite);
@@ -266,7 +266,7 @@ TPM_RESULT TPM_MsaComposite_CheckMigAuthDigest(TPM_DIGEST tpm_digest, /* value t
     uint32_t		n;		/* count through msaList */
     TPM_BOOL		match;
 
-    printf(" TPM_MsaComposite_CheckMigAuthDigest:\n");
+    TPMLIB_LogPrintf(" TPM_MsaComposite_CheckMigAuthDigest:\n");
     for (n = 0 , match = FALSE ; (n < tpm_msa_composite->MSAlist) && !match ; n++) {
 	rc = TPM_Digest_Compare(tpm_digest, tpm_msa_composite->migAuthDigest[n]);
 	if (rc == 0) {
@@ -277,7 +277,7 @@ TPM_RESULT TPM_MsaComposite_CheckMigAuthDigest(TPM_DIGEST tpm_digest, /* value t
 	rc = TPM_SUCCESS;
     }
     else {
-	printf("TPM_MsaComposite_CheckMigAuthDigest: Error, no match to msaList\n");
+	TPMLIB_LogPrintf("TPM_MsaComposite_CheckMigAuthDigest: Error, no match to msaList\n");
 	rc = TPM_MA_TICKET_SIGNATURE;
     }
     return rc;
@@ -305,7 +305,7 @@ TPM_RESULT TPM_MsaComposite_CheckSigTicket(TPM_DIGEST sigTicket, /* expected HMA
     const unsigned char *buffer;	
     uint32_t		length;
     
-    printf(" TPM_MsaComposite_CheckSigTicket: TPM_MSA_COMPOSITE length %u\n",
+    TPMLIB_LogPrintf(" TPM_MsaComposite_CheckSigTicket: TPM_MSA_COMPOSITE length %u\n",
 	   tpm_msa_composite->MSAlist);
     TPM_Sbuffer_Init(&sbuffer);		/* freed @1 */
     for (n = 0 , match = FALSE ;
@@ -332,7 +332,7 @@ TPM_RESULT TPM_MsaComposite_CheckSigTicket(TPM_DIGEST sigTicket, /* expected HMA
     }
     if (rc == 0) {
 	    if (!match) {
-	    printf("TPM_MsaComposite_CheckSigTicket: Error, no match to msaList\n");
+	    TPMLIB_LogPrintf("TPM_MsaComposite_CheckSigTicket: Error, no match to msaList\n");
 	    rc = TPM_MA_TICKET_SIGNATURE;
 	}
     }
@@ -353,7 +353,7 @@ TPM_RESULT TPM_MsaComposite_CheckSigTicket(TPM_DIGEST sigTicket, /* expected HMA
 
 void TPM_CmkAuth_Init(TPM_CMK_AUTH *tpm_cmk_auth)
 {
-    printf(" TPM_CmkAuth_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CmkAuth_Init:\n");
     TPM_Digest_Init(tpm_cmk_auth->migrationAuthorityDigest);
     TPM_Digest_Init(tpm_cmk_auth->destinationKeyDigest);
     TPM_Digest_Init(tpm_cmk_auth->sourceKeyDigest);
@@ -376,7 +376,7 @@ TPM_RESULT TPM_CmkAuth_Load(TPM_CMK_AUTH *tpm_cmk_auth,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkAuth_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CmkAuth_Load:\n");
     /* load migrationAuthorityDigest */
     if (rc == 0) {
 	rc = TPM_Digest_Load(tpm_cmk_auth->migrationAuthorityDigest, stream, stream_size);
@@ -403,7 +403,7 @@ TPM_RESULT TPM_CmkAuth_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkAuth_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CmkAuth_Store:\n");
     /* store migrationAuthorityDigest */
     if (rc == 0) {
 	rc = TPM_Digest_Store(sbuffer, tpm_cmk_auth->migrationAuthorityDigest);
@@ -430,7 +430,7 @@ TPM_RESULT TPM_CmkAuth_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_CmkAuth_Delete(TPM_CMK_AUTH *tpm_cmk_auth)
 {
-    printf(" TPM_CmkAuth_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_CmkAuth_Delete:\n");
     if (tpm_cmk_auth != NULL) {
 	TPM_CmkAuth_Init(tpm_cmk_auth);
     }
@@ -450,7 +450,7 @@ void TPM_CmkAuth_Delete(TPM_CMK_AUTH *tpm_cmk_auth)
 
 void TPM_CmkMigauth_Init(TPM_CMK_MIGAUTH *tpm_cmk_migauth)
 {
-    printf(" TPM_CmkMigauth_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMigauth_Init:\n");
     TPM_Digest_Init(tpm_cmk_migauth->msaDigest);
     TPM_Digest_Init(tpm_cmk_migauth->pubKeyDigest);
     return;
@@ -472,7 +472,7 @@ TPM_RESULT TPM_CmkMigauth_Load(TPM_CMK_MIGAUTH *tpm_cmk_migauth,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkMigauth_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMigauth_Load:\n");
     /* check tag */
     if (rc == 0) {	
 	rc = TPM_CheckTag(TPM_TAG_CMK_MIGAUTH, stream, stream_size);
@@ -499,7 +499,7 @@ TPM_RESULT TPM_CmkMigauth_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkMigauth_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMigauth_Store:\n");
     /* store tag */
     if (rc == 0) {	
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CMK_MIGAUTH); 
@@ -526,7 +526,7 @@ TPM_RESULT TPM_CmkMigauth_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_CmkMigauth_Delete(TPM_CMK_MIGAUTH *tpm_cmk_migauth)
 {
-    printf(" TPM_CmkMigauth_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMigauth_Delete:\n");
     if (tpm_cmk_migauth != NULL) {
 	TPM_CmkMigauth_Init(tpm_cmk_migauth);
     }
@@ -547,7 +547,7 @@ TPM_RESULT TPM_CmkMigauth_CheckHMAC(TPM_BOOL *valid,			/* result */
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;	/* serialized TPM_CMK_MIGAUTH */
 
-    printf(" TPM_CmkMigauth_CheckHMAC:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMigauth_CheckHMAC:\n");
     TPM_Sbuffer_Init(&sbuffer);				/* freed @1 */
     /* Serialize the TPM_CMK_MIGAUTH structure */
     if (rc == 0) {
@@ -577,7 +577,7 @@ TPM_RESULT TPM_CmkMigauth_CheckHMAC(TPM_BOOL *valid,			/* result */
 
 void TPM_CmkSigticket_Init(TPM_CMK_SIGTICKET *tpm_cmk_sigticket)
 {
-    printf(" TPM_CmkSigticket_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CmkSigticket_Init:\n");
     TPM_Digest_Init(tpm_cmk_sigticket->verKeyDigest);
     TPM_Digest_Init(tpm_cmk_sigticket->signedData);
     return;
@@ -599,7 +599,7 @@ TPM_RESULT TPM_CmkSigticket_Load(TPM_CMK_SIGTICKET *tpm_cmk_sigticket,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkSigticket_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CmkSigticket_Load:\n");
     /* check tag */
     if (rc == 0) {	
 	rc = TPM_CheckTag(TPM_TAG_CMK_SIGTICKET, stream, stream_size);
@@ -626,7 +626,7 @@ TPM_RESULT TPM_CmkSigticket_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkSigticket_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CmkSigticket_Store:\n");
     /* store tag */
     if (rc == 0) {	
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CMK_SIGTICKET); 
@@ -653,7 +653,7 @@ TPM_RESULT TPM_CmkSigticket_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_CmkSigticket_Delete(TPM_CMK_SIGTICKET *tpm_cmk_sigticket)
 {
-    printf(" TPM_CmkSigticket_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_CmkSigticket_Delete:\n");
     if (tpm_cmk_sigticket != NULL) {
 	TPM_CmkSigticket_Init(tpm_cmk_sigticket);
     }
@@ -673,7 +673,7 @@ void TPM_CmkSigticket_Delete(TPM_CMK_SIGTICKET *tpm_cmk_sigticket)
 
 void TPM_CmkMaApproval_Init(TPM_CMK_MA_APPROVAL *tpm_cmk_ma_approval)
 {
-    printf(" TPM_CmkMaApproval_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMaApproval_Init:\n");
     TPM_Digest_Init(tpm_cmk_ma_approval->migrationAuthorityDigest);
     return;
 }
@@ -694,7 +694,7 @@ TPM_RESULT TPM_CmkMaApproval_Load(TPM_CMK_MA_APPROVAL *tpm_cmk_ma_approval,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkMaApproval_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMaApproval_Load:\n");
     /* check tag */
     if (rc == 0) {	
 	rc = TPM_CheckTag(TPM_TAG_CMK_MA_APPROVAL, stream, stream_size);
@@ -717,7 +717,7 @@ TPM_RESULT TPM_CmkMaApproval_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CmkMaApproval_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMaApproval_Store:\n");
     /* store tag */
     if (rc == 0) {	
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CMK_MA_APPROVAL); 
@@ -740,7 +740,7 @@ TPM_RESULT TPM_CmkMaApproval_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_CmkMaApproval_Delete(TPM_CMK_MA_APPROVAL *tpm_cmk_ma_approval)
 {
-    printf(" TPM_CmkMaApproval_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMaApproval_Delete:\n");
     if (tpm_cmk_ma_approval != NULL) {
 	TPM_CmkMaApproval_Init(tpm_cmk_ma_approval);
     }
@@ -761,7 +761,7 @@ TPM_RESULT TPM_CmkMaApproval_CheckHMAC(TPM_BOOL *valid,			/* result */
     TPM_RESULT		rc = 0;
     TPM_STORE_BUFFER	sbuffer;	/* serialized TPM_CMK_MA_APPROVAL */
 
-    printf(" TPM_CmkMaApproval_CheckHMAC:\n");
+    TPMLIB_LogPrintf(" TPM_CmkMaApproval_CheckHMAC:\n");
     TPM_Sbuffer_Init(&sbuffer);				/* freed @1 */
     /* Serialize the TPM_CMK_MA_APPROVAL structure */
     if (rc == 0) {
@@ -812,7 +812,7 @@ TPM_RESULT TPM_CreateBlobCommon(TPM_SIZED_BUFFER *outData,	/* The modified, encr
     BYTE		*r1;
     BYTE		*x1;
 
-    printf("TPM_CreateBlobCommon:\n");
+    TPMLIB_LogPrintf("TPM_CreateBlobCommon:\n");
     o1 = NULL;		/* freed @1 */
     r1 = NULL;		/* freed @2 */
     x1 = NULL;		/* freed @3 */
@@ -949,7 +949,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	random;		/* String used for xor encryption */
     TPM_SIZED_BUFFER	outData;	/* The modified, encrypted entity. */
 
-    printf("TPM_Process_CreateMigrationBlob: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Ordinal Entry\n");
     TPM_Migrationkeyauth_Init(&migrationKeyAuth);	/* freed @1 */
     TPM_SizedBuffer_Init(&encData);			/* freed @2 */
     TPM_SizedBuffer_Init(&random);			/* freed @3 */
@@ -968,7 +968,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get migrationType */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMigrationBlob: parentHandle %08x\n", parentHandle); 
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: parentHandle %08x\n", parentHandle); 
 	returnCode = TPM_Load16(&migrationType, &command, &paramSize);
     }
     /* get migrationKeyAuth */
@@ -1011,7 +1011,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH2_COMMAND)) {
-	printf("TPM_Process_CreateMigrationBlob: parentAuthHandle %08x\n", parentAuthHandle);
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: parentAuthHandle %08x\n", parentAuthHandle);
     }
     /* get the 'below the line' authorization parameters */
     if (returnCode == TPM_SUCCESS) {
@@ -1023,11 +1023,11 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMigrationBlob: entityAuthHandle %08x\n", entityAuthHandle); 
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: entityAuthHandle %08x\n", entityAuthHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateMigrationBlob: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1080,7 +1080,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     /* if there is no parent authorization, check that the parent authDataUsage is TPM_AUTH_NEVER */
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH2_COMMAND)) {
 	if (parentKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_CreateMigrationBlob: Error, parent key authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Error, parent key authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -1088,7 +1088,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_CreateMigrationBlob: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Error, keyUsage %04hx is invalid\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -1096,7 +1096,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     /* 3. Create d1 a TPM_STORE_ASYMKEY structure by decrypting encData using the key pointed to by
        parentHandle. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMigrationBlob: Decrypting encData\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Decrypting encData\n");
 	/* decrypt with the parent key to a stream */
 	returnCode = TPM_RSAPrivateDecryptMalloc(&d1Decrypt,	       /* decrypted data */
 						 &d1DecryptLength,     /* actual size of d1 data */
@@ -1116,7 +1116,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     /* a. Verify that d1 -> payload is TPM_PT_ASYM. */
     if (returnCode == TPM_SUCCESS) {
 	if (d1AsymKey.payload != TPM_PT_ASYM) {
-	    printf("TPM_Process_CreateMigrationBlob: Error, bad payload %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Error, bad payload %02x\n",
 		   d1AsymKey.payload);
 	    returnCode = TPM_BAD_MIGRATION;
 	}
@@ -1152,7 +1152,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
        migrationKey || migrationKeyAuth -> migrationScheme || TPM_PERMANENT_DATA -> tpmProof). */
     /* first serialize the TPM_PUBKEY migrationKeyAuth -> migrationKey */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMigrationBlob: Verifying migrationKeyAuth\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Verifying migrationKeyAuth\n");
 	returnCode = TPM_Pubkey_Store(&mka_sbuffer, &(migrationKeyAuth.migrationKey));
     }
     if (returnCode == TPM_SUCCESS) {
@@ -1167,7 +1167,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     }
     /* 6. If migrationType == TPM_MS_MIGRATE the TPM SHALL perform the following actions: */
     if ((returnCode == TPM_SUCCESS) && (migrationType == TPM_MS_MIGRATE)) {
-	printf("TPM_Process_CreateMigrationBlob: migrationType TPM_MS_MIGRATE\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: migrationType TPM_MS_MIGRATE\n");
 	/* a. Build two byte arrays, K1 and K2: */
 	/* i. K1 = d1.privKey[0..19] (d1.privKey.keyLength + 16 bytes of d1.privKey.key), sizeof(K1)
 	   = 20 */
@@ -1200,7 +1200,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     }
     /* 7. If migrationType == TPM_MS_REWRAP the TPM SHALL perform the following actions: */
     else if ((returnCode == TPM_SUCCESS) && (migrationType == TPM_MS_REWRAP)) {
-	printf("TPM_Process_CreateMigrationBlob: migrationType TPM_MS_REWRAP\n");
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: migrationType TPM_MS_REWRAP\n");
 	/* a. Rewrap the key using the public key in migrationKeyAuth, keeping the existing contents
 	   of that key. */
 	if (returnCode == TPM_SUCCESS) {
@@ -1215,7 +1215,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     /* 8. Else */
     /* a. Return TPM_BAD_PARAMETER */
     else if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CreateMigrationBlob: Error, illegal migrationType %04hx\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Error, illegal migrationType %04hx\n",
 	       migrationType);
 	returnCode = TPM_BAD_PARAMETER;
     }
@@ -1224,7 +1224,7 @@ TPM_RESULT TPM_Process_CreateMigrationBlob(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateMigrationBlob: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateMigrationBlob: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1385,7 +1385,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	outData;	/* The encrypted private key that can be loaded with
 					   TPM_LoadKey */
 
-    printf("TPM_Process_ConvertMigrationBlob: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inData);		/* freed @1 */
     TPM_SizedBuffer_Init(&random);		/* freed @2 */
     TPM_SizedBuffer_Init(&outData);		/* freed @3 */
@@ -1404,7 +1404,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get inData */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ConvertMigrationBlob: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_SizedBuffer_Load(&inData, &command, &paramSize);
     }
     /* get random */
@@ -1444,7 +1444,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ConvertMigrationBlob: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1468,7 +1468,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     /* check TPM_AUTH_DATA_USAGE authDataUsage */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (parentKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_ConvertMigrationBlob: Error, parent key authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Error, parent key authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -1504,7 +1504,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
        TPM_KEY_STORAGE, the TPM must return the error code TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_ConvertMigrationBlob: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Error, "
 		   "parentHandle -> keyUsage should be TPM_KEY_STORAGE, is %04x\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
@@ -1512,7 +1512,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     }
     /* 3. Create d1 by decrypting the inData area using the key in parentHandle */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ConvertMigrationBlob: Decrypting inData\n");
+	TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Decrypting inData\n");
 	TPM_PrintFourLimit("TPM_Process_ConvertMigrationBlob: inData", inData.buffer, inData.size);
 	returnCode = TPM_RSAPrivateDecryptMalloc(&d1Decrypt,		/* decrypted data */
 						 &d1DecryptLength,	/* actual size of d1 data */
@@ -1523,7 +1523,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     /* the random input parameter must be the same length as the decrypted data */
     if (returnCode == TPM_SUCCESS) {
 	if (d1DecryptLength != random.size) {
-	    printf("TPM_Process_ConvertMigrationBlob: Error "
+	    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Error "
 		   "decrypt data length %u random size %u\n",
 		   d1DecryptLength, random.size);
 	    returnCode = TPM_BAD_PARAMETER;
@@ -1534,7 +1534,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
 	returnCode = TPM_Malloc(&o1Oaep, d1DecryptLength);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ConvertMigrationBlob: d1 length %u\n", d1DecryptLength);
+	TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: d1 length %u\n", d1DecryptLength);
 	TPM_PrintFourLimit("TPM_Process_ConvertMigrationBlob: d1 -", d1Decrypt, d1DecryptLength);
 	/* 4. Create o1 by XOR d1 and random parameter */
 	TPM_XOR(o1Oaep, d1Decrypt, random.buffer, d1DecryptLength);
@@ -1551,7 +1551,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
 	/* NOTE TPM_StoreAsymkey_LoadO1() copied TPM_MIGRATE_ASYMKEY -> payload to TPM_STORE_ASYMKEY
 	   -> payload */
 	if (d2AsymKey.payload != TPM_PT_MIGRATE) {
-	    printf("TPM_Process_ConvertMigrationBlob: Error, invalid payload %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Error, invalid payload %02x\n",
 		   d2AsymKey.payload);
 	    returnCode = TPM_BAD_MIGRATION;
 	}
@@ -1577,7 +1577,7 @@ TPM_RESULT TPM_Process_ConvertMigrationBlob(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ConvertMigrationBlob: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ConvertMigrationBlob: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1694,7 +1694,7 @@ TPM_RESULT TPM_Process_AuthorizeMigrationKey(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_MIGRATIONKEYAUTH outData;	/* (f1) Returned public key and authorization digest. */
 
-    printf("TPM_Process_AuthorizeMigrationKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_AuthorizeMigrationKey: Ordinal Entry\n");
     TPM_Pubkey_Init(&migrationKey);		/* freed @1 */
     TPM_Migrationkeyauth_Init(&outData);	/* freed @2 */
     TPM_Sbuffer_Init(&sbuffer);			/* freed @3 */
@@ -1744,7 +1744,7 @@ TPM_RESULT TPM_Process_AuthorizeMigrationKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_AuthorizeMigrationKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_AuthorizeMigrationKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1765,7 +1765,7 @@ TPM_RESULT TPM_Process_AuthorizeMigrationKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (rsa_key_parms->keyLength < 2048) {
-	    printf("TPM_Process_AuthorizeMigrationKey: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_AuthorizeMigrationKey: Error, "
 		   "migrationKey length %u less than 2048\n",
 		   rsa_key_parms->keyLength);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
@@ -1803,7 +1803,7 @@ TPM_RESULT TPM_Process_AuthorizeMigrationKey(tpm_state_t *tpm_state,
        return the error code TPM_INAPPROPRIATE_ENC if it is not */
     if (returnCode == TPM_SUCCESS) {
 	if (migrationKey.algorithmParms.encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-	    printf("TPM_Process_AuthorizeMigrationKey: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_AuthorizeMigrationKey: Error, "
 		   "migrationKey encScheme %04hx must be TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		   migrationKey.algorithmParms.encScheme);
 	    returnCode = TPM_INAPPROPRIATE_ENC;
@@ -1836,7 +1836,7 @@ TPM_RESULT TPM_Process_AuthorizeMigrationKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_AuthorizeMigrationKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_AuthorizeMigrationKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1963,7 +1963,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	outData;	/* The re-encrypted blob */
 
-    printf("TPM_Process_MigrateKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_MigrateKey: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inData);	/* freed @1 */
     TPM_SizedBuffer_Init(&outData);	/* freed @2 */
     TPM_Pubkey_Init(&pubKey);		/* freed @4 */
@@ -1978,7 +1978,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get pubKey */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MigrateKey: maKeyHandle %08x\n", maKeyHandle); 
+	TPMLIB_LogPrintf("TPM_Process_MigrateKey: maKeyHandle %08x\n", maKeyHandle); 
 	returnCode = TPM_Pubkey_Load(&pubKey, &command, &paramSize);
     }
     /* get encData */
@@ -2018,7 +2018,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_MigrateKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_MigrateKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2043,7 +2043,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     }	 
     /* get the session data */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf("TPM_Process_MigrateKey: maAuthHandle %08x\n", maAuthHandle); 
+	TPMLIB_LogPrintf("TPM_Process_MigrateKey: maAuthHandle %08x\n", maAuthHandle); 
 	returnCode = TPM_AuthSessions_GetData(&auth_session_data,
 					      &hmacKey,
 					      tpm_state,
@@ -2068,7 +2068,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     /* check TPM_AUTH_DATA_USAGE authDataUsage */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (maKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_MigrateKey: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_MigrateKey: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -2076,12 +2076,12 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
        TPM_KEY_MIGRATE, and that the allowed encryption scheme is TPM_ES_RSAESOAEP_SHA1_MGF1. */
     if (returnCode == TPM_SUCCESS) {
 	if (maKey->keyUsage != TPM_KEY_MIGRATE) {
-	    printf("TPM_Process_MigrateKey: Error, keyUsage %04hx not TPM_KEY_MIGRATE\n",
+	    TPMLIB_LogPrintf("TPM_Process_MigrateKey: Error, keyUsage %04hx not TPM_KEY_MIGRATE\n",
 		   maKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
 	else if (maKey->algorithmParms.encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-	    printf("TPM_Process_MigrateKey: Error, encScheme %04hx not TPM_ES_RSAESOAEP_SHA_MGF1\n",
+	    TPMLIB_LogPrintf("TPM_Process_MigrateKey: Error, encScheme %04hx not TPM_ES_RSAESOAEP_SHA_MGF1\n",
 		   maKey->algorithmParms.encScheme);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -2096,7 +2096,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     }	     
     /* decrypt using maKey */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MigrateKey: Decrypt using maKey\n");
+	TPMLIB_LogPrintf("TPM_Process_MigrateKey: Decrypt using maKey\n");
 	returnCode =
 	    TPM_RSAPrivateDecryptMalloc(&decrypt_data,		/* decrypted data, freed @3 */
 					&decrypt_data_size,	/* actual size of decrypt data */
@@ -2106,7 +2106,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
 	
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MigrateKey: Encrypt using pubKey\n");
+	TPMLIB_LogPrintf("TPM_Process_MigrateKey: Encrypt using pubKey\n");
 	returnCode = TPM_RSAPublicEncrypt_Pubkey(&outData,	/* encrypted data */
 						 decrypt_data,
 						 decrypt_data_size,
@@ -2117,7 +2117,7 @@ TPM_RESULT TPM_Process_MigrateKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_MigrateKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_MigrateKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2252,7 +2252,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     TPM_KEY		wrappedKey;	/* The TPM_KEY structure which includes the public and
 					   encrypted private key. MUST be TPM_KEY12 */
 
-    printf("TPM_Process_CMK_CreateKey: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Ordinal Entry\n");
     TPM_Key_Init(&keyInfo);			/* freed @1 */
     TPM_Key_Init(&wrappedKey);			/* freed @2 */
     TPM_CmkMaApproval_Init(&m1CmkMaApproval);	/* freed @3 */
@@ -2268,7 +2268,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get dataUsageAuth */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_Authdata_Load(dataUsageAuth, &command, &paramSize);
     }
     /* get keyInfo */
@@ -2315,11 +2315,11 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: authHandle %08x\n", authHandle); 
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: authHandle %08x\n", authHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_CreateKey: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2369,41 +2369,41 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_Key_CheckProperties(&ver, &keyInfo, 0,
 					     tpm_state->tpm_permanent_flags.FIPS);
-	printf("TPM_Process_CMK_CreateKey: key parameters v = %d\n", ver);
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: key parameters v = %d\n", ver);
     }
     /* 4. Verify that parentHandle->keyUsage equals TPM_KEY_STORAGE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: Checking parent key\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Checking parent key\n");
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_CMK_CreateKey: Error, parent keyUsage not TPM_KEY_STORAGE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, parent keyUsage not TPM_KEY_STORAGE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }	 
     /* 5. Verify that parentHandle-> keyFlags-> migratable == FALSE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_CMK_CreateKey: Error, parent migratable\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, parent migratable\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
     /* 6. If keyInfo -> keyFlags -> migratable is FALSE then return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: Checking key flags\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Checking key flags\n");
 	if (!(keyInfo.keyFlags & TPM_MIGRATABLE)) {
-	    printf("TPM_Process_CMK_CreateKey: Error, keyInfo migratable is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, keyInfo migratable is FALSE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
     /* 7. If keyInfo -> keyFlags -> migrateAuthority is FALSE , return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (!(keyInfo.keyFlags & TPM_MIGRATEAUTHORITY)) {
-	    printf("TPM_Process_CMK_CreateKey: Error, keyInfo migrateauthority is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, keyInfo migrateauthority is FALSE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
     /* 8. Verify that the migration authority is authorized */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: Checking migration authority authorization\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Checking migration authority authorization\n");
 	/* a. Create M1 a TPM_CMK_MA_APPROVAL structure */
 	/* NOTE Done by TPM_CmkMaApproval_Init() */
 	/* i. Set M1 ->migrationAuthorityDigest to migrationAuthorityDigest */
@@ -2416,7 +2416,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
 					tpm_state->tpm_permanent_data.tpmProof, /* HMAC key */
 					&m1CmkMaApproval);
 	if (!hmacValid) {
-	    printf("TPM_Process_CMK_CreateKey: Error, Invalid migrationAuthorityApproval\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, Invalid migrationAuthorityApproval\n");
 	    returnCode = TPM_MA_AUTHORITY;
 	}
     }
@@ -2424,10 +2424,10 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     /* a. keyInfo -> keyUsage MUST NOT be TPM_KEY_IDENTITY or TPM_KEY_AUTHCHANGE. If it is, return
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateKey: Checking key usage\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Checking key usage\n");
 	if ((keyInfo.keyUsage == TPM_KEY_IDENTITY) ||
 	    (keyInfo.keyUsage == TPM_KEY_AUTHCHANGE)) {
-	    printf("TPM_Process_CMK_CreateKey: Error, invalid keyInfo -> keyUsage %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, invalid keyInfo -> keyUsage %04hx\n",
 		   keyInfo.keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -2447,7 +2447,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     /* 12. If keyInfo -> tag is NOT TPM_TAG_KEY12 return TPM_INVALID_STRUCTURE */
     if (returnCode == TPM_SUCCESS) {
 	if (ver != 2) {
-	    printf("TPM_Process_CMK_CreateKey: Error, keyInfo must be TPM_TAG_KEY12\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Error, keyInfo must be TPM_TAG_KEY12\n");
 	    returnCode = TPM_INVALID_STRUCTURE;
 	}
     }
@@ -2468,7 +2468,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
 	continueAuthSession = FALSE;
 	/* 16. Generate asymmetric key according to algorithm information in keyInfo */
 	/* 17. Fill in the wrappedKey structure with information from the newly generated key.	*/
-	printf("TPM_Process_CMK_CreateKey: Generating key\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Generating key\n");
 	returnCode = TPM_Key_GenerateRSA(&wrappedKey,
 					 tpm_state,
 					 parentKey,
@@ -2524,7 +2524,7 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_CreateKey: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateKey: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2633,7 +2633,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_HMAC		sigTicket;	/* Ticket that proves digest created on this TPM */
 
-    printf("TPM_Process_CMK_CreateTicket: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Ordinal Entry\n");
     TPM_Pubkey_Init(&verificationKey);		/* freed @1 */
     TPM_SizedBuffer_Init(&signatureValue);	/* freed @2 */
     TPM_CmkSigticket_Init(&m2CmkSigticket);	/* freed @3 */
@@ -2687,7 +2687,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_CreateTicket: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2726,7 +2726,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     /* a. Validate that verificationKey -> algorithmParms -> algorithmID == TPM_ALG_RSA */
     if (returnCode == TPM_SUCCESS) {
 	if (verificationKey.algorithmParms.algorithmID != TPM_ALG_RSA) {
-	    printf("TPM_Process_CMK_CreateTicket: Error, incorrect algorithmID %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Error, incorrect algorithmID %08x\n",
 		   verificationKey.algorithmParms.algorithmID);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -2734,7 +2734,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     /* b. Validate that verificationKey -> algorithmParms ->encScheme == TPM_ES_NONE */
     if (returnCode == TPM_SUCCESS) {
 	if (verificationKey.algorithmParms.encScheme != TPM_ES_NONE) {
-	    printf("TPM_Process_CMK_CreateTicket: Error, incorrect encScheme %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Error, incorrect encScheme %04hx\n",
 		   verificationKey.algorithmParms.encScheme);
 	    returnCode = TPM_INAPPROPRIATE_ENC;
 	}
@@ -2744,7 +2744,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((verificationKey.algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (verificationKey.algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_CMK_CreateTicket: Error, incorrect sigScheme %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Error, incorrect sigScheme %04hx\n",
 		   verificationKey.algorithmParms.sigScheme);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -2752,13 +2752,13 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     /* 3. Use verificationKey to verify that signatureValue is a valid signature on signedData, and
        return error TPM_BAD_SIGNATURE on mismatch */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateTicket: Verifying signature\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Verifying signature\n");
 	returnCode = TPM_RSAVerifyH(&signatureValue,		/* signature */
 				    signedData,			/* data that was signed */
 				    TPM_DIGEST_SIZE,		/* size of signed data */
 				    &verificationKey);		/* TPM_PUBKEY public key */
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_CMK_CreateTicket: Error verifying signature\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Error verifying signature\n");
 	}
     }
     /* 4. Create M2 a TPM_CMK_SIGTICKET */
@@ -2780,7 +2780,7 @@ TPM_RESULT TPM_Process_CMK_CreateTicket(tpm_state_t *tpm_state,
     }
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_CreateTicket: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateTicket: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2936,7 +2936,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	random;		/* String used for xor encryption */
     TPM_SIZED_BUFFER	outData;	/* The modified, encrypted entity. */
 
-    printf("TPM_Process_CMK_CreateBlob: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Ordinal Entry\n");
     d1Decrypt = NULL;					/* freed @1 */
     TPM_Migrationkeyauth_Init(&migrationKeyAuth);	/* freed @2 */
     TPM_SizedBuffer_Init(&msaListBuffer);		/* freed @3 */
@@ -3027,7 +3027,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_CreateBlob: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3083,7 +3083,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
     /* 3. Verify that parentHandle-> keyFlags-> migratable == FALSE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_CMK_CreateBlob: Error, parent migratable\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, parent migratable\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -3091,14 +3091,14 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_CMK_CreateBlob: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, keyUsage %04hx is invalid\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
     /* 4. Create d1 by decrypting encData using the key pointed to by parentHandle. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateBlob: Decrypting encData\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Decrypting encData\n");
 	/* decrypt with the parent key to a stream */
 	returnCode = TPM_RSAPrivateDecryptMalloc(&d1Decrypt,	/* decrypted data, freed @1 */
 						 &d1DecryptLength,	/* actual size of d1 data */
@@ -3121,7 +3121,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
        tpmProof) */
     /* first serialize the TPM_PUBKEY migrationKeyAuth -> migrationKey */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateBlob: Verifying migrationKeyAuth\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Verifying migrationKeyAuth\n");
 	returnCode = TPM_Pubkey_Store(&mka_sbuffer, &(migrationKeyAuth.migrationKey));
     }
     if (returnCode == TPM_SUCCESS) {
@@ -3140,7 +3140,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((d1AsymKey.payload != TPM_PT_MIGRATE_RESTRICTED) &&
 	    (d1AsymKey.payload != TPM_PT_MIGRATE_EXTERNAL)) {
-	    printf("TPM_Process_CMK_CreateBlob: Error, invalid payload %02x\n", d1AsymKey.payload);
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, invalid payload %02x\n", d1AsymKey.payload);
 	    returnCode = TPM_INVALID_STRUCTURE;
 	}
     }
@@ -3162,7 +3162,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 					      tpm_state->tpm_permanent_data.tpmProof, /* HMAC key*/
 					      &m2CmkMigauth);
 	if (!valid) {
-	    printf("TPM_Process_CMK_CreateBlob: Error validating migrationAuth\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error validating migrationAuth\n");
 	    returnCode = TPM_MA_AUTHORITY;
 	}	    
     }
@@ -3177,7 +3177,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	(migrationKeyAuth.migrationScheme == TPM_MS_RESTRICT_MIGRATE)) {
 	/* a. Verify that intended migration destination is an MA: */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_CMK_CreateBlob: migrationScheme is TPM_MS_RESTRICT_MIGRATE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: migrationScheme is TPM_MS_RESTRICT_MIGRATE\n");
 	    /* i. For one of n=1 to n=(msaList -> MSAlist), verify that SHA-1[migrationKeyAuth ->
 	       migrationKey] == msaList -> migAuthDigest[n] */
 	    returnCode = TPM_MsaComposite_CheckMigAuthDigest(migrationKeyDigest, &msaList);
@@ -3187,7 +3187,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	   TPM_ALG_RSA */
 	if (returnCode == TPM_SUCCESS) {
 	    if (migrationKeyAuth.migrationKey.algorithmParms.algorithmID != TPM_ALG_RSA) {
-		printf("TPM_Process_CMK_CreateBlob: Error, algorithmID %08x not TPM_ALG_RSA\n",
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, algorithmID %08x not TPM_ALG_RSA\n",
 		       migrationKeyAuth.migrationKey.algorithmParms.algorithmID);
 		returnCode = TPM_BAD_KEY_PROPERTY;
 	    }
@@ -3198,7 +3198,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	    if (migrationKeyAuth.migrationKey.algorithmParms.encScheme !=
 		TPM_ES_RSAESOAEP_SHA1_MGF1) {
 
-		printf("TPM_Process_CMK_CreateBlob: Error, "
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, "
 		       "encScheme %04hx not TPM_ES_RSAESOAEP_SHA1_MGF1\n",
 		       migrationKeyAuth.migrationKey.algorithmParms.encScheme );
 		returnCode = TPM_INAPPROPRIATE_ENC;
@@ -3208,7 +3208,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	   TPM_SS_NONE */
 	if (returnCode == TPM_SUCCESS) {
 	    if (migrationKeyAuth.migrationKey.algorithmParms.sigScheme != TPM_SS_NONE) {
-		printf("TPM_Process_CMK_CreateBlob: Error, sigScheme %04hx not TPM_SS_NONE\n",
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, sigScheme %04hx not TPM_SS_NONE\n",
 		       migrationKeyAuth.migrationKey.algorithmParms.sigScheme);
 		returnCode = TPM_INVALID_KEYUSAGE;
 	    }
@@ -3216,7 +3216,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	/* c. The TPM MAY validate that restrictTicketSize is zero. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (restrictTicketBuffer.size != 0) {
-		printf("TPM_Process_CMK_CreateBlob: Error, "
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, "
 		       "TPM_MS_RESTRICT_MIGRATE and restrictTicketSize %u not zero\n",
 		       restrictTicketBuffer.size);
 		returnCode = TPM_BAD_PARAMETER;
@@ -3225,7 +3225,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	/* d. The TPM MAY validate that sigTicketSize is zero. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (sigTicketBuffer.size != 0) {
-		printf("TPM_Process_CMK_CreateBlob: Error, "
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, "
 		       "TPM_MS_RESTRICT_MIGRATE and sigTicketSize %u not zero\n",
 		       sigTicketBuffer.size);
 		returnCode = TPM_BAD_PARAMETER;
@@ -3241,7 +3241,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	   TPM_CMK_SIGTICKET structure such that: */
 	/* (1) V1 -> verKeyDigest = msaList -> migAuthDigest[n] */
 	/* (2) V1 -> signedData = SHA-1[restrictTicket] */
-	printf("TPM_Process_CMK_CreateBlob: migrationScheme is TPM_MS_RESTRICT_APPROVE_DOUBLE\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: migrationScheme is TPM_MS_RESTRICT_APPROVE_DOUBLE\n");
 	/* deserialize the sigTicket TPM_HMAC */
 	if (returnCode == TPM_SUCCESS) {
 	    stream = sigTicketBuffer.buffer;
@@ -3271,7 +3271,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	    returnCode = TPM_Digest_Compare(migrationKeyDigest,
 					    restrictTicket.destinationKeyDigest);
 	    if (returnCode != TPM_SUCCESS) {
-		printf("TPM_Process_CMK_CreateBlob: Error, no match to destinationKeyDigest\n");
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, no match to destinationKeyDigest\n");
 		returnCode = TPM_MA_DESTINATION;
 	    }
 	}
@@ -3280,14 +3280,14 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_Digest_Compare(pubSourceKeyDigest, restrictTicket.sourceKeyDigest);
 	    if (returnCode != TPM_SUCCESS) {
-		printf("TPM_Process_CMK_CreateBlob: Error, no match to sourceKeyDigest\n");
+		TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, no match to sourceKeyDigest\n");
 		returnCode = TPM_MA_SOURCE;
 	    }
 	}
     }
     /* 10. Else return with error TPM_BAD_PARAMETER. */
     else if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_CreateBlob: Error, Illegal migrationScheme %04hx\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Error, Illegal migrationScheme %04hx\n",
 	       migrationKeyAuth.migrationScheme);
 	returnCode = TPM_BAD_PARAMETER;
     }
@@ -3332,7 +3332,7 @@ TPM_RESULT TPM_Process_CMK_CreateBlob(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_CreateBlob: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_CreateBlob: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3457,7 +3457,7 @@ TPM_RESULT TPM_Process_CMK_SetRestrictions(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_CMK_SetRestrictions: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -3468,7 +3468,7 @@ TPM_RESULT TPM_Process_CMK_SetRestrictions(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&restriction, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_SetRestrictions: restriction %08x\n", restriction);
+	TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: restriction %08x\n", restriction);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -3503,7 +3503,7 @@ TPM_RESULT TPM_Process_CMK_SetRestrictions(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_SetRestrictions: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3546,19 +3546,19 @@ TPM_RESULT TPM_Process_CMK_SetRestrictions(tpm_state_t *tpm_state,
 	if (tpm_state->tpm_permanent_data.restrictDelegate != restriction) {
 	    tpm_state->tpm_permanent_data.restrictDelegate = restriction;
 	    /* Store the permanent data back to NVRAM */
-	    printf("TPM_Process_CMK_SetRestrictions: Storing permanent data\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: Storing permanent data\n");
 	    returnCode = TPM_PermanentAll_NVStore(tpm_state,
 						  TRUE,	/* write NV */
 						  0);	/* no roll back */
 	}
 	else {
-	    printf("TPM_Process_CMK_SetRestrictions: No change to value\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: No change to value\n");
 	}
     }
     /*	3. Return TPM_SUCCESS */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_SetRestrictions: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_SetRestrictions: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3663,7 +3663,7 @@ TPM_RESULT TPM_Process_CMK_ApproveMA(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_HMAC		outData;	/* HMAC of migrationAuthorityDigest */
 
-    printf("TPM_Process_CMK_ApproveMA: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_ApproveMA: Ordinal Entry\n");
     TPM_CmkMaApproval_Init(&m2CmkMaApproval);	/* freed @1 */
     /*
       get inputs
@@ -3707,7 +3707,7 @@ TPM_RESULT TPM_Process_CMK_ApproveMA(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_ApproveMA: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ApproveMA: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3759,7 +3759,7 @@ TPM_RESULT TPM_Process_CMK_ApproveMA(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_ApproveMA: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_ApproveMA: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3898,7 +3898,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	outData;	/* The encrypted private key that can be loaded with
 					   TPM_LoadKey */
 
-    printf("TPM_Process_CMK_ConvertMigration: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Ordinal Entry\n");
     TPM_CmkAuth_Init(&restrictTicket);		/* freed @1 */
     TPM_Key_Init(&migratedKey);			/* freed @2 */
     TPM_SizedBuffer_Init(&msaListBuffer);	/* freed @3 */
@@ -3922,7 +3922,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get restrictTicket */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_ConvertMigration: parentHandle %08x\n", parentHandle);
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: parentHandle %08x\n", parentHandle);
 	returnCode = TPM_CmkAuth_Load(&restrictTicket, &command, &paramSize);
     }
     /* get sigTicket */
@@ -3974,7 +3974,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4027,7 +4027,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
        TPM_KEY_STORAGE, the TPM must return the error code TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (parentKey->keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, "
 		   "parentHandle -> keyUsage should be TPM_KEY_STORAGE, is %04x\n",
 		   parentKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
@@ -4035,7 +4035,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     }
     /* 3. Create d1 by decrypting the migratedKey -> encData area using the key in parentHandle */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_ConvertMigration: Decrypting encData\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Decrypting encData\n");
 	TPM_PrintFour("TPM_Process_CMK_ConvertMigration: encData", migratedKey.encData.buffer);
 	returnCode = TPM_RSAPrivateDecryptMalloc(&d1Decrypt,		/* decrypted data */
 						 &d1DecryptLength,	/* actual size of d1 data */
@@ -4046,7 +4046,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     /* the random input parameter must be the same length as the decrypted data */
     if (returnCode == TPM_SUCCESS) {
 	if (d1DecryptLength != random.size) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error "
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error "
 		   "decrypt data length %u random size %u\n",
 		   d1DecryptLength, random.size);
 	    returnCode = TPM_BAD_PARAMETER;
@@ -4057,7 +4057,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
 	returnCode = TPM_Malloc(&o1Oaep, d1DecryptLength);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_ConvertMigration: d1 length %u\n", d1DecryptLength);
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: d1 length %u\n", d1DecryptLength);
 	TPM_PrintFour("TPM_Process_CMK_ConvertMigration: d1 -", d1Decrypt);
 	/* 4. Create o1 by XOR d1 and random parameter */
 	TPM_XOR(o1Oaep, d1Decrypt, random.buffer, d1DecryptLength);
@@ -4070,7 +4070,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
 	returnCode = TPM_StoreAsymkey_LoadO1(&d2AsymKey, o1Oaep, d1DecryptLength);
     }
     if (returnCode == TPM_SUCCESS) {	
-	printf("TPM_Process_CMK_ConvertMigration: Checking pHash\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Checking pHash\n");
 	/* 6. Create migratedPubKey a TPM_PUBKEY structure corresponding to migratedKey */
 	/* NOTE this function goes directly to the SHA1 digest */
 	returnCode = TPM_Key_GeneratePubkeyDigest(migratedPubKeyDigest, &migratedKey);
@@ -4096,9 +4096,9 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     /* 9. Verify that parentHandle-> keyFlags -> migratable == FALSE and parentHandle-> encData ->
        migrationAuth == tpmProof */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_ConvertMigration: Checking parent key\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Checking parent key\n");
 	if (parentKey->keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, parent migratable\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, parent migratable\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -4108,7 +4108,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
        payload */
     if (returnCode == TPM_SUCCESS) {
 	if (d2AsymKey.payload != TPM_PT_CMK_MIGRATE) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, invalid payload %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, invalid payload %02x\n",
 		   d2AsymKey.payload);
 	    returnCode = TPM_BAD_MIGRATION;
 	}
@@ -4122,7 +4122,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     /* a. V1 -> verKeyDigest = msaList -> migAuthDigest[n] */
     /* b. V1 -> signedData = SHA-1[restrictTicket] */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_CMK_ConvertMigration: Checking sigTicket\n");
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Checking sigTicket\n");
 	/* generate SHA1[restrictTicket] */
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_SHA1_GenerateStructure(v1CmkSigticket.signedData, &restrictTicket,
@@ -4148,7 +4148,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
 	returnCode = TPM_Digest_Compare(restrictTicket.destinationKeyDigest,
 					parentPubKeyDigest);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error checking destinationKeyDigest\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error checking destinationKeyDigest\n");
 	    returnCode = TPM_MA_DESTINATION;
 	}	    
     }
@@ -4163,7 +4163,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
        */
     if (returnCode == TPM_SUCCESS) {
 	if (!(migratedKey.keyFlags & TPM_MIGRATABLE)) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, migratedKey migratable is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, migratedKey migratable is FALSE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -4172,7 +4172,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
        */
     if (returnCode == TPM_SUCCESS) {
 	if (!(migratedKey.keyFlags & TPM_MIGRATEAUTHORITY)) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error, "
 		   "migratedKey migrateauthority is FALSE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -4182,7 +4182,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_Digest_Compare(restrictTicket.sourceKeyDigest, migratedPubKeyDigest);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_CMK_ConvertMigration: Error checking sourceKeyDigest\n");
+	    TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Error checking sourceKeyDigest\n");
 	    returnCode = TPM_MA_SOURCE;
 	}
     }
@@ -4216,7 +4216,7 @@ TPM_RESULT TPM_Process_CMK_ConvertMigration(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CMK_ConvertMigration: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CMK_ConvertMigration: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

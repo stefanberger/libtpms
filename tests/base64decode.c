@@ -14,7 +14,7 @@ static unsigned char *read_file(const char *name, size_t *len)
     FILE *f = fopen(name, "rb");
 
     if (!f) {
-        printf("Could not open file %s for reading.", name);
+        TPMLIB_LogPrintf("Could not open file %s for reading.", name);
         exit(EXIT_FAILURE);
     }
 
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     size_t result_len;
 
     if (argc != 3) {
-        printf("Need 2 files as parameters.\n");
+        TPMLIB_LogPrintf("Need 2 files as parameters.\n");
         return EXIT_FAILURE;
     }
 
@@ -54,13 +54,13 @@ int main(int argc, char *argv[])
                            &result, &result_len);
 
     if (rc != TPM_SUCCESS) {
-        printf("Decoding of the input file failed.\n");
+        TPMLIB_LogPrintf("Decoding of the input file failed.\n");
         res = EXIT_FAILURE;
         goto cleanup;
     }
 
     if (result_len != len_cmp) {
-        printf("Length of decoded blob (%zu) does "
+        TPMLIB_LogPrintf("Length of decoded blob (%zu) does "
                "not match length of 2nd file (%zu).\n",
                result_len, len_cmp);
         res = EXIT_FAILURE;
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     }
 
     if (memcmp(result, buf_cmp, result_len) != 0) {
-       printf("Decoded blob does not match input from 2nd file.\n");
+       TPMLIB_LogPrintf("Decoded blob does not match input from 2nd file.\n");
        res = EXIT_FAILURE;
        goto cleanup;
     }

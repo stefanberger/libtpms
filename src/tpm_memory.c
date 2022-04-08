@@ -57,28 +57,28 @@ TPM_RESULT TPM_Malloc(unsigned char **buffer, uint32_t size)
        memory leak). */
     if (rc == 0) {
         if (*buffer != NULL) {
-            printf("TPM_Malloc: Error (fatal), *buffer %p should be NULL before malloc\n", *buffer);
+            TPMLIB_LogPrintf("TPM_Malloc: Error (fatal), *buffer %p should be NULL before malloc\n", *buffer);
             rc = TPM_FAIL;
         }
     }
     /* verify that the size is not "too large" */
     if (rc == 0) {
         if (size > TPM_ALLOC_MAX) {
-            printf("TPM_Malloc: Error, size %u greater than maximum allowed\n", size);
+            TPMLIB_LogPrintf("TPM_Malloc: Error, size %u greater than maximum allowed\n", size);
             rc = TPM_SIZE;
         }       
     }
     /* verify that the size is not 0, this would be implementation defined and should never occur */
     if (rc == 0) {
         if (size == 0) {
-            printf("TPM_Malloc: Error (fatal), size is zero\n");
+            TPMLIB_LogPrintf("TPM_Malloc: Error (fatal), size is zero\n");
             rc = TPM_FAIL;
         }       
     }
     if (rc == 0) {
         *buffer = malloc(size);
         if (*buffer == NULL) {
-            printf("TPM_Malloc: Error allocating %u bytes\n", size);
+            TPMLIB_LogPrintf("TPM_Malloc: Error allocating %u bytes\n", size);
             rc = TPM_SIZE;
         }
     }
@@ -97,14 +97,14 @@ TPM_RESULT TPM_Realloc(unsigned char **buffer,
     /* verify that the size is not "too large" */
     if (rc == 0) {
         if (size > TPM_ALLOC_MAX) {
-            printf("TPM_Realloc: Error, size %u greater than maximum allowed\n", size);
+            TPMLIB_LogPrintf("TPM_Realloc: Error, size %u greater than maximum allowed\n", size);
             rc = TPM_SIZE;
         }       
     }
     if (rc == 0) {
         tmpptr = realloc(*buffer, size);
         if (tmpptr == NULL) {
-            printf("TPM_Realloc: Error reallocating %u bytes\n", size);
+            TPMLIB_LogPrintf("TPM_Realloc: Error reallocating %u bytes\n", size);
             rc = TPM_SIZE;
         }
     }

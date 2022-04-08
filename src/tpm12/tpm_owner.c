@@ -138,7 +138,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     TPM_KEY		srkPub;			/* Structure containing all parameters of new SRK,
 						   srkPub.encData is set to 0. */
     
-    printf("TPM_Process_TakeOwnership: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Ordinal Entry\n");
     srk = &(tpm_state->tpm_permanent_data.srk);		/* get pointer to SRK in permanent data */
 
     /* so that Delete's are safe */
@@ -159,7 +159,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     }
     /* get encOwnerAuth parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: protocolID %04hx\n", protocolID);
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: protocolID %04hx\n", protocolID);
 	returnCode = TPM_SizedBuffer_Load(&encOwnerAuth, &command, &paramSize);
     }
     /* get encSrkAuth parameter */
@@ -205,7 +205,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_TakeOwnership: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -219,23 +219,23 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     */
     /* 1.  If TPM_PERMANENT_DATA -> ownerAuth is valid return TPM_OWNER_SET */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Checking TPM state\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Checking TPM state\n");
 	if (tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_Process_TakeOwnership: Error, owner already installed\n");
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, owner already installed\n");
 	    returnCode = TPM_OWNER_SET;
 	}
     }
     /* 2.  If TPM_PERMANENT_FLAGS -> ownership is FALSE return TPM_INSTALL_DISABLED */
     if (returnCode == TPM_SUCCESS) {
 	if (!(tpm_state->tpm_permanent_flags.ownership)) {
-	    printf("TPM_Process_TakeOwnership: Error, ownership is false\n");
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, ownership is false\n");
 	    returnCode = TPM_INSTALL_DISABLED;
 	}
     }
     /* 3.  If TPM_PERMANENT_DATA -> endorsementKey is invalid return TPM_NO_ENDORSEMENT */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_permanent_data.endorsementKey.keyUsage == TPM_KEY_UNINITIALIZED) {
-	    printf("TPM_Process_TakeOwnership: Error, endorsement key is invalid\n");
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, endorsement key is invalid\n");
 	    returnCode = TPM_NO_ENDORSEMENT;
 	}
     }
@@ -255,7 +255,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* 5. If protocolID is not TPM_PID_OWNER, the TPM MAY return TPM_BAD_PARAMETER */
     if (returnCode == TPM_SUCCESS) {
 	if (protocolID != TPM_PID_OWNER) {
-	    printf("TPM_Process_TakeOwnership: Error, bad protocolID\n");
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, bad protocolID\n");
 	    returnCode = TPM_BAD_PARAMETER;
 
 	}
@@ -273,7 +273,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* b.  Validate that A1 is a length of 20 bytes, on error return TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (a1Auth_length != TPM_SECRET_SIZE) {
-	    printf("TPM_Process_TakeOwnership: Error, A1 length %u, should be %u\n",
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, A1 length %u, should be %u\n",
 		   a1Auth_length, TPM_SECRET_SIZE);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -296,9 +296,9 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     */
     /* a. If srkParams -> keyUsage is not TPM_KEY_STORAGE return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Validating SRK parameters\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Validating SRK parameters\n");
 	if (srkParams.keyUsage != TPM_KEY_STORAGE) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->keyUsage is not TPM_KEY_STORAGE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -306,7 +306,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* b. If srkParams -> migratable is TRUE return TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (srkParams.keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_TakeOwnership: Error, srkParams->keyFlags migratable is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, srkParams->keyFlags migratable is TRUE\n");
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
     }
@@ -314,7 +314,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
        TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (srkParams.algorithmParms.algorithmID != TPM_ALG_RSA) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->algorithmParms->algorithmID is NOT TPM_ALG_RSA\n");
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -323,7 +323,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
        TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (srkParams.algorithmParms.encScheme != TPM_ES_RSAESOAEP_SHA1_MGF1) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->algorithmParms->encScheme is NOT TPM_ES_RSAESOAEP_SHA1_MGF1\n");
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -332,7 +332,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
       TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (srkParams.algorithmParms.sigScheme != TPM_SS_NONE) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->algorithmParms->sigScheme is NOT TPM_SS_NONE\n");
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -344,7 +344,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (srkRSAKeyParms->keyLength < 2048) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->algorithmParms->parms->keyLength "
 		   "MUST be greater than or equal to 2048\n");
 	    returnCode = TPM_BAD_KEY_PROPERTY;
@@ -354,7 +354,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
        TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (srkRSAKeyParms->exponent.size != 0) {
-	    printf("TPM_Process_TakeOwnership: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, "
 		   "srkParams->algorithmParms->parms->exponentSize %u is not zero\n",
 		   srkRSAKeyParms->exponent.size);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
@@ -365,7 +365,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state -> tpm_permanent_flags.FIPS) {
 	    if (srkParams.authDataUsage == TPM_AUTH_NEVER) {
-		printf("TPM_Process_TakeOwnership:  Error, "
+		TPMLIB_LogPrintf("TPM_Process_TakeOwnership:  Error, "
 		       "FIPS and authDataUsage is TPM_AUTH_NEVER\n");
 		returnCode = TPM_NOTFIPS;
 	    }
@@ -378,7 +378,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* 9.  Generate K1 (SRK) according to the srkParams on error return TPM_BAD_KEY_PROPERTY */
     /* a.This includes copying PCRInfo from srkParams to K1 */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: SRK key length %u\n", srkRSAKeyParms->keyLength);
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: SRK key length %u\n", srkRSAKeyParms->keyLength);
 	if (ver == 1) {
 	    if (srkParams.tpm_pcr_info != NULL) {
 		TPM_PCRInfo_Trace("TPM_Process_TakeOwnership: SRK PCRs",
@@ -386,7 +386,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
 				  srkParams.tpm_pcr_info->digestAtRelease);
 	    }
 	    else {
-		printf("TPM_Process_TakeOwnership: No SRK PCRs\n");
+		TPMLIB_LogPrintf("TPM_Process_TakeOwnership: No SRK PCRs\n");
 	    }
 	}
 	else {
@@ -396,10 +396,10 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
 				  srkParams.tpm_pcr_info_long->digestAtRelease);
 	    }
 	    else {
-		printf("TPM_Process_TakeOwnership: No SRK PCRs\n");
+		TPMLIB_LogPrintf("TPM_Process_TakeOwnership: No SRK PCRs\n");
 	    }
 	}
-	printf("TPM_Process_TakeOwnership: Creating SRK, authDataUsage %u\n",
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Creating SRK, authDataUsage %u\n",
 	       srkParams.authDataUsage);
 	/* The old keys should already be deleted from an OwnerClear, but it can't hurt to do it
 	   again to prevent memory leaks on errors. */
@@ -420,7 +420,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* 15.  Create TPM_PERMANENT_DATA -> tpmProof by using the TPM RNG */
     /* NOTE:  Moved here so tpmProof can be inserted into SRK -> migrationAuth */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Creating tpmProof\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Creating tpmProof\n");
 	returnCode = TPM_Secret_Generate(tpm_state->tpm_permanent_data.tpmProof);
     }
     /* 10.  Create A2 a TPM_SECRET by decrypting encSrkAuth using the PRIVEK */
@@ -436,7 +436,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* b.  Validate that A2 is a length of 20 bytes, on error return TPM_BAD_KEY_PROPERTY */
     if (returnCode == TPM_SUCCESS) {
 	if (a2SrkAuth_length != TPM_SECRET_SIZE) {
-	    printf("TPM_Process_TakeOwnership: Error, A2 length %u, should be %u\n",
+	    TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Error, A2 length %u, should be %u\n",
 		   a2SrkAuth_length, TPM_SECRET_SIZE);
 	    returnCode = TPM_BAD_KEY_PROPERTY;
 	}
@@ -469,13 +469,13 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* 13.  Create TPM_PERMANENT_DATA -> contextKey according to the rules for the algorithm in use
        by the TPM to save context blobs */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Creating contextKey\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Creating contextKey\n");
 	returnCode = TPM_SymmetricKeyData_GenerateKey(tpm_state->tpm_permanent_data.contextKey);
     }
     /* 14.  Create TPM_PERMANENT_DATA -> delegateKey according to the rules for the algorithm in use
        by the TPM to save delegate blobs */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Creating delegateKey\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Creating delegateKey\n");
 	returnCode = TPM_SymmetricKeyData_GenerateKey(tpm_state->tpm_permanent_data.delegateKey);
     }
     /* 15.  Create TPM_PERMANENT_DATA -> tpmProof by using the TPM RNG */
@@ -483,12 +483,12 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     /* 16.  Export TPM_PERMANENT_DATA -> srk as srkPub */
     if (returnCode == TPM_SUCCESS) {
 	/* copy the srk */
-	printf("TPM_Process_TakeOwnership: Creating srkPub for response\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Creating srkPub for response\n");
 	returnCode = TPM_Key_Copy(&srkPub, srk, FALSE); /* don't copy encData */
     }
     /* 17. Set TPM_PERMANENT_FLAGS -> readPubek to FALSE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TakeOwnership: Clear readPubek\n");
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Clear readPubek\n");
 	TPM_SetCapability_Flag(&writeAllNV2,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.readPubek),	/* flag */
 			       FALSE);						/* value */
@@ -502,7 +502,7 @@ TPM_RESULT TPM_Process_TakeOwnership(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_TakeOwnership: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_TakeOwnership: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -607,7 +607,7 @@ TPM_RESULT TPM_Process_OwnerClear(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_OwnerClear: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OwnerClear: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -646,7 +646,7 @@ TPM_RESULT TPM_Process_OwnerClear(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OwnerClear: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_OwnerClear: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -689,7 +689,7 @@ TPM_RESULT TPM_Process_OwnerClear(tpm_state_t *tpm_state,
     /* 2. If TPM_PERMANENT_FLAGS -> disableOwnerClear is TRUE then return TPM_CLEAR_DISABLED. */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_permanent_flags.disableOwnerClear) {
-	    printf("TPM_Process_OwnerClear: Error, disableOwnerClear is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_OwnerClear: Error, disableOwnerClear is TRUE\n");
 	    returnCode = TPM_CLEAR_DISABLED;
 	}
     }
@@ -709,7 +709,7 @@ TPM_RESULT TPM_Process_OwnerClear(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OwnerClear: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OwnerClear: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -800,7 +800,7 @@ TPM_RESULT TPM_Process_ForceClear(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ForceClear: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ForceClear: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -830,7 +830,7 @@ TPM_RESULT TPM_Process_ForceClear(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ForceClear: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ForceClear: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -845,14 +845,14 @@ TPM_RESULT TPM_Process_ForceClear(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (!physicalPresence) {
-	    printf("TPM_Process_ForceClear: Error, physicalPresence is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_ForceClear: Error, physicalPresence is FALSE\n");
 	    returnCode = TPM_BAD_PRESENCE;
 	}
     }
     /* 2. If TPM_STCLEAR_FLAGS -> disableForceClear is TRUE return TPM_CLEAR_DISABLED */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_stclear_flags.disableForceClear) {
-	    printf("TPM_Process_ForceClear: Error, disableForceClear is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_ForceClear: Error, disableForceClear is TRUE\n");
 	    returnCode = TPM_CLEAR_DISABLED;
 	}
     }
@@ -872,7 +872,7 @@ TPM_RESULT TPM_Process_ForceClear(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ForceClear: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ForceClear: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -939,7 +939,7 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
 					      &current,
 					      tpm_state->tpm_key_handle_entries,
 					      start)) == 0) {
-	printf("TPM_OwnerClearCommon: Flushing key handle %08x\n",
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Flushing key handle %08x\n",
 	       tpm_key_handle_entry->handle);
 	rc = TPM_KeyHandleEntry_FlushSpecific(tpm_state, tpm_key_handle_entry);
 	start = current + 1;
@@ -952,7 +952,7 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
 #endif
     /* a.This includes owner evict keys */
     if (rc == 0) {
-	printf("TPM_OwnerClearCommon: Deleting owner evict keys\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Deleting owner evict keys\n");
 	TPM_KeyHandleEntries_OwnerEvictDelete(tpm_state->tpm_key_handle_entries);
     }
     /* 4.  The TPM MUST NOT modify the following TPM_PERMANENT_DATA items
@@ -975,19 +975,19 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
     /* 5. The TPM MUST invalidate the following TPM_PERMANENT_DATA items and
        any internal resources associated with these items */
     if (rc == 0) {
-	printf("TPM_OwnerClearCommon: Invalidate TPM_PERMANENT_DATA items\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Invalidate TPM_PERMANENT_DATA items\n");
 	/* a. ownerAuth */
 	TPM_Secret_Init(tpm_state->tpm_permanent_data.ownerAuth);
 	tpm_state->tpm_permanent_data.ownerInstalled = FALSE;
 	/* b. srk */
 	TPM_Key_Delete(&(tpm_state->tpm_permanent_data.srk));
 	/* c. delegateKey */
-	printf("TPM_OwnerClearCommon: Invalidate delegateKey\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Invalidate delegateKey\n");
 	TPM_SymmetricKeyData_Init(tpm_state->tpm_permanent_data.delegateKey);
 	/* d. delegateTable */
 	TPM_DelegateTable_Delete(&(tpm_state->tpm_permanent_data.delegateTable));
 	/* e. contextKey */
-	printf("TPM_OwnerClearCommon: Invalidate contextKey\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Invalidate contextKey\n");
 	TPM_SymmetricKeyData_Init(tpm_state->tpm_permanent_data.contextKey);
 	/* f. tpmProof */
 	TPM_Secret_Init(tpm_state->tpm_permanent_data.tpmProof);
@@ -1007,26 +1007,26 @@ TPM_RESULT TPM_OwnerClearCommon(tpm_state_t *tpm_state,
 	   b. Lists (e.g. contextList) SHALL be invalidated
 	   NOTE This also terminates all sessions
 	*/
-	printf("TPM_OwnerClearCommon: Invalidate TPM_STANY_DATA\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Invalidate TPM_STANY_DATA\n");
 	TPM_StanyData_Delete(&(tpm_state->tpm_stany_data));
 	/* 8. The TPM MUST invalidate all fields of TPM_STCLEAR_DATA except the PCR's
 	   a. Nonces SHALL be reset
 	   b. Lists (e.g. contextList) SHALL be invalidated
 	   c. deferredPhysicalPresence MUST be set to 0
 	*/
-	printf("TPM_OwnerClearCommon: Invalidate TPM_STCLEAR_DATA\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Invalidate TPM_STCLEAR_DATA\n");
 	TPM_StclearData_Delete(&(tpm_state->tpm_stclear_data),
 			       tpm_state->tpm_permanent_data.pcrAttrib,
 			       FALSE);	/* don't reset the PCR's */
 	/* 9.  The TPM MUST set the following TPM_PERMANENT_FLAGS to their default values */
 	/* a.  disable */
-	printf("TPM_OwnerClearCommon: Set disable TRUE\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Set disable TRUE\n");
 	tpm_state->tpm_permanent_flags.disable = TRUE;
 	/* b.  deactivated */
-	printf("TPM_OwnerClearCommon: Set deactivated TRUE\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Set deactivated TRUE\n");
 	tpm_state->tpm_permanent_flags.deactivated = TRUE;
 	/* c.  readPubek */
-	printf("TPM_OwnerClearCommon: Set readPubek TRUE\n");
+	TPMLIB_LogPrintf("TPM_OwnerClearCommon: Set readPubek TRUE\n");
 	tpm_state->tpm_permanent_flags.readPubek = TRUE;
 	/* d.  disableOwnerClear */
 	tpm_state->tpm_permanent_flags.disableOwnerClear = FALSE;
@@ -1158,7 +1158,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_PhysicalPresence: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1183,7 +1183,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 					  transportInternal);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_PhysicalPresence: physicalPresence parameter %04x\n", physicalPresence);
+	TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: physicalPresence parameter %04x\n", physicalPresence);
     }
     /* check state */
     if (returnCode == TPM_SUCCESS) {
@@ -1196,7 +1196,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_PhysicalPresence: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1207,7 +1207,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 #ifdef TPM_V12
     if (returnCode == TPM_SUCCESS) {
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_MASK) {
-	    printf("TPM_Process_PhysicalPresence: Error, physicalPresence extra bits\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresence extra bits\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1228,7 +1228,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	a2 = physicalPresence & (TPM_PHYSICAL_PRESENCE_LOCK |
 				 TPM_PHYSICAL_PRESENCE_PRESENT |
 				 TPM_PHYSICAL_PRESENCE_NOTPRESENT);
-	printf("TPM_Process_PhysicalPresence: a1 %04x a2 %04x\n", a1, a2);
+	TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: a1 %04x a2 %04x\n", a1, a2);
     }
     /*
       Lifetime lock settings
@@ -1239,7 +1239,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* a. If TPM_PERMANENT_FLAGS -> physicalPresenceLifetimeLock is TRUE, return
 	       TPM_BAD_PARAMETER */
 	    if (tpm_state->tpm_permanent_flags.physicalPresenceLifetimeLock) {
-		printf("TPM_Process_PhysicalPresence: Error, "
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, "
 		       "physicalPresenceLifetimeLock is TRUE\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
@@ -1247,7 +1247,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	/* b. If any A2 setting is present return TPM_BAD_PARAMETER */
 	if (returnCode == TPM_SUCCESS) {
 	    if (a2) {
-		printf("TPM_Process_PhysicalPresence: Error, a1 and a2 TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, a1 and a2 TRUE\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1256,7 +1256,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    if ((physicalPresence & TPM_PHYSICAL_PRESENCE_HW_ENABLE) &&
 		(physicalPresence & TPM_PHYSICAL_PRESENCE_HW_DISABLE)) {
-		printf("TPM_Process_PhysicalPresence: Error, HW enable and disable both TRUE \n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, HW enable and disable both TRUE \n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1265,7 +1265,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    if ((physicalPresence & TPM_PHYSICAL_PRESENCE_CMD_ENABLE ) &&
 		(physicalPresence & TPM_PHYSICAL_PRESENCE_CMD_DISABLE )) {
-		printf("TPM_Process_PhysicalPresence: Error, CMD enable and disable both TRUE \n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, CMD enable and disable both TRUE \n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1273,7 +1273,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* e. If physicalPresence -> TPM_PHYSICAL_PRESENCE_HW_ENABLE is TRUE Set
 	       TPM_PERMANENT_FLAGS -> physicalPresenceHWEnable to TRUE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_HW_ENABLE) {
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable TRUE\n");
 		TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				       &(tpm_state->tpm_permanent_flags.physicalPresenceHWEnable),
 				       TRUE);					/* value */
@@ -1281,7 +1281,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* f. If physicalPresence -> TPM_PHYSICAL_PRESENCE_HW_DISABLE is TRUE Set
 	       TPM_PERMANENT_FLAGS -> physicalPresenceHWEnable to FALSE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_HW_DISABLE) {
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable FALSE\n");
 		TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				       &(tpm_state->tpm_permanent_flags.physicalPresenceHWEnable),
 				       FALSE);					/* value */
@@ -1289,7 +1289,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* g. If physicalPresence -> TPM_PHYSICAL_PRESENCE_CMD_ENABLE is TRUE, Set
 	       TPM_PERMANENT_FLAGS -> physicalPresenceCMDEnable to TRUE. */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_CMD_ENABLE) {
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable TRUE\n");
 		TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				       &(tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable),
 				       TRUE);					/* value */
@@ -1297,7 +1297,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* h. If physicalPresence -> TPM_PHYSICAL_PRESENCE_CMD_DISABLE is TRUE, Set
 	       TPM_PERMANENT_FLAGS -> physicalPresenceCMDEnable to FALSE. */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_CMD_DISABLE) {
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable FALSE\n");
 		TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				       &(tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable),
 				       FALSE);					/* value */
@@ -1305,7 +1305,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* i. If physicalPresence -> TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK is TRUE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK) {
 		/* i. Set TPM_PERMANENT_FLAGS -> physicalPresenceLifetimeLock to TRUE */
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceLifetimeLock\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceLifetimeLock\n");
 		TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				       &(tpm_state->tpm_permanent_flags.physicalPresenceLifetimeLock),
 				       TRUE);					/* value */
@@ -1323,7 +1323,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    this was OK */
 	if (returnCode == TPM_SUCCESS) {
 	    if (a1) {
-		printf("TPM_Process_PhysicalPresence: Error, a1 and a2 TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, a1 and a2 TRUE\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1331,7 +1331,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	   */
 	if (returnCode == TPM_SUCCESS) {
 	    if (!tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable) {
-		printf("TPM_Process_PhysicalPresence: Error, physicalPresenceCMDEnable is FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresenceCMDEnable is FALSE\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1340,7 +1340,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    if ((physicalPresence & TPM_PHYSICAL_PRESENCE_LOCK ) &&
 		(physicalPresence & TPM_PHYSICAL_PRESENCE_PRESENT)) {
-		printf("TPM_Process_PhysicalPresence: Error, LOCK and PRESENT both TRUE \n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, LOCK and PRESENT both TRUE \n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1349,14 +1349,14 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    if ((physicalPresence & TPM_PHYSICAL_PRESENCE_PRESENT) &&
 		(physicalPresence & TPM_PHYSICAL_PRESENCE_NOTPRESENT)) {
-		printf("TPM_Process_PhysicalPresence: Error, PRESENT and NOT_PRESENT both TRUE \n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, PRESENT and NOT_PRESENT both TRUE \n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
 	/* e. If TPM_STCLEAR_FLAGS -> physicalPresenceLock is TRUE, return TPM_BAD_PARAMETER */
 	if (returnCode == TPM_SUCCESS) {
 	    if (tpm_state->tpm_stclear_flags.physicalPresenceLock) {
-		printf("TPM_Process_PhysicalPresence: Error, physicalPresenceLock is TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresenceLock is TRUE\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
 	}
@@ -1364,23 +1364,23 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
 	    /* f. If physicalPresence -> TPM_PHYSICAL_PRESENCE_LOCK is TRUE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_LOCK) {
 		/* i. Set TPM_STCLEAR_FLAGS -> physicalPresence to FALSE */
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
 		tpm_state->tpm_stclear_flags.physicalPresence = FALSE;
 		/* ii. Set TPM_STCLEAR_FLAGS -> physicalPresenceLock to TRUE */
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresenceLock TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceLock TRUE\n");
 		tpm_state->tpm_stclear_flags.physicalPresenceLock = TRUE;
 		/* iii. Return TPM_SUCCESS */
 	    }
 	    /* g. If physicalPresence -> TPM_PHYSICAL_PRESENCE_PRESENT is TRUE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_PRESENT) {
 		/* i. Set TPM_STCLEAR_FLAGS -> physicalPresence to TRUE */
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresence TRUE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresence TRUE\n");
 		tpm_state->tpm_stclear_flags.physicalPresence = TRUE;
 	    }
 	    /* h. If physicalPresence -> TPM_PHYSICAL_PRESENCE_NOTPRESENT is TRUE */
 	    if (physicalPresence & TPM_PHYSICAL_PRESENCE_NOTPRESENT) {
 		/* i. Set TPM_STCLEAR_FLAGS -> physicalPresence to FALSE */
-		printf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
 		tpm_state->tpm_stclear_flags.physicalPresence = FALSE;
 	    }
 	    /* i. Return TPM_SUCCESS */
@@ -1390,7 +1390,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if (!a1 && !a2) {
 	    /* a. Return TPM_BAD_PARAMETER */
-	    printf("TPM_Process_PhysicalPresence: Error, a1 and a2 FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, a1 and a2 FALSE\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1405,28 +1405,28 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
        MUST cause no action and MUST return the error TCPA_BAD_PARAMETER. */
     if (returnCode == TPM_SUCCESS) {
 	if (tpm_state->tpm_stclear_flags.physicalPresenceLock) {
-	    printf("TPM_Process_PhysicalPresence: Error, physicalPresenceLock is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresenceLock is TRUE\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
 	/* NOTE: The specification doesn't say what to do if both flags are set.  Following the 1.2
 	   specification seems reasonable. */
 	if ((physicalPresence & TPM_PHYSICAL_PRESENCE_PRESENT) &&
 	    (physicalPresence & TPM_PHYSICAL_PRESENCE_NOTPRESENT)) {
-	    printf("TPM_Process_PhysicalPresence: Error, PRESENT and NOT_PRESENT both TRUE \n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, PRESENT and NOT_PRESENT both TRUE \n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
 	if ((tpm_state->tpm_permanent_flags.physicalPresenceLifetimeLock) &&
 	    (physicalPresence & (TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK |
 				 TPM_PHYSICAL_PRESENCE_HW_ENABLE |
 				 TPM_PHYSICAL_PRESENCE_CMD_ENABLE))) {
-	    printf("TPM_Process_PhysicalPresence: Error, physicalPresenceLifetimeLock is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresenceLifetimeLock is TRUE\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
 	if ((!tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable) &&
 	    (physicalPresence & (TPM_PHYSICAL_PRESENCE_LOCK |
 				 TPM_PHYSICAL_PRESENCE_PRESENT |
 				 TPM_PHYSICAL_PRESENCE_NOTPRESENT))) {
-	    printf("TPM_Process_PhysicalPresence: Error, physicalPresenceCMDEnable is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Error, physicalPresenceCMDEnable is FALSE\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
 
@@ -1435,36 +1435,36 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* a. physicalPresenceHWEnable and physicalPresenceCMDEnable  */
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_HW_ENABLE) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceHWEnable TRUE\n");
 	    TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				   &(tpm_state->tpm_permanent_flags.physicalPresenceHWEnable),
 				   TRUE);					/* value */
 	}
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_CMD_ENABLE) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceCMDEnable TRUE\n");
 	    TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				   &(tpm_state->tpm_permanent_flags.physicalPresenceCMDEnable),
 				   TRUE);					/* value */
 	}
 	/* b. physicalPresenceLifetimeLock  */
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_LIFETIME_LOCK) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresenceLifetimeLock\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceLifetimeLock\n");
 	    TPM_SetCapability_Flag(&writeAllNV,			/* altered */
 				   &(tpm_state->tpm_permanent_flags.physicalPresenceLifetimeLock),
 				   TRUE);					/* value */
 	}
 	/* c. PhysicalPresence	*/
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_PRESENT) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresence TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresence TRUE\n");
 	    tpm_state->tpm_stclear_flags.physicalPresence = TRUE;
 	}
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_NOTPRESENT) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresence FALSE\n");
 	    tpm_state->tpm_stclear_flags.physicalPresence = FALSE;
 	}
 	/* d. PhysicalPresenceLock  */
 	if (physicalPresence & TPM_PHYSICAL_PRESENCE_LOCK) {
-	    printf("TPM_Process_PhysicalPresence: Setting physicalPresenceLock TRUE\n");
+	    TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Setting physicalPresenceLock TRUE\n");
 	    tpm_state->tpm_stclear_flags.physicalPresenceLock = TRUE;
 	}
     }
@@ -1478,7 +1478,7 @@ TPM_RESULT TPM_Process_PhysicalPresence(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_PhysicalPresence: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_PhysicalPresence: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1560,7 +1560,7 @@ TPM_RESULT TPM_Process_DisableOwnerClear(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_DisableOwnerClear: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DisableOwnerClear: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1599,7 +1599,7 @@ TPM_RESULT TPM_Process_DisableOwnerClear(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DisableOwnerClear: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DisableOwnerClear: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1638,7 +1638,7 @@ TPM_RESULT TPM_Process_DisableOwnerClear(tpm_state_t *tpm_state,
     /* 3. When this flag is TRUE the only mechanism that can clear the TPM is the TPM_ForceClear
        command. The TPM_ForceClear command requires physical access to the TPM to execute. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DisableOwnerClear: Set disableOwnerClear\n");
+	TPMLIB_LogPrintf("TPM_Process_DisableOwnerClear: Set disableOwnerClear\n");
 	TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 			       &(tpm_state->tpm_permanent_flags.disableOwnerClear),	/* flag */
 			       TRUE);							/* value */
@@ -1652,7 +1652,7 @@ TPM_RESULT TPM_Process_DisableOwnerClear(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DisableOwnerClear: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DisableOwnerClear: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1737,7 +1737,7 @@ TPM_RESULT TPM_Process_DisableForceClear(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_DisableForceClear: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DisableForceClear: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1767,7 +1767,7 @@ TPM_RESULT TPM_Process_DisableForceClear(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DisableForceClear: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DisableForceClear: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1785,7 +1785,7 @@ TPM_RESULT TPM_Process_DisableForceClear(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DisableForceClear: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DisableForceClear: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1868,7 +1868,7 @@ TPM_RESULT TPM_Process_ResetEstablishmentBit(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ResetEstablishmentBit: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ResetEstablishmentBit: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1899,7 +1899,7 @@ TPM_RESULT TPM_Process_ResetEstablishmentBit(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ResetEstablishmentBit: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ResetEstablishmentBit: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1929,7 +1929,7 @@ TPM_RESULT TPM_Process_ResetEstablishmentBit(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ResetEstablishmentBit: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ResetEstablishmentBit: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

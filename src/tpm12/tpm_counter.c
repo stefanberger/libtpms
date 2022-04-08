@@ -114,7 +114,7 @@ TPM_RESULT TPM_Counters_StoreHandles(TPM_STORE_BUFFER *sbuffer,
     uint16_t	loaded;
     uint32_t	i;
 
-    printf(" TPM_Counters_StoreHandles:\n");
+    TPMLIB_LogPrintf(" TPM_Counters_StoreHandles:\n");
     if (rc == 0) {
 	loaded = 0;
 	/* count the number of loaded counters */
@@ -143,7 +143,7 @@ void TPM_Counters_GetSpace(uint32_t *space,
 {
     uint32_t i;
 
-    printf(" TPM_Counters_GetSpace:\n");
+    TPMLIB_LogPrintf(" TPM_Counters_GetSpace:\n");
     for (*space = 0 , i = 0 ; i < TPM_MIN_COUNTERS ; i++) {
 	if (!(monotonicCounters[i]).valid) {
 	    (*space)++;
@@ -169,7 +169,7 @@ TPM_RESULT TPM_Counters_GetNewHandle(TPM_COUNTER_VALUE **tpm_counter_value,
     TPM_RESULT	rc = 0;
     TPM_BOOL is_space;
     
-    printf(" TPM_Counters_GetNewHandle:\n");
+    TPMLIB_LogPrintf(" TPM_Counters_GetNewHandle:\n");
     for (*countID = 0, is_space = FALSE ;
 	 *countID < TPM_MIN_COUNTERS ;
 	 (*countID)++) {
@@ -181,12 +181,12 @@ TPM_RESULT TPM_Counters_GetNewHandle(TPM_COUNTER_VALUE **tpm_counter_value,
     }
     /* NOTE: According to TPMWG email, TPM_COUNT_ID can be an index */
     if (is_space) {
-	printf("  TPM_Counters_GetNewHandle: Assigned handle %u\n", *countID);
+	TPMLIB_LogPrintf("  TPM_Counters_GetNewHandle: Assigned handle %u\n", *countID);
 	*tpm_counter_value = &(monotonicCounters[*countID]);
 	(*tpm_counter_value)->valid = TRUE;			/* mark it occupied */
     }
     else {
-	printf("TPM_Counters_GetNewHandle: Error, no space in monotonicCounters table\n");
+	TPMLIB_LogPrintf("TPM_Counters_GetNewHandle: Error, no space in monotonicCounters table\n");
 	rc = TPM_RESOURCES;
     }
     return rc;
@@ -204,14 +204,14 @@ void TPM_Counters_GetNextCount(TPM_ACTUAL_COUNT *nextCount,
     TPM_COUNT_ID countID;
     TPM_ACTUAL_COUNT maxCount = 0;
 
-    printf(" TPM_Counters_GetNextCount:\n");
+    TPMLIB_LogPrintf(" TPM_Counters_GetNextCount:\n");
     for (countID = 0 ; countID < TPM_MIN_COUNTERS ; countID++) {
 	if (monotonicCounters[countID].counter > maxCount) {
 	    maxCount = monotonicCounters[countID].counter;
 	}
     }
     *nextCount = maxCount + 1;
-    printf("  TPM_Counters_GetNextCount: Next count %u\n", *nextCount);
+    TPMLIB_LogPrintf("  TPM_Counters_GetNextCount: Next count %u\n", *nextCount);
     return;
 }
 
@@ -223,18 +223,18 @@ TPM_RESULT TPM_Counters_IsValidId(TPM_COUNTER_VALUE *monotonicCounters,
 {
     TPM_RESULT		rc = 0;
    
-    printf(" TPM_Counters_IsValidId: countID %u\n", countID);
+    TPMLIB_LogPrintf(" TPM_Counters_IsValidId: countID %u\n", countID);
     /* range check */
     if (rc == 0) {
 	if (countID >= TPM_MIN_COUNTERS) {
-	    printf("TPM_Counters_IsValidId: Error countID %u out of range\n", countID);
+	    TPMLIB_LogPrintf("TPM_Counters_IsValidId: Error countID %u out of range\n", countID);
 	    rc = TPM_BAD_COUNTER ;
 	}
     }
     /* validity (creation) check */
     if (rc == 0) {
 	if (!(monotonicCounters[countID].valid)) {
-	    printf("TPM_Counters_IsValidId: Error countID %u invalid\n", countID);
+	    TPMLIB_LogPrintf("TPM_Counters_IsValidId: Error countID %u invalid\n", countID);
 	    rc = TPM_BAD_COUNTER ;
 	}	    
     }
@@ -252,7 +252,7 @@ TPM_RESULT TPM_Counters_GetCounterValue(TPM_COUNTER_VALUE **tpm_counter_value,
 {
     TPM_RESULT		rc = 0;
     
-    printf(" TPM_Counters_GetCounterValue: countID %u\n", countID);
+    TPMLIB_LogPrintf(" TPM_Counters_GetCounterValue: countID %u\n", countID);
     /* valid counter check */
     if (rc == 0) {
 	rc = TPM_Counters_IsValidId(monotonicCounters, countID);
@@ -278,11 +278,11 @@ TPM_RESULT TPM_Counters_Release(TPM_COUNTER_VALUE *monotonicCounters)
     TPM_RESULT	 rc = 0;
     TPM_COUNT_ID i;
     
-    printf(" TPM_Counters_Release:\n");
+    TPMLIB_LogPrintf(" TPM_Counters_Release:\n");
     for (i = 0 ; i < TPM_MIN_COUNTERS ; i++) {
 	if (monotonicCounters[i].valid) {
 	    /* the actual count value does not reset to zero */
-	    printf(" TPM_Counters_Release: Releasing %u\n", i);
+	    TPMLIB_LogPrintf(" TPM_Counters_Release: Releasing %u\n", i);
 	    TPM_Secret_Init(monotonicCounters[i].authData);
 	    TPM_Digest_Init(monotonicCounters[i].digest);
 	    monotonicCounters[i].valid = FALSE;
@@ -318,7 +318,7 @@ void TPM_Counters_GetActiveCounter(TPM_COUNT_ID *activeCounter,
 
 void TPM_CounterValue_Init(TPM_COUNTER_VALUE *tpm_counter_value)
 {
-    printf(" TPM_CounterValue_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CounterValue_Init:\n");
     memset(tpm_counter_value->label, 0, TPM_COUNTER_LABEL_SIZE);
     tpm_counter_value->counter = 0;
     TPM_Secret_Init(tpm_counter_value->authData);
@@ -340,7 +340,7 @@ TPM_RESULT TPM_CounterValue_Load(TPM_COUNTER_VALUE *tpm_counter_value,	/* result
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_CounterValue_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CounterValue_Load:\n");
     /* check tag */
     if (rc == 0) {	
 	rc = TPM_CheckTag(TPM_TAG_COUNTER_VALUE, stream, stream_size);
@@ -377,7 +377,7 @@ TPM_RESULT TPM_CounterValue_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_CounterValue_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CounterValue_Store:\n");
     /* store tag, label, counter */
     if (rc == 0) {	
 	rc = TPM_CounterValue_StorePublic(sbuffer, tpm_counter_value); 
@@ -407,7 +407,7 @@ TPM_RESULT TPM_CounterValue_StorePublic(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_CounterValue_StorePublic:\n");
+    TPMLIB_LogPrintf(" TPM_CounterValue_StorePublic:\n");
     /* store tag */
     if (rc == 0) {	
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_COUNTER_VALUE); 
@@ -448,7 +448,7 @@ TPM_RESULT TPM_CounterValue_Set(TPM_COUNTER_VALUE *tpm_counter_value,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_CounterValue_Set:\n");
+    TPMLIB_LogPrintf(" TPM_CounterValue_Set:\n");
     tpm_counter_value->counter = counter;
     memcpy(tpm_counter_value->label, label, TPM_COUNTER_LABEL_SIZE);
     TPM_Secret_Copy(tpm_counter_value->authData, authData);
@@ -473,11 +473,11 @@ TPM_RESULT TPM_CounterValue_Release(TPM_COUNTER_VALUE *tpm_counter_value,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_CounterValue_Release: countID %u\n", countID);
+    TPMLIB_LogPrintf(" TPM_CounterValue_Release: countID %u\n", countID);
     /* sanity check */
     if (rc == 0) {
 	if (!tpm_counter_value->valid) {
-	    printf("TPM_CounterValue_Release: Error (fatal), countID %u not valid\n", countID);
+	    TPMLIB_LogPrintf("TPM_CounterValue_Release: Error (fatal), countID %u not valid\n", countID);
 	    rc = TPM_FAIL;	/* should never occur */
 	}
     }
@@ -545,7 +545,7 @@ TPM_RESULT TPM_Process_CreateCounter(tpm_state_t *tpm_state,
     TPM_COUNT_ID	countID = 0;		/* The handle for the counter */
     TPM_COUNTER_VALUE	*counterValue = NULL;	/* The starting counter value */
 
-    printf("TPM_Process_CreateCounter: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_CreateCounter: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -595,7 +595,7 @@ TPM_RESULT TPM_Process_CreateCounter(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_CreateCounter: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_CreateCounter: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -678,7 +678,7 @@ TPM_RESULT TPM_Process_CreateCounter(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_CreateCounter: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_CreateCounter: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -790,7 +790,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_COUNTER_VALUE	*counterValue = NULL;	/* The counter value */
 
-    printf("TPM_Process_IncrementCounter: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -801,7 +801,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&countID, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_IncrementCounter: countID %u\n", countID);
+	TPMLIB_LogPrintf("TPM_Process_IncrementCounter: countID %u\n", countID);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -836,7 +836,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_IncrementCounter: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -862,10 +862,10 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
 	    /* a. If TPM_STCLEAR_DATA -> countID does not equal countID */
 	    if (tpm_state->tpm_stclear_data.countID != countID) {
 		if (tpm_state->tpm_stclear_data.countID == TPM_COUNT_ID_ILLEGAL) {
-		    printf("TPM_Process_IncrementCounter: Error, counter has been released\n");
+		    TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Error, counter has been released\n");
 		}
 		else {
-		    printf("TPM_Process_IncrementCounter: Error, %u is already active\n",
+		    TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Error, %u is already active\n",
 			   tpm_state->tpm_stclear_data.countID);
 		}
 		/* i. Return TPM_BAD_COUNTER */
@@ -909,7 +909,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
 	if (tpm_state->tpm_stclear_data.countID == TPM_COUNT_ID_NULL) {
 	    /* c. Set TPM_STCLEAR_DATA -> countID to countID */
 	    tpm_state->tpm_stclear_data.countID = countID;
-	    printf("TPM_Process_IncrementCounter: Setting %u as active counter\n", countID);
+	    TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Setting %u as active counter\n", countID);
 	}
     }
     if (returnCode == TPM_SUCCESS) {
@@ -925,7 +925,7 @@ TPM_RESULT TPM_Process_IncrementCounter(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_IncrementCounter: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_IncrementCounter: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1016,7 +1016,7 @@ TPM_RESULT TPM_Process_ReadCounter(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ReadCounter: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ReadCounter: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1050,7 +1050,7 @@ TPM_RESULT TPM_Process_ReadCounter(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ReadCounter: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ReadCounter: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1060,13 +1060,13 @@ TPM_RESULT TPM_Process_ReadCounter(tpm_state_t *tpm_state,
     */
     /* 1. Validate that countID points to a valid counter. Return TPM_BAD_COUNTER on error. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ReadCounter: countID %u\n", countID);
+	TPMLIB_LogPrintf("TPM_Process_ReadCounter: countID %u\n", countID);
 	returnCode = TPM_Counters_IsValidId(tpm_state->tpm_permanent_data.monotonicCounter,
 					    countID);
     }
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ReadCounter: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ReadCounter: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1156,7 +1156,7 @@ TPM_RESULT TPM_Process_ReleaseCounter(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ReleaseCounter: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1167,7 +1167,7 @@ TPM_RESULT TPM_Process_ReleaseCounter(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&countID, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ReleaseCounter: countID %u\n", countID);
+	TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: countID %u\n", countID);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -1202,7 +1202,7 @@ TPM_RESULT TPM_Process_ReleaseCounter(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ReleaseCounter: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1262,14 +1262,14 @@ TPM_RESULT TPM_Process_ReleaseCounter(tpm_state_t *tpm_state,
     /* 2. The TPM invalidates all internal information regarding the counter. This includes
        releasing countID such that any subsequent attempts to use countID will fail. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ReleaseCounter: Releasing counter %u\n", countID);
+	TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: Releasing counter %u\n", countID);
 	returnCode = TPM_CounterValue_Release(counterValue, countID);
     }
     if (returnCode == TPM_SUCCESS) {
 	writeAllNV= TRUE;
 	/* 4. If TPM_STCLEAR_DATA -> countID equals countID,  */
 	if (tpm_state->tpm_stclear_data.countID == countID ) {
-	    printf("TPM_Process_ReleaseCounter: Deactivating counter %u\n", countID);
+	    TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: Deactivating counter %u\n", countID);
 	    /* a. Set TPM_STCLEAR_DATA -> countID to an illegal value (not the NULL value) */
 	    tpm_state->tpm_stclear_data.countID = TPM_COUNT_ID_ILLEGAL;
 	}
@@ -1283,7 +1283,7 @@ TPM_RESULT TPM_Process_ReleaseCounter(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ReleaseCounter: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ReleaseCounter: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1384,7 +1384,7 @@ TPM_RESULT TPM_Process_ReleaseCounterOwner(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_ReleaseCounterOwner: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ReleaseCounterOwner: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1395,7 +1395,7 @@ TPM_RESULT TPM_Process_ReleaseCounterOwner(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&countID, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ReleaseCounterOwner: countID %u\n", countID);
+	TPMLIB_LogPrintf("TPM_Process_ReleaseCounterOwner: countID %u\n", countID);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -1430,7 +1430,7 @@ TPM_RESULT TPM_Process_ReleaseCounterOwner(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ReleaseCounterOwner: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ReleaseCounterOwner: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1494,7 +1494,7 @@ TPM_RESULT TPM_Process_ReleaseCounterOwner(tpm_state_t *tpm_state,
 	writeAllNV = TRUE;
 	/* 5. If TPM_STCLEAR_DATA -> countID equals countID,  */
 	if (tpm_state->tpm_stclear_data.countID == countID ) {
-	    printf("TPM_Process_ReleaseCounterOwner: Deactivating counter %u\n", countID);
+	    TPMLIB_LogPrintf("TPM_Process_ReleaseCounterOwner: Deactivating counter %u\n", countID);
 	    /* a. Set TPM_STCLEAR_DATA -> countID to an illegal value (not the zero value) */
 	    tpm_state->tpm_stclear_data.countID = TPM_COUNT_ID_ILLEGAL;
 	}
@@ -1508,7 +1508,7 @@ TPM_RESULT TPM_Process_ReleaseCounterOwner(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ReleaseCounterOwner: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ReleaseCounterOwner: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

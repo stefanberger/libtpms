@@ -491,20 +491,20 @@ RsaSimulationEnd(
     UINT32      nonFirst = 0;
     if((PrimeCounts[0] + PrimeCounts[1] + PrimeCounts[2]) != 0)
 	{
-	    printf("Primes generated = %s\n", PrintTuple(PrimeCounts));
-	    printf("Fields sieved = %s\n", PrintTuple(totalFieldsSieved));
-	    printf("Fields with no primes = %s\n", PrintTuple(noPrimeFields));
-	    printf("Primes checked with Miller-Rabin = %s\n",
+	    TPMLIB_LogPrintf("Primes generated = %s\n", PrintTuple(PrimeCounts));
+	    TPMLIB_LogPrintf("Fields sieved = %s\n", PrintTuple(totalFieldsSieved));
+	    TPMLIB_LogPrintf("Fields with no primes = %s\n", PrintTuple(noPrimeFields));
+	    TPMLIB_LogPrintf("Primes checked with Miller-Rabin = %s\n",
 		   PrintTuple(MillerRabinTrials));
 	    for(i = 0; i < 3; i++)
 		averages[i] = (totalFieldsSieved[i]
 			       != 0 ? bitsInFieldAfterSieve[i] / totalFieldsSieved[i]
 			       : 0);
-	    printf("Average candidates in field %s\n", PrintTuple(averages));
+	    TPMLIB_LogPrintf("Average candidates in field %s\n", PrintTuple(averages));
 	    for(i = 1; i < (sizeof(failedAtIteration) / sizeof(failedAtIteration[0]));
 		i++)
 		nonFirst += failedAtIteration[i];
-	    printf("Miller-Rabin failures not in first round = %d\n", nonFirst);
+	    TPMLIB_LogPrintf("Miller-Rabin failures not in first round = %d\n", nonFirst);
 	}
     CLEAR_VALUE(PrimeCounts);
     CLEAR_VALUE(totalFieldsSieved);

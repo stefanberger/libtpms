@@ -69,7 +69,7 @@
 
 void TPM_EKBlob_Init(TPM_EK_BLOB *tpm_ek_blob)
 {
-    printf(" TPM_EKBlob_Init:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlob_Init:\n");
     tpm_ek_blob->ekType = 0;
     TPM_SizedBuffer_Init(&(tpm_ek_blob->blob));
     return;
@@ -91,7 +91,7 @@ TPM_RESULT TPM_EKBlob_Load(TPM_EK_BLOB *tpm_ek_blob,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlob_Load:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlob_Load:\n");
     /* check the tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_EK_BLOB, stream, stream_size);
@@ -119,7 +119,7 @@ TPM_RESULT TPM_EKBlob_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlob_Store:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlob_Store:\n");
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_EK_BLOB); 
     }
@@ -144,7 +144,7 @@ TPM_RESULT TPM_EKBlob_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_EKBlob_Delete(TPM_EK_BLOB *tpm_ek_blob)
 {
-    printf(" TPM_EKBlob_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlob_Delete:\n");
     if (tpm_ek_blob != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_ek_blob->blob));
 	TPM_EKBlob_Init(tpm_ek_blob);
@@ -165,7 +165,7 @@ void TPM_EKBlob_Delete(TPM_EK_BLOB *tpm_ek_blob)
 
 void TPM_EKBlobActivate_Init(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate)
 {
-    printf(" TPM_EKBlobActivate_Init:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobActivate_Init:\n");
     TPM_SymmetricKey_Init(&(tpm_ek_blob_activate->sessionKey));
     TPM_Digest_Init(tpm_ek_blob_activate->idDigest);
     TPM_PCRInfoShort_Init(&(tpm_ek_blob_activate->pcrInfo));
@@ -188,7 +188,7 @@ TPM_RESULT TPM_EKBlobActivate_Load(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlobActivate_Load:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobActivate_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_EK_BLOB_ACTIVATE, stream, stream_size);
@@ -220,7 +220,7 @@ TPM_RESULT TPM_EKBlobActivate_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlobActivate_Store:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobActivate_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_EK_BLOB_ACTIVATE); 
@@ -252,7 +252,7 @@ TPM_RESULT TPM_EKBlobActivate_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_EKBlobActivate_Delete(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate)
 {
-    printf(" TPM_EKBlobActivate_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobActivate_Delete:\n");
     if (tpm_ek_blob_activate != NULL) {
 	TPM_SymmetricKey_Delete(&(tpm_ek_blob_activate->sessionKey));
 	TPM_PCRInfoShort_Delete(&(tpm_ek_blob_activate->pcrInfo));
@@ -275,7 +275,7 @@ void TPM_EKBlobActivate_Delete(TPM_EK_BLOB_ACTIVATE *tpm_ek_blob_activate)
 
 void TPM_EKBlobAuth_Init(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth)
 {
-    printf(" TPM_EKBlobAuth_Init:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobAuth_Init:\n");
     TPM_Secret_Init(tpm_ek_blob_auth->authValue);
     return;
 }
@@ -296,7 +296,7 @@ TPM_RESULT TPM_EKBlobAuth_Load(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlobAuth_Load:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobAuth_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_EK_BLOB_AUTH, stream, stream_size);
@@ -319,7 +319,7 @@ TPM_RESULT TPM_EKBlobAuth_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_EKBlobAuth_Store:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobAuth_Store:\n");
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_EK_BLOB_AUTH); 
     }
@@ -340,7 +340,7 @@ TPM_RESULT TPM_EKBlobAuth_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_EKBlobAuth_Delete(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth)
 {
-    printf(" TPM_EKBlobAuth_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_EKBlobAuth_Delete:\n");
     if (tpm_ek_blob_auth != NULL) {
 	TPM_EKBlobAuth_Init(tpm_ek_blob_auth);
     }
@@ -361,7 +361,7 @@ void TPM_EKBlobAuth_Delete(TPM_EK_BLOB_AUTH *tpm_ek_blob_auth)
 
 void TPM_IdentityContents_Init(TPM_IDENTITY_CONTENTS *tpm_identity_contents)
 {
-    printf(" TPM_IdentityContents_Init:\n");
+    TPMLIB_LogPrintf(" TPM_IdentityContents_Init:\n");
     TPM_StructVer_Init(&(tpm_identity_contents->ver));
     tpm_identity_contents->ordinal = TPM_ORD_MakeIdentity;
     TPM_Digest_Init(tpm_identity_contents->labelPrivCADigest);
@@ -387,7 +387,7 @@ TPM_RESULT TPM_IdentityContents_Load(TPM_IDENTITY_CONTENTS *tpm_identity_content
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_IdentityContents_Load:\n");
+    TPMLIB_LogPrintf(" TPM_IdentityContents_Load:\n");
     /* load ver */
     if (rc == 0) {
 	rc = TPM_StructVer_Load(&(tpm_identity_contents->ver), stream, stream_size);
@@ -423,7 +423,7 @@ TPM_RESULT TPM_IdentityContents_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_IdentityContents_Store:\n");
+    TPMLIB_LogPrintf(" TPM_IdentityContents_Store:\n");
     /* store ver */
     if (rc == 0) {
 	rc = TPM_StructVer_Store(sbuffer, &(tpm_identity_contents->ver));
@@ -454,7 +454,7 @@ TPM_RESULT TPM_IdentityContents_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_IdentityContents_Delete(TPM_IDENTITY_CONTENTS *tpm_identity_contents)
 {
-    printf(" TPM_IdentityContents_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_IdentityContents_Delete:\n");
     if (tpm_identity_contents != NULL) {
 	TPM_Pubkey_Delete(&(tpm_identity_contents->identityPubKey));
 	TPM_IdentityContents_Init(tpm_identity_contents);
@@ -475,7 +475,7 @@ void TPM_IdentityContents_Delete(TPM_IDENTITY_CONTENTS *tpm_identity_contents)
 
 void TPM_AsymCaContents_Init(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents)
 {
-    printf(" TPM_AsymCaContents_Init:\n");
+    TPMLIB_LogPrintf(" TPM_AsymCaContents_Init:\n");
     TPM_SymmetricKey_Init(&(tpm_asym_ca_contents->sessionKey));
     TPM_Digest_Init(tpm_asym_ca_contents->idDigest);
     return;
@@ -497,7 +497,7 @@ TPM_RESULT TPM_AsymCaContents_Load(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AsymCaContents_Load:\n");
+    TPMLIB_LogPrintf(" TPM_AsymCaContents_Load:\n");
     if (rc == 0) {
 	rc = TPM_SymmetricKey_Load(&(tpm_asym_ca_contents->sessionKey), stream, stream_size);
     }
@@ -519,7 +519,7 @@ TPM_RESULT TPM_AsymCaContents_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AsymCaContents_Store:\n");
+    TPMLIB_LogPrintf(" TPM_AsymCaContents_Store:\n");
     if (rc == 0) {
 	rc = TPM_SymmetricKey_Store(sbuffer, &(tpm_asym_ca_contents->sessionKey));
     }
@@ -541,7 +541,7 @@ TPM_RESULT TPM_AsymCaContents_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_AsymCaContents_Delete(TPM_ASYM_CA_CONTENTS *tpm_asym_ca_contents)
 {
-    printf(" TPM_AsymCaContents_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_AsymCaContents_Delete:\n");
     if (tpm_asym_ca_contents != NULL) {
 	TPM_SymmetricKey_Delete(&(tpm_asym_ca_contents->sessionKey));
 	TPM_AsymCaContents_Init(tpm_asym_ca_contents);
@@ -642,7 +642,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
 						   */
     TPM_SIZED_BUFFER		identityBinding;	/* Signature of TPM_IDENTITY_CONTENTS using
 							   idKey.private. */
-    printf("TPM_Process_MakeIdentity: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Ordinal Entry\n");
     TPM_Key_Init(&idKeyParams);			/* freed @1 */
     TPM_Key_Init(&idKey);			/* freed @2 */
     TPM_SizedBuffer_Init(&identityBinding);	/* freed @3 */
@@ -694,7 +694,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
 					&continueSrkSession,
 					srkAuth,
 					&command, &paramSize);
-	printf("TPM_Process_MakeIdentity: srkAuthHandle %08x\n", srkAuthHandle);
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: srkAuthHandle %08x\n", srkAuthHandle);
     }
     /* get the 'below the line' authorization parameters */
     if (returnCode == TPM_SUCCESS) {
@@ -706,11 +706,11 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MakeIdentity: authHandle %08x\n", authHandle); 
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: authHandle %08x\n", authHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_MakeIdentity: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -735,7 +735,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_Key_CheckProperties(&ver, &idKeyParams, 2048,
 					     tpm_state->tpm_permanent_flags.FIPS);
-	printf("TPM_Process_MakeIdentity: key parameters v = %d\n", ver);
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: key parameters v = %d\n", ver);
     }
     /* 2. Use authHandle to verify that the Owner authorized all TPM_MakeIdentity input
        parameters. */
@@ -795,7 +795,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
     /* if there is no SRK authorization, check that the SRK authDataUsage is TPM_AUTH_NEVER */
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH2_COMMAND)) {
 	if (tpm_state->tpm_permanent_data.srk.authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_MakeIdentity: Error, SRK authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Error, SRK authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -803,9 +803,9 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     /* NOTE: TPM_KEY_IDENTITY keys must use TPM_SS_RSASSAPKCS1v15_SHA1 */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MakeIdentity: Checking key parameters\n");
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Checking key parameters\n");
 	if (idKeyParams.keyUsage != TPM_KEY_IDENTITY) {
-	    printf("TPM_Process_MakeIdentity: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Error, "
 		   "idKeyParams keyUsage %08x should be TPM_KEY_IDENTITY\n",
 		   idKeyParams.keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
@@ -815,7 +815,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
        TPM_INVALID_KEYUSAGE */
     if (returnCode == TPM_SUCCESS) {
 	if (idKeyParams.keyFlags & TPM_MIGRATABLE) {
-	    printf("TPM_Process_MakeIdentity: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Error, "
 		   "idKeyParams keyFlags %08x cannot be migratable\n",
 		   idKeyParams.keyFlags);
 	    returnCode = TPM_INVALID_KEYUSAGE;
@@ -858,7 +858,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
 	   pcrInfo
 	   
 	   does not set encData */
-	printf("TPM_Process_MakeIdentity: Generating key\n");
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Generating key\n");
 	returnCode = TPM_Key_GenerateRSA(&idKey,
 					 tpm_state,
 					 &(tpm_state->tpm_permanent_data.srk),	/* parent key */
@@ -889,7 +889,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
     }	 
     /* 15. Encrypt the private portion of idKey using the SRK as the parent key */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MakeIdentity: Encrypting key private part with SRK\n");
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Encrypting key private part with SRK\n");
 	returnCode = TPM_Key_GenerateEncData(&idKey, &(tpm_state->tpm_permanent_data.srk));
     }
     /* 16. Create a TPM_IDENTITY_CONTENTS structure named idContents using labelPrivCADigest and the
@@ -909,7 +909,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
     }
     /* sign the digest */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_MakeIdentity: Signing digest of TPM_IDENTITY_CONTENTS\n");
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Signing digest of TPM_IDENTITY_CONTENTS\n");
 	returnCode = TPM_RSASignToSizedBuffer(&identityBinding, h1Digest, TPM_DIGEST_SIZE, &idKey);
     }
 #if 0	/* NOTE Debug code to reverse the signature */
@@ -946,7 +946,7 @@ TPM_RESULT TPM_Process_MakeIdentity(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_MakeIdentity: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_MakeIdentity: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1105,7 +1105,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
     TPM_DIGEST			outParamDigest;
     TPM_SYMMETRIC_KEY		symmetricKey;	/* The decrypted symmetric key. */
 
-    printf("TPM_Process_ActivateIdentity: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&blob);		/* freed @1 */
     TPM_SymmetricKey_Init(&symmetricKey);	/* freed @2 */
     TPM_AsymCaContents_Init(&b1AsymCaContents); /* freed @4 */
@@ -1154,7 +1154,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 					&continueIdKeySession,
 					idKeyAuth,
 					&command, &paramSize);
-	printf("TPM_Process_ActivateIdentity: idKeyAuthHandle %08x\n", idKeyAuthHandle);
+	TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: idKeyAuthHandle %08x\n", idKeyAuthHandle);
     }
     /* get the 'below the line' authorization parameters */
     if (returnCode == TPM_SUCCESS) {
@@ -1166,11 +1166,11 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ActivateIdentity: authHandle %08x\n", authHandle); 
+	TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: authHandle %08x\n", authHandle); 
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_ActivateIdentity: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1250,16 +1250,16 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
        */
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH2_COMMAND)) {
 	if (idKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_ActivateIdentity: Error, ID key authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error, ID key authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
     /* 3. Validate that the idKey is the public key of a valid TPM identity by checking that
        idKeyHandle -> keyUsage is TPM_KEY_IDENTITY. Return TPM_BAD_PARAMETER on mismatch */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ActivateIdentity: Checking for identity key\n");
+	TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Checking for identity key\n");
 	if (idKey->keyUsage != TPM_KEY_IDENTITY) {
-	    printf("TPM_Process_ActivateIdentity: Error, keyUsage %04hx must be TPM_KEY_IDENTITY\n",
+	    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error, keyUsage %04hx must be TPM_KEY_IDENTITY\n",
 		   idKey->keyUsage);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
@@ -1270,7 +1270,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
     }
     /* 5. Decrypt blob creating B1 using PRIVEK as the decryption key */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_ActivateIdentity: Decrypting blob with EK\n");
+	TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Decrypting blob with EK\n");
 	returnCode = TPM_RSAPrivateDecryptMalloc(&b1Blob,	/* decrypted data */
 						 &b1BlobLength,	/* actual size of b1 data */
 						 blob.buffer,
@@ -1286,7 +1286,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	/* a. If B1 -> tag is TPM_TAG_EK_BLOB then */
 	if (hTag == TPM_TAG_EK_BLOB) {
 	    /* i. B1 is a TPM_EK_BLOB */
-	    printf("TPM_Process_ActivateIdentity: b1 is TPM_EK_BLOB\n");
+	    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: b1 is TPM_EK_BLOB\n");
 	    vers = 2;
 	    returnCode = TPM_EKBlob_Load(&b1EkBlob, &stream, &stream_size);
 	}
@@ -1295,7 +1295,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	    /* i. B1 is a TPM_ASYM_CA_CONTENTS. As there is no tag for this structure it is possible
 	       for the TPM to make a mistake here but other sections of the structure undergo
 	       validation */
-	    printf("TPM_Process_ActivateIdentity: b1 is TPM_ASYM_CA_CONTENTS\n");
+	    TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: b1 is TPM_ASYM_CA_CONTENTS\n");
 	    vers = 1;
 	    returnCode = TPM_AsymCaContents_Load(&b1AsymCaContents, &stream, &stream_size);
 	}
@@ -1306,7 +1306,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_Digest_Compare(h1Digest, b1AsymCaContents.idDigest);
 	    if (returnCode != 0) {
-		printf("TPM_Process_ActivateIdentity: Error "
+		TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error "
 		       "comparing TPM_ASYM_CA_CONTENTS idDigest\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
@@ -1321,7 +1321,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	/* a. Validate that B1 -> ekType is TPM_EK_TYPE_ACTIVATE, return TPM_BAD_TYPE if not. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (b1EkBlob.ekType != TPM_EK_TYPE_ACTIVATE) {
-		printf("TPM_Process_ActivateIdentity: Error, "
+		TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error, "
 		       "TPM_EK_BLOB not ekType TPM_EK_TYPE_ACTIVATE\n");
 		returnCode = TPM_BAD_TYPE;
 	    }
@@ -1336,7 +1336,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_Digest_Compare(h1Digest, a1.idDigest);
 	    if (returnCode != 0) {
-		printf("TPM_Process_ActivateIdentity: Error "
+		TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Error "
 		       "comparing TPM_EK_TYPE_ACTIVATE idDigest\n");
 		returnCode = TPM_BAD_PARAMETER;
 	    }
@@ -1365,7 +1365,7 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_ActivateIdentity: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_ActivateIdentity: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

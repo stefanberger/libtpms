@@ -67,7 +67,7 @@
 
 void TPM_DelegatePublic_Init(TPM_DELEGATE_PUBLIC *tpm_delegate_public)
 {
-    printf(" TPM_DelegatePublic_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DelegatePublic_Init:\n");
     tpm_delegate_public->rowLabel = 0;
     TPM_PCRInfoShort_Init(&(tpm_delegate_public->pcrInfo));
     TPM_Delegations_Init(&(tpm_delegate_public->permissions));
@@ -91,7 +91,7 @@ TPM_RESULT TPM_DelegatePublic_Load(TPM_DELEGATE_PUBLIC *tpm_delegate_public,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_DelegatePublic_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DelegatePublic_Load:\n");
     /* check the tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELEGATE_PUBLIC, stream, stream_size);
@@ -130,7 +130,7 @@ TPM_RESULT TPM_DelegatePublic_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_DelegatePublic_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DelegatePublic_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELEGATE_PUBLIC);
@@ -170,7 +170,7 @@ TPM_RESULT TPM_DelegatePublic_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DelegatePublic_Delete(TPM_DELEGATE_PUBLIC *tpm_delegate_public)
 {
-    printf(" TPM_DeleteDelegatePublic:\n");
+    TPMLIB_LogPrintf(" TPM_DeleteDelegatePublic:\n");
     if (tpm_delegate_public != NULL) {
 	TPM_PCRInfoShort_Delete(&(tpm_delegate_public->pcrInfo));
 	TPM_Delegations_Delete(&(tpm_delegate_public->permissions));
@@ -188,7 +188,7 @@ TPM_RESULT TPM_DelegatePublic_Copy(TPM_DELEGATE_PUBLIC *dest,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_DelegatePublic_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_DelegatePublic_Copy:\n");
     if (rc == 0) {
 	/* copy rowLabel */
 	dest->rowLabel = src->rowLabel;
@@ -219,7 +219,7 @@ TPM_RESULT TPM_DelegatePublic_Copy(TPM_DELEGATE_PUBLIC *dest,
 
 void TPM_DelegateSensitive_Init(TPM_DELEGATE_SENSITIVE *tpm_delegate_sensitive)
 {
-    printf(" TPM_DelegateSensitive_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateSensitive_Init:\n");
     TPM_Secret_Init(tpm_delegate_sensitive->authValue);
     return;
 }
@@ -239,7 +239,7 @@ TPM_RESULT TPM_DelegateSensitive_Load(TPM_DELEGATE_SENSITIVE *tpm_delegate_sensi
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_DelegateSensitive_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateSensitive_Load:\n");
     /* check the tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELEGATE_SENSITIVE, stream, stream_size);
@@ -262,7 +262,7 @@ TPM_RESULT TPM_DelegateSensitive_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_DelegateSensitive_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateSensitive_Store:\n");
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELEGATE_SENSITIVE);
     }
@@ -283,7 +283,7 @@ TPM_RESULT TPM_DelegateSensitive_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DelegateSensitive_Delete(TPM_DELEGATE_SENSITIVE *tpm_delegate_sensitive)
 {
-    printf(" TPM_DeleteDelegateSensitive:\n");
+    TPMLIB_LogPrintf(" TPM_DeleteDelegateSensitive:\n");
     if (tpm_delegate_sensitive != NULL) {
 	TPM_DelegateSensitive_Init(tpm_delegate_sensitive);
     }
@@ -304,7 +304,7 @@ TPM_RESULT TPM_DelegateSensitive_DecryptEncData(TPM_DELEGATE_SENSITIVE *tpm_dele
     unsigned char		*stream;		/* temp input stream */
     uint32_t			stream_size;
 
-    printf(" TPM_DelegateSensitive_DecryptEncData:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateSensitive_DecryptEncData:\n");
     s1 = NULL;						/* freed @1 */
     if (rc == 0) {
 	rc = TPM_SymmetricKeyData_Decrypt(&s1,		/* decrypted data */
@@ -335,7 +335,7 @@ TPM_RESULT TPM_DelegateSensitive_DecryptEncData(TPM_DELEGATE_SENSITIVE *tpm_dele
 
 void TPM_Delegations_Init(TPM_DELEGATIONS *tpm_delegations)
 {
-    printf(" TPM_Delegations_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Delegations_Init:\n");
     tpm_delegations->delegateType = TPM_DEL_KEY_BITS;	/* any legal value */
     tpm_delegations->per1 = 0;
     tpm_delegations->per2 = 0;
@@ -357,7 +357,7 @@ TPM_RESULT TPM_Delegations_Load(TPM_DELEGATIONS *tpm_delegations,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Delegations_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Delegations_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELEGATIONS, stream, stream_size);
@@ -378,26 +378,26 @@ TPM_RESULT TPM_Delegations_Load(TPM_DELEGATIONS *tpm_delegations,
     if (rc == 0) {
 	if (tpm_delegations->delegateType == TPM_DEL_OWNER_BITS) {
 	    if (tpm_delegations->per1 & ~TPM_DELEGATE_PER1_MASK) {
-		printf("TPM_Delegations_Load: Error, owner per1 %08x\n", tpm_delegations->per1);
+		TPMLIB_LogPrintf("TPM_Delegations_Load: Error, owner per1 %08x\n", tpm_delegations->per1);
 		rc = TPM_BAD_PARAMETER;
 	    }
 	    if (tpm_delegations->per2 & ~TPM_DELEGATE_PER2_MASK) {
-		printf("TPM_Delegations_Load: Error, owner per2 %08x\n", tpm_delegations->per2);
+		TPMLIB_LogPrintf("TPM_Delegations_Load: Error, owner per2 %08x\n", tpm_delegations->per2);
 		rc = TPM_BAD_PARAMETER;
 	    }
 	}
 	else if (tpm_delegations->delegateType == TPM_DEL_KEY_BITS) {
 	    if (tpm_delegations->per1 & ~TPM_KEY_DELEGATE_PER1_MASK) {
-		printf("TPM_Delegations_Load: Error, key per1 %08x\n", tpm_delegations->per1);
+		TPMLIB_LogPrintf("TPM_Delegations_Load: Error, key per1 %08x\n", tpm_delegations->per1);
 		rc = TPM_BAD_PARAMETER;
 	    }
 	    if (tpm_delegations->per2 & ~TPM_KEY_DELEGATE_PER2_MASK) {
-		printf("TPM_Delegations_Load: Error, key per2 %08x\n", tpm_delegations->per2);
+		TPMLIB_LogPrintf("TPM_Delegations_Load: Error, key per2 %08x\n", tpm_delegations->per2);
 		rc = TPM_BAD_PARAMETER;
 	    }
 	}
 	else {
-	    printf("TPM_Delegations_Load: Error, delegateType %08x\n",
+	    TPMLIB_LogPrintf("TPM_Delegations_Load: Error, delegateType %08x\n",
 		   tpm_delegations->delegateType);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -416,7 +416,7 @@ TPM_RESULT TPM_Delegations_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_Delegations_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Delegations_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELEGATIONS);
@@ -447,7 +447,7 @@ TPM_RESULT TPM_Delegations_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_Delegations_Delete(TPM_DELEGATIONS *tpm_delegations)
 {
-    printf(" TPM_Delegations_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_Delegations_Delete:\n");
     if (tpm_delegations != NULL) {
 	TPM_Delegations_Init(tpm_delegations);
     }
@@ -477,11 +477,11 @@ TPM_RESULT TPM_Delegations_CheckPermissionDelegation(TPM_DELEGATIONS *newDelegat
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Delegations_CheckPermissionDelegation:\n");
+    TPMLIB_LogPrintf(" TPM_Delegations_CheckPermissionDelegation:\n");
     /* check per1 */
     if (rc == 0) {
 	if (newDelegations->per1 & ~currentDelegations->per1) {
-	    printf("TPM_Delegations_CheckPermissionDelegation: Error, "
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckPermissionDelegation: Error, "
 		   "new per1 %08x current per1 %08x\n",
 		   newDelegations->per1, currentDelegations->per1);
 	    rc = TPM_AUTHFAIL;
@@ -490,7 +490,7 @@ TPM_RESULT TPM_Delegations_CheckPermissionDelegation(TPM_DELEGATIONS *newDelegat
     /* check per2 */
     if (rc == 0) {
 	if (newDelegations->per2 & ~currentDelegations->per2) {
-	    printf("TPM_Delegations_CheckPermissionDelegation: Error, "
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckPermissionDelegation: Error, "
 		   "new per1 %08x current per1 %08x\n",
 		   newDelegations->per1, currentDelegations->per1);
 	    rc = TPM_AUTHFAIL;
@@ -515,7 +515,7 @@ TPM_RESULT TPM_Delegations_CheckPermission(tpm_state_t *tpm_state,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Delegations_CheckPermission: ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_Delegations_CheckPermission: ordinal %08x\n", ordinal);
     if (rc == 0) {
 	switch (entityType) {
 	  case TPM_ET_KEYHANDLE:
@@ -525,7 +525,7 @@ TPM_RESULT TPM_Delegations_CheckPermission(tpm_state_t *tpm_state,
 	    rc = TPM_Delegations_CheckOwnerPermission(&(delegatePublic->permissions), ordinal);
 	    break;
 	  default:
-	    printf("TPM_Delegations_CheckPermission: Error, "
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckPermission: Error, "
 		   "DSAP session does not support entity type %02x\n",
 		   entityType);
 	    rc = TPM_AUTHFAIL;
@@ -552,11 +552,11 @@ TPM_RESULT TPM_Delegations_CheckOwnerPermission(TPM_DELEGATIONS *tpm_delegations
     uint16_t	ownerPermissionBlock;		/* 0:unused, 1:per1 2:per2 */
     uint32_t	ownerPermissionPosition;	/* owner permission bit position */
 
-    printf(" TPM_Delegations_CheckOwnerPermission: ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_Delegations_CheckOwnerPermission: ordinal %08x\n", ordinal);
     /* check that the TPM_DELEGATIONS structure is the correct type */
     if (rc == 0) {
 	if (tpm_delegations->delegateType != TPM_DEL_OWNER_BITS) {
-	    printf("TPM_Delegations_CheckOwnerPermission: Error,"
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckOwnerPermission: Error,"
 		   "Ordinal requires owner auth but delegateType is %08x\n",
 		   tpm_delegations->delegateType);
 	    rc = TPM_AUTHFAIL;
@@ -570,25 +570,25 @@ TPM_RESULT TPM_Delegations_CheckOwnerPermission(TPM_DELEGATIONS *tpm_delegations
     }
     /* check that the permission bit is set in the TPM_DELEGATIONS bit map */
     if (rc == 0) {
-	printf("  TPM_Delegations_CheckOwnerPermission: block %u position %u\n",
+	TPMLIB_LogPrintf("  TPM_Delegations_CheckOwnerPermission: block %u position %u\n",
 	       ownerPermissionBlock, ownerPermissionPosition);
 	switch (ownerPermissionBlock) {
 	  case 1:	/* per1 */
 	    if (!(tpm_delegations->per1 & (1 << ownerPermissionPosition))) {
-		printf("TPM_Delegations_CheckOwnerPermission: Error, per1 %08x\n",
+		TPMLIB_LogPrintf("TPM_Delegations_CheckOwnerPermission: Error, per1 %08x\n",
 		       tpm_delegations->per1);
 		rc = TPM_AUTHFAIL;
 	    }
 	    break;
 	  case 2:	/* per2 */
 	    if (!(tpm_delegations->per2 & (1 << ownerPermissionPosition))) {
-		printf("TPM_Delegations_CheckOwnerPermission: Error, per2 %08x\n",
+		TPMLIB_LogPrintf("TPM_Delegations_CheckOwnerPermission: Error, per2 %08x\n",
 		       tpm_delegations->per2);
 		rc = TPM_AUTHFAIL;
 	    }
 	    break;
 	  default:
-	    printf("TPM_Delegations_CheckOwnerPermission: Error, block not 1 or 2\n");
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckOwnerPermission: Error, block not 1 or 2\n");
 	    rc = TPM_AUTHFAIL;
 	    break;
 	}
@@ -607,11 +607,11 @@ TPM_RESULT TPM_Delegations_CheckKeyPermission(TPM_DELEGATIONS *tpm_delegations,
     uint16_t	keyPermissionBlock;		/* 0:unused, 1:per1 2:per2 */
     uint32_t	keyPermissionPosition;		/* key permission bit position */
 
-    printf(" TPM_Delegations_CheckKeyPermission: ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_Delegations_CheckKeyPermission: ordinal %08x\n", ordinal);
     /* check that the TPM_DELEGATIONS structure is the correct type */
     if (rc == 0) {
 	if (tpm_delegations->delegateType != TPM_DEL_KEY_BITS) {
-	    printf("TPM_Delegations_CheckKeyPermission: Error,"
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckKeyPermission: Error,"
 		   "Ordinal requires key auth but delegateType is %08x\n",
 		   tpm_delegations->delegateType);
 	    rc = TPM_AUTHFAIL;
@@ -625,25 +625,25 @@ TPM_RESULT TPM_Delegations_CheckKeyPermission(TPM_DELEGATIONS *tpm_delegations,
     }
     /* check that the permission bit is set in the TPM_DELEGATIONS bit map */
     if (rc == 0) {
-	printf("  TPM_Delegations_CheckKeyPermission: block %u position %u\n",
+	TPMLIB_LogPrintf("  TPM_Delegations_CheckKeyPermission: block %u position %u\n",
 	       keyPermissionBlock, keyPermissionPosition);
 	switch (keyPermissionBlock) {
 	  case 1:	/* per1 */
 	    if (!(tpm_delegations->per1 & (1 << keyPermissionPosition))) {
-		printf("TPM_Delegations_CheckKeyPermission: Error, per1 %08x\n",
+		TPMLIB_LogPrintf("TPM_Delegations_CheckKeyPermission: Error, per1 %08x\n",
 		       tpm_delegations->per1);
 		rc = TPM_AUTHFAIL;
 	    }
 	    break;
 	  case 2:	/* per2 */
 	    if (!(tpm_delegations->per2 & (1 << keyPermissionPosition))) {
-		printf("TPM_Delegations_CheckKeyPermission: Error, per2 %08x\n",
+		TPMLIB_LogPrintf("TPM_Delegations_CheckKeyPermission: Error, per2 %08x\n",
 		       tpm_delegations->per2);
 		rc = TPM_AUTHFAIL;
 	    }
 	    break;
 	  default:
-	    printf("TPM_Delegations_CheckKeyPermission: Error, block not 1 or 2\n");
+	    TPMLIB_LogPrintf("TPM_Delegations_CheckKeyPermission: Error, block not 1 or 2\n");
 	    rc = TPM_AUTHFAIL;
 	    break;
 	}
@@ -664,7 +664,7 @@ TPM_RESULT TPM_Delegations_CheckKeyPermission(TPM_DELEGATIONS *tpm_delegations,
 
 void TPM_DelegateOwnerBlob_Init(TPM_DELEGATE_OWNER_BLOB *tpm_delegate_owner_blob)
 {
-    printf(" TPM_DelegateOwnerBlob_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateOwnerBlob_Init:\n");
     TPM_DelegatePublic_Init(&(tpm_delegate_owner_blob->pub));
     TPM_Digest_Init(tpm_delegate_owner_blob->integrityDigest);
     TPM_SizedBuffer_Init(&(tpm_delegate_owner_blob->additionalArea));
@@ -688,7 +688,7 @@ TPM_RESULT TPM_DelegateOwnerBlob_Load(TPM_DELEGATE_OWNER_BLOB *tpm_delegate_owne
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateOwnerBlob_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateOwnerBlob_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELEGATE_OWNER_BLOB, stream, stream_size);
@@ -700,7 +700,7 @@ TPM_RESULT TPM_DelegateOwnerBlob_Load(TPM_DELEGATE_OWNER_BLOB *tpm_delegate_owne
     /* check that permissions are owner */
     if (rc == 0) {
 	if (tpm_delegate_owner_blob->pub.permissions.delegateType != TPM_DEL_OWNER_BITS) {
-	    printf("TPM_DelegateOwnerBlob_Load: Error, delegateType expected %08x found %08x\n",
+	    TPMLIB_LogPrintf("TPM_DelegateOwnerBlob_Load: Error, delegateType expected %08x found %08x\n",
 		   TPM_DEL_OWNER_BITS, tpm_delegate_owner_blob->pub.permissions.delegateType);
 	    rc = TPM_INVALID_STRUCTURE;
 	}
@@ -731,7 +731,7 @@ TPM_RESULT TPM_DelegateOwnerBlob_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateOwnerBlob_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateOwnerBlob_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELEGATE_OWNER_BLOB);
@@ -766,7 +766,7 @@ TPM_RESULT TPM_DelegateOwnerBlob_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DelegateOwnerBlob_Delete(TPM_DELEGATE_OWNER_BLOB *tpm_delegate_owner_blob)
 {
-    printf(" TPM_DelegateOwnerBlob_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateOwnerBlob_Delete:\n");
     if (tpm_delegate_owner_blob != NULL) {
 	TPM_DelegatePublic_Delete(&(tpm_delegate_owner_blob->pub));
 	TPM_SizedBuffer_Delete(&(tpm_delegate_owner_blob->additionalArea));
@@ -789,7 +789,7 @@ void TPM_DelegateOwnerBlob_Delete(TPM_DELEGATE_OWNER_BLOB *tpm_delegate_owner_bl
 
 void TPM_DelegateKeyBlob_Init(TPM_DELEGATE_KEY_BLOB *tpm_delegate_key_blob)
 {
-    printf(" TPM_DelegateKeyBlob_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateKeyBlob_Init:\n");
     TPM_DelegatePublic_Init(&(tpm_delegate_key_blob->pub));
     TPM_Digest_Init(tpm_delegate_key_blob->integrityDigest);
     TPM_Digest_Init(tpm_delegate_key_blob->pubKeyDigest);
@@ -814,7 +814,7 @@ TPM_RESULT TPM_DelegateKeyBlob_Load(TPM_DELEGATE_KEY_BLOB *tpm_delegate_key_blob
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateKeyBlob_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateKeyBlob_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELG_KEY_BLOB, stream, stream_size);
@@ -826,7 +826,7 @@ TPM_RESULT TPM_DelegateKeyBlob_Load(TPM_DELEGATE_KEY_BLOB *tpm_delegate_key_blob
     /* check that permissions are key */
     if (rc == 0) {
 	if (tpm_delegate_key_blob->pub.permissions.delegateType != TPM_DEL_KEY_BITS) {
-	    printf("TPM_DelegateKeyBlob_Load: Error, delegateType expected %08x found %08x\n",
+	    TPMLIB_LogPrintf("TPM_DelegateKeyBlob_Load: Error, delegateType expected %08x found %08x\n",
 		   TPM_DEL_KEY_BITS, tpm_delegate_key_blob->pub.permissions.delegateType);
 	    rc = TPM_INVALID_STRUCTURE;
 	}
@@ -861,7 +861,7 @@ TPM_RESULT TPM_DelegateKeyBlob_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateKeyBlob_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateKeyBlob_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELG_KEY_BLOB);
@@ -900,7 +900,7 @@ TPM_RESULT TPM_DelegateKeyBlob_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DelegateKeyBlob_Delete(TPM_DELEGATE_KEY_BLOB *tpm_delegate_key_blob)
 {
-    printf(" TPM_DelegateKeyBlob_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateKeyBlob_Delete:\n");
     if (tpm_delegate_key_blob != NULL) {
 	TPM_DelegatePublic_Delete(&(tpm_delegate_key_blob->pub));
 	TPM_SizedBuffer_Delete(&(tpm_delegate_key_blob->additionalArea));
@@ -925,7 +925,7 @@ void TPM_FamilyTable_Init(TPM_FAMILY_TABLE *tpm_family_table)
 {
     size_t i;
 
-    printf(" TPM_FamilyTable_Init: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_Init: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
     for (i = 0 ; i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN ; i++) {
 	TPM_FamilyTableEntry_Init(&(tpm_family_table->famTableRow[i]));
     }
@@ -949,7 +949,7 @@ TPM_RESULT TPM_FamilyTable_Load(TPM_FAMILY_TABLE *tpm_family_table,
     TPM_RESULT	rc = 0;
     size_t	i;
 
-    printf(" TPM_FamilyTable_Load: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_Load: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN) ; i++) {
 	rc = TPM_FamilyTableEntry_Load(&(tpm_family_table->famTableRow[i]),
 				       stream,
@@ -973,7 +973,7 @@ TPM_RESULT TPM_FamilyTable_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
     size_t i;
 
-    printf(" TPM_FamilyTable_Store: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_Store: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN) ; i++) {
 	rc = TPM_FamilyTableEntry_Store(sbuffer,
 					&(tpm_family_table->famTableRow[i]), store_tag);
@@ -994,7 +994,7 @@ void TPM_FamilyTable_Delete(TPM_FAMILY_TABLE *tpm_family_table)
 {
     size_t i;
 
-    printf(" TPM_FamilyTable_Delete: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_Delete: Qty %u\n", TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
     if (tpm_family_table != NULL) {
 	for (i = 0 ; i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN ; i++) {
 	    TPM_FamilyTableEntry_Delete(&(tpm_family_table->famTableRow[i]));
@@ -1020,7 +1020,7 @@ TPM_RESULT TPM_FamilyTable_GetEntry(TPM_FAMILY_TABLE_ENTRY **tpm_family_table_en
     size_t	i;
     TPM_BOOL	found;
 
-    printf(" TPM_FamilyTable_GetEntry: familyID %08x\n", familyID);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_GetEntry: familyID %08x\n", familyID);
     for (i = 0, found = FALSE ; (i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN) && !found ; i++) {
 	if (tpm_family_table->famTableRow[i].valid &&
 	    (tpm_family_table->famTableRow[i].familyID == familyID)) {	/* found */
@@ -1029,7 +1029,7 @@ TPM_RESULT TPM_FamilyTable_GetEntry(TPM_FAMILY_TABLE_ENTRY **tpm_family_table_en
 	}
     }
     if (!found) {
-	printf("TPM_FamilyTable_GetEntry: Error, familyID %08x not found\n", familyID);
+	TPMLIB_LogPrintf("TPM_FamilyTable_GetEntry: Error, familyID %08x not found\n", familyID);
 	rc = TPM_BADINDEX;
     }
     return rc;
@@ -1052,7 +1052,7 @@ TPM_RESULT TPM_FamilyTable_GetEnabledEntry(TPM_FAMILY_TABLE_ENTRY **tpm_family_t
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_FamilyTable_GetEnabledEntry: familyID %08x\n", familyID);
+    TPMLIB_LogPrintf(" TPM_FamilyTable_GetEnabledEntry: familyID %08x\n", familyID);
     if (rc == 0) {
 	rc = TPM_FamilyTable_GetEntry(tpm_family_table_entry,
 				      tpm_family_table,
@@ -1060,7 +1060,7 @@ TPM_RESULT TPM_FamilyTable_GetEnabledEntry(TPM_FAMILY_TABLE_ENTRY **tpm_family_t
     }
     if (rc == 0) {
 	if (!((*tpm_family_table_entry)->flags & TPM_FAMFLAG_ENABLED)) {
-	    printf("TPM_FamilyTable_GetEnabledEntry: Error, family %08x disabled\n", familyID);
+	    TPMLIB_LogPrintf("TPM_FamilyTable_GetEnabledEntry: Error, family %08x disabled\n", familyID);
 	    rc = TPM_DISABLED_CMD;
 	}
     }
@@ -1080,17 +1080,17 @@ TPM_RESULT TPM_FamilyTable_IsSpace(TPM_FAMILY_TABLE_ENTRY **tpm_family_table_ent
     TPM_RESULT	rc = 0;
     
     
-    printf(" TPM_FamilyTable_IsSpace:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTable_IsSpace:\n");
     for (i = 0, isSpace = FALSE ; i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN; i++) {
 	*tpm_family_table_entry = &(tpm_family_table->famTableRow[i]);
 	if (!((*tpm_family_table_entry)->valid)) {
-	    printf("  TPM_FamilyTable_IsSpace: Found space at %lu\n", (unsigned long)i);
+	    TPMLIB_LogPrintf("  TPM_FamilyTable_IsSpace: Found space at %lu\n", (unsigned long)i);
 	    isSpace = TRUE;
 	    break;
 	}	    
     }
     if (!isSpace) {
-	printf("  TPM_FamilyTable_IsSpace: Error, no space found\n");
+	TPMLIB_LogPrintf("  TPM_FamilyTable_IsSpace: Error, no space found\n");
 	rc = TPM_RESOURCES;
     }
     return rc;
@@ -1111,13 +1111,13 @@ TPM_RESULT TPM_FamilyTable_StoreValid(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     size_t	i;
 
-    printf(" TPM_FamilyTable_StoreValid: \n");
+    TPMLIB_LogPrintf(" TPM_FamilyTable_StoreValid: \n");
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_FAMILY_TABLE_ENTRY_MIN) ; i++) {
 	/* store only the valid rows */
 	if (tpm_family_table->famTableRow[i].valid) {
 	    /* store only the publicly visible members */
-	    printf("  TPM_FamilyTable_StoreValid: Entry %lu is valid\n", (unsigned long)i);
-	    printf("  TPM_FamilyTable_StoreValid: Entry family ID is %08x\n",
+	    TPMLIB_LogPrintf("  TPM_FamilyTable_StoreValid: Entry %lu is valid\n", (unsigned long)i);
+	    TPMLIB_LogPrintf("  TPM_FamilyTable_StoreValid: Entry family ID is %08x\n",
 		   tpm_family_table->famTableRow[i].familyID);
 	    rc = TPM_FamilyTableEntry_StorePublic(sbuffer,
 						  &(tpm_family_table->famTableRow[i]), store_tag);
@@ -1139,7 +1139,7 @@ TPM_RESULT TPM_FamilyTable_StoreValid(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_FamilyTableEntry_Init(TPM_FAMILY_TABLE_ENTRY *tpm_family_table_entry)
 {
-    printf(" TPM_FamilyTableEntry_Init:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTableEntry_Init:\n");
     tpm_family_table_entry->familyLabel = 0;
     tpm_family_table_entry->familyID = 0;
     tpm_family_table_entry->verificationCount = 0;
@@ -1164,7 +1164,7 @@ TPM_RESULT TPM_FamilyTableEntry_Load(TPM_FAMILY_TABLE_ENTRY *tpm_family_table_en
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_FamilyTableEntry_Load:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTableEntry_Load:\n");
     /* load tag */
     /* the tag is not serialized when storing TPM_PERMANENT_DATA, to save NV space */
     /* load familyLabel */
@@ -1188,7 +1188,7 @@ TPM_RESULT TPM_FamilyTableEntry_Load(TPM_FAMILY_TABLE_ENTRY *tpm_family_table_en
 	rc = TPM_LoadBool(&(tpm_family_table_entry->valid), stream, stream_size);
     }
     if (rc == 0) {
-	printf("  TPM_FamilyTableEntry_Load: label %02x familyID %08x valid %u\n",
+	TPMLIB_LogPrintf("  TPM_FamilyTableEntry_Load: label %02x familyID %08x valid %u\n",
 	       tpm_family_table_entry->familyLabel,
 	       tpm_family_table_entry->familyID,
 	       tpm_family_table_entry->valid);
@@ -1210,7 +1210,7 @@ TPM_RESULT TPM_FamilyTableEntry_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_FamilyTableEntry_Store:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTableEntry_Store:\n");
     /* store public, visible members */
     if (rc == 0) {
 	rc = TPM_FamilyTableEntry_StorePublic(sbuffer, tpm_family_table_entry, store_tag); 
@@ -1237,7 +1237,7 @@ TPM_RESULT TPM_FamilyTableEntry_StorePublic(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_FamilyTableEntry_StorePublic:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTableEntry_StorePublic:\n");
     /* store tag */
     if ((rc == 0) && (store_tag)) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_FAMILY_TABLE_ENTRY); 
@@ -1273,7 +1273,7 @@ TPM_RESULT TPM_FamilyTableEntry_StorePublic(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_FamilyTableEntry_Delete(TPM_FAMILY_TABLE_ENTRY *tpm_family_table_entry)
 {
-    printf(" TPM_FamilyTableEntry_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_FamilyTableEntry_Delete:\n");
     if (tpm_family_table_entry != NULL) {
 	TPM_FamilyTableEntry_Init(tpm_family_table_entry);
     }
@@ -1295,7 +1295,7 @@ void TPM_DelegateTable_Init(TPM_DELEGATE_TABLE *tpm_delegate_table)
 {
     size_t i;
 
-    printf(" TPM_DelegateTable_Init: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_DelegateTable_Init: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
     for (i = 0 ; i < TPM_NUM_DELEGATE_TABLE_ENTRY_MIN ; i++) {
 	TPM_DelegateTableRow_Init(&(tpm_delegate_table->delRow[i]));
     }
@@ -1319,7 +1319,7 @@ TPM_RESULT TPM_DelegateTable_Load(TPM_DELEGATE_TABLE *tpm_delegate_table,
     TPM_RESULT	rc = 0;
     size_t	i;
 
-    printf(" TPM_DelegateTable_Load: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_DelegateTable_Load: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_DELEGATE_TABLE_ENTRY_MIN)  ; i++) {
 	rc = TPM_DelegateTableRow_Load(&(tpm_delegate_table->delRow[i]),
 					 stream,
@@ -1340,7 +1340,7 @@ TPM_RESULT TPM_DelegateTable_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
     size_t i;
 
-    printf(" TPM_DelegateTable_Store: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_DelegateTable_Store: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_DELEGATE_TABLE_ENTRY_MIN) ; i++) {
 	rc = TPM_DelegateTableRow_Store(sbuffer, &(tpm_delegate_table->delRow[i]));
     }
@@ -1360,7 +1360,7 @@ void TPM_DelegateTable_Delete(TPM_DELEGATE_TABLE *tpm_delegate_table)
 {
     size_t i;
 
-    printf(" TPM_DelegateTable_Delete: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
+    TPMLIB_LogPrintf(" TPM_DelegateTable_Delete: Qty %u\n", TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
     if (tpm_delegate_table != NULL) {
 	for (i = 0 ; i < TPM_NUM_DELEGATE_TABLE_ENTRY_MIN ; i++) {
 	    TPM_DelegateTableRow_Delete(&(tpm_delegate_table->delRow[i]));
@@ -1383,13 +1383,13 @@ TPM_RESULT TPM_DelegateTable_StoreValid(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     uint32_t	i;
 
-    printf(" TPM_DelegateTable_StoreValid:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateTable_StoreValid:\n");
     for (i = 0 ; (rc == 0) && (i < TPM_NUM_DELEGATE_TABLE_ENTRY_MIN) ; i++) {
 	/* store only the valid rows */
 	if (tpm_delegate_table->delRow[i].valid) {
 	    /* a. Write the TPM_DELEGATE_INDEX to delegateTable */
-	    printf("  TPM_DelegateTable_StoreValid: Entry %u is valid\n", i);
-	    printf("  TPM_DelegateTable_StoreValid: Entry family ID is %08x\n",
+	    TPMLIB_LogPrintf("  TPM_DelegateTable_StoreValid: Entry %u is valid\n", i);
+	    TPMLIB_LogPrintf("  TPM_DelegateTable_StoreValid: Entry family ID is %08x\n",
 		   tpm_delegate_table->delRow[i].pub.familyID);
 	    if (rc == 0) {
 		rc = TPM_Sbuffer_Append32(sbuffer, i);
@@ -1414,10 +1414,10 @@ TPM_RESULT TPM_DelegateTable_GetRow(TPM_DELEGATE_TABLE_ROW **delegateTableRow,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_DelegateTable_GetRow: index %u\n", rowIndex);
+    TPMLIB_LogPrintf(" TPM_DelegateTable_GetRow: index %u\n", rowIndex);
     if (rc == 0) {
 	if (rowIndex >= TPM_NUM_DELEGATE_TABLE_ENTRY_MIN) {
-	    printf("TPM_DelegateTable_GetRow: index %u out of range\n", rowIndex);
+	    TPMLIB_LogPrintf("TPM_DelegateTable_GetRow: index %u out of range\n", rowIndex);
 	    rc = TPM_BADINDEX;
 	}
     }
@@ -1447,7 +1447,7 @@ TPM_RESULT TPM_DelegateTable_GetValidRow(TPM_DELEGATE_TABLE_ROW **delegateTableR
     if (rc == 0) {
 	*delegateTableRow = &(tpm_delegate_table->delRow[rowIndex]);
 	if (!(*delegateTableRow)->valid) {
-	    printf("TPM_DelegateTable_GetValidRow: index %u invalid\n", rowIndex);
+	    TPMLIB_LogPrintf("TPM_DelegateTable_GetValidRow: index %u invalid\n", rowIndex);
 	    rc = TPM_BADINDEX;
 	}
     }
@@ -1467,7 +1467,7 @@ TPM_RESULT TPM_DelegateTable_GetValidRow(TPM_DELEGATE_TABLE_ROW **delegateTableR
 
 void TPM_DelegateTableRow_Init(TPM_DELEGATE_TABLE_ROW *tpm_delegate_table_row)
 {
-    printf(" TPM_DelegateTableRow_Init:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateTableRow_Init:\n");
     TPM_DelegatePublic_Init(&(tpm_delegate_table_row->pub));
     TPM_Secret_Init(tpm_delegate_table_row->authValue);
     tpm_delegate_table_row->valid = FALSE;
@@ -1490,7 +1490,7 @@ TPM_RESULT TPM_DelegateTableRow_Load(TPM_DELEGATE_TABLE_ROW *tpm_delegate_table_
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateTableRow_Load:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateTableRow_Load:\n");
     /* check the tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_DELEGATE_TABLE_ROW, stream, stream_size);
@@ -1521,7 +1521,7 @@ TPM_RESULT TPM_DelegateTableRow_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_DelegateTableRow_Store:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateTableRow_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_DELEGATE_TABLE_ROW);
@@ -1552,7 +1552,7 @@ TPM_RESULT TPM_DelegateTableRow_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_DelegateTableRow_Delete(TPM_DELEGATE_TABLE_ROW *tpm_delegate_table_row)
 {
-    printf(" TPM_DelegateTableRow_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_DelegateTableRow_Delete:\n");
     if (tpm_delegate_table_row != NULL) {
 	TPM_DelegatePublic_Delete(&(tpm_delegate_table_row->pub));
 	TPM_DelegateTableRow_Init(tpm_delegate_table_row);
@@ -1642,7 +1642,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     TPM_DIGEST			outParamDigest;
     TPM_STORE_BUFFER		retData;	/* Returned data */
 
-    printf("TPM_Process_DelegateManage: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&opData);		/* freed @1 */
     TPM_Sbuffer_Init(&retData);			/* freed @2 */
     /*
@@ -1656,12 +1656,12 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }
     /* get opCode parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateManage: familyID %08x\n", familyID);
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: familyID %08x\n", familyID);
 	returnCode = TPM_Load32(&opCode, &command, &paramSize);
     }
     /* get opData parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateManage: opCode %u\n", opCode);
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: opCode %u\n", opCode);
 	returnCode = TPM_SizedBuffer_Load(&opData, &command, &paramSize);
     }
     /* save the ending point of inParam's for authorization and auditing */
@@ -1697,7 +1697,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateManage: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1714,7 +1714,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
        TPM_BADINDEX if not found */
     /* b. Set FR, a TPM_FAMILY_TABLE_ENTRY, to TPM_FAMILY_TABLE. famTableRow[familyRow] */
     if ((returnCode == TPM_SUCCESS) && (opCode != TPM_FAMILY_CREATE)) {
-	printf("TPM_Process_DelegateManage: Not creating, get entry for familyID %08x\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Not creating, get entry for familyID %08x\n",
 	       familyID);
 	returnCode = TPM_FamilyTable_GetEntry(&familyRow,
 					      &(tpm_state->tpm_permanent_data.familyTable),
@@ -1765,7 +1765,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 		   parameter, return TPM_DELEGATE_FAMILY on error */
 		if (returnCode == TPM_SUCCESS) {
 		    if (delegatePublic->familyID != familyID) {
-			printf("TPM_Process_DelegateManage: Error, familyID %08x should be %08x\n",
+			TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, familyID %08x should be %08x\n",
 			       familyID, delegatePublic->familyID);
 			returnCode = TPM_DELEGATE_FAMILY;
 		    }
@@ -1777,7 +1777,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH1_COMMAND)) {
 	/* a. If TPM_PERMANENT_DATA -> ownerAuth is valid, return TPM_AUTHFAIL */
 	if (tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_Process_DelegateManage: Error, owner installed but no authorization\n");
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, owner installed but no authorization\n");
 	    returnCode = TPM_AUTHFAIL ;
 	}
     }
@@ -1785,7 +1785,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
        TPM_DELEGATE_LOCK */
     if ((returnCode == TPM_SUCCESS) && (tag != TPM_TAG_RQU_AUTH1_COMMAND)) {
 	if ((opCode != TPM_FAMILY_CREATE) && (familyRow->flags & TPM_DELEGATE_ADMIN_LOCK)) {
-	    printf("TPM_Process_DelegateManage: Error, row locked\n");
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, row locked\n");
 	    returnCode = TPM_DELEGATE_LOCK;
 	}
     }
@@ -1797,7 +1797,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	nv1++;
 	/* iii. If NV1 > TPM_MAX_NV_WRITE_NOOWNER return TPM_MAXNVWRITES */
 	if (nv1 > TPM_MAX_NV_WRITE_NOOWNER) {
-	    printf("TPM_Process_DelegateManage: Error, max NV writes %d w/o owner reached\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, max NV writes %d w/o owner reached\n",
 		   tpm_state->tpm_permanent_data.noOwnerNVWrite);
 	    returnCode = TPM_MAXNVWRITES;
 	}
@@ -1810,7 +1810,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }	
     /* 4. The TPM invalidates sessions */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateManage: Invalidate sessions\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Invalidate sessions\n");
 	/* a. MUST invalidate all DSAP sessions */
 	/* b. MUST invalidate all OSAP sessions associated with the delegation table */
 	/* d. MAY invalidate any other session */
@@ -1824,7 +1824,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
       5. If opCode == TPM_FAMILY_CREATE
     */
     if ((returnCode == TPM_SUCCESS) && (opCode == TPM_FAMILY_CREATE)) {
-	printf("TPM_Process_DelegateManage: Processing TPM_FAMILY_CREATE\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Processing TPM_FAMILY_CREATE\n");
 	/* a. Validate that sufficient space exists within the TPM to store an additional family and
 	   map F2 to the newly allocated space. */
 	if (returnCode == TPM_SUCCESS) {
@@ -1835,7 +1835,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    /* i. If opDataSize != sizeof(TPM_FAMILY_LABEL) return TPM_BAD_PARAM_SIZE */
 	    if (opData.size != sizeof(TPM_FAMILY_LABEL)) {
-		printf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
+		TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
 		returnCode = TPM_BAD_PARAM_SIZE;
 	    }
 	}
@@ -1860,7 +1860,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	    familyRow->flags &= ~TPM_DELEGATE_ADMIN_LOCK;
 	    /* i. Set retDataSize = 4 */
 	    /* j. Set retData = F2 -> familyID */
-	    printf("TPM_Process_DelegateManage: Created familyID %08x\n", familyRow->familyID);
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Created familyID %08x\n", familyRow->familyID);
 	    familyRow->valid = TRUE;
 	    returnCode = TPM_Sbuffer_Append32(&retData, familyRow->familyID);
 	}
@@ -1876,17 +1876,17 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }
     /* 7. If opCode == TPM_FAMILY_ADMIN */
     if ((returnCode == TPM_SUCCESS) && (opCode == TPM_FAMILY_ADMIN)) {
-	printf("TPM_Process_DelegateManage: Processing TPM_FAMILY_ADMIN\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Processing TPM_FAMILY_ADMIN\n");
 	/* a. Validate that opDataSize == 1, and that opData is a Boolean value. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (opData.size != sizeof(TPM_BOOL)) {
-		printf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
+		TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
 		returnCode = TPM_BAD_PARAM_SIZE;
 	    }
 	}
 	/* b. Set (FR -> flags -> TPM_DELEGATE_ADMIN_LOCK) = opData */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_DelegateManage: TPM_FAMILY_ADMIN opData %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: TPM_FAMILY_ADMIN opData %02x\n",
 		   opData.buffer[0]);
 	    if (*(TPM_BOOL *)(opData.buffer)) {
 		familyRow->flags |= TPM_DELEGATE_ADMIN_LOCK;
@@ -1894,7 +1894,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	    else {
 		familyRow->flags &= ~TPM_DELEGATE_ADMIN_LOCK;
 	    }
-	    printf("TPM_Process_DelegateManage: new TPM_FAMILY_TABLE_ENTRY.flags %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: new TPM_FAMILY_TABLE_ENTRY.flags %08x\n",
 		   familyRow->flags);
 	    /* c. Set retDataSize = 0 */
 	    /* NOTE Done by TPM_Sbuffer_Init() */
@@ -1906,17 +1906,17 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }
     /* 8. else If opflag == TPM_FAMILY_ENABLE */
     if ((returnCode == TPM_SUCCESS) && (opCode == TPM_FAMILY_ENABLE)) {
-	printf("TPM_Process_DelegateManage: Processing TPM_FAMILY_ENABLE\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Processing TPM_FAMILY_ENABLE\n");
 	/* a. Validate that opDataSize == 1, and that opData is a Boolean value. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (opData.size != sizeof(TPM_BOOL)) {
-		printf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
+		TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, invalid opDataSize %u\n", opData.size);
 		returnCode = TPM_BAD_PARAM_SIZE;
 	    }
 	}
 	/* b. Set FR -> flags-> TPM_FAMFLAG_ENABLED = opData */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_DelegateManage: TPM_FAMILY_ENABLE opData %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: TPM_FAMILY_ENABLE opData %02x\n",
 		   opData.buffer[0]);
 	    if (*(TPM_BOOL *)(opData.buffer)) {
 		familyRow->flags |= TPM_FAMFLAG_ENABLED;	
@@ -1924,7 +1924,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	    else {
 		familyRow->flags &= ~TPM_FAMFLAG_ENABLED;
 	    }
-	    printf("TPM_Process_DelegateManage: new TPM_FAMILY_TABLE_ENTRY.flags %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: new TPM_FAMILY_TABLE_ENTRY.flags %08x\n",
 		   familyRow->flags);
 	    /* c. Set retDataSize = 0 */
 	    /* NOTE Done by TPM_Sbuffer_Init() */
@@ -1936,7 +1936,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     }
     /* 9. else If opflag == TPM_FAMILY_INVALIDATE */
     if ((returnCode == TPM_SUCCESS) && (opCode == TPM_FAMILY_INVALIDATE)) {
-	printf("TPM_Process_DelegateManage: Processing TPM_FAMILY_INVALIDATE\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Processing TPM_FAMILY_INVALIDATE\n");
 	/* a. Invalidate all data associated with familyRow */
 	/* i. All data is all information pointed to by FR */
 	/* ii. return TPM_SELFTEST_FAILED on failure */
@@ -1953,7 +1953,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
 	    (opCode != TPM_FAMILY_ADMIN) &&
 	    (opCode != TPM_FAMILY_ENABLE) &&
 	    (opCode != TPM_FAMILY_INVALIDATE)) {
-	    printf("TPM_Process_DelegateManage: Error, bad opCode %08x\n", opCode);
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: Error, bad opCode %08x\n", opCode);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -1961,7 +1961,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
        incremented value */
     if (returnCode == TPM_SUCCESS) {
 	if (writeAllNV && nv1Incremented) {
-	    printf("TPM_Process_DelegateManage: noOwnerNVWrite %u\n", nv1);
+	    TPMLIB_LogPrintf("TPM_Process_DelegateManage: noOwnerNVWrite %u\n", nv1);
 	    tpm_state->tpm_permanent_data.noOwnerNVWrite = nv1;
 	}
     }
@@ -1974,7 +1974,7 @@ TPM_RESULT TPM_Process_DelegateManage(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateManage: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateManage: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2105,7 +2105,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER		blobSbuffer;	/* The partially encrypted delegation information.
 						   */
 
-    printf("TPM_Process_DelegateCreateKeyDelegation: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Ordinal Entry\n");
     TPM_DelegatePublic_Init(&publicInfo);		/* freed @1 */
     TPM_DelegateSensitive_Init(&m1DelegateSensitive);	/* freed @2 */
     TPM_Sbuffer_Init(&delegateSensitive_sbuffer);	/* freed @3 */
@@ -2122,7 +2122,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get publicInfo parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateCreateKeyDelegation: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_DelegatePublic_Load(&publicInfo, &command, &paramSize);
     }
     /* get delAuth parameter */
@@ -2162,7 +2162,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateCreateKeyDelegation: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2220,7 +2220,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     /* 3. If the key authentication is in fact a delegation, then the TPM SHALL validate the command
        and parameters using Delegation authorisation, then */
     if ((returnCode == TPM_SUCCESS) && (auth_session_data->protocolID == TPM_PID_DSAP)) {
-	printf("TPM_Process_DelegateCreateKeyDelegation: Authentication is a delegation\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Authentication is a delegation\n");
 	/* get the TPM_DELEGATE_PUBLIC from the DSAP session */
 	if (returnCode == TPM_SUCCESS) {
 	    returnCode = TPM_AuthSessionData_GetDelegatePublic(&delegatePublic,
@@ -2230,7 +2230,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
 	   TPM_DELEGATE_FAMILY on error */
 	if (returnCode == TPM_SUCCESS) {
 	    if (publicInfo.familyID != delegatePublic->familyID) {
-		printf("TPM_Process_DelegateCreateKeyDelegation: Error, "
+		TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Error, "
 		       "familyID %u should be %u\n",
 		       publicInfo.familyID, delegatePublic->familyID);
 		returnCode = TPM_DELEGATE_FAMILY;
@@ -2240,7 +2240,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
 	   TPM_FAMFLAG_ENABLED is FALSE, return error TPM_DISABLED_CMD. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (!(familyRow->flags & TPM_FAMFLAG_ENABLED)) {
-		printf("TPM_Process_DelegateCreateKeyDelegation: Error, family %u disabled\n",
+		TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Error, family %u disabled\n",
 		       publicInfo.familyID);
 		returnCode = TPM_DISABLED_CMD;
 	    }
@@ -2256,7 +2256,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     /* 4. Check that publicInfo -> delegateType is TPM_DEL_KEY_BITS */
     if (returnCode == TPM_SUCCESS) {
 	if (publicInfo.permissions.delegateType	 != TPM_DEL_KEY_BITS) {
-	    printf("TPM_Process_DelegateCreateKeyDelegation: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Error, "
 		   "delegateType %08x not a key delegation\n",
 		   publicInfo.permissions.delegateType);
 	    returnCode = TPM_BAD_PARAMETER;
@@ -2296,7 +2296,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     }
     /* encrypt with delegate key */
     if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_DelegateCreateKeyDelegation: Encrypting TPM_DELEGATE_SENSITIVE\n");
+	    TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Encrypting TPM_DELEGATE_SENSITIVE\n");
 	    returnCode =
 		TPM_SymmetricKeyData_EncryptSbuffer(&(p1DelegateKeyBlob.sensitiveArea),
 						    &delegateSensitive_sbuffer,
@@ -2345,7 +2345,7 @@ TPM_RESULT TPM_Process_DelegateCreateKeyDelegation(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateCreateKeyDelegation: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateKeyDelegation: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2480,7 +2480,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER		blobSbuffer;	/* The partially encrypted delegation
 						   information. */
 
-    printf("TPM_Process_DelegateCreateOwnerDelegation: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Ordinal Entry\n");
     TPM_DelegatePublic_Init(&publicInfo);		/* freed @1 */
     TPM_DelegateSensitive_Init(&m1DelegateSensitive);	/* freed @2 */
     TPM_Sbuffer_Init(&delegateSensitive_sbuffer);	/* freed @3 */
@@ -2497,7 +2497,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     }
     /* get publicInfo parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateCreateOwnerDelegation: increment %02x\n", increment);
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: increment %02x\n", increment);
 	returnCode = TPM_DelegatePublic_Load(&publicInfo, &command, &paramSize);
     }
     /* get delAuth parameter */
@@ -2537,7 +2537,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateCreateOwnerDelegation: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Error, "
 		   "command has %u extra bytes\n", paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2595,7 +2595,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
 	   TPM_DELEGATE_FAMILY */
 	if (returnCode == TPM_SUCCESS) {
 	    if (publicInfo.familyID != delegatePublic->familyID) {
-		printf("TPM_Process_DelegateCreateOwnerDelegation: Error, "
+		TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Error, "
 		       "familyID %u should be %u\n",
 		       publicInfo.familyID, delegatePublic->familyID);
 		returnCode = TPM_DELEGATE_FAMILY;
@@ -2604,7 +2604,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
 	/* b. If FR -> flags -> TPM_FAMFLAG_ENABLED is FALSE, return error TPM_DISABLED_CMD. */
 	if (returnCode == TPM_SUCCESS) {
 	    if (!(familyRow->flags & TPM_FAMFLAG_ENABLED)) {
-		printf("TPM_Process_DelegateCreateOwnerDelegation: Error, family %u disabled\n",
+		TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Error, family %u disabled\n",
 		       publicInfo.familyID);
 		returnCode = TPM_DISABLED_CMD;
 	    }
@@ -2620,7 +2620,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     /* 4. Check that publicInfo -> delegateType is TPM_DEL_OWNER_BITS */
     if (returnCode == TPM_SUCCESS) {
 	if (publicInfo.permissions.delegateType != TPM_DEL_OWNER_BITS) {
-	    printf("TPM_Process_DelegateCreateOwnerDelegation: Error, bad delegateType %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Error, bad delegateType %08x\n",
 		   publicInfo.permissions.delegateType);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
@@ -2656,7 +2656,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     }
     /* 8. Create M1 a TPM_DELEGATE_SENSITIVE structure */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateCreateOwnerDelegation: Creating TPM_DELEGATE_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Creating TPM_DELEGATE_SENSITIVE\n");
 	/* a. Set M1 -> tag to TPM_TAG_DELEGATE_SENSITIVE */
 	/* NOTE Done by TPM_DelegateSensitive_Init() */
 	/* b. Set M1 -> authValue to a1 */
@@ -2670,7 +2670,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     }
     /* encrypt with delegate key */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateCreateOwnerDelegation: Encrypting TPM_DELEGATE_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Encrypting TPM_DELEGATE_SENSITIVE\n");
 	returnCode =
 	    TPM_SymmetricKeyData_EncryptSbuffer(&(b1DelegateOwnerBlob.sensitiveArea),
 						&delegateSensitive_sbuffer,
@@ -2681,7 +2681,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     /* NOTE Done by TPM_DelegateOwnerBlob_Init() */
     /* b. Set B1 -> pub to publicInfo */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateCreateOwnerDelegation: Creating TPM_DELEGATE_OWNER_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Creating TPM_DELEGATE_OWNER_BLOB\n");
 	returnCode = TPM_DelegatePublic_Copy(&(b1DelegateOwnerBlob.pub), &publicInfo);
     }
     /* c. Set B1 -> sensitiveSize to the size of M2 */
@@ -2722,7 +2722,7 @@ TPM_RESULT TPM_Process_DelegateCreateOwnerDelegation(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateCreateOwnerDelegation: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateCreateOwnerDelegation: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2855,7 +2855,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
     uint32_t			outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST			outParamDigest;
 
-    printf("TPM_Process_DelegateLoadOwnerDelegation: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Ordinal Entry\n");
     TPM_DelegateOwnerBlob_Init(&d1Blob);		/* freed @1 */
     TPM_DelegateSensitive_Init(&s1DelegateSensitive);	/* freed @2 */
     /*
@@ -2869,7 +2869,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
     }
     /* get blobSize parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateLoadOwnerDelegation: index %u\n", index);
+	TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: index %u\n", index);
 	returnCode = TPM_Load32(&blobSize, &command, &paramSize);
     }
     /* get blob parameter */
@@ -2909,7 +2909,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateLoadOwnerDelegation: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2938,7 +2938,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
 	   TPM_AUTHFAIL on error */
 	if (returnCode == TPM_SUCCESS) {
 	    if (tag != TPM_TAG_RQU_AUTH1_COMMAND) {
-		printf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
+		TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
 		       "owner installed but no authorization\n");
 		returnCode = TPM_AUTHFAIL;
 	    }
@@ -2981,7 +2981,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (d1Blob.pub.familyID != delegatePublic->familyID) {
-		    printf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
+		    TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
 			   "familyID %u should be %u\n",
 			   d1Blob.pub.familyID, delegatePublic->familyID);
 		    returnCode = TPM_DELEGATE_FAMILY;
@@ -2994,7 +2994,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
 	/* a. If FR -> flags -> TPM_DELEGATE_ADMIN_LOCK is TRUE return TPM_DELEGATE_LOCK */
 	if (returnCode == TPM_SUCCESS) {
 	    if (familyRow->flags & TPM_DELEGATE_ADMIN_LOCK) {
-		printf("TPM_Process_DelegateLoadOwnerDelegation: Error, row locked\n");
+		TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Error, row locked\n");
 		returnCode = TPM_DELEGATE_LOCK;
 	    }
 	}
@@ -3006,7 +3006,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
 	    nv1++;
 	    /* iii. If NV1 > TPM_MAX_NV_WRITE_NOOWNER return TPM_MAXNVWRITES */
 	    if (nv1 > TPM_MAX_NV_WRITE_NOOWNER) {
-		printf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
+		TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Error, "
 		       "max NV writes %d w/o owner reached\n",
 		       tpm_state->tpm_permanent_data.noOwnerNVWrite);
 		returnCode = TPM_MAXNVWRITES;
@@ -3023,7 +3023,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
     /* NOTE Done by TPM_FamilyTable_GetEnabledEntry() */
     /* 7. If TPM Owner is installed, validate the integrity of the blob */
     if ((returnCode == TPM_SUCCESS) && tpm_state->tpm_permanent_data.ownerInstalled) {
-	printf("TPM_Process_DelegateLoadOwnerDelegation: Checking integrityDigest\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Checking integrityDigest\n");
 	/* a. Copy D1 -> integrityDigest to H2 */
 	/* b. Set D1 -> integrityDigest to NULL */
 	/* c. Create H3 the HMAC of D1 using tpmProof as the secret */
@@ -3039,7 +3039,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
        sensitiveArea using TPM_DELEGATE_KEY. */
     if ((returnCode == TPM_SUCCESS) && tpm_state->tpm_permanent_data.ownerInstalled) {
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_DelegateLoadOwnerDelegation: Decrypting sensitiveArea\n");
+	    TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Decrypting sensitiveArea\n");
 	    returnCode =
 		TPM_DelegateSensitive_DecryptEncData(&s1DelegateSensitive,	/* decrypted data */
 						     &(d1Blob.sensitiveArea),	/* encrypted */
@@ -3096,7 +3096,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
        incremented value */
     if (returnCode == TPM_SUCCESS) {
 	if (writeAllNV && nv1Incremented) {
-	    printf("TPM_Process_DelegateLoadOwnerDelegation: noOwnerNVWrite %u\n", nv1);
+	    TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: noOwnerNVWrite %u\n", nv1);
 	    tpm_state->tpm_permanent_data.noOwnerNVWrite = nv1;
 	}
     }
@@ -3109,7 +3109,7 @@ TPM_RESULT TPM_Process_DelegateLoadOwnerDelegation(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateLoadOwnerDelegation: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateLoadOwnerDelegation: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3206,7 +3206,7 @@ TPM_RESULT TPM_Process_DelegateReadTable(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER		delegateSbuffer;	/* Array of TPM_DELEGATE_INDEX and
 							   TPM_DELEGATE_PUBLIC elements */
 
-    printf("TPM_Process_DelegateReadTable: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateReadTable: Ordinal Entry\n");
     TPM_Sbuffer_Init(&familySbuffer);		/* freed @1 */
     TPM_Sbuffer_Init(&delegateSbuffer);		/* freed @2 */
     /*
@@ -3238,7 +3238,7 @@ TPM_RESULT TPM_Process_DelegateReadTable(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateReadTable: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateReadTable: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3268,7 +3268,7 @@ TPM_RESULT TPM_Process_DelegateReadTable(tpm_state_t *tpm_state,
     /* 5. Return TPM_SUCCESS */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateReadTable: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateReadTable: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3373,7 +3373,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
     TPM_STORE_BUFFER		outputDataSbuffer;	/* TPM_DELEGATE_KEY_BLOB or
 							   TPM_DELEGATE_OWNER_BLOB */
 
-    printf("TPM_Process_DelegateUpdateVerification: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&inputData);			/* freed @1 */
     TPM_DelegateOwnerBlob_Init(&d1DelegateOwnerBlob);	/* freed @2 */
     TPM_DelegateKeyBlob_Init(&d1DelegateKeyBlob);	/* freed @3 */
@@ -3420,7 +3420,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateUpdateVerification: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3500,7 +3500,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
 		familyID = d1DelegateKeyBlob.pub.familyID;
 		break;
 	      default:
-		printf("TPM_Process_DelegateUpdateVerification: Error, invalid tag %04hx\n", d1Tag);
+		TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Error, invalid tag %04hx\n", d1Tag);
 		returnCode = TPM_BAD_PARAMETER;
 		break;
 	    }
@@ -3552,7 +3552,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
 	   TPM_DELEGATE_FAMILY */
 	if (returnCode == TPM_SUCCESS) {
 	    if (familyID != delegatePublic->familyID) {
-		printf("TPM_Process_DelegateUpdateVerification: Error, "
+		TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Error, "
 		       "familyID %u should be %u\n",
 		       familyID, delegatePublic->familyID);
 		returnCode = TPM_DELEGATE_FAMILY;
@@ -3563,7 +3563,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
 	   TPM_DISABLED_CMD */
 	if (returnCode == TPM_SUCCESS) {
 	    if (!(familyRow->flags & TPM_FAMFLAG_ENABLED)) {
-		printf("TPM_Process_DelegateUpdateVerification: Error, family %u disabled\n",
+		TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Error, family %u disabled\n",
 		       familyID);
 		returnCode = TPM_DISABLED_CMD;
 	    }
@@ -3639,7 +3639,7 @@ TPM_RESULT TPM_Process_DelegateUpdateVerification(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateUpdateVerification: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateUpdateVerification: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3742,7 +3742,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
     uint32_t			outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST			outParamDigest;
 
-    printf("TPM_Process_DelegateVerifyDelegation: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&delegation);			/* freed @1 */
     TPM_DelegateOwnerBlob_Init(&d1DelegateOwnerBlob);	/* freed @2 */
     TPM_DelegateKeyBlob_Init(&d1DelegateKeyBlob);	/* freed @3 */
@@ -3780,7 +3780,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DelegateVerifyDelegation: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3825,7 +3825,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
 	    break;
 	    /* 3. Else return TPM_BAD_PARAMETER */
 	  default:
-	    printf("TPM_Process_DelegateVerifyDelegation: Error, invalid tag %04hx\n", d1Tag);
+	    TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Error, invalid tag %04hx\n", d1Tag);
 	    returnCode = TPM_BAD_PARAMETER;
 	    break;
 	}
@@ -3843,7 +3843,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
        return TPM_FAMILYCOUNT */
     if (returnCode == TPM_SUCCESS) {
 	if (verificationCount != familyRow->verificationCount) {
-	    printf("TPM_Process_DelegateVerifyDelegation: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Error, "
 		   "verificationCount mismatch %u %u\n",
 		   verificationCount, familyRow->verificationCount);
 	    returnCode = TPM_FAMILYCOUNT;
@@ -3875,7 +3875,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
     /* 9. Create S1 a TPM_DELEGATE_SENSITIVE area by decrypting D1 -> sensitiveArea using
        TPM_DELEGATE_KEY */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DelegateVerifyDelegation: Decrypting sensitiveArea\n");
+	TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Decrypting sensitiveArea\n");
 	if (d1Tag == TPM_TAG_DELEGATE_OWNER_BLOB) {
 	    returnCode =
 		TPM_DelegateSensitive_DecryptEncData(&s1DelegateSensitive, 
@@ -3899,7 +3899,7 @@ TPM_RESULT TPM_Process_DelegateVerifyDelegation(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DelegateVerifyDelegation: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DelegateVerifyDelegation: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

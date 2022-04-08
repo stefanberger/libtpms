@@ -66,10 +66,10 @@ TPM_RESULT TPM_GetTimeOfDay(uint32_t *tv_sec, uint32_t *tv_usec)
     if (irc == 0) {
         *tv_sec = tval.tv_sec;
         *tv_usec = tval.tv_usec;
-        printf(" TPM_GetTimeOfDay: %d sec %d usec\n",*tv_sec, *tv_usec);
+        TPMLIB_LogPrintf(" TPM_GetTimeOfDay: %d sec %d usec\n",*tv_sec, *tv_usec);
     }
     else {
-        printf("TPM_GetTimeOfDay: Error (fatal) getting time of day\n");
+        TPMLIB_LogPrintf("TPM_GetTimeOfDay: Error (fatal) getting time of day\n");
         rc = TPM_FAIL;
     }
     return rc;

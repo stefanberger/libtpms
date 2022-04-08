@@ -66,7 +66,7 @@ TPM_RESULT TPM_RSAGenerateEVP_PKEY(EVP_PKEY **pkey,              /* out: pkey */
     /* sanity check for the free */
     if (rc == 0) {
 	if (*pkey != NULL) {
-            printf("TPM_RSAGeneratePrivateToken: Error (fatal), pkey %p should be NULL\n",
+            TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error (fatal), pkey %p should be NULL\n",
 		   *pkey);
             rc = TPM_FAIL;
 	}
@@ -75,7 +75,7 @@ TPM_RESULT TPM_RSAGenerateEVP_PKEY(EVP_PKEY **pkey,              /* out: pkey */
     if (rc == 0) {
         *pkey = EVP_PKEY_new();                        /* freed by caller */
         if (*pkey == NULL) {
-            printf("TPM_RSAGeneratePrivateToken: Error in EVP_PKEY_new()\n");
+            TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error in EVP_PKEY_new()\n");
             rc = TPM_FAIL;
         }
     }
@@ -93,14 +93,14 @@ TPM_RESULT TPM_RSAGenerateEVP_PKEY(EVP_PKEY **pkey,              /* out: pkey */
     if (rc == 0) {
         rsakey = RSA_new();
         if (rsakey == NULL) {
-            printf("TPM_RSAGeneratePrivateToken: Error in RSA_new()\n");
+            TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error in RSA_new()\n");
             rc = TPM_FAIL;
         }
     }
     if (rc == 0) {
         irc = RSA_set0_key(rsakey, n, e, d);
         if (irc != 1) {
-            printf("TPM_RSAGeneratePrivateToken: Error in RSA_set0_key()\n");
+            TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error in RSA_set0_key()\n");
             rc = TPM_FAIL;
         } else {
             n = NULL;
@@ -112,7 +112,7 @@ TPM_RESULT TPM_RSAGenerateEVP_PKEY(EVP_PKEY **pkey,              /* out: pkey */
         RSA_set_flags(rsakey, RSA_FLAG_NO_BLINDING);
         irc = EVP_PKEY_assign_RSA(*pkey, rsakey);
         if (irc == 0) {
-            printf("TPM_RSAGeneratePrivateToken: Error in EVP_PKEY_assign_RSA()\n");
+            TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error in EVP_PKEY_assign_RSA()\n");
             rc = TPM_FAIL;
         } else {
             rsakey = NULL;

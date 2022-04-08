@@ -175,25 +175,25 @@ TPM_RESULT TPM_Crypto_Init()
     TPM_RESULT rc = 0;
     SECStatus rv = SECSuccess;
 
-    printf("TPM_Crypto_Init: FreeBL library\n");
+    TPMLIB_LogPrintf("TPM_Crypto_Init: FreeBL library\n");
     /* initialize the random number generator */
     if (rc == 0) {
-	printf(" TPM_Crypto_Init: Initializing RNG\n");
+	TPMLIB_LogPrintf(" TPM_Crypto_Init: Initializing RNG\n");
 	rv = RNG_RNGInit();
 	if (rv != SECSuccess) {
-	    printf("TPM_Crypto_Init: Error (fatal), RNG_RNGInit rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_Crypto_Init: Error (fatal), RNG_RNGInit rv %d\n", rv);
 	    rc = TPM_FAIL;
 	}
     }
     /* add additional seed  entropy to the random number generator */
     if (rc == 0) {
-	printf(" TPM_Crypto_Init: Seeding RNG\n");
+	TPMLIB_LogPrintf(" TPM_Crypto_Init: Seeding RNG\n");
 	RNG_SystemInfoForRNG();
     }
     if (rc == 0) {
 	rv = BL_Init();
 	if (rv != SECSuccess) {
-	    printf("TPM_Crypto_Init: Error (fatal), BL_Init rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_Crypto_Init: Error (fatal), BL_Init rv %d\n", rv);
 	    rc =TPM_FAIL ;
 	}
     }
@@ -231,7 +231,7 @@ TPM_RESULT TPM_Crypto_TestSpecific()
     const unsigned char *stream;
     uint32_t stream_size;
     
-    printf(" TPM_Crypto_TestSpecific: Test 1 - SHA1 two parts\n");
+    TPMLIB_LogPrintf(" TPM_Crypto_TestSpecific: Test 1 - SHA1 two parts\n");
     context1 = NULL;			/* freed @1 */
     context2 = NULL;			/* freed @2 */
     TPM_Sbuffer_Init(&sbuffer);		/* freed @3 */
@@ -265,7 +265,7 @@ TPM_RESULT TPM_Crypto_TestSpecific()
     if (rc == 0) {
 	not_equal = memcmp(expect1, actual, TPM_DIGEST_SIZE);
 	if (not_equal) {
-	    printf("TPM_Crypto_TestSpecific: Error in test 1\n");
+	    TPMLIB_LogPrintf("TPM_Crypto_TestSpecific: Error in test 1\n");
 	    TPM_PrintFour("\texpect", expect1);
 	    TPM_PrintFour("\tactual", actual);
 	    rc = TPM_FAILEDSELFTEST;
@@ -289,12 +289,12 @@ TPM_RESULT TPM_Random(BYTE *buffer, size_t bytes)
     TPM_RESULT 	rc = 0;
     SECStatus 	rv = SECSuccess;
 
-    printf(" TPM_Random: Requesting %lu bytes\n", (unsigned long)bytes);
+    TPMLIB_LogPrintf(" TPM_Random: Requesting %lu bytes\n", (unsigned long)bytes);
     /* generate the random bytes */
     if (rc == 0) {
 	rv = RNG_GenerateGlobalRandomBytes(buffer, bytes);
 	if (rv != SECSuccess) {
-	    printf("TPM_Random: Error (fatal) in RNG_GenerateGlobalRandomBytes rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_Random: Error (fatal) in RNG_GenerateGlobalRandomBytes rv %d\n", rv);
 	    rc = TPM_FAIL;
 	}
     }
@@ -312,11 +312,11 @@ static TPM_RESULT TPM_RandomNonZero(BYTE *buffer, size_t bytes)
     size_t 	i;
     SECStatus 	rv = SECSuccess;
 
-    printf(" TPM_RandomNonZero: Requesting %lu bytes\n", (unsigned long)bytes);
+    TPMLIB_LogPrintf(" TPM_RandomNonZero: Requesting %lu bytes\n", (unsigned long)bytes);
     for (i = 0 ; (rc == 0) && (i < bytes) ; ) {
 	rv = RNG_GenerateGlobalRandomBytes(buffer, 1);
 	if (rv != SECSuccess) {
-	    printf("TPM_Random: Error (fatal) in RNG_GenerateGlobalRandomBytes rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_Random: Error (fatal) in RNG_GenerateGlobalRandomBytes rv %d\n", rv);
 	    rc = TPM_FAIL;
 	}
 	else {
@@ -337,12 +337,12 @@ TPM_RESULT TPM_StirRandomCmd(TPM_SIZED_BUFFER *inData)
     TPM_RESULT 	rc = 0;
     SECStatus 	rv = SECSuccess;
 
-    printf(" TPM_StirRandomCmd:\n");
+    TPMLIB_LogPrintf(" TPM_StirRandomCmd:\n");
     if (rc == 0) {
 	/* add the seeding material */
 	rv = RNG_RandomUpdate(inData->buffer, inData->size);
 	if (rv != SECSuccess) {
-	    printf("TPM_StirRandom: Error (fatal) in RNG_RandomUpdate rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_StirRandom: Error (fatal) in RNG_RandomUpdate rv %d\n", rv);
 	    rc = TPM_FAIL;
 	} 
     }
@@ -405,7 +405,7 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
     RSAPrivateKey *rsaPrivateKey = NULL;  	/* freed @1 */
     unsigned long e;				/* public exponent */
 
-    printf(" TPM_RSAGenerateKeyPair:\n");
+    TPMLIB_LogPrintf(" TPM_RSAGenerateKeyPair:\n");
     /* initialize in case of error */
     *n = NULL;
     *p = NULL;
@@ -415,7 +415,7 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
        of 8 and will not fit well in a byte */
     if (rc == 0) {
 	if ((num_bits % 16) != 0) {
-	    printf("TPM_RSAGenerateKeyPair: Error, num_bits %d is not a multiple of 16\n",
+	    TPMLIB_LogPrintf("TPM_RSAGenerateKeyPair: Error, num_bits %d is not a multiple of 16\n",
 		   num_bits);
 	    rc = TPM_BAD_KEY_PROPERTY;
 	}
@@ -431,14 +431,14 @@ TPM_RESULT TPM_RSAGenerateKeyPair(unsigned char **n,            /* public key - 
     }
     /* generate the key pair */
     if (rc == 0) {
-        printf("  TPM_RSAGenerateKeyPair: num_bits %d exponent %08lx\n", num_bits, e);
+        TPMLIB_LogPrintf("  TPM_RSAGenerateKeyPair: num_bits %d exponent %08lx\n", num_bits, e);
 	publicExponent.type = siBuffer;
 	publicExponent.data = (unsigned char *)earr;
 	publicExponent.len = e_size;
 	/* Generate and return a new RSA public and private key token */
 	rsaPrivateKey = RSA_NewKey(num_bits, &publicExponent);  /* freed @1 */
 	if (rsaPrivateKey == NULL) {
-            printf("TPM_RSAGenerateKeyPair: Error (fatal) calling RSA_NewKey()\n");
+            TPMLIB_LogPrintf("TPM_RSAGenerateKeyPair: Error (fatal) calling RSA_NewKey()\n");
             rc = TPM_FAIL;
         }
     }
@@ -502,7 +502,7 @@ static TPM_RESULT TPM_RSAGeneratePublicToken(RSAPublicKey *rsaPublicKey,
 
     /* simply assign the arrays to the key token */
     if (rc == 0) {
-	printf(" TPM_RSAGeneratePublicToken: nbytes %u ebytes %u\n", nbytes, ebytes);
+	TPMLIB_LogPrintf(" TPM_RSAGeneratePublicToken: nbytes %u ebytes %u\n", nbytes, ebytes);
 	rsaPublicKey->arena = NULL;
       	/* public modulus */
 	rsaPublicKey->modulus.type = siBuffer;
@@ -530,7 +530,7 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSAPrivateKey *rsa_pri_key, /* fre
     TPM_RESULT  rc = 0;
     SECStatus rv = SECSuccess;
 
-    printf("  TPM_RSAGeneratePrivateToken:\n");
+    TPMLIB_LogPrintf("  TPM_RSAGeneratePrivateToken:\n");
     if (rc == 0) {
 	rsa_pri_key->arena = NULL;
 	/* public exponent */
@@ -548,7 +548,7 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSAPrivateKey *rsa_pri_key, /* fre
 	/* given these key parameters (n,e,d), fill in the rest of the parameters */
 	rv = RSA_PopulatePrivateKey(rsa_pri_key); 	/* freed by caller */
 	if (rv != SECSuccess) {
-	    printf("TPM_RSAGeneratePrivateToken: Error, RSA_PopulatePrivateKey rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_RSAGeneratePrivateToken: Error, RSA_PopulatePrivateKey rv %d\n", rv);
 	    rc = TPM_BAD_PARAMETER;
 	}
     }
@@ -581,12 +581,12 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
     unsigned char       *padded_data = NULL;	/* freed @2 */
     int                 padded_data_size = 0;
 
-    printf(" TPM_RSAPrivateDecrypt: Input data size %u\n", encrypt_data_size);
+    TPMLIB_LogPrintf(" TPM_RSAPrivateDecrypt: Input data size %u\n", encrypt_data_size);
     TPM_RSAPrivateKeyInit(&rsa_pri_key);			/* freed @1 */
     /* the encrypted data size must equal the public key size */
     if (rc == 0) {
 	if (encrypt_data_size != nbytes) {
-	    printf("TPM_RSAPrivateDecrypt: Error, Encrypted data size is %u not %u\n",
+	    TPMLIB_LogPrintf("TPM_RSAPrivateDecrypt: Error, Encrypted data size is %u not %u\n",
 		   encrypt_data_size, nbytes);
 	    rc = TPM_DECRYPT_ERROR;
 	}
@@ -614,13 +614,13 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
 			      padded_data,		/* to - the decrypted but padded data */
 			      encrypt_data);		/* from - the encrypted data */
 	if (rv != SECSuccess) {
-	    printf("TPM_RSAPrivateDecrypt: Error in RSA_PrivateKeyOp(), rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_RSAPrivateDecrypt: Error in RSA_PrivateKeyOp(), rv %d\n", rv);
 	    rc = TPM_DECRYPT_ERROR;
 	}
    }
     if (rc == 0) {
-        printf("  TPM_RSAPrivateDecrypt: RSA_PrivateKeyOp() success\n");
-        printf("  TPM_RSAPrivateDecrypt: Padded data size %u\n", padded_data_size);
+        TPMLIB_LogPrintf("  TPM_RSAPrivateDecrypt: RSA_PrivateKeyOp() success\n");
+        TPMLIB_LogPrintf("  TPM_RSAPrivateDecrypt: Padded data size %u\n", padded_data_size);
         TPM_PrintFour("  TPM_RSAPrivateDecrypt: Decrypt padded data", padded_data);
 	/* check and remove the padding based on the TPM encryption scheme */
         if (encScheme == TPM_ES_RSAESOAEP_SHA1_MGF1) {
@@ -647,12 +647,12 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
 					     padded_data_size);  	/* from length */
         }
         else {
-            printf("TPM_RSAPrivateDecrypt: Error, unknown encryption scheme %04x\n", encScheme);
+            TPMLIB_LogPrintf("TPM_RSAPrivateDecrypt: Error, unknown encryption scheme %04x\n", encScheme);
             rc = TPM_INAPPROPRIATE_ENC;
         }
     }
     if (rc == 0) {
-        printf("  TPM_RSAPrivateDecrypt: RSA_padding_check_PKCS1 recovered %d bytes\n",
+        TPMLIB_LogPrintf("  TPM_RSAPrivateDecrypt: RSA_padding_check_PKCS1 recovered %d bytes\n",
 	       *decrypt_data_length);
         TPM_PrintFourLimit("  TPM_RSAPrivateDecrypt: Decrypt data", decrypt_data, decrypt_data_size);
     }
@@ -678,7 +678,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char *encrypt_data,    /* encrypted dat
     TPM_RESULT  	rc = 0;
     unsigned char 	*padded_data = NULL;			/* freed @1 */
     
-    printf(" TPM_RSAPublicEncrypt: Input data size %lu\n", (unsigned long)decrypt_data_size);
+    TPMLIB_LogPrintf(" TPM_RSAPublicEncrypt: Input data size %lu\n", (unsigned long)decrypt_data_size);
     /* intermediate buffer for the padded decrypted data */
     if (rc == 0) {
         rc = TPM_Malloc(&padded_data, encrypt_data_size);	/* freed @1 */
@@ -708,7 +708,7 @@ TPM_RESULT TPM_RSAPublicEncrypt(unsigned char *encrypt_data,    /* encrypted dat
 					   decrypt_data_size);		/* from length */
         }
         else {
-            printf("TPM_RSAPublicEncrypt: Error, unknown encryption scheme %04x\n", encScheme);
+            TPMLIB_LogPrintf("TPM_RSAPublicEncrypt: Error, unknown encryption scheme %04x\n", encScheme);
             rc = TPM_INAPPROPRIATE_ENC;
         }
     }
@@ -744,11 +744,11 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     SECStatus 		rv = SECSuccess;
     RSAPublicKey        rsa_pub_key;
 
-    printf("   TPM_RSAPublicEncryptRaw:\n");
+    TPMLIB_LogPrintf("   TPM_RSAPublicEncryptRaw:\n");
     /* the input data size must equal the public key size (already padded) */
     if (rc == 0) {
 	if (decrypt_data_size != nbytes) {
-	    printf("TPM_RSAPublicEncryptRaw: Error, decrypt data size is %u not %u\n",
+	    TPMLIB_LogPrintf("TPM_RSAPublicEncryptRaw: Error, decrypt data size is %u not %u\n",
 		   decrypt_data_size, nbytes);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -756,7 +756,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
     /* the output data size must equal the public key size */
     if (rc == 0) {
 	if (encrypt_data_size != nbytes) {
-	    printf("TPM_RSAPublicEncryptRaw: Error, Output data size is %u not %u\n",
+	    TPMLIB_LogPrintf("TPM_RSAPublicEncryptRaw: Error, Output data size is %u not %u\n",
 		   encrypt_data_size, nbytes);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -778,7 +778,7 @@ TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,	/* output */
 			     encrypt_data,      /* output - the encrypted data */
 			     decrypt_data);     /* input - the clear text data */
 	if (rv != SECSuccess) {
-	    printf("TPM_RSAPublicEncrypt: Error in RSA_PublicKeyOp, rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_RSAPublicEncrypt: Error in RSA_PublicKeyOp, rv %d\n", rv);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
     }
@@ -815,7 +815,7 @@ TPM_RESULT TPM_RSASign(unsigned char *signature,        /* output */
     TPM_RESULT          rc = 0;
     RSAPrivateKey 	rsa_pri_key;
 
-    printf(" TPM_RSASign:\n");
+    TPMLIB_LogPrintf(" TPM_RSASign:\n");
     TPM_RSAPrivateKeyInit(&rsa_pri_key);			/* freed @1 */
     /* construct the free private key object from n,e,d */
     if (rc == 0) {
@@ -830,7 +830,7 @@ TPM_RESULT TPM_RSASign(unsigned char *signature,        /* output */
     /* sanity check the size of the output signature buffer */
     if (rc == 0) {
         if (signature_size < nbytes) {
-            printf("TPM_RSASign: Error (fatal), buffer %u too small for signature %u\n",
+            TPMLIB_LogPrintf("TPM_RSASign: Error (fatal), buffer %u too small for signature %u\n",
                    signature_size, nbytes);
             rc = TPM_FAIL;      /* internal error, should never occur */
         }
@@ -839,7 +839,7 @@ TPM_RESULT TPM_RSASign(unsigned char *signature,        /* output */
     if (rc == 0) {
         switch(sigScheme) {
           case TPM_SS_NONE:
-            printf("TPM_RSASign: Error, sigScheme TPM_SS_NONE\n");
+            TPMLIB_LogPrintf("TPM_RSASign: Error, sigScheme TPM_SS_NONE\n");
             rc = TPM_INVALID_KEYUSAGE;
             break;
           case TPM_SS_RSASSAPKCS1v15_SHA1:
@@ -858,7 +858,7 @@ TPM_RESULT TPM_RSASign(unsigned char *signature,        /* output */
                                 &rsa_pri_key);
             break;
           default:
-            printf("TPM_RSASign: Error, sigScheme %04hx unknown\n", sigScheme);
+            TPMLIB_LogPrintf("TPM_RSASign: Error, sigScheme %04hx unknown\n", sigScheme);
             rc = TPM_INVALID_KEYUSAGE;
             break;
         }
@@ -882,12 +882,12 @@ static TPM_RESULT TPM_RSASignSHA1(unsigned char *signature,             /* outpu
     TPM_RESULT  rc = 0;
     unsigned char *message_der;	         /* DER padded message, freed @1 */
 
-    printf(" TPM_RSASignSHA1: key size %d\n", rsa_pri_key->modulus.len);
+    TPMLIB_LogPrintf(" TPM_RSASignSHA1: key size %d\n", rsa_pri_key->modulus.len);
     message_der = NULL;         	/* freed @1 */
     /* sanity check, SHA1 messages must be 20 bytes */
     if (rc == 0) {
         if (message_size != TPM_DIGEST_SIZE) {
-            printf("TPM_RSASignSHA1: Error, message size %lu not TPM_DIGEST_SIZE\n",
+            TPMLIB_LogPrintf("TPM_RSASignSHA1: Error, message size %lu not TPM_DIGEST_SIZE\n",
                    (unsigned long)message_size );
             rc = TPM_DECRYPT_ERROR;
         } 
@@ -930,7 +930,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
     SECStatus 	rv = SECSuccess;
     unsigned char *message_pad;		/* PKCS1 type 1 padded message, freed @1 */
     
-    printf(" TPM_RSASignDER: key size %d\n", rsa_pri_key->modulus.len);
+    TPMLIB_LogPrintf(" TPM_RSASignDER: key size %d\n", rsa_pri_key->modulus.len);
     message_pad = NULL;         /* freed @1 */
     /* the padded message size is the same as the key size */
     /* allocate memory for the padded message */
@@ -939,7 +939,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
     }
     /* PKCS1 type 1 pad the message */
     if (rc == 0) {
-        printf("  TPM_RSASignDER: Applying PKCS1 type 1 padding, size from %lu to %u\n",
+        TPMLIB_LogPrintf("  TPM_RSASignDER: Applying PKCS1 type 1 padding, size from %lu to %u\n",
                (unsigned long)message_size, rsa_pri_key->modulus.len);
         TPM_PrintFourLimit("  TPM_RSASignDER: Input message", message, message_size);
         /* This call checks that the message will fit with the padding */
@@ -950,7 +950,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
     }
     /* raw sign with private key */
     if (rc == 0) {
-        printf("  TPM_RSASignDER: Encrypting with private key, message size %d\n",
+        TPMLIB_LogPrintf("  TPM_RSASignDER: Encrypting with private key, message size %d\n",
 	       rsa_pri_key->modulus.len);
         TPM_PrintFour("  TPM_RSASignDER: Padded message", message_pad);
         /* sign with private key */
@@ -958,7 +958,7 @@ static TPM_RESULT TPM_RSASignDER(unsigned char *signature,              /* outpu
 			      signature,		/* to - the decrypted but padded data */
 			      message_pad);		/* from - the encrypted data */
 	if (rv != SECSuccess) {
-	    printf("TPM_RSASignDER: Error in RSA_PrivateKeyOp(), rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_RSASignDER: Error in RSA_PrivateKeyOp(), rv %d\n", rv);
 	    rc = TPM_DECRYPT_ERROR;
 	}
     }
@@ -992,7 +992,7 @@ TPM_RESULT TPM_RSAVerifySHA1(unsigned char *signature,          /* input */
     uint32_t 		padLength;
     int 		irc;
     
-    printf(" TPM_RSAVerifySHA1:\n");
+    TPMLIB_LogPrintf(" TPM_RSAVerifySHA1:\n");
     /* allocate memory for the padded result of the public key operation */
     if (rc == 0) {
 	rc = TPM_Malloc(&padded_data, nbytes);	/* freed @1 */
@@ -1017,7 +1017,7 @@ TPM_RESULT TPM_RSAVerifySHA1(unsigned char *signature,          /* input */
     /* check message length */
     if (rc == 0) {
 	if (message_size != (nbytes - padLength)) {
-	    printf("TPM_RSAVerifySHA1: Error, "
+	    TPMLIB_LogPrintf("TPM_RSAVerifySHA1: Error, "
                    "message size %u not equal to size %u after padding removed\n",
 		   message_size, nbytes - padLength);
 	    rc = TPM_BAD_SIGNATURE;
@@ -1027,7 +1027,7 @@ TPM_RESULT TPM_RSAVerifySHA1(unsigned char *signature,          /* input */
     if (rc == 0) {
 	irc = memcmp(message, padded_data + padLength, message_size);
 	if (irc != 0) {
-	    printf("TPM_RSAVerifySHA1: Error, message mismatch\n");
+	    TPMLIB_LogPrintf("TPM_RSAVerifySHA1: Error, message mismatch\n");
 	    TPM_PrintFourLimit(" TPM_RSAVerifySHA1: message", message, message_size);
 	    TPM_PrintFourLimit(" TPM_RSAVerifySHA1: message from signature", padded_data + padLength, message_size);
 	    rc = TPM_BAD_SIGNATURE;
@@ -1058,28 +1058,28 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
     RSAPrivateKey 	rsa_pri_key;
 
     /* set to NULL so caller can free after failure */
-    printf(" TPM_RSAGetPrivateKey:\n");
+    TPMLIB_LogPrintf(" TPM_RSAGetPrivateKey:\n");
     TPM_RSAPrivateKeyInit(&rsa_pri_key);	/* freed @1 */
     *qarr = NULL;
     *darr = NULL;
     /* check input parameters */
     if (rc == 0) {
         if ((narr == NULL) || (nbytes == 0)) {
-            printf("TPM_RSAGetPrivateKey: Error, missing n\n");
+            TPMLIB_LogPrintf("TPM_RSAGetPrivateKey: Error, missing n\n");
             rc = TPM_BAD_PARAMETER;
         }
     }
     /* check input parameters */
     if (rc == 0) {
         if ((earr == NULL) || (ebytes == 0)) {
-            printf("TPM_RSAGetPrivateKey: Error, missing e\n");
+            TPMLIB_LogPrintf("TPM_RSAGetPrivateKey: Error, missing e\n");
             rc = TPM_BAD_PARAMETER;
         }
     }
     /* check input parameters */
     if (rc == 0) {
         if ((parr == NULL) || (pbytes == 0)) {
-            printf("TPM_RSAGetPrivateKey: Error, missing p\n");
+            TPMLIB_LogPrintf("TPM_RSAGetPrivateKey: Error, missing p\n");
             rc = TPM_BAD_PARAMETER;
         }
     }
@@ -1097,7 +1097,7 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
 	/* fill in the rest of the freebl key token parameters. */
 	rv = RSA_PopulatePrivateKey(&rsa_pri_key); 	/* freed @1 */
 	if (rv != SECSuccess) {
-	    printf("TPM_RSAGetPrivateKey: Error in RSA_PopulatePrivateKey rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_RSAGetPrivateKey: Error in RSA_PopulatePrivateKey rv %d\n", rv);
 	    rc = TPM_BAD_PARAMETER;
 	}
     }
@@ -1118,7 +1118,7 @@ TPM_RESULT TPM_RSAGetPrivateKey(uint32_t *qbytes, unsigned char **qarr,
     if (rc == 0) {
         TPM_PrintFour("  TPM_RSAGetPrivateKey: Calculated q",  *qarr);
         TPM_PrintFour("  TPM_RSAGetPrivateKey: Calculated d",  *darr);
-        printf("  TPM_RSAGetPrivateKey: length of n,p,q,d = %u / %u / %u / %u\n",
+        TPMLIB_LogPrintf("  TPM_RSAGetPrivateKey: length of n,p,q,d = %u / %u / %u / %u\n",
                nbytes, pbytes, *qbytes, *dbytes);
     }
     PORT_FreeArena(rsa_pri_key.arena, PR_TRUE);		/* @1 */
@@ -1144,10 +1144,10 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Add(unsigned char *output,	/* to */
     uint32_t	index;
 
     /* sanity check the length, this should never fail */
-    printf("   TPM_PKCS1_PaddingType1Add:\n");
+    TPMLIB_LogPrintf("   TPM_PKCS1_PaddingType1Add:\n");
     if (rc == 0) {
 	if ((inputLength + 11) > outputLength) {
-            printf("TPM_PKCS1_PaddingType1Add: Error, input %u too big for output %u\n",
+            TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Add: Error, input %u too big for output %u\n",
                    inputLength, outputLength);
 	    rc = TPM_DECRYPT_ERROR;
 	}
@@ -1191,11 +1191,11 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     TPM_RESULT 	rc = 0;
     int		irc;
 
-    printf("   TPM_PKCS1_PaddingType1Check:\n");
+    TPMLIB_LogPrintf("   TPM_PKCS1_PaddingType1Check:\n");
     /* sanity check the length */
     if (rc == 0) {
 	if ((sizeof(sha1Oid) + 11) > inputLength) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, "
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, "
 		   "sizeof(sha1Oid) %lu + 11 > inputLength %u\n",
 		   (unsigned long)sizeof(sha1Oid), inputLength);
 	    rc = TPM_ENCRYPT_ERROR;
@@ -1205,7 +1205,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     if (rc == 0) {
 	*padLength = 0;
 	if (input[*padLength] != 0x00) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x00\n",
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x00\n",
 		   *padLength, input[*padLength]);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -1214,7 +1214,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     /* check byte 1 */
     if (rc == 0) {
 	if (input[*padLength] != 0x01) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x01\n",
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x01\n",
 		   *padLength, input[*padLength]);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -1223,7 +1223,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     /* check for at least 8 0xff bytes */
     for ( ; (rc == 0) && (*padLength < 10) ; (*padLength)++) {
 	if (input[*padLength] != 0xff) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0xff\n",
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0xff\n",
 		   *padLength, input[*padLength]);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -1237,7 +1237,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     /* check for 0x00 byte */
     if (rc == 0) {
 	if (input[*padLength] != 0x00) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x00\n",
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, byte %u %02x not 0x00\n",
 		   *padLength, input[*padLength]);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
@@ -1246,7 +1246,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     /* check length for OID */
     if (rc == 0) {
 	if (*padLength + sizeof(sha1Oid) > inputLength) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, "
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, "
 		   "padLength %u + sizeof(sha1Oid) %lu > inputLength %u\n",
 		   *padLength,  (unsigned long)sizeof(sha1Oid), inputLength);
 	    rc = TPM_ENCRYPT_ERROR;
@@ -1256,7 +1256,7 @@ static TPM_RESULT TPM_PKCS1_PaddingType1Check(uint32_t *padLength,
     if (rc == 0) {
 	irc = memcmp(input + *padLength, sha1Oid, sizeof(sha1Oid));
 	if (irc != 0) {
-	    printf("TPM_PKCS1_PaddingType1Check: Error, OID mismatch\n");
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType1Check: Error, OID mismatch\n");
 	    TPM_PrintAll("   TPM_PKCS1_PaddingType1Check: OID",
 			 input + *padLength, sizeof(sha1Oid));
 	    rc = TPM_ENCRYPT_ERROR;
@@ -1288,13 +1288,13 @@ static TPM_RESULT TPM_PKCS1_PaddingType2Add(unsigned char *encodedMessage,    	/
 {
     TPM_RESULT	rc = 0;
 
-    printf("   TPM_PKCS1_PaddingType2Add: Message length %u padded length %u\n",
+    TPMLIB_LogPrintf("   TPM_PKCS1_PaddingType2Add: Message length %u padded length %u\n",
 	   messageLength, encodedMessageLength);
     /* 1. If the length of the message M is greater than emLen - 10 octets, output "message too
        long" and stop. */
     if (rc == 0) {
 	if ((messageLength + 11) > encodedMessageLength) {
-	    printf("TPM_PKCS1_PaddingType2Add: Error, message length too big for padded length\n");
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType2Add: Error, message length too big for padded length\n");
 	    rc = TPM_ENCRYPT_ERROR;
 	}
     }
@@ -1329,12 +1329,12 @@ TPM_RESULT TPM_PKCS1_PaddingType2Check(unsigned char *outputData,	/* to */
     TPM_RESULT	rc = 0;
     size_t 	i;
 
-    printf("   TPM_PKCS1_PaddingType2Check:\n");
+    TPMLIB_LogPrintf("   TPM_PKCS1_PaddingType2Check:\n");
     /* check the leading bytes for 0x00, 0x02 */
     if (rc == 0) {
 	if ((inputData[0] != 0x00) ||
 	    (inputData[1] != 0x02)) {
-	    printf("TPM_PKCS1_PaddingType2Check: Error, bad leading bytes %02x %02x\n",
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType2Check: Error, bad leading bytes %02x %02x\n",
 		   inputData[0], inputData[1]);
 	    rc = TPM_DECRYPT_ERROR;
 	}
@@ -1348,14 +1348,14 @@ TPM_RESULT TPM_PKCS1_PaddingType2Check(unsigned char *outputData,	/* to */
     /* check for the trailing 0x00 */
     if (rc == 0) {
 	if (i == inputDataLength) {
-	    printf("TPM_PKCS1_PaddingType2Check: Error, missing trailing 0x00\n");
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType2Check: Error, missing trailing 0x00\n");
 	    rc = TPM_DECRYPT_ERROR;
 	}
     }
     /* check that PS was at least 8 bytes */
     if (rc == 0) {
 	if (i < 10) {
-	    printf("TPM_PKCS1_PaddingType2Check: Error, bad PS length %lu\n", (unsigned long)i-2);
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType2Check: Error, bad PS length %lu\n", (unsigned long)i-2);
 	    rc = TPM_DECRYPT_ERROR;
 	}
     }
@@ -1364,7 +1364,7 @@ TPM_RESULT TPM_PKCS1_PaddingType2Check(unsigned char *outputData,	/* to */
 	i++;	/* index past the trailing 0x00 */
 	*outputDataLength = inputDataLength - i;
 	if (*outputDataLength > outputDataSize) {
-	    printf("TPM_PKCS1_PaddingType2Check: Error, "
+	    TPMLIB_LogPrintf("TPM_PKCS1_PaddingType2Check: Error, "
 		   "message %u greater than output data size %u\n",
 		   *outputDataLength, outputDataSize);
 	    rc = TPM_DECRYPT_ERROR;
@@ -1418,7 +1418,7 @@ TPM_RESULT TPM_BN_is_one(TPM_BIGNUM bn_in)
 
     irc = mpz_cmp_ui(*bn, 1);
     if (irc != 0) {
-        printf("TPM_BN_is_one: Error, result is not 1\n");
+        TPMLIB_LogPrintf("TPM_BN_is_one: Error, result is not 1\n");
         rc = TPM_DAA_WRONG_W;
     }
     return rc;
@@ -1482,7 +1482,7 @@ TPM_RESULT TPM_BN_rshift(TPM_BIGNUM *rBignum_in,              /* freed by caller
     mpz_t 	**rBignum = (mpz_t **)rBignum_in;
     mpz_t 	*aBignum = (mpz_t *)aBignum_in;
     
-    printf(" TPM_BN_rshift: n %d\n", n);
+    TPMLIB_LogPrintf(" TPM_BN_rshift: n %d\n", n);
     if (rc == 0) {
         rc = TPM_BN_new(rBignum_in);
     }
@@ -1506,7 +1506,7 @@ TPM_RESULT TPM_BN_lshift(TPM_BIGNUM *rBignum_in,              /* freed by caller
     mpz_t 	**rBignum = (mpz_t **)rBignum_in;
     mpz_t 	*aBignum = (mpz_t *)aBignum_in;
     
-    printf(" TPM_BN_lshift: n %d\n", n);
+    TPMLIB_LogPrintf(" TPM_BN_lshift: n %d\n", n);
     if (rc == 0) {
         rc = TPM_BN_new(rBignum_in);
     }
@@ -1531,7 +1531,7 @@ TPM_RESULT TPM_BN_add(TPM_BIGNUM rBignum_in,
     mpz_t 	*aBignum = (mpz_t *)aBignum_in;
     mpz_t 	*bBignum = (mpz_t *)bBignum_in;
 
-    printf(" TPM_BN_add:\n");
+    TPMLIB_LogPrintf(" TPM_BN_add:\n");
     /* result = a + b */
     mpz_add(*rBignum, *aBignum, *bBignum);
     return rc;
@@ -1551,7 +1551,7 @@ TPM_RESULT TPM_BN_mul(TPM_BIGNUM rBignum_in,
     mpz_t 	*aBignum = (mpz_t *)aBignum_in;
     mpz_t 	*bBignum = (mpz_t *)bBignum_in;
 
-    printf(" TPM_BN_mul:\n");
+    TPMLIB_LogPrintf(" TPM_BN_mul:\n");
     /* r = a * b */
     mpz_mul(*rBignum, *aBignum, *bBignum);
     return rc;
@@ -1573,7 +1573,7 @@ TPM_RESULT TPM_BN_mod_exp(TPM_BIGNUM rBignum_in,
     mpz_t 	*pBignum = (mpz_t *)pBignum_in;
     mpz_t 	*nBignum = (mpz_t *)nBignum_in;
     
-    printf(" TPM_BN_mod_exp:\n");
+    TPMLIB_LogPrintf(" TPM_BN_mod_exp:\n");
     mpz_powm(*rBignum, *aBignum, *pBignum, *nBignum);
     return rc;
 }
@@ -1594,7 +1594,7 @@ TPM_RESULT TPM_BN_mod_add(TPM_BIGNUM rBignum_in,
     mpz_t 	*bBignum = (mpz_t *)bBignum_in;
     mpz_t 	*mBignum = (mpz_t *)mBignum_in;
 
-    printf(" TPM_BN_mod_add:\n");
+    TPMLIB_LogPrintf(" TPM_BN_mod_add:\n");
     /* r = a + b */
     mpz_add(*rBignum, *aBignum, *bBignum);
     /* set r to r mod m */
@@ -1618,7 +1618,7 @@ TPM_RESULT TPM_BN_mod_mul(TPM_BIGNUM rBignum_in,
     mpz_t 	*bBignum = (mpz_t *)bBignum_in;
     mpz_t 	*mBignum = (mpz_t *)mBignum_in;
 
-    printf(" TPM_BN_mod_mul:\n");
+    TPMLIB_LogPrintf(" TPM_BN_mod_mul:\n");
     /* r = a * b */
     mpz_mul(*rBignum, *aBignum, *bBignum);
     /* set r to r mod m */
@@ -1700,7 +1700,7 @@ static TPM_RESULT TPM_memcpyPad(unsigned char **bin_out,
 {
     TPM_RESULT  rc = 0;
 
-    printf("   TPM_memcpyPad: padBytes %u\n", padBytes);
+    TPMLIB_LogPrintf("   TPM_memcpyPad: padBytes %u\n", padBytes);
     if (rc == 0) {
         /* padBytes 0 says that no padding is required */
         if (padBytes == 0) {
@@ -1709,12 +1709,12 @@ static TPM_RESULT TPM_memcpyPad(unsigned char **bin_out,
 	/* The required output should never be less than the supplied input.  Sanity check and
 	   return a fatal error. */
         if (padBytes < bin_in_length) {
-            printf("TPM_memcpyPad: Error (fatal), "
+            TPMLIB_LogPrintf("TPM_memcpyPad: Error (fatal), "
                    "padBytes %u less than %u\n", padBytes, bin_in_length);
             rc = TPM_FAIL;
         }
         if (padBytes != bin_in_length) {
-            printf("   TPM_memcpyPad: padBytes %u bytes %u\n", padBytes, bin_in_length);
+            TPMLIB_LogPrintf("   TPM_memcpyPad: padBytes %u bytes %u\n", padBytes, bin_in_length);
         }
     }
     /* allocate memory for the padded output */
@@ -1769,12 +1769,12 @@ TPM_RESULT TPM_SHA1InitCmd(void **context)
 {
     TPM_RESULT  rc = 0;
 
-    printf(" TPM_SHA1InitCmd:\n");
+    TPMLIB_LogPrintf(" TPM_SHA1InitCmd:\n");
     if (rc == 0) {
 	/* create a new freebl SHA1 context */
 	*context = SHA1_NewContext();
 	if (*context == NULL) {
-	    printf("TPM_SHA1InitCmd:  Error allocating a new context\n");
+	    TPMLIB_LogPrintf("TPM_SHA1InitCmd:  Error allocating a new context\n");
             rc = TPM_SIZE;
 	}
     }
@@ -1792,12 +1792,12 @@ TPM_RESULT TPM_SHA1UpdateCmd(void *context, const unsigned char *data, uint32_t 
 {
     TPM_RESULT  rc = 0;
     
-    printf(" TPM_SHA1Update: length %u\n", length);
+    TPMLIB_LogPrintf(" TPM_SHA1Update: length %u\n", length);
     if (context != NULL) {
         SHA1_Update(context, data, length);
     }
     else {
-        printf("TPM_SHA1Update: Error, no existing SHA1 thread\n");
+        TPMLIB_LogPrintf("TPM_SHA1Update: Error, no existing SHA1 thread\n");
         rc = TPM_SHA_THREAD;
     }
     return rc;
@@ -1811,10 +1811,10 @@ TPM_RESULT TPM_SHA1FinalCmd(unsigned char *md, void *context)
     TPM_RESULT  	rc = 0;
     unsigned int 	digestLen;
     
-    printf(" TPM_SHA1FinalCmd:\n");
+    TPMLIB_LogPrintf(" TPM_SHA1FinalCmd:\n");
     if (rc== 0) {
 	if (context == NULL) {
-	    printf("TPM_SHA1FinalCmd: Error, no existing SHA1 thread\n");
+	    TPMLIB_LogPrintf("TPM_SHA1FinalCmd: Error, no existing SHA1 thread\n");
 	    rc = TPM_SHA_THREAD;
 	}
     }
@@ -1822,7 +1822,7 @@ TPM_RESULT TPM_SHA1FinalCmd(unsigned char *md, void *context)
 	SHA1_End(context, md, &digestLen, TPM_DIGEST_SIZE);
 	/* Sanity check.  For SHA1 it should always be 20 bytes. */
 	if (digestLen != TPM_DIGEST_SIZE) {
-	    printf("TPM_SHA1Final: Error (fatal), SHA1_End returned %u bytes\n", digestLen);
+	    TPMLIB_LogPrintf("TPM_SHA1Final: Error (fatal), SHA1_End returned %u bytes\n", digestLen);
 	    rc = TPM_FAIL;
 	}
     }
@@ -1834,7 +1834,7 @@ TPM_RESULT TPM_SHA1FinalCmd(unsigned char *md, void *context)
 void TPM_SHA1Delete(void **context)
 {
     if (*context != NULL) {
-        printf(" TPM_SHA1Delete:\n");
+        TPMLIB_LogPrintf(" TPM_SHA1Delete:\n");
 	/* zero because the SHA1 context might have data left from an HMAC */
 	SHA1_DestroyContext(*context, PR_TRUE);	
         *context = NULL;
@@ -1898,11 +1898,11 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
     SHA1SaveContextStr 	restoreContext;
     size_t		i;
     
-    printf(" TPM_Sha1Context_Load: FreeBL\n");
+    TPMLIB_LogPrintf(" TPM_Sha1Context_Load: FreeBL\n");
     /* TPM_Sha1Context_Store() stored a flag to indicate whether a context was stored */
     if (rc== 0) {
 	rc = TPM_LoadBool(&contextPresent, stream, stream_size);
- 	printf(" TPM_Sha1Context_Load: contextPresent %u\n", contextPresent);
+ 	TPMLIB_LogPrintf(" TPM_Sha1Context_Load: contextPresent %u\n", contextPresent);
     }
     /* check format tag */
     /* In the future, if multiple formats are supported, this check will be replaced by a 'switch'
@@ -1913,7 +1913,7 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
     /* check that context is NULL to detect memory leak */
     if ((rc== 0) && contextPresent) {
 	if (*context != NULL) {
-            printf("TPM_Sha1Context_Load: Error (fatal), *context %p should be NULL\n", *context );
+            TPMLIB_LogPrintf("TPM_Sha1Context_Load: Error (fatal), *context %p should be NULL\n", *context );
             rc = TPM_FAIL;
 	}
     }
@@ -1926,7 +1926,7 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
 	flattenSize = SHA1_FlattenSize(tmpContext);
 	/* sanity check that the freebl library and TPM structure here are in sync */
 	if (flattenSize != sizeof(SHA1SaveContextStr)) {
-	    printf("TPM_Sha1Context_Load: Error, "
+	    TPMLIB_LogPrintf("TPM_Sha1Context_Load: Error, "
 		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from structure\n",
 		   flattenSize, (unsigned long)sizeof(SHA1SaveContextStr));
 	    rc = TPM_BAD_PARAM_SIZE;
@@ -1957,7 +1957,7 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
 	/* the size test above ensures that the cast here is safe */
 	*context = SHA1_Resurrect((unsigned char *)&restoreContext, NULL);
 	if (*context == NULL) {
-	    printf("TPM_Sha1Context_Load: Error, could not SHA1_Resurrect\n");
+	    TPMLIB_LogPrintf("TPM_Sha1Context_Load: Error, could not SHA1_Resurrect\n");
 	    rc = TPM_SIZE;
 	}
     }
@@ -1981,18 +1981,18 @@ TPM_RESULT TPM_Sha1Context_Store(TPM_STORE_BUFFER *sbuffer,
     SHA1SaveContextStr	saveContext;
     TPM_BOOL		contextPresent;		/* is there a context to be stored */
 
-    printf(" TPM_Sha1Context_Store: FreeBL\n");
+    TPMLIB_LogPrintf(" TPM_Sha1Context_Store: FreeBL\n");
     /* store contextPresent */
     if (rc == 0) {
 	if (context != NULL) {
-	    printf("  TPM_Sha1Context_Store: Storing context\n");
+	    TPMLIB_LogPrintf("  TPM_Sha1Context_Store: Storing context\n");
 	    contextPresent = TRUE;
 	}
 	else {
-	    printf("  TPM_Sha1Context_Store: No context to store\n");
+	    TPMLIB_LogPrintf("  TPM_Sha1Context_Store: No context to store\n");
 	    contextPresent = FALSE;
 	}
-	printf("  TPM_Sha1Context_Store: contextPresent %u \n", contextPresent);
+	TPMLIB_LogPrintf("  TPM_Sha1Context_Store: contextPresent %u \n", contextPresent);
         rc = TPM_Sbuffer_Append(sbuffer, &contextPresent, sizeof(TPM_BOOL));
     }
     /* overall format tag */
@@ -2004,7 +2004,7 @@ TPM_RESULT TPM_Sha1Context_Store(TPM_STORE_BUFFER *sbuffer,
 	flattenSize = SHA1_FlattenSize(context);	/* it will not be NULL here */
 	/* sanity check that the freebl library and TPM structure here are in sync */
 	if (flattenSize != sizeof(SHA1SaveContextStr)) {
-	    printf("TPM_Sha1Context_Store: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_Sha1Context_Store: Error (fatal), "
 		   "SHA1 context size %u from SHA1_FlattenSize not equal %lu from structure\n",
 		   flattenSize, (unsigned long)sizeof(SHA1SaveContextStr));
 	    rc = TPM_FAIL;
@@ -2015,7 +2015,7 @@ TPM_RESULT TPM_Sha1Context_Store(TPM_STORE_BUFFER *sbuffer,
 	/* the size test above ensures that the cast here is safe */
 	rv = SHA1_Flatten(context, (unsigned char *)&saveContext);
 	if (rv != SECSuccess) {
-	    printf("TPM_Sha1Context_Store: Error (fatal), SHA1_Flatten rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_Sha1Context_Store: Error (fatal), SHA1_Flatten rv %d\n", rv);
 	    rc = TPM_FAIL;
 	}
     }
@@ -2056,7 +2056,7 @@ TPM_RESULT TPM_SymmetricKeyData_New(TPM_SYMMETRIC_KEY_TOKEN *tpm_symmetric_key_d
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_SymmetricKeyData_New:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_New:\n");
     if (rc == 0) {
 	rc = TPM_Malloc(tpm_symmetric_key_data, sizeof(TPM_SYMMETRIC_KEY_DATA));
     }
@@ -2072,7 +2072,7 @@ TPM_RESULT TPM_SymmetricKeyData_New(TPM_SYMMETRIC_KEY_TOKEN *tpm_symmetric_key_d
 
 void TPM_SymmetricKeyData_Free(TPM_SYMMETRIC_KEY_TOKEN *tpm_symmetric_key_data)
 {
-    printf(" TPM_SymmetricKeyData_Free:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Free:\n");
     if (*tpm_symmetric_key_data != NULL) {
         TPM_SymmetricKeyData_Init(*tpm_symmetric_key_data);
 	free(*tpm_symmetric_key_data);
@@ -2091,7 +2091,7 @@ void TPM_SymmetricKeyData_Init(TPM_SYMMETRIC_KEY_TOKEN tpm_symmetric_key_token)
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
 
-    printf(" TPM_SymmetricKeyData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Init:\n");
     tpm_symmetric_key_data->tag = TPM_TAG_KEY;
     tpm_symmetric_key_data->valid = FALSE;
     tpm_symmetric_key_data->fill = 0;
@@ -2113,7 +2113,7 @@ TPM_RESULT TPM_SymmetricKeyData_Load(TPM_SYMMETRIC_KEY_TOKEN tpm_symmetric_key_t
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
     
-    printf(" TPM_SymmetricKeyData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Load:\n");
     /* check tag */
     if (rc == 0) {
         rc = TPM_CheckTag(TPM_TAG_KEY, stream, stream_size);
@@ -2146,7 +2146,7 @@ TPM_RESULT TPM_SymmetricKeyData_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
     
-    printf(" TPM_SymmetricKeyData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Store:\n");
     /* store tag */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append16(sbuffer, tpm_symmetric_key_data->tag);
@@ -2179,7 +2179,7 @@ TPM_RESULT TPM_SymmetricKeyData_GenerateKey(TPM_SYMMETRIC_KEY_TOKEN tpm_symmetri
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
     
-    printf(" TPM_SymmetricKeyData_GenerateKey:\n");
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_GenerateKey:\n");
     /* generate a random key */
     if (rc == 0) {
         rc = TPM_Random(tpm_symmetric_key_data->userKey, sizeof(tpm_symmetric_key_data->userKey));
@@ -2215,14 +2215,14 @@ TPM_RESULT TPM_SymmetricKeyData_Encrypt(unsigned char **encrypt_data,   /* outpu
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
 
-    printf(" TPM_SymmetricKeyData_Encrypt: Length %u\n", decrypt_length);
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Encrypt: Length %u\n", decrypt_length);
     decrypt_data_pad = NULL;    /* freed @1 */
     cx = NULL;    		/* freed @2 */
     
     /* sanity check that the AES key has previously been generated */
     if (rc == 0) {
 	if (!tpm_symmetric_key_data->valid) {
-	    printf("TPM_SymmetricKeyData_Encrypt: Error (fatal), AES key not valid\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Encrypt: Error (fatal), AES key not valid\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -2230,7 +2230,7 @@ TPM_RESULT TPM_SymmetricKeyData_Encrypt(unsigned char **encrypt_data,   /* outpu
         /* calculate the PKCS#7 / RFC2630 pad length and padded data length */
         pad_length = TPM_AES_BLOCK_SIZE - (decrypt_length % TPM_AES_BLOCK_SIZE);
         *encrypt_length = decrypt_length + pad_length;
-        printf("  TPM_SymmetricKeyData_Encrypt: Padded length %u pad length %u\n",
+        TPMLIB_LogPrintf("  TPM_SymmetricKeyData_Encrypt: Padded length %u pad length %u\n",
                *encrypt_length, pad_length);
         /* allocate memory for the encrypted response */
         rc = TPM_Malloc(encrypt_data, *encrypt_length);
@@ -2250,7 +2250,7 @@ TPM_RESULT TPM_SymmetricKeyData_Encrypt(unsigned char **encrypt_data,   /* outpu
 			       TPM_AES_BLOCK_SIZE,	/* key length */
 			       TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	if (cx == NULL) {
-	    printf("TPM_SymmetricKeyData_Encrypt: Error creating AES context\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Encrypt: Error creating AES context\n");
 	    rc = TPM_SIZE;
 	}
     }
@@ -2268,7 +2268,7 @@ TPM_RESULT TPM_SymmetricKeyData_Encrypt(unsigned char **encrypt_data,   /* outpu
 			 decrypt_data_pad, *encrypt_length);			/* input */
 
 	if (rv != SECSuccess) {
-	    printf("TPM_SymmetricKeyData_Encrypt: Error, rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Encrypt: Error, rv %d\n", rv);
 	    rc = TPM_ENCRYPT_ERROR;
 	}
     }
@@ -2320,20 +2320,20 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
     TPM_SYMMETRIC_KEY_DATA *tpm_symmetric_key_data =
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
     
-    printf(" TPM_SymmetricKeyData_Decrypt: Length %u\n", encrypt_length);
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Decrypt: Length %u\n", encrypt_length);
     cx = NULL;    /* freed @1 */
 
     /* sanity check encrypted length */
     if (rc == 0) {
         if (encrypt_length < TPM_AES_BLOCK_SIZE) {
-            printf("TPM_SymmetricKeyData_Decrypt: Error, bad length\n");
+            TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error, bad length\n");
             rc = TPM_DECRYPT_ERROR;
         }
     }
     /* sanity check that the AES key has previously been generated */
     if (rc == 0) {
 	if (!tpm_symmetric_key_data->valid) {
-	    printf("TPM_SymmetricKeyData_Decrypt: Error (fatal), AES key not valid\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error (fatal), AES key not valid\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -2352,7 +2352,7 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
 			       TPM_AES_BLOCK_SIZE,	/* key length */
 			       TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	if (cx == NULL) {
-	    printf("TPM_SymmetricKeyData_Decrypt: Error creating AES context\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error creating AES context\n");
 	    rc = TPM_SIZE;
 	}
     }
@@ -2364,7 +2364,7 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
 			 *decrypt_data, &output_length, encrypt_length,	/* output */
 			 encrypt_data, encrypt_length);			/* input */
 	if (rv != SECSuccess) {
-	    printf("TPM_SymmetricKeyData_Decrypt: Error, rv %d\n", rv);
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error, rv %d\n", rv);
 	    rc = TPM_DECRYPT_ERROR;
 	}
     }
@@ -2376,10 +2376,10 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
         /* get the pad length from the last byte */
         pad_length = (uint32_t)*(*decrypt_data + encrypt_length - 1);
         /* sanity check the pad length */
-        printf(" TPM_SymmetricKeyData_Decrypt: Pad length %u\n", pad_length);
+        TPMLIB_LogPrintf(" TPM_SymmetricKeyData_Decrypt: Pad length %u\n", pad_length);
         if ((pad_length == 0) ||
             (pad_length > TPM_AES_BLOCK_SIZE)) {
-            printf("TPM_SymmetricKeyData_Decrypt: Error, illegal pad length\n");
+            TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error, illegal pad length\n");
             rc = TPM_DECRYPT_ERROR;
         }
     }
@@ -2391,7 +2391,7 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
         /* sanity check the pad */
         for (i = 0 ; i < pad_length ; i++, pad_data++) {
             if (*pad_data != pad_length) {
-                printf("TPM_SymmetricKeyData_Decrypt: Error, bad pad %02x at index %u\n",
+                TPMLIB_LogPrintf("TPM_SymmetricKeyData_Decrypt: Error, bad pad %02x at index %u\n",
                        *pad_data, i);
                 rc = TPM_DECRYPT_ERROR;
             }
@@ -2443,12 +2443,12 @@ TPM_RESULT TPM_SymmetricKeyData_CtrCrypt(unsigned char *data_out,               
     uint32_t		output_length;			/* dummy */
     uint32_t 		cint;				/* counter as a 32-bit integer */
 
-    printf(" TPM_SymmetricKeyData_CtrCrypt: data_size %u\n", data_size);
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_CtrCrypt: data_size %u\n", data_size);
     symmetric_key_size = symmetric_key_size;
     /* check the input CTR size, it can be truncated, but cannot be smaller than the AES key */
     if (rc == 0) {
         if (ctr_in_size < sizeof(ctr)) {
-            printf("  TPM_SymmetricKeyData_CtrCrypt: Error (fatal)"
+            TPMLIB_LogPrintf("  TPM_SymmetricKeyData_CtrCrypt: Error (fatal)"
                    ", CTR size %u too small for AES key\n", ctr_in_size);
             rc = TPM_FAIL;              /* should never occur */
         }
@@ -2467,12 +2467,12 @@ TPM_RESULT TPM_SymmetricKeyData_CtrCrypt(unsigned char *data_out,               
 			       TPM_AES_BLOCK_SIZE,	/* key length */
 			       TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	if (cx == NULL) {
-	    printf("TPM_SymmetricKeyData_CtrCrypt: Error creating AES context\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_CtrCrypt: Error creating AES context\n");
 	    rc = TPM_SIZE;
 	}
     }
     while (data_size != 0) {
-        printf("  TPM_SymmetricKeyData_CtrCrypt : data_size remaining %u\n", data_size);
+        TPMLIB_LogPrintf("  TPM_SymmetricKeyData_CtrCrypt : data_size remaining %u\n", data_size);
 	/* initialize the context each time through the loop */
 	if (rc == 0) {
 	    rv = AES_InitContext(cx,			/* AES context */
@@ -2483,7 +2483,7 @@ TPM_RESULT TPM_SymmetricKeyData_CtrCrypt(unsigned char *data_out,               
 				 TRUE,			/* encrypt */
 				 TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	    if (rv != SECSuccess) {
-		printf("TPM_SymmetricKeyData_CtrCrypt: Error, rv %d\n", rv);
+		TPMLIB_LogPrintf("TPM_SymmetricKeyData_CtrCrypt: Error, rv %d\n", rv);
 		rc = TPM_ENCRYPT_ERROR;
 	    }
 	}
@@ -2494,7 +2494,7 @@ TPM_RESULT TPM_SymmetricKeyData_CtrCrypt(unsigned char *data_out,               
 			     ctr, TPM_AES_BLOCK_SIZE);				/* input */
 
 	    if (rv != SECSuccess) {
-		printf("TPM_SymmetricKeyData_CtrCrypt: Error, rv %d\n", rv);
+		TPMLIB_LogPrintf("TPM_SymmetricKeyData_CtrCrypt: Error, rv %d\n", rv);
 		rc = TPM_ENCRYPT_ERROR;
 	    }
 	}
@@ -2560,12 +2560,12 @@ TPM_RESULT TPM_SymmetricKeyData_OfbCrypt(unsigned char *data_out,       	/* outp
     unsigned char 	pad_buffer[TPM_AES_BLOCK_SIZE];       	/* the XOR pad */
     uint32_t		output_length;				/* dummy */
 
-    printf(" TPM_SymmetricKeyData_OfbCrypt: data_size %u\n", data_size);
+    TPMLIB_LogPrintf(" TPM_SymmetricKeyData_OfbCrypt: data_size %u\n", data_size);
     symmetric_key_size = symmetric_key_size;
     /* check the input OFB size, it can be truncated, but cannot be smaller than the AES key */
     if (rc == 0) {
         if (ivec_in_size < TPM_AES_BLOCK_SIZE) {
-            printf("  TPM_SymmetricKeyData_OfbCrypt: Error (fatal),"
+            TPMLIB_LogPrintf("  TPM_SymmetricKeyData_OfbCrypt: Error (fatal),"
                    "IV size %u too small for AES key\n", ivec_in_size);
             rc = TPM_FAIL;              /* should never occur */
         }
@@ -2584,12 +2584,12 @@ TPM_RESULT TPM_SymmetricKeyData_OfbCrypt(unsigned char *data_out,       	/* outp
 			       TPM_AES_BLOCK_SIZE,	/* key length */
 			       TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	if (cx == NULL) {
-	    printf("TPM_SymmetricKeyData_OfbCrypt: Error creating AES context\n");
+	    TPMLIB_LogPrintf("TPM_SymmetricKeyData_OfbCrypt: Error creating AES context\n");
 	    rc = TPM_SIZE;
 	}
     }
     while (data_size != 0) {
-        printf("   TPM_SymmetricKeyData_OfbCrypt: data_size remaining %u\n", data_size);
+        TPMLIB_LogPrintf("   TPM_SymmetricKeyData_OfbCrypt: data_size remaining %u\n", data_size);
 	/* initialize the context each time through the loop */
 	if (rc == 0) {
 	    rv = AES_InitContext(cx,			/* AES context */
@@ -2600,7 +2600,7 @@ TPM_RESULT TPM_SymmetricKeyData_OfbCrypt(unsigned char *data_out,       	/* outp
 				 TRUE,			/* encrypt */
 				 TPM_AES_BLOCK_SIZE);	/* AES  block length */
 	    if (rv != SECSuccess) {
-		printf("TPM_SymmetricKeyData_OfbCrypt: Error, rv %d\n", rv);
+		TPMLIB_LogPrintf("TPM_SymmetricKeyData_OfbCrypt: Error, rv %d\n", rv);
 		rc = TPM_ENCRYPT_ERROR;
 	    }
 	}
@@ -2612,7 +2612,7 @@ TPM_RESULT TPM_SymmetricKeyData_OfbCrypt(unsigned char *data_out,       	/* outp
 			     ivec_loop, TPM_AES_BLOCK_SIZE);			/* input */
 
 	    if (rv != SECSuccess) {
-		printf("TPM_SymmetricKeyData_OfbCrypt: Error, rv %d\n", rv);
+		TPMLIB_LogPrintf("TPM_SymmetricKeyData_OfbCrypt: Error, rv %d\n", rv);
 		rc = TPM_ENCRYPT_ERROR;
 	    }
 	}

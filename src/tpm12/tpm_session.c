@@ -101,7 +101,7 @@ static TPM_RESULT TPM_LoadContext_CheckNvLoaded(tpm_state_t *tpm_state,
 
 void TPM_AuthSessionData_Init(TPM_AUTH_SESSION_DATA *tpm_auth_session_data)
 {
-    printf(" TPM_AuthSessionData_Init:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_Init:\n");
     tpm_auth_session_data->handle = 0;
     tpm_auth_session_data->protocolID = 0;
     tpm_auth_session_data->entityTypeByte = 0;
@@ -130,7 +130,7 @@ TPM_RESULT TPM_AuthSessionData_Load(TPM_AUTH_SESSION_DATA *tpm_auth_session_data
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AuthSessionData_Load:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_Load:\n");
     /* load handle */
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_auth_session_data->handle), stream, stream_size);
@@ -181,7 +181,7 @@ TPM_RESULT TPM_AuthSessionData_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_AuthSessionData_Store:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_Store:\n");
     /* store handle */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_auth_session_data->handle);
@@ -228,7 +228,7 @@ TPM_RESULT TPM_AuthSessionData_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_AuthSessionData_Delete(TPM_AUTH_SESSION_DATA *tpm_auth_session_data)
 {
-    printf(" TPM_AuthSessionData_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_Delete:\n");
     if (tpm_auth_session_data != NULL) {
 	TPM_DelegatePublic_Delete(&(tpm_auth_session_data->pub));
 	TPM_AuthSessionData_Init(tpm_auth_session_data);
@@ -262,7 +262,7 @@ TPM_RESULT TPM_AuthSessionData_GetDelegatePublic(TPM_DELEGATE_PUBLIC **delegateP
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_AuthSessionData_GetDelegatePublic:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_GetDelegatePublic:\n");
     if (rc == 0) {
 	*delegatePublic = &(auth_session_data->pub);
     }
@@ -278,7 +278,7 @@ TPM_RESULT TPM_AuthSessionData_CheckEncScheme(TPM_ADIP_ENC_SCHEME adipEncScheme,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_AuthSessionData_CheckEncScheme: adipEncScheme %02x\n", adipEncScheme);
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_CheckEncScheme: adipEncScheme %02x\n", adipEncScheme);
     switch (adipEncScheme) {
       case TPM_ET_XOR:
 	/* i.If TPM_PERMANENT_FLAGS -> FIPS is TRUE */
@@ -290,7 +290,7 @@ TPM_RESULT TPM_AuthSessionData_CheckEncScheme(TPM_ADIP_ENC_SCHEME adipEncScheme,
       case TPM_ET_AES128_CTR:
 	break;
       default:
-	printf("TPM_AuthSessionData_CheckEncScheme: Error, unsupported adipEncScheme\n");
+	TPMLIB_LogPrintf("TPM_AuthSessionData_CheckEncScheme: Error, unsupported adipEncScheme\n");
 	rc = TPM_INAPPROPRIATE_ENC;
 	break;
     }
@@ -316,12 +316,12 @@ TPM_RESULT TPM_AuthSessionData_Decrypt(TPM_DIGEST a1Even,
     TPM_DIGEST	x1Even;
     TPM_DIGEST	x2Odd;
 
-    printf(" TPM_AuthSessionData_Decrypt:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessionData_Decrypt:\n");
     /* sanity check - the session must be OSAP or DSAP */
     if (rc == 0) {
 	if ((tpm_auth_session_data->protocolID != TPM_PID_OSAP) &&
 	    (tpm_auth_session_data->protocolID != TPM_PID_DSAP)) {
-	    printf("TPM_AuthSessionData_Decrypt: Error, protocolID should be OSAP, is %04hx\n",
+	    TPMLIB_LogPrintf("TPM_AuthSessionData_Decrypt: Error, protocolID should be OSAP, is %04hx\n",
 		   tpm_auth_session_data->protocolID);
 	    rc = TPM_BAD_MODE;
 	}
@@ -398,7 +398,7 @@ TPM_RESULT TPM_AuthSessionData_Decrypt(TPM_DIGEST a1Even,
 	    break;
 #endif	/* TPM_AES */
 	  default:
-	    printf("TPM_AuthSessionData_Decrypt: Error, entityType %02x not supported\n",
+	    TPMLIB_LogPrintf("TPM_AuthSessionData_Decrypt: Error, entityType %02x not supported\n",
 		   tpm_auth_session_data->adipEncScheme);
 	    rc = TPM_INAPPROPRIATE_ENC;
 	    break;
@@ -415,7 +415,7 @@ void TPM_AuthSessions_Init(TPM_AUTH_SESSION_DATA *authSessions)
 {
     size_t i;
     
-    printf(" TPM_AuthSessions_Init:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_Init:\n");
     for (i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	TPM_AuthSessionData_Init(&(authSessions[i]));
     }
@@ -440,7 +440,7 @@ TPM_RESULT TPM_AuthSessions_Load(TPM_AUTH_SESSION_DATA *authSessions,
     size_t		i;
     uint32_t		activeCount;
 
-    printf(" TPM_AuthSessions_Load:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_Load:\n");
     /* load active count */
     if (rc == 0) {
 	rc = TPM_Load32(&activeCount, stream, stream_size);
@@ -448,13 +448,13 @@ TPM_RESULT TPM_AuthSessions_Load(TPM_AUTH_SESSION_DATA *authSessions,
     /* load authorization sessions */
     if (rc == 0) {
 	if (activeCount > TPM_MIN_AUTH_SESSIONS) {
-	    printf("TPM_AuthSessions_Load: Error (fatal) %u sessions, %u slots\n",
+	    TPMLIB_LogPrintf("TPM_AuthSessions_Load: Error (fatal) %u sessions, %u slots\n",
 		   activeCount, TPM_MIN_AUTH_SESSIONS);
 	    rc = TPM_FAIL;
 	}
     }    
     if (rc == 0) {
-	printf(" TPM_AuthSessions_Load: Loading %u sessions\n", activeCount);
+	TPMLIB_LogPrintf(" TPM_AuthSessions_Load: Loading %u sessions\n", activeCount);
     }
     for (i = 0 ; (rc == 0) && (i < activeCount) ; i++) {
 	rc = TPM_AuthSessionData_Load(&(authSessions[i]), stream, stream_size);
@@ -480,13 +480,13 @@ TPM_RESULT TPM_AuthSessions_Store(TPM_STORE_BUFFER *sbuffer,
     if (rc == 0) {
 	TPM_AuthSessions_GetSpace(&space, authSessions);
 	activeCount = TPM_MIN_AUTH_SESSIONS - space;
-	printf(" TPM_AuthSessions_Store: Storing %u sessions\n", activeCount);
+	TPMLIB_LogPrintf(" TPM_AuthSessions_Store: Storing %u sessions\n", activeCount);
 	rc = TPM_Sbuffer_Append32(sbuffer, activeCount);
     }
     /* store auth sessions */
     for (i = 0 ; (rc == 0) && (i < TPM_MIN_AUTH_SESSIONS) ; i++) {
 	if ((authSessions[i]).valid) {	  /* if the session is active */
-	    printf("  TPM_AuthSessions_Store: Storing %08x\n", authSessions[i].handle);
+	    TPMLIB_LogPrintf("  TPM_AuthSessions_Store: Storing %08x\n", authSessions[i].handle);
 	    rc = TPM_AuthSessionData_Store(sbuffer, &(authSessions[i]));
 	}
     }
@@ -501,7 +501,7 @@ void TPM_AuthSessions_Delete(TPM_AUTH_SESSION_DATA *authSessions)
 {
     size_t i;
     
-    printf(" TPM_AuthSessions_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_Delete:\n");
     for (i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	TPM_AuthSessionData_Delete(&(authSessions[i]));
     }
@@ -517,10 +517,10 @@ void TPM_AuthSessions_IsSpace(TPM_BOOL *isSpace,
 			      uint32_t *index,
 			      TPM_AUTH_SESSION_DATA *authSessions)
 {
-    printf(" TPM_AuthSessions_IsSpace:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_IsSpace:\n");
     for (*index = 0, *isSpace = FALSE ; *index < TPM_MIN_AUTH_SESSIONS ; (*index)++) {
 	if (!((authSessions[*index]).valid)) {
-	    printf("  TPM_AuthSessions_IsSpace: Found space at %u\n", *index);
+	    TPMLIB_LogPrintf("  TPM_AuthSessions_IsSpace: Found space at %u\n", *index);
 	    *isSpace = TRUE;
 	    break;
 	}	    
@@ -533,7 +533,7 @@ void TPM_AuthSessions_Trace(TPM_AUTH_SESSION_DATA *authSessions)
     size_t i;
     for (i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	if ((authSessions[i]).valid) {
-	    printf(" TPM_AuthSessions_Trace: %lu handle %08x\n",
+	    TPMLIB_LogPrintf(" TPM_AuthSessions_Trace: %lu handle %08x\n",
 		   (unsigned long)i, authSessions[i].handle);
 	}
     }
@@ -549,7 +549,7 @@ void TPM_AuthSessions_GetSpace(uint32_t *space,
 {
     uint32_t i;
 
-    printf(" TPM_AuthSessions_GetSpace:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_GetSpace:\n");
     for (*space = 0 , i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	if (!((authSessions[i]).valid)) {
 	    (*space)++;
@@ -571,7 +571,7 @@ TPM_RESULT TPM_AuthSessions_StoreHandles(TPM_STORE_BUFFER *sbuffer,
     uint16_t	i;
     uint32_t	space;
     
-    printf(" TPM_AuthSessions_StoreHandles:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_StoreHandles:\n");
     /* get the number of loaded handles */
     if (rc == 0) {
 	TPM_AuthSessions_GetSpace(&space, authSessions);
@@ -604,12 +604,12 @@ TPM_RESULT TPM_AuthSessions_GetNewHandle(TPM_AUTH_SESSION_DATA **tpm_auth_sessio
     uint32_t			index;
     TPM_BOOL			isSpace;
     
-    printf(" TPM_AuthSessions_GetNewHandle:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_GetNewHandle:\n");
     /* is there an empty entry, get the location index */
     if (rc == 0) {
 	TPM_AuthSessions_IsSpace(&isSpace, &index, authSessions);
 	if (!isSpace) {
-	    printf("TPM_AuthSessions_GetNewHandle: Error, no space in authSessions table\n");
+	    TPMLIB_LogPrintf("TPM_AuthSessions_GetNewHandle: Error, no space in authSessions table\n");
 	    TPM_AuthSessions_Trace(authSessions);
 	    rc = TPM_RESOURCES;
 	}
@@ -622,7 +622,7 @@ TPM_RESULT TPM_AuthSessions_GetNewHandle(TPM_AUTH_SESSION_DATA **tpm_auth_sessio
 				       (TPM_GETENTRY_FUNCTION_T)TPM_AuthSessions_GetEntry);
     }
     if (rc == 0) {
-	printf("  TPM_AuthSessions_GetNewHandle: Assigned handle %08x\n", *authHandle);
+	TPMLIB_LogPrintf("  TPM_AuthSessions_GetNewHandle: Assigned handle %08x\n", *authHandle);
 	*tpm_auth_session_data = &(authSessions[index]);
 	/* assign the handle */
 	(*tpm_auth_session_data)->handle = *authHandle;
@@ -649,7 +649,7 @@ TPM_RESULT TPM_AuthSessions_GetEntry(TPM_AUTH_SESSION_DATA **tpm_auth_session_da
     size_t	i;
     TPM_BOOL	found;
     
-    printf(" TPM_AuthSessions_GetEntry: authHandle %08x\n", authHandle);
+    TPMLIB_LogPrintf(" TPM_AuthSessions_GetEntry: authHandle %08x\n", authHandle);
     for (i = 0, found = FALSE ; (i < TPM_MIN_AUTH_SESSIONS) && !found ; i++) {
 	if ((authSessions[i].valid) &&		    
 	    (authSessions[i].handle == authHandle)) {	  /* found */
@@ -658,7 +658,7 @@ TPM_RESULT TPM_AuthSessions_GetEntry(TPM_AUTH_SESSION_DATA **tpm_auth_session_da
 	}
     }
     if (!found) {
-	printf("  TPM_AuthSessions_GetEntry: session handle %08x not found\n",
+	TPMLIB_LogPrintf("  TPM_AuthSessions_GetEntry: session handle %08x not found\n",
 	       authHandle);
 	rc = TPM_INVALID_AUTHHANDLE;
     }
@@ -682,12 +682,12 @@ TPM_RESULT TPM_AuthSessions_AddEntry(TPM_HANDLE *tpm_handle,				/* i/o */
     uint32_t			index;
     TPM_BOOL			isSpace;
     
-    printf(" TPM_AuthSessions_AddEntry: handle %08x, keepHandle %u\n",
+    TPMLIB_LogPrintf(" TPM_AuthSessions_AddEntry: handle %08x, keepHandle %u\n",
 	   *tpm_handle, keepHandle);
     /* check for valid TPM_AUTH_SESSION_DATA */
     if (rc == 0) {
 	if (tpm_auth_session_data == NULL) {	/* NOTE: should never occur */
-	    printf("TPM_AuthSessions_AddEntry: Error (fatal), NULL TPM_AUTH_SESSION_DATA\n");
+	    TPMLIB_LogPrintf("TPM_AuthSessions_AddEntry: Error (fatal), NULL TPM_AUTH_SESSION_DATA\n");
 	    rc = TPM_FAIL;
 	}
     }
@@ -695,7 +695,7 @@ TPM_RESULT TPM_AuthSessions_AddEntry(TPM_HANDLE *tpm_handle,				/* i/o */
     if (rc == 0) {
 	TPM_AuthSessions_IsSpace(&isSpace, &index, authSessions);
 	if (!isSpace) {
-	    printf("TPM_AuthSessions_AddEntry: Error, session entries full\n");
+	    TPMLIB_LogPrintf("TPM_AuthSessions_AddEntry: Error, session entries full\n");
 	    TPM_AuthSessions_Trace(authSessions);
 	    rc = TPM_RESOURCES;
 	}
@@ -710,7 +710,7 @@ TPM_RESULT TPM_AuthSessions_AddEntry(TPM_HANDLE *tpm_handle,				/* i/o */
     if (rc == 0) {
 	TPM_AuthSessionData_Copy(&(authSessions[index]), *tpm_handle, tpm_auth_session_data);
 	authSessions[index].valid = TRUE;
-	printf("  TPM_AuthSessions_AddEntry: Index %u handle %08x\n",
+	TPMLIB_LogPrintf("  TPM_AuthSessions_AddEntry: Index %u handle %08x\n",
 	       index, authSessions[index].handle);
     }
     return rc;
@@ -761,13 +761,13 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
     TPM_RESULT	rc = 0;
     TPM_DELEGATE_TABLE_ROW	*delegateTableRow;
     
-    printf(" TPM_AuthSessions_GetData: authHandle %08x\n", authHandle);
+    TPMLIB_LogPrintf(" TPM_AuthSessions_GetData: authHandle %08x\n", authHandle);
     if (rc == 0) {
 	rc = TPM_AuthSessions_GetEntry(tpm_auth_session_data,
 				       tpm_state->tpm_stclear_data.authSessions,
 				       authHandle);
 	if (rc != 0) {
-	    printf("TPM_AuthSessions_GetData: Error, authHandle %08x not found\n", authHandle);
+	    TPMLIB_LogPrintf("TPM_AuthSessions_GetData: Error, authHandle %08x not found\n", authHandle);
 	}
     }
     /* If a specific protocol is required, check that the handle points to the correct session type
@@ -778,7 +778,7 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
 	    break;
 	  case TPM_PID_OIAP:
 	    if ((*tpm_auth_session_data)->protocolID != TPM_PID_OIAP) {
-		printf("TPM_AuthSessions_GetData: Error, "
+		TPMLIB_LogPrintf("TPM_AuthSessions_GetData: Error, "
 		       "session protocolID should be OIAP, is %04hx\n",
 		       (*tpm_auth_session_data)->protocolID);
 		rc = TPM_BAD_MODE;
@@ -788,14 +788,14 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
 	    /* Any ordinal requiring OSAP should also accept DSAP */
 	    if (((*tpm_auth_session_data)->protocolID != TPM_PID_OSAP) &&
 		((*tpm_auth_session_data)->protocolID != TPM_PID_DSAP)) {
-		printf("TPM_AuthSessions_GetData: Error, "
+		TPMLIB_LogPrintf("TPM_AuthSessions_GetData: Error, "
 		       "session protocolID should be OSAP or DSAP, is %04hx\n",
 		       (*tpm_auth_session_data)->protocolID);
 		rc = TPM_BAD_MODE;
 	    }
 	    break;
 	  default:	/* should not occur */
-	    printf("TPM_AuthSessions_GetData: Error, required protocolID %04hx unsupported\n",
+	    TPMLIB_LogPrintf("TPM_AuthSessions_GetData: Error, required protocolID %04hx unsupported\n",
 		   protocolID);
 	    rc = TPM_BAD_MODE;
 	    break;
@@ -805,7 +805,7 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
     if (rc == 0) {
 	if (entityType == TPM_ET_OWNER) {
 	    if (!tpm_state->tpm_permanent_data.ownerInstalled) {
-		printf("TPM_AuthSessions_GetData: Error, no owner installed\n");
+		TPMLIB_LogPrintf("TPM_AuthSessions_GetData: Error, no owner installed\n");
 		rc = TPM_AUTHFAIL;
 	    }
 	}
@@ -820,7 +820,7 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
 	    /* ii. If TPM_STCLEAR_DATA -> ownerReference is pointing to a delegate row */
 	    if ((entityType == TPM_ET_OWNER) &&
 		(tpm_state->tpm_stclear_data.ownerReference != TPM_KH_OWNER)) {
-		printf("  TPM_AuthSessions_GetData: Delegating to row %u\n",
+		TPMLIB_LogPrintf("  TPM_AuthSessions_GetData: Delegating to row %u\n",
 		       tpm_state->tpm_stclear_data.ownerReference);
 		/* (1) Set R1 a row index to TPM_STCLEAR_DATA -> ownerReference */
 		/* (2) Set D1 a TPM_DELEGATE_TABLE_ROW to TPM_PERMANENT_DATA -> delegateTable ->
@@ -879,7 +879,7 @@ TPM_RESULT TPM_AuthSessions_GetData(TPM_AUTH_SESSION_DATA **tpm_auth_session_dat
 	    }
 	    break;
 	  default:	/* should not occur */
-	    printf("TPM_AuthSessions_GetData: session protocolID %04hx unsupported\n",
+	    TPMLIB_LogPrintf("TPM_AuthSessions_GetData: session protocolID %04hx unsupported\n",
 		   (*tpm_auth_session_data)->protocolID);
 	    rc = TPM_AUTHFAIL;
 	    break;
@@ -898,7 +898,7 @@ TPM_RESULT TPM_AuthSessions_TerminateHandle(TPM_AUTH_SESSION_DATA *authSessions,
     TPM_RESULT	rc = 0;
     TPM_AUTH_SESSION_DATA *tpm_auth_session_data;
 
-    printf(" TPM_AuthSessions_TerminateHandle: Handle %08x\n", authHandle);
+    TPMLIB_LogPrintf(" TPM_AuthSessions_TerminateHandle: Handle %08x\n", authHandle);
     /* get the TPM_AUTH_SESSION_DATA associated with the TPM_AUTHHANDLE */
     if (rc == 0) {
 	rc = TPM_AuthSessions_GetEntry(&tpm_auth_session_data, authSessions, authHandle);
@@ -930,7 +930,7 @@ void TPM_AuthSessions_TerminateEntity(TPM_BOOL *continueAuthSession,
     TPM_BOOL		terminate;
     TPM_RESULT		match;
 
-    printf(" TPM_AuthSessions_TerminateEntity: entityType %04x\n", entityType);
+    TPMLIB_LogPrintf(" TPM_AuthSessions_TerminateEntity: entityType %04x\n", entityType);
     for (i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	terminate = FALSE;
 	if ((authSessions[i].valid) &&			    /* if the entry is valid */
@@ -950,7 +950,7 @@ void TPM_AuthSessions_TerminateEntity(TPM_BOOL *continueAuthSession,
 	    }
 	}
 	if (terminate) {
-	    printf("  TPM_AuthSessions_TerminateEntity: Terminating handle %08x\n",
+	    TPMLIB_LogPrintf("  TPM_AuthSessions_TerminateEntity: Terminating handle %08x\n",
 		   authSessions[i].handle);
 	    /* if terminating the ordinal's session */
 	    if (authSessions[i].handle == authHandle) {
@@ -980,7 +980,7 @@ void TPM_AuthSessions_TerminatexSAP(TPM_BOOL *continueAuthSession,
 {
     uint32_t		i;
 
-    printf(" TPM_AuthSessions_TerminatexSAP:\n");
+    TPMLIB_LogPrintf(" TPM_AuthSessions_TerminatexSAP:\n");
     for (i = 0 ; i < TPM_MIN_AUTH_SESSIONS ; i++) {
 	if ((authSessions[i].protocolID == TPM_PID_OSAP) ||
 	    (authSessions[i]. protocolID == TPM_PID_DSAP)) {
@@ -988,7 +988,7 @@ void TPM_AuthSessions_TerminatexSAP(TPM_BOOL *continueAuthSession,
 	    if (authSessions[i].handle == authHandle) {
 		*continueAuthSession = FALSE;	/* for the ordinal response */
 	    }
-	    printf("  TPM_AuthSessions_TerminatexSAP: Terminating handle %08x\n",
+	    TPMLIB_LogPrintf("  TPM_AuthSessions_TerminatexSAP: Terminating handle %08x\n",
 		   authSessions[i].handle);
 	    TPM_AuthSessionData_Delete(&authSessions[i]);
 	}	    
@@ -1013,7 +1013,7 @@ void TPM_ContextList_Init(uint32_t *contextList)
 {
     size_t i;
     
-    printf(" TPM_ContextList_Init:\n");
+    TPMLIB_LogPrintf(" TPM_ContextList_Init:\n");
     for (i = 0 ; i < TPM_MIN_SESSION_LIST ; i++) {
 	contextList[i] = 0;
     }
@@ -1036,7 +1036,7 @@ TPM_RESULT TPM_ContextList_Load(uint32_t *contextList,
     TPM_RESULT		rc = 0;
     size_t		i;
     
-    printf(" TPM_ContextList_Load:\n");
+    TPMLIB_LogPrintf(" TPM_ContextList_Load:\n");
     for (i = 0 ; (rc == 0) && (i < TPM_MIN_SESSION_LIST) ; i++) {
 	rc = TPM_Load32(&(contextList[i]), stream, stream_size); 
     }
@@ -1055,7 +1055,7 @@ TPM_RESULT TPM_ContextList_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
     size_t		i;
 
-    printf(" TPM_ContextList_Store: Storing %u contexts\n", TPM_MIN_SESSION_LIST);
+    TPMLIB_LogPrintf(" TPM_ContextList_Store: Storing %u contexts\n", TPM_MIN_SESSION_LIST);
     for (i = 0 ; (rc == 0) && (i < TPM_MIN_SESSION_LIST) ; i++) {
 	rc = TPM_Sbuffer_Append32(sbuffer, contextList[i]); 
     }
@@ -1073,7 +1073,7 @@ void TPM_ContextList_GetSpace(uint32_t *space,
 {
     uint32_t i;
 
-    printf(" TPM_ContextList_GetSpace:\n");
+    TPMLIB_LogPrintf(" TPM_ContextList_GetSpace:\n");
     for (*space = 0 , i = 0 ; i < TPM_MIN_SESSION_LIST ; i++) {
 	if (contextList[i] == 0) {	/* zero values are free space */
 	    if (*space == 0) {
@@ -1095,10 +1095,10 @@ TPM_RESULT TPM_ContextList_GetEntry(uint32_t *entry,
 {
     TPM_RESULT	rc = 0;
     
-    printf(" TPM_ContextList_GetEntry:\n");
+    TPMLIB_LogPrintf(" TPM_ContextList_GetEntry:\n");
     if (rc == 0) {
 	if (value == 0) {
-	    printf("TPM_ContextList_GetEntry: Error, value %d never found\n", value);
+	    TPMLIB_LogPrintf("TPM_ContextList_GetEntry: Error, value %d never found\n", value);
 	    rc = TPM_BADCONTEXT;
 	}
     }
@@ -1109,7 +1109,7 @@ TPM_RESULT TPM_ContextList_GetEntry(uint32_t *entry,
 	    }
 	}
 	if (*entry == TPM_MIN_SESSION_LIST) {
-	    printf("TPM_ContextList_GetEntry: Error, value %d not found\n", value);
+	    TPMLIB_LogPrintf("TPM_ContextList_GetEntry: Error, value %d not found\n", value);
 	    rc = TPM_BADCONTEXT;
 	}
     }
@@ -1129,7 +1129,7 @@ TPM_RESULT TPM_ContextList_StoreHandles(TPM_STORE_BUFFER *sbuffer,
     uint16_t	i;
     uint16_t	loaded;
     
-    printf(" TPM_ContextList_StoreHandles:\n");
+    TPMLIB_LogPrintf(" TPM_ContextList_StoreHandles:\n");
     if (rc == 0) {
 	loaded = 0;
 	/* count the number of loaded handles */
@@ -1162,7 +1162,7 @@ TPM_RESULT TPM_ContextList_StoreHandles(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_ContextBlob_Init(TPM_CONTEXT_BLOB *tpm_context_blob)
 {
-    printf(" TPM_ContextBlob_Init:\n");
+    TPMLIB_LogPrintf(" TPM_ContextBlob_Init:\n");
     tpm_context_blob->resourceType = 0;
     tpm_context_blob->handle = 0;
     memset(tpm_context_blob->label, 0, TPM_CONTEXT_LABEL_SIZE);
@@ -1189,7 +1189,7 @@ TPM_RESULT TPM_ContextBlob_Load(TPM_CONTEXT_BLOB *tpm_context_blob,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ContextBlob_Load:\n");
+    TPMLIB_LogPrintf(" TPM_ContextBlob_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_CONTEXTBLOB, stream, stream_size);
@@ -1236,7 +1236,7 @@ TPM_RESULT TPM_ContextBlob_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ContextBlob_Store:\n");
+    TPMLIB_LogPrintf(" TPM_ContextBlob_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CONTEXTBLOB);
@@ -1283,7 +1283,7 @@ TPM_RESULT TPM_ContextBlob_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_ContextBlob_Delete(TPM_CONTEXT_BLOB *tpm_context_blob)
 {
-    printf(" TPM_ContextBlob_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_ContextBlob_Delete:\n");
     if (tpm_context_blob != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_context_blob->additionalData));
 	TPM_SizedBuffer_Delete(&(tpm_context_blob->sensitiveData));
@@ -1305,7 +1305,7 @@ void TPM_ContextBlob_Delete(TPM_CONTEXT_BLOB *tpm_context_blob)
 
 void TPM_ContextSensitive_Init(TPM_CONTEXT_SENSITIVE *tpm_context_sensitive)
 {
-    printf(" TPM_ContextSensitive_Init:\n");
+    TPMLIB_LogPrintf(" TPM_ContextSensitive_Init:\n");
     TPM_Nonce_Init(tpm_context_sensitive->contextNonce);
     TPM_SizedBuffer_Init(&(tpm_context_sensitive->internalData));
     return;
@@ -1327,7 +1327,7 @@ TPM_RESULT TPM_ContextSensitive_Load(TPM_CONTEXT_SENSITIVE *tpm_context_sensitiv
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ContextSensitive_Load:\n");
+    TPMLIB_LogPrintf(" TPM_ContextSensitive_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_CONTEXT_SENSITIVE, stream, stream_size);
@@ -1354,7 +1354,7 @@ TPM_RESULT TPM_ContextSensitive_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_ContextSensitive_Store:\n");
+    TPMLIB_LogPrintf(" TPM_ContextSensitive_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CONTEXT_SENSITIVE);
@@ -1381,7 +1381,7 @@ TPM_RESULT TPM_ContextSensitive_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_ContextSensitive_Delete(TPM_CONTEXT_SENSITIVE *tpm_context_sensitive)
 {
-    printf(" TPM_ContextSensitive_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_ContextSensitive_Delete:\n");
     if (tpm_context_sensitive != NULL) {
 	TPM_SizedBuffer_Delete(&(tpm_context_sensitive->internalData));
 	TPM_ContextSensitive_Init(tpm_context_sensitive);
@@ -1424,7 +1424,7 @@ TPM_RESULT TPM_Process_OIAP(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_AUTHHANDLE	authHandle = 0; 		/* 0, no suggested value */
 
-    printf("TPM_Process_OIAP: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OIAP: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1455,7 +1455,7 @@ TPM_RESULT TPM_Process_OIAP(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OIAP: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_OIAP: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1474,7 +1474,7 @@ TPM_RESULT TPM_Process_OIAP(tpm_state_t *tpm_state,
     }
     /* 3. Internally the TPM will do the following: */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OIAP: Using authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_OIAP: Using authHandle %08x\n", authHandle);
 	got_handle = TRUE;
 	/* a. TPM allocates space to save handle, protocol identification, both nonces and any other
 	   information the TPM needs to manage the session. */
@@ -1490,7 +1490,7 @@ TPM_RESULT TPM_Process_OIAP(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OIAP: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OIAP: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1606,7 +1606,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
     TPM_NONCE		nonceEvenOSAP;	/* Nonce generated by TPM and associated with shared
 					   secret. */
 
-    printf("TPM_Process_OSAP: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_OSAP: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -1620,12 +1620,12 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
     }
     /* get entityValue */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OSAP: entityType %04hx\n", entityType);
+	TPMLIB_LogPrintf("TPM_Process_OSAP: entityType %04hx\n", entityType);
 	returnCode = TPM_Load32(&entityValue, &command, &paramSize);
     }
     /* get nonceOddOSAP */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OSAP: entityValue %08x\n", entityValue);
+	TPMLIB_LogPrintf("TPM_Process_OSAP: entityValue %08x\n", entityValue);
 	returnCode = TPM_Nonce_Load(nonceOddOSAP, &command, &paramSize);
     }
     /* digest the input parameters */
@@ -1652,7 +1652,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_OSAP: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_OSAP: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1668,7 +1668,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 						   tpm_state->tpm_stclear_data.authSessions);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_OSAP: Using authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_OSAP: Using authHandle %08x\n", authHandle);
 	got_handle = TRUE;
 	/* 2. S1 MUST track the following information: */
 	/* a. Protocol identification */
@@ -1700,7 +1700,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    /* b. If entityValue is TPM_KH_OPERATOR return TPM_BAD_HANDLE */
 	    if (returnCode == TPM_SUCCESS) {
 		if (entityValue == TPM_KH_OPERATOR) {
-		    printf("TPM_Process_OSAP: Error, "
+		    TPMLIB_LogPrintf("TPM_Process_OSAP: Error, "
 			   "entityType TPM_ET_KEYHANDLE entityValue TPM_KH_OPERATOR\n");
 		    returnCode = TPM_BAD_HANDLE;
 		}
@@ -1708,7 +1708,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    /* look up and get the TPM_KEY authorization data */
 	    if (returnCode == TPM_SUCCESS) {
 		/* get the TPM_KEY, entityValue is the handle */
-		printf("TPM_Process_OSAP: entityType TPM_ET_KEYHANDLE entityValue %08x\n",
+		TPMLIB_LogPrintf("TPM_Process_OSAP: entityType TPM_ET_KEYHANDLE entityValue %08x\n",
 		       entityValue);
 		/* TPM_KeyHandleEntries_GetKey() does the mapping from TPM_KH_SRK to the SRK */
 		returnCode = TPM_KeyHandleEntries_GetKey(&authKey,
@@ -1732,11 +1732,11 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    /* b. The HMAC key is the secret pointed to by ownerReference (owner secret or delegated
 	       secret) */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_OSAP: entityType TPM_ET_OWNER, ownerReference %08x\n",
+		TPMLIB_LogPrintf("TPM_Process_OSAP: entityType TPM_ET_OWNER, ownerReference %08x\n",
 		       tpm_state->tpm_stclear_data.ownerReference);
 		/* verify that an owner is installed */
 		if (!tpm_state->tpm_permanent_data.ownerInstalled) {
-		    printf("TPM_Process_OSAP: Error, no owner\n");
+		    TPMLIB_LogPrintf("TPM_Process_OSAP: Error, no owner\n");
 		    returnCode = TPM_BAD_PARAMETER;
 		}
 	    }
@@ -1760,7 +1760,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	  case TPM_ET_SRK:
 	    /* 8. else if entityType = TPM_ET_SRK */
 	    /* a. The entity to authorize is the SRK. entityValue is ignored. */
-	    printf("TPM_Process_OSAP: entityType TPM_ET_SRK\n");
+	    TPMLIB_LogPrintf("TPM_Process_OSAP: entityType TPM_ET_SRK\n");
 	    entityDigest = &(tpm_state->tpm_permanent_data.srk.tpm_store_asymkey->pubDataDigest);
 	    returnCode = TPM_Key_GetUsageAuth(&authData, &(tpm_state->tpm_permanent_data.srk));
 	    break;
@@ -1768,7 +1768,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    /* 9. else if entityType = TPM_ET_COUNTER */
 	    /* a. The entity is a monotonic counter, entityValue contains the counter handle */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_OSAP: entityType TPM_ET_COUNTER entityValue %08x\n",
+		TPMLIB_LogPrintf("TPM_Process_OSAP: entityType TPM_ET_COUNTER entityValue %08x\n",
 		       entityValue);
 		returnCode =
 		    TPM_Counters_GetCounterValue(&counterValue,
@@ -1786,7 +1786,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    /* 10. else if entityType = TPM_ET_NV 
 	       a. The entity is a NV index, entityValue contains the NV index */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_OSAP: entityType TPM_ET_NV\n");
+		TPMLIB_LogPrintf("TPM_Process_OSAP: entityType TPM_ET_NV\n");
 		returnCode = TPM_NVIndexEntries_GetEntry(&tpm_nv_data_sensitive,
 							 &(tpm_state->tpm_nv_index_entries),
 							 entityValue);
@@ -1800,7 +1800,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
 	    break;
 	  default:
 	    /* 11. else return TPM_INVALID_PARAMETER */
-	    printf("TPM_Process_OSAP: Error, unknown entityType %04x\n", entityType);
+	    TPMLIB_LogPrintf("TPM_Process_OSAP: Error, unknown entityType %04x\n", entityType);
 	    returnCode = TPM_BAD_PARAMETER;
 	    break;
 	}
@@ -1857,7 +1857,7 @@ TPM_RESULT TPM_Process_OSAP(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_OSAP: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_OSAP: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2015,7 +2015,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
     TPM_NONCE		nonceEvenDSAP;	/* Nonce generated by TPM and associated with shared
 					   secret. */
 
-    printf("TPM_Process_DSAP: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DSAP: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&entityValue);			/* freed @1 */
     TPM_DelegateOwnerBlob_Init(&b1DelegateOwnerBlob);	/* freed @2 */
     TPM_DelegateKeyBlob_Init(&k1DelegateKeyBlob);	/* freed @3 */
@@ -2029,12 +2029,12 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
     }
     /* get keyHandle */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DSAP: entityType %04hx\n", entityType);
+	TPMLIB_LogPrintf("TPM_Process_DSAP: entityType %04hx\n", entityType);
 	returnCode = TPM_Load32(&keyHandle, &command, &paramSize);
     }
     /* get nonceOddDSAP */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DSAP: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_DSAP: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Nonce_Load(nonceOddDSAP, &command, &paramSize);
     }
     /* save the starting point of inParam's for authorization and auditing */
@@ -2069,7 +2069,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DSAP: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DSAP: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2107,7 +2107,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 	    /* f. Verify that B1->verificationCount equals FR -> verificationCount. */
 	    if (returnCode == TPM_SUCCESS) {
 		if (b1DelegateOwnerBlob.pub.verificationCount != familyRow->verificationCount) {
-		    printf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
 			   b1DelegateOwnerBlob.pub.verificationCount, familyRow->verificationCount);
 		    returnCode = TPM_FAMILYCOUNT;
 		}
@@ -2169,7 +2169,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 	    /* g. Verify that D1->verificationCount equals FR -> verificationCount. */
 	    if (returnCode == TPM_SUCCESS) {
 		if (d1DelegateTableRow->pub.verificationCount != familyRow->verificationCount) {
-		    printf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
 			   d1DelegateTableRow->pub.verificationCount, familyRow->verificationCount);
 		    returnCode = TPM_FAMILYCOUNT;
 		}
@@ -2199,7 +2199,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 	    /* f. Verify that K1 -> pub -> verificationCount equals FR -> verificationCount. */
 	    if (returnCode == TPM_SUCCESS) {
 		if (k1DelegateKeyBlob.pub.verificationCount != familyRow->verificationCount) {
-		    printf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_DSAP: Error, verificationCount mismatch %u %u\n",
 			   k1DelegateKeyBlob.pub.verificationCount, familyRow->verificationCount);
 		    returnCode = TPM_FAMILYCOUNT;
 		}
@@ -2253,7 +2253,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 	    break;
 	  default:
 	    /* 4. Else return TPM_BAD_PARAMETER */
-	    printf("TPM_Process_DSAP: Error, bad entityType %04hx\n", entityType);
+	    TPMLIB_LogPrintf("TPM_Process_DSAP: Error, bad entityType %04hx\n", entityType);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -2266,7 +2266,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 						   tpm_state->tpm_stclear_data.authSessions);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DSAP: Using authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_DSAP: Using authHandle %08x\n", authHandle);
 	got_handle = TRUE;
 	/* save protocol identification */
 	authSession->protocolID = TPM_PID_DSAP;
@@ -2326,7 +2326,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DSAP: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DSAP: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2404,7 +2404,7 @@ static TPM_RESULT TPM_OSAPDelegate(TPM_DIGEST **entityDigest,
     TPM_DELEGATE_TABLE_ROW	*d1DelegateTableRow;
     TPM_FAMILY_TABLE_ENTRY	*familyRow;		/* family table row containing familyID */
 
-    printf("TPM_DSAPCommon: Index %u\n", delegateRowIndex);
+    TPMLIB_LogPrintf("TPM_DSAPCommon: Index %u\n", delegateRowIndex);
     /* 2. Else if entityType == TPM_ET_DEL_ROW */
     /* a. Verify that entityValue points to a valid row in the delegation table. */
     /* b. Set d1 to the delegation information in the row. */
@@ -2425,7 +2425,7 @@ static TPM_RESULT TPM_OSAPDelegate(TPM_DIGEST **entityDigest,
     /* g. Verify that d1->verificationCount equals FR -> verificationCount. */
     if (rc == TPM_SUCCESS) {
 	if (d1DelegateTableRow->pub.verificationCount != familyRow->verificationCount) {
-	    printf("TPM_DSAPCommon: Error, verificationCount mismatch %u %u\n",
+	    TPMLIB_LogPrintf("TPM_DSAPCommon: Error, verificationCount mismatch %u %u\n",
 		   d1DelegateTableRow->pub.verificationCount, familyRow->verificationCount);
 	    rc = TPM_FAMILYCOUNT;
 	}
@@ -2500,7 +2500,7 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SetOwnerPointer: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -2512,11 +2512,11 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
     }
     /* get entityValue */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SetOwnerPointer: entityType %04hx\n", entityType);
+	TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: entityType %04hx\n", entityType);
 	returnCode = TPM_Load32(&entityValue, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SetOwnerPointer: entityValue %08x\n", entityValue);
+	TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: entityValue %08x\n", entityValue);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -2542,7 +2542,7 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetOwnerPointer: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2580,7 +2580,7 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
 	    /* f. Verify that B1->verificationCount equals FR -> verificationCount. */
 	    if (returnCode == TPM_SUCCESS) {
 		if (b1DelegateTableRow->pub.verificationCount != familyRow->verificationCount) {
-		    printf("TPM_Process_SetOwnerPointer: Error, "
+		    TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Error, "
 			   "verificationCount mismatch %u %u\n",
 			   b1DelegateTableRow->pub.verificationCount, familyRow->verificationCount);
 		    returnCode = TPM_FAMILYCOUNT;
@@ -2589,7 +2589,7 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
 	    /* g. The TPM sets V1-> ownerReference to entityValue */
 	    /* h. Return TPM_SUCCESS */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_SetOwnerPointer: Setting ownerReference to %08x\n",
+		TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Setting ownerReference to %08x\n",
 		       entityValue);
 		v1StClearData->ownerReference = entityValue;
 	    }
@@ -2599,12 +2599,12 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
 	    /* a. This value indicates that the entity is the TPM owner. entityValue is ignored.  */
 	    /* b. The TPM sets V1-> ownerReference to TPM_KH_OWNER */
 	    /* c. Return TPM_SUCCESS */
-	    printf("TPM_Process_SetOwnerPointer: Setting ownerReference to %08x\n", TPM_KH_OWNER);
+	    TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Setting ownerReference to %08x\n", TPM_KH_OWNER);
 	    v1StClearData->ownerReference = TPM_KH_OWNER;
 	}
 	/* 4. Return TPM_BAD_PARAMETER */
 	else {
-	    printf("TPM_Process_SetOwnerPointer: Error, bad entityType\n");
+	    TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Error, bad entityType\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
@@ -2613,7 +2613,7 @@ TPM_RESULT TPM_Process_SetOwnerPointer(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetOwnerPointer: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetOwnerPointer: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2691,7 +2691,7 @@ TPM_RESULT TPM_Process_TerminateHandle(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_TerminateHandle: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_TerminateHandle: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -2726,7 +2726,7 @@ TPM_RESULT TPM_Process_TerminateHandle(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_TerminateHandle: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_TerminateHandle: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2736,7 +2736,7 @@ TPM_RESULT TPM_Process_TerminateHandle(tpm_state_t *tpm_state,
     */
     /* terminate the handle */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TerminateHandle: Using authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_TerminateHandle: Using authHandle %08x\n", authHandle);
 	returnCode = TPM_AuthSessions_TerminateHandle(tpm_state->tpm_stclear_data.authSessions,
 						      authHandle);
     }
@@ -2745,7 +2745,7 @@ TPM_RESULT TPM_Process_TerminateHandle(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_TerminateHandle: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_TerminateHandle: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2818,7 +2818,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
     
-    printf("TPM_Process_FlushSpecific: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -2830,7 +2830,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get resourceType parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_FlushSpecific: Handle %08x\n", handle);
+	TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Handle %08x\n", handle);
 	returnCode = TPM_Load32(&resourceType, &command, &paramSize);
     }
     /* save the ending point of inParam's for authorization and auditing */
@@ -2858,7 +2858,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_FlushSpecific: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2871,7 +2871,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	  case TPM_RT_CONTEXT:
 	    /* 1. If resourceType is TPM_RT_CONTEXT */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_FlushSpecific: Flushing context count %08x\n", handle);
+		TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Flushing context count %08x\n", handle);
 		/* a. The handle for a context is not a handle but the "context count" value. The
 		   TPM uses the "context count" value to locate the proper contextList entry and
 		   sets R1 to the contextList entry */
@@ -2882,7 +2882,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 		/* 7. Validate that R1 determined by resourceType and handle points to a valid
 		   allocated resource.	Return TPM_BAD_PARAMETER on error. */
 		if (returnCode != TPM_SUCCESS) {
-		    printf("TPM_Process_FlushSpecific: Error, context count %08x not found\n",
+		    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Error, context count %08x not found\n",
 			   handle);
 		    returnCode = TPM_BAD_PARAMETER;
 		}
@@ -2898,14 +2898,14 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	    /* 2. Else if resourceType is TPM_RT_KEY */
 	    /* a. Set R1 to the key pointed to by handle */
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_FlushSpecific: Flushing key handle %08x\n", handle);
+		TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Flushing key handle %08x\n", handle);
 		returnCode = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 							   tpm_state->tpm_key_handle_entries,
 							   handle);
 		/* 7. Validate that R1 determined by resourceType and handle points to a valid
 		   allocated resource.	Return TPM_BAD_PARAMETER on error. */
 		if (returnCode != TPM_SUCCESS) {
-		    printf("TPM_Process_FlushSpecific: Error, key handle %08x not found\n",
+		    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Error, key handle %08x not found\n",
 			   handle);
 		    returnCode = TPM_BAD_PARAMETER;
 		}
@@ -2913,7 +2913,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	    /* b. If R1 -> ownerEvict is TRUE return TPM_KEY_OWNER_CONTROL */
 	    if (returnCode == TPM_SUCCESS) {
 		if (tpm_key_handle_entry->keyControl & TPM_KEY_CONTROL_OWNER_EVICT) {
-		    printf("TPM_Process_FlushSpecific: Error, keyHandle specifies owner evict\n");
+		    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Error, keyHandle specifies owner evict\n");
 		    returnCode = TPM_KEY_OWNER_CONTROL;
 		}
 	    }
@@ -2931,7 +2931,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	       resource.  Return TPM_BAD_PARAMETER on error. */
 	    /* 8. Invalidate R1 and all internal resources allocated to R1 */
 	    /* a. Resources include authorization sessions */
-	    printf("TPM_Process_FlushSpecific: Flushing authorization session handle %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Flushing authorization session handle %08x\n",
 		   handle);
 	    returnCode = TPM_AuthSessions_TerminateHandle(tpm_state->tpm_stclear_data.authSessions,
 							  handle);
@@ -2943,7 +2943,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	       resource.  Return TPM_BAD_PARAMETER on error. */
 	    /* 8. Invalidate R1 and all internal resources allocated to R1 */
 	    /* a. Resources include authorization sessions */
-	    printf("TPM_Process_FlushSpecific: Flushing transport session handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Flushing transport session handle %08x\n", handle);
 	    returnCode = TPM_TransportSessions_TerminateHandle
 			 (tpm_state->tpm_stclear_data.transSessions,
 			  handle,
@@ -2956,13 +2956,13 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
 	       resource.  Return TPM_BAD_PARAMETER on error. */
 	    /* 8. Invalidate R1 and all internal resources allocated to R1 */
 	    /* a. Resources include authorization sessions */
-	    printf("TPM_Process_FlushSpecific: Flushing DAA session handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Flushing DAA session handle %08x\n", handle);
 	    returnCode = TPM_DaaSessions_TerminateHandle(tpm_state->tpm_stclear_data.daaSessions,
 							 handle);
 	    break;
 	  default:
 	    /* 6. Else return TPM_INVALID_RESOURCE */
-	    printf("TPM_Process_FlushSpecific: Error, invalid resourceType %08x\n", resourceType);
+	    TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Error, invalid resourceType %08x\n", resourceType);
 	    returnCode = TPM_INVALID_RESOURCE;
 	    break;
 	}
@@ -2972,7 +2972,7 @@ TPM_RESULT TPM_Process_FlushSpecific(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_FlushSpecific: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_FlushSpecific: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3062,7 +3062,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;			/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
     
-    printf("TPM_Process_SaveContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SaveContext: Ordinal Entry\n");
     TPM_Sbuffer_Init(&b1_sbuffer);			/* freed @1 */
     TPM_Sbuffer_Init(&r1ContextSensitive);		/* freed @2 */
     TPM_ContextBlob_Init(&b1ContextBlob);		/* freed @3 */
@@ -3079,12 +3079,12 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get resourceType */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: handle %08x\n", handle);
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: handle %08x\n", handle);
 	returnCode = TPM_Load32(&resourceType, &command, &paramSize);
     }
     /* get label */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: resourceType %08x\n", resourceType);
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: resourceType %08x\n", resourceType);
 	returnCode = TPM_Loadn(label, TPM_CONTEXT_LABEL_SIZE, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
@@ -3114,7 +3114,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SaveContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3134,7 +3134,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	switch (resourceType) {
 	  case TPM_RT_KEY:
 	    /* a. TPM_RT_KEY */
-	    printf("TPM_Process_SaveContext: Resource is key handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Resource is key handle %08x\n", handle);
 	    /* check if the key handle is valid */
 	    returnCode = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 						       tpm_state->tpm_key_handle_entries,
@@ -3142,38 +3142,38 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	    break;
 	  case TPM_RT_AUTH:
 	    /* b. TPM_RT_AUTH */
-	    printf("TPM_Process_SaveContext: Resource is session handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Resource is session handle %08x\n", handle);
 	    returnCode = TPM_AuthSessions_GetEntry(&tpm_auth_session_data,
 						   v1StClearData->authSessions,
 						   handle);
 	    break;
 	  case TPM_RT_TRANS:
 	    /* c. TPM_RT_TRANS */
-	    printf("TPM_Process_SaveContext: Resource is transport handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Resource is transport handle %08x\n", handle);
 	    returnCode = TPM_TransportSessions_GetEntry(&tpm_transport_internal,
 							v1StClearData->transSessions,
 							handle);
 	    break;
 	  case TPM_RT_DAA_TPM:	
 	    /* d. TPM_RT_DAA_TPM */
-	    printf("TPM_Process_SaveContext: Resource is DAA handle %08x\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Resource is DAA handle %08x\n", handle);
 	    returnCode = TPM_DaaSessions_GetEntry(&tpm_daa_session_data,
 						  v1StClearData->daaSessions,
 						  handle);
 	    break;
 	  default:
-	    printf("TPM_Process_SaveContext: Error, invalid resourceType %08x\n", resourceType);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, invalid resourceType %08x\n", resourceType);
 	    returnCode = TPM_INVALID_RESOURCE;
 	    break;
 	}
 	if (returnCode != 0) {
-	    printf("TPM_Process_SaveContext: Error, handle %08x not found\n", handle);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, handle %08x not found\n", handle);
 	    returnCode = TPM_INVALID_RESOURCE;
 	}
     }
     /* 4. Locate the correct nonce */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: Locating nonce\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Locating nonce\n");
 	/* a. If resourceType is TPM_RT_KEY */
 	if (resourceType == TPM_RT_KEY) {
 	    if (returnCode == TPM_SUCCESS) {
@@ -3191,7 +3191,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 		/* iii. If the key has TPM_KEY_CONTROL_OWNER_EVICT set then return TPM_OWNER_CONTROL
 		 */
 		if (tpm_key_handle_entry->keyControl & TPM_KEY_CONTROL_OWNER_EVICT) {
-		    printf("TPM_Process_SaveContext: Error, key under owner control\n");
+		    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, key under owner control\n");
 		    returnCode = TPM_OWNER_CONTROL;
 		}
 	    }
@@ -3213,7 +3213,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	}
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: Building sensitive data\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Building sensitive data\n");
 	/* 5. Set K1 to TPM_PERMANENT_DATA -> contextKey */
 	k1ContextKey = tpm_state->tpm_permanent_data.contextKey;
 	/* 6. Create R1 by putting the sensitive part of the resource pointed to by handle into a
@@ -3235,7 +3235,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	    returnCode = TPM_DaaSessionData_Store(&r1ContextSensitive, tpm_daa_session_data);
 	    break;
 	  default:
-	    printf("TPM_Process_SaveContext: Error, invalid resourceType %08x", resourceType);
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, invalid resourceType %08x", resourceType);
 	    returnCode = TPM_INVALID_RESOURCE;
 	    break;
 	}
@@ -3245,7 +3245,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     /* a. C1 forms the inner encrypted wrapper for the blob. All saved context blobs MUST include a
        TPM_CONTEXT_SENSITIVE structure and the TPM_CONTEXT_SENSITIVE structure MUST be encrypted. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: Building TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Building TPM_CONTEXT_SENSITIVE\n");
 	/* b. Set C1 -> contextNonce to N1 */
 	TPM_Nonce_Copy(c1ContextSensitive.contextNonce, *n1ContextNonce);
 	/* c. Set C1 -> internalData to R1 */
@@ -3254,7 +3254,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     }
     /* 8. Create B1 a TPM_CONTEXT_BLOB */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveContext: Building TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Building TPM_CONTEXT_BLOB\n");
 	/* a. Set B1 -> tag to TPM_TAG_CONTEXTBLOB */
 	/* NOTE Done at TPM_ContextBlob_Init() */
 	/* b. Set B1 -> resourceType to resourceType */
@@ -3294,12 +3294,12 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	}
 	/* 10. Else */
 	else {
-	    printf("TPM_Process_SaveContext: Processing session context count\n");
+	    TPMLIB_LogPrintf("TPM_Process_SaveContext: Processing session context count\n");
 	    if (returnCode == TPM_SUCCESS) {
 		/* a. If V1 -> contextCount > 2^32-2 then */
 		if (v1StClearData->contextCount > 0xfffffffe) {
 		    /* i. Return with TPM_TOOMANYCONTEXTS */
-		    printf("TPM_Process_SaveContext: Error, too many contexts\n");
+		    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, too many contexts\n");
 		    returnCode = TPM_TOOMANYCONTEXTS;
 		}
 	    }
@@ -3318,7 +3318,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	    if (returnCode == TPM_SUCCESS) {
 		TPM_ContextList_GetSpace(&space, &contextIndex, v1StClearData->contextList);
 		if (space == 0) {
-		    printf("TPM_Process_SaveContext: Error, no space in context list\n");
+		    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, no space in context list\n");
 		    returnCode = TPM_NOCONTEXTSPACE;
 		}
 	    }
@@ -3349,7 +3349,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 								 handle);
 		    break;
 		  default:
-		    printf("TPM_Process_SaveContext: Error, invalid resourceType %08x",
+		    TPMLIB_LogPrintf("TPM_Process_SaveContext: Error, invalid resourceType %08x",
 			   resourceType);
 		    returnCode = TPM_INVALID_RESOURCE;
 		    break;
@@ -3362,7 +3362,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* This is a bit circular.  It's safe since the TPM_CONTEXT_BLOB is serialized before the
 	   HMAC is generated.  The result is put back into the structure.  */
-	printf("TPM_Process_SaveContext: Digesting TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Digesting TPM_CONTEXT_BLOB\n");
 	returnCode = TPM_HMAC_GenerateStructure
 		     (b1ContextBlob.integrityDigest,		/* HMAC */
 		      tpm_state->tpm_permanent_data.tpmProof,	/* HMAC key */
@@ -3393,7 +3393,7 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SaveContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SaveContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3492,7 +3492,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_LoadContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadContext: Ordinal Entry\n");
     TPM_ContextBlob_Init(&b1ContextBlob);			/* freed @1 */
     TPM_KeyHandleEntry_Init(&tpm_key_handle_entry);		/* no free */
     m1Decrypt = NULL;						/* freed @2 */
@@ -3511,12 +3511,12 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get keepHandle parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: entityHandle %08x\n", entityHandle);
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: entityHandle %08x\n", entityHandle);
 	returnCode = TPM_LoadBool(&keepHandle, &command, &paramSize);
     }
     /* get contextSize parameter (redundant, not used) */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: keepHandle %02x\n", keepHandle);
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: keepHandle %02x\n", keepHandle);
 	returnCode = TPM_Load32(&contextSize, &command, &paramSize);
     }
     /* get contextBlob parameter */
@@ -3547,7 +3547,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3561,7 +3561,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 	/* 2. Map V1 to TPM_STANY_DATA NOTE MAY be TPM_STCLEAR_DATA */
 	v1StClearData = &(tpm_state->tpm_stclear_data);
 	/* 3. Create M1 by decrypting B1 -> sensitiveData using TPM_PERMANENT_DATA -> contextKey */
-	printf("TPM_Process_LoadContext: Decrypting sensitiveData\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Decrypting sensitiveData\n");
 	returnCode = TPM_SymmetricKeyData_Decrypt(&m1Decrypt,		/* decrypted data */
 						  &m1_length,		/* length decrypted data */
 						  b1ContextBlob.sensitiveData.buffer, /* encrypt */
@@ -3579,33 +3579,33 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     }
     /* Parse the TPM_CONTEXT_SENSITIVE -> internalData depending on the resource type */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: Parsing TPM_CONTEXT_SENSITIVE -> internalData\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Parsing TPM_CONTEXT_SENSITIVE -> internalData\n");
 	stream = c1ContextSensitive.internalData.buffer;
 	stream_size = c1ContextSensitive.internalData.size;
 	switch (b1ContextBlob.resourceType) {
 	  case TPM_RT_KEY:
-	    printf("TPM_Process_LoadContext: Loading TPM_KEY_HANDLE_ENTRY\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Loading TPM_KEY_HANDLE_ENTRY\n");
 	    returnCode = TPM_KeyHandleEntry_Load(&tpm_key_handle_entry, &stream, &stream_size);
 	    break;
 	  case TPM_RT_AUTH:
-	    printf("TPM_Process_LoadContext: Loading TPM_AUTH_SESSION_DATA\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Loading TPM_AUTH_SESSION_DATA\n");
 	    returnCode = TPM_AuthSessionData_Load(&tpm_auth_session_data, &stream, &stream_size);
-	    printf("TPM_Process_LoadContext: protocolID %02x entityTypeByte %02x\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: protocolID %02x entityTypeByte %02x\n",
 		   tpm_auth_session_data.protocolID, tpm_auth_session_data.entityTypeByte);
 	    break;
 	  case TPM_RT_TRANS:
-	    printf("TPM_Process_LoadContext: Loading TPM_TRANSPORT_INTERNAL\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Loading TPM_TRANSPORT_INTERNAL\n");
 	    returnCode = TPM_TransportInternal_Load(&tpm_transport_internal,
 						    &stream, &stream_size);
 	    break;
 	  case TPM_RT_DAA_TPM:
-	    printf("TPM_Process_LoadContext: Loading TPM_DAA_SESSION_DATA\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Loading TPM_DAA_SESSION_DATA\n");
 	    returnCode = TPM_DaaSessionData_Load(&tpm_daa_session_data, &stream, &stream_size);
-	    printf("TPM_Process_LoadContext: stage %u\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: stage %u\n",
 		   tpm_daa_session_data.DAA_session.DAA_stage);
 	    break;
 	  default:
-	    printf("TPM_Process_LoadContext: Error, invalid resourceType %08x",
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Error, invalid resourceType %08x",
 		   b1ContextBlob.resourceType);
 	    returnCode = TPM_INVALID_RESOURCE;
 	    break;
@@ -3613,7 +3613,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     }
     /* 5. Check contextNonce */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: Checking contextNonce\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Checking contextNonce\n");
 	/* a. If B1 -> resourceType is NOT TPM_RT_KEY */
 	if (b1ContextBlob.resourceType != TPM_RT_KEY) {
 	    /* i. If C1 -> contextNonce does not equal V1 -> contextNonceSession return
@@ -3622,7 +3622,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 		returnCode = TPM_Nonce_Compare(v1StClearData->contextNonceSession,
 					       c1ContextSensitive.contextNonce);
 		if (returnCode != TPM_SUCCESS) {
-		    printf("TPM_Process_LoadContext: Error comparing non-key contextNonce\n");
+		    TPMLIB_LogPrintf("TPM_Process_LoadContext: Error comparing non-key contextNonce\n");
 		    returnCode = TPM_BADCONTEXT;
 		}
 	    }
@@ -3661,7 +3661,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 								   entityDigest);
 			break;
 		      default:
-			printf("TPM_Process_LoadContext: Error, invalid session entityType %02x\n",
+			TPMLIB_LogPrintf("TPM_Process_LoadContext: Error, invalid session entityType %02x\n",
 			       tpm_auth_session_data.entityTypeByte);
 			returnCode = TPM_WRONG_ENTITYTYPE;
 			break;
@@ -3670,7 +3670,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 			returnCode= TPM_Digest_Compare(entityDigest,
 						       tpm_auth_session_data.entityDigest);
 			if (returnCode != TPM_SUCCESS) {
-			    printf("TPM_Process_LoadContext: Error, "
+			    TPMLIB_LogPrintf("TPM_Process_LoadContext: Error, "
 				   "OSAP or DSAP entityDigest mismatch\n");
 			    returnCode = TPM_RESOURCEMISSING;
 			}
@@ -3694,7 +3694,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 		    returnCode = TPM_Nonce_Compare(v1StClearData->contextNonceKey,
 						   c1ContextSensitive.contextNonce);
 		    if (returnCode != 0) {
-			printf("TPM_Process_LoadContext: Error comparing contextNonceKey\n");
+			TPMLIB_LogPrintf("TPM_Process_LoadContext: Error comparing contextNonceKey\n");
 			returnCode = TPM_BADCONTEXT;
 		    }
 		}
@@ -3703,7 +3703,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     }
     /* 6. Validate the structure */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: Checking integrityDigest\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Checking integrityDigest\n");
 	/* a. Set H1 to B1 -> integrityDigest */
 	/* NOTE Done by TPM_HMAC_CheckStructure() */
 	/* b. Set B1 -> integrityDigest to all zeros */
@@ -3723,7 +3723,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     }
     /* 9. If B1 -> resourceType is NOT TPM_RT_KEY */
     if ((returnCode == TPM_SUCCESS) && (b1ContextBlob.resourceType != TPM_RT_KEY)) {
-	printf("TPM_Process_LoadContext: Checking contextCount\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Checking contextCount\n");
 	/* a. Find contextIndex such that V1 -> contextList[contextIndex] equals B1 ->
 	   TPM_CONTEXT_BLOB -> contextCount */
 	/* b. If not found then return TPM_BADCONTEXT */
@@ -3740,7 +3740,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     /* 10. Process B1 to return the resource back into TPM use */
     /* restore the entity, try to keep the handle as 'handle' */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadContext: Adding entry to table\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Adding entry to table\n");
 	switch (b1ContextBlob.resourceType) {
 	  case TPM_RT_KEY:
 	    returnCode = TPM_KeyHandleEntries_AddEntry(&(b1ContextBlob.handle),
@@ -3771,7 +3771,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 	    daa_session_added = TRUE;
 	    break;
 	  default:
-	    printf("TPM_Process_LoadContext: Error, invalid resourceType %08x\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadContext: Error, invalid resourceType %08x\n",
 		   b1ContextBlob.resourceType);
 	    returnCode = TPM_INVALID_RESOURCE;
 	    break;
@@ -3782,7 +3782,7 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3865,7 +3865,7 @@ static TPM_RESULT TPM_LoadContext_CheckKeyLoaded(tpm_state_t *tpm_state,
     TPM_RESULT			rc = 0;
     TPM_KEY_HANDLE_ENTRY	*key_handle_entry;
 
-    printf("TPM_LoadContext_CheckKeyLoaded: handle %08x\n", entityHandle);
+    TPMLIB_LogPrintf("TPM_LoadContext_CheckKeyLoaded: handle %08x\n", entityHandle);
     /* get the key associated with entityHandle */
     /* special case, SRK is not in the key handle list */
     if (entityHandle == TPM_KH_SRK) {
@@ -3874,7 +3874,7 @@ static TPM_RESULT TPM_LoadContext_CheckKeyLoaded(tpm_state_t *tpm_state,
 			    tpm_state->tpm_permanent_data.srk.tpm_store_asymkey->pubDataDigest);
 	}
 	else {
-	    printf("TPM_LoadContext_CheckKeyLoaded: Error, ownerInstalled is FALSE\n");
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckKeyLoaded: Error, ownerInstalled is FALSE\n");
 	    rc = TPM_NOSRK;
 	}
     }
@@ -3887,7 +3887,7 @@ static TPM_RESULT TPM_LoadContext_CheckKeyLoaded(tpm_state_t *tpm_state,
 	    TPM_Digest_Copy(entityDigest, key_handle_entry->key->tpm_store_asymkey->pubDataDigest);
 	}
 	else {
-	    printf("TPM_LoadContext_CheckKeyLoaded: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckKeyLoaded: Error, key handle %08x not found\n",
 		   entityHandle);
 	    rc = TPM_BAD_HANDLE;
 	}
@@ -3909,7 +3909,7 @@ static TPM_RESULT TPM_LoadContext_CheckKeyLoadedByDigest(tpm_state_t *tpm_state,
     size_t			current;
     TPM_KEY_HANDLE_ENTRY	*key_handle_entry;
 
-    printf("TPM_LoadContext_CheckKeyLoadedByDigest:\n");
+    TPMLIB_LogPrintf("TPM_LoadContext_CheckKeyLoadedByDigest:\n");
     /* get the key associated with entityDigest */
     start = 0;
     /* iterate through all keys in the key handle table */
@@ -3934,7 +3934,7 @@ static TPM_RESULT TPM_LoadContext_CheckKeyLoadedByDigest(tpm_state_t *tpm_state,
 	}
     }	 
     if (rc != 0) {
-	printf("TPM_LoadContext_CheckKeyLoadedByDigest: "
+	TPMLIB_LogPrintf("TPM_LoadContext_CheckKeyLoadedByDigest: "
 	       "Error, OSAP or DSAP entityDigest mismatch\n");
 	rc = TPM_RESOURCEMISSING;
     }
@@ -3951,11 +3951,11 @@ static TPM_RESULT TPM_LoadContext_CheckOwnerLoaded(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
 
-    printf("TPM_LoadContext_CheckOwnerLoaded:\n");
+    TPMLIB_LogPrintf("TPM_LoadContext_CheckOwnerLoaded:\n");
     /* verify that an owner is installed */
     if (rc == 0) {
 	if (!tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_LoadContext_CheckOwnerLoaded: Error, no owner\n");
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckOwnerLoaded: Error, no owner\n");
 	    rc = TPM_RESOURCEMISSING;
 	}
     }
@@ -3975,11 +3975,11 @@ static TPM_RESULT TPM_LoadContext_CheckSrkLoaded(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
 
-    printf("TPM_LoadContext_CheckSrkLoaded:\n");
+    TPMLIB_LogPrintf("TPM_LoadContext_CheckSrkLoaded:\n");
     /* verify that an owner is installed */
     if (rc == 0) {
 	if (!tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_LoadContext_CheckSrkLoaded: Error, no SRK\n");
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckSrkLoaded: Error, no SRK\n");
 	    rc = TPM_RESOURCEMISSING;
 	}
     }
@@ -4003,13 +4003,13 @@ static TPM_RESULT TPM_LoadContext_CheckCounterLoaded(tpm_state_t *tpm_state,
     TPM_RESULT			rc = 0;
     TPM_COUNTER_VALUE		*counterValue;		/* associated with entityHandle */
 
-    printf("TPM_LoadContext_CheckCounterLoaded: handle %08x\n", entityHandle);
+    TPMLIB_LogPrintf("TPM_LoadContext_CheckCounterLoaded: handle %08x\n", entityHandle);
     if (rc == 0) {
 	rc = TPM_Counters_GetCounterValue(&counterValue,
 					  tpm_state->tpm_permanent_data.monotonicCounter,
 					  entityHandle);
 	if (rc != 0) {
-	    printf("TPM_LoadContext_CheckCounterLoaded: Error, no counter\n");
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckCounterLoaded: Error, no counter\n");
 	    rc = TPM_RESOURCEMISSING;
 	}	    
     }
@@ -4031,13 +4031,13 @@ static TPM_RESULT TPM_LoadContext_CheckNvLoaded(tpm_state_t *tpm_state,
     TPM_RESULT			rc = 0;
     TPM_NV_DATA_SENSITIVE	*tpm_nv_data_sensitive;	/* associated with entityValue */
 
-    printf(" TPM_LoadContext_CheckNvLoaded: handle %08x\n", entityHandle);
+    TPMLIB_LogPrintf(" TPM_LoadContext_CheckNvLoaded: handle %08x\n", entityHandle);
     if (rc == 0) {
 	rc = TPM_NVIndexEntries_GetEntry(&tpm_nv_data_sensitive,
 					 &(tpm_state->tpm_nv_index_entries),
 					 entityHandle);
 	if (rc != 0) {
-	    printf("TPM_LoadContext_CheckNvLoaded: Error, no NV at index %08x\n", entityHandle);
+	    TPMLIB_LogPrintf("TPM_LoadContext_CheckNvLoaded: Error, no NV at index %08x\n", entityHandle);
 	    rc = TPM_RESOURCEMISSING;
 	}	    
     }
@@ -4110,7 +4110,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_KeyControlOwner: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Ordinal Entry\n");
     TPM_Pubkey_Init(&pubKey);		/* freed @1 */
     /*
       get inputs
@@ -4123,7 +4123,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get pubKey parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_KeyControlOwner: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Pubkey_Load(&pubKey, &command, &paramSize);
     }
     /* get bitName parameter */
@@ -4135,7 +4135,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 	returnCode = TPM_Load8(&bitValue, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_KeyControlOwner: bitName %08x bitValue %02x\n", bitName, bitValue);
+	TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: bitName %08x bitValue %02x\n", bitName, bitValue);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -4170,7 +4170,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_KeyControlOwner: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4214,7 +4214,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 						   tpm_state->tpm_key_handle_entries,
 						   keyHandle);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_KeyControlOwner: Error, key handle not loaded\n");
+	    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, key handle not loaded\n");
 	    returnCode = TPM_INVALID_KEYHANDLE;
 	}
     }
@@ -4227,7 +4227,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 	    (tpm_key_handle_entry->key->keyUsage != TPM_KEY_IDENTITY) &&
 	    (tpm_key_handle_entry->key->keyUsage != TPM_KEY_BIND) &&
 	    (tpm_key_handle_entry->key->keyUsage != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_KeyControlOwner: Error, invalid key keyUsage %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, invalid key keyUsage %04hx\n",
 		   tpm_key_handle_entry->key->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -4239,7 +4239,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_Key_ComparePubkey(tpm_key_handle_entry->key, &pubKey);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_KeyControlOwner: Error comparing pubKey\n");
+	    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error comparing pubKey\n");
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }	 
@@ -4253,7 +4253,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 	    oldOwnerEvict = tpm_key_handle_entry->keyControl & TPM_KEY_CONTROL_OWNER_EVICT;
 	    /* a. If bitValue == TRUE */
 	    if (bitValue) {
-		printf("TPM_Process_KeyControlOwner: setting key owner evict\n");
+		TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: setting key owner evict\n");
 		if (!oldOwnerEvict) {	/* if the key is not owner evict */
 		    /* i. Verify that after this operation at least two key slots will be present
 		       within the TPM that can store any type of key both of which do NOT have the
@@ -4263,7 +4263,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 							  tpm_state->tpm_key_handle_entries,
 							  2);	/* minSpace */
 			if (!isSpace) {
-			    printf("TPM_Process_KeyControlOwner: Error, "
+			    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, "
 				   "Need 2 non-evict slots\n");
 			    returnCode = TPM_NOSPACE;
 			}
@@ -4273,7 +4273,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 		    if (returnCode == TPM_SUCCESS) {
 			if (tpm_key_handle_entry->parentPCRStatus ||
 			    tpm_key_handle_entry->key->keyFlags & TPM_ISVOLATILE) {
-			    printf("TPM_Process_KeyControlOwner: Error, "
+			    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, "
 				   "parentPCRStatus or Volatile\n");
 			    returnCode = TPM_BAD_PARAMETER;
 			}
@@ -4287,7 +4287,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 		    /* check that the number of owner evict key slots will not be exceeded */
 		    if (returnCode == TPM_SUCCESS) {
 			if (ownerEvictCount == TPM_OWNER_EVICT_KEY_HANDLES) {
-			    printf("TPM_Process_KeyControlOwner: Error, "
+			    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Error, "
 				   "no evict space, only %u evict slots\n",
 				   TPM_OWNER_EVICT_KEY_HANDLES);
 			    returnCode = TPM_NOSPACE;
@@ -4305,13 +4305,13 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 		    }
 		}
 		else {	/* if the key is already owner evict, nothing to do */
-		    printf("TPM_Process_KeyControlOwner: key is already owner evict\n");
+		    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: key is already owner evict\n");
 		}
 	    }
 	    /* b. Else if bitValue == FALSE */
 	    else {
 		if (oldOwnerEvict) {		/* if the key is currently owner evict */
-		    printf("TPM_Process_KeyControlOwner: setting key not owner evict\n");
+		    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: setting key not owner evict\n");
 		    /* i. Set ownerEvict within the internal key storage structure to FALSE. */
 		    if (returnCode == TPM_SUCCESS) {
 			tpm_key_handle_entry->keyControl &= ~TPM_KEY_CONTROL_OWNER_EVICT;
@@ -4324,12 +4324,12 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
 		    }
 		}
 		else { 	/* if the key is already not owner evict, nothing to do */
-		    printf("TPM_Process_KeyControlOwner: key is already not owner evict\n");
+		    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: key is already not owner evict\n");
 		}
 	    }
 	    break;
 	  default:
-	    printf("TPM_Process_KeyControlOwner: Invalid bitName %08x\n", bitName);
+	    TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Invalid bitName %08x\n", bitName);
 	    returnCode = TPM_BAD_MODE;
 	    break;
 	}
@@ -4339,7 +4339,7 @@ TPM_RESULT TPM_Process_KeyControlOwner(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_KeyControlOwner: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_KeyControlOwner: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4442,7 +4442,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SaveKeyContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Ordinal Entry\n");
     TPM_ContextSensitive_Init(&contextSensitive);	/* freed @1 */
     TPM_Sbuffer_Init(&contextSensitive_sbuffer);	/* freed @2 */
     TPM_ContextBlob_Init(&contextBlob);			/* freed @3 */
@@ -4480,7 +4480,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SaveKeyContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4508,7 +4508,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
     */
     /* check if the key handle is valid */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveKeyContext: Handle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Handle %08x\n", keyHandle);
 	returnCode = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 						   tpm_state->tpm_key_handle_entries,
 						   keyHandle);
@@ -4527,7 +4527,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
        information of the resource is included in internalData.	 For a key, the sensitive part is
        the TPM_STORE_ASYMKEY */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveKeyContext: Building TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Building TPM_CONTEXT_SENSITIVE\n");
 	returnCode = TPM_SizedBuffer_SetStructure(&(contextSensitive.internalData),
 						  tpm_key_handle_entry,
 						  (TPM_STORE_FUNCTION_T)TPM_KeyHandleEntry_Store);
@@ -4536,7 +4536,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
 	/* TPM_CONTEXT_SENSITIVE -> contextNonce */
 	TPM_Nonce_Copy(contextSensitive.contextNonce, tpm_state->tpm_stclear_data.contextNonceKey);
 	/* TPM_CONTEXT_BLOB -> resourceType, handle, integrityDigest */
-	printf("TPM_Process_SaveKeyContext: Building TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Building TPM_CONTEXT_BLOB\n");
 	contextBlob.resourceType = TPM_RT_KEY;
 	contextBlob.handle = keyHandle;
 	contextBlob.contextCount = 0;
@@ -4555,7 +4555,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* This is a bit circular.  It's safe since the TPM_CONTEXT_BLOB is serialized before the
 	   HMAC is generated.	The result is put back into the structure.  */
-	printf("TPM_Process_SaveKeyContext: Digesting TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Digesting TPM_CONTEXT_BLOB\n");
 	returnCode = TPM_HMAC_GenerateStructure
 		     (contextBlob.integrityDigest,		/* HMAC */
 		      tpm_state->tpm_permanent_data.tpmProof,	/* HMAC key */
@@ -4568,7 +4568,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
 	/* The cleartext went into sensitiveData for the integrityDigest calculation.  Free it now,
 	   before the encrypted data is stored there. */
 	TPM_SizedBuffer_Delete(&(contextBlob.sensitiveData));
-	printf("TPM_Process_SaveKeyContext: Encrypting TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Encrypting TPM_CONTEXT_SENSITIVE\n");
 	returnCode =
 	    TPM_SymmetricKeyData_EncryptSbuffer(&(contextBlob.sensitiveData),
 						&contextSensitive_sbuffer,
@@ -4589,7 +4589,7 @@ TPM_RESULT TPM_Process_SaveKeyContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SaveKeyContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SaveKeyContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4682,7 +4682,7 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     TPM_KEY_HANDLE	keyHandle;	/* The handle assigned to the key after it has been
 					   successfully loaded. */
 
-    printf("TPM_Process_LoadKeyContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Ordinal Entry\n");
     TPM_ContextBlob_Init(&keyContextBlob);		/* freed @1 */
     contextSensitiveBuffer = NULL;			/* freed @2 */
     TPM_ContextSensitive_Init(&contextSensitive);	/* freed @3 */
@@ -4724,7 +4724,7 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadKeyContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4746,13 +4746,13 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     */
     if (returnCode == TPM_SUCCESS) {
 	if (keyContextBlob.resourceType != TPM_RT_KEY) {
-	    printf("TPM_Process_LoadKeyContext: Error, resourceType %08x should be TPM_RT_KEY\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Error, resourceType %08x should be TPM_RT_KEY\n",
 		   keyContextBlob.resourceType);
 	    returnCode	=TPM_BAD_PARAMETER;
 	}
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Decrypting TPM_CONTEXT_SENSITIVE stream\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Decrypting TPM_CONTEXT_SENSITIVE stream\n");
 	returnCode =
 	    TPM_SymmetricKeyData_Decrypt(&contextSensitiveBuffer,	/* decrypted data */
 					 &contextSensitiveBuffer_length, /* length decrypted data */
@@ -4762,24 +4762,24 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     }
     /* deserialize TPM_CONTEXT_SENSITIVE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Creating TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Creating TPM_CONTEXT_SENSITIVE\n");
 	stream = contextSensitiveBuffer;
 	stream_size = contextSensitiveBuffer_length;
 	returnCode = TPM_ContextSensitive_Load(&contextSensitive, &stream, &stream_size);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Loading TPM_KEY_HANDLE_ENTRY from internalData\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Loading TPM_KEY_HANDLE_ENTRY from internalData\n");
 	stream = contextSensitive.internalData.buffer;
 	stream_size = contextSensitive.internalData.size;
 	returnCode = TPM_KeyHandleEntry_Load(&tpm_key_handle_entry, &stream, &stream_size);
     }
     /* check contextNonce */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Checking TPM_CONTEXT_SENSITIVE -> contextNonce\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Checking TPM_CONTEXT_SENSITIVE -> contextNonce\n");
 	returnCode = TPM_Nonce_Compare(tpm_state->tpm_stclear_data.contextNonceKey,
 				       contextSensitive.contextNonce);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_LoadKeyContext: Error comparing contextNonceKey\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Error comparing contextNonceKey\n");
 	    returnCode = TPM_BADCONTEXT;
 	}
     }
@@ -4789,7 +4789,7 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
 					 contextSensitiveBuffer_length, contextSensitiveBuffer);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Checking integrityDigest\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Checking integrityDigest\n");
 	/* make a copy of integrityDigest, because it needs to be 0 for the HMAC calculation */
 	/* NOTE Done by TPM_HMAC_CheckStructure() */
 	/* b. Set B1 -> integrityDigest to NULL */
@@ -4805,7 +4805,7 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     }
     /* try to use the saved handle value when possible */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Checking if suggested handle %08x is free\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Checking if suggested handle %08x is free\n",
 	       keyContextBlob.handle);
 	/* check if the key handle is free */
 	getRc = TPM_KeyHandleEntries_GetEntry(&used_key_handle_entry,
@@ -4822,18 +4822,18 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     }
     /* check that there is space in the key handle entries */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Checking for table space\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Checking for table space\n");
 	TPM_KeyHandleEntries_IsSpace(&isSpace, &index,
 				     tpm_state->tpm_key_handle_entries);
 	/* if there is no space, return error */
 	if (!isSpace) {
-	    printf("TPM_Process_LoadKeyContext: Error, no room in table\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Error, no room in table\n");
 	    returnCode = TPM_RESOURCES;
 	}
     }
     /* restore the entity, try to keep the handle as 'handle' */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadKeyContext: Adding entry to table\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Adding entry to table\n");
 	returnCode = TPM_KeyHandleEntries_AddEntry(&keyHandle,
 						   FALSE,		/* keep handle */
 						   tpm_state->tpm_key_handle_entries,
@@ -4845,7 +4845,7 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadKeyContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadKeyContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4943,7 +4943,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SaveAuthContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Ordinal Entry\n");
     TPM_ContextSensitive_Init(&contextSensitive);	/* freed @1 */
     TPM_Sbuffer_Init(&contextSensitive_sbuffer);	/* freed @2 */
     TPM_ContextBlob_Init(&contextBlob);			/* freed @3 */
@@ -4958,7 +4958,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     /* save the starting point of inParam's for authorization and auditing */
     inParamStart = command;
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveAuthContext: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: authHandle %08x\n", authHandle);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -4984,7 +4984,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SaveAuthContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5015,7 +5015,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
 	v1StClearData = &(tpm_state->tpm_stclear_data);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveAuthContext: Handle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Handle %08x\n", authHandle);
 	returnCode = TPM_AuthSessions_GetEntry(&tpm_auth_session_data,
 					       v1StClearData->authSessions,
 					       authHandle);
@@ -5033,7 +5033,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
        information of the resource is included in internalData.	 For a session, the entire structure
        can fit in the sensitive part. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveAuthContext: Building TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Building TPM_CONTEXT_SENSITIVE\n");
 	returnCode = TPM_SizedBuffer_SetStructure(&(contextSensitive.internalData),
 						  tpm_auth_session_data,
 						  (TPM_STORE_FUNCTION_T)TPM_AuthSessionData_Store);
@@ -5044,7 +5044,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
 	/* TPM_CONTEXT_SENSITIVE -> contextNonce */
 	TPM_Nonce_Copy(contextSensitive.contextNonce, v1StClearData->contextNonceSession);
 	/* TPM_CONTEXT_BLOB -> resourceType, handle, integrityDigest */
-	printf("TPM_Process_SaveAuthContext: Building TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Building TPM_CONTEXT_BLOB\n");
 	contextBlob.resourceType = TPM_RT_AUTH;
 	contextBlob.handle = authHandle;
 	TPM_Digest_Init(contextBlob.integrityDigest);
@@ -5059,11 +5059,11 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
 						  &contextSensitive_sbuffer);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SaveAuthContext: Processing session context count\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Processing session context count\n");
 	/* a. If V1 -> contextCount > 2^32-2 then */
 	if (v1StClearData->contextCount > 0xfffffffe) {
 	    /* i. Return with TPM_TOOMANYCONTEXTS */
-	    printf("TPM_Process_SaveAuthContext: Error, too many contexts\n");
+	    TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Error, too many contexts\n");
 	    returnCode = TPM_TOOMANYCONTEXTS;
 	}
     }
@@ -5084,7 +5084,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	TPM_ContextList_GetSpace(&space, &contextIndex, v1StClearData->contextList);
 	if (space == 0) {
-	    printf("TPM_Process_SaveAuthContext: Error, no space in context list\n");
+	    TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Error, no space in context list\n");
 	    returnCode = TPM_NOCONTEXTSPACE;
 	}
     }
@@ -5104,7 +5104,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* This is a bit circular.  It's safe since the TPM_CONTEXT_BLOB is serialized before the
 	   HMAC is generated.	The result is put back into the structure.  */
-	printf("TPM_Process_SaveAuthContext: Digesting TPM_CONTEXT_BLOB\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Digesting TPM_CONTEXT_BLOB\n");
 	returnCode = TPM_HMAC_GenerateStructure
 		     (contextBlob.integrityDigest,		/* HMAC */
 		      tpm_state->tpm_permanent_data.tpmProof,	/* HMAC key */
@@ -5117,7 +5117,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
 	/* The cleartext went into sensitiveData for the integrityDigest calculation.  Free it now,
 	   before the encrypted data is stored there. */
 	TPM_SizedBuffer_Delete(&(contextBlob.sensitiveData));
-	printf("TPM_Process_SaveAuthContext: Encrypting TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Encrypting TPM_CONTEXT_SENSITIVE\n");
 	returnCode =
 	    TPM_SymmetricKeyData_EncryptSbuffer(&(contextBlob.sensitiveData),
 						&contextSensitive_sbuffer,
@@ -5132,7 +5132,7 @@ TPM_RESULT TPM_Process_SaveAuthContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SaveAuthContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SaveAuthContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5229,7 +5229,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     TPM_KEY_HANDLE	authHandle;	/* The handle assigned to the authorization session after it
 					   has been successfully loaded. */
 
-    printf("TPM_Process_LoadAuthContext: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Ordinal Entry\n");
     TPM_ContextBlob_Init(&authContextBlob);		/* freed @1 */
     contextSensitiveBuffer = NULL;			/* freed @2 */
     TPM_ContextSensitive_Init(&contextSensitive);	/* freed @3 */
@@ -5248,7 +5248,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 	returnCode = TPM_ContextBlob_Load(&authContextBlob, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: handle %08x\n", authContextBlob.handle);
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: handle %08x\n", authContextBlob.handle);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -5274,7 +5274,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_LoadAuthContext: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5301,13 +5301,13 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 	/* 2. Map V1 to TPM_STANY_DATA NOTE MAY be TPM_STCLEAR_DATA */
 	v1StClearData = &(tpm_state->tpm_stclear_data);
 	if (authContextBlob.resourceType != TPM_RT_AUTH) {
-	    printf("TPM_Process_LoadAuthContext: Error, resourceType %08x should be TPM_RT_AUTH\n",
+	    TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Error, resourceType %08x should be TPM_RT_AUTH\n",
 		   authContextBlob.resourceType);
 	    returnCode = TPM_BAD_PARAMETER;
 	}
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Decrypting TPM_CONTEXT_SENSITIVE stream\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Decrypting TPM_CONTEXT_SENSITIVE stream\n");
 	returnCode =
 	    TPM_SymmetricKeyData_Decrypt(&contextSensitiveBuffer,	 /* decrypted data */
 					 &contextSensitiveBuffer_length, /* length decrypted data */
@@ -5317,7 +5317,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     }
     /* deserialize TPM_CONTEXT_SENSITIVE */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Creating TPM_CONTEXT_SENSITIVE\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Creating TPM_CONTEXT_SENSITIVE\n");
 	stream = contextSensitiveBuffer;
 	stream_size = contextSensitiveBuffer_length;
 	returnCode = TPM_ContextSensitive_Load(&contextSensitive,
@@ -5326,20 +5326,20 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     }
     /* Parse the TPM_CONTEXT_SENSITIVE -> internalData to TPM_AUTH_SESSION_DATA	 */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Loading TPM_AUTH_SESSION_DATA from internalData\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Loading TPM_AUTH_SESSION_DATA from internalData\n");
 	stream = contextSensitive.internalData.buffer;
 	stream_size = contextSensitive.internalData.size;
 	returnCode = TPM_AuthSessionData_Load(&tpm_auth_session_data, &stream, &stream_size);
     }
     /* check contextNonce */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: protocolID %04x entityTypeByte %02x\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: protocolID %04x entityTypeByte %02x\n",
 	       tpm_auth_session_data.protocolID, tpm_auth_session_data.entityTypeByte);
-	printf("TPM_Process_LoadAuthContext: Checking TPM_CONTEXT_SENSITIVE -> contextNonce\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Checking TPM_CONTEXT_SENSITIVE -> contextNonce\n");
 	returnCode = TPM_Nonce_Compare(v1StClearData->contextNonceSession,
 				       contextSensitive.contextNonce);
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_LoadAuthContext: Error comparing contextNonceSession\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Error comparing contextNonceSession\n");
 	    returnCode = TPM_BADCONTEXT;
 	}
     }
@@ -5350,7 +5350,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 	       or DSAP session */
 	    switch (tpm_auth_session_data.entityTypeByte) {
 	      case TPM_ET_OWNER:
-		printf("TPM_Process_LoadAuthContext: Owner OSAP/DSAP session\n");
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Owner OSAP/DSAP session\n");
 		/* check for owner */
 		if (returnCode == TPM_SUCCESS) {
 		    returnCode = TPM_LoadContext_CheckOwnerLoaded(tpm_state, entityDigest);
@@ -5360,14 +5360,14 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 		    returnCode= TPM_Digest_Compare(entityDigest,
 						   tpm_auth_session_data.entityDigest);
 		    if (returnCode != TPM_SUCCESS) {
-			printf("TPM_Process_LoadAuthContext: "
+			TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: "
 			       "Error, OSAP or DSAP entityDigest mismatch\n");
 			returnCode = TPM_RESOURCEMISSING;
 		    }
 		}
 		break;
 	      case TPM_ET_SRK:
-		printf("TPM_Process_LoadAuthContext: SRK OSAP/DSAP session\n");
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: SRK OSAP/DSAP session\n");
 		/* check for SRK */
 		if (returnCode == TPM_SUCCESS) {
 		    returnCode = TPM_LoadContext_CheckSrkLoaded(tpm_state, entityDigest);
@@ -5377,21 +5377,21 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 		    returnCode= TPM_Digest_Compare(entityDigest,
 						   tpm_auth_session_data.entityDigest);
 		    if (returnCode != TPM_SUCCESS) {
-			printf("TPM_Process_LoadAuthContext: "
+			TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: "
 			       "Error, OSAP or DSAP entityDigest mismatch\n");
 			returnCode = TPM_RESOURCEMISSING;
 		    }
 		}
 		break;
 	      case TPM_ET_KEYHANDLE:
-		printf("TPM_Process_LoadAuthContext: Key OSAP/DSAP session\n");
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Key OSAP/DSAP session\n");
 		/* for keys */
 		returnCode =
 		    TPM_LoadContext_CheckKeyLoadedByDigest(tpm_state,
 							   tpm_auth_session_data.entityDigest);
 		break;
 	      case TPM_ET_COUNTER:
-		printf("TPM_Process_LoadAuthContext: Counter OSAP/DSAP session\n");
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Counter OSAP/DSAP session\n");
 #if 0	/* TPM_LoadAuthContext is a deprecated 1.1 command, where there was no counter */
 		returnCode =
 		    TPM_LoadContext_CheckCounterLoaded(tpm_state,
@@ -5400,7 +5400,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 #endif
 		break;
 	      case TPM_ET_NV:
-		printf("TPM_Process_LoadAuthContext: NV OSAP/DSAP session\n");
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: NV OSAP/DSAP session\n");
 #if 0	/* TPM_LoadAuthContext is a deprecated 1.1 command, where there was no NV space */
 		returnCode =
 		    TPM_LoadContext_CheckNvLoaded(tpm_state,
@@ -5409,7 +5409,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 #endif
 		break;
 	      default:
-		printf("TPM_Process_LoadAuthContext: Error, invalid session entityType %02x\n",
+		TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Error, invalid session entityType %02x\n",
 		       tpm_auth_session_data.entityTypeByte);
 		returnCode = TPM_WRONG_ENTITYTYPE;
 		break;
@@ -5417,7 +5417,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 	}
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Checking integrityDigest\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Checking integrityDigest\n");
 	/* b. Set B1 -> integrityDigest to NULL */
 	/* NOTE Done by TPM_HMAC_CheckStructure() */
 	/* c. Copy M1 to B1 -> sensitiveData (integrityDigest HMAC uses cleartext) */
@@ -5434,7 +5434,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     }
     /* try to use the saved handle value when possible */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Checking if suggested handle %08x is free\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Checking if suggested handle %08x is free\n",
 	       authContextBlob.handle);
 	/* check if the auth handle is free */
 	getRc = TPM_AuthSessions_GetEntry(&used_auth_session_data,
@@ -5451,12 +5451,12 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     }
     /* check that there is space in the authorization handle entries */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Checking for table space\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Checking for table space\n");
 	TPM_AuthSessions_IsSpace(&isSpace, &index,
 				 tpm_state->tpm_stclear_data.authSessions);
 	/* if there is no space, return error */
 	if (!isSpace) {
-	    printf("TPM_Process_LoadAuthContext: Error, no room in table\n");
+	    TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Error, no room in table\n");
 	    TPM_AuthSessions_Trace(tpm_state->tpm_stclear_data.authSessions);
 	    returnCode = TPM_RESOURCES;
 	}
@@ -5465,7 +5465,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
        TPM_CONTEXT_BLOB -> contextCount */
     /* b. If not found then return TPM_BADCONTEXT */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_LoadAuthContext: Checking contextCount\n");
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Checking contextCount\n");
 	returnCode = TPM_ContextList_GetEntry(&contextIndex,
 					      v1StClearData->contextList,
 					      authContextBlob.contextCount);
@@ -5487,7 +5487,7 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_LoadAuthContext: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_LoadAuthContext: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

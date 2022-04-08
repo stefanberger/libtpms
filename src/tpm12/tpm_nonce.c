@@ -53,7 +53,7 @@ void TPM_Nonce_Init(TPM_NONCE tpm_nonce)
 {
     size_t i;
 
-    printf("  TPM_Nonce_Init:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Init:\n");
     for (i = 0 ; i < TPM_NONCE_SIZE ; i++) {
         tpm_nonce[i] = 0;
     }
@@ -74,7 +74,7 @@ TPM_RESULT TPM_Nonce_Load(TPM_NONCE tpm_nonce,
 {
     TPM_RESULT  rc = 0;
     
-    printf("  TPM_Nonce_Load:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Load:\n");
     rc = TPM_Loadn(tpm_nonce, TPM_NONCE_SIZE, stream, stream_size);
     return rc;
 }
@@ -92,7 +92,7 @@ TPM_RESULT TPM_Nonce_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Nonce_Store:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Store:\n");
     rc = TPM_Sbuffer_Append(sbuffer, tpm_nonce, TPM_NONCE_SIZE);        
     return rc;
 }
@@ -102,7 +102,7 @@ TPM_RESULT TPM_Nonce_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_Nonce_Copy(TPM_NONCE destination, const TPM_NONCE source)
 {
-    printf("  TPM_Nonce_Copy:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Copy:\n");
     memcpy(destination, source, TPM_NONCE_SIZE);
     return;
 }
@@ -116,10 +116,10 @@ TPM_RESULT TPM_Nonce_Compare(TPM_NONCE expect, const TPM_NONCE actual)
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Nonce_Compare:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Compare:\n");
     rc = memcmp(expect, actual, TPM_NONCE_SIZE);
     if (rc != 0) {
-        printf("TPM_Nonce_Compare: Error comparing nonce\n");
+        TPMLIB_LogPrintf("TPM_Nonce_Compare: Error comparing nonce\n");
         TPM_PrintFour(" TPM_Nonce_Compare: Expect", expect);
         TPM_PrintFour(" TPM_Nonce_Compare: Actual", actual);
         rc = TPM_AUTHFAIL;
@@ -134,7 +134,7 @@ TPM_RESULT TPM_Nonce_Generate(TPM_NONCE tpm_nonce)
 {
     TPM_RESULT  rc = 0;
 
-    printf("  TPM_Nonce_Generate:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_Generate:\n");
     rc = TPM_Random(tpm_nonce, TPM_NONCE_SIZE);
     return rc;
 }
@@ -146,7 +146,7 @@ void TPM_Nonce_IsZero(TPM_BOOL *isZero, TPM_NONCE tpm_nonce)
 {
     size_t i;
 
-    printf("  TPM_Nonce_IsZero:\n");
+    TPMLIB_LogPrintf("  TPM_Nonce_IsZero:\n");
     for (i = 0, *isZero = TRUE ; (i < TPM_NONCE_SIZE) && *isZero ; i++) {
         if (tpm_nonce[i] != 0) {
             *isZero = FALSE;

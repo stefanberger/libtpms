@@ -73,7 +73,7 @@
 
 void TPM_StructVer_Init(TPM_STRUCT_VER *tpm_struct_ver)
 {
-    printf(" TPM_StructVer_Init:\n");
+    TPMLIB_LogPrintf(" TPM_StructVer_Init:\n");
     tpm_struct_ver->major = 0x01;
     tpm_struct_ver->minor = 0x01;
     tpm_struct_ver->revMajor = 0x00;
@@ -94,7 +94,7 @@ TPM_RESULT TPM_StructVer_Load(TPM_STRUCT_VER *tpm_struct_ver,
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_StructVer_Load:\n");
+    TPMLIB_LogPrintf(" TPM_StructVer_Load:\n");
     if (rc == 0) {
         rc = TPM_Load8(&(tpm_struct_ver->major), stream, stream_size);
     }
@@ -122,7 +122,7 @@ TPM_RESULT TPM_StructVer_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_StructVer_Store:\n");
+    TPMLIB_LogPrintf(" TPM_StructVer_Store:\n");
     if (rc == 0) {
         rc = TPM_Sbuffer_Append(sbuffer, &(tpm_struct_ver->major), sizeof(BYTE));               
     }
@@ -143,7 +143,7 @@ TPM_RESULT TPM_StructVer_Store(TPM_STORE_BUFFER *sbuffer,
 void TPM_StructVer_Copy(TPM_STRUCT_VER *tpm_struct_ver_dest,
                         TPM_STRUCT_VER *tpm_struct_ver_src)
 {
-    printf(" TPM_StructVer_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_StructVer_Copy:\n");
     tpm_struct_ver_dest->major    = tpm_struct_ver_src->major;
     tpm_struct_ver_dest->minor    = tpm_struct_ver_src->minor;
     tpm_struct_ver_dest->revMajor = tpm_struct_ver_src->revMajor;
@@ -157,14 +157,14 @@ TPM_RESULT TPM_StructVer_CheckVer(TPM_STRUCT_VER *tpm_struct_ver)
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_StructVer_CheckVer: version %u.%u.%u.%u\n",
+    TPMLIB_LogPrintf(" TPM_StructVer_CheckVer: version %u.%u.%u.%u\n",
            tpm_struct_ver->major,
            tpm_struct_ver->minor,
            tpm_struct_ver->revMajor,
            tpm_struct_ver->revMinor);
     if ((tpm_struct_ver->major != 0x01) ||
         (tpm_struct_ver->minor != 0x01)) {
-        printf("TPM_StructVer_CheckVer: Error checking version\n");
+        TPMLIB_LogPrintf("TPM_StructVer_CheckVer: Error checking version\n");
         rc = TPM_BAD_VERSION;
     }
     return rc;
@@ -179,7 +179,7 @@ TPM_RESULT TPM_StructVer_CheckVer(TPM_STRUCT_VER *tpm_struct_ver)
 
 void TPM_Version_Init(TPM_VERSION *tpm_version)
 {
-    printf(" TPM_Version_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Version_Init:\n");
     tpm_version->major = 0;
     tpm_version->minor = 0;
     tpm_version->revMajor = 0;
@@ -190,7 +190,7 @@ void TPM_Version_Init(TPM_VERSION *tpm_version)
 void TPM_Version_Set(TPM_VERSION *tpm_version,
                      TPM_PERMANENT_DATA *tpm_permanent_data)
 {
-    printf(" TPM_Version_Set:\n");
+    TPMLIB_LogPrintf(" TPM_Version_Set:\n");
     /* This SHALL indicate the major version of the TPM, mostSigVer MUST be 0x01, leastSigVer MUST
        be 0x00 */
     tpm_version->major = TPM_MAJOR;
@@ -220,7 +220,7 @@ TPM_RESULT TPM_Version_Load(TPM_VERSION *tpm_version,
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_Version_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Version_Load:\n");
     /* load major */
     if (rc == 0) {
         rc = TPM_Load8(&(tpm_version->major), stream, stream_size);
@@ -252,7 +252,7 @@ TPM_RESULT TPM_Version_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_Version_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Version_Store:\n");
     /* store major */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append(sbuffer, &(tpm_version->major), sizeof(BYTE));          

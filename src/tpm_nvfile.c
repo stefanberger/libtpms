@@ -113,13 +113,13 @@ TPM_RESULT TPM_NVRAM_Init(void)
     }
 #endif
 
-    printf(" TPM_NVRAM_Init:\n");
+    TPMLIB_LogPrintf(" TPM_NVRAM_Init:\n");
 #ifdef TPM_NV_DISK
     /* TPM_NV_DISK TPM emulation stores in local directory determined by environment variable. */
     if (rc == 0) {
         tpm_state_path = getenv("TPM_PATH");
         if (tpm_state_path == NULL) {
-            printf("TPM_NVRAM_Init: Error (fatal), TPM_PATH environment variable not set\n");
+            TPMLIB_LogPrintf("TPM_NVRAM_Init: Error (fatal), TPM_PATH environment variable not set\n");
             rc = TPM_FAIL;
         }
     }
@@ -130,14 +130,14 @@ TPM_RESULT TPM_NVRAM_Init(void)
     if (rc == 0) {
         length = strlen(tpm_state_path);
         if ((length + TPM_FILENAME_MAX) > FILENAME_MAX) {
-            printf("TPM_NVRAM_Init: Error (fatal), TPM state path name %s too large\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_Init: Error (fatal), TPM state path name %s too large\n",
 		   tpm_state_path);
             rc = TPM_FAIL;
         }
     }
     if (rc == 0) {
         strcpy(state_directory, tpm_state_path);
-        printf("TPM_NVRAM_Init: Rooted state path %s\n", state_directory);
+        TPMLIB_LogPrintf("TPM_NVRAM_Init: Rooted state path %s\n", state_directory);
     }
     return rc;
 }
@@ -185,7 +185,7 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
     }
 #endif
 
-    printf(" TPM_NVRAM_LoadData: From file %s\n", name);
+    TPMLIB_LogPrintf(" TPM_NVRAM_LoadData: From file %s\n", name);
     *data = NULL;
     *length = 0;
     /* open the file */
@@ -195,15 +195,15 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
                                           tpm_number, name);
     }
     if (rc == 0) {
-        printf("  TPM_NVRAM_LoadData: Opening file %s\n", filename);
+        TPMLIB_LogPrintf("  TPM_NVRAM_LoadData: Opening file %s\n", filename);
         file = fopen(filename, "rb");                           /* closed @1 */
         if (file == NULL) {     /* if failure, determine cause */
             if (errno == ENOENT) {
-                printf("TPM_NVRAM_LoadData: No such file %s\n", filename);
+                TPMLIB_LogPrintf("TPM_NVRAM_LoadData: No such file %s\n", filename);
                 rc = TPM_RETRY;         /* first time start up */
             }
             else {
-                printf("TPM_NVRAM_LoadData: Error (fatal) opening %s for read, %s\n",
+                TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) opening %s for read, %s\n",
                        filename, strerror(errno));
                 rc = TPM_FAIL;
             }
@@ -213,7 +213,7 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
     if (rc == 0) {
         irc = fseek(file, 0L, SEEK_END);        /* seek to end of file */
         if (irc == -1L) {
-            printf("TPM_NVRAM_LoadData: Error (fatal) fseek'ing %s, %s\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) fseek'ing %s, %s\n",
                    filename, strerror(errno));
             rc = TPM_FAIL;
         }
@@ -221,7 +221,7 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
     if (rc == 0) {
         lrc = ftell(file);                      /* get position in the stream */
         if (lrc == -1L) {
-            printf("TPM_NVRAM_LoadData: Error (fatal) ftell'ing %s, %s\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) ftell'ing %s, %s\n",
                    filename, strerror(errno));
             rc = TPM_FAIL;
         }
@@ -232,17 +232,17 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
     if (rc == 0) {
         irc = fseek(file, 0L, SEEK_SET);        /* seek back to the beginning of the file */
         if (irc == -1L) {
-            printf("TPM_NVRAM_LoadData: Error (fatal) fseek'ing %s, %s\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) fseek'ing %s, %s\n",
                    filename, strerror(errno));
             rc = TPM_FAIL;
         }
     }
     /* allocate a buffer for the actual data */
     if ((rc == 0) && *length != 0) {
-        printf(" TPM_NVRAM_LoadData: Reading %u bytes of data\n", *length);
+        TPMLIB_LogPrintf(" TPM_NVRAM_LoadData: Reading %u bytes of data\n", *length);
         rc = TPM_Malloc(data, *length);
 	if (rc != 0) {
-            printf("TPM_NVRAM_LoadData: Error (fatal) allocating %u bytes\n", *length);
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) allocating %u bytes\n", *length);
             rc = TPM_FAIL;
 	}
     }
@@ -250,21 +250,21 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
     if ((rc == 0) && *length != 0) {
         src = fread(*data, 1, *length, file);
         if (src != *length) {
-            printf("TPM_NVRAM_LoadData: Error (fatal), data read of %u only read %lu\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal), data read of %u only read %lu\n",
                    *length, (unsigned long)src);
             rc = TPM_FAIL;
         }
     }
     /* close the file */
     if (file != NULL) {
-        printf(" TPM_NVRAM_LoadData: Closing file %s\n", filename);
+        TPMLIB_LogPrintf(" TPM_NVRAM_LoadData: Closing file %s\n", filename);
         irc = fclose(file);             /* @1 */
         if (irc != 0) {
-            printf("TPM_NVRAM_LoadData: Error (fatal) closing file %s\n", filename);
+            TPMLIB_LogPrintf("TPM_NVRAM_LoadData: Error (fatal) closing file %s\n", filename);
             rc = TPM_FAIL;
         }
         else {
-            printf(" TPM_NVRAM_LoadData: Closed file %s\n", filename);
+            TPMLIB_LogPrintf(" TPM_NVRAM_LoadData: Closed file %s\n", filename);
         }
     }
     return rc;
@@ -299,7 +299,7 @@ TPM_RESULT TPM_NVRAM_StoreData(const unsigned char *data,
     }
 #endif
 
-    printf(" TPM_NVRAM_StoreData: To name %s\n", name);
+    TPMLIB_LogPrintf(" TPM_NVRAM_StoreData: To name %s\n", name);
     if (rc == 0) {
         /* map name to the rooted filename */
         rc = TPM_NVRAM_GetFilenameForName(filename, sizeof(filename),
@@ -307,33 +307,33 @@ TPM_RESULT TPM_NVRAM_StoreData(const unsigned char *data,
     }
     if (rc == 0) {
         /* open the file */
-        printf(" TPM_NVRAM_StoreData: Opening file %s\n", filename);
+        TPMLIB_LogPrintf(" TPM_NVRAM_StoreData: Opening file %s\n", filename);
         file = fopen(filename, "wb");                           /* closed @1 */
         if (file == NULL) {
-            printf("TPM_NVRAM_StoreData: Error (fatal) opening %s for write failed, %s\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_StoreData: Error (fatal) opening %s for write failed, %s\n",
                    filename, strerror(errno));
             rc = TPM_FAIL;
         }
     }
     /* write the data to the file */
     if (rc == 0) {
-        printf("  TPM_NVRAM_StoreData: Writing %u bytes of data\n", length);
+        TPMLIB_LogPrintf("  TPM_NVRAM_StoreData: Writing %u bytes of data\n", length);
         lrc = fwrite(data, 1, length, file);
         if (lrc != length) {
-            printf("TPM_NVRAM_StoreData: Error (fatal), data write of %u only wrote %u\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_StoreData: Error (fatal), data write of %u only wrote %u\n",
                    length, lrc);
             rc = TPM_FAIL;
         }
     }
     if (file != NULL) {
-        printf("  TPM_NVRAM_StoreData: Closing file %s\n", filename);
+        TPMLIB_LogPrintf("  TPM_NVRAM_StoreData: Closing file %s\n", filename);
         irc = fclose(file);             /* @1 */
         if (irc != 0) {
-            printf("TPM_NVRAM_StoreData: Error (fatal) closing file\n");
+            TPMLIB_LogPrintf("TPM_NVRAM_StoreData: Error (fatal) closing file\n");
             rc = TPM_FAIL;
         }
         else {
-            printf("  TPM_NVRAM_StoreData: Closed file %s\n", filename);
+            TPMLIB_LogPrintf("  TPM_NVRAM_StoreData: Closed file %s\n", filename);
         }
     }
     return rc;
@@ -355,16 +355,16 @@ static TPM_RESULT TPM_NVRAM_GetFilenameForName(char *filename,        /* output:
     int n;
     TPM_RESULT rc = TPM_FAIL;
 
-    printf(" TPM_NVRAM_GetFilenameForName: For name %s\n", name);
+    TPMLIB_LogPrintf(" TPM_NVRAM_GetFilenameForName: For name %s\n", name);
     n = snprintf(filename, filename_len,
                  "%s/%02lx.%s", state_directory, (unsigned long)tpm_number,
                  name);
     if (n < 0) {
-        printf(" TPM_NVRAM_GetFilenameForName: Error (fatal), snprintf failed\n");
+        TPMLIB_LogPrintf(" TPM_NVRAM_GetFilenameForName: Error (fatal), snprintf failed\n");
     } else if ((size_t)n >= filename_len) {
-        printf(" TPM_NVRAM_GetFilenameForName: Error (fatal), buffer too small\n");
+        TPMLIB_LogPrintf(" TPM_NVRAM_GetFilenameForName: Error (fatal), buffer too small\n");
     } else {
-        printf("  TPM_NVRAM_GetFilenameForName: File name %s\n", filename);
+        TPMLIB_LogPrintf("  TPM_NVRAM_GetFilenameForName: File name %s\n", filename);
         rc = TPM_SUCCESS;
     }
     return rc;
@@ -399,7 +399,7 @@ TPM_RESULT TPM_NVRAM_DeleteName(uint32_t tpm_number,
     }
 #endif
     
-    printf(" TPM_NVRAM_DeleteName: Name %s\n", name);
+    TPMLIB_LogPrintf(" TPM_NVRAM_DeleteName: Name %s\n", name);
     /* map name to the rooted filename */
     if (rc == 0) {
         rc = TPM_NVRAM_GetFilenameForName(filename, sizeof(filename),
@@ -410,7 +410,7 @@ TPM_RESULT TPM_NVRAM_DeleteName(uint32_t tpm_number,
         if ((irc != 0) &&               /* if the remove failed */
             (mustExist ||               /* if any error is a failure, or */
              (errno != ENOENT))) {      /* if error other than no such file */
-            printf("TPM_NVRAM_DeleteName: Error, (fatal) file remove failed, errno %d\n",
+            TPMLIB_LogPrintf("TPM_NVRAM_DeleteName: Error, (fatal) file remove failed, errno %d\n",
                    errno);
             rc = TPM_FAIL;
         }

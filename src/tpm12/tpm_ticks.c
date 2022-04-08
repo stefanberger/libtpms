@@ -80,7 +80,7 @@ static void TPM_Uint64_ConvertTo(uint32_t *sec,
 
 void TPM_Uint64_Init(TPM_UINT64 *tpm_uint64)
 {
-    printf(" TPM_Uint64_Init:\n");
+    TPMLIB_LogPrintf(" TPM_Uint64_Init:\n");
     tpm_uint64->sec = 0;
     tpm_uint64->usec = 0;
     return;
@@ -103,7 +103,7 @@ TPM_RESULT TPM_Uint64_Load(TPM_UINT64 *tpm_uint64,
     uint32_t		upper;
     uint32_t		lower;
 
-    printf(" TPM_Uint64_Load:\n");
+    TPMLIB_LogPrintf(" TPM_Uint64_Load:\n");
     /* load upper */
     if (rc == 0) {
 	rc = TPM_Load32(&upper, stream, stream_size);
@@ -137,7 +137,7 @@ TPM_RESULT TPM_Uint64_Store(TPM_STORE_BUFFER *sbuffer,
     uint32_t		upper;
     uint32_t		lower;
 
-    printf(" TPM_Uint64_Store:\n");
+    TPMLIB_LogPrintf(" TPM_Uint64_Store:\n");
     /* store upper */
     if (rc == 0) {
 	/* convert to 64 bit number */
@@ -154,7 +154,7 @@ TPM_RESULT TPM_Uint64_Store(TPM_STORE_BUFFER *sbuffer,
 void TPM_Uint64_Copy(TPM_UINT64 *dest,
 		     const TPM_UINT64 *src)
 {
-    printf(" TPM_Uint64_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_Uint64_Copy:\n");
     dest->sec = src->sec;
     dest->usec = src->usec;
     return;
@@ -180,13 +180,13 @@ static void TPM_Uint64_ConvertFrom(uint32_t *upper,
 {
     long long result;
     
-    printf("  TPM_Uint64_ConvertFrom: sec %u, usec %u\n", sec, usec);
+    TPMLIB_LogPrintf("  TPM_Uint64_ConvertFrom: sec %u, usec %u\n", sec, usec);
     result = (sec * 1000000LL) + (long long)usec;
-    printf("   TPM_Uint64_ConvertFrom: Result usec %llu, %llx\n", result, result);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertFrom: Result usec %llu, %llx\n", result, result);
     *upper = (result >> 32) & 0xffffffff;
     *lower = result & 0xffffffff;
-    printf("   TPM_Uint64_ConvertFrom: Upper %u, %x\n", *upper, *upper);
-    printf("   TPM_Uint64_ConvertFrom: Lower %u, %x\n", *lower, *lower);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertFrom: Upper %u, %x\n", *upper, *upper);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertFrom: Lower %u, %x\n", *lower, *lower);
     return;
 }
 
@@ -197,13 +197,13 @@ static void TPM_Uint64_ConvertTo(uint32_t *sec,
 {
     long long result;
 
-    printf("   TPM_Uint64_ConvertTo: Upper %u, %x\n", upper, upper);
-    printf("   TPM_Uint64_ConvertTo: Lower %u, %x\n", lower, lower);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertTo: Upper %u, %x\n", upper, upper);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertTo: Lower %u, %x\n", lower, lower);
     result = ((long long)upper << 32) | (long long)lower;
-    printf("   TPM_Uint64_ConvertTo: Result usec %llu, %llx\n", result, result);
+    TPMLIB_LogPrintf("   TPM_Uint64_ConvertTo: Result usec %llu, %llx\n", result, result);
     *sec = result / 1000000LL;
     *usec = result % 1000000LL;
-    printf("  TPM_Uint64_ConvertTo: sec %u, usec %u\n", *sec, *usec);
+    TPMLIB_LogPrintf("  TPM_Uint64_ConvertTo: sec %u, usec %u\n", *sec, *usec);
     return;
 }
 
@@ -219,7 +219,7 @@ TPM_RESULT TPM_Uint64_Test()
     unsigned char *stream;
     uint32_t stream_size;
 
-    printf("  TPM_Uint64_Test\n");
+    TPMLIB_LogPrintf("  TPM_Uint64_Test\n");
     TPM_Sbuffer_Init(&sbuffer);
     uint64In.sec = 12345678;
     uint64In.usec = 781234;
@@ -234,7 +234,7 @@ TPM_RESULT TPM_Uint64_Test()
     if (rc == 0) {
 	if ((uint64In.sec != uint64Out.sec) ||
 	    (uint64In.usec != uint64Out.usec)) {
-	    printf("TPM_Uint64_Test: Error (fatal)\n");
+	    TPMLIB_LogPrintf("TPM_Uint64_Test: Error (fatal)\n");
 	    rc = TPM_FAILEDSELFTEST;
 	}
     }
@@ -252,7 +252,7 @@ TPM_RESULT TPM_Uint64_Test()
 
 void TPM_CurrentTicks_Init(TPM_CURRENT_TICKS *tpm_current_ticks)
 {
-    printf(" TPM_CurrentTicks_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_Init:\n");
     TPM_Uint64_Init(&(tpm_current_ticks->currentTicks));
     tpm_current_ticks->tickRate = TPM_TICK_RATE;
     TPM_Nonce_Init(tpm_current_ticks->tickNonce);
@@ -270,7 +270,7 @@ TPM_RESULT TPM_CurrentTicks_Start(TPM_CURRENT_TICKS *tpm_current_ticks)
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_CurrentTicks_Start:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_Start:\n");
     if (rc == 0) {
 	/* current is relative to the initial value, and is always 0 */
 	TPM_Uint64_Init(&(tpm_current_ticks->currentTicks));
@@ -300,7 +300,7 @@ TPM_RESULT TPM_CurrentTicks_LoadAll(TPM_CURRENT_TICKS *tpm_current_ticks,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CurrentTicks_LoadAll:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_LoadAll:\n");
     /* load tag */
     if (rc == 0) {
         rc = TPM_CheckTag(TPM_TAG_CURRENT_TICKS, stream, stream_size);
@@ -335,7 +335,7 @@ TPM_RESULT TPM_CurrentTicks_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CurrentTicks_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CURRENT_TICKS);
@@ -366,7 +366,7 @@ TPM_RESULT TPM_CurrentTicks_StoreAll(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CurrentTicks_StoreAll:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_StoreAll:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_CurrentTicks_Store(sbuffer, tpm_current_ticks);
@@ -389,7 +389,7 @@ TPM_RESULT TPM_CurrentTicks_Update(TPM_CURRENT_TICKS *tpm_current_ticks)
     uint32_t	currentTimeSec;
     uint32_t	currentTimeUsec;
     
-    printf(" TPM_CurrentTicks_Update: Initial %u sec %u usec\n",
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_Update: Initial %u sec %u usec\n",
 	   tpm_current_ticks->initialTime.sec, tpm_current_ticks->initialTime.usec);
     /* get the current time of day */
     if (rc == 0) {
@@ -413,7 +413,7 @@ TPM_RESULT TPM_CurrentTicks_Update(TPM_CURRENT_TICKS *tpm_current_ticks)
 							tpm_current_ticks->initialTime.sec;
 	    }
 	    else {
-		printf(" TPM_CurrentTicks_Update: Error (fatal), illegal current time\n");
+		TPMLIB_LogPrintf(" TPM_CurrentTicks_Update: Error (fatal), illegal current time\n");
 		rc = TPM_FAIL;
 	    }
 	}
@@ -429,13 +429,13 @@ TPM_RESULT TPM_CurrentTicks_Update(TPM_CURRENT_TICKS *tpm_current_ticks)
 							tpm_current_ticks->initialTime.sec;
 	    }
 	    else {
-		printf(" TPM_CurrentTicks_Update: Error (fatal), illegal current time\n");
+		TPMLIB_LogPrintf(" TPM_CurrentTicks_Update: Error (fatal), illegal current time\n");
 		rc = TPM_FAIL;
 	    }
 	}
     }
     if (rc == 0) {
-	printf(" TPM_CurrentTicks_Update: Ticks %u sec %u usec\n",
+	TPMLIB_LogPrintf(" TPM_CurrentTicks_Update: Ticks %u sec %u usec\n",
 	       tpm_current_ticks->currentTicks.sec,
 	       tpm_current_ticks->currentTicks.usec);
     }
@@ -449,7 +449,7 @@ TPM_RESULT TPM_CurrentTicks_Update(TPM_CURRENT_TICKS *tpm_current_ticks)
 void TPM_CurrentTicks_Copy(TPM_CURRENT_TICKS *dest,
 			   TPM_CURRENT_TICKS *src)
 {
-    printf(" TPM_CurrentTicks_Copy:\n");
+    TPMLIB_LogPrintf(" TPM_CurrentTicks_Copy:\n");
     TPM_Uint64_Copy(&(dest->currentTicks), &(src->currentTicks));
     dest->tickRate = src->tickRate;
     TPM_Nonce_Copy(dest->tickNonce, src->tickNonce);
@@ -507,7 +507,7 @@ TPM_RESULT TPM_Process_GetTicks(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_CURRENT_TICKS	*t1CurrentTicks = NULL;		/* The current time held in the TPM */
 
-    printf("TPM_Process_GetTicks: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetTicks: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -537,7 +537,7 @@ TPM_RESULT TPM_Process_GetTicks(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetTicks: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetTicks: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -556,7 +556,7 @@ TPM_RESULT TPM_Process_GetTicks(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetTicks: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetTicks: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -659,7 +659,7 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     TPM_CURRENT_TICKS	*currentTicks = NULL;	/* The current time according to the TPM */
     TPM_SIZED_BUFFER	sig;			/* The resulting digital signature. */
 
-    printf("TPM_Process_TickStampBlob: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&sig);		/* freed @1 */
     TPM_SignInfo_Init(&h1SignInfo);	/* freed @2 */
     TPM_Sbuffer_Init(&h2Data);		/* freed @3 */
@@ -675,7 +675,7 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get antiReplay parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TickStampBlob: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Nonce_Load(antiReplay, &command, &paramSize);
     }
     /* get digestToStamp parameter */
@@ -716,11 +716,11 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
 					&command, &paramSize);
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf("TPM_Process_TickStampBlob: authHandle %08x\n", authHandle);
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: authHandle %08x\n", authHandle);
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_TickStampBlob: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -741,7 +741,7 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     }
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (sigKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_TickStampBlob: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -776,11 +776,11 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     /* 2. Validate that keyHandle -> keyUsage is TPM_KEY_SIGNING, TPM_KEY_IDENTITY or
        TPM_KEY_LEGACY, if not return the error code TPM_INVALID_KEYUSAGE. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TickStampBlob: Checking key properties\n");
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Checking key properties\n");
 	if ((sigKey->keyUsage != TPM_KEY_SIGNING) &&
 	    (sigKey->keyUsage != TPM_KEY_IDENTITY) &&
 	    (sigKey->keyUsage != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_TickStampBlob: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Error, keyUsage %04hx is invalid\n",
 		   sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -790,7 +790,7 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	if ((sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) &&
 	    (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_INFO)) {
-	    printf("TPM_Process_TickStampBlob: Error, invalid sigKey sigScheme %04hx\n",
+	    TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Error, invalid sigKey sigScheme %04hx\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INAPPROPRIATE_SIG;
 	}
@@ -800,14 +800,14 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     /* NOTE: Always initialized */
     /* 5. Create T1, a TPM_CURRENT_TICKS structure. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TickStampBlob: Creating TPM_CURRENT_TICKS structure\n");
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Creating TPM_CURRENT_TICKS structure\n");
 	currentTicks = &(tpm_state->tpm_stany_data.currentTicks);
 	/* update the ticks based on the current time */
 	returnCode = TPM_CurrentTicks_Update(currentTicks);
     }
     if (returnCode == TPM_SUCCESS) {
 	/* 6. Create H1 a TPM_SIGN_INFO structure and set the structure defaults */
-	printf("TPM_Process_TickStampBlob: Creating TPM_SIGN_INFO structure\n");
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Creating TPM_SIGN_INFO structure\n");
 	/* NOTE: Done by TPM_SignInfo_Init() */
 	/* a. Set H1 -> fixed to 'TSTP' */
 	memcpy(h1SignInfo.fixed, "TSTP", TPM_SIGN_INFO_FIXED_SIZE);
@@ -829,12 +829,12 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     /* 7. The TPM computes the signature, sig, using the key referenced by keyHandle, using SHA-1 of
        H1 as the information to be signed */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TickStampBlob: Digesting TPM_SIGN_INFO structure\n");
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Digesting TPM_SIGN_INFO structure\n");
 	returnCode = TPM_SHA1_GenerateStructure(h3Digest, &h1SignInfo,
 						(TPM_STORE_FUNCTION_T)TPM_SignInfo_Store);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_TickStampBlob: Signing TPM_SIGN_INFO digest\n");
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Signing TPM_SIGN_INFO digest\n");
 	returnCode = TPM_RSASignToSizedBuffer(&sig,		/* signature */
 					      h3Digest,		/* message */
 					      TPM_DIGEST_SIZE,	/* message size */
@@ -845,7 +845,7 @@ TPM_RESULT TPM_Process_TickStampBlob(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_TickStampBlob: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_TickStampBlob: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

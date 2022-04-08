@@ -185,7 +185,7 @@ static TPM_RESULT TPM_SetCapability_CapVendor(tpm_state_t *tpm_state,
 
 void TPM_CapVersionInfo_Init(TPM_CAP_VERSION_INFO *tpm_cap_version_info)
 {
-    printf(" TPM_CapVersionInfo_Init:\n");
+    TPMLIB_LogPrintf(" TPM_CapVersionInfo_Init:\n");
     TPM_Version_Init(&(tpm_cap_version_info->version));
     tpm_cap_version_info->specLevel = TPM_SPEC_LEVEL;
     tpm_cap_version_info->errataRev = TPM_ERRATA_REV;
@@ -201,7 +201,7 @@ void TPM_CapVersionInfo_Init(TPM_CAP_VERSION_INFO *tpm_cap_version_info)
 void TPM_CapVersionInfo_Set(TPM_CAP_VERSION_INFO *tpm_cap_version_info,
 			    TPM_PERMANENT_DATA *tpm_permanent_data)
 {
-    printf(" TPM_CapVersionInfo_Set:\n");
+    TPMLIB_LogPrintf(" TPM_CapVersionInfo_Set:\n");
     TPM_Version_Set(&(tpm_cap_version_info->version), tpm_permanent_data);
     tpm_cap_version_info->specLevel = TPM_SPEC_LEVEL;
     tpm_cap_version_info->errataRev = TPM_ERRATA_REV;
@@ -229,7 +229,7 @@ TPM_RESULT TPM_CapVersionInfo_Load(TPM_CAP_VERSION_INFO *tpm_cap_version_info,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CapVersionInfo_Load:\n");
+    TPMLIB_LogPrintf(" TPM_CapVersionInfo_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_CAP_VERSION_INFO, stream, stream_size);
@@ -282,7 +282,7 @@ TPM_RESULT TPM_CapVersionInfo_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_CapVersionInfo_Store:\n");
+    TPMLIB_LogPrintf(" TPM_CapVersionInfo_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_CAP_VERSION_INFO); 
@@ -329,7 +329,7 @@ TPM_RESULT TPM_CapVersionInfo_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_CapVersionInfo_Delete(TPM_CAP_VERSION_INFO *tpm_cap_version_info)
 {
-    printf(" TPM_CapVersionInfo_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_CapVersionInfo_Delete:\n");
     if (tpm_cap_version_info != NULL) {
 	free(tpm_cap_version_info->vendorSpecific);
 	TPM_CapVersionInfo_Init(tpm_cap_version_info);
@@ -2060,7 +2060,7 @@ TPM_RESULT TPM_OrdinalTable_GetEntry(TPM_ORDINAL_TABLE **entry,
     TPM_RESULT	rc = TPM_BAD_ORDINAL;
     size_t	i;
 
-    /* printf(" TPM_OrdinalTable_GetEntry: Ordinal %08x\n", ordinal); */
+    /* TPMLIB_LogPrintf(" TPM_OrdinalTable_GetEntry: Ordinal %08x\n", ordinal); */
     *entry = NULL;
     for (i = 0 ; i < (sizeof(tpm_ordinal_table)/sizeof(TPM_ORDINAL_TABLE)) ; i++) {
 	if (ordinalTable[i].ordinal == ordinal) {	/* if found */
@@ -2084,7 +2084,7 @@ void TPM_OrdinalTable_GetProcessFunction(tpm_process_function_t *tpm_process_fun
     TPM_RESULT	rc = 0;
     TPM_ORDINAL_TABLE *entry;
     
-    printf(" TPM_OrdinalTable_GetProcessFunction: Ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_OrdinalTable_GetProcessFunction: Ordinal %08x\n", ordinal);
 
     if (rc == 0) {
 	rc = TPM_OrdinalTable_GetEntry(&entry, ordinalTable, ordinal);
@@ -2113,7 +2113,7 @@ void TPM_OrdinalTable_GetAuditable(TPM_BOOL *auditable,
     TPM_RESULT	rc = 0;
     TPM_ORDINAL_TABLE *entry;
     
-    printf(" TPM_OrdinalTable_GetAuditable: Ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_OrdinalTable_GetAuditable: Ordinal %08x\n", ordinal);
     if (rc == 0) {
 	rc = TPM_OrdinalTable_GetEntry(&entry, tpm_ordinal_table, ordinal);
     }
@@ -2185,7 +2185,7 @@ TPM_RESULT TPM_OrdinalTable_GetOwnerPermission(uint16_t *ownerPermissionBlock,
 	*ownerPermissionPosition = entry->ownerPermissionPosition;
 	/* sanity check ordinal table entry value */
 	if (*ownerPermissionPosition >= (sizeof(uint32_t) * CHAR_BIT)) {
-	    printf("TPM_OrdinalTable_GetOwnerPermission: Error (fatal): "
+	    TPMLIB_LogPrintf("TPM_OrdinalTable_GetOwnerPermission: Error (fatal): "
 		   "ownerPermissionPosition out of range %u\n", *ownerPermissionPosition);
 	    rc = TPM_FAIL;	/* should never occur */
 	}
@@ -2211,7 +2211,7 @@ TPM_RESULT TPM_OrdinalTable_GetKeyPermission(uint16_t *keyPermissionBlock,
 	*keyPermissionBlock = entry->keyPermissionBlock;
 	*keyPermissionPosition = entry->keyPermissionPosition;
 	if (*keyPermissionPosition >= (sizeof(uint32_t) * CHAR_BIT)) {
-	    printf("TPM_OrdinalTable_GetKeyPermission: Error (fatal): "
+	    TPMLIB_LogPrintf("TPM_OrdinalTable_GetKeyPermission: Error (fatal): "
 		   "keyPermissionPosition out of range %u\n", *keyPermissionPosition);
 	    rc = TPM_FAIL;	/* should never occur */
 	}
@@ -2251,7 +2251,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
     TPM_ORDINAL_TABLE	*entry;		/* table entry for the ordinal */
     uint32_t		authLen;	/* length of below the line parameters */
 
-    printf(" TPM_OrdinalTable_ParseWrappedCmd:\n");
+    TPMLIB_LogPrintf(" TPM_OrdinalTable_ParseWrappedCmd:\n");
     /* Extract the standard command parameters from the command stream.	 This also validates
        paramSize against wrappedCmdSize */
     if (rc == 0) {
@@ -2265,7 +2265,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
     }
     /* get the entry from the ordinal table */
     if (rc == 0) {
-	printf("  TPM_OrdinalTable_ParseWrappedCmd: ordinal %08x\n", *ordinal);
+	TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedCmd: ordinal %08x\n", *ordinal);
 	rc = TPM_OrdinalTable_GetEntry(&entry, tpm_ordinal_table, *ordinal);
     }
     if (rc == 0) {
@@ -2291,7 +2291,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
 	    break;
 	}
 	if (paramSize < *datawStart + authLen) {
-	    printf("TPM_OrdinalTable_ParseWrappedCmd: Error, "
+	    TPMLIB_LogPrintf("TPM_OrdinalTable_ParseWrappedCmd: Error, "
 		   "paramSize %u less than datawStart %u + authLen %u\n",
 		   paramSize, *datawStart, authLen);
 	    rc = TPM_BAD_PARAM_SIZE;
@@ -2300,7 +2300,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
     if (rc == 0) {
 	/* subtract safe, cannot be negative after above check */
 	*datawLen = paramSize - *datawStart - authLen;
-	printf("  TPM_OrdinalTable_ParseWrappedCmd: datawStart %u datawLen %u\n",
+	TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedCmd: datawStart %u datawLen %u\n",
 	       *datawStart, *datawLen);
 	/* determine whether the command can be wrapped in a transport session */
 	*transportWrappable = entry->transportWrappable;
@@ -2308,7 +2308,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
 	*keyHandles = entry->keyHandles;
     }
     if (rc == 0) {
-	printf("  TPM_OrdinalTable_ParseWrappedCmd: key handles %u\n", *keyHandles);
+	TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedCmd: key handles %u\n", *keyHandles);
 	switch (*keyHandles) {
 	  case 0:
 	    /* no key handles */
@@ -2325,14 +2325,14 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedCmd(uint32_t *datawStart,
 			       sizeof(TPM_KEY_HANDLE);
 	    break;
 	  case 0xffffffff:
-	    printf("  TPM_OrdinalTable_ParseWrappedCmd: key handles special case\n");
+	    TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedCmd: key handles special case\n");
 	    /* potential key handle */
 	    *keyHandle1Index = sizeof(TPM_TAG) + sizeof(uint32_t) + sizeof(TPM_COMMAND_CODE);
 	    /* can't determine handle type here since resourceType is encrypted */
 	    break;
 	  default:
 	    /* sanity check ordinal table */
-	    printf("TPM_OrdinalTable_ParseWrappedCmd: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_OrdinalTable_ParseWrappedCmd: Error (fatal), "
 		   "invalid key handles for %08x for ordinal %08x\n", *keyHandles, *ordinal);
 	    rc = TPM_FAIL;	/* should never occur */
 	    break;
@@ -2363,7 +2363,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedRsp(uint32_t *datawStart,
     TPM_ORDINAL_TABLE	*entry;		/* table entry for the ordinal */
     uint32_t		authLen;	/* length of below the line parameters */
 
-    printf(" TPM_OrdinalTable_ParseWrappedRsp: ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_OrdinalTable_ParseWrappedRsp: ordinal %08x\n", ordinal);
     /* Extract the standard response parameters from the response stream.  This also validates
        paramSize against wrappedRspSize */
     if (rc == 0) {
@@ -2373,7 +2373,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedRsp(uint32_t *datawStart,
     }
     /* get the entry from the ordinal table */
     if (rc == 0) {
-	printf(" TPM_OrdinalTable_ParseWrappedRsp: returnCode %08x\n", *rcw);
+	TPMLIB_LogPrintf(" TPM_OrdinalTable_ParseWrappedRsp: returnCode %08x\n", *rcw);
 	rc = TPM_OrdinalTable_GetEntry(&entry, tpm_ordinal_table, ordinal);
     }
     /* parse the success return code case */
@@ -2398,7 +2398,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedRsp(uint32_t *datawStart,
 		break;
 	    }
 	    if (paramSize < *datawStart + authLen) {
-		printf("TPM_OrdinalTable_ParseWrappedRsp: Error, "
+		TPMLIB_LogPrintf("TPM_OrdinalTable_ParseWrappedRsp: Error, "
 		       "paramSize %u less than datawStart %u + authLen %u\n",
 		       paramSize, *datawStart, authLen);
 		rc = TPM_BAD_PARAM_SIZE;	/* FIXME not clear what to do here */
@@ -2407,7 +2407,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedRsp(uint32_t *datawStart,
 	if (rc == 0) {
 	    /* subtract safe, cannot be negative after about check */
 	    *datawLen = paramSize - *datawStart - authLen;
-	    printf("  TPM_OrdinalTable_ParseWrappedRsp: datawStart %u datawLen %u\n",
+	    TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedRsp: datawStart %u datawLen %u\n",
 		   *datawStart, *datawLen);
 	}
     }
@@ -2415,7 +2415,7 @@ TPM_RESULT TPM_OrdinalTable_ParseWrappedRsp(uint32_t *datawStart,
     else if ((rc == 0) && (*rcw != TPM_SUCCESS)) {
 	*datawStart = sizeof(TPM_TAG) + sizeof(uint32_t) + sizeof(TPM_RESULT);
 	*datawLen = 0;
-	printf("  TPM_OrdinalTable_ParseWrappedRsp: datawLen %u\n", *datawLen);
+	TPMLIB_LogPrintf("  TPM_OrdinalTable_ParseWrappedRsp: datawLen %u\n", *datawLen);
     }
     return rc;
 }
@@ -2426,7 +2426,7 @@ void TPM_KeyHandleEntries_Trace(TPM_KEY_HANDLE_ENTRY *tpm_key_handle_entries)
 {
     size_t i;
     for (i = 0 ; (i < 4) && (i < TPM_KEY_HANDLES) ; i++) {
-	printf("TPM_KeyHandleEntries_Trace: %lu handle %08x tpm_key %p\n",
+	TPMLIB_LogPrintf("TPM_KeyHandleEntries_Trace: %lu handle %08x tpm_key %p\n",
 	       (unsigned long)i, tpm_key_handle_entries[i].handle, tpm_key_handle_entries[i].key);
     }
     return;
@@ -2436,7 +2436,7 @@ void TPM_State_Trace(tpm_state_t *tpm_state);
 
 void TPM_State_Trace(tpm_state_t *tpm_state)
 {
-    printf("TPM_State_Trace: disable %u p_deactive %u v_deactive %u owned %u state %u\n",
+    TPMLIB_LogPrintf("TPM_State_Trace: disable %u p_deactive %u v_deactive %u owned %u state %u\n",
 	   tpm_state->tpm_permanent_flags.disable,
 	   tpm_state->tpm_permanent_flags.deactivated,
 	   tpm_state->tpm_stclear_flags.deactivated,
@@ -2607,7 +2607,7 @@ TPM_RESULT TPM_Process(TPM_STORE_BUFFER *response,
 	       over */
 	    TPM_Sbuffer_Clear(sbuffer);
 	    /* store the tag, paramSize, and returnCode */
-	    printf("TPM_Process: Ordinal returnCode %08x %u\n",
+	    TPMLIB_LogPrintf("TPM_Process: Ordinal returnCode %08x %u\n",
 		   returnCode, returnCode);
 	    rc = TPM_Sbuffer_StoreInitialResponse(sbuffer, TPM_TAG_RQU_COMMAND, returnCode);
 	}
@@ -2662,7 +2662,7 @@ TPM_RESULT TPM_Process_Wrapped(TPM_STORE_BUFFER *response,
     tpm_process_function_t tpm_process_function = NULL; /* based on ordinal */
     TPM_STORE_BUFFER	ordinalResponse;		/* response for this ordinal */
     
-    printf("TPM_Process_Wrapped:\n");
+    TPMLIB_LogPrintf("TPM_Process_Wrapped:\n");
     TPM_Sbuffer_Init(&ordinalResponse);		/* freed @1 */
     /* Set the tag, paramSize, and ordinal from the wrapped command stream */
     /* If paramSize does not equal the command stream size, return TPM_BAD_PARAM_SIZE */
@@ -2723,7 +2723,7 @@ TPM_RESULT TPM_Process_GetCommandParams(TPM_TAG *tag,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Process_GetCommandParams:\n");
+    TPMLIB_LogPrintf(" TPM_Process_GetCommandParams:\n");
     /* get tag */
     if (rc == 0) {
 	rc = TPM_Load16(tag, command, command_size);
@@ -2741,7 +2741,7 @@ TPM_RESULT TPM_Process_GetCommandParams(TPM_TAG *tag,
 	if (*paramSize !=
 	    *command_size + sizeof(TPM_TAG) + sizeof(uint32_t) + sizeof(TPM_COMMAND_CODE)) {
 
-	    printf("TPM_Process_GetCommandParams: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_GetCommandParams: Error, "
 		   "command size %lu not equal to paramSize %u\n",
 		   (unsigned long)
 		   (*command_size + sizeof(TPM_TAG) + sizeof(uint32_t) + sizeof(TPM_COMMAND_CODE)),
@@ -2749,7 +2749,7 @@ TPM_RESULT TPM_Process_GetCommandParams(TPM_TAG *tag,
 	    rc = TPM_BAD_PARAM_SIZE;
 	}
 	else {
-	    printf("  TPM_Process_GetCommandParams: tag %04x paramSize %u ordinal %08x\n",
+	    TPMLIB_LogPrintf("  TPM_Process_GetCommandParams: tag %04x paramSize %u ordinal %08x\n",
 		   *tag, *paramSize, *ordinal);
 	}
     }
@@ -2772,7 +2772,7 @@ TPM_RESULT TPM_Process_GetResponseParams(TPM_TAG *tag,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_Process_GetResponseParams:\n");
+    TPMLIB_LogPrintf(" TPM_Process_GetResponseParams:\n");
     /* get tag */
     if (rc == 0) {
 	rc = TPM_Load16(tag, response, response_size);
@@ -2790,7 +2790,7 @@ TPM_RESULT TPM_Process_GetResponseParams(TPM_TAG *tag,
 	if (*paramSize != (*response_size + sizeof(TPM_TAG) +
 			   sizeof(uint32_t) + sizeof(TPM_RESULT))) {
 	    
-	    printf("TPM_Process_GetResponseParams: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_GetResponseParams: Error, "
 		   "response size %lu not equal to paramSize %u\n",
 		   (unsigned long)
 		   (*response_size + sizeof(TPM_TAG) + sizeof(uint32_t) + sizeof(TPM_RESULT)),
@@ -2798,7 +2798,7 @@ TPM_RESULT TPM_Process_GetResponseParams(TPM_TAG *tag,
 	    rc = TPM_BAD_PARAM_SIZE;
 	}
 	else {
-	    printf("  TPM_Process_GetResponseParams: tag %04x paramSize %u ordinal %08x\n",
+	    TPMLIB_LogPrintf("  TPM_Process_GetResponseParams: tag %04x paramSize %u ordinal %08x\n",
 		   *tag, *paramSize, *returnCode);
 	}
     }
@@ -2814,7 +2814,7 @@ TPM_RESULT TPM_CheckRequestTag210(TPM_TAG tpm_tag)
     if ((tpm_tag != TPM_TAG_RQU_AUTH2_COMMAND) &&
 	(tpm_tag != TPM_TAG_RQU_AUTH1_COMMAND) &&
 	(tpm_tag != TPM_TAG_RQU_COMMAND)) {
-	printf("TPM_CheckRequestTag210: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag210: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2826,7 +2826,7 @@ TPM_RESULT TPM_CheckRequestTag21(TPM_TAG tpm_tag)
     
     if ((tpm_tag != TPM_TAG_RQU_AUTH2_COMMAND) &&
 	(tpm_tag != TPM_TAG_RQU_AUTH1_COMMAND)) {
-	printf("TPM_CheckRequestTag21: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag21: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2837,7 +2837,7 @@ TPM_RESULT TPM_CheckRequestTag2(TPM_TAG tpm_tag)
     TPM_RESULT	rc = 0;
     
     if (tpm_tag != TPM_TAG_RQU_AUTH2_COMMAND) {
-	printf("TPM_CheckRequestTag2: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag2: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2849,7 +2849,7 @@ TPM_RESULT TPM_CheckRequestTag10(TPM_TAG tpm_tag)
     
     if ((tpm_tag != TPM_TAG_RQU_AUTH1_COMMAND) &&
 	(tpm_tag != TPM_TAG_RQU_COMMAND)) {
-	printf("TPM_CheckRequestTag10: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag10: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2860,7 +2860,7 @@ TPM_RESULT TPM_CheckRequestTag1(TPM_TAG tpm_tag)
     TPM_RESULT	rc = 0;
     
     if (tpm_tag != TPM_TAG_RQU_AUTH1_COMMAND) {
-	printf("TPM_CheckRequestTag1: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag1: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2871,7 +2871,7 @@ TPM_RESULT TPM_CheckRequestTag0(TPM_TAG tpm_tag)
     TPM_RESULT	rc = 0;
     
     if (tpm_tag != TPM_TAG_RQU_COMMAND) {
-	printf("TPM_CheckRequestTag0: Error, tag %04hx\n", tpm_tag);
+	TPMLIB_LogPrintf("TPM_CheckRequestTag0: Error, tag %04hx\n", tpm_tag);
 	rc = TPM_BADTAG;
     }
     return rc;
@@ -2887,13 +2887,13 @@ TPM_RESULT TPM_Process_Unused(tpm_state_t *tpm_state,
 {
     TPM_RESULT	rcf = 0;
 
-    printf("TPM_Process_Unused:\n");
+    TPMLIB_LogPrintf("TPM_Process_Unused:\n");
     tpm_state = tpm_state;			/* not used */
     paramSize = paramSize;			/* not used */
     ordinal = ordinal;				/* not used */
     command = command;				/* not used */
     transportInternal = transportInternal;	/* not used */
-    printf("TPM_Process_Unused: Ordinal returnCode %08x %u\n",
+    TPMLIB_LogPrintf("TPM_Process_Unused: Ordinal returnCode %08x %u\n",
 	   TPM_BAD_ORDINAL, TPM_BAD_ORDINAL);
     rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, TPM_BAD_ORDINAL);
     return rcf;
@@ -2912,7 +2912,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_CheckState: Check map %08x\n", tpm_check_map);
+    TPMLIB_LogPrintf(" TPM_CheckState: Check map %08x\n", tpm_check_map);
     /* check the dictionary attack lockout, only for authorized commands */
     if (rc == 0) {
 	if ((tpm_check_map & TPM_CHECK_NO_LOCKOUT) && (tag != TPM_TAG_RQU_COMMAND)) {
@@ -2925,7 +2925,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
     if (rc == 0) {
 	if (tpm_check_map & TPM_CHECK_NOT_SHUTDOWN) {
 	    if (tpm_state->testState == TPM_TEST_STATE_FAILURE) {
-		printf("TPM_CheckState: Error, shutdown is TRUE\n");
+		TPMLIB_LogPrintf("TPM_CheckState: Error, shutdown is TRUE\n");
 		rc = TPM_FAILEDSELFTEST;
 	    }
 	}
@@ -2934,7 +2934,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
        TPM_CheckState().  All other commands SHALL return TPM_INVALID_POSTINIT */
     if (rc == 0) {
 	if (tpm_state->tpm_stany_flags.postInitialise) {
-	    printf("TPM_CheckState: Error, postInitialise is TRUE\n");
+	    TPMLIB_LogPrintf("TPM_CheckState: Error, postInitialise is TRUE\n");
 	    rc = TPM_INVALID_POSTINIT;
 	}
     }
@@ -2948,7 +2948,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
 	if ((tpm_check_map & TPM_CHECK_ENABLED) &&
 	    !((tpm_check_map & TPM_CHECK_NV_NOAUTH) && !tpm_state->tpm_permanent_flags.nvLocked)) {
 	    if (tpm_state->tpm_permanent_flags.disable) {
-		printf("TPM_CheckState: Error, disable is TRUE\n");
+		TPMLIB_LogPrintf("TPM_CheckState: Error, disable is TRUE\n");
 		rc = TPM_DISABLED;
 	    }
 	}
@@ -2958,7 +2958,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
 	if ((tpm_check_map & TPM_CHECK_ACTIVATED) &&
 	    !((tpm_check_map & TPM_CHECK_NV_NOAUTH) && !tpm_state->tpm_permanent_flags.nvLocked)) {
 	    if (tpm_state->tpm_stclear_flags.deactivated) {
-		printf("TPM_CheckState: Error, deactivated is TRUE\n");
+		TPMLIB_LogPrintf("TPM_CheckState: Error, deactivated is TRUE\n");
 		rc = TPM_DEACTIVATED;
 	    }
 	}
@@ -2967,7 +2967,7 @@ TPM_RESULT TPM_CheckState(tpm_state_t *tpm_state,
     if (rc == 0) {
 	if (tpm_check_map & TPM_CHECK_OWNER) {
 	    if (!tpm_state->tpm_permanent_data.ownerInstalled) {
-		printf("TPM_CheckState: Error, ownerInstalled is FALSE\n");
+		TPMLIB_LogPrintf("TPM_CheckState: Error, ownerInstalled is FALSE\n");
 		rc = TPM_NOSRK;
 	    }
 	}
@@ -2987,7 +2987,7 @@ TPM_RESULT TPM_Process_Preprocess(tpm_state_t *tpm_state,
 {
     TPM_RESULT		rc = 0;				/* fatal error, no response */
 
-    printf(" TPM_Process_Preprocess: Ordinal %08x\n", ordinal);
+    TPMLIB_LogPrintf(" TPM_Process_Preprocess: Ordinal %08x\n", ordinal);
     /* Preprocess to check if command can be run in limited operation mode */
     if (rc == 0) {
 	if (tpm_state->testState == TPM_TEST_STATE_LIMITED) {
@@ -3108,7 +3108,7 @@ TPM_RESULT TPM_Check_SHA1Context(tpm_state_t *tpm_state,
 	    
 	    ) {
 
-	    printf("TPM_Check_SHA1Context: Invalidating SHA1 context\n");
+	    TPMLIB_LogPrintf("TPM_Check_SHA1Context: Invalidating SHA1 context\n");
 	    TPM_SHA1Delete(&(tpm_state->sha1_context));
 	}
     }
@@ -3149,14 +3149,14 @@ TPM_RESULT TPM_GetInParamDigest(TPM_DIGEST inParamDigest,		/* output */
     TPM_RESULT		rc = 0;			/* this function return code */ 
     TPM_COMMAND_CODE	nOrdinal;		/* ordinal in network byte order */
     
-    printf(" TPM_GetInParamDigest:\n");
+    TPMLIB_LogPrintf(" TPM_GetInParamDigest:\n");
     if (rc == 0) {
 	/* TRUE if called from encrypted transport session.  This is currently only needed when
 	   auditing, but it's safer to always initialize it */
 	*transportEncrypt = 
 	    (transportInternal != NULL) &&	
 	    (transportInternal->transPublic.transAttributes & TPM_TRANSPORT_ENCRYPT);
-	printf("  TPM_GetInParamDigest: transportEncrypt %02x\n", *transportEncrypt);
+	TPMLIB_LogPrintf("  TPM_GetInParamDigest: transportEncrypt %02x\n", *transportEncrypt);
 	/* Determine if the ordinal should be audited. */
 	rc = TPM_OrdinalAuditStatus_GetAuditStatus(auditStatus,
 						   ordinal,
@@ -3210,7 +3210,7 @@ TPM_RESULT TPM_GetOutParamDigest(TPM_DIGEST outParamDigest,	/* output */
     TPM_RESULT		nreturnCode;	/* returnCode in nbo */
     TPM_COMMAND_CODE	nOrdinal;	/* ordinal in network byte order */
     
-    printf(" TPM_GetOutParamDigest:\n");
+    TPMLIB_LogPrintf(" TPM_GetOutParamDigest:\n");
     if (rc == 0)	{
 	if ((auditStatus && !transportEncrypt) || (tag != TPM_TAG_RQU_COMMAND)) {
 	    nreturnCode = htonl(returnCode);
@@ -3252,7 +3252,7 @@ TPM_RESULT TPM_ProcessAudit(tpm_state_t *tpm_state,
     TPM_COMMAND_CODE	nOrdinal;		/* ordinal in network byte order */
     TPM_DIGEST		transportDigest;	/* special case digest in encrypted transport */
     
-    printf(" TPM_ProcessAudit:\n");
+    TPMLIB_LogPrintf(" TPM_ProcessAudit:\n");
 
     /* The TPM will execute the ordinal and perform auditing in the following manner: */
     /* 1. Execute command */
@@ -3264,7 +3264,7 @@ TPM_RESULT TPM_ProcessAudit(tpm_state_t *tpm_state,
 	if (isZero) {
 	    /* i. Increment TPM_PERMANENT_DATA -> auditMonotonicCounter by 1 */
 	    tpm_state->tpm_permanent_data.auditMonotonicCounter.counter++;
-	    printf("  TPM_ProcessAudit: Incrementing auditMonotonicCounter to %u\n",
+	    TPMLIB_LogPrintf("  TPM_ProcessAudit: Incrementing auditMonotonicCounter to %u\n",
 		   tpm_state->tpm_permanent_data.auditMonotonicCounter.counter);
 	    rc = TPM_PermanentAll_NVStore(tpm_state,
 					  TRUE,		/* write NV */
@@ -3391,7 +3391,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
     
-    printf("TPM_Process_GetCapability: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetCapability: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&subCap);		/* freed @1 */
     TPM_Sbuffer_Init(&capabilityResponse);	/* freed @2 */
     /*
@@ -3405,7 +3405,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
     }
     /* get subCap parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetCapability: capArea %08x\n", capArea);
+	TPMLIB_LogPrintf("TPM_Process_GetCapability: capArea %08x\n", capArea);
 	returnCode = TPM_SizedBuffer_Load(&subCap, &command, &paramSize);
     }
     /* subCap is often a uint16_t or uint32_t, create them now */
@@ -3437,7 +3437,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetCapability: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetCapability: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3468,12 +3468,12 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
 		!((capArea == TPM_CAP_PROPERTY) && (subCap32 == TPM_CAP_PROP_TIS_TIMEOUT))
 		) {
 		if (tpm_state->testState == TPM_TEST_STATE_FAILURE)  {
-		    printf("TPM_Process_GetCapability: Error, shutdown capArea %08x subCap %08x\n",
+		    TPMLIB_LogPrintf("TPM_Process_GetCapability: Error, shutdown capArea %08x subCap %08x\n",
 			   capArea, subCap32);
 		    returnCode = TPM_FAILEDSELFTEST;
 		}
 		else {
-		    printf("TPM_Process_GetCapability: Limited operation, run self-test\n");
+		    TPMLIB_LogPrintf("TPM_Process_GetCapability: Limited operation, run self-test\n");
 		    returnCode = TPM_ContinueSelfTestCmd(tpm_state);
 		}
 	    }
@@ -3483,7 +3483,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
       Processing
     */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetCapability: capArea %08x subCap32 subCap16 %08x %04x\n",
+	TPMLIB_LogPrintf("TPM_Process_GetCapability: capArea %08x subCap32 subCap16 %08x %04x\n",
 	       capArea, subCap32, subCap16);
 	returnCode = TPM_GetCapabilityCommon(&capabilityResponse, tpm_state,
 					     capArea, subCap16, subCap32, &subCap);
@@ -3492,7 +3492,7 @@ TPM_RESULT TPM_Process_GetCapability(tpm_state_t *tpm_state,
       response
     */
     if (rcf == 0) {
-	printf("TPM_Process_GetCapability: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetCapability: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3550,11 +3550,11 @@ void TPM_GetSubCapInt(uint16_t *subCap16,
     *subCap32 = 0;	/* default, means was not a uint32_t */
     if (subCap->size == sizeof(uint32_t)) {
 	*subCap32 = htonl(*(uint32_t *)subCap->buffer);
-	printf(" TPM_GetSubCapInt: subCap %08x\n", *subCap32);
+	TPMLIB_LogPrintf(" TPM_GetSubCapInt: subCap %08x\n", *subCap32);
     }
     else if (subCap->size == sizeof(uint16_t)) {
 	*subCap16 = htons(*(uint16_t *)subCap->buffer);
-	printf(" TPM_GetSubCapInt: subCap %04x\n", *subCap16);
+	TPMLIB_LogPrintf(" TPM_GetSubCapInt: subCap %04x\n", *subCap16);
     }
 }
 
@@ -3578,14 +3578,14 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 {
     TPM_RESULT rc = 0;
 
-    printf(" TPM_GetCapabilityCommon: capArea %08x\n", capArea);
+    TPMLIB_LogPrintf(" TPM_GetCapabilityCommon: capArea %08x\n", capArea);
     switch (capArea) {
       case TPM_CAP_ORD:
 	if (subCap->size == sizeof(uint32_t)) {
 	    rc = TPM_GetCapability_CapOrd(capabilityResponse, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3594,7 +3594,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapAlg(capabilityResponse, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3603,7 +3603,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapPid(capabilityResponse, subCap16);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3612,7 +3612,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapFlag(capabilityResponse, tpm_state, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3621,7 +3621,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapProperty(capabilityResponse, tpm_state, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3644,7 +3644,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapSymMode(capabilityResponse, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3655,7 +3655,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 						subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3670,7 +3670,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapNVIndex(capabilityResponse, tpm_state, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3679,7 +3679,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapTransAlg(capabilityResponse, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3688,7 +3688,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapHandle(capabilityResponse, tpm_state, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3697,7 +3697,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapTransEs(capabilityResponse, subCap16);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3706,7 +3706,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 	    rc = TPM_GetCapability_CapAuthEncrypt(capabilityResponse, subCap32);
 	}
 	else {
-	    printf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
+	    TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, Bad subCap size %u\n", subCap->size);
 	    rc = TPM_BAD_MODE;
 	}
 	break;
@@ -3723,7 +3723,7 @@ TPM_RESULT TPM_GetCapabilityCommon(TPM_STORE_BUFFER *capabilityResponse,
 					     &(tpm_state->tpm_permanent_data));
 	break;
       default:
-	printf("TPM_GetCapabilityCommon: Error, unsupported capArea %08x", capArea);
+	TPMLIB_LogPrintf("TPM_GetCapabilityCommon: Error, unsupported capArea %08x", capArea);
 	rc = TPM_BAD_MODE;
 	break;
     }
@@ -3753,7 +3753,7 @@ static TPM_RESULT TPM_GetCapability_CapOrd(TPM_STORE_BUFFER *capabilityResponse,
     else {
 	supported = FALSE;
     }	
-    printf("  TPM_GetCapability_CapOrd: Ordinal %08x, result %02x\n",
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapOrd: Ordinal %08x, result %02x\n",
 	   ordinal, supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
@@ -3773,14 +3773,14 @@ static TPM_RESULT TPM_GetCapability_CapAlg(TPM_STORE_BUFFER *capabilityResponse,
     TPM_RESULT	rc = 0;
     TPM_BOOL	supported;
 
-    printf(" TPM_GetCapability_CapAlg: algorithmID %08x\n", algorithmID);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapAlg: algorithmID %08x\n", algorithmID);
     if (algorithmID == TPM_ALG_RSA) {
 	supported = TRUE;
     }
     else {
 	supported = FALSE;
     }
-    printf("  TPM_GetCapability_CapAlg: Result %08x\n", supported);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapAlg: Result %08x\n", supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
 }    
@@ -3798,7 +3798,7 @@ static TPM_RESULT TPM_GetCapability_CapPid(TPM_STORE_BUFFER *capabilityResponse,
     TPM_RESULT	rc = 0;
     TPM_BOOL	supported;
 
-    printf(" TPM_GetCapability_CapPid: protocolID %04hx\n", protocolID);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapPid: protocolID %04hx\n", protocolID);
     switch (protocolID) {
 	/* supported protocols */
       case TPM_PID_OIAP:
@@ -3815,7 +3815,7 @@ static TPM_RESULT TPM_GetCapability_CapPid(TPM_STORE_BUFFER *capabilityResponse,
 	supported = FALSE;
 	break;
     }	
-    printf("  TPM_GetCapability_CapPid: Result %08x\n", supported);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapPid: Result %08x\n", supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
 }    
@@ -3834,18 +3834,18 @@ static TPM_RESULT TPM_GetCapability_CapFlag(TPM_STORE_BUFFER *capabilityResponse
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_GetCapability_CapFlag: capFlag %08x\n", capFlag);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapFlag: capFlag %08x\n", capFlag);
     switch (capFlag) {
       case TPM_CAP_FLAG_PERMANENT:
-	printf("  TPM_GetCapability_CapFlag: TPM_CAP_FLAG_PERMANENT\n");;
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapFlag: TPM_CAP_FLAG_PERMANENT\n");;
 	rc = TPM_PermanentFlags_StoreBytes(capabilityResponse, &(tpm_state->tpm_permanent_flags));
 	break;
       case TPM_CAP_FLAG_VOLATILE:
-	printf("  TPM_GetCapability_CapFlag: TPM_CAP_FLAG_VOLATILE\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapFlag: TPM_CAP_FLAG_VOLATILE\n");
 	rc = TPM_StclearFlags_Store(capabilityResponse, &(tpm_state->tpm_stclear_flags));
 	break;
       default:
-	printf("TPM_GetCapability_CapFlag: Error, illegal capFlag %08x\n", capFlag);
+	TPMLIB_LogPrintf("TPM_GetCapability_CapFlag: Error, illegal capFlag %08x\n", capFlag);
 	rc = TPM_BAD_MODE;
 	break;
     }
@@ -3864,78 +3864,78 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
     uint32_t 	uint32a;
     uint32_t 	dummy;	/* to hold unused response parameter */
 
-    printf(" TPM_GetCapability_CapProperty: capProperty %08x\n", capProperty);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: capProperty %08x\n", capProperty);
     switch (capProperty) {
       case TPM_CAP_PROP_PCR:	/* Returns the number of PCR registers supported by the TPM */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_PCR %u\n", TPM_NUM_PCR);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_PCR %u\n", TPM_NUM_PCR);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_NUM_PCR);
 	break;
       case TPM_CAP_PROP_DIR:	/* Returns the number of DIR registers under control of the TPM
 				   owner supported by the TPM. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DIR %u\n", TPM_AUTHDIR_SIZE);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DIR %u\n", TPM_AUTHDIR_SIZE);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_AUTHDIR_SIZE);
 	break;
       case TPM_CAP_PROP_MANUFACTURER:	/* Returns the Identifier of the TPM manufacturer. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MANUFACTURER %.4s\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MANUFACTURER %.4s\n",
 	       TPM_MANUFACTURER);
 	rc = TPM_Sbuffer_Append(capabilityResponse, (const unsigned char *)TPM_MANUFACTURER, 4);
 	break;
       case TPM_CAP_PROP_KEYS:	/* Returns the number of 2048-bit RSA keys that can be loaded. This
 				   MAY vary with time and circumstances. */
 	TPM_KeyHandleEntries_GetSpace(&uint32, tpm_state->tpm_key_handle_entries);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_KEYS %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_KEYS %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_MIN_COUNTER: /* uint32_t. The minimum amount of time in 10ths of a second
 					that must pass between invocations of incrementing the
 					monotonic counter. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MIN_COUNTER\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MIN_COUNTER\n");
 	rc = TPM_Sbuffer_Append32(capabilityResponse, 0);
 	break;
       case TPM_CAP_PROP_AUTHSESS:	/* The number of available authorization sessions. This MAY
 					   vary with time and circumstances. */
 	TPM_AuthSessions_GetSpace(&uint32, tpm_state->tpm_stclear_data.authSessions);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_AUTHSESS space %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_AUTHSESS space %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_TRANSESS:	/* The number of available transport sessions. This MAY vary
 					   with time and circumstances.	 */
 	TPM_TransportSessions_GetSpace(&uint32, tpm_state->tpm_stclear_data.transSessions);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_TRANSESS space %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_TRANSESS space %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_COUNTERS:	/* The number of available monotonic counters. This MAY vary
 					   with time and circumstances. */
 	TPM_Counters_GetSpace(&uint32, tpm_state->tpm_permanent_data.monotonicCounter);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_COUNTERS %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_COUNTERS %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_MAX_AUTHSESS:	/* The maximum number of loaded authorization sessions the
 					   TPM supports. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_AUTHSESS %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_AUTHSESS %u\n",
 	       TPM_MIN_AUTH_SESSIONS);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_MIN_AUTH_SESSIONS);
 	break;
       case TPM_CAP_PROP_MAX_TRANSESS:	/* The maximum number of loaded transport sessions the TPM
 					   supports. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_TRANSESS %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_TRANSESS %u\n",
 	       TPM_MIN_TRANS_SESSIONS);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_MIN_TRANS_SESSIONS);
 	break;
       case TPM_CAP_PROP_MAX_COUNTERS:	/* The maximum number of monotonic counters under control of
 					   TPM_CreateCounter */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_COUNTERS %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_COUNTERS %u\n",
 	       TPM_MIN_COUNTERS);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_MIN_COUNTERS);
 	break;
       case TPM_CAP_PROP_MAX_KEYS:	/* The maximum number of 2048 RSA keys that the TPM can
 					   support. The number does not include the EK or SRK. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_KEYS %u\n", TPM_KEY_HANDLES);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_KEYS %u\n", TPM_KEY_HANDLES);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_KEY_HANDLES);
 	break;
       case TPM_CAP_PROP_OWNER:	/* A value of TRUE indicates that the TPM has successfully installed
 				   an owner. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_OWNER %02x\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_OWNER %02x\n",
 	       tpm_state->tpm_permanent_data.ownerInstalled);
 	rc = TPM_Sbuffer_Append(capabilityResponse,
 				&(tpm_state->tpm_permanent_data.ownerInstalled), sizeof(TPM_BOOL));
@@ -3943,47 +3943,47 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
       case TPM_CAP_PROP_CONTEXT:	/* The number of available saved session slots. This MAY
 					   vary with time and circumstances. */
 	TPM_ContextList_GetSpace(&uint32, &dummy, tpm_state->tpm_stclear_data.contextList);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CONTEXT %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CONTEXT %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_MAX_CONTEXT:	/* The maximum number of saved session slots. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_CONTEXT %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_CONTEXT %u\n",
 	       TPM_MIN_SESSION_LIST);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_MIN_SESSION_LIST);
 	break;
       case TPM_CAP_PROP_FAMILYROWS:	/* The number of rows in the family table */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_FAMILYROWS %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_FAMILYROWS %u\n",
 	       TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_NUM_FAMILY_TABLE_ENTRY_MIN);
 	break;
       case TPM_CAP_PROP_TIS_TIMEOUT:
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_TIS_TIMEOUT\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_TIS_TIMEOUT\n");
 	rc = TPM_GetCapability_CapPropTisTimeout(capabilityResponse);
 	break;
       case TPM_CAP_PROP_STARTUP_EFFECT: /* The TPM_STARTUP_EFFECTS structure */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_STARTUP_EFFECT %08x\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_STARTUP_EFFECT %08x\n",
 	       TPM_STARTUP_EFFECTS_VALUE);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_STARTUP_EFFECTS_VALUE);
 	break;
       case TPM_CAP_PROP_DELEGATE_ROW:	/* The size of the delegate table in rows. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DELEGATE_ENTRIES %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DELEGATE_ENTRIES %u\n",
 	       TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_NUM_DELEGATE_TABLE_ENTRY_MIN);
 	break;
       case TPM_CAP_PROP_MAX_DAASESS:	/* The maximum number of loaded DAA sessions (join or sign)
 					   that the TPM supports */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DAA_MAX\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DAA_MAX\n");
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_MIN_DAA_SESSIONS);
 	break;
       case TPM_CAP_PROP_DAASESS:	/* The number of available DAA sessions. This may vary with
 					   time and circumstances */
 	TPM_DaaSessions_GetSpace(&uint32, tpm_state->tpm_stclear_data.daaSessions);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_SESSION_DAA space %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_SESSION_DAA space %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_CONTEXT_DIST:	/* The maximum distance between context count values. This
 					   MUST be at least 2^16-1. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CONTEXT_DIST\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CONTEXT_DIST\n");
 	rc = TPM_Sbuffer_Append32(capabilityResponse, 0xffffffff);
 	break;
       case TPM_CAP_PROP_DAA_INTERRUPT:	/* BOOL. A value of TRUE indicates that the TPM will accept
@@ -3993,7 +3993,7 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
 					   the DAA Join or Sign upon the receipt of any command
 					   other than the next join/sign in the session or a
 					   TPM_SaveContext */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DAA_INTERRUPT\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DAA_INTERRUPT\n");
 	rc = TPM_Sbuffer_Append8(capabilityResponse, TRUE);   
 	break;
       case TPM_CAP_PROP_SESSIONS: /* UNIT32. The number of available authorization and transport
@@ -4001,23 +4001,23 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
 				     circumstances. */
 	TPM_AuthSessions_GetSpace(&uint32, tpm_state->tpm_stclear_data.authSessions);
 	TPM_TransportSessions_GetSpace(&uint32a, tpm_state->tpm_stclear_data.transSessions);
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_SESSIONS %u + %u\n", uint32, uint32a);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_SESSIONS %u + %u\n", uint32, uint32a);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32 + uint32a);
 	break;
       case TPM_CAP_PROP_MAX_SESSIONS: /* uint32_t. The maximum number of sessions the
 					 TPM supports. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_SESSIONS\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_SESSIONS\n");
 	rc = TPM_Sbuffer_Append32(capabilityResponse,
 				  TPM_MIN_AUTH_SESSIONS + TPM_MIN_TRANS_SESSIONS);
 	break;
       case TPM_CAP_PROP_CMK_RESTRICTION: /* uint32_t TPM_Permanent_Data -> restrictDelegate */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CMK_RESTRICTION %08x\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_CMK_RESTRICTION %08x\n",
 	       tpm_state->tpm_permanent_data.restrictDelegate);
 	rc = TPM_Sbuffer_Append32(capabilityResponse,
 				  tpm_state->tpm_permanent_data.restrictDelegate);
 	break;
       case TPM_CAP_PROP_DURATION: 
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DURATION\n");
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_DURATION\n");
 	rc = TPM_GetCapability_CapPropDuration(capabilityResponse);
 	break;
       case TPM_CAP_PROP_ACTIVE_COUNTER: /* TPM_COUNT_ID. The id of the current counter. 0xff..ff if
@@ -4028,7 +4028,7 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
 	if (uint32 == TPM_COUNT_ID_ILLEGAL) {
 	    uint32 = TPM_COUNT_ID_NULL;
 	}
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_ACTIVE_COUNTER %u\n", uint32);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_ACTIVE_COUNTER %u\n", uint32);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	break;
       case TPM_CAP_PROP_MAX_NV_AVAILABLE: /* uint32_t. Deprecated.  The maximum number of NV space
@@ -4038,25 +4038,25 @@ static TPM_RESULT TPM_GetCapability_CapProperty(TPM_STORE_BUFFER *capabilityResp
 					     TPM_NV_INDEX_TRIAL.  */
 	rc = TPM_NVIndexEntries_GetFreeSpace(&uint32, &(tpm_state->tpm_nv_index_entries));
 	if (rc == 0) {
-	    printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_NV_AVAILABLE %u\n", uint32);
+	    TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_MAX_NV_AVAILABLE %u\n", uint32);
 	    rc = TPM_Sbuffer_Append32(capabilityResponse, uint32);
 	}
 	/* There should always be free space >= 0.  If the call fails here, there is an internal
 	   error. */
 	else {
-	    printf(" TPM_GetCapability_CapProperty: Error (fatal) "
+	    TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: Error (fatal) "
 		   "in TPM_CAP_PROP_MAX_NV_AVAILABLE\n");
 	    rc = TPM_FAIL;
 	}
 	break;
       case TPM_CAP_PROP_INPUT_BUFFER: /* uint32_t. The size of the TPM input and output buffers in
 					 bytes. */
-	printf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_INPUT_BUFFER %u\n",
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapProperty: TPM_CAP_PROP_INPUT_BUFFER %u\n",
 	       TPM_BUFFER_MAX);
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_BUFFER_MAX);
 	break;
      default:
-	printf("TPM_GetCapability_CapProperty: Error, illegal capProperty %08x\n", capProperty);
+	TPMLIB_LogPrintf("TPM_GetCapability_CapProperty: Error, illegal capProperty %08x\n", capProperty);
 	rc = TPM_BAD_MODE;
 	break;
     }
@@ -4082,7 +4082,7 @@ static TPM_RESULT TPM_GetCapability_CapVersion(TPM_STORE_BUFFER *capabilityRespo
     TPM_STRUCT_VER	tpm_struct_ver;
 
     TPM_StructVer_Init(&tpm_struct_ver);
-    printf(" TPM_GetCapability_CapVersion: %u.%u.%u.%u\n",
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapVersion: %u.%u.%u.%u\n",
 	   tpm_struct_ver.major, tpm_struct_ver.minor,
 	   tpm_struct_ver.revMajor, tpm_struct_ver.revMinor);
     rc = TPM_StructVer_Store(capabilityResponse, &tpm_struct_ver);
@@ -4120,13 +4120,13 @@ static TPM_RESULT TPM_GetCapability_CapCheckLoaded(TPM_STORE_BUFFER *capabilityR
 	    TPM_KeyHandleEntries_IsSpace(&isSpace, &index, tpm_key_handle_entry);
 	}
 	else {
-	    printf(" TPM_GetCapability_CapCheckLoaded: algorithmID %08x is not TPM_ALG_RSA %08x\n",
+	    TPMLIB_LogPrintf(" TPM_GetCapability_CapCheckLoaded: algorithmID %08x is not TPM_ALG_RSA %08x\n",
 		   keyParms.algorithmID, TPM_ALG_RSA);
 	    isSpace = FALSE;
 	}
     }
     if (rc == 0) {
-	printf(" TPM_GetCapability_CapCheckLoaded: Return %02x\n", isSpace);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapCheckLoaded: Return %02x\n", isSpace);
 	rc = TPM_Sbuffer_Append(capabilityResponse, &isSpace, sizeof(TPM_BOOL));
     }
     TPM_KeyParms_Delete(&keyParms);		/* @1 */
@@ -4143,7 +4143,7 @@ static TPM_RESULT TPM_GetCapability_CapSymMode(TPM_STORE_BUFFER *capabilityRespo
     TPM_RESULT	rc = 0;
     
     symMode = symMode;	/* not currently used */
-    printf(" TPM_GetCapability_CapSymMode: Return %02x\n", FALSE);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapSymMode: Return %02x\n", FALSE);
     rc = TPM_Sbuffer_Append8(capabilityResponse, FALSE);
     return rc;
 }
@@ -4159,14 +4159,14 @@ static TPM_RESULT TPM_GetCapability_CapKeyStatus(TPM_STORE_BUFFER *capabilityRes
     TPM_KEY_HANDLE_ENTRY	*tpm_key_handle_entry;	/* corresponding to handle */
     TPM_BOOL			ownerEvict;
     
-    printf(" TPM_GetCapability_CapKeyStatus: key handle %08x\n", tpm_key_handle);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapKeyStatus: key handle %08x\n", tpm_key_handle);
     /* map from the handle to the TPM_KEY structure */
     if (rc == 0) {
 	rc = TPM_KeyHandleEntries_GetEntry(&tpm_key_handle_entry,
 					   tpm_key_handle_entries,
 					   tpm_key_handle);
 	if (rc != 0) {
-	    printf("TPM_GetCapability_CapKeyStatus: Error, key handle %08x not found\n",
+	    TPMLIB_LogPrintf("TPM_GetCapability_CapKeyStatus: Error, key handle %08x not found\n",
 		   tpm_key_handle);
 	}
     }
@@ -4174,7 +4174,7 @@ static TPM_RESULT TPM_GetCapability_CapKeyStatus(TPM_STORE_BUFFER *capabilityRes
     if (rc == 0) {
 	ownerEvict = (tpm_key_handle_entry->keyControl & TPM_KEY_CONTROL_OWNER_EVICT) ?
 		     TRUE : FALSE;;
-	printf(" TPM_GetCapability_CapKeyStatus: return %02x\n", ownerEvict);
+	TPMLIB_LogPrintf(" TPM_GetCapability_CapKeyStatus: return %02x\n", ownerEvict);
 	rc = TPM_Sbuffer_Append(capabilityResponse, &ownerEvict, sizeof(TPM_BOOL));
     }
     return rc;
@@ -4195,10 +4195,10 @@ static TPM_RESULT TPM_GetCapability_CapMfr(TPM_STORE_BUFFER *capabilityResponse,
     if (rc == 0) {
 	if (subCap->size >= sizeof(uint32_t)) {
 	    subCap32 = htonl(*(uint32_t *)subCap->buffer);
-	    printf(" TPM_GetCapability_CapMfr: subCap %08x\n", subCap32);
+	    TPMLIB_LogPrintf(" TPM_GetCapability_CapMfr: subCap %08x\n", subCap32);
 	}
 	else {
-	    printf("TPM_GetCapability_CapMfr: Error, subCap size %u < %lu\n",
+	    TPMLIB_LogPrintf("TPM_GetCapability_CapMfr: Error, subCap size %u < %lu\n",
 		   subCap->size, (unsigned long)sizeof(uint32_t));
 	    rc = TPM_BAD_MODE;
 	}
@@ -4211,11 +4211,11 @@ static TPM_RESULT TPM_GetCapability_CapMfr(TPM_STORE_BUFFER *capabilityResponse,
 	  case TPM_CAP_PROCESS_ID:
 	    if (subCap->size == sizeof(uint32_t)) {
 		pid_t pid = getpid();
-		printf(" TPM_GetCapability_CapMfr: TPM_CAP_PROCESS_ID %u\n", (uint32_t)pid);
+		TPMLIB_LogPrintf(" TPM_GetCapability_CapMfr: TPM_CAP_PROCESS_ID %u\n", (uint32_t)pid);
 		rc = TPM_Sbuffer_Append32(capabilityResponse, (uint32_t)pid);
 	    }
 	    else {
-		printf("TPM_GetCapability_CapMfr: Error, Bad subCap size %u\n", subCap->size);
+		TPMLIB_LogPrintf("TPM_GetCapability_CapMfr: Error, Bad subCap size %u\n", subCap->size);
 		rc = TPM_BAD_MODE;
 	    }
 	    break;
@@ -4223,7 +4223,7 @@ static TPM_RESULT TPM_GetCapability_CapMfr(TPM_STORE_BUFFER *capabilityResponse,
 	  default:
 	    capabilityResponse = capabilityResponse;	/* not used */
 	    tpm_state = tpm_state;			/* not used */
-	    printf("TPM_GetCapability_CapMfr: Error, unsupported subCap %08x\n", subCap32);
+	    TPMLIB_LogPrintf("TPM_GetCapability_CapMfr: Error, unsupported subCap %08x\n", subCap32);
 	    rc = TPM_BAD_MODE;
 	    break;
 	}
@@ -4241,7 +4241,7 @@ static TPM_RESULT TPM_GetCapability_CapNVIndex(TPM_STORE_BUFFER *capabilityRespo
     TPM_RESULT		rc = 0;
     TPM_NV_DATA_PUBLIC 	*tpm_nv_data_public;
     
-    printf(" TPM_GetCapability_CapNVIndex: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapNVIndex: nvIndex %08x\n", nvIndex);
     /* map from the nvIndex to the TPM_NV_DATA_PUBLIC structure */
     if (rc == 0) {
 	rc = TPM_NVIndexEntries_GetDataPublic(&tpm_nv_data_public,
@@ -4270,9 +4270,9 @@ static TPM_RESULT TPM_GetCapability_CapTransAlg(TPM_STORE_BUFFER *capabilityResp
     TPM_RESULT	rc = 0;
     TPM_BOOL	supported;
 
-    printf(" TPM_GetCapability_CapTransAlg: algorithmID %08x\n", algorithmID);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapTransAlg: algorithmID %08x\n", algorithmID);
     TPM_TransportPublic_CheckAlgId(&supported, algorithmID);
-    printf("  TPM_GetCapability_CapTransAlg: Result %08x\n", supported);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapTransAlg: Result %08x\n", supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
 }
@@ -4296,40 +4296,40 @@ static TPM_RESULT TPM_GetCapability_CapHandle(TPM_STORE_BUFFER *capabilityRespon
 {
     TPM_RESULT	rc = 0;
 
-    printf(" TPM_GetCapability_CapHandle: resourceType %08x\n", resourceType);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapHandle: resourceType %08x\n", resourceType);
     switch (resourceType) {
       case TPM_RT_KEY:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_KEY\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_KEY\n");
 	rc = TPM_KeyHandleEntries_StoreHandles(capabilityResponse,
 					       tpm_state->tpm_key_handle_entries);
 	break;
       case TPM_RT_AUTH:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_AUTH\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_AUTH\n");
 	rc = TPM_AuthSessions_StoreHandles(capabilityResponse,
 					   tpm_state->tpm_stclear_data.authSessions);
 	break;
       case TPM_RT_TRANS:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_TRANS\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_TRANS\n");
 	rc = TPM_TransportSessions_StoreHandles(capabilityResponse,
 						tpm_state->tpm_stclear_data.transSessions);
 	break;
       case TPM_RT_CONTEXT:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_CONTEXT\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_CONTEXT\n");
 	rc = TPM_ContextList_StoreHandles(capabilityResponse,
 					  tpm_state->tpm_stclear_data.contextList);
 	break;
       case TPM_RT_COUNTER:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_COUNTER\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_COUNTER\n");
 	rc = TPM_Counters_StoreHandles(capabilityResponse,
 				       tpm_state->tpm_permanent_data.monotonicCounter);
 	break;
       case TPM_RT_DAA_TPM:
-	printf("  TPM_GetCapability_CapHandle: TPM_RT_DAA_TPM\n");
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapHandle: TPM_RT_DAA_TPM\n");
 	rc = TPM_DaaSessions_StoreHandles(capabilityResponse,
 					  tpm_state->tpm_stclear_data.daaSessions);
 	break;
       default:
-	printf("TPM_GetCapability_CapHandle: Error, illegal resource type %08x\n",
+	TPMLIB_LogPrintf("TPM_GetCapability_CapHandle: Error, illegal resource type %08x\n",
 	       resourceType);
 	rc = TPM_BAD_PARAMETER;
     }
@@ -4347,7 +4347,7 @@ static TPM_RESULT TPM_GetCapability_CapTransEs(TPM_STORE_BUFFER *capabilityRespo
     TPM_RESULT	rc = 0;
     TPM_BOOL	supported;
 
-    printf(" TPM_GetCapability_CapTransEs: encScheme %04hx\n", encScheme);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapTransEs: encScheme %04hx\n", encScheme);
     switch (encScheme) {
 	/* supported protocols */
       case TPM_ES_SYM_CTR:
@@ -4361,7 +4361,7 @@ static TPM_RESULT TPM_GetCapability_CapTransEs(TPM_STORE_BUFFER *capabilityRespo
 	supported = FALSE;
 	break;
     }	
-    printf("  TPM_GetCapability_CapTransEs: Result %08x\n", supported);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapTransEs: Result %08x\n", supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
 }
@@ -4378,7 +4378,7 @@ static TPM_RESULT TPM_GetCapability_CapAuthEncrypt(TPM_STORE_BUFFER *capabilityR
     TPM_RESULT	rc = 0;
     TPM_BOOL	supported;
 
-    printf(" TPM_GetCapability_CapAuthEncrypt: algorithmID %08x\n", algorithmID);
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapAuthEncrypt: algorithmID %08x\n", algorithmID);
     switch (algorithmID) {
       case TPM_ALG_XOR:
       case TPM_ALG_AES128:
@@ -4396,7 +4396,7 @@ static TPM_RESULT TPM_GetCapability_CapAuthEncrypt(TPM_STORE_BUFFER *capabilityR
 	supported = FALSE;
 	break;
     }	
-    printf("  TPM_GetCapability_CapAuthEncrypt: Result %08x\n", supported);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapAuthEncrypt: Result %08x\n", supported);
     rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     return rc;
 }
@@ -4418,7 +4418,7 @@ static TPM_RESULT TPM_GetCapability_CapSelectSize(TPM_STORE_BUFFER *capabilityRe
     uint32_t		stream_size;
     TPM_BOOL		supported;
 
-    printf(" TPM_GetCapability_CapSelectSize:\n");
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapSelectSize:\n");
     TPM_SelectSize_Init(&tpm_select_size);		/* no free required */
     /* deserialize the subCap to the structure */
     if (rc == 0) {
@@ -4428,7 +4428,7 @@ static TPM_RESULT TPM_GetCapability_CapSelectSize(TPM_STORE_BUFFER *capabilityRe
     }
     if (rc == 0) {
 	/* The TPM MUST return an error if sizeOfSelect is 0 */
-	printf("  TPM_GetCapability_CapSelectSize: subCap reqSize %u\n",
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapSelectSize: subCap reqSize %u\n",
 	       tpm_select_size.reqSize);
 	if ((tpm_select_size.reqSize > (TPM_NUM_PCR/CHAR_BIT)) ||
 	    (tpm_select_size.reqSize == 0)) {
@@ -4439,7 +4439,7 @@ static TPM_RESULT TPM_GetCapability_CapSelectSize(TPM_STORE_BUFFER *capabilityRe
 	}
     }
     if (rc == 0) {
-	printf("  TPM_GetCapability_CapSelectSize: Result %08x\n", supported);
+	TPMLIB_LogPrintf("  TPM_GetCapability_CapSelectSize: Result %08x\n", supported);
 	rc = TPM_Sbuffer_Append(capabilityResponse, &supported, sizeof(TPM_BOOL));
     }
     return rc;
@@ -4462,7 +4462,7 @@ static TPM_RESULT TPM_GetCapability_CapDaLogic(TPM_STORE_BUFFER *capabilityRespo
     TPM_DA_INFO_LIMITED tpm_da_info_limited;
     TPM_DA_INFO		tpm_da_info;
 
-    printf(" TPM_GetCapability_CapDaLogic:\n");
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapDaLogic:\n");
     TPM_DaInfoLimited_Init(&tpm_da_info_limited);	/* freed @1 */
     TPM_DaInfo_Init(&tpm_da_info);			/* freed @2 */
     subCap = subCap;			/* dictionary attack mitigation not per entity type in this
@@ -4499,13 +4499,13 @@ static TPM_RESULT TPM_GetCapability_CapVersionVal(TPM_STORE_BUFFER *capabilityRe
     TPM_RESULT			rc = 0;
     TPM_CAP_VERSION_INFO	tpm_cap_version_info;
 
-    printf(" TPM_GetCapability_CapVersionVal:\n");
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapVersionVal:\n");
     TPM_CapVersionInfo_Set(&tpm_cap_version_info, tpm_permanent_data);	/* freed @1 */
-    printf("  TPM_GetCapability_CapVersionVal: specLevel %04hx\n", tpm_cap_version_info.specLevel);
-    printf("  TPM_GetCapability_CapVersionVal: errataRev %02x\n", tpm_cap_version_info.errataRev);
-    printf("  TPM_GetCapability_CapVersionVal: revMajor %02x revMinor %02x\n",
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapVersionVal: specLevel %04hx\n", tpm_cap_version_info.specLevel);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapVersionVal: errataRev %02x\n", tpm_cap_version_info.errataRev);
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapVersionVal: revMajor %02x revMinor %02x\n",
 	   tpm_cap_version_info.version.revMajor, tpm_cap_version_info.version.revMinor);
-    printf("  TPM_GetCapability_CapVersionVal: tpmVendorID %02x %02x %02x %02x\n",
+    TPMLIB_LogPrintf("  TPM_GetCapability_CapVersionVal: tpmVendorID %02x %02x %02x %02x\n",
 	   tpm_cap_version_info.tpmVendorID[0],
 	   tpm_cap_version_info.tpmVendorID[1],
 	   tpm_cap_version_info.tpmVendorID[2],
@@ -4528,7 +4528,7 @@ static TPM_RESULT TPM_GetCapability_CapPropTisTimeout(TPM_STORE_BUFFER *capabili
 {
     TPM_RESULT			rc = 0;
 
-    printf(" TPM_GetCapability_CapPropTisTimeout:\n");
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapPropTisTimeout:\n");
     if (rc == 0) { 
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_TIMEOUT_A);
     }								   
@@ -4555,7 +4555,7 @@ static TPM_RESULT TPM_GetCapability_CapPropDuration(TPM_STORE_BUFFER *capability
 {
     TPM_RESULT			rc = 0;
 
-    printf(" TPM_GetCapability_CapPropDuration:\n");
+    TPMLIB_LogPrintf(" TPM_GetCapability_CapPropDuration:\n");
     if (rc == 0) { 
 	rc = TPM_Sbuffer_Append32(capabilityResponse, TPM_SMALL_DURATION);
     }								   
@@ -4636,7 +4636,7 @@ TPM_RESULT TPM_Process_GetCapabilityOwner(tpm_state_t *tpm_state,
     uint32_t		non_volatile_flags;	/* The current state of the non-volatile flags. */
     uint32_t		volatile_flags;		/* The current state of the volatile flags. */
 
-    printf("TPM_Process_GetCapabilityOwner: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetCapabilityOwner: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -4675,7 +4675,7 @@ TPM_RESULT TPM_Process_GetCapabilityOwner(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetCapabilityOwner: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetCapabilityOwner: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4734,7 +4734,7 @@ TPM_RESULT TPM_Process_GetCapabilityOwner(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetCapabilityOwner: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetCapabilityOwner: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -4866,7 +4866,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     TPM_SIZED_BUFFER	resp;		/* The capability response */
     TPM_SIZED_BUFFER	sig;		/* The resulting digital signature. */
 
-    printf("TPM_Process_GetCapabilitySigned: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&subCap);	/* freed @1 */
     TPM_SizedBuffer_Init(&resp);	/* freed @2 */
     TPM_SizedBuffer_Init(&sig);		/* freed @3 */
@@ -4882,7 +4882,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     inParamStart = command;
     /* get antiReplay parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_GetCapabilitySigned: keyHandle %08x\n", keyHandle);
+	TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: keyHandle %08x\n", keyHandle);
 	returnCode = TPM_Nonce_Load(antiReplay, &command, &paramSize);
     }
     /* get capArea parameter */
@@ -4926,7 +4926,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_GetCapabilitySigned: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -4948,7 +4948,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     /* 1. The TPM validates the authority to use keyHandle */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND)) {
 	if (sigKey->authDataUsage != TPM_AUTH_NEVER) {
-	    printf("TPM_Process_GetCapabilitySigned: Error, authorization required\n");
+	    TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Error, authorization required\n");
 	    returnCode = TPM_AUTHFAIL;
 	}
     }
@@ -4995,7 +4995,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* get the capability r1 serialization */
 	TPM_Sbuffer_Get(&r1Response, &r1_buffer, &r1_length);
-	printf("TPM_Process_GetCapabilitySigned: resp length %08x\n", r1_length);
+	TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: resp length %08x\n", r1_length);
 	TPM_PrintFour("TPM_Process_GetCapabilitySigned: Hashing resp", r1_buffer);
 	TPM_PrintFour("TPM_Process_GetCapabilitySigned: antiReplay", antiReplay);
 	/* 3. The TPM creates S1 by taking a SHA1 hash of the concatenation (r1 || antiReplay).	 */
@@ -5011,7 +5011,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
 	if ((sigKey->keyUsage != TPM_KEY_SIGNING) &&
 	    ((sigKey->keyUsage) != TPM_KEY_IDENTITY) &&
 	    ((sigKey->keyUsage) != TPM_KEY_LEGACY)) {
-	    printf("TPM_Process_GetCapabilitySigned: Error, keyUsage %04hx is invalid\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Error, keyUsage %04hx is invalid\n",
 		   sigKey->keyUsage);
 	    returnCode = TPM_INVALID_KEYUSAGE;
 	}
@@ -5020,7 +5020,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
        result in sig. */
     if (returnCode == TPM_SUCCESS) {
 	if (sigKey->algorithmParms.sigScheme != TPM_SS_RSASSAPKCS1v15_SHA1) {
-	    printf("TPM_Process_GetCapabilitySigned: Error, inappropriate signature scheme %04x\n",
+	    TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Error, inappropriate signature scheme %04x\n",
 		   sigKey->algorithmParms.sigScheme);
 	    returnCode = TPM_INAPPROPRIATE_SIG;
 	}
@@ -5037,7 +5037,7 @@ TPM_RESULT TPM_Process_GetCapabilitySigned(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_GetCapabilitySigned: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_GetCapabilitySigned: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5158,7 +5158,7 @@ TPM_RESULT TPM_Process_SetCapability(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;		/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_SetCapability: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_SetCapability: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&subCap);	/* freed @1 */
     TPM_SizedBuffer_Init(&setValue);	/* freed @2 */
     /*
@@ -5172,7 +5172,7 @@ TPM_RESULT TPM_Process_SetCapability(tpm_state_t *tpm_state,
     }
     /* get subCap parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_SetCapability: capArea %08x \n", capArea);
+	TPMLIB_LogPrintf("TPM_Process_SetCapability: capArea %08x \n", capArea);
 	returnCode = TPM_SizedBuffer_Load(&subCap, &command, &paramSize);
     }
     /* get setValue parameter */
@@ -5214,7 +5214,7 @@ TPM_RESULT TPM_Process_SetCapability(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_SetCapability: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_SetCapability: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -5272,7 +5272,7 @@ TPM_RESULT TPM_Process_SetCapability(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_SetCapability: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_SetCapability: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -5349,7 +5349,7 @@ TPM_RESULT TPM_SetCapabilityCommon(tpm_state_t *tpm_state,
     TPM_BOOL	valueBool;
     uint32_t	valueUint32 = 0;	/* start with illegal value */
     
-    printf(" TPM_SetCapabilityCommon:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapabilityCommon:\n");
     subCap16 = subCap16;			/* not used */
     subCap = subCap;				/* not used */
     if (rc == 0) {
@@ -5394,7 +5394,7 @@ TPM_RESULT TPM_SetCapabilityCommon(tpm_state_t *tpm_state,
 					     subCap32, setValue);
 	    break;
 	  default:
-	    printf("TPM_SetCapabilityCommon: Error, unsupported capArea %08x", capArea);
+	    TPMLIB_LogPrintf("TPM_SetCapabilityCommon: Error, unsupported capArea %08x", capArea);
 	    rc = TPM_BAD_MODE;
 	    break;
 	}
@@ -5435,11 +5435,11 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
     TPM_RESULT	rc = 0;
     TPM_BOOL	altered = FALSE;	/* TRUE if the structure has been changed */
     
-    printf(" TPM_SetCapability_CapPermFlags: valueBool %02x\n", valueBool);
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapPermFlags: valueBool %02x\n", valueBool);
     if (rc == 0) {						   
 	switch (subCap32) {
 	  case TPM_PF_DISABLE:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLE\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLE\n");
 	    /* Owner authorization or physical presence
 	       TPM_OwnerSetDisable
 	       TPM_PhysicalEnable
@@ -5447,7 +5447,7 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    */
 	    if (rc == 0) {
 		if (!ownerAuthorized && !presenceAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, no authorization\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, no authorization\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
@@ -5458,32 +5458,32 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_OWNERSHIP:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_OWNERSHIP\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_OWNERSHIP\n");
 	    /* No authorization. No ownerInstalled. Physical presence asserted
 	       Not available when TPM deactivated or disabled
 	       TPM_SetOwnerInstall
 	    */
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_data.ownerInstalled) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, owner installed\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, owner installed\n");
 		    rc = TPM_OWNER_SET;
 		}
 	    }
 	    if (rc == 0) {
 		if (!presenceAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, no physicalPresence\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, no physicalPresence\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5494,20 +5494,20 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_DEACTIVATED:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_DEACTIVATED\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_DEACTIVATED\n");
 	    /* No authorization, physical presence assertion
 	       Not available when TPM disabled
 	       TPM_PhysicalSetDeactivated
 	    */
 	    if (rc == 0) {
 		if (!presenceAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, no physicalPresence\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, no physicalPresence\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
@@ -5518,25 +5518,25 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_READPUBEK:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_READPUBEK\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_READPUBEK\n");
 	    /* Owner authorization
 	       Not available when TPM deactivated or disabled
 	    */
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5546,37 +5546,37 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 				       valueBool);
 	    }
 	    if (rc == 0) {
-		printf("  TPM_SetCapability_CapPermFlags : readPubek %02x\n",
+		TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags : readPubek %02x\n",
 		       tpm_state->tpm_permanent_flags.readPubek);
 	    }
 	    break;
 	  case TPM_PF_DISABLEOWNERCLEAR:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLEOWNERCLEAR\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLEOWNERCLEAR\n");
 	    /* Owner authorization. Can only set to TRUE, FALSE invalid value. 
 	       After being set only ForceClear resets back to FALSE.
 	       Not available when TPM deactivated or disabled
 	       TPM_DisableOwnerClear */
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (!valueBool) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, cannot set FALSE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, cannot set FALSE\n");
 		    rc = TPM_BAD_PARAMETER;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5587,7 +5587,7 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_ALLOWMAINTENANCE:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_ALLOWMAINTENANCE\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_ALLOWMAINTENANCE\n");
 	    /* Owner authorization. Can only set to FALSE, TRUE invalid value. 
 	       After being set only changing TPM owner resets back to TRUE
 	       Not available when TPM deactivated or disabled
@@ -5595,25 +5595,25 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    */
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (valueBool) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, cannot set TRUE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, cannot set TRUE\n");
 		    rc = TPM_BAD_PARAMETER;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5624,26 +5624,26 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_READSRKPUB:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_READSRKPUB\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_READSRKPUB\n");
 	    /* Owner Authorization
 	       Not available when TPM deactivated or disabled
 	       TPM_SetCapability
 	    */
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, disable is TRUE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, disable is TRUE\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, deactivated is TRUE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, deactivated is TRUE\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5654,7 +5654,7 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    break;
 	  case TPM_PF_TPMESTABLISHED:
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_TPMESTABLISHED\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_TPMESTABLISHED\n");
 	    /* Locality 3 or locality 4
 	       Can only set to FALSE
 	       TPM_ResetEstablishmentBit
@@ -5665,7 +5665,7 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    }
 	    if (rc == 0) {
 		if (valueBool) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, can only set to FALSE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, can only set to FALSE\n");
 		    rc = TPM_BAD_PARAMETER;
 		}
 	    }
@@ -5680,10 +5680,10 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	    /* Owner Authorization
 	       TPM_SetCapability
 	    */
-	    printf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLEFULLDALOGICINFO\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermFlags: TPM_PF_DISABLEFULLDALOGICINFO\n");
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
@@ -5706,7 +5706,7 @@ static TPM_RESULT TPM_SetCapability_CapPermFlags(tpm_state_t *tpm_state,
 	  case TPM_PF_NV_LOCKED:
 	  case TPM_PF_MAINTENANCEDONE:
 	  default:
-	    printf("TPM_SetCapability_CapPermFlags: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapPermFlags: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -5731,29 +5731,29 @@ static TPM_RESULT TPM_SetCapability_CapPermData(tpm_state_t *tpm_state,
     TPM_RESULT	rc = 0;
     TPM_BOOL	writeAllNV = FALSE;	/* TRUE if the structure has been changed */
     
-    printf(" TPM_SetCapability_CapPermData:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapPermData:\n");
     presenceAuthorized = presenceAuthorized;			/* not used */
     if (rc == 0) {						   
 	switch (subCap32) {
 	  case TPM_PD_RESTRICTDELEGATE:
-	    printf("  TPM_SetCapability_CapPermData: TPM_PD_RESTRICTDELEGATE\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapPermData: TPM_PD_RESTRICTDELEGATE\n");
 	    /* Owner authorization.  Not available when TPM deactivated or disabled */
 	    /* TPM_CMK_SetRestrictions */
 	    if (rc == 0) {
 		if (!ownerAuthorized) {
-		    printf("TPM_SetCapability_CapPermData: Error, not owner authorized\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermData: Error, not owner authorized\n");
 		    rc = TPM_AUTHFAIL;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapPermData: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermData: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapPermData: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapPermData: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
@@ -5793,7 +5793,7 @@ static TPM_RESULT TPM_SetCapability_CapPermData(tpm_state_t *tpm_state,
 	  case TPM_PD_NOOWNERNVWRITE:
 	  case TPM_PD_TPMDAASEED:
 	  default:
-	    printf("TPM_SetCapability_CapPermData: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapPermData: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -5817,31 +5817,31 @@ static TPM_RESULT TPM_SetCapability_CapStclearFlags(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
 
-    printf(" TPM_SetCapability_CapStclearFlags: valueBool %02x\n", valueBool);
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapStclearFlags: valueBool %02x\n", valueBool);
     ownerAuthorized = ownerAuthorized;		/* not used */
     presenceAuthorized = presenceAuthorized;	/* not used */
     if (rc == 0) {						   
 	switch (subCap32) {
 	  case TPM_SF_DISABLEFORCECLEAR:
-	    printf("  TPM_SetCapability_CapStclearFlags: TPM_SF_DISABLEFORCECLEAR\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapStclearFlags: TPM_SF_DISABLEFORCECLEAR\n");
 	    /* Not available when TPM deactivated or disabled */
 	    /* TPM_DisableForceClear */
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapStclearFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStclearFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapStclearFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStclearFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
 	    /* Can only set to TRUE */
 	    if (rc == 0) {
 		if (!valueBool) {
-		    printf("TPM_SetCapability_CapStclearFlags: Error, cannot set FALSE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStclearFlags: Error, cannot set FALSE\n");
 		    rc = TPM_BAD_PARAMETER;
 		}
 	    }
@@ -5854,7 +5854,7 @@ static TPM_RESULT TPM_SetCapability_CapStclearFlags(tpm_state_t *tpm_state,
 	  case TPM_SF_PHYSICALPRESENCELOCK:
 	  case TPM_SF_BGLOBALLOCK:
 	  default:
-	    printf("TPM_SetCapability_CapStclearFlags: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapStclearFlags: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -5880,13 +5880,13 @@ static TPM_RESULT TPM_SetCapability_CapStclearData(tpm_state_t *tpm_state,
     valueUint32 = valueUint32;
 #endif
 
-    printf(" TPM_SetCapability_CapStclearData:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapStclearData:\n");
     ownerAuthorized = ownerAuthorized;		/* not used */
     if (rc == 0) {						   
 	switch (subCap32) {
 #if  (TPM_REVISION >= 103)	/* added for rev 103 */
 	  case TPM_SD_DEFERREDPHYSICALPRESENCE:
-	    printf("  TPM_SetCapability_CapStclearData: TPM_SD_DEFERREDPHYSICALPRESENCE\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapStclearData: TPM_SD_DEFERREDPHYSICALPRESENCE\n");
 	    /* Can only set to TRUE if PhysicalPresence is asserted.  Can set to FALSE at any
 	       time. */
 	    /* 1. If physical presence is not asserted */
@@ -5895,7 +5895,7 @@ static TPM_RESULT TPM_SetCapability_CapStclearData(tpm_state_t *tpm_state,
 	    if (rc == 0) {
 		if (!presenceAuthorized) {
 		    if (~(tpm_state->tpm_stclear_data.deferredPhysicalPresence) & valueUint32) {
-			printf("TPM_SetCapability_CapStclearData: "
+			TPMLIB_LogPrintf("TPM_SetCapability_CapStclearData: "
 			       "Error, no physicalPresence and deferredPhysicalPresence %08x\n",
 			       tpm_state->tpm_stclear_data.deferredPhysicalPresence);
 			rc = TPM_BAD_PRESENCE;
@@ -5905,7 +5905,7 @@ static TPM_RESULT TPM_SetCapability_CapStclearData(tpm_state_t *tpm_state,
 	    /* 2.Set TPM_STCLEAR_DATA -> deferredPhysicalPresence to TPM_SetCapability -> setValue.
 	    */
 	    if (rc == 0) {
-		printf("   TPM_SetCapability_CapStclearData: deferredPhysicalPresence now %08x\n",
+		TPMLIB_LogPrintf("   TPM_SetCapability_CapStclearData: deferredPhysicalPresence now %08x\n",
 		       valueUint32);
 		tpm_state->tpm_stclear_data.deferredPhysicalPresence = valueUint32;
 	    }
@@ -5917,7 +5917,7 @@ static TPM_RESULT TPM_SetCapability_CapStclearData(tpm_state_t *tpm_state,
 	  case TPM_SD_DISABLERESETLOCK:
 	  case TPM_SD_PCR:
 	  default:
-	    printf("TPM_SetCapability_CapStclearData: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapStclearData: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -5938,13 +5938,13 @@ static TPM_RESULT TPM_SetCapability_CapStanyFlags(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
 
-    printf(" TPM_SetCapability_CapStanyFlags:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapStanyFlags:\n");
     ownerAuthorized = ownerAuthorized;			/* not used */
     presenceAuthorized = presenceAuthorized;		/* not used */
     if (rc == 0) {						   
 	switch (subCap32) {
 	  case TPM_AF_TOSPRESENT:
-	    printf("  TPM_SetCapability_CapStanyFlags: TPM_AF_TOSPRESENT\n");
+	    TPMLIB_LogPrintf("  TPM_SetCapability_CapStanyFlags: TPM_AF_TOSPRESENT\n");
 	    /* locality 3 or 4 */
 	    /* Not available when TPM deactivated or disabled */
 	    if (rc == 0) {
@@ -5953,20 +5953,20 @@ static TPM_RESULT TPM_SetCapability_CapStanyFlags(tpm_state_t *tpm_state,
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_SetCapability_CapStanyFlags: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStanyFlags: Error, disabled\n");
 		    rc = TPM_DISABLED;
 		}
 	    }
 	    if (rc == 0) {
 		if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_SetCapability_CapStanyFlags: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStanyFlags: Error, deactivated\n");
 		    rc = TPM_DEACTIVATED;
 		}
 	    }
 	    /* can only be set to FALSE */
 	    if (rc == 0) {
 		if (valueBool) {
-		    printf("TPM_SetCapability_CapStanyFlags: Error, cannot set TRUE\n");
+		    TPMLIB_LogPrintf("TPM_SetCapability_CapStanyFlags: Error, cannot set TRUE\n");
 		    rc = TPM_BAD_PARAMETER;
 		}
 	    }
@@ -5978,7 +5978,7 @@ static TPM_RESULT TPM_SetCapability_CapStanyFlags(tpm_state_t *tpm_state,
 	  case TPM_AF_LOCALITYMODIFIER:
 	  case TPM_AF_TRANSPORTEXCLUSIVE:
 	  default:
-	    printf("TPM_SetCapability_CapStanyFlags: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapStanyFlags: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}
@@ -5999,7 +5999,7 @@ static TPM_RESULT TPM_SetCapability_CapStanyData(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
 
-    printf(" TPM_SetCapability_CapStanyData:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapStanyData:\n");
     tpm_state = tpm_state;			/* not used */
     ownerAuthorized = ownerAuthorized;		/* not used */
     presenceAuthorized = presenceAuthorized;	/* not used */
@@ -6013,7 +6013,7 @@ static TPM_RESULT TPM_SetCapability_CapStanyData(tpm_state_t *tpm_state,
 	  case TPM_AD_CONTEXTLIST:
 	  case TPM_AD_SESSIONS:
 	  default:
-	    printf("TPM_SetCapability_CapStanyData: Error, bad subCap32 %u\n",
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapStanyData: Error, bad subCap32 %u\n",
 		   subCap32);
 	    rc = TPM_BAD_PARAMETER;
 	}				
@@ -6032,7 +6032,7 @@ static TPM_RESULT TPM_SetCapability_CapVendor(tpm_state_t *tpm_state,
 {
     TPM_RESULT			rc = 0;
     
-    printf(" TPM_SetCapability_CapVendor:\n");
+    TPMLIB_LogPrintf(" TPM_SetCapability_CapVendor:\n");
     ownerAuthorized = ownerAuthorized;		/* not used */
     presenceAuthorized = presenceAuthorized;	/* not used */
     setValue = setValue;
@@ -6040,7 +6040,7 @@ static TPM_RESULT TPM_SetCapability_CapVendor(tpm_state_t *tpm_state,
     if (rc == 0) {
 	switch(subCap32) {
 	  default:
-	    printf("TPM_SetCapability_CapVendor: Error, unsupported subCap %08x\n", subCap32);
+	    TPMLIB_LogPrintf("TPM_SetCapability_CapVendor: Error, unsupported subCap %08x\n", subCap32);
 	    tpm_state = tpm_state;			/* not used */
 	    rc = TPM_BAD_PARAMETER;
 	    break;

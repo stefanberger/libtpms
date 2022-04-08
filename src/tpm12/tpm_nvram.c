@@ -78,7 +78,7 @@
 
 void TPM_NVAttributes_Init(TPM_NV_ATTRIBUTES *tpm_nv_attributes)
 {
-    printf(" TPM_NVAttributes_Init:\n");
+    TPMLIB_LogPrintf(" TPM_NVAttributes_Init:\n");
     tpm_nv_attributes->attributes = 0;
     return;
 }
@@ -99,7 +99,7 @@ TPM_RESULT TPM_NVAttributes_Load(TPM_NV_ATTRIBUTES *tpm_nv_attributes,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_NVAttributes_Load:\n");
+    TPMLIB_LogPrintf(" TPM_NVAttributes_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_NV_ATTRIBUTES, stream, stream_size);
@@ -122,7 +122,7 @@ TPM_RESULT TPM_NVAttributes_Store(TPM_STORE_BUFFER *sbuffer,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_NVAttributes_Store:\n");
+    TPMLIB_LogPrintf(" TPM_NVAttributes_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_NV_ATTRIBUTES);
@@ -144,7 +144,7 @@ TPM_RESULT TPM_NVAttributes_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_NVAttributes_Delete(TPM_NV_ATTRIBUTES *tpm_nv_attributes)
 {
-    printf(" TPM_NVAttributes_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_NVAttributes_Delete:\n");
     if (tpm_nv_attributes != NULL) {
 	TPM_NVAttributes_Init(tpm_nv_attributes);
     }
@@ -171,7 +171,7 @@ void TPM_NVAttributes_Copy(TPM_NV_ATTRIBUTES *tpm_nv_attributes_dest,
 
 void TPM_NVDataPublic_Init(TPM_NV_DATA_PUBLIC *tpm_nv_data_public)
 {
-    printf(" TPM_NVDataPublic_Init:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataPublic_Init:\n");
     tpm_nv_data_public->nvIndex = TPM_NV_INDEX_LOCK;	/* mark unused */
     TPM_PCRInfoShort_Init(&(tpm_nv_data_public->pcrInfoRead));
     TPM_PCRInfoShort_Init(&(tpm_nv_data_public->pcrInfoWrite));
@@ -200,7 +200,7 @@ TPM_RESULT TPM_NVDataPublic_Load(TPM_NV_DATA_PUBLIC *tpm_nv_data_public,
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_NVDataPublic_Load:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataPublic_Load:\n");
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_NV_DATA_PUBLIC, stream, stream_size);
@@ -252,7 +252,7 @@ TPM_RESULT TPM_NVDataPublic_Store(TPM_STORE_BUFFER *sbuffer,
 {	
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_NVDataPublic_Store:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataPublic_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_NV_DATA_PUBLIC);
@@ -303,7 +303,7 @@ TPM_RESULT TPM_NVDataPublic_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_NVDataPublic_Delete(TPM_NV_DATA_PUBLIC *tpm_nv_data_public)
 {
-    printf(" TPM_NVDataPublic_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataPublic_Delete:\n");
     if (tpm_nv_data_public != NULL) {
 	TPM_PCRInfoShort_Delete(&(tpm_nv_data_public->pcrInfoRead));
 	TPM_PCRInfoShort_Delete(&(tpm_nv_data_public->pcrInfoWrite));
@@ -326,7 +326,7 @@ void TPM_NVDataPublic_Delete(TPM_NV_DATA_PUBLIC *tpm_nv_data_public)
 
 void TPM_NVDataSensitive_Init(TPM_NV_DATA_SENSITIVE *tpm_nv_data_sensitive)
 {
-    printf(" TPM_NVDataSensitive_Init:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_Init:\n");
     TPM_NVDataPublic_Init(&(tpm_nv_data_sensitive->pubInfo));
     TPM_Secret_Init(tpm_nv_data_sensitive->authValue);
     tpm_nv_data_sensitive->data = NULL;
@@ -353,7 +353,7 @@ TPM_RESULT TPM_NVDataSensitive_Load(TPM_NV_DATA_SENSITIVE *tpm_nv_data_sensitive
     TPM_BOOL 		optimize;
     TPM_BOOL		isGPIO;
 
-    printf(" TPM_NVDataSensitive_Load: nvEntriesVersion %04hx\n", nvEntriesVersion);
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_Load: nvEntriesVersion %04hx\n", nvEntriesVersion);
     /* check tag */
     if (rc == 0) {
 	rc = TPM_CheckTag(TPM_TAG_NV_DATA_SENSITIVE, stream, stream_size);
@@ -409,7 +409,7 @@ TPM_RESULT TPM_NVDataSensitive_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
     TPM_BOOL		isGPIO;
 
-    printf(" TPM_NVDataSensitive_Store:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_Store:\n");
     /* store tag */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_NV_DATA_SENSITIVE);
@@ -446,7 +446,7 @@ TPM_RESULT TPM_NVDataSensitive_Store(TPM_STORE_BUFFER *sbuffer,
 
 void TPM_NVDataSensitive_Delete(TPM_NV_DATA_SENSITIVE *tpm_nv_data_sensitive)
 {
-    printf(" TPM_NVDataSensitive_Delete:\n");
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_Delete:\n");
     if (tpm_nv_data_sensitive != NULL) {
 	/* zero any secrets in NV index data */
 	if (tpm_nv_data_sensitive->data != NULL) {
@@ -472,18 +472,18 @@ TPM_RESULT TPM_NVDataSensitive_IsValidIndex(TPM_NV_INDEX nvIndex)
     TPM_RESULT		rc = 0;
     TPM_BOOL		isGPIO;
 
-    printf(" TPM_NVDataSensitive_IsValidIndex: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_IsValidIndex: nvIndex %08x\n", nvIndex);
     if (rc == 0) {
 	if ((nvIndex == TPM_NV_INDEX_LOCK) ||
 	    (nvIndex == TPM_NV_INDEX0) ||
 	    (nvIndex == TPM_NV_INDEX_DIR)) {
-	    printf("TPM_NVDataSensitive_IsValidIndex: Error, illegal special index\n");
+	    TPMLIB_LogPrintf("TPM_NVDataSensitive_IsValidIndex: Error, illegal special index\n");
 	    rc = TPM_BADINDEX;
 	}
     }
     if (rc == 0) {
 	if ((nvIndex & TPM_NV_INDEX_RESVD) != 0) {
-	    printf("TPM_NVDataSensitive_IsValidIndex: Error, illegal reserved index\n");
+	    TPMLIB_LogPrintf("TPM_NVDataSensitive_IsValidIndex: Error, illegal reserved index\n");
 	    rc = TPM_BADINDEX;
 	}
     }
@@ -511,14 +511,14 @@ TPM_RESULT TPM_NVDataSensitive_IsGPIO(TPM_BOOL *isGPIO, TPM_NV_INDEX nvIndex)
 {
     TPM_RESULT		rc = 0;
 
-    printf("  TPM_NVDataSensitive_IsGPIO: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf("  TPM_NVDataSensitive_IsGPIO: nvIndex %08x\n", nvIndex);
     *isGPIO = FALSE;
 #if defined TPM_PCCLIENT
     if (rc == 0) {
 	/* GPIO space allowed for PC Client */
 	if ((nvIndex >= TPM_NV_INDEX_GPIO_START) &&
 	    (nvIndex <= TPM_NV_INDEX_GPIO_END)) {
-	    printf("   TPM_NVDataSensitive_IsGPIO: nvIndex is GPIO space\n");
+	    TPMLIB_LogPrintf("   TPM_NVDataSensitive_IsGPIO: nvIndex is GPIO space\n");
 	    *isGPIO = TRUE;
 	}	
     }
@@ -528,7 +528,7 @@ TPM_RESULT TPM_NVDataSensitive_IsGPIO(TPM_BOOL *isGPIO, TPM_NV_INDEX nvIndex)
 	/* GPIO space cannot be defined in platforms with no GPIO */
 	if ((nvIndex >= TPM_NV_INDEX_GPIO_START) &&
 	    (nvIndex <= TPM_NV_INDEX_GPIO_END)) {
-	    printf("TPM_NVDataSensitive_IsGPIO: Error, illegal index\n");
+	    TPMLIB_LogPrintf("TPM_NVDataSensitive_IsGPIO: Error, illegal index\n");
 	    rc = TPM_BADINDEX;
 	}	
     }
@@ -540,11 +540,11 @@ TPM_RESULT TPM_NVDataSensitive_IsValidPlatformIndex(TPM_NV_INDEX nvIndex)
 {
     TPM_RESULT		rc = 0;
 
-    printf(" TPM_NVDataSensitive_IsValidPlatformIndex: nvIndex %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_NVDataSensitive_IsValidPlatformIndex: nvIndex %08x\n", nvIndex);
 #ifndef TPM_PCCLIENT
     if (rc == 0) {
 	if (((nvIndex & TPM_NV_INDEX_PURVIEW_MASK) >> TPM_NV_INDEX_PURVIEW_BIT) == TPM_PC) {
-	    printf("  TPM_NVDataSensitive_IsValidPlatformIndex: Error, PC Client index\n");
+	    TPMLIB_LogPrintf("  TPM_NVDataSensitive_IsValidPlatformIndex: Error, PC Client index\n");
 	    rc = TPM_BADINDEX;
 	}
     }
@@ -564,7 +564,7 @@ TPM_RESULT TPM_NVDataSensitive_IsValidPlatformIndex(TPM_NV_INDEX nvIndex)
 
 void TPM_NVIndexEntries_Init(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries)
 {
-    printf(" TPM_NVIndexEntries_Init:\n");
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_Init:\n");
     tpm_nv_index_entries->nvIndexCount = 0;
     tpm_nv_index_entries->tpm_nvindex_entry = NULL;
     return;
@@ -582,7 +582,7 @@ void TPM_NVIndexEntries_Delete(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries)
 {
     size_t i;
 
-    printf(" TPM_NVIndexEntries_Delete: Deleting from %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_Delete: Deleting from %u slots\n",
 	   tpm_nv_index_entries->nvIndexCount);
     /* free the entries */
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
@@ -604,10 +604,10 @@ void TPM_NVIndexEntries_Trace(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries)
     uint32_t	i;
     TPM_NV_DATA_SENSITIVE *tpm_nv_data_sensitive;
     
-    printf("\tTPM_NVIndexEntries_Trace: %u slots\n", tpm_nv_index_entries->nvIndexCount);
+    TPMLIB_LogPrintf("\tTPM_NVIndexEntries_Trace: %u slots\n", tpm_nv_index_entries->nvIndexCount);
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
 	tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
-	printf("\tTPM_NVIndexEntries_Trace: TPM_NV_DATA_SENSITIVE.data %p\n",
+	TPMLIB_LogPrintf("\tTPM_NVIndexEntries_Trace: TPM_NV_DATA_SENSITIVE.data %p\n",
 	       tpm_nv_data_sensitive->data);
     }
     return;
@@ -627,7 +627,7 @@ TPM_RESULT TPM_NVIndexEntries_Load(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries,
     uint32_t	i;
     TPM_TAG	nvEntriesVersion;
 
-    printf(" TPM_NVIndexEntries_Load:\n");
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_Load:\n");
     /* get the NV entries version number */
     if (rc == 0) {
 	rc = TPM_Load16(&nvEntriesVersion, stream, stream_size); 
@@ -639,7 +639,7 @@ TPM_RESULT TPM_NVIndexEntries_Load(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries,
 	  case TPM_TAG_NVSTATE_NV_V2:
 	    break;
 	  default:
-            printf("TPM_NVIndexEntries_Load: Error (fatal), version %04x unsupported\n",
+            TPMLIB_LogPrintf("TPM_NVIndexEntries_Load: Error (fatal), version %04x unsupported\n",
 		   nvEntriesVersion);
             rc = TPM_FAIL;
 	    break;
@@ -651,7 +651,7 @@ TPM_RESULT TPM_NVIndexEntries_Load(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries,
     }
     /* allocate memory for the array, nvIndexCount TPM_NV_DATA_SENSITIVE structures */
     if ((rc == 0) && (tpm_nv_index_entries->nvIndexCount > 0)) {
-	printf("  TPM_NVIndexEntries_Load: Loading %u slots\n", tpm_nv_index_entries->nvIndexCount);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_Load: Loading %u slots\n", tpm_nv_index_entries->nvIndexCount);
 	rc = TPM_Malloc((unsigned char **)&(tpm_nv_index_entries->tpm_nvindex_entry),
 			sizeof(TPM_NV_DATA_SENSITIVE) * tpm_nv_index_entries->nvIndexCount);
     }
@@ -661,17 +661,17 @@ TPM_RESULT TPM_NVIndexEntries_Load(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries,
     }
     /* tpm_nvindex_entry array */
     for (i = 0 ; (rc == 0) && (i < tpm_nv_index_entries->nvIndexCount) ; i++) {
-	printf("  TPM_NVIndexEntries_Load: Loading slot %u\n", i);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_Load: Loading slot %u\n", i);
 	if (rc == 0) {
 	    rc = TPM_NVDataSensitive_Load(&(tpm_nv_index_entries->tpm_nvindex_entry[i]),
 					  nvEntriesVersion, stream, stream_size);
 	}
 	/* should never load an unused entry */
 	if (rc == 0) {
-	    printf("  TPM_NVIndexEntries_Load: Loaded NV index %08x\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_Load: Loaded NV index %08x\n",
 		   tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex);
 	    if (tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex == TPM_NV_INDEX_LOCK) {
-		printf("TPM_NVIndexEntries_Load: Error (fatal) Entry %u bad NV index %08x\n",
+		TPMLIB_LogPrintf("TPM_NVIndexEntries_Load: Error (fatal) Entry %u bad NV index %08x\n",
 		       i, tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex);
 		rc = TPM_FAIL;
 	    }
@@ -694,7 +694,7 @@ TPM_RESULT TPM_NVIndexEntries_Store(TPM_STORE_BUFFER *sbuffer,
     uint32_t 	count;		/* number of used entries to store */
     size_t i;
    
-    printf(" TPM_NVIndexEntries_Store: Storing from %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_Store: Storing from %u slots\n",
 	   tpm_nv_index_entries->nvIndexCount);
     /* append the NV entries version number to the stream */
     if (rc == 0) {
@@ -712,12 +712,12 @@ TPM_RESULT TPM_NVIndexEntries_Store(TPM_STORE_BUFFER *sbuffer,
     for (i = 0 ; (rc == 0) && (i < tpm_nv_index_entries->nvIndexCount) ; i++) {
 	/* if the entry is used */
 	if (tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex != TPM_NV_INDEX_LOCK) {
-	    printf("  TPM_NVIndexEntries_Store: Storing slot %lu NV index %08x\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_Store: Storing slot %lu NV index %08x\n",
 		   (unsigned long)i, tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex);
 	    rc = TPM_NVDataSensitive_Store(sbuffer, &(tpm_nv_index_entries->tpm_nvindex_entry[i]));
 	}
 	else {
-	    printf("  TPM_NVIndexEntries_Store: Skipping unused slot %lu\n", (unsigned long)i);
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_Store: Skipping unused slot %lu\n", (unsigned long)i);
 	}
     }
     return rc;
@@ -731,7 +731,7 @@ void TPM_NVIndexEntries_StClear(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries)
 {
     size_t i;
 
-    printf(" TPM_NVIndexEntries_StClear: Clearing %u slots\n", tpm_nv_index_entries->nvIndexCount);
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_StClear: Clearing %u slots\n", tpm_nv_index_entries->nvIndexCount);
     /* bReadSTClear and bWriteSTClear are volatile, in that they are set FALSE at
        TPM_Startup(ST_Clear) */
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
@@ -754,7 +754,7 @@ TPM_RESULT TPM_NVIndexEntries_LoadVolatile(TPM_NV_INDEX_ENTRIES *tpm_nv_index_en
     uint32_t		entryIndex;
     TPM_NV_DATA_PUBLIC	*tpm_nv_data_public;
 
-    printf(" TPM_NVIndexEntries_LoadVolatile:\n");
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_LoadVolatile:\n");
     /* check tag */
     if (rc == 0) {
         rc = TPM_CheckTag(TPM_TAG_NV_INDEX_ENTRIES_VOLATILE_V1, stream, stream_size);
@@ -764,9 +764,9 @@ TPM_RESULT TPM_NVIndexEntries_LoadVolatile(TPM_NV_INDEX_ENTRIES *tpm_nv_index_en
 	rc = TPM_Load32(&usedCount, stream, stream_size);
     }
     if (rc == 0) {
-	printf("  TPM_NVIndexEntries_LoadVolatile: usedCount %u\n", usedCount);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_LoadVolatile: usedCount %u\n", usedCount);
 	if (usedCount != tpm_nv_index_entries->nvIndexCount) {
-	    printf("TPM_NVIndexEntries_LoadVolatile: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_NVIndexEntries_LoadVolatile: Error (fatal), "
 		   "usedCount %u does not equal slot count %u\n",
 		   usedCount, tpm_nv_index_entries->nvIndexCount);
 	    rc = TPM_FAIL;
@@ -778,7 +778,7 @@ TPM_RESULT TPM_NVIndexEntries_LoadVolatile(TPM_NV_INDEX_ENTRIES *tpm_nv_index_en
 	 entryIndex++) {
 
 	tpm_nv_data_public = &(tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo);
-	printf("  TPM_NVIndexEntries_LoadVolatile: Loading index %08x\n",
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_LoadVolatile: Loading index %08x\n",
 	       tpm_nv_data_public->nvIndex);
 	/* load bReadSTClear */
 	if (rc == 0) {
@@ -804,7 +804,7 @@ TPM_RESULT TPM_NVIndexEntries_StoreVolatile(TPM_STORE_BUFFER *sbuffer,
     uint32_t		entryIndex;
     TPM_NV_DATA_PUBLIC	*tpm_nv_data_public;
     
-    printf(" TPM_NVIndexEntries_StoreVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_StoreVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
     /* store tag */
     if (rc == 0) {
         rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_NV_INDEX_ENTRIES_VOLATILE_V1);
@@ -816,7 +816,7 @@ TPM_RESULT TPM_NVIndexEntries_StoreVolatile(TPM_STORE_BUFFER *sbuffer,
     }
     /* store usedCount */
     if (rc == 0) {
-	printf("  TPM_NVIndexEntries_StoreVolatile: usedCount %u\n", usedCount);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_StoreVolatile: usedCount %u\n", usedCount);
 	rc = TPM_Sbuffer_Append32(sbuffer, usedCount);
     }
     /* save entries into the array */
@@ -829,7 +829,7 @@ TPM_RESULT TPM_NVIndexEntries_StoreVolatile(TPM_STORE_BUFFER *sbuffer,
 	    TPM_NV_INDEX_LOCK) {
 
 	    tpm_nv_data_public = &(tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo);
-	    printf("  TPM_NVIndexEntries_StoreVolatile: Storing index %08x\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_StoreVolatile: Storing index %08x\n",
 		   tpm_nv_data_public->nvIndex);
 	    /* store bReadSTClear */
 	    if (rc == 0) {
@@ -859,7 +859,7 @@ TPM_RESULT TPM_NVIndexEntries_GetVolatile(TPM_NV_DATA_ST **tpm_nv_data_st, /* fr
     uint32_t	entryIndex;
     uint32_t	usedIndex;
 
-    printf(" TPM_NVIndexEntries_GetVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
     /* Get the number of used slots.  If indexes were deleted since the last TPM_Init, there can be
        some unused slots. */
     if (rc == 0) {
@@ -867,7 +867,7 @@ TPM_RESULT TPM_NVIndexEntries_GetVolatile(TPM_NV_DATA_ST **tpm_nv_data_st, /* fr
     }
     /* allocate memory for the array, nvIndexCount TPM_NV_DATA_SENSITIVE structures */
     if ((rc == 0) && (usedCount > 0)) {
-	printf("  TPM_NVIndexEntries_GetVolatile: Aloocating for %u used slots\n", usedCount);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetVolatile: Aloocating for %u used slots\n", usedCount);
 	rc = TPM_Malloc((unsigned char **)tpm_nv_data_st,
 			sizeof(TPM_NV_DATA_ST) * usedCount);
     }
@@ -880,11 +880,11 @@ TPM_RESULT TPM_NVIndexEntries_GetVolatile(TPM_NV_DATA_ST **tpm_nv_data_st, /* fr
 	if (tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo.nvIndex !=
 	    TPM_NV_INDEX_LOCK) {
 
-	    printf("  TPM_NVIndexEntries_GetVolatile: Saving slot %u at used %u NV index %08x\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetVolatile: Saving slot %u at used %u NV index %08x\n",
 		   entryIndex, usedIndex,
 		   tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo.nvIndex);
 	    
-	    printf("  TPM_NVIndexEntries_GetVolatile: bReadSTClear %u bWriteSTClear %u\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetVolatile: bReadSTClear %u bWriteSTClear %u\n",
 		   tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo.bReadSTClear,
 		   tpm_nv_index_entries->tpm_nvindex_entry[entryIndex].pubInfo.bWriteSTClear);
 	    (*tpm_nv_data_st)[usedIndex].nvIndex =
@@ -911,14 +911,14 @@ TPM_RESULT TPM_NVIndexEntries_SetVolatile(TPM_NV_DATA_ST *tpm_nv_data_st,
     uint32_t 	usedCount;
     uint32_t	i;
 
-    printf(" TPM_NVIndexEntries_SetVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_SetVolatile: %u slots\n", tpm_nv_index_entries->nvIndexCount);
     /* Get the number of used slots.  This should be equal to the total number of slots. */
     if (rc == 0) {
 	rc = TPM_NVIndexEntries_GetUsedCount(&usedCount, tpm_nv_index_entries);
     }
     if (rc == 0) {
 	if (usedCount != tpm_nv_index_entries->nvIndexCount) {
-	    printf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
 		   "usedCount %u does not equal slot count %u\n",
 		   usedCount, tpm_nv_index_entries->nvIndexCount);
 	    rc = TPM_FAIL;
@@ -927,20 +927,20 @@ TPM_RESULT TPM_NVIndexEntries_SetVolatile(TPM_NV_DATA_ST *tpm_nv_data_st,
     /* if the used count is non-zero, the volatile array should not be NULL */
     if (rc == 0) {
 	if ((usedCount > 0) && (tpm_nv_data_st == NULL)) {
-	    printf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
 		   "usedCount %u unconsistant with volatile array NULL\n", usedCount);
 	    rc = TPM_FAIL;
 	}
     }
     /* copy entries into the array */
     for (i = 0 ; (rc == 0) && (i < tpm_nv_index_entries->nvIndexCount) ; i++) {
-	printf("  TPM_NVIndexEntries_SetVolatile: slot %u index %08x\n",
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_SetVolatile: slot %u index %08x\n",
 	       i, tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex);
 	/* sanity check on a mismatch of entries between the save and restore */
 	if (tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex !=
 	    tpm_nv_data_st[i].nvIndex) {
 
-	    printf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
+	    TPMLIB_LogPrintf("TPM_NVIndexEntries_SetVolatile: Error (fatal), "
 		   "mismatch NV entry %08x, saved %08x\n",
 		   tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.nvIndex,
 		   tpm_nv_data_st[i].nvIndex);
@@ -948,7 +948,7 @@ TPM_RESULT TPM_NVIndexEntries_SetVolatile(TPM_NV_DATA_ST *tpm_nv_data_st,
 	}
 	/* restore entries from the array */
 	else {
-	    printf("  TPM_NVIndexEntries_SetVolatile: bReadSTClear %u bWriteSTClear %u\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_SetVolatile: bReadSTClear %u bWriteSTClear %u\n",
 		   tpm_nv_data_st[i].bReadSTClear, tpm_nv_data_st[i].bWriteSTClear);
 	    tpm_nv_index_entries->tpm_nvindex_entry[i].pubInfo.bReadSTClear =
 		tpm_nv_data_st[i].bReadSTClear;
@@ -975,12 +975,12 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_s
     TPM_BOOL		done = FALSE;
     size_t 		i;
 
-    printf(" TPM_NVIndexEntries_GetFreeEntry: Searching %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetFreeEntry: Searching %u slots\n",
 	   tpm_nv_index_entries->nvIndexCount);
     /* for debug - trace the entire TPM_NV_INDEX_ENTRIES array */
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
 	*tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
-	printf("   TPM_NVIndexEntries_GetFreeEntry: slot %lu entry %08x\n",
+	TPMLIB_LogPrintf("   TPM_NVIndexEntries_GetFreeEntry: slot %lu entry %08x\n",
 	       (unsigned long)i, (*tpm_nv_data_sensitive)->pubInfo.nvIndex);
     }    
     /* search the existing array for a free entry */
@@ -988,7 +988,7 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_s
 	*tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
 	/* if the entry is not used */
 	if ((*tpm_nv_data_sensitive)->pubInfo.nvIndex == TPM_NV_INDEX_LOCK) {
-	    printf("  TPM_NVIndexEntries_GetFreeEntry: Found free slot %lu\n", (unsigned long)i);
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetFreeEntry: Found free slot %lu\n", (unsigned long)i);
 	    done = TRUE;
 	}
     }
@@ -1000,7 +1000,7 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_s
     }
     /* initialize the new entry in the array */
     if ((rc == 0) && !done) {
-	printf("  TPM_NVIndexEntries_GetFreeEntry: Created new slot at index %lu\n",
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetFreeEntry: Created new slot at index %lu\n",
 	       (unsigned long)i);
 	*tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
 	TPM_NVDataSensitive_Init(*tpm_nv_data_sensitive);
@@ -1022,12 +1022,12 @@ TPM_RESULT TPM_NVIndexEntries_GetEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_sensi
     size_t 			i;
     TPM_BOOL			found;
     
-    printf(" TPM_NVIndexEntries_GetEntry: Getting NV index %08x in %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetEntry: Getting NV index %08x in %u slots\n",
 	   nvIndex, tpm_nv_index_entries->nvIndexCount);
     /* for debug tracing */
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
 	*tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
-	printf("   TPM_NVIndexEntries_GetEntry: slot %lu entry %08x\n",
+	TPMLIB_LogPrintf("   TPM_NVIndexEntries_GetEntry: slot %lu entry %08x\n",
 	       (unsigned long)i, (*tpm_nv_data_sensitive)->pubInfo.nvIndex);
     }    
     /* check for the special index that indicates an empty entry */
@@ -1042,11 +1042,11 @@ TPM_RESULT TPM_NVIndexEntries_GetEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_sensi
 
 	*tpm_nv_data_sensitive = &(tpm_nv_index_entries->tpm_nvindex_entry[i]);
 	if ((*tpm_nv_data_sensitive)->pubInfo.nvIndex == nvIndex) {
-	    printf("  TPM_NVIndexEntries_GetEntry: Found NV index at slot %lu\n", (unsigned long)i);
-	    printf("   TPM_NVIndexEntries_GetEntry: permission %08x dataSize %u\n",
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetEntry: Found NV index at slot %lu\n", (unsigned long)i);
+	    TPMLIB_LogPrintf("   TPM_NVIndexEntries_GetEntry: permission %08x dataSize %u\n",
 		   (*tpm_nv_data_sensitive)->pubInfo.permission.attributes,
 		   (*tpm_nv_data_sensitive)->pubInfo.dataSize);
-	    printf("   TPM_NVIndexEntries_GetEntry: "
+	    TPMLIB_LogPrintf("   TPM_NVIndexEntries_GetEntry: "
 		   "bReadSTClear %02x bWriteSTClear %02x bWriteDefine %02x\n",
 		   (*tpm_nv_data_sensitive)->pubInfo.bReadSTClear,
 		   (*tpm_nv_data_sensitive)->pubInfo.bWriteSTClear,
@@ -1056,7 +1056,7 @@ TPM_RESULT TPM_NVIndexEntries_GetEntry(TPM_NV_DATA_SENSITIVE **tpm_nv_data_sensi
     }
     if (rc == 0) {
 	if (!found) {
-	    printf("  TPM_NVIndexEntries_GetEntry: NV index not found\n");
+	    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetEntry: NV index not found\n");
 	    rc = TPM_BADINDEX;
 	}
     }
@@ -1083,7 +1083,7 @@ TPM_RESULT TPM_NVIndexEntries_GetUsedCount(uint32_t *count,
 	    (*count)++;
 	}
     }
-    printf(" TPM_NVIndexEntries_GetUsedCount: Used count %d in %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetUsedCount: Used count %d in %u slots\n",
 	   *count, tpm_nv_index_entries->nvIndexCount);
     return rc;
 }
@@ -1098,7 +1098,7 @@ TPM_RESULT TPM_NVIndexEntries_GetNVList(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
     size_t 	i;
 
-    printf(" TPM_NVIndexEntries_GetNVList: Creating list from %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetNVList: Creating list from %u slots\n",
 	   tpm_nv_index_entries->nvIndexCount);
     
     for (i = 0 ; (rc == 0) && (i < tpm_nv_index_entries->nvIndexCount) ; i++) {
@@ -1124,7 +1124,7 @@ TPM_RESULT TPM_NVIndexEntries_GetUsedSpace(uint32_t *usedSpace,
     TPM_STORE_BUFFER sbuffer;
     const unsigned char *buffer;
     
-    printf("  TPM_NVIndexEntries_GetUsedSpace:\n");
+    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetUsedSpace:\n");
     TPM_Sbuffer_Init(&sbuffer);			/* freed @1 */
     /* serialize NV defined space */
     if (rc == 0) {
@@ -1133,7 +1133,7 @@ TPM_RESULT TPM_NVIndexEntries_GetUsedSpace(uint32_t *usedSpace,
     /* get the serialized buffer and its length */
     if (rc == 0) {
 	TPM_Sbuffer_Get(&sbuffer, &buffer, usedSpace);
-	printf("  TPM_NVIndexEntries_GetUsedSpace: Used space %u\n", *usedSpace);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetUsedSpace: Used space %u\n", *usedSpace);
     }
     TPM_Sbuffer_Delete(&sbuffer);	/* @1 */
     return rc;
@@ -1151,7 +1151,7 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeSpace(uint32_t *freeSpace,
     TPM_RESULT	rc = 0;
     uint32_t usedSpace;
 
-    printf("  TPM_NVIndexEntries_GetFreeSpace:\n");
+    TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetFreeSpace:\n");
     /* get the used space */
     if (rc == 0) {
 	rc = TPM_NVIndexEntries_GetUsedSpace(&usedSpace, tpm_nv_index_entries);
@@ -1159,7 +1159,7 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeSpace(uint32_t *freeSpace,
     /* sanity check */
     if (rc == 0) {
 	if (usedSpace > TPM_MAX_NV_DEFINED_SIZE) {
-	    printf("TPM_NVIndexEntries_GetFreeSpace: used %u greater than max %u\n",
+	    TPMLIB_LogPrintf("TPM_NVIndexEntries_GetFreeSpace: used %u greater than max %u\n",
 		   usedSpace, TPM_MAX_NV_DEFINED_SIZE);
 	    rc = TPM_NOSPACE;
 	}
@@ -1167,7 +1167,7 @@ TPM_RESULT TPM_NVIndexEntries_GetFreeSpace(uint32_t *freeSpace,
     /* calculate the free space */
     if (rc == 0) {
 	*freeSpace = TPM_MAX_NV_DEFINED_SIZE - usedSpace;
-	printf("  TPM_NVIndexEntries_GetFreeSpace: Free space %u\n", *freeSpace);
+	TPMLIB_LogPrintf("  TPM_NVIndexEntries_GetFreeSpace: Free space %u\n", *freeSpace);
     }
     return rc;
 }
@@ -1194,7 +1194,7 @@ TPM_RESULT TPM_NVIndexEntries_DeleteOwnerAuthorized(TPM_NV_INDEX_ENTRIES *tpm_nv
     size_t 			i;
     TPM_NV_DATA_SENSITIVE	*tpm_nv_data_sensitive;	/* an entry in the array */
     
-    printf(" TPM_NVIndexEntries_DeleteOwnerAuthorized: Deleting from %u slots\n",
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_DeleteOwnerAuthorized: Deleting from %u slots\n",
 	   tpm_nv_index_entries->nvIndexCount);
     for (i = 0 ; i < tpm_nv_index_entries->nvIndexCount ; i++) {
 	/* get an entry in the array */
@@ -1209,7 +1209,7 @@ TPM_RESULT TPM_NVIndexEntries_DeleteOwnerAuthorized(TPM_NV_INDEX_ENTRIES *tpm_nv
 		if (!(tpm_nv_data_sensitive->pubInfo.nvIndex & TPM_NV_INDEX_D_BIT) ||
 		    deleteAllNvram) {
 		    /* delete the index */
-		    printf(" TPM_NVIndexEntries_DeleteOwnerAuthorized: Deleting NV index %08x\n",
+		    TPMLIB_LogPrintf(" TPM_NVIndexEntries_DeleteOwnerAuthorized: Deleting NV index %08x\n",
 			   tpm_nv_data_sensitive->pubInfo.nvIndex);
 		    TPM_NVDataSensitive_Delete(tpm_nv_data_sensitive);
 		}
@@ -1229,7 +1229,7 @@ TPM_RESULT TPM_NVIndexEntries_GetDataPublic(TPM_NV_DATA_PUBLIC **tpm_nv_data_pub
     TPM_RESULT			rc = 0;
     TPM_NV_DATA_SENSITIVE 	*tpm_nv_data_sensitive;
     
-    printf(" TPM_NVIndexEntries_GetDataPublic: Getting data at NV index %08x\n", nvIndex);
+    TPMLIB_LogPrintf(" TPM_NVIndexEntries_GetDataPublic: Getting data at NV index %08x\n", nvIndex);
     if (rc == 0) {
 	rc = TPM_NVIndexEntries_GetEntry(&tpm_nv_data_sensitive,
 					 tpm_nv_index_entries,
@@ -1299,7 +1299,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	data;		/* The data to set the area to */
 
-    printf("TPM_Process_NVReadValue: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&data);			/* freed @1 */
     /*
       get inputs
@@ -1353,7 +1353,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_NVReadValue: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1372,10 +1372,10 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     /* b. TPM_NV_PER_AUTHREAD is not ignored. */
     /* c. If ownerAuth is present, the TPM MAY check the authorization HMAC. */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_NVReadValue: index %08x offset %u dataSize %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVReadValue: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, dataSize);
 	if (!(tpm_state->tpm_permanent_flags.nvLocked)) {
-	    printf("TPM_Process_NVReadValue: nvLocked FALSE, ignoring authorization\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: nvLocked FALSE, ignoring authorization\n");
 	    ignore_auth = TRUE;
 	}
 	/* determine whether the nvIndex is legal GPIO space */
@@ -1388,16 +1388,16 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	/* a. If nvIndex = TPM_NV_INDEX_DIR, set D1 to TPM_PERMANENT_DATA -> authDir[0] */
 	if (nvIndex == TPM_NV_INDEX_DIR) {
-	    printf("TPM_Process_NVReadValue: Reading DIR\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Reading DIR\n");
 	    dir = TRUE;
 	}
 	else {
-	    printf("TPM_Process_NVReadValue: Loading data from NVRAM\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Loading data from NVRAM\n");
 	    returnCode = TPM_NVIndexEntries_GetEntry(&d1NvdataSensitive,
 						     &(tpm_state->tpm_nv_index_entries),
 						     nvIndex);
 	    if (returnCode != 0) {
-		printf("TPM_Process_NVReadValue: Error, NV index %08x not found\n", nvIndex);
+		TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, NV index %08x not found\n", nvIndex);
 	    }
 	}
     }
@@ -1409,12 +1409,12 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	    if (d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERREAD) {
 		/* i. If TPM_PERMANENT_FLAGS -> disable is TRUE, return TPM_DISABLED */
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_Process_NVReadValue: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, disabled\n");
 		    return TPM_DISABLED;
 		}
 		/* ii. If TPM_STCLEAR_FLAGS -> deactivated is TRUE, return TPM_DEACTIVATED */
 		else if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_Process_NVReadValue: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, deactivated\n");
 		    return TPM_DEACTIVATED;;
 		}
 	    }
@@ -1430,7 +1430,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_AUTH1_COMMAND) && !dir) {
 	/* a. If D1 -> TPM_NV_PER_OWNERREAD is FALSE return TPM_AUTH_CONFLICT */
 	if (!(d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERREAD)) {
-	    printf("TPM_Process_NVReadValue: Error, "
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, "
 		   "owner authorization conflict, attributes %08x\n",
 		   d1NvdataSensitive->pubInfo.permission.attributes);
 	    returnCode = TPM_AUTH_CONFLICT;
@@ -1464,14 +1464,14 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND) && !dir) {
 	/* a. If D1 -> TPM_NV_PER_AUTHREAD is TRUE return TPM_AUTH_CONFLICT */
 	if (d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_AUTHREAD) {
-	    printf("TPM_Process_NVReadValue: Error, authorization conflict TPM_NV_PER_AUTHREAD\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, authorization conflict TPM_NV_PER_AUTHREAD\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
     /* b. If D1 -> TPM_NV_PER_OWNERREAD is TRUE return TPM_AUTH_CONFLICT */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND) && !ignore_auth && !dir) {
 	if (d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERREAD) {
-	    printf("TPM_Process_NVReadValue: Error, authorization conflict TPM_NV_PER_OWNERREAD\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, authorization conflict TPM_NV_PER_OWNERREAD\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -1490,7 +1490,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (!physicalPresence) {
-		    printf("TPM_Process_NVReadValue: Error, physicalPresence is FALSE\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, physicalPresence is FALSE\n");
 		    returnCode = TPM_BAD_PRESENCE;
 		}
 	    }
@@ -1501,7 +1501,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_READ_STCLEAR) &&
 	    /* a. If D1 -> bReadSTClear is TRUE return TPM_DISABLED_CMD */
 	    (d1NvdataSensitive->pubInfo.bReadSTClear)) {
-	    printf("TPM_Process_NVReadValue: Error, area locked by bReadSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, area locked by bReadSTClear\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
@@ -1517,7 +1517,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS && !dir) {
 	/* 10. If dataSize is 0 then */
 	if (dataSize == 0) {
-	    printf("TPM_Process_NVReadValue: dataSize 0, setting bReadSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: dataSize 0, setting bReadSTClear\n");
 	    /* a. Set D1 -> bReadSTClear to TRUE */
 	    d1NvdataSensitive->pubInfo.bReadSTClear = TRUE;
 	    /* b. Set data to NULL (output parameter dataSize to 0) */
@@ -1530,7 +1530,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 		s1Last = offset + dataSize; /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
 		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
-		    printf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
 		}
@@ -1547,7 +1547,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 		returnCode = TPM_Malloc(&gpioData, dataSize);	/* freed @2 */
 	    }	    
 	    if ((returnCode == TPM_SUCCESS) && isGPIO) {
-		printf("TPM_Process_NVReadValue: Reading GPIO\n");
+		TPMLIB_LogPrintf("TPM_Process_NVReadValue: Reading GPIO\n");
 		returnCode = TPM_IO_GPIO_Read(nvIndex,
 					      dataSize,
 					      gpioData,
@@ -1565,14 +1565,14 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	if (returnCode == TPM_SUCCESS) {
 	    s1Last = offset + dataSize;	    /* set to last data point */
 	    if (s1Last > TPM_DIGEST_SIZE) {
-		printf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u too small\n",
+		TPMLIB_LogPrintf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u too small\n",
 		       TPM_DIGEST_SIZE);
 		returnCode = TPM_NOSPACE;
 	    }
 	}
 	/* i.This includes partial reads of TPM_NV_INDEX_DIR. */
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_NVReadValue: Copying data\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValue: Copying data\n");
 	    returnCode = TPM_SizedBuffer_Set(&data, dataSize,
 					     tpm_state->tpm_permanent_data.authDIR + offset);
 	}
@@ -1582,7 +1582,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_NVReadValue: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVReadValue: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -1689,7 +1689,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
     TPM_DIGEST		outParamDigest;
     TPM_SIZED_BUFFER	data;		/* The data */
 
-    printf("TPM_Process_NVReadValueAuth: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&data);			/* freed @1 */
     /*
       get inputs
@@ -1741,7 +1741,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_NVReadValueAuth: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -1760,20 +1760,20 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
     /* 1. Locate and set D1 to the TPM_NV_DATA_AREA that corresponds to nvIndex, on error return
        TPM_BAD_INDEX */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_NVReadValueAuth: index %08x offset %u dataSize %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, dataSize);
-	printf("TPM_Process_NVReadValueAuth: Loading data from NVRAM\n");
+	TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Loading data from NVRAM\n");
 	returnCode = TPM_NVIndexEntries_GetEntry(&d1NvdataSensitive,
 						 &(tpm_state->tpm_nv_index_entries),
 						 nvIndex);
 	if (returnCode != 0) {
-	    printf("TPM_Process_NVReadValueAuth: Error, NV index %08x not found\n", nvIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, NV index %08x not found\n", nvIndex);
 	}
     }
     /* 2. If D1 -> TPM_NV_PER_AUTHREAD is FALSE return TPM_AUTH_CONFLICT */
     if (returnCode == TPM_SUCCESS) {
 	if (!(d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_AUTHREAD)) {
-	    printf("TPM_Process_NVReadValueAuth: Error, authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -1809,7 +1809,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (!physicalPresence) {
-		    printf("TPM_Process_NVReadValueAuth: Error, physicalPresence is FALSE\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, physicalPresence is FALSE\n");
 		    returnCode = TPM_BAD_PRESENCE;
 		}
 	    }
@@ -1834,14 +1834,14 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_READ_STCLEAR) &&
 	    /* a. If D1 -> bReadSTClear is TRUE return TPM_DISABLED_CMD */
 	    (d1NvdataSensitive->pubInfo.bReadSTClear)) {
-	    printf("TPM_Process_NVReadValueAuth: Error, area locked by bReadSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, area locked by bReadSTClear\n");
 	    returnCode = TPM_DISABLED_CMD;
 	}
     }
     if (returnCode == TPM_SUCCESS) {
 	/* 8. If dataSize is 0 then */
 	if (dataSize == 0) {
-	    printf("TPM_Process_NVReadValueAuth: dataSize 0, setting bReadSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: dataSize 0, setting bReadSTClear\n");
 	    /* a. Set D1 -> bReadSTClear to TRUE */
 	    d1NvdataSensitive->pubInfo.bReadSTClear = TRUE;
 	    /* b. Set data to NULL */
@@ -1854,7 +1854,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 		s1Last = offset + dataSize; /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
 		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
-		    printf("TPM_Process_NVReadValueAuth: Error, NVRAM dataSize %u too small\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Error, NVRAM dataSize %u too small\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
 		}
@@ -1870,7 +1870,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 		returnCode = TPM_Malloc(&gpioData, dataSize);	/* freed @2 */
 	    }	    
 	    if ((returnCode == TPM_SUCCESS) && isGPIO) {
-		printf("TPM_Process_NVReadValueAuth: Reading GPIO\n");
+		TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Reading GPIO\n");
 		returnCode = TPM_IO_GPIO_Read(nvIndex,
 					      dataSize,
 					      gpioData,
@@ -1887,7 +1887,7 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_NVReadValueAuth: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVReadValueAuth: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2011,7 +2011,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_NVWriteValue: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&data);			/* freed @1 */
     /*
       get inputs
@@ -2063,7 +2063,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_NVWriteValue: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2076,7 +2076,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
       Processing
     */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_NVWriteValue: index %08x offset %u dataSize %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValue: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, data.size);
 	TPM_PrintFourLimit("TPM_Process_NVWriteValue: data", data.buffer, data.size);
 	/* 1. If TPM_PERMANENT_FLAGS -> nvLocked is FALSE then all authorization checks except for
@@ -2086,7 +2086,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	/* b. TPM_NV_PER_AUTHWRITE is not ignored. */
 	/* a.If ownerAuth is present, the TPM MAY check the authorization HMAC. */
 	if (!(tpm_state->tpm_permanent_flags.nvLocked)) {
-	    printf("TPM_Process_NVWriteValue: nvLocked FALSE, ignoring authorization\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: nvLocked FALSE, ignoring authorization\n");
 	    ignore_auth = TRUE;
 	}
 	if (nvIndex == TPM_NV_INDEX0) {
@@ -2102,16 +2102,16 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && !index0) {
 	/* a. If nvIndex = TPM_NV_INDEX_DIR, set D1 to TPM_PERMANENT_DATA -> authDir[0] */
 	if (nvIndex == TPM_NV_INDEX_DIR) {
-	    printf("TPM_Process_NVWriteValue: Writing DIR\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Writing DIR\n");
 	    dir = TRUE;
 	}
 	else {
-	    printf("TPM_Process_NVWriteValue: Loading data space from NVRAM\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Loading data space from NVRAM\n");
 	    returnCode = TPM_NVIndexEntries_GetEntry(&d1NvdataSensitive,
 						     &(tpm_state->tpm_nv_index_entries),
 						     nvIndex);
 	    if (returnCode != 0) {
-		printf("TPM_Process_NVWriteValue: Error, NV index %08x not found\n", nvIndex);
+		TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, NV index %08x not found\n", nvIndex);
 	    }
 	}
     }
@@ -2123,12 +2123,12 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 		(d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERWRITE)) {
 		/* i. If TPM_PERMANENT_FLAGS -> disable is TRUE, return TPM_DISABLED */
 		if (tpm_state->tpm_permanent_flags.disable) {
-		    printf("TPM_Process_NVWriteValue: Error, disabled\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, disabled\n");
 		    return TPM_DISABLED;
 		}
 		/* ii.If TPM_STCLEAR_FLAGS -> deactivated is TRUE, return TPM_DEACTIVATED */
 		else if (tpm_state->tpm_stclear_flags.deactivated) {
-		    printf("TPM_Process_NVWriteValue: Error, deactivated\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, deactivated\n");
 		    return TPM_DEACTIVATED;;
 		}
 	    }
@@ -2144,7 +2144,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	/* a. If D1 -> permission -> TPM_NV_PER_OWNERWRITE is FALSE return TPM_AUTH_CONFLICT */
 	/* i. This check is ignored if nvIndex is TPM_NV_INDEX0. */
 	if (!(d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERWRITE)) {
-	    printf("TPM_Process_NVWriteValue: Error, owner authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, owner authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -2178,7 +2178,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	/* a. If D1 -> permission -> TPM_NV_PER_OWNERWRITE is TRUE return TPM_AUTH_CONFLICT */
 	if (dir ||		/* DIR always has TPM_NV_PER_OWNERWRITE */
 	    (d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_OWNERWRITE)) {
-	    printf("TPM_Process_NVWriteValue: Error, no owner authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, no owner authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -2190,7 +2190,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	nv1++;
 	/* iii. If NV1 > TPM_MAX_NV_WRITE_NOOWNER return TPM_MAXNVWRITES */
 	if (nv1 > TPM_MAX_NV_WRITE_NOOWNER) {
-	    printf("TPM_Process_NVWriteValue: Error, max NV writes %d w/o owner reached\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, max NV writes %d w/o owner reached\n",
 		   tpm_state->tpm_permanent_data.noOwnerNVWrite);
 	    returnCode = TPM_MAXNVWRITES;
 	}
@@ -2204,12 +2204,12 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	if (nvIndex == 0) {
 	    /* a. If dataSize is not 0, the TPM MAY return TPM_BADINDEX. */
 	    if (data.size != 0) {
-		printf("TPM_Process_NVWriteValue: Error, index 0 size %u\n", data.size);
+		TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, index 0 size %u\n", data.size);
 		returnCode = TPM_BADINDEX;
 	    }
 	    else {
 		/* b. Set TPM_STCLEAR_FLAGS -> bGlobalLock to TRUE */
-		printf("TPM_Process_NVWriteValue: nvIndex 0, setting bGlobalLock\n");
+		TPMLIB_LogPrintf("TPM_Process_NVWriteValue: nvIndex 0, setting bGlobalLock\n");
 		tpm_state->tpm_stclear_flags.bGlobalLock = TRUE;
 		/* c. Return TPM_SUCCESS */
 		done = TRUE;
@@ -2219,7 +2219,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     /* 7. If D1 -> permission -> TPM_NV_PER_AUTHWRITE is TRUE return TPM_AUTH_CONFLICT */
     if ((returnCode == TPM_SUCCESS) && !done && !dir) {
 	if (d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_AUTHWRITE) {
-	    printf("TPM_Process_NVWriteValue: Error, authorization conflict, attributes %08x \n",
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, authorization conflict, attributes %08x \n",
 		   d1NvdataSensitive->pubInfo.permission.attributes);
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
@@ -2239,7 +2239,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (!physicalPresence) {
-		    printf("TPM_Process_NVWriteValue: Error, physicalPresence is FALSE\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, physicalPresence is FALSE\n");
 		    returnCode = TPM_BAD_PRESENCE;
 		}
 	    }
@@ -2250,7 +2250,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITEDEFINE) &&
 	    /* a. If D1 -> bWriteDefine is TRUE return TPM_AREA_LOCKED */
 	    (d1NvdataSensitive->pubInfo.bWriteDefine)) {
-	    printf("TPM_Process_NVWriteValue: Error, area locked by bWriteDefine\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, area locked by bWriteDefine\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
@@ -2259,7 +2259,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_GLOBALLOCK) &&
 	    /* a. If TPM_STCLEAR_FLAGS -> bGlobalLock is TRUE return TPM_AREA_LOCKED */
 	    (tpm_state->tpm_stclear_flags.bGlobalLock)) {
-	    printf("TPM_Process_NVWriteValue: Error, area locked by bGlobalLock\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, area locked by bGlobalLock\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
@@ -2268,7 +2268,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITE_STCLEAR) &&
 	    /* a. If D1 ->bWriteSTClear is TRUE return TPM_AREA_LOCKED */
 	    (d1NvdataSensitive->pubInfo.bWriteSTClear)) {
-	    printf("TPM_Process_NVWriteValue: Error, area locked by bWriteSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, area locked by bWriteSTClear\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
@@ -2284,7 +2284,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && !done && !dir) {
 	/* 14. If dataSize = 0 then */
 	if (data.size == 0) {
-	    printf("TPM_Process_NVWriteValue: dataSize 0, setting bWriteSTClear, bWriteDefine\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: dataSize 0, setting bWriteSTClear, bWriteDefine\n");
 	    /* a. Set D1 -> bWriteSTClear to TRUE */
 	    d1NvdataSensitive->pubInfo.bWriteSTClear = TRUE;
 	    /* b. Set D1 -> bWriteDefine */
@@ -2303,7 +2303,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 		s1Last = offset + data.size;	    /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
 		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
-		    printf("TPM_Process_NVWriteValue: Error, NVRAM dataSize %u too small\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, NVRAM dataSize %u too small\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
 		}
@@ -2313,7 +2313,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 		if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITEALL) &&
 		    /* i. If dataSize != D1 -> dataSize return TPM_NOT_FULLWRITE */
 		    (data.size != d1NvdataSensitive->pubInfo.dataSize)) {
-		    printf("TPM_Process_NVWriteValue: Error, Must write full %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, Must write full %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOT_FULLWRITE;
 		}
@@ -2324,7 +2324,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 		    /* wearout optimization, don't write if the data is the same */
 		    irc = memcmp((d1NvdataSensitive->data) + offset, data.buffer, data.size);
 		    if (irc != 0) {
-			printf("TPM_Process_NVWriteValue: Copying data\n");
+			TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Copying data\n");
 			/* d. Write the new value into the NV storage area */
 			memcpy((d1NvdataSensitive->data) + offset, data.buffer, data.size);
 			/* must write TPM_PERMANENT_DATA back to NVRAM, set this flag after
@@ -2332,12 +2332,12 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 			writeAllNV = TRUE;
 		    }
 		    else {
-			printf("TPM_Process_NVWriteValue: Same data, no copy\n");
+			TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Same data, no copy\n");
 		    }
 		}
 		/* GPIO */
 		else {
-		    printf("TPM_Process_NVWriteValue: Writing GPIO\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Writing GPIO\n");
 		    returnCode = TPM_IO_GPIO_Write(nvIndex,
 						   data.size,
 						   data.buffer,
@@ -2354,13 +2354,13 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 	    /* DIR is hard coded as a TPM_DIRVALUE array, TPM_NV_WRITEALL is implied */
 	    if (returnCode == TPM_SUCCESS) {
 		if ((offset != 0) || (data.size != TPM_DIGEST_SIZE)) {
-		    printf("TPM_Process_NVWriteValue: Error, Must write full DIR %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Error, Must write full DIR %u\n",
 			   TPM_DIGEST_SIZE);
 		    returnCode = TPM_NOT_FULLWRITE;
 		}
 	    }
 	    if (returnCode == TPM_SUCCESS) {
-		printf("TPM_Process_NVWriteValue: Copying data\n");
+		TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Copying data\n");
 		memcpy(tpm_state->tpm_permanent_data.authDIR, data.buffer, TPM_DIGEST_SIZE);
 		writeAllNV = TRUE;
 	    }
@@ -2372,7 +2372,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     }
     /* 15.d Write the new value into the NV storage area */
     if (writeAllNV) {
-	printf("TPM_Process_NVWriteValue: Writing data to NVRAM\n");
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Writing data to NVRAM\n");
 	/* NOTE Don't do this step until just before the serialization */
 	/* e. If NV1_INCREMENTED is TRUE */
 	if (nv1Incremented) {
@@ -2388,7 +2388,7 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_NVWriteValue: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValue: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2496,7 +2496,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_NVWriteValueAuth: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Ordinal Entry\n");
     TPM_SizedBuffer_Init(&data);			/* freed @1 */
     /*
       get inputs
@@ -2548,7 +2548,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2567,21 +2567,21 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     /* 1. Locate and set D1 to the TPM_NV_DATA_AREA that corresponds to nvIndex, return TPM_BADINDEX
        on error */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_NVWriteValueAuth: index %08x offset %u dataSize %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: index %08x offset %u dataSize %u\n",
 	       nvIndex, offset, data.size);
 	TPM_PrintFourLimit("TPM_Process_NVWriteValueAuth: data", data.buffer, data.size);
-	printf("TPM_Process_NVWriteValueAuth: Loading data from NVRAM\n");
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Loading data from NVRAM\n");
 	returnCode = TPM_NVIndexEntries_GetEntry(&d1NvdataSensitive,
 						 &(tpm_state->tpm_nv_index_entries),
 						 nvIndex);
 	if (returnCode != 0) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, NV index %08x not found\n", nvIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, NV index %08x not found\n", nvIndex);
 	}
     }
     /* 2. If D1 -> attributes does not specify TPM_NV_PER_AUTHWRITE then return TPM_AUTH_CONFLICT */
     if (returnCode == TPM_SUCCESS) {
 	if (!(d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_AUTHWRITE)) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -2623,7 +2623,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 	    }
 	    if (returnCode == TPM_SUCCESS) {
 		if (!physicalPresence) {
-		    printf("TPM_Process_NVWriteValueAuth: Error, physicalPresence is FALSE\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, physicalPresence is FALSE\n");
 		    returnCode = TPM_BAD_PRESENCE;
 		}
 	    }
@@ -2642,7 +2642,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITEDEFINE) &&
 	    /* a. If D1 -> bWriteDefine is TRUE return TPM_AREA_LOCKED */
 	    (d1NvdataSensitive->pubInfo.bWriteDefine)) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, area locked by bWriteDefine\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, area locked by bWriteDefine\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
@@ -2651,7 +2651,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_GLOBALLOCK) &&
 	    /* a. If TPM_STCLEAR_FLAGS -> bGlobalLock is TRUE return TPM_AREA_LOCKED */
 	    (tpm_state->tpm_stclear_flags.bGlobalLock)) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, area locked by bGlobalLock\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, area locked by bGlobalLock\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
@@ -2660,14 +2660,14 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 	if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITE_STCLEAR) &&
 	    /* a. If D1 -> bWriteSTClear is TRUE return TPM_AREA_LOCKED */
 	    (d1NvdataSensitive->pubInfo.bWriteSTClear)) {
-	    printf("TPM_Process_NVWriteValueAuth: Error, area locked by bWriteSTClear\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, area locked by bWriteSTClear\n");
 	    returnCode = TPM_AREA_LOCKED;
 	}
     }
     if (returnCode == TPM_SUCCESS) {
 	/* 10. If dataSize = 0 then */
 	if (data.size == 0) {
-	    printf("TPM_Process_NVWriteValueAuth: "
+	    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: "
 		   "dataSize 0, setting bWriteSTClear, bWriteDefine\n");
 	    /* a. Set D1 -> bWriteSTClear to TRUE */
 	    d1NvdataSensitive->pubInfo.bWriteSTClear = TRUE;
@@ -2687,7 +2687,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 		s1Last = offset + data.size;	    /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
 		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
-		    printf("TPM_Process_NVWriteValueAuth: Error, NVRAM dataSize %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, NVRAM dataSize %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
 		}
@@ -2697,7 +2697,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 		if ((d1NvdataSensitive->pubInfo.permission.attributes & TPM_NV_PER_WRITEALL) &&
 		    /* i. If dataSize != D1 -> dataSize return TPM_NOT_FULLWRITE */
 		    (data.size != d1NvdataSensitive->pubInfo.dataSize)) {
-		    printf("TPM_Process_NVWriteValueAuth: Error, Must write all %u\n",
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Error, Must write all %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOT_FULLWRITE;
 		}
@@ -2709,19 +2709,19 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 		    irc = memcmp((d1NvdataSensitive->data) + offset, data.buffer, data.size);
 		    if (irc != 0) {
 			/* d. Write the new value into the NV storage area */
-			printf("TPM_Process_NVWriteValueAuth: Copying data\n");
+			TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Copying data\n");
 			memcpy((d1NvdataSensitive->data) + offset, data.buffer, data.size);
 			/* must write TPM_PERMANENT_DATA back to NVRAM, set this flag after
 			   structure is written */
 			writeAllNV = TRUE;
 		    }
 		    else {
-			printf("TPM_Process_NVWriteValueAuth: Same data, no copy\n");
+			TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Same data, no copy\n");
 		    }
 		}
 		/* GPIO */
 		else {
-		    printf("TPM_Process_NVWriteValueAuth: Writing GPIO\n");
+		    TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Writing GPIO\n");
 		    returnCode = TPM_IO_GPIO_Write(nvIndex,
 						   data.size,
 						   data.buffer,
@@ -2733,7 +2733,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     /* 12. Set D1 -> bReadSTClear to FALSE */
     if (returnCode == TPM_SUCCESS) {
 	d1NvdataSensitive->pubInfo.bReadSTClear = FALSE;
-	printf("TPM_Process_NVWriteValueAuth: Writing data to NVRAM\n");
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Writing data to NVRAM\n");
     }
     /* write back TPM_PERMANENT_DATA if required */
     returnCode = TPM_PermanentAll_NVStore(tpm_state,
@@ -2744,7 +2744,7 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_NVWriteValueAuth: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVWriteValueAuth: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -2880,7 +2880,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_NVDefineSpace: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Ordinal Entry\n");
     /* This design gets a slot in the TPM_NV_INDEX_ENTRIES array, either an existing empty one or a
        newly re'allocated one.  The incoming parameters are deserialized directly into the slot.
 
@@ -2909,7 +2909,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	pubInfo->nvIndex = TPM_NV_INDEX_LOCK;	/* temporarily mark unused */
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_NVDefineSpace: index %08x permission %08x dataSize %08x\n",
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: index %08x permission %08x dataSize %08x\n",
 	       newNVIndex, pubInfo->permission.attributes, pubInfo->dataSize);
 	TPM_PCRInfo_Trace("TPM_Process_NVDefineSpace: pcrInfoRead",
 			  pubInfo->pcrInfoRead.pcrSelection,
@@ -2953,7 +2953,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_NVDefineSpace: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -2971,14 +2971,14 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	(tag == TPM_TAG_RQU_COMMAND)) {
 	/* a. If pubInfo -> dataSize is not 0, the command MAY return TPM_BADINDEX. */
 	if (pubInfo->dataSize != 0) {
-	    printf("TPM_Process_NVDefineSpace: Error, TPM_NV_INDEX_LOCK dataSize %u\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, TPM_NV_INDEX_LOCK dataSize %u\n",
 		   pubInfo->dataSize);
 	    returnCode = TPM_BADINDEX;
 	}
 	else {
 	    /* b. Set TPM_PERMANENT_FLAGS -> nvLocked to TRUE */
 	    /* writeAllNV set to TRUE if nvLocked is being set, not if already set */
-	    printf("TPM_Process_NVDefineSpace: Setting nvLocked\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Setting nvLocked\n");
 	    TPM_SetCapability_Flag(&writeAllNV,					/* altered */
 				   &(tpm_state->tpm_permanent_flags.nvLocked ), /* flag */
 				   TRUE);					/* value */
@@ -2999,14 +2999,14 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     /* i.If ownerAuth is present, the TPM MAY check the authorization HMAC. */
     if (returnCode == TPM_SUCCESS) {
 	if (!(tpm_state->tpm_permanent_flags.nvLocked)) {
-	    printf("TPM_Process_NVDefineSpace: nvLocked FALSE, ignoring authorization\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: nvLocked FALSE, ignoring authorization\n");
 	    ignore_auth = TRUE;
 	}
     }
     /*	b.The check for pubInfo -> nvIndex == 0 in Action 3. is not ignored. */
     if ((returnCode == TPM_SUCCESS) && !done) {
 	if (newNVIndex == TPM_NV_INDEX0) {
-	    printf("TPM_Process_NVDefineSpace: Error, bad index %08x\n", newNVIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, bad index %08x\n", newNVIndex);
 	    returnCode = TPM_BADINDEX;
 	}
     }
@@ -3017,7 +3017,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	if (newNVIndex & TPM_NV_INDEX_D_BIT) {
 	    /* c. Index value of 0 is reserved and cannot be defined */
 	    /* a. Return TPM_BADINDEX */
-	    printf("TPM_Process_NVDefineSpace: Error, bad index %08x\n", newNVIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, bad index %08x\n", newNVIndex);
 	    returnCode = TPM_BADINDEX;
 	}
     }
@@ -3067,7 +3067,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	}
 	if (returnCode == TPM_SUCCESS) {
 	    if (!physicalPresence) {
-		printf("TPM_Process_NVDefineSpace: Error, physicalPresence is FALSE\n");
+		TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, physicalPresence is FALSE\n");
 		returnCode = TPM_BAD_PRESENCE;
 	    }
 	}
@@ -3075,7 +3075,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     /* b. If TPM Owner is present then return TPM_OWNER_SET. */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND) && !done && !ignore_auth) {
 	if (tpm_state->tpm_permanent_data.ownerInstalled) {
-	    printf("TPM_Process_NVDefineSpace: Error, no authorization, but owner installed\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, no authorization, but owner installed\n");
 	    returnCode = TPM_OWNER_SET;
 	}
     }
@@ -3083,7 +3083,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
        an attempt to delete the value without TPM Owner authentication. */
     if ((returnCode == TPM_SUCCESS) && (tag == TPM_TAG_RQU_COMMAND) && !done && !ignore_auth) {
 	if (pubInfo->dataSize == 0) {
-	    printf("TPM_Process_NVDefineSpace: Error, no owner authorization and dataSize 0\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, no owner authorization and dataSize 0\n");
 	    returnCode = TPM_BAD_DATASIZE;
 	}
     }
@@ -3095,7 +3095,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	nv1++;
 	/* iii. If NV1 > TPM_MAX_NV_WRITE_NOOWNER return TPM_MAXNVWRITES */
 	if (nv1 > TPM_MAX_NV_WRITE_NOOWNER) {
-	    printf("TPM_Process_NVDefineSpace: Error, max NV writes %d w/o owner reached\n",
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, max NV writes %d w/o owner reached\n",
 		   tpm_state->tpm_permanent_data.noOwnerNVWrite);
 	    returnCode = TPM_MAXNVWRITES;
 	}
@@ -3112,18 +3112,18 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     /* 6. If pubInfo -> nvIndex points to a valid previously defined storage area then */
     /* 6.a. Map D1 a TPM_NV_DATA_SENSITIVE to the storage area */
     if ((returnCode == TPM_SUCCESS) && !done) {
-	printf("TPM_Process_NVDefineSpace: Loading existing NV index %08x\n", newNVIndex);
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Loading existing NV index %08x\n", newNVIndex);
 	returnCode = TPM_NVIndexEntries_GetEntry(&d1_old,
 						 &(tpm_state->tpm_nv_index_entries),
 						 newNVIndex);
 	if (returnCode == TPM_SUCCESS) {
-	    printf("TPM_Process_NVDefineSpace: NV index %08x exists\n", newNVIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: NV index %08x exists\n", newNVIndex);
 	    foundOld = TRUE;
 	}
 	else if (returnCode == TPM_BADINDEX) {
 	    returnCode = TPM_SUCCESS;	/* non-existent index is not an error */
 	    foundOld = FALSE;
-	    printf("TPM_Process_NVDefineSpace: Index %08x is new\n", newNVIndex);
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Index %08x is new\n", newNVIndex);
 	}
     }
     if ((returnCode == TPM_SUCCESS) && !done && !ignore_auth && foundOld) {
@@ -3131,7 +3131,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	if (d1_old->pubInfo.permission.attributes & TPM_NV_PER_GLOBALLOCK) {
 	    /* i. If TPM_STCLEAR_FLAGS -> bGlobalLock is TRUE then return TPM_AREA_LOCKED */
 	    if (tpm_state->tpm_stclear_flags.bGlobalLock) {
-		printf("TPM_Process_NVDefineSpace: Error, index %08x (bGlobalLock) locked\n",
+		TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, index %08x (bGlobalLock) locked\n",
 		       newNVIndex);
 		returnCode = TPM_AREA_LOCKED;
 	    }
@@ -3142,7 +3142,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	if (d1_old->pubInfo.permission.attributes & TPM_NV_PER_WRITE_STCLEAR) {
 	    /* i. If D1 -> pubInfo -> bWriteSTClear is TRUE then return TPM_AREA_LOCKED */
 	    if (d1_old->pubInfo.bWriteSTClear) {
-		printf("TPM_Process_NVDefineSpace: Error, area locked by bWriteSTClear\n");
+		TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, area locked by bWriteSTClear\n");
 		returnCode = TPM_AREA_LOCKED;
 	    }
 	}
@@ -3163,7 +3163,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && !done && foundOld) {
 	/* 6.d. Invalidate the data area currently pointed to by D1 and ensure that if the area is
 	   reallocated no residual information is left */
-	printf("TPM_Process_NVDefineSpace: Deleting index %08x\n", newNVIndex);
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Deleting index %08x\n", newNVIndex);
 	TPM_NVDataSensitive_Delete(d1_old);
 	/* must write deleted space back to NVRAM */
 	writeAllNV = TRUE;
@@ -3174,7 +3174,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     /* g. If pubInfo -> dataSize is 0 then return TPM_SUCCESS */
     if ((returnCode == TPM_SUCCESS) && !done && foundOld) {
 	if (pubInfo->dataSize == 0) {
-	    printf("TPM_Process_NVDefineSpace: Size 0, done\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Size 0, done\n");
 	    done = TRUE;
 	}
     }
@@ -3206,7 +3206,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && !done) {
 	if ((pubInfo->permission.attributes & TPM_NV_PER_OWNERWRITE) &&
 	    (pubInfo->permission.attributes & TPM_NV_PER_AUTHWRITE)) {
-	    printf("TPM_Process_NVDefineSpace: Error, write authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, write authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -3215,7 +3215,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     if ((returnCode == TPM_SUCCESS) && !done) {
 	if ((pubInfo->permission.attributes & TPM_NV_PER_OWNERREAD) &&
 	    (pubInfo->permission.attributes & TPM_NV_PER_AUTHREAD)) {
-	    printf("TPM_Process_NVDefineSpace: Error, read authorization conflict\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, read authorization conflict\n");
 	    returnCode = TPM_AUTH_CONFLICT;
 	}
     }
@@ -3228,7 +3228,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
 	    !(pubInfo->permission.attributes & TPM_NV_PER_PPWRITE) &&
 	    !writeLocalities) {
 	    /* i. Return TPM_PER_NOWRITE */
-	    printf("TPM_Process_NVDefineSpace: Error, no write\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, no write\n");
 	    returnCode = TPM_PER_NOWRITE;
 	}
     }
@@ -3240,7 +3240,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     /* f. If dataSize is 0 return TPM_BAD_PARAM_SIZE */
     if ((returnCode == TPM_SUCCESS) && !done) {
 	if (pubInfo->dataSize == 0) {
-	    printf("TPM_Process_NVDefineSpace: Error, New index data size is zero\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error, New index data size is zero\n");
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
     }
@@ -3273,13 +3273,13 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
        data*/
     /* a. return TPM_NOSPACE if pubInfo -> dataSize is not available in the TPM */
     if ((returnCode == TPM_SUCCESS) && !done) {
-	printf("TPM_Process_NVDefineSpace: Allocated %u data bytes at %p\n",
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Allocated %u data bytes at %p\n",
 	       pubInfo->dataSize, d1_new->data);
-	printf("TPM_Process_NVDefineSpace: Checking for %u bytes free space\n", pubInfo->dataSize);
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Checking for %u bytes free space\n", pubInfo->dataSize);
 	returnCode = TPM_NVIndexEntries_GetFreeSpace(&freeSpace,
 						     &(tpm_state->tpm_nv_index_entries));
 	if (returnCode != TPM_SUCCESS) {
-	    printf("TPM_Process_NVDefineSpace: Error: No space\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Error: No space\n");
 	}
     }
      /* if there is no free space, free the NV index in-memory structure.  This implicitly removes
@@ -3288,7 +3288,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     if ((returnCode != TPM_SUCCESS) ||
 	(newNVIndex == TPM_NV_INDEX_TRIAL)) {
 	if (newNVIndex == TPM_NV_INDEX_TRIAL) {
-	    printf("TPM_Process_NVDefineSpace: nvIndex is TPM_NV_INDEX_TRIAL, done\n");
+	    TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: nvIndex is TPM_NV_INDEX_TRIAL, done\n");
 	    /* don't actually write, just return success or failure */
 	    done = TRUE;
 	}
@@ -3296,7 +3296,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     }
     /* 12. If pubInfo -> nvIndex is not TPM_NV_INDEX_TRIAL  */
     if ((returnCode == TPM_SUCCESS) && !done) {
-	printf("TPM_Process_NVDefineSpace: Creating index %08x\n", newNVIndex);
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Creating index %08x\n", newNVIndex);
 	/* b. Set all bytes in the newly defined area to 0xFF */
 	memset(d1_new->data, 0xff, pubInfo->dataSize);
 	/* must write newly defined space back to NVRAM */
@@ -3321,7 +3321,7 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_NVDefineSpace: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_NVDefineSpace: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3443,7 +3443,7 @@ TPM_RESULT TPM_Process_DirWriteAuth(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_DirWriteAuth: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -3455,7 +3455,7 @@ TPM_RESULT TPM_Process_DirWriteAuth(tpm_state_t *tpm_state,
     }
     /* get newContents parameter */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DirWriteAuth: dirIndex %08x\n", dirIndex);
+	TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: dirIndex %08x\n", dirIndex);
 	returnCode = TPM_Digest_Load(newContents, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
@@ -3494,7 +3494,7 @@ TPM_RESULT TPM_Process_DirWriteAuth(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DirWriteAuth: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3533,13 +3533,13 @@ TPM_RESULT TPM_Process_DirWriteAuth(tpm_state_t *tpm_state,
     /* 2. Validate that dirIndex points to a valid DIR on this TPM */
     if (returnCode == TPM_SUCCESS) {
 	if (dirIndex != 0) {	/* only one TPM_PERMANENT_DATA -> authDIR */
-	    printf("TPM_Process_DirWriteAuth: Error, Invalid index %08x\n", dirIndex);
+	    TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: Error, Invalid index %08x\n", dirIndex);
 	    returnCode = TPM_BADINDEX;
 	}
     }
     /* 3. Write newContents into the DIR pointed to by dirIndex */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DirWriteAuth: Writing data\n");
+	TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: Writing data\n");
 	TPM_Digest_Copy(tpm_state->tpm_permanent_data.authDIR, newContents);
 	/* write back TPM_PERMANENT_DATA */
 	returnCode = TPM_PermanentAll_NVStore(tpm_state,
@@ -3551,7 +3551,7 @@ TPM_RESULT TPM_Process_DirWriteAuth(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DirWriteAuth: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DirWriteAuth: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }
@@ -3642,7 +3642,7 @@ TPM_RESULT TPM_Process_DirRead(tpm_state_t *tpm_state,
     uint32_t		outParamEnd;	/* ending point of outParam's */
     TPM_DIGEST		outParamDigest;
 
-    printf("TPM_Process_DirRead: Ordinal Entry\n");
+    TPMLIB_LogPrintf("TPM_Process_DirRead: Ordinal Entry\n");
     /*
       get inputs
     */
@@ -3653,7 +3653,7 @@ TPM_RESULT TPM_Process_DirRead(tpm_state_t *tpm_state,
 	returnCode = TPM_Load32(&dirIndex, &command, &paramSize);
     }
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DirRead: dirIndex %08x\n", dirIndex);
+	TPMLIB_LogPrintf("TPM_Process_DirRead: dirIndex %08x\n", dirIndex);
     }
     /* save the ending point of inParam's for authorization and auditing */
     inParamEnd = command;
@@ -3679,7 +3679,7 @@ TPM_RESULT TPM_Process_DirRead(tpm_state_t *tpm_state,
     }
     if (returnCode == TPM_SUCCESS) {
 	if (paramSize != 0) {
-	    printf("TPM_Process_DirRead: Error, command has %u extra bytes\n",
+	    TPMLIB_LogPrintf("TPM_Process_DirRead: Error, command has %u extra bytes\n",
 		   paramSize);
 	    returnCode = TPM_BAD_PARAM_SIZE;
 	}
@@ -3690,13 +3690,13 @@ TPM_RESULT TPM_Process_DirRead(tpm_state_t *tpm_state,
     /* 1. Validate that dirIndex points to a valid DIR on this TPM */
     if (returnCode == TPM_SUCCESS) {
 	if (dirIndex != 0) {		/* only one TPM_PERMANENT_DATA -> authDIR */
-	    printf("TPM_Process_DirRead: Error, Invalid index %08x\n", dirIndex);
+	    TPMLIB_LogPrintf("TPM_Process_DirRead: Error, Invalid index %08x\n", dirIndex);
 	    returnCode = TPM_BADINDEX;
 	}
     }
     /* 2. Return the contents of the DIR in dirContents */
     if (returnCode == TPM_SUCCESS) {
-	printf("TPM_Process_DirRead: Reading data\n");
+	TPMLIB_LogPrintf("TPM_Process_DirRead: Reading data\n");
 	TPM_PrintFour("TPM_Process_DirRead:", tpm_state->tpm_permanent_data.authDIR);
     }
     /*
@@ -3704,7 +3704,7 @@ TPM_RESULT TPM_Process_DirRead(tpm_state_t *tpm_state,
     */
     /* standard response: tag, (dummy) paramSize, returnCode.  Failure is fatal. */
     if (rcf == 0) {
-	printf("TPM_Process_DirRead: Ordinal returnCode %08x %u\n",
+	TPMLIB_LogPrintf("TPM_Process_DirRead: Ordinal returnCode %08x %u\n",
 	       returnCode, returnCode);
 	rcf = TPM_Sbuffer_StoreInitialResponse(response, tag, returnCode);
     }

@@ -66,6 +66,4 @@ extern int swallow_rc;
 #endif  /* TPM_DEBUG */
 #endif
 
-#define printf(...) TPMLIB_LogPrintf(__VA_ARGS__);
-
 #endif
