@@ -1,5 +1,12 @@
 CHANGES - changes for libtpms
 
+version 0.9.4:
+  - tpm: #undef printf in case it is #define'd (OSS-Fuzz)
+  - tpm2: Check return code of BN_div()
+  - tpm2: Initialize variables due to gcc complaint (s390x, false positive)
+  - tpm12: Initialize variables due to gcc complaint (s390x, false positive)
+  - build-sys: Fix configure script to support _FORTIFY_SOURCE=3
+
 version 0.9.3:
   - build-sys: Add probing for -fstack-protector
   - tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size
