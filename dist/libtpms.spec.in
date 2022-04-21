@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Apr 25 2022 Stefan Berger - 0.9.4-1
+- Release of version 0.9.4
+
 * Mon Mar 07 2022 Stefan Berger - 0.9.3-1
 - Release of version 0.9.3
 
