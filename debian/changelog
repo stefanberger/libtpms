@@ -1,3 +1,13 @@
+libtpms (0.9.4) RELEASED; urgency=medium
+
+  - tpm: #undef printf in case it is #define'd (OSS-Fuzz)
+  - tpm2: Check return code of BN_div()
+  - tpm2: Initialize variables due to gcc complaint (s390x, false positive)
+  - tpm12: Initialize variables due to gcc complaint (s390x, false positive)
+  - build-sys: Fix configure script to support _FORTIFY_SOURCE=3
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 25 Apr 2022 09:00:00 -0500
+
 libtpms (0.9.3) RELEASED; urgency=medium
 
   - build-sys: Add probing for -fstack-protector
