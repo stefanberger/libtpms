@@ -267,6 +267,11 @@ TPM_RESULT TPM_NVRAM_LoadData(unsigned char **data,     /* freed by caller */
             printf(" TPM_NVRAM_LoadData: Closed file %s\n", filename);
         }
     }
+
+    if (rc) {
+        free(*data);
+        *data = NULL;
+    }
     return rc;
 }
 
