@@ -732,7 +732,7 @@ CryptSecretDecrypt(
 					     nonceCaller->t.size);
 			      }
 			  // make sure secret will fit
-			  if(secret->t.size > data->t.size)
+			  if(secret->t.size > sizeof(data->t.buffer))
 			      return TPM_RC_FAILURE;
 			  data->t.size = secret->t.size;
 			  // CFB decrypt, using nonceCaller as iv
