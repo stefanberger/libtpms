@@ -1244,8 +1244,8 @@ TPM_RESULT TPM_FamilyTableEntry_StorePublic(TPM_STORE_BUFFER *sbuffer,
     }
     /* store familyLabel */
     if (rc == 0) {
-	TPM_Sbuffer_Append(sbuffer, &(tpm_family_table_entry->familyLabel),
-			   sizeof(TPM_FAMILY_LABEL));
+	rc = TPM_Sbuffer_Append(sbuffer, &(tpm_family_table_entry->familyLabel),	// libtpms changed: assign rc
+				sizeof(TPM_FAMILY_LABEL));
     }
     /* store familyID */
     if (rc == 0) {
