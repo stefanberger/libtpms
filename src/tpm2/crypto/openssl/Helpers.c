@@ -319,8 +319,7 @@ OpenSSLEccGetPrivate(
                 }
                 // result is sufficient
             }
-            OK = TRUE;
-            OsslToTpmBn(dOut, D);
+            OK = OsslToTpmBn(dOut, D);
         }
         break;
     }
