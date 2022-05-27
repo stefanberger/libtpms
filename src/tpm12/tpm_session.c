@@ -240,10 +240,12 @@ void TPM_AuthSessionData_Delete(TPM_AUTH_SESSION_DATA *tpm_auth_session_data)
    since it might already be used.
 */
 
-void TPM_AuthSessionData_Copy(TPM_AUTH_SESSION_DATA *dest_auth_session_data,
-			      TPM_HANDLE tpm_handle,
-			      TPM_AUTH_SESSION_DATA *src_auth_session_data)
+TPM_RESULT TPM_AuthSessionData_Copy(TPM_AUTH_SESSION_DATA *dest_auth_session_data,// libtpms changed
+				    TPM_HANDLE tpm_handle,
+				    TPM_AUTH_SESSION_DATA *src_auth_session_data)
 {
+    TPM_RESULT		rc;							// libtpms added
+
     dest_auth_session_data->handle = tpm_handle;
     dest_auth_session_data->protocolID = src_auth_session_data->protocolID;
     dest_auth_session_data->entityTypeByte = src_auth_session_data->entityTypeByte;
@@ -251,8 +253,10 @@ void TPM_AuthSessionData_Copy(TPM_AUTH_SESSION_DATA *dest_auth_session_data,
     TPM_Nonce_Copy(dest_auth_session_data->nonceEven, src_auth_session_data->nonceEven);
     TPM_Secret_Copy(dest_auth_session_data->sharedSecret, src_auth_session_data->sharedSecret);
     TPM_Digest_Copy(dest_auth_session_data->entityDigest, src_auth_session_data->entityDigest);
-    TPM_DelegatePublic_Copy(&(dest_auth_session_data->pub), &(src_auth_session_data->pub));
+    rc = TPM_DelegatePublic_Copy(&(dest_auth_session_data->pub), &(src_auth_session_data->pub));
     dest_auth_session_data->valid= src_auth_session_data->valid;
+
+    return rc;									// libtpms added
 }
 
 /* TPM_AuthSessionData_GetDelegatePublic() */
@@ -708,7 +712,7 @@ TPM_RESULT TPM_AuthSessions_AddEntry(TPM_HANDLE *tpm_handle,				/* i/o */
 				       (TPM_GETENTRY_FUNCTION_T)TPM_AuthSessions_GetEntry);
     }
     if (rc == 0) {
-	TPM_AuthSessionData_Copy(&(authSessions[index]), *tpm_handle, tpm_auth_session_data);
+	rc = TPM_AuthSessionData_Copy(&(authSessions[index]), *tpm_handle, tpm_auth_session_data);
 	authSessions[index].valid = TRUE;
 	printf("  TPM_AuthSessions_AddEntry: Index %u handle %08x\n",
 	       index, authSessions[index].handle);
