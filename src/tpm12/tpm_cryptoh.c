@@ -1407,10 +1407,10 @@ TPM_RESULT TPM_MGF1_GenerateArray(unsigned char **array,
     }
     /* generate the MGF1 array */
     if (rc == 0) {
-	TPM_MGF1(*array,
-		 arrayLen,
-		 seed,
-		 seedLen);
+	rc = TPM_MGF1(*array,		// libtpms changed: assign rc
+		      arrayLen,
+		      seed,
+		      seedLen);
 	TPM_PrintFour("  TPM_MGF1_GenerateArray: MGF1", *array);
     }
     va_end(ap);
