@@ -110,7 +110,7 @@ TPM_RESULT TPM_AuthSessionData_Store(TPM_STORE_BUFFER *sbuffer,
 void       TPM_AuthSessionData_Delete(TPM_AUTH_SESSION_DATA *tpm_auth_session_data);
 
 
-void       TPM_AuthSessionData_Copy(TPM_AUTH_SESSION_DATA *dest_auth_session_data,
+TPM_RESULT TPM_AuthSessionData_Copy(TPM_AUTH_SESSION_DATA *dest_auth_session_data,  // libtpms modified: TPM_RESULT not void
                                     TPM_HANDLE tpm_handle,
                                     TPM_AUTH_SESSION_DATA *src_auth_session_data);
 TPM_RESULT TPM_AuthSessionData_GetDelegatePublic(TPM_DELEGATE_PUBLIC **delegatePublic,  
