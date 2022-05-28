@@ -2500,6 +2500,8 @@ TPM_RESULT TPM_Process_CMK_CreateKey(tpm_state_t *tpm_state,
 	TPM_Digest_Copy(m2CmkMigauth.msaDigest, migrationAuthorityDigest);
 	/* ii. Set M2 -> pubKeyDigest to SHA-1 (thisPubKey) */
 	returnCode = TPM_Key_GeneratePubkeyDigest(m2CmkMigauth.pubKeyDigest, &wrappedKey);
+    }								// libtpms added
+    if (returnCode == TPM_SUCCESS) {				// libtpms added
 	/* e. Set wrappedKey -> encData -> migrationAuth equal to HMAC(M2), using tpmProof as the
 	   shared secret */
 	returnCode = TPM_HMAC_GenerateStructure
