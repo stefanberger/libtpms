@@ -426,7 +426,7 @@ BnSetBit(
     // Grow the number if necessary to set the bit.
     while(bn->size <= offset)
 	bn->d[bn->size++] = 0;
-    bn->d[offset] |= (crypt_uword_t)(1 << RADIX_MOD(bitNum));
+    bn->d[offset] |= ((crypt_uword_t)1 << RADIX_MOD(bitNum));
     return TRUE;
 }
 /* 10.2.3.3.17 BnTestBit() */
