@@ -1306,8 +1306,11 @@ STATE_RESET_DATA_Unmarshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
         if (hdr.version <= 3) {
             /* version <= 3 was writing an array of UINT8 */
             UINT8 element;
-            for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
+            for (i = 0; i < array_size; i++) {
                 rc = UINT8_Unmarshal(&element, buffer, size);
+                if (rc != TPM_RC_SUCCESS)
+                    break;
+
                 data->contextArray[i] = element;
             }
             s_ContextSlotMask = 0xff;
