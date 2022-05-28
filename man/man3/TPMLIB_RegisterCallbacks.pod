@@ -164,8 +164,9 @@ under which a command is supposed to be executed. The implementing function
 should return the number of the locality by writing it into the 
 B<localityModifier> pointer.
 
-Upon success this function should return B<TPM_SUCCESS>, a failure code
-otherwise.
+This function is expected to return B<TPM_SUCCESS> along with a valid
+locality number. The program implementing the called function is trusted to
+manage locality numbers correctly.
 
 The default implementation returns 0 as the locality.
 
