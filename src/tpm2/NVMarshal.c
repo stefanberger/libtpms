@@ -4641,7 +4641,8 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
         }
         if (rc == TPM_RC_SUCCESS) {
             rc = UINT32_Unmarshal(&entrysize, buffer, size);
-
+        }
+        if (rc == TPM_RC_SUCCESS) {
             /* the entrysize also depends on the sizeof(nvi); we may have to
                update it if sizeof(nvi) changed between versions */
             entrysize_offset = o;
@@ -4649,9 +4650,8 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
             offset = sizeof(UINT32);
             if (entrysize == 0)
                 break;
-        }
-        /* 2nd: handle */
-        if (rc == TPM_RC_SUCCESS) {
+
+            /* 2nd: handle */
             rc = TPM_HANDLE_Unmarshal(&handle, buffer, size);
         }
 
