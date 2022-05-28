@@ -5427,6 +5427,8 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 	/* c. Copy M1 to B1 -> sensitiveData (integrityDigest HMAC uses cleartext) */
 	returnCode = TPM_SizedBuffer_Set(&(authContextBlob.sensitiveData),
 					 contextSensitiveBuffer_length, contextSensitiveBuffer);
+    }						// libtpms added
+    if (returnCode == TPM_SUCCESS) {		// libtpms added
 	/* verify the integrityDigest HMAC of TPM_CONTEXT_BLOB using TPM_PERMANENT_DATA -> tpmProof
 	   as the HMAC key */
 	returnCode = TPM_HMAC_CheckStructure
