@@ -188,7 +188,8 @@ static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
     if (cbs->tpm_io_getlocality) {
         TPM_MODIFIER_INDICATOR locty;
 
-        locality = cbs->tpm_io_getlocality(&locty, 0);
+        /* called function is trusted and must return valid value */
+        cbs->tpm_io_getlocality(&locty, 0);
 
         locality = locty;
     }
