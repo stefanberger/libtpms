@@ -140,6 +140,13 @@ DAStartup(
        && !IS_ORDERLY(g_prevOrderlyState))
 	{
 #if USE_DA_USED
+	    // libtpms added: begin
+	    // To avoid the TPM_PT_LOCKOUT_COUNTER to increase and ultimately cause
+	    // DA lockouts due to abrupt termination of a VM that couldn't send
+	    // TPM2_Shutdown(), we *never* increase the failedTries upon TPM2_Startup().
+	    // https://bugzilla.redhat.com/show_bug.cgi?id=2087538
+	    g_daUsed = FALSE;
+	    // libtpms added: end
 	    gp.failedTries += g_daUsed;
 	    g_daUsed = FALSE;
 #else
