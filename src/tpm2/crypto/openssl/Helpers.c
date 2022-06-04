@@ -439,8 +439,6 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
         EVP_PKEY_assign_RSA(*pkey, rsakey) == 0)
         ERROR_RETURN(TPM_RC_FAILURE)
 
-    RSA_set_flags(rsakey, RSA_FLAG_NO_BLINDING);
-
     retVal = TPM_RC_SUCCESS;
 
  Exit:
