@@ -232,6 +232,12 @@ static void TestSymmetricAlgorithm(const SYMMETRIC_TEST_VECTOR* test,  //
     // libtpms added begin
     if (test->dataOut[mode - TPM_ALG_CTR] == NULL)
         return;
+    /* Skip test cases whose algorithms or keysizes are runtime-disabled */
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+					     test->alg, test->keyBits,
+					     TPM_ECC_NONE,
+					     g_RuntimeProfile.stateFormatLevel))
+	return;
     // libtpms added end
 
     //
