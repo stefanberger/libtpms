@@ -4891,7 +4891,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
         BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
-                        "USER NVRAM", "version 3 or later");
+                        "PERSISTENT_ALL", "version 3 or later");
         /* future versions nest-append here */
     }
 
