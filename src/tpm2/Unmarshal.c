@@ -2713,12 +2713,21 @@ TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *siz
 #if AES_256	// libtpms added end
 	  case 256:
 #endif		// libtpms added
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+						     TPM_ALG_AES,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
