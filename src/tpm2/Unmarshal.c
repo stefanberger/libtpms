@@ -3750,15 +3750,24 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	  case 1024:
 	  case 2048:
 	  case 3072:
-#if RSA_4096					// libtpms added begin
+#if RSA_4096										// libtpms added begin
 	  case 4096:
-#endif						// libtpms added end
+#endif
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     TPM_ALG_RSA,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }										// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
