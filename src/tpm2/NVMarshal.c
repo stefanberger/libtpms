@@ -4995,6 +4995,11 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     memset(&scd, 0, sizeof(scd));
     memset(indexOrderlyRam, 0, sizeof(indexOrderlyRam));
 
+    /* Set the runtime profile to the default.
+     * If a profile is part of the state activate it at the end.
+     */
+    rc = RuntimeProfileSet(&g_RuntimeProfile, NULL, false);
+
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PERSISTENT_ALL_VERSION,
@@ -5057,6 +5062,7 @@ skip_future_versions:
         NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd);
         NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
         NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
+        /* Activate a profile read from the state of the TPM 2 */
         rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON, false);
     }
 
