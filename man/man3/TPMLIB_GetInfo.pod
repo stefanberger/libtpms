@@ -38,6 +38,53 @@ The following flags are defined and return JSON objects as shown:
 
 This JSON object may be extended in the future.
 
+=item B<TPMLIB_INFO_RUNTIME_ALGORITHMS> (since v0.10.0)
+
+ {
+   "RuntimeAlgorithms": {
+     "Implemented": "rsa,rsa-min-size=1024,tdes,tdes-min-size=128,sha1,hmac," \
+                    "aes,aes-min-size=128,mgf1,keyedhash,xor,sha256,sha384," \
+                    "sha512,null,rsassa,rsaes,rsapss,oaep,ecdsa,ecdh,ecdaa," \
+                    "sm2,ecschnorr,ecmqv,kdf1-sp800-56a,kdf2,kdf1-sp800-108," \
+                    "ecc,ecc-min-size=192,ecc-nist,ecc-bn,ecc-nist-p192," \
+                    "ecc-nist-p224,ecc-nist-p256,ecc-nist-p384," \
+                    "ecc-nist-p521,"ecc-bn-p256,ecc-bn-p638,ecc-sm2-p256," \
+                    "symcipher,camellia,camellia-min-size=128,cmac,ctr,ofb," \
+                    "cbc,cfb,ecb",
+     "CanBeDisabled": "tdes,sha1,sha512,rsassa,rsaes,rsapss,ecmqv,ecc-nist," \
+                      "ecc-bn,ecc-nist-p192,ecc-nist-p224,ecc-nist-p521," \
+                      "ecc-bn-p256,ecc-bn-p638,ecc-sm2-p256,camellia,cmac," \
+                      "ctr,ofb,cbc,ecb",
+     "Enabled": "rsa,rsa-min-size=1024,hmac,aes,aes-min-size=128,mgf1," \
+                "keyedhash,xor,sha256,sha384,null,oaep,ecdsa,ecdh,ecdaa," \
+                "sm2,ecschnorr,kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc," \
+                "ecc-min-size=192,ecc-bn,ecc-nist-p192,ecc-nist-p224," \
+                "ecc-nist-p256,ecc-nist-p384,ecc-nist-p521,ecc-bn-p256," \
+                "ecc-bn-p638,ecc-sm2-p256,symcipher,camellia," \
+                "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb",
+     "Disabled": "tdes,sha1,sha512,rsassa,rsaes,rsapss,ecmqv,ecc-nist"
+   }
+ }
+
+This JSON object enumerates all I<implemented> algorithms as well as supported
+elliptic curve cryptography (ECC) curves. Those verbs enumerated under
+I<CanBeDisabled> represent algorithms and ECC curves that a user may omit from
+a profile, thus making them unavailable to applications. The verbs enumerated
+under I<Enabled> and I<Disabled> represent algorithms that are enabled and
+disabled in the currently active profile.
+
+The verbs I<ecc-nist> and I<ecc-bn> are shortcuts enabling all currently
+implemented ECC NIST curves (ecc-nist-p192, ecc-nist-p256, ...) and BN
+(Baretto-Naehrig) curves (ecc-bn-p256, ecc-bn-p638). If omitted then the
+individual curves can still be enumerated individually to enable them.
+Since I<ecc-nist-p256> and I<ecc-nist-p384> cannot be disabled, they must
+be enumerated if the I<ecc-nist> shortcut is not used.
+
+Minimum key sizes for rsa, ecc, tdes, aes, and camellia are also described.
+
+When new algorithms and ECC curves are added to the TPM in the future, then
+this JSON object will return more algorithms.
+
 =back
 
 =head1 RETURN VALUE
