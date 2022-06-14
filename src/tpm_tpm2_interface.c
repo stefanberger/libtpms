@@ -69,6 +69,7 @@
 
 extern BOOL      g_inFailureMode;
 static BOOL      reportedFailureCommand;
+static char     *g_profile;
 
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
@@ -136,7 +137,7 @@ static TPM_RESULT TPM2_MainInit(void)
                 TPMLIB_LogTPM2Error(
                     "%s: _plat__NVEnable(NULL) failed: %d\n",
                     __func__, ret);
-            if (TPM_Manufacture(TRUE) < 0 || g_inFailureMode) {
+            if (TPM_Manufacture(TRUE, g_profile) < 0 || g_inFailureMode) {
                 TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
                                     "failure mode\n", __func__);
                 reportedFailureCommand = TRUE;
@@ -171,6 +172,9 @@ static void TPM2_Terminate(void)
 
     _rpc__Signal_PowerOff();
     ExpDCacheFree();
+
+    free(g_profile);
+    g_profile = NULL;
 }
 
 static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,

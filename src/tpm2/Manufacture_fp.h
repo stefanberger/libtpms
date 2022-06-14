@@ -81,8 +81,9 @@
 #define MANUF_FIRST_TIME    1
 #define MANUF_REMANUFACTURE 0
 LIB_EXPORT int TPM_Manufacture(
-			       int firstTime  // IN: indicates if this is the first call from
+			       int firstTime, // IN: indicates if this is the first call from
 			       //     main()
+			       const char     *profile	// libtpms added
 			       );
 
 //*** TPM_TearDown()
