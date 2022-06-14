@@ -510,6 +510,11 @@ static TPM_RESULT TPM12_SetState(enum TPMLIB_StateType st,
     return ret;
 }
 
+static TPM_RESULT TPM12_SetProfile(const char *profile)
+{
+    return TPM_FAIL;
+}
+
 const struct tpm_interface TPM12Interface = {
     .MainInit = TPM12_MainInit,
     .Terminate = TPM12_Terminate,
@@ -527,4 +532,5 @@ const struct tpm_interface TPM12Interface = {
     .ValidateState = TPM12_ValidateState,
     .SetState = TPM12_SetState,
     .GetState = TPM12_GetState,
+    .SetProfile = TPM12_SetProfile,
 };

@@ -37,3 +37,10 @@ LIBTPMS_0.6.0 {
     local:
 	*;
 } LIBTPMS_0.5.1;
+
+LIBTPMS_0.10.0 {
+    global:
+	TPMLIB_SetProfile;
+    local:
+	*;
+} LIBTPMS_0.6.0;

@@ -170,6 +170,8 @@ TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
 TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
                            unsigned char **buffer, uint32_t *buflen);
 
+TPM_RESULT TPMLIB_SetProfile(const char *profile);
+
 #ifdef __cplusplus
 }
 #endif
