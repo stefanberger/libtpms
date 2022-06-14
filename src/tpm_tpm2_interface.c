@@ -806,6 +806,31 @@ static TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
     return ret;
 }
 
+static TPM_RESULT TPM2_SetProfile(const char *profile)
+{
+    char *copyProfile = NULL;
+    TPM_RC rc;
+
+    if (_rpc__Signal_IsPowerOn())
+        return TPM_INVALID_POSTINIT;
+
+    if (profile) {
+        /* test the profile */
+        rc = RuntimeProfileTest(&g_RuntimeProfile, profile, true);
+        if (rc != TPM_RC_SUCCESS)
+            return TPM_FAIL;
+
+        copyProfile = strdup(profile);
+        if (!copyProfile)
+            return TPM_SIZE;
+    }
+
+    free(g_profile);
+    g_profile = copyProfile;
+
+    return TPM_SUCCESS;
+}
+
 const struct tpm_interface TPM2Interface = {
     .MainInit = TPM2_MainInit,
     .Terminate = TPM2_Terminate,
@@ -823,4 +848,5 @@ const struct tpm_interface TPM2Interface = {
     .ValidateState = TPM2_ValidateState,
     .SetState = TPM2_SetState,
     .GetState = TPM2_GetState,
+    .SetProfile = TPM2_SetProfile,
 };
