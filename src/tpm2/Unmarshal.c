@@ -250,13 +250,22 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 	    if (*target != TPM_ECC_NONE &&		// libtpms added begin
 		!CryptEccIsCurveRuntimeUsable(*target)) {
 	      rc = TPM_RC_CURVE;
+	    }
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     TPM_ALG_ECC,
+						     CryptEccGetKeySizeForCurve(*target),
+						     *target,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_CURVE;
 	    }						// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
