@@ -183,8 +183,14 @@ CryptCapGetECCCurve(TPM_ECC_CURVE   curveID,   // IN: the starting ECC curve
 	    // If curveID is less than the starting curveID, skip it
 	    if(curve < curveID)
 		continue;
-            if (!CryptEccIsCurveRuntimeUsable(curve)) // libtpms added: runtime filter supported curves
-                continue;
+	    if (!CryptEccIsCurveRuntimeUsable(curve))	// libtpms added begin
+		continue;
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     TPM_ALG_ECC,
+						     CryptEccGetKeySizeForCurve(curve),
+						     curve,
+						     g_RuntimeProfile.stateFormatLevel))
+		continue;				// libtpms added end
 	    if(curveList->count < maxCount)
 		{
 		    // If we have not filled up the return list, add more curves to
