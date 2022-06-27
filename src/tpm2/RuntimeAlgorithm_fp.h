@@ -42,8 +42,6 @@
 #ifndef RUNTIME_ALGORITHM_H
 #define RUNTIME_ALGORITHM_H
 
-#include "Tpm.h"
-
 #define NUM_ENTRIES_ALGORITHM_PROPERTIES	(size_t)(TPM_ALG_LAST + 1)
 #define NUM_ENTRIES_ECC_ALGO_PROPERTIES         (size_t)(TPM_ECC_SM2_P256 + 1)
 

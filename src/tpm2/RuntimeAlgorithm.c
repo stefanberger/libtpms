@@ -43,7 +43,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "RuntimeAlgorithm_fp.h"
+#include "Tpm.h"
 #include "NVMarshal.h"
 #include "GpMacros.h"
 #include "tpm_library_intern.h"
