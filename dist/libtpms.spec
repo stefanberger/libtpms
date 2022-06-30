@@ -2,7 +2,7 @@
 
 %define name      libtpms
 %define version   0.9.5
-%define release   0~dev1
+%define release   1
 
 # Valid crypto subsystems are 'freebl' and 'openssl'
 %if "%{?crypto_subsystem}" == ""
@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Jul 01 2022 Stefan Berger - 0.9.5-1
+- Release of version 0.9.5
+
 * Mon Apr 25 2022 Stefan Berger - 0.9.4-1
 - Release of version 0.9.4
 
