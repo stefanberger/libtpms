@@ -1,5 +1,10 @@
 CHANGES - changes for libtpms
 
+version 0.9.5:
+  - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+  - tpm2: Fix a potential overflow expression (coverity)
+  - tpm2: Fix size check in CryptSecretDecrypt
+
 version 0.9.4:
   - tpm: #undef printf in case it is #define'd (OSS-Fuzz)
   - tpm2: Check return code of BN_div()
