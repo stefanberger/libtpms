@@ -4070,8 +4070,10 @@ skip_future_versions:
 #define PERSISTENT_DATA_VERSION 4
 
 static UINT16
-PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                        struct RuntimeProfile *RuntimeProfile)
 {
+    UINT32 commandCount = RuntimeCommandsCountEnabled(&RuntimeProfile->RuntimeCommands);
     UINT16 written;
     UINT16 array_size;
     UINT8 clocksize;
@@ -4115,8 +4117,12 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 
     written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
 
-    /* ppList may grow */
-    array_size = sizeof(data->ppList);
+    /* ppList may grow; use the same math as in Global.h PERSISTENT_DATA to calculate
+     * ppList array size. If commands are disabled then commandCount will be smaller
+     * than COMMAND_COUNT used there.
+     */
+    array_size = (commandCount + 7) / 8;
+    assert(array_size == sizeof(data->ppList));
     written += UINT16_Marshal(&array_size, buffer, size);
     written += Array_Marshal(&data->ppList[0], array_size, buffer, size);
 
@@ -4127,8 +4133,11 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += BOOL_Marshal(&data->lockOutAuthEnabled, buffer, size);
     written += UINT16_Marshal(&data->orderlyState, buffer, size);
 
-    /* auditCommands may grow */
-    array_size = sizeof(data->auditCommands);
+    /* auditCommands may grow; use the same math as in Global.h PERSISTENT_DATA to
+     * calculate array size.
+     */
+    array_size = ((commandCount + 1) + 7) / 8;		/* same as in Global.h PERSISTENT_DATA */
+    assert(array_size == sizeof(data->auditCommands)); /* for NULL profile only */
     written += UINT16_Marshal(&array_size, buffer, size);
     written += Array_Marshal(&data->auditCommands[0], array_size,
                              buffer, size);
@@ -4174,7 +4183,8 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 }
 
 static TPM_RC
-PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                          struct RuntimeProfile *RuntimeProfile)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
@@ -4273,6 +4283,7 @@ skip_num_policy_pcr_group:
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
         rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memset(data->ppList, 0, sizeof(data->ppList));
         memcpy(data->ppList, buf, MIN(array_size, sizeof(data->ppList)));
     }
 
@@ -4303,6 +4314,7 @@ skip_num_policy_pcr_group:
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
         rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memset(data->auditCommands, 0, sizeof(data->auditCommands));
         memcpy(data->auditCommands, buf,
                MIN(array_size, sizeof(data->auditCommands)));
     }
@@ -4951,7 +4963,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
         written += String_Marshal(profileJSON, buffer, size); // since v4
     }
     written += PACompileConstants_Marshal(buffer, size);
-    written += PERSISTENT_DATA_Marshal(&pd, buffer, size);
+    written += PERSISTENT_DATA_Marshal(&pd, buffer, size, &g_RuntimeProfile);
     written += ORDERLY_DATA_Marshal(&od, buffer, size);
     writeSuState = (pd.orderlyState & TPM_SU_STATE_MASK) == TPM_SU_STATE;
     /* starting with v3 we only write STATE_RESET and STATE_CLEAR if needed */
@@ -4986,6 +4998,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     STATE_RESET_DATA srd;
     STATE_CLEAR_DATA scd;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+    unsigned int stateFormatLevel = 0; // ignored
     BOOL readSuState = false;
     char *profileJSON = NULL;
 
@@ -4995,25 +5008,29 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     memset(&scd, 0, sizeof(scd));
     memset(indexOrderlyRam, 0, sizeof(indexOrderlyRam));
 
-    /* Set the runtime profile to the default.
-     * If a profile is part of the state activate it at the end.
-     */
-    rc = RuntimeProfileSet(&g_RuntimeProfile, NULL, false);
-
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PERSISTENT_ALL_VERSION,
                                  PERSISTENT_ALL_MAGIC);
     }
-
-    if (rc == TPM_RC_SUCCESS && hdr.version >= 4) {
-        rc = String_Unmarshal(&profileJSON, buffer, size);
+    if (rc == TPM_RC_SUCCESS) {
+        if (hdr.version >= 4) {
+            rc = String_Unmarshal(&profileJSON, buffer, size);
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* set the profile read from the state */
+        rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON, false);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* allow all algorithms to be unmarshalled */
+        rc = RuntimeAlgorithmSetProfile(&g_RuntimeProfile.RuntimeAlgorithm, NULL, &stateFormatLevel, ~0);
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = PACompileConstants_Unmarshal(buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
+        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size, &g_RuntimeProfile);
     }
     if (rc == TPM_RC_SUCCESS) {
         if (hdr.version < 3) {
