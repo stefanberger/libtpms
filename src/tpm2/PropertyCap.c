@@ -330,7 +330,7 @@ TPMPropertyIsDefined(
 	    // number of library commands.
 	      {
 #if COMPRESSED_LISTS
-		  (*value) = COMMAND_COUNT;
+		  (*value) = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); // libtpms changed: was COMMAND_COUNT
 #else
 		  COMMAND_INDEX       commandIndex;
 		  *value = 0;
@@ -348,7 +348,7 @@ TPMPropertyIsDefined(
 	    // number of commands from the TPM library that are implemented
 	      {
 #if COMPRESSED_LISTS
-		  *value = LIBRARY_COMMAND_ARRAY_SIZE;
+		  *value = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); // libtpms changed: was LIBRARY_COMMAND_ARRAY_SIZE
 #else
 		  COMMAND_INDEX       commandIndex;
 		  *value = 0;
