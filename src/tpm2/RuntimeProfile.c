@@ -734,3 +734,17 @@ RuntimeProfileWasNullProfile(struct RuntimeProfile *RuntimeProfile)
 {
     return RuntimeProfile->wasNullProfile;
 }
+
+LIB_EXPORT TPM_RC
+RuntimeProfileGetByIndex(size_t  idx,
+			 char    **runtimeProfileJSON)
+{
+    if (idx >= ARRAY_SIZE(RuntimeProfileDescs))
+	return TPM_RC_VALUE;
+    return RuntimeProfileFormat(runtimeProfileJSON,
+				RuntimeProfileDescs[idx].name,
+				RuntimeProfileDescs[idx].stateFormatLevel,
+				RuntimeProfileDescs[idx].algorithmsProfile,
+				RuntimeProfileDescs[idx].commandsProfile,
+				RuntimeProfileDescs[idx].description);
+}

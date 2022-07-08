@@ -137,6 +137,32 @@ This JSON object shows the currently active profile.
 The above profile is the 'null' profile. If the null profile is used then
 the state will again be readable by libtpms v0.9.
 
+=item B<TPMLIB_INFO_AVAILABLE_PROFILES> (since v0.10.0)
+
+This JSON object enumerates available profiles.
+
+ {
+   "AvailableProfiles": [
+     {
+       "Name": "default-v1",
+       "StateFormatLevel": 4,
+       "Commands": "0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,...",
+       "Algorithms": "rsa,rsa-min-size=1024,tdes,tdes-min-size=128,...",
+       "Description": "This profile enables all currently supported ...",
+     },
+     {
+       "Name": "null",
+       "StateFormatLevel": 1,
+       "Commands": "0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,...",
+       "Algorithms": "rsa,rsa-min-size=1024,tdes,tdes-min-size=128,...",
+       "Description": "The profile enables the commands and algorithms ...",
+     },
+     ....
+   ]
+ }
+
+Future versions of libtpms may enumerate other profiles.
+
 =back
 
 =head1 RETURN VALUE
