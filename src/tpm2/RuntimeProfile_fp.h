@@ -82,4 +82,8 @@ RuntimeProfileFormatJSON(struct RuntimeProfile *RuntimeProfile);
 const char *
 RuntimeProfileGetJSON(struct RuntimeProfile *RuntimeProfile);
 
+TPM_RC
+RuntimeProfileGetByIndex(size_t  idx,
+			 char    **runtimeProfileJSON);
+
 #endif /* RUNTIME_PROFILE_H */

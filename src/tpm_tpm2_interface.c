@@ -394,6 +394,10 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         "\"Disabled\":%s"
     "}";
     const char *tpmProfile_temp = "\"ActiveProfile\":%s";
+    const char *availableProfiles_temp =
+    "\"AvailableProfiles\":["
+        "%s%s%s"
+    "]";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
@@ -408,6 +412,8 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     char *runtimeCommands = NULL;
     char *profile = NULL;
     const char *profileJSON;
+    char *availableProfiles = NULL;
+    char *tmp = NULL;
     size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
@@ -516,6 +522,41 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_AVAILABLE_PROFILES)) {
+        size_t idx = 0;
+        char *json = NULL;
+
+        fmt = buffer; // keep here in case of 'goto error'
+        buffer = NULL;
+
+        tmp = NULL;
+
+        while (RuntimeProfileGetByIndex(idx, &json) == TPM_RC_SUCCESS) {
+            if (asprintf(&availableProfiles,
+                         idx > 0 ? tmp : availableProfiles_temp,
+                         idx > 0 ? "," : "",
+                         json,
+                         "%s%s%s") < 0) {
+                free(json);
+                goto error;
+            }
+
+            free(json);
+            free(tmp);
+            tmp = availableProfiles;
+            idx++;
+        }
+        availableProfiles = NULL;
+        if (asprintf(&availableProfiles, tmp, "", "", "") < 0)
+            goto error;
+
+        if (asprintf(&buffer, fmt, printed ? "," : "",
+                     availableProfiles, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
@@ -533,6 +574,8 @@ exit:
         free(runtimeCmds[rct]);
     free(runtimeAlgorithms);
     free(runtimeCommands);
+    free(availableProfiles);
+    free(tmp);
 
     return buffer;
 
