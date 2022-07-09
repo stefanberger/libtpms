@@ -135,10 +135,8 @@ static TPM_RESULT TPM_SymmetricKeyData_Crypt(unsigned char *data_out,
 
 #if defined(__OpenBSD__)
  # define OPENSSL_OLD_API
-#else
- #if OPENSSL_VERSION_NUMBER < 0x10100000
-  #define OPENSSL_OLD_API
- #endif
+#elif OPENSSL_VERSION_NUMBER < 0x10100000
+ #define OPENSSL_OLD_API
 #endif
 
 /* AES requires data lengths that are a multiple of the block size */
