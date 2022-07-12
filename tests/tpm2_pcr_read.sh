@@ -24,9 +24,10 @@ rc=$?
 
 fs=$(get_filesize NVChip)
 [ $? -ne 0 ] && exit 1
-if [ $fs -ne 176832 ]; then
+exp=176832
+if [ $fs -ne $exp ]; then
 	echo "Error: Unexpected size of NVChip file."
-	echo "Expected: 131072"
+	echo "Expected: $exp"
 	echo "Got     : $fs"
 	rc=1
 fi
