@@ -1,3 +1,4 @@
 # libtpms maintainers
-# Github ID, Name, email address
-stefanberger, Stefan Berger, stefanb@linux.ibm.com
+# Github ID, Name, email address, notes
+stefanberger, Stefan Berger, stefanb@linux.ibm.com, overall maintainer
+williamcroberts, William Roberts, william.c.roberts@intel.com, LibreSSL maintainer
