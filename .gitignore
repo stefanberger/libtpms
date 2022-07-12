@@ -59,6 +59,7 @@ Makefile
 /tests/tpm2_cve-2023-1018
 /tests/tpm2_pcr_read
 /tests/tpm2_selftest
+/tests/tpm2_setprofile
 /debian/*debhelper*
 /debian/*substvars
 /debian/autoreconf.*

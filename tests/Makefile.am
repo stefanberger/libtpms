@@ -26,7 +26,8 @@ check_PROGRAMS += \
 	tpm2_cve-2023-1017 \
 	tpm2_cve-2023-1018 \
 	tpm2_pcr_read \
-	tpm2_selftest
+	tpm2_selftest \
+	tpm2_setprofile
 
 TESTS += \
 	fuzz.sh \
@@ -35,7 +36,8 @@ TESTS += \
 	tpm2_cve-2023-1017.sh \
 	tpm2_cve-2023-1018.sh \
 	tpm2_pcr_read.sh \
-	tpm2_selftest.sh
+	tpm2_selftest.sh \
+	tpm2_setprofile.sh
 endif
 
 nvram_offsets_SOURCES = nvram_offsets.c
@@ -117,6 +119,8 @@ EXTRA_DIST = \
 	tpm2_run_test.sh \
 	tpm2_selftest.c \
 	tpm2_selftest.sh \
+	tpm2_setprofile.c \
+	tpm2_setprofile.sh \
 	fuzz.sh
 
 CLEANFILES = \
