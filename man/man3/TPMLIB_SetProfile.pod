@@ -1,0 +1,219 @@
+=head1 NAME
+
+TPMLIB_SetProfile  - Set a profile for a TPM 2
+
+=head1 LIBRARY
+
+TPM library (libtpms, -ltpms)
+
+=head1 SYNOPSIS
+
+B<#include <libtpms/tpm_types.h>>
+
+B<#include <libtpms/tpm_library.h>>
+
+B<#include <libtpms/tpm_error.h>>
+
+B<TPM_RESULT TPMLIB_SetProfile(const char *profile);>
+
+=head1 DESCRIPTION
+
+B<TPMLIB_SetProfile()> is used to apply one of libtpms's provided profiles
+to a TPM 2 when it is started the first time. B<TPMLIB_SetProfile()> must be
+called after B<TPMLIB_ChooseTPMVersion()> and before B<TPMLIB_MainInit()>.
+A profile may only be applied to a TPM 2 and will always fail for a TPM 1.2.
+
+Once a profile has been set it will be used by the TPM 2 from then on and
+the profile will be carried along with the state of the TPM 2 if the state
+of the TPM 2 was written using the callback registered with
+B<TPMLIB_RegisterCallbacks()>. Later attempts to set a different profile
+for the same TPM 2 instance using this API call will have no effect.
+
+Libtpms v0.10 and later support several built-in profiles. The 'null' profile
+provides backwards compatibility for libtpms v0.9 and only enables those
+algorithm and commands that were available at that version of libtpms.
+The default profile enables all currently available commands and algorithms.
+Neither one of these profiles allows any modifications by the user. The
+'custom' profile is the only one that a user may modify and where the user
+may disable any commands and/or algorithms that can be disabled.
+
+If a NULL pointer is given as a profile then the 'null' profile will be
+used and only commands and algorithms of libtpms v0.9 will be enabled.
+The state of such a TPM 2 instance will be readable by the current version of
+libtpms as well as later versions of libtpms and allow for downgrading
+libtpms to version 0.9 from a later version.
+
+Profiles with the prefix 'default' enable as many algorithms and commands
+as possible. The 'default-v1' profile, introduced with libtpms v0.10, allows
+to run with libtpms v0.10 and later but will not allow to downgrade to
+earlir versions of libtpms, such as v0.9.
+
+A profile is a JSON map in string format. It must contain the 'Name'
+field with the name of a known profile. It may contain a field
+'Algorithms' that holds a comma-separated list of algorithms (verbs) to
+enable or the field 'Commands' that holds a comma-separated list of ranges
+of command codes to enable.
+
+The following are examples of TPM 2 profiles:
+
+     {"Name":"default-v1"}
+
+     {
+      "Name":"custom",
+      "Algorithms":"rsa,rsa-min-size=1024,tdes-min-size=128,hmac,aes,\
+                    aes-min-size=128,mgf1,keyedhash,xor,sha256,sha384,\
+                    sha512,null,rsassa,rsaes,rsapss,oaep,ecdsa,ecdh,ecdaa,\
+                    sm2,ecschnorr,ecmqv,kdf1-sp800-56a,kdf2,kdf1-sp800-108,\
+                    ecc,ecc-min-size=192,ecc-nist,ecc-nb,symcipher,camellia,\
+                    camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb",
+      "StateFormatLevel":2
+     }
+
+The first profile selects the current default profile along with all
+commands and algorithms that are available.
+The second profile selects the I<custom> profile but restricts the
+set of algorithms that the TPM 2 provides to those ones that are listed.
+Since 'sha1' and 'tdes' are missing in the list, it disables those algorithms.
+Note that the I<custom> profile is the only profile that allows customizations
+of enabled Algorthms and Commands.
+
+Only a subset of the implemented algorithms can be disabled. To determine
+the list of algorithms that can be disabled, use the list of algorithms
+return by I<TPMLIB_GetInfo(TPMLIB_INFO_RUNTIME_ALGORITHMS)> in the
+'CanBeDisabled' field. Similarly, only a subset of the implemented commands
+can be disabled and I<TPMLIB_GetInfo(TPMLIB_INFO_RUNTIME_COMMANDS)> can
+be used to determine the list of 'CanBeDisabled' commands.
+
+Since it is possible to disable algorithms that are mandatory for the
+PC client TPM 2 one can create a TPM 2 instance that will cause
+applications to fail. Therefore, it is necessary to carefully select which
+algorithms to disable following the requirements of applications that will
+be used. At the same time the choice of enabled commands is important
+so that algorithms that are enabled can actually be used with the set
+of enabled commands and applications do not fail unexpectedly because of
+disabled commands. Therefore, determining the list of algorithms and
+commands to enable and disable is left to the user.
+
+=head1 StateFormatLevel
+
+The I<StateFormatLevel> field exists in each profile carried by the
+state of a TPM 2. The I<StateFormatLevel> is an integer that is increased
+whenever new TPM 2 commands or algorithms are enabled for profiles. The effect
+of this parameter is that a profile with I<StateFormatLevel> 'n' will not be
+accepted by a libtpms version that does not at least implement
+I<StateFormatLevel> 'n'. This prevents applications that may have used any newly
+enabled algorithms or commands from failing because they try to use them
+again with a TPM 2 from a libtpms version that does not support them.
+
+When the above is applied to a virtual machine environment then this means that
+migrating the state of a TPM 2 is only possible to a libtpms version that
+implements at least the same StateFormatLevel. Therefore, care must be taken
+which profile is chosen so that the profile's StateFormatLevel does not
+become the obstacle for migrating the TPM state between different versions
+of libtpms. This in turn means that in an environment where older libtpms
+versions exist, which may be a target for migration, then the oldest
+libtpms version's supported profile should be chosen. If libtpms v0.9
+exists then this should be the 'null' profile, for libtpms v0.10 this can
+be the the 'default-v1' profile.
+
+The following lists the meaning of I<StateFormatLevel>s:
+
+=over 4
+
+=item 1: (since v0.10)
+
+This <StateFormatLevel> is reserved for the null profile. Only algorithms
+and commands supported by libtpms v0.9 are enabled. To remain compatible
+with libtpms v0.9 state format, the null profile will not be written as part
+of the state.
+
+=item 2: (since v0.10)
+
+This I<StateFormatLevel> enabled the writing of the profile as part of the
+state.
+
+=back
+
+A user may specify the I<StateFormatLevel> when using the I<custom> profile.
+In this case the given I<StateFormatLevel> serves as the maximum
+I<StateFormatLevel> that the given algorithms and commands may require
+(e.g., '2' would not allow to enable the command ECC_Encrypt, which
+requires '3') or allows to enable key sizes, such as AES-192, when for
+example I<StateFormatLevel> '4' is given. If I<StateFormatLevel> '3'
+is given then AES-192 will not be enabled.
+
+=head1 ERRORS
+
+=over 4
+
+=item B<TPM_SUCCESS>
+
+The function completed successfully.
+
+=item B<TPM_FAIL>
+
+A failure occurred. This may be due to a badly formatted JSON profile,
+a missing field in the JSON profile, an unknown verb in the JSON profile,
+or an out of memory error. The log file may show the reason for the
+failure.
+
+A TPM 1.2 cannot have a profile applied and will always respond with
+this error code.
+
+=back
+
+For a complete list of TPM error codes please consult the include file
+B<libtpms/tpm_error.h>
+
+=head1 EXAMPLE
+
+ #include <stdio.h>
+
+ #include <libtpms/tpm_types.h>
+ #include <libtpms/tpm_library.h>
+ #include <libtpms/tpm_error.h>
+
+ int main(void) {
+     TPM_RESULT res;
+     unsigned char *respbuffer = NULL;
+     uint32_t resp_size = 0;
+     uint32_t respbufsize = 0;
+     unsigned char *command;
+     uint32_t command_size;
+
+     [...]
+
+     if (TPMLIB_ChooseTPMVersion(TPMLIB_TPM_VERSION_2) != TPM_SUCCESS) {
+         fprintf(stderr, "Could not choose a TPM 2.\n");
+         return 1;
+     }
+
+     if (TPMLIB_SetProfile(NULL) != TPM_SUCCESS) {
+         fprintf(stderr, "Could not set the profile.\n");
+         return 1;
+     }
+
+     if (TPMLIB_MainInit() != TPM_SUCCESS) {
+         fprintf(stderr, "Could not start the TPM.\n");
+         return 1;
+     }
+
+     [...]
+     /* build TPM command */
+     [...]
+
+     res = TPMLIB_Process(&respbuffer, &resp_size,
+                          &respbufsize,
+                          command, command_size);
+     [...]
+
+     TPMLIB_Terminate();
+
+     return 0;
+ }
+
+=head1 SEE ALSO
+
+B<TPMLIB_ChooseTPMVersion>, B<TPMLIB_RegisterCallbacks>(3), B<TPMLIB_GetInfo>(3)
+
+=cut
