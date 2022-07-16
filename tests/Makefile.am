@@ -10,7 +10,8 @@ TESTS_ENVIRONMENT = \
   abs_top_srcdir=`cd '$(top_srcdir)'; pwd`
 
 AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
-AM_LDFLAGS = -ltpms -L$(top_builddir)/src/.libs $(SANITIZERS)
+AM_LDFLAGS = -no-undefined $(SANITIZERS)
+LDADD = $(top_builddir)/src/libtpms.la
 
 check_PROGRAMS = \
 	base64decode
