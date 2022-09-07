@@ -112,6 +112,15 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Sep 08 2022 Stefan Berger - 0.8.8-1
+- tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+- tpm2: Fix a potential overflow expression (coverity)
+- tpm2: Fix size check in CryptSecretDecrypt
+- tpm2: Check return code of BN_div()
+- tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size 0 (OSSL 3)
+- tpm2: Do not write permanent state if only clock changed
+- build-sys: Add probing for -fstack-protector
+
 * Fri Sep 17 2021 Stefan Berger - 0.8.7-1
 - tpm2: Fixes for building and running with OpenSSL 3.0
 
