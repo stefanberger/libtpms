@@ -1,5 +1,14 @@
 CHANGES - changes for libtpms
 
+version 0.8.8:
+ - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+ - tpm2: Fix a potential overflow expression (coverity)
+ - tpm2: Fix size check in CryptSecretDecrypt
+ - tpm2: Check return code of BN_div()
+ - tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size 0 (OSSL 3)
+ - tpm2: Do not write permanent state if only clock changed
+ - build-sys: Add probing for -fstack-protector
+
 version 0.8.7:
  - tpm2: Adapted code for compiling with OpenSSL 3.0
  - build-sys: Adapted for silent building with OpenSSL 3.0
