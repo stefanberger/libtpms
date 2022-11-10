@@ -1,5 +1,12 @@
 CHANGES - changes for libtpms
 
+version 0.7.11:
+ - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+ - tpm2: Fix a potential overflow expression (coverity)
+ - tpm2: Fix size check in CryptSecretDecrypt
+ - tpm2: Check return code of BN_div()
+ - tpm2: Do not write permanent state if only clock changed
+
 version 0.7.10:
  - tpm2: Marshal event sequence objects' hash state
  - tpm2: Fixes for building and running with OpenSSL 3.0
