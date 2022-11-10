@@ -112,6 +112,13 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Nov 11 2022 Stefan Berger - 0.7.11-1
+- tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+- tpm2: Fix a potential overflow expression (coverity)
+- tpm2: Fix size check in CryptSecretDecrypt
+- tpm2: Check return code of BN_div()
+- tpm2: Do not write permanent state if only clock changed
+
 * Mon Sep 20 2021 Stefan Berger - 0.7.10-1
 - tpm2: Marshal event sequence objects' hash state
 - tpm2: Fixes for building and running with OpenSSL 3.0
