@@ -366,6 +366,40 @@ TPM_RC DoEVPGetIV(
 
 #endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
+TPM_RC
+DoEVPCryptOneBlock(
+                   EVP_CIPHER_CTX      *ctx,        // IN: optional context
+                   const EVP_CIPHER    *evp_cipher, // IN: EVP_CIPHER to use
+                   const BYTE          *key,        // IN: key whose size is suitable for evpfn
+                   const BYTE          *in,         // IN: input block
+                   int                  inl,        // IN: size of input block in bytes
+                   BYTE                *out,        // OUT: output block; must be different memory than in
+                   BOOL                 encrypt     // IN: encrypto (TRUE) or decrypt (FALSE)
+                   )
+{
+    EVP_CIPHER_CTX *l_ctx = NULL;
+    TPM_RC          retVal = 0;
+    int             outlen1 = 0;
+    int             outlen2 = 0;
+
+    l_ctx = ctx ? ctx : EVP_CIPHER_CTX_new();
+    if (!l_ctx)
+        ERROR_RETURN(TPM_RC_MEMORY);
+
+    if (EVP_CipherInit(l_ctx, evp_cipher, key, NULL, encrypt) != 1 ||
+	EVP_CIPHER_CTX_set_padding(l_ctx, 0) != 1 ||
+	EVP_CipherUpdate(l_ctx, out, &outlen1, in, inl) != 1 ||
+	EVP_CipherFinal_ex(l_ctx, out + outlen1, &outlen2) != 1 ||
+	outlen1 + outlen2 != inl)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+ Exit:
+    if (!ctx)
+        EVP_CIPHER_CTX_free(l_ctx);
+
+    return retVal;
+}
+
 #if USE_OPENSSL_FUNCTIONS_EC
 BOOL
 OpenSSLEccGetPrivate(

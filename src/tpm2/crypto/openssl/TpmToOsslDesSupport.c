@@ -65,6 +65,7 @@
    library. */
 /* B.2.3.1.2. Defines and Includes */
 #include "Tpm.h"
+#include "Helpers_fp.h"  // libtpms added
 #if (defined SYM_LIB_OSSL) && ALG_TDES
 /*     B.2.3.1.3. Functions */
 /* B.2.3.1.3.1. TDES_set_encyrpt_key() */
@@ -101,6 +102,7 @@ void TDES_encrypt(
 		     &ks[0], &ks[1], &ks[2],
 		     DES_ENCRYPT);
 }
+
 #if !USE_OPENSSL_FUNCTIONS_SYMMETRIC
 /* B.2.3.1.3.3. TDES_decrypt() */
 /* As with TDES_encypt() this function bridges between the TPM single schedule model and the
@@ -116,4 +118,29 @@ void TDES_decrypt(
 		     DES_DECRYPT);
 }
 #endif // !USE_OPENSSL_FUNCTIONS_SYMMETRIC
+
+#if OPENSSL_VERSION_NUMBER > 0x30000000L
+
+void TDES_crypt(
+		const BYTE       *key,
+		UINT16            keySizeInBits,
+		const BYTE       *in,
+		BYTE             *out,
+		BOOL              encrypt
+		)
+{
+    static const EVP_CIPHER *evp_cipher_cached = NULL;
+
+    if (!evp_cipher_cached) {
+        evp_cipher_cached = EVP_des_ede3_ecb();
+        pAssert(evp_cipher_cached);
+    }
+
+    if (DoEVPCryptOneBlock(NULL, evp_cipher_cached, key, in, sizeof(DES_cblock),
+			   out, encrypt))
+	pAssert(false)
+}
+
+#endif // OPENSSL_VERSION_NUMBER
+
 #endif // SYM_LIB_OSSL

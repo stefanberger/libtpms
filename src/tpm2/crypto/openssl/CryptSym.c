@@ -494,18 +494,26 @@ static void TDES_CTR(const BYTE *key,            // IN
                      INT16       blockSize       // IN
                      )
 {
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     tpmCryptKeySchedule_t   keySchedule;
+#endif
     int                     i;
     BYTE                    tmp[MAX_SYM_BLOCK_SIZE];
     BYTE                   *pT;
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     TDES_set_encrypt_key(key, keySizeInBits,
                          (tpmKeyScheduleTDES *)&keySchedule.tdes);
+#endif
 
     for(; dSize > 0; dSize -= blockSize)
 	{
 	    // Encrypt the current value of the IV(counter)
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	    TDES_encrypt(iv, tmp, (tpmKeyScheduleTDES *)&keySchedule.tdes);
+#else
+	    TDES_crypt(key, keySizeInBits, iv, tmp, TRUE);
+#endif
 	    //increment the counter (counter is big-endian so start at end)
 	    for(i = blockSize - 1; i >= 0; i--)
 		if((iv[i] += 1) != 0)

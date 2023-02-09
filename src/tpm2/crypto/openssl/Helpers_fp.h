@@ -87,6 +87,17 @@ TPM_RC DoEVPGetIV(
 
 #endif
 
+TPM_RC
+DoEVPCryptOneBlock(
+                   EVP_CIPHER_CTX      *ctx,        // IN: optional context
+                   const EVP_CIPHER    *evp_cipher, // IN: crypto function
+                   const BYTE          *key,        // IN: key whose size is suitable for evpfn
+                   const BYTE          *in,         // IN: input block
+                   int                  inl,        // IN: size of input block in bytes
+                   BYTE                *out,        // OUT: output block; must be different memory than in
+                   BOOL                 encrypt     // IN: encrypto (TRUE) or decrypt (FALSE)
+                   );
+
 #if USE_OPENSSL_FUNCTIONS_EC
 BOOL OpenSSLEccGetPrivate(
                           bigNum             dOut,   // OUT: the qualified random value

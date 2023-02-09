@@ -79,5 +79,16 @@ void TDES_decrypt(
 		  tpmKeyScheduleTDES   *ks
 		  );
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+void TDES_crypt(
+		const BYTE       *key,
+		UINT16            keySizeInBits,
+		const BYTE       *in,
+		BYTE             *out,
+		BOOL              encrypt
+		);
+
+#endif
 
 #endif
