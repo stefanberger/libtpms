@@ -94,21 +94,23 @@ OpenSSLCryptGenerateKeyDes(
                            TPMT_SENSITIVE *sensitive    // OUT: sensitive area
                           )
 {
-    DES_cblock *key;
-    size_t      offset;
-    size_t      limit;
+    TPM_RC         retVal = TPM_RC_SUCCESS;
+    EVP_CIPHER_CTX *ctx;
 
-    limit = MIN(sizeof(sensitive->sensitive.sym.t.buffer),
-                sensitive->sensitive.sym.t.size);
-    limit = TPM2_ROUNDUP(limit, sizeof(*key));
-    pAssert(limit < sizeof(sensitive->sensitive.sym.t.buffer));
+    if (!(ctx = EVP_CIPHER_CTX_new()))
+        return TPM_RC_MEMORY;
 
-    for (offset = 0; offset < limit; offset += sizeof(*key)) {
-        key = (DES_cblock *)&sensitive->sensitive.sym.t.buffer[offset];
-        if (DES_random_key(key) != 1)
-            return TPM_RC_NO_RESULT;
-    }
-    return TPM_RC_SUCCESS;
+    pAssert(sizeof(sensitive->sensitive.sym.t.buffer) >= 3 * sizeof(DES_cblock))
+
+    if (EVP_CipherInit_ex(ctx, EVP_des_ede3(), NULL, NULL, NULL, 0) != 1 ||
+        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_RAND_KEY, 0,
+                            sensitive->sensitive.sym.t.buffer) != 1)
+        ERROR_RETURN(TPM_RC_NO_RESULT);
+
+ Exit:
+    EVP_CIPHER_CTX_free(ctx);
+
+    return retVal;
 }
 
 evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
