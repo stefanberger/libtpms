@@ -71,6 +71,16 @@ OpenSSLCryptGenerateKeyDes(
                            TPMT_SENSITIVE *sensitive    // OUT: sensitive area
                           );
 
+TPM_RC DoEVPGetIV(
+                  EVP_CIPHER_CTX    *ctx,    // IN: required context
+                  unsigned char     *iv,     // IN: pointer to buffer for IV
+                  size_t             iv_len  // IN: size of the buffer
+                  );
+#endif
+
+/* The following functions to support symmetric crypto using
+   OpenSSL are needed for CMAC for example */
+
 const EVP_CIPHER *GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 			       UINT16        keySizeInBits,   // IN
 			       TPM_ALG_ID    mode,            // IN
@@ -78,14 +88,6 @@ const EVP_CIPHER *GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 			       BYTE         *keyToUse,        // OUT same as key or stretched key
 			       UINT16       *keyToUseLen      // IN/OUT
 			      );
-
-TPM_RC DoEVPGetIV(
-                  EVP_CIPHER_CTX    *ctx,    // IN: required context
-                  unsigned char     *iv,     // IN: pointer to buffer for IV
-                  size_t             iv_len  // IN: size of the buffer
-                  );
-
-#endif
 
 TPM_RC
 DoEVPCryptOneBlock(

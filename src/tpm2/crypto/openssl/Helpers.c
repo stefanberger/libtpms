@@ -115,6 +115,32 @@ OpenSSLCryptGenerateKeyDes(
     return retVal;
 }
 
+TPM_RC DoEVPGetIV(
+                  EVP_CIPHER_CTX    *ctx,    // IN: required context
+                  unsigned char     *iv,     // IN: pointer to buffer for IV
+                  size_t             iv_len  // IN: size of the buffer
+                  )
+{
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    OSSL_PARAM params[] = {
+        OSSL_PARAM_octet_ptr(OSSL_CIPHER_PARAM_UPDATED_IV, &iv, iv_len),
+        OSSL_PARAM_END
+    };
+    if (EVP_CIPHER_CTX_get_params(ctx, params) != 1)
+        return TPM_RC_FAILURE;
+#else
+    const unsigned char *c_iv;
+
+    c_iv = EVP_CIPHER_CTX_iv(ctx);
+    if (!c_iv)
+        return TPM_RC_FAILURE;
+    memcpy(iv, c_iv, iv_len);
+#endif // OPENSSL_VERSION_NUMBER
+
+    return 0;
+}
+
+#endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 #define __NUM_ALGS      4 /* AES, TDES, Camellia, SM4 */
 #define __NUM_MODES     5 /* CTR, OFB, CBC, CFB, ECB */
@@ -338,33 +364,6 @@ GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     /* get cached result of evpfn() */
     return GetCachedEVPCipher(evpfn, algIdx, mode, i);
 }
-
-TPM_RC DoEVPGetIV(
-                  EVP_CIPHER_CTX    *ctx,    // IN: required context
-                  unsigned char     *iv,     // IN: pointer to buffer for IV
-                  size_t             iv_len  // IN: size of the buffer
-                  )
-{
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-    OSSL_PARAM params[] = {
-        OSSL_PARAM_octet_ptr(OSSL_CIPHER_PARAM_UPDATED_IV, &iv, iv_len),
-        OSSL_PARAM_END
-    };
-    if (EVP_CIPHER_CTX_get_params(ctx, params) != 1)
-        return TPM_RC_FAILURE;
-#else
-    const unsigned char *c_iv;
-
-    c_iv = EVP_CIPHER_CTX_iv(ctx);
-    if (!c_iv)
-        return TPM_RC_FAILURE;
-    memcpy(iv, c_iv, iv_len);
-#endif // OPENSSL_VERSION_NUMBER
-
-    return 0;
-}
-
-#endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 TPM_RC
 DoEVPCryptOneBlock(
