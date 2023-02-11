@@ -621,7 +621,7 @@ CryptSymmetricEncrypt(
             ERROR_RETURN(TPM_RC_FAILURE);
 
         ivInOut->t.size = ivLen;
-        if (DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
+        if (ivLen > 0 && DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
             ERROR_RETURN(TPM_RC_FAILURE);
     }
  Exit:
@@ -744,7 +744,7 @@ CryptSymmetricDecrypt(
             ERROR_RETURN(TPM_RC_FAILURE);
 
         ivInOut->t.size = ivLen;
-        if (DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
+        if (ivLen > 0 && DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
             ERROR_RETURN(TPM_RC_FAILURE);
     }
 
