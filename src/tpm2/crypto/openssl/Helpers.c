@@ -286,6 +286,22 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     return evpfn;
 }
 
+TPM_RC DoEVPGetIV(
+                  EVP_CIPHER_CTX    *ctx,    // IN: required context
+                  unsigned char     *iv,     // IN: pointer to buffer for IV
+                  size_t             iv_len  // IN: size of the buffer
+                  )
+{
+    const unsigned char *c_iv;
+
+    c_iv = EVP_CIPHER_CTX_iv(ctx);
+    if (!c_iv)
+        return TPM_RC_FAILURE;
+    memcpy(iv, c_iv, iv_len);
+
+    return 0;
+}
+
 #endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 #if USE_OPENSSL_FUNCTIONS_EC
