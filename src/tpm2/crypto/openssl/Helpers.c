@@ -367,6 +367,140 @@ TPM_RC DoEVPGetIV(
 #endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
 #if USE_OPENSSL_FUNCTIONS_EC
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+static OSSL_PARAM *
+OpenSSLBuildEcParams(
+                     const EC_GROUP   *G   // IN: the group to convert to OSSL_PARAM
+                     )
+{
+    const char     *field_name;
+    OSSL_PARAM_BLD *bld = NULL;
+    BIGNUM         *p = BN_secure_new();
+    BIGNUM         *a = BN_new();
+    BIGNUM         *b = BN_new();
+    const EC_POINT *group_gen;
+    unsigned char  *buffer = NULL;
+    size_t          buffer_size;
+    OSSL_PARAM     *params = NULL;
+
+    pAssert(G != NULL);
+
+    if (EC_GROUP_get_field_type(G) == NID_X9_62_prime_field)
+        field_name = SN_X9_62_prime_field;
+    else {
+        field_name = SN_X9_62_characteristic_two_field;
+        fprintf(stderr, "CASE B!!!!!!!!!!!!!\n");
+    }
+
+    if ((bld = OSSL_PARAM_BLD_new()) == NULL ||
+        EC_GROUP_get_curve(G, p, a, b, NULL) != 1 ||
+        OSSL_PARAM_BLD_push_utf8_string(bld, OSSL_PKEY_PARAM_EC_FIELD_TYPE,
+                                        field_name, 0) != 1 ||
+        OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_P, p) != 1 ||
+        OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_A, a) != 1 ||
+        OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_B, b) != 1 ||
+        OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_COFACTOR,
+                               EC_GROUP_get0_cofactor(G)) != 1 ||
+        OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_EC_ORDER,
+                               EC_GROUP_get0_order(G)) != 1)
+        goto Exit;
+
+    if ((group_gen = EC_GROUP_get0_generator(G)) == NULL ||
+        (buffer_size = EC_POINT_point2oct(G, group_gen, POINT_CONVERSION_UNCOMPRESSED,
+                                          NULL, 0, NULL)) == 0 ||
+        (buffer = OPENSSL_malloc(buffer_size)) == NULL ||
+        EC_POINT_point2oct(G, group_gen, POINT_CONVERSION_UNCOMPRESSED,
+                           buffer, buffer_size, NULL) != buffer_size ||
+        OSSL_PARAM_BLD_push_octet_string(bld, OSSL_PKEY_PARAM_EC_GENERATOR,
+                                         buffer, buffer_size) != 1)
+        goto Exit;
+
+    params = OSSL_PARAM_BLD_to_param(bld);
+
+ Exit:
+    OSSL_PARAM_BLD_free(bld);
+    OPENSSL_free(buffer);
+    BN_free(b);
+    BN_free(a);
+    BN_clear_free(p);
+
+    return params;
+}
+
+BOOL
+OpenSSLEccGetPrivate(
+                     bigNum             dOut,  // OUT: the qualified random value
+                     const EC_GROUP    *G,     // IN:  the EC_GROUP to use
+                     const UINT32       requestedBits // IN: if not 0, then dOut must have that many bits
+                    )
+{
+    BOOL           OK = FALSE;
+    EVP_PKEY_CTX  *ctx = NULL;
+    BIGNUM        *D = NULL;
+    EVP_PKEY      *pkey = NULL;
+    OSSL_PARAM    *params = NULL;
+    UINT32         requestedBytes = BITS_TO_BYTES(requestedBits);
+    int            repeats = 0;
+    int            maxRepeats;
+    int            numBytes;
+
+    if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL)) == NULL ||
+        EVP_PKEY_keygen_init(ctx) != 1 ||
+        (params = OpenSSLBuildEcParams(G)) == NULL ||
+        EVP_PKEY_CTX_set_params(ctx, params) != 1)
+        goto Exit;
+
+    maxRepeats = 8;
+    // non-byte boundary order'ed curves, like NIST P521, need more loops to
+    // have a result with topmost byte != 0
+    if (requestedBits & 7)
+        maxRepeats += (9 - (requestedBits & 7));
+
+    while (TRUE) {
+        if (EVP_PKEY_generate(ctx, &pkey) != 1) {
+            pAssert(FALSE); // REMOVE once bnp256 works
+            goto Exit;
+        }
+
+        BN_clear_free(D);
+        D = NULL;
+
+        if (EVP_PKEY_get_bn_param(pkey, OSSL_PKEY_PARAM_PRIV_KEY, &D) != 1)
+            goto Exit;
+
+        // if we need a certain amount of bytes and we are below a threshold
+        // of loops, check the number of bytes we have, otherwise take the
+        // result
+        if ((requestedBytes != 0) && (repeats < maxRepeats)) {
+            numBytes = BN_num_bytes(D);
+            if ((int)requestedBytes != numBytes) {
+                // result does not have enough bytes
+                fprintf(stderr, "AGAIN: %d vs. %d\n", (int)requestedBytes, BN_num_bytes(D));
+                repeats++;
+                continue;
+            }
+            // result is sufficient
+        }
+        OK = OsslToTpmBn(dOut, D);
+        break;
+    }
+
+    fprintf(stderr, "%d vs. %d\n", (int)requestedBytes, BN_num_bytes(D));
+    pAssert((int)requestedBytes == BN_num_bytes(D));
+
+ Exit:
+    BN_clear_free(D);
+    EVP_PKEY_free(pkey);
+    OSSL_PARAM_free(params);
+    EVP_PKEY_CTX_free(ctx);
+
+    return OK;
+}
+
+#else
+
 BOOL
 OpenSSLEccGetPrivate(
                      bigNum             dOut,  // OUT: the qualified random value
@@ -421,6 +555,8 @@ OpenSSLEccGetPrivate(
 
     return OK;
 }
+#endif // OPENSSL_VERSION_NUMBER
+
 #endif // USE_OPENSSL_FUNCTIONS_EC
 
 #if USE_OPENSSL_FUNCTIONS_RSA
