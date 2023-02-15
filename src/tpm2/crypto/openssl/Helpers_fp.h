@@ -93,6 +93,14 @@ BOOL OpenSSLEccGetPrivate(
                           const EC_GROUP    *G,      // IN:  the EC_GROUP to use
                           const UINT32       requestedBits // IN: if not 0, then dOut must have that many bits
                          );
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+TPM_RC BuildEcPrivateKey(
+                         EVP_PKEY         **ppkey, // OUT
+                         const EC_GROUP    *G,     // IN: group of the key
+                         const BIGNUM      *D      // IN: private key
+                        );
+#endif
 #endif
 
 #if USE_OPENSSL_FUNCTIONS_RSA

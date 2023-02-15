@@ -64,6 +64,9 @@
 #include "Tpm.h"
 #include "CryptEccSignature_fp.h"
 #include "TpmToOsslMath_fp.h"  // libtpms added
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include "Helpers_fp.h" // libtpms added
+#endif
 #if ALG_ECC
 /* 10.2.12.2 Utility Functions */
 /* 10.2.12.2.1 EcdsaDigest() */
@@ -220,7 +223,15 @@ BnSignEcdsa(
 	    )
 {
     ECDSA_SIG        *sig = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    EVP_PKEY_CTX     *sctx = NULL;
+    EVP_PKEY         *pkey = NULL;
+    size_t            sigbuf_len;
+    unsigned char    *sigbuf = NULL;
+    const unsigned char *csigbuf;
+#else
     EC_KEY           *eckey;
+#endif
     int               retVal;
     const BIGNUM     *r;
     const BIGNUM     *s;
@@ -228,6 +239,20 @@ BnSignEcdsa(
 
     d = BigInitialized(d, bnD);
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    if ((retVal = BuildEcPrivateKey(&pkey, E->G, d)))
+        goto Exit;
+
+    if ((sctx = EVP_PKEY_CTX_new_from_pkey(NULL, pkey, NULL)) == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EVP_PKEY_sign_init(sctx) != 1 ||
+        EVP_PKEY_sign(sctx, NULL, &sigbuf_len, digest->b.buffer, digest->b.size) != 1 ||
+        (csigbuf = sigbuf = OPENSSL_malloc(sigbuf_len)) == NULL ||
+        EVP_PKEY_sign(sctx, sigbuf, &sigbuf_len, digest->b.buffer, digest->b.size) != 1 ||
+        (sig = d2i_ECDSA_SIG(NULL, &csigbuf, sigbuf_len)) == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+#else
     eckey = EC_KEY_new();
 
     if (d == NULL || eckey == NULL)
@@ -242,6 +267,7 @@ BnSignEcdsa(
     sig = ECDSA_do_sign(digest->b.buffer, digest->b.size, eckey);
     if (sig == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
+#endif // OPENSSL_VERSION_NUMBER
 
     ECDSA_SIG_get0(sig, &r, &s);
     OsslToTpmBn(bnR, r);
@@ -251,7 +277,13 @@ BnSignEcdsa(
 
  Exit:
     BN_clear_free(d);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    OPENSSL_free(sigbuf);
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(sctx);
+#else
     EC_KEY_free(eckey);
+#endif
     ECDSA_SIG_free(sig);
 
     return retVal;
