@@ -100,6 +100,12 @@ TPM_RC BuildEcPrivateKey(
                          const EC_GROUP    *G,     // IN: group of the key
                          const BIGNUM      *D      // IN: private key
                         );
+
+TPM_RC BuildEcPublicKey(
+                        EVP_PKEY         **ppkey, // OUT
+                        const EC_GROUP    *G,     // IN: group of the key
+                        const EC_POINT    *Q      // IN: public point
+                       );
 #endif
 #endif
 

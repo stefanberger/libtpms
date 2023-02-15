@@ -373,7 +373,8 @@ TPM_RC DoEVPGetIV(
 static OSSL_PARAM *
 OpenSSLBuildEcParams(
                      const EC_GROUP   *G,  // IN: the group to convert to OSSL_PARAM
-                     const BIGNUM     *D   // IN: optional private key
+                     const BIGNUM     *D,  // IN: optional private key
+                     const EC_POINT   *Q   // IN: optional public point
                      )
 {
     const char     *field_name;
@@ -385,6 +386,8 @@ OpenSSLBuildEcParams(
     unsigned char  *buffer = NULL;
     size_t          buffer_size;
     OSSL_PARAM     *params = NULL;
+    unsigned char  *qbuffer = NULL;
+    size_t          qbuffer_size;
 
     pAssert(G != NULL);
 
@@ -422,10 +425,22 @@ OpenSSLBuildEcParams(
         OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_PRIV_KEY, D) != 1)
         goto Exit;
 
+    if (Q) {
+        if ((qbuffer_size = EC_POINT_point2oct(G, Q, POINT_CONVERSION_UNCOMPRESSED,
+                                               NULL, 0, NULL)) <= 0 ||
+            (qbuffer = OPENSSL_malloc(qbuffer_size)) == NULL ||
+            EC_POINT_point2oct(G, Q, POINT_CONVERSION_UNCOMPRESSED,
+                               qbuffer, qbuffer_size, NULL) != qbuffer_size ||
+            OSSL_PARAM_BLD_push_octet_string(bld, OSSL_PKEY_PARAM_PUB_KEY,
+                                             qbuffer, qbuffer_size) != 1)
+        goto Exit;
+    }
+
     params = OSSL_PARAM_BLD_to_param(bld);
 
  Exit:
     OSSL_PARAM_BLD_free(bld);
+    OPENSSL_free(qbuffer);
     OPENSSL_free(buffer);
     BN_free(b);
     BN_free(a);
@@ -453,7 +468,7 @@ OpenSSLEccGetPrivate(
 
     if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL)) == NULL ||
         EVP_PKEY_keygen_init(ctx) != 1 ||
-        (params = OpenSSLBuildEcParams(G, NULL)) == NULL ||
+        (params = OpenSSLBuildEcParams(G, NULL, NULL)) == NULL ||
         EVP_PKEY_CTX_set_params(ctx, params) != 1)
         goto Exit;
 
@@ -518,10 +533,39 @@ TPM_RC BuildEcPrivateKey(
         EVP_PKEY_fromdata_init(ctx) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
-    if ((grp_params = OpenSSLBuildEcParams(G, D)) == NULL)
+    if ((grp_params = OpenSSLBuildEcParams(G, D, NULL)) == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
 
     if (EVP_PKEY_fromdata(ctx, ppkey, EVP_PKEY_KEY_PARAMETERS | EVP_PKEY_KEYPAIR, grp_params) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+ Exit:
+    OSSL_PARAM_free(grp_params);
+    EVP_PKEY_CTX_free(ctx);
+
+    return retVal;
+}
+
+TPM_RC BuildEcPublicKey(
+                        EVP_PKEY         **ppkey, // OUT
+                        const EC_GROUP    *G,     // IN: group of the key
+                        const EC_POINT    *Q      // IN: public point
+                       )
+{
+    TPM_RC          retVal = 0;
+    EVP_PKEY_CTX   *ctx = NULL;
+    OSSL_PARAM     *grp_params = NULL;
+
+    if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "EC", NULL)) == NULL ||
+        EVP_PKEY_fromdata_init(ctx) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if ((grp_params = OpenSSLBuildEcParams(G, NULL, Q)) == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (EVP_PKEY_fromdata(ctx, ppkey,
+                          EVP_PKEY_KEY_PARAMETERS | EVP_PKEY_PUBLIC_KEY,
+                          grp_params) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
  Exit:

@@ -747,9 +747,16 @@ BnValidateSignatureEcdsa(
 			 )
 {
     int               retVal;
-    int               rc;
     ECDSA_SIG        *sig = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    EVP_PKEY_CTX     *vctx = NULL;
+    EVP_PKEY         *pkey = NULL;
+    size_t            sigbuf_len;
+    unsigned char    *sigbuf = NULL;
+#else
+    int               rc;
     EC_KEY           *eckey = NULL;
+#endif
     BIGNUM           *r = BN_new();
     BIGNUM           *s = BN_new();
     EC_POINT         *q = EcPointInitialized(ecQ, E);
@@ -758,6 +765,22 @@ BnValidateSignatureEcdsa(
     s = BigInitialized(s, bnS);
 
     sig = ECDSA_SIG_new();
+
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+
+    if ((retVal = BuildEcPublicKey(&pkey, E->G, q)))
+        goto Exit;
+
+    if ((vctx = EVP_PKEY_CTX_new_from_pkey(NULL, pkey, NULL)) == NULL)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+    if (ECDSA_SIG_set0(sig, r, s) != 1 ||
+        (sigbuf_len = i2d_ECDSA_SIG(sig, &sigbuf)) <= 0 ||
+        EVP_PKEY_verify_init(vctx) != 1 ||
+        EVP_PKEY_verify(vctx, sigbuf, sigbuf_len, digest->b.buffer, digest->b.size) != 1)
+        ERROR_RETURN(TPM_RC_FAILURE);
+
+#else
     eckey = EC_KEY_new();
 
     if (r == NULL || s == NULL || q == NULL || sig == NULL || eckey == NULL)
@@ -788,13 +811,19 @@ BnValidateSignatureEcdsa(
         retVal = TPM_RC_FAILURE;
         break;
     }
+#endif
 
  Exit:
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(vctx);
+#else
     EC_KEY_free(eckey);
-    ECDSA_SIG_free(sig);
-    EC_POINT_clear_free(q);
     BN_clear_free(r);
     BN_clear_free(s);
+#endif
+    ECDSA_SIG_free(sig);
+    EC_POINT_clear_free(q);
 
     return retVal;
 }
