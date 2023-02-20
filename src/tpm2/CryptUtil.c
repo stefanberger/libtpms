@@ -826,6 +826,10 @@ CryptParameterDecryption(
 			  + sizeof(session->sessionKey.t.buffer)));
     TPM2B_HMAC_KEY          key;            // decryption key
     UINT32                  cipherSize = 0; // size of cipher text
+
+    if (leadingSizeInByte > bufferSize)
+	return TPM_RC_INSUFFICIENT;
+
     // Retrieve encrypted data size.
     if(leadingSizeInByte == 2)
 	{
@@ -833,6 +837,7 @@ CryptParameterDecryption(
 	    // data to be decrypted
 	    cipherSize = (UINT32)BYTE_ARRAY_TO_UINT16(buffer);
 	    buffer = &buffer[2];   // advance the buffer
+	    bufferSize -= 2;
 	}
 #ifdef  TPM4B
     else if(leadingSizeInByte == 4)
@@ -840,6 +845,7 @@ CryptParameterDecryption(
 	    // the leading size is four bytes so get the four byte size field
 	    cipherSize = BYTE_ARRAY_TO_UINT32(buffer);
 	    buffer = &buffer[4];   //advance pointer
+	    bufferSize -= 4;
 	}
 #endif
     else
