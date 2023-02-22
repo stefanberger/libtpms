@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Feb 28 2023 Stefan Berger - 0.9.6-1
+- tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
+
 * Fri Jul 01 2022 Stefan Berger - 0.9.5-1
 - Release of version 0.9.5
 
