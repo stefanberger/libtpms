@@ -1,3 +1,9 @@
+libtpms (0.9.6) RELEASED; urgency=high
+
+  - tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Tue, 28 Feb 2023 09:00:00 -0500
+
 libtpms (0.9.5) RELEASED; urgency=medium
 
   - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
