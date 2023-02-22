@@ -50,7 +50,7 @@ extern "C" {
 
 #define TPM_LIBRARY_VER_MAJOR 0
 #define TPM_LIBRARY_VER_MINOR 9
-#define TPM_LIBRARY_VER_MICRO 5
+#define TPM_LIBRARY_VER_MICRO 6
 
 #define TPM_LIBRARY_VERSION_GEN(MAJ, MIN, MICRO) \
     (( MAJ << 16 ) | ( MIN << 8 ) | ( MICRO ))
