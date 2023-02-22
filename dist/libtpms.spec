@@ -112,6 +112,9 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Feb 28 2023 Stefan Berger - 0.8.9-1
+- tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
+
 * Thu Sep 08 2022 Stefan Berger - 0.8.8-1
 - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
 - tpm2: Fix a potential overflow expression (coverity)
