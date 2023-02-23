@@ -690,6 +690,20 @@ BnEccModMult2(
 	EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
 	{
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	    EC_POINT *pR1 = EC_POINT_new(E->G);
+	    EC_POINT *pR2 = EC_POINT_new(E->G);
+	    int OK;
+
+	    pAssert(pR1 && pR2);
+	    OK = EC_POINT_mul(E->G, pR1, NULL, pS, bnD, E->CTX);
+	    OK &= EC_POINT_mul(E->G, pR2, NULL, pQ, bnU, E->CTX);
+	    OK &= EC_POINT_add(E->G, pR, pR1, pR2, E->CTX);
+	    pAssert(OK);
+
+	    EC_POINT_clear_free(pR1);
+	    EC_POINT_clear_free(pR2);
+#else
 	    const EC_POINT        *points[2];
 	    const BIGNUM          *scalars[2];
 	    points[0] = pS;
@@ -697,6 +711,7 @@ BnEccModMult2(
 	    scalars[0] = bnD;
 	    scalars[1] = bnU;
 	    EC_POINTs_mul(E->G, pR, NULL, 2, points, scalars, E->CTX);
+#endif
 	}
     PointFromOssl(R, pR, E);
     EC_POINT_clear_free(pR); // libtpms changed
