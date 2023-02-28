@@ -892,6 +892,8 @@ TPM2_PolicyAuthorize(
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
     // Extract from the Name of the key, the algorithm used to compute it's Name
+    if (in->keySign.t.size < 2)		// libtpms added: TPM 2 Errata v1.4
+        return TPM_RC_INSUFFICIENT;	// libtpms added
     hashAlg = BYTE_ARRAY_TO_UINT16(in->keySign.t.name);
     // 'keySign' parameter needs to use a supported hash algorithm, otherwise
     // can't tell how large the digest should be
