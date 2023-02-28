@@ -71,15 +71,13 @@ OpenSSLCryptGenerateKeyDes(
                            TPMT_SENSITIVE *sensitive    // OUT: sensitive area
                           );
 
-typedef const EVP_CIPHER *(*evpfunc)(void);
-
-evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
-                     UINT16        keySizeInBits,   // IN
-                     TPM_ALG_ID    mode,            // IN
-                     const BYTE   *key,             // IN
-                     BYTE         *keyToUse,        // OUT same as key or stretched key
-                     UINT16       *keyToUseLen      // IN/OUT
-                     );
+const EVP_CIPHER *GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
+			       UINT16        keySizeInBits,   // IN
+			       TPM_ALG_ID    mode,            // IN
+			       const BYTE   *key,             // IN
+			       BYTE         *keyToUse,        // OUT same as key or stretched key
+			       UINT16       *keyToUseLen      // IN/OUT
+			      );
 
 TPM_RC DoEVPGetIV(
                   EVP_CIPHER_CTX    *ctx,    // IN: required context

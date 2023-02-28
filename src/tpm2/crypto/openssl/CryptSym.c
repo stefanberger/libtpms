@@ -540,7 +540,7 @@ CryptSymmetricEncrypt(
     INT16                blockSize;
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    evpfunc              evpfn;
+    const EVP_CIPHER    *evp_cipher;
     EVP_CIPHER_CTX      *ctx = NULL;
     int                  outlen1 = 0;
     int                  outlen2 = 0;
@@ -580,9 +580,9 @@ CryptSymmetricEncrypt(
 		return TPM_RC_SIZE;
         }
 
-    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
-                         keyToUse, &keyToUseLen);
-    if (evpfn == NULL)
+    evp_cipher = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                              keyToUse, &keyToUseLen);
+    if (evp_cipher == NULL)
         return TPM_RC_FAILURE;
 
     if (dIn == dOut) {
@@ -605,7 +605,7 @@ CryptSymmetricEncrypt(
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx ||
-        EVP_EncryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
+        EVP_EncryptInit_ex(ctx, evp_cipher, NULL, keyToUse, iv) != 1 ||
         EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
         EVP_EncryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
@@ -656,7 +656,7 @@ CryptSymmetricDecrypt(
     INT16                blockSize;
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    evpfunc              evpfn;
+    const EVP_CIPHER    *evp_cipher;
     EVP_CIPHER_CTX      *ctx = NULL;
     int                  outlen1 = 0;
     int                  outlen2 = 0;
@@ -704,9 +704,9 @@ CryptSymmetricDecrypt(
 	    break;
 	}
 
-    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
-                         keyToUse, &keyToUseLen);
-    if (evpfn ==  NULL)
+    evp_cipher = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                              keyToUse, &keyToUseLen);
+    if (evp_cipher == NULL)
         return TPM_RC_FAILURE;
 
     /* a buffer with a 'safety margin' for EVP_DecryptUpdate */
@@ -725,7 +725,7 @@ CryptSymmetricDecrypt(
 
     ctx = EVP_CIPHER_CTX_new();
     if (!ctx ||
-        EVP_DecryptInit_ex(ctx, evpfn(), NULL, keyToUse, iv) != 1 ||
+        EVP_DecryptInit_ex(ctx, evp_cipher, NULL, keyToUse, iv) != 1 ||
         EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
         EVP_DecryptUpdate(ctx, buffer, &outlen1, dIn, dSize) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
