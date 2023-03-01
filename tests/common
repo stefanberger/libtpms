@@ -6,9 +6,9 @@
 function get_filesize()
 {
 	if [[ "$(uname -s)" =~ (Linux|CYGWIN_NT-) ]]; then
-		stat -c%s $1
+		stat -c%s "$1"
 	else
 		# OpenBSD
-		stat -f%z $1
+		stat -f%z "$1"
 	fi
 }
