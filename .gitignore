@@ -54,6 +54,8 @@ Makefile
 /tests/freebl_sha1flattensize
 /tests/nvram_offsets
 /tests/tpm2_createprimary
+/tests/tpm2_cve-2023-1017
+/tests/tpm2_cve-2023-1018
 /tests/tpm2_pcr_read
 /tests/tpm2_selftest
 /debian/*debhelper*
