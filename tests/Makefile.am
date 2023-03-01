@@ -83,6 +83,7 @@ EXTRA_DIST = \
 	tpm2_createprimary.sh \
 	tpm2_pcr_read.c \
 	tpm2_pcr_read.sh \
+	tpm2_run_test.sh \
 	tpm2_selftest.c \
 	tpm2_selftest.sh \
 	fuzz.sh
