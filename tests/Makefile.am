@@ -23,6 +23,8 @@ if WITH_TPM2
 check_PROGRAMS += \
 	nvram_offsets \
 	tpm2_createprimary \
+	tpm2_cve-2023-1017 \
+	tpm2_cve-2023-1018 \
 	tpm2_pcr_read \
 	tpm2_selftest
 
@@ -30,6 +32,8 @@ TESTS += \
 	fuzz.sh \
 	nvram_offsets \
 	tpm2_createprimary.sh \
+	tpm2_cve-2023-1017.sh \
+	tpm2_cve-2023-1018.sh \
 	tpm2_pcr_read.sh \
 	tpm2_selftest.sh
 endif
@@ -81,6 +85,10 @@ EXTRA_DIST = \
 	common \
 	tpm2_createprimary.c \
 	tpm2_createprimary.sh \
+	tpm2_cve-2023-1017.c \
+	tpm2_cve-2023-1017.sh \
+	tpm2_cve-2023-1018.c \
+	tpm2_cve-2023-1018.sh \
 	tpm2_pcr_read.c \
 	tpm2_pcr_read.sh \
 	tpm2_run_test.sh \
