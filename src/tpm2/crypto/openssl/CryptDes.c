@@ -3,7 +3,6 @@
 /*			   Functions Required for TDES  			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptDes.c 1398 2018-12-17 22:37:57Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -166,6 +165,12 @@ CryptGenerateKeyDes(
     // number of bits.
     sensitive->sensitive.sym.t.size =
 	BITS_TO_BYTES(publicArea->parameters.symDetail.sym.keyBits.sym);
+    // Because we use BYTE_ARRAY_TO_UINT64 below, require the requested DES key
+    // to be a multiple of 8 bytes in size.
+    if((sensitive->sensitive.sym.t.size % 8) != 0)
+	{
+	    return TPM_RC_SYMMETRIC;
+	}
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC    // libtpms added begin
     if (rand == NULL)
         return OpenSSLCryptGenerateKeyDes(sensitive);
