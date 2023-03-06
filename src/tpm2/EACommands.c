@@ -3,7 +3,6 @@
 /*			    Enhanced Authorization Commands			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EACommands.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -891,9 +890,11 @@ TPM2_PolicyAuthorize(
     // Input Validation
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    if(in->keySign.t.size < 2)
+	{
+	    return TPM_RCS_SIZE + RC_PolicyAuthorize_keySign;
+	}
     // Extract from the Name of the key, the algorithm used to compute it's Name
-    if (in->keySign.t.size < 2)		// libtpms added: TPM 2 Errata v1.4
-        return TPM_RC_INSUFFICIENT;	// libtpms added
     hashAlg = BYTE_ARRAY_TO_UINT16(in->keySign.t.name);
     // 'keySign' parameter needs to use a supported hash algorithm, otherwise
     // can't tell how large the digest should be
