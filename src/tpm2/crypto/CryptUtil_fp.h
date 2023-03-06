@@ -141,7 +141,7 @@ TPM_RC
 CryptParameterDecryption(
 			 TPM_HANDLE       handle,            // IN: encrypted session handle
 			 TPM2B           *nonceCaller,       // IN: nonce caller
-			 UINT32           bufferSize,        // IN: size of parameter buffer
+			 INT32            bufferSize,        // IN: size of parameter buffer
 			 UINT16           leadingSizeInByte, // IN: the size of the leading size field in
 			 //     byte
 			 TPM2B_AUTH      *extraKey,          // IN: the authValue

@@ -3,7 +3,6 @@
 /*			Interfaces to the Crypto Engine				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -815,7 +814,7 @@ TPM_RC
 CryptParameterDecryption(
 			 TPM_HANDLE       handle,            // IN: encrypted session handle
 			 TPM2B           *nonceCaller,       // IN: nonce caller
-			 UINT32           bufferSize,        // IN: size of parameter buffer
+			 INT32            bufferSize,        // IN: size of parameter buffer
 			 UINT16           leadingSizeInByte, // IN: the size of the leading size field in
 			 //     byte
 			 TPM2B_AUTH      *extraKey,          // IN: the authValue
@@ -829,35 +828,27 @@ CryptParameterDecryption(
     TPM2B_TYPE(HMAC_KEY, (sizeof(extraKey->t.buffer)
 			  + sizeof(session->sessionKey.t.buffer)));
     TPM2B_HMAC_KEY          key;            // decryption key
-    UINT32                  cipherSize = 0; // size of cipher text
+    UINT16                  cipherSize = 0; // size of cipher text
 
-    if (leadingSizeInByte > bufferSize)
-	return TPM_RC_INSUFFICIENT;
-
-    // Retrieve encrypted data size.
-    if(leadingSizeInByte == 2)
+    if(bufferSize < leadingSizeInByte)
 	{
-	    // The first two bytes of the buffer are the size of the
-	    // data to be decrypted
-	    cipherSize = (UINT32)BYTE_ARRAY_TO_UINT16(buffer);
-	    buffer = &buffer[2];   // advance the buffer
-	    bufferSize -= 2;
+	    return TPM_RC_INSUFFICIENT;
 	}
-#ifdef  TPM4B
-    else if(leadingSizeInByte == 4)
-	{
-	    // the leading size is four bytes so get the four byte size field
-	    cipherSize = BYTE_ARRAY_TO_UINT32(buffer);
-	    buffer = &buffer[4];   //advance pointer
-	    bufferSize -= 4;
-	}
-#endif
-    else
+    // Parameter encryption for a non-2B is not supported.
+    if(leadingSizeInByte != 2)
 	{
 	    FAIL(FATAL_ERROR_INTERNAL);
+	    return TPM_RC_FAILURE;
+	}
+    // Retrieve encrypted data size.
+    if(UINT16_Unmarshal(&cipherSize, &buffer, &bufferSize) != TPM_RC_SUCCESS)
+	{
+	    return TPM_RC_INSUFFICIENT;
 	}
     if(cipherSize > bufferSize)
+	{
 	return TPM_RC_SIZE;
+	}
     // Compute decryption key by concatenating sessionAuth with extra input key
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
     MemoryConcat2B(&key.b, &extraKey->b, sizeof(key.t.buffer));
@@ -865,14 +856,22 @@ CryptParameterDecryption(
 	// XOR parameter decryption formulation:
 	//    XOR(parameter, hash, sessionAuth, nonceNewer, nonceOlder)
 	// Call XOR obfuscation function
-	CryptXORObfuscation(session->authHashAlg, &key.b, nonceCaller,
-			    &(session->nonceTPM.b), cipherSize, buffer);
+	CryptXORObfuscation(session->authHashAlg,
+			    &key.b,
+			    nonceCaller,
+			    &(session->nonceTPM.b),
+			    (UINT32)cipherSize,
+			    buffer);
     else
 	// Assume that it is one of the symmetric block ciphers.
-	ParmDecryptSym(session->symmetric.algorithm, session->authHashAlg,
+	ParmDecryptSym(session->symmetric.algorithm,
+		       session->authHashAlg,
 		       session->symmetric.keyBits.sym,
-		       &key.b, nonceCaller, &session->nonceTPM.b,
-		       cipherSize, buffer);
+		       &key.b,
+		       nonceCaller,
+		       &session->nonceTPM.b,
+		       (UINT32)cipherSize,
+		       buffer);
     return TPM_RC_SUCCESS;
 }
 /* 10.2.6.6.7 CryptComputeSymmetricUnique() */
