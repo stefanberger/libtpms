@@ -3,7 +3,6 @@
 /*		Process the Authorization Sessions     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -1880,12 +1879,13 @@ UpdateAllNonceTPM(
    in the response buffer to be filled. This is where the authorization sessions will go, if
    any. command->parameterSize is the number of bytes that have been marshaled as parameters in the
    output buffer. */
-void
+TPM_RC
 BuildResponseSession(
 		     COMMAND         *command        // IN: structure that has relevant command
 		     //     information
 		     )
 {
+    TPM_RC result = TPM_RC_SUCCESS;
     pAssert(command->authSize == 0);
     // Reset the parameter buffer to point to the start of the parameters so that
     // there is a starting point for any rpHash that might be generated and so there
@@ -1915,11 +1915,23 @@ BuildResponseSession(
 					       &extraKey);
 			}
 		    size = EncryptSize(command->index);
+		    // This function operates on internally-generated data that is
+		    // expected to be well-formed for parameter encryption.
+		    // In the event that there is a bug elsewhere in the code and the
+		    // input data is not well-formed, CryptParameterEncryption will
+		    // put the TPM into failure mode instead of allowing the out-of-
+		    // band write.
 		    CryptParameterEncryption(s_sessionHandles[s_encryptSessionIndex],
 					     &s_nonceCaller[s_encryptSessionIndex].b,
+					     command->parameterSize,
 					     (UINT16)size,
 					     &extraKey,
 					     command->parameterBuffer);
+		    if(g_inFailureMode)
+			{
+			    result = TPM_RC_FAILURE;
+			    goto Cleanup;
+			}
 		}
 	}
     // Audit sessions should be processed regardless of the tag because
@@ -1969,7 +1981,8 @@ BuildResponseSession(
 			SessionFlush(s_sessionHandles[i]);
 		}
 	}
-    return;
+ Cleanup:
+    return result;
 }
 /* 6.4.5.13 SessionRemoveAssociationToHandle() */
 /* This function deals with the case where an entity associated with an authorization is deleted
