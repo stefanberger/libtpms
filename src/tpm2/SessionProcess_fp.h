@@ -3,7 +3,6 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SessionProcess_fp.h 1490 2019-07-26 21:13:22Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -83,7 +82,7 @@ TPM_RC
 CheckAuthNoSession(
 		   COMMAND         *command        // IN: command parsing structure
 		   );
-void
+TPM_RC
 BuildResponseSession(
 		     COMMAND         *command        // IN: structure that has relevant command
 		     //     information

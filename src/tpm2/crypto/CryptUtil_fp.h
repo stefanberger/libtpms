@@ -3,7 +3,6 @@
 /*			  Interfaces to the CryptoEngine			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptUtil_fp.h 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -131,6 +130,7 @@ void
 CryptParameterEncryption(
 			 TPM_HANDLE       handle,            // IN: encrypt session handle
 			 TPM2B           *nonceCaller,       // IN: nonce caller
+			 INT32            bufferSize,        // IN: size of parameter buffer
 			 UINT16           leadingSizeInByte, // IN: the size of the leading size field in
 			 //     bytes
 			 TPM2B_AUTH      *extraKey,          // IN: additional key material other than

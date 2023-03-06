@@ -755,6 +755,7 @@ void
 CryptParameterEncryption(
 			 TPM_HANDLE       handle,            // IN: encrypt session handle
 			 TPM2B           *nonceCaller,       // IN: nonce caller
+			 INT32            bufferSize,	     // IN: size of parameter buffer
 			 UINT16           leadingSizeInByte, // IN: the size of the leading size field in
 			 //     bytes
 			 TPM2B_AUTH      *extraKey,          // IN: additional key material other than
@@ -766,28 +767,29 @@ CryptParameterEncryption(
     TPM2B_TYPE(TEMP_KEY, (sizeof(extraKey->t.buffer)
 			  + sizeof(session->sessionKey.t.buffer)));
     TPM2B_TEMP_KEY        key;               // encryption key
-    UINT32               cipherSize = 0;    // size of cipher text
-    // Retrieve encrypted data size.
-    if(leadingSizeInByte == 2)
-	{
-	    // Extract the first two bytes as the size field as the data size
-	    // encrypt
-	    cipherSize = (UINT32)BYTE_ARRAY_TO_UINT16(buffer);
-	    // advance the buffer
-	    buffer = &buffer[2];
-	}
-#ifdef      TPM4B
-    else if(leadingSizeInByte == 4)
-	{
-	    // use the first four bytes to indicate the number of bytes to encrypt
-	    cipherSize = BYTE_ARRAY_TO_UINT32(buffer);
-	    //advance pointer
-	    buffer = &buffer[4];
-	}
-#endif
-    else
+    UINT16                cipherSize = 0;    // size of cipher text
+
+    if(bufferSize < leadingSizeInByte)
 	{
 	    FAIL(FATAL_ERROR_INTERNAL);
+	    return;
+	}
+    // Parameter encryption for a non-2B is not supported.
+    if(leadingSizeInByte != 2)
+	{
+	    FAIL(FATAL_ERROR_INTERNAL);
+	    return;
+	}
+    // Retrieve encrypted data size.
+    if(UINT16_Unmarshal(&cipherSize, &buffer, &bufferSize) != TPM_RC_SUCCESS)
+	{
+	    FAIL(FATAL_ERROR_INTERNAL);
+	    return;
+	}
+    if(cipherSize > bufferSize)
+	{
+	    FAIL(FATAL_ERROR_INTERNAL);
+	    return;
 	}
     // Compute encryption key by concatenating sessionKey with extra key
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
@@ -795,14 +797,21 @@ CryptParameterEncryption(
     if(session->symmetric.algorithm == TPM_ALG_XOR)
 	// XOR parameter encryption formulation:
 	//    XOR(parameter, hash, sessionAuth, nonceNewer, nonceOlder)
-	CryptXORObfuscation(session->authHashAlg, &(key.b),
+	CryptXORObfuscation(session->authHashAlg,
+			    &(key.b),
 			    &(session->nonceTPM.b),
-			    nonceCaller, cipherSize, buffer);
+			    nonceCaller,
+			    (UINT32)cipherSize,
+			    buffer);
     else
-	ParmEncryptSym(session->symmetric.algorithm, session->authHashAlg,
-		       session->symmetric.keyBits.aes, &(key.b),
-		       nonceCaller, &(session->nonceTPM.b),
-		       cipherSize, buffer);
+	ParmEncryptSym(session->symmetric.algorithm,
+		       session->authHashAlg,
+		       session->symmetric.keyBits.aes,
+		       &(key.b),
+		       nonceCaller,
+		       &(session->nonceTPM.b),
+		       (UINT32)cipherSize,
+		       buffer);
     return;
 }
 /* 10.2.6.6.6 CryptParameterDecryption() */

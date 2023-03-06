@@ -3,7 +3,6 @@
 /*			     ExecCommand					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ExecCommand.c 1600 2020-03-30 22:08:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -275,7 +274,11 @@ ExecuteCommand(
     if(result != TPM_RC_SUCCESS)
 	goto Cleanup;
     // Build the session area at the end of the parameter area.
-    BuildResponseSession(&command);
+    result = BuildResponseSession(&command);
+    if(result != TPM_RC_SUCCESS)
+	{
+	    goto Cleanup;
+	}
  Cleanup:
     if(g_clearOrderly == TRUE
        && NV_IS_ORDERLY)
