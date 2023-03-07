@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -283,7 +283,7 @@ TPM2_Startup(
     OK = OK && NV_SYNC_PERSISTENT(orderlyState);
     // This can be reset after the first completion of a TPM2_Startup() after
     // a power loss. It can probably be reset earlier but this is an OK place.
-    if (OK) 
+    if (OK)
 	g_powerWasLost = FALSE;
     return (OK) ? TPM_RC_SUCCESS : TPM_RC_FAILURE;
 }
@@ -308,9 +308,9 @@ TPM2_Shutdown(
     gp.orderlyState = in->shutdownType;
 #if USE_DA_USED
     // CLEAR g_daUsed so that any future DA-protected access will cause the
-    // shutdown to become non-orderly. It is not sufficient to invalidate the 
-    // shutdown state after a DA failure because an attacker can inhibit access 
-    // to NV and use the fact that an update of failedTries was attempted as an 
+    // shutdown to become non-orderly. It is not sufficient to invalidate the
+    // shutdown state after a DA failure because an attacker can inhibit access
+    // to NV and use the fact that an update of failedTries was attempted as an
     // indication of an authorization failure. By making sure that the orderly state
     // is CLEAR before any DA attempt, this prevents the possibility of this 'attack.'
     g_daUsed = FALSE;

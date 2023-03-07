@@ -90,7 +90,7 @@ TPM2_EncryptDecrypt(
     attributes = symKey->publicArea.objectAttributes;
     // The input key should be a symmetric key
     if(symKey->publicArea.type != TPM_ALG_SYMCIPHER)
-	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;	
+	return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
     // The key must be unrestricted and allow the selected operation
     OK = IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted)
      if(YES == in->decrypt)
