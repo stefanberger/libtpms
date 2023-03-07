@@ -154,13 +154,15 @@ extern const bignum_t   BnConstZero;
    and the structure it points to is name_ */
 #define BN_ADDRESS(name) (bigNum)&name##_
 
+#define CRYPT_WORDS(bytes)  BYTES_TO_CRYPT_WORDS(bytes)
+#define MIN_ALLOC(bytes)    (CRYPT_WORDS(bytes) < 1 ? 1 : CRYPT_WORDS(bytes))
 #define BN_CONST(name, words, initializer)				\
     typedef const struct name##_type {					\
 	crypt_uword_t       allocated;					\
 	crypt_uword_t       size;					\
 	crypt_uword_t       d[words < 1 ? 1 : words];			\
     } name##_type;							\
-    name##_type name = {(words < 1 ? 1 : words), words, {initializer}};
+    name##_type name = {MIN_ALLOC(bytes), CRYPT_WORDS(bytes), {initializer}};
 
 #define BN_STRUCT_ALLOCATION(bits) (BITS_TO_CRYPT_WORDS(bits) + 1)
 /* Create a structure of the correct size. */
@@ -258,7 +260,7 @@ typedef struct
 #define CurveGetG(C)        ((pointConst)&((C)->base))
 #define CurveGetGx(C)       ((C)->base.x)
 #define CurveGetGy(C)       ((C)->base.y)
-/* Convert bytes in initializers according to the endianness of the system. This is used for
+/* Convert bytes in initializers according to the endianess of the system. This is used for
    CryptEccData.c. */
 #define     BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)			\
     (    ((UINT32)(a) << 24)						\
