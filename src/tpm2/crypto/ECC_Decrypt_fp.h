@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			Include Headers for Internal Routines			*/
+/*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccCrypt_fp.h 1594 2020-03-26 22:15:48Z kgoldman $	*/
+/*            $Id$		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,38 +55,37 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2020 - 2022				*/
+/*  (c) Copyright IBM Corp. and others, 2022					*/
 /*										*/
 /********************************************************************************/
 
-#ifndef CRYPTECCCRYPT_FP_H
-#define CRYPTECCCRYPT_FP_H
 
-BOOL
-CryptEccSelectScheme(
-		     OBJECT              *key,           //IN: key containing default scheme
-		     TPMT_KDF_SCHEME     *scheme         // IN: a decrypt scheme
-		     );
+#ifndef ECC_Decrypt_FP_H
+#define ECC_Decrypt_FP_H
 
-LIB_EXPORT TPM_RC
-CryptEccEncrypt(
-		OBJECT                  *key,           // IN: public key of recipient
-		TPMT_KDF_SCHEME         *scheme,        // IN: scheme to use.
-		TPM2B_MAX_BUFFER        *plainText,     // IN: the text to obfuscate
-		TPMS_ECC_POINT          *c1,            // OUT: public ephemeral key
-		TPM2B_MAX_BUFFER        *c2,            // OUT: obfuscated text
-		TPM2B_DIGEST            *c3             // OUT: digest of ephemeral key
-		//      and plainText
-		);
-LIB_EXPORT TPM_RC
-CryptEccDecrypt(
-		OBJECT                  *key,           // IN: key used for data recovery
-		TPMT_KDF_SCHEME         *scheme,        // IN: scheme to use.
-		TPM2B_MAX_BUFFER        *plainText,     // OUT: the recovered text
-		TPMS_ECC_POINT          *c1,            // IN: public ephemeral key
-		TPM2B_MAX_BUFFER        *c2,            // IN: obfuscated text
-		TPM2B_DIGEST            *c3             // IN: digest of ephemeral key
-		//      and plainText
-		);
+typedef struct {
+    TPMI_DH_OBJECT	keyHandle;
+    TPM2B_ECC_POINT	C1;
+    TPM2B_MAX_BUFFER	C2;
+    TPM2B_DIGEST	C3;
+    TPMT_KDF_SCHEME	inScheme;
+} ECC_Decrypt_In;
+
+#define RC_ECC_Decrypt_keyHandle (TPM_RC_H + TPM_RC_1)
+#define RC_ECC_Decrypt_C1	 (TPM_RC_P + TPM_RC_1)
+#define RC_ECC_Decrypt_C2	 (TPM_RC_P + TPM_RC_2)
+#define RC_ECC_Decrypt_C3	 (TPM_RC_P + TPM_RC_3)
+#define RC_ECC_Decrypt_inScheme  (TPM_RC_P + TPM_RC_4)
+
+typedef struct {
+    TPM2B_MAX_BUFFER	plainText;
+} ECC_Decrypt_Out;
+
+TPM_RC
+TPM2_ECC_Decrypt(
+		 ECC_Decrypt_In      *in,            // IN: input parameter list
+		 ECC_Decrypt_Out     *out            // OUT: output parameter list
+		 );
+
 
 #endif

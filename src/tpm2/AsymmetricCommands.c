@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2022				*/
 /*										*/
 /********************************************************************************/
 
@@ -297,3 +297,53 @@ TPM2_ZGen_2Phase(
     return result;
 }
 #endif // CC_ZGen_2Phase
+#include "Tpm.h"
+#include "ECC_Encrypt_fp.h"
+
+#if CC_ECC_Encrypt  // Conditional expansion of this file
+TPM_RC
+TPM2_ECC_Encrypt(
+		 ECC_Encrypt_In   *in,            // IN: input parameter list
+		 ECC_Encrypt_Out  *out            // OUT: output parameter list
+		 )
+{
+    OBJECT          *pubKey = HandleToObject(in->keyHandle);
+    // Parameter validation
+    if (pubKey->publicArea.type != TPM_ALG_ECC)
+	return TPM_RC_KEY + RC_ECC_Encrypt_keyHandle;
+    // Have to have a scheme selected
+    if(!CryptEccSelectScheme(pubKey, &in->inScheme))
+	return TPM_RCS_SCHEME + RC_ECC_Encrypt_inScheme;
+    //  Command Output
+    return CryptEccEncrypt(pubKey, &in->inScheme, &in->plainText,
+			   &out->C1.point, &out->C2, &out->C3);
+}
+#endif // CC_ECC_Encrypt
+#include "Tpm.h"
+#include "ECC_Decrypt_fp.h"
+#include "CryptEccCrypt_fp.h"
+
+#if CC_ECC_Decrypt  // Conditional expansion of this file
+TPM_RC
+TPM2_ECC_Decrypt(
+		 ECC_Decrypt_In   *in,            // IN: input parameter list
+		 ECC_Decrypt_Out  *out            // OUT: output parameter list
+		 )
+{
+    OBJECT          *key = HandleToObject(in->keyHandle);
+    // Parameter validation
+    // Must be the correct type of key with correct attributes
+    if (key->publicArea.type != TPM_ALG_ECC)
+	return TPM_RC_KEY + RC_ECC_Decrypt_keyHandle;
+    if (IS_ATTRIBUTE(key->publicArea.objectAttributes, TPMA_OBJECT, restricted)
+	|| !IS_ATTRIBUTE(key->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
+	return TPM_RCS_ATTRIBUTES + RC_ECC_Decrypt_keyHandle;
+    // Have to have a scheme selected
+    if(!CryptEccSelectScheme(key, &in->inScheme))
+	return TPM_RCS_SCHEME + RC_ECC_Decrypt_inScheme;
+    //  Command Output
+    return CryptEccDecrypt(key, &in->inScheme, &out->plainText,
+			   &in->C1.point, &in->C2, &in->C3);
+}
+#endif // CC_ECC_Decrypt
+
