@@ -1931,7 +1931,7 @@ CertifyX509_COMMAND_DESCRIPTOR_t _CertifyX509Data = {
 				 (UINT16)(offsetof(CertifyX509_Out, tbsDigest)),
 				 (UINT16)(offsetof(CertifyX509_Out, signature))},
 	/* types         */     {TPMI_DH_OBJECT_H_UNMARSHAL,
-				 TPMI_DH_OBJECT_H_UNMARSHAL + ADD_FLAG,
+				 TPMI_DH_OBJECT_H_UNMARSHAL,
 				 TPM2B_DATA_P_UNMARSHAL,
 				 TPMT_SIG_SCHEME_P_UNMARSHAL + ADD_FLAG,
 				 TPM2B_MAX_BUFFER_P_UNMARSHAL,
