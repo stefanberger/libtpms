@@ -92,6 +92,7 @@ UnsignedCompareB(
 			return (a[i] > b[i]) ? 1 : -1;
 		}
 	}
+    // Will return == if sizes are both zero
     return 0;
 }
 /* 9.11.2.2 SignedCompareB() */
@@ -108,23 +109,13 @@ SignedCompareB(
 	       const BYTE      *b              // IN: b buffer
 	       )
 {
-    int      signA, signB;       // sign of a and b
-    // For positive or 0, sign_a is 1
-    // for negative, sign_a is 0
-    signA = ((a[0] & 0x80) == 0) ? 1 : 0;
-    // For positive or 0, sign_b is 1
-    // for negative, sign_b is 0
-    signB = ((b[0] & 0x80) == 0) ? 1 : 0;
-    if(signA != signB)
-	{
-	    return signA - signB;
-	}
-    if(signA == 1)
+    // are the signs different ?
+    if(((a[0] ^ b[0]) & 0x80) > 0)
+	// if the signs are different, then a is less than b if a is negative.
+	return a[0] & 0x80 ? -1 : 1;
+    else
 	// do unsigned compare function
 	return UnsignedCompareB(aSize, a, bSize, b);
-    else
-	// do unsigned compare the other way
-	return 0 - UnsignedCompareB(aSize, a, bSize, b);
 }
 /* 9.11.3.3 ModExpB */
 /* This function is used to do modular exponentiation in support of RSA. The most typical uses are:
