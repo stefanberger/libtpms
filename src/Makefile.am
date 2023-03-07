@@ -309,6 +309,8 @@ noinst_HEADERS += \
 	tpm2/crypto/CryptSym_fp.h \
 	tpm2/crypto/CryptTest.h \
 	tpm2/crypto/CryptUtil_fp.h \
+	tpm2/crypto/ECC_Decrypt_fp.h \
+	tpm2/crypto/ECC_Encrypt_fp.h \
 	tpm2/ACT.h \
 	tpm2/ACT_spt_fp.h \
 	tpm2/ACT_SetTimeout_fp.h \
@@ -529,6 +531,7 @@ if LIBTPMS_USE_OPENSSL
 libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/CryptCmac.c \
 	tpm2/crypto/openssl/CryptDes.c \
+	tpm2/crypto/openssl/CryptEccCrypt.c \
 	tpm2/crypto/openssl/CryptEccKeyExchange.c \
 	tpm2/crypto/openssl/CryptEccMain.c \
 	tpm2/crypto/openssl/CryptEccSignature.c \
