@@ -79,6 +79,14 @@
     || defined(_M_ARM) || defined(__arm__) || defined(__thumb__)	\
     || defined(__powerpc__) || defined(__PPC__)
 #       define RADIX_BITS                      32
+#   elif defined(__riscv) || defined(__riscv__)
+#       if __riscv_xlen == 32
+#            define RADIX_BITS                 32
+#       elif __riscv_xlen == 64
+#            define RADIX_BITS                 64
+#       else
+#            error Unsupported __riscv_xlen value
+#       endif
 #   else
 #       error Unable to determine RADIX_BITS from compiler environment
 #   endif

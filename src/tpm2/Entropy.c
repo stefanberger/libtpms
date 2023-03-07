@@ -3,7 +3,7 @@
 /*			     Entropy						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entropy.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: Entropy.c 1661 2021-03-18 19:00:58Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -69,7 +69,8 @@
 
 #include <time.h>
 #include "Platform.h"
-#ifdef _MSC_VER
+
+#if defined _MSC_VER || defined _MINGW
 #include <process.h>
 #else
 #include <unistd.h>
@@ -147,7 +148,7 @@ _plat__GetEntropy(
 	    // NOTE 2: In debug builds by default the reference implementation will seed
 	    // its RNG deterministically (without using any platform provided randomness).
 	    // See the USE_DEBUG_RNG macro and DRBG_GetEntropy() function.
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined _MINGW
 	    srand((unsigned)_plat__RealTime() ^ _getpid());
 #else
 	    srand((unsigned)_plat__RealTime() ^ getpid());

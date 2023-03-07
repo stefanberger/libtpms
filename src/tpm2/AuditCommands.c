@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -64,7 +64,7 @@
 #if CC_SetCommandCodeAuditStatus  // Conditional expansion of this file
 TPM_RC
 TPM2_SetCommandCodeAuditStatus(
-			       SetCommandCodeAuditStatus_In    *in             // IN: input parameter list
+			       SetCommandCodeAuditStatus_In    *in	// IN: input parameter list
 			       )
 {
     // The command needs NV update.  Check if NV is available.

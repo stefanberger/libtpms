@@ -86,18 +86,18 @@ TPM2_ContextSave(
     // the update of state reset data. If the state is orderly and
     // cannot be changed, exit early.
     RETURN_IF_ORDERLY;
-    
+
     // Internal Data Update
-    
+
     // This implementation does not do things in quite the same way as described in
-    // Part 2 of the specification. In Part 2, it indicates that the 
-    // TPMS_CONTEXT_DATA contains two TPM2B values. That is not how this is 
-    // implemented. Rather, the size field of the TPM2B_CONTEXT_DATA is used to 
-    // determine the amount of data in the encrypted data. That part is not 
-    // independently sized. This makes the actual size 2 bytes smaller than 
-    // calculated using Part 2. Since this is opaque to the caller, it is not 
+    // Part 2 of the specification. In Part 2, it indicates that the
+    // TPMS_CONTEXT_DATA contains two TPM2B values. That is not how this is
+    // implemented. Rather, the size field of the TPM2B_CONTEXT_DATA is used to
+    // determine the amount of data in the encrypted data. That part is not
+    // independently sized. This makes the actual size 2 bytes smaller than
+    // calculated using Part 2. Since this is opaque to the caller, it is not
     // necessary to fix. The actual size is returned by TPM2_GetCapabilties().
-    
+
     // Initialize output handle.  At the end of command action, the output
     // handle of an object will be replaced, while the output handle
     // for a session will be the same as input

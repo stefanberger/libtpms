@@ -297,12 +297,12 @@ typedef struct
 #define JOINED(a,b) a b
 #define MJOIN(a,b) a b
 
-#define B4_TO_BN(a, b, c, d)  (((((a << 8) + b) << 8) + c) + d)
 #if RADIX_BYTES == 64
 #define B8_TO_BN(a, b, c, d, e, f, g, h)				\
-    (UINT64)(((((((((((((((a) << 8) | b) << 8) | c) << 8) | d) << 8)	\
-		   e) << 8) | f) << 8) | g) << 8) | h)
-#define B1_TO_BN(a)                     B8_TO_BN(0, 0, 0, 0, 0, 0, 0, a)
+    ((((((((((((((((UINT64)a) << 8) | (UINT64)b) << 8) | (UINT64)c) << 8) \
+	     | (UINT64)d) << 8) | (UINT64)e) << 8) | (UINT64)f) << 8)	\
+       | (UINT64)g) << 8) | (UINT64)h)
+#define B1_TO_BN(a)                     B8_TO_BN(0, 0, 0, 0, 0, 0, 0, a)o
 #define B2_TO_BN(a, b)                  B8_TO_BN(0, 0, 0, 0, 0, 0, a, b)
 #define B3_TO_BN(a, b, c)               B8_TO_BN(0, 0, 0, 0, 0, a, b, c)
 #define B4_TO_BN(a, b, c, d)            B8_TO_BN(0, 0, 0, 0, a, b, c, d)
@@ -310,10 +310,11 @@ typedef struct
 #define B6_TO_BN(a, b, c, d, e, f)      B8_TO_BN(0, 0, a, b, c, d, e, f)
 #define B7_TO_BN(a, b, c, d, e, f, g)   B8_TO_BN(0, a, b, c, d, e, f, g)
 #else
-#define B1_TO_BN(a)                 B4_TO_BN(0, 0, 0, a)
-#define B2_TO_BN(a, b)              B4_TO_BN(0, 0, a, b)
-#define B3_TO_BN(a, b, c)           B4_TO_BN(0, a, b, c)
-#define B4_TO_BN(a, b, c, d)        (((((a << 8) + b) << 8) + c) + d)
+#define B1_TO_BN(a)                     B4_TO_BN(0, 0, 0, a)
+#define B2_TO_BN(a, b)                  B4_TO_BN(0, 0, a, b)
+#define B3_TO_BN(a, b, c)               B4_TO_BN(0, a, b, c)
+#define B4_TO_BN(a, b, c, d)						\
+    (((((((UINT32)a << 8) | (UINT32)b) << 8) | (UINT32)c) << 8) | (UINT32)d)
 #define B5_TO_BN(a, b, c, d, e)          B4_TO_BN(b, c, d, e), B1_TO_BN(a)
 #define B6_TO_BN(a, b, c, d, e, f)       B4_TO_BN(c, d, e, f), B2_TO_BN(a, b)
 #define B7_TO_BN(a, b, c, d, e, f, g)    B4_TO_BN(d, e, f, g), B3_TO_BN(a, b, c)
