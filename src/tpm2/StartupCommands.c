@@ -99,7 +99,7 @@ _TPM_Init(
     // Initialize the NvEnvironment.
     g_nvOk = NvPowerOn();
     // Initialize cryptographic functions
-    g_inFailureMode |= (CryptInit() == FALSE); /* libtpms changed */
+    g_inFailureMode |= (g_nvOk == FALSE) || (CryptInit() == FALSE); // libtpms changed
     if(!g_inFailureMode)
 	{
 	    // Load the persistent data
