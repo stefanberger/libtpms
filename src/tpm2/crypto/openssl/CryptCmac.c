@@ -68,6 +68,9 @@
 #define _CRYPT_HASH_C_
 #include "Tpm.h"
 #include "CryptSym.h"
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include "Helpers_fp.h"
+#endif
 #if ALG_CMAC
     /* 10.2.6.3	Functions */
     /* 10.2.6.3.1	CryptCmacStart() */
@@ -118,6 +121,7 @@ CryptCmacData(
     TPM_ALG_ID               algorithm = cmacState->symAlg;
     BYTE                    *key = cmacState->symKey.t.buffer;
     UINT16                   keySizeInBits = cmacState->keySizeBits;
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     tpmCryptKeySchedule_t    keySchedule;
     TpmCryptSetSymKeyCall_t  encrypt;
     TpmCryptSymFinal_t       final; /* libtpms added */
@@ -130,11 +134,35 @@ CryptCmacData(
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	}
+#else
+    const EVP_CIPHER *evp_cipher;
+    BYTE              keyToUse[MAX_SYM_KEY_BYTES];
+    UINT16            keyToUseLen = (UINT16)sizeof(keyToUse);
+    EVP_CIPHER_CTX   *ctx;
+    BYTE              out[MAX_SYM_BLOCK_SIZE];
+    int               inl;
+
+    evp_cipher = GetEVPCipher(algorithm, keySizeInBits, TPM_ALG_ECB, key,
+			      keyToUse, &keyToUseLen);
+
+    if (!evp_cipher ||
+        (ctx = EVP_CIPHER_CTX_new()) == NULL ||
+	(inl = EVP_CIPHER_get_block_size(evp_cipher)) <= 0)
+	pAssert(false);
+#endif
+
     while(size > 0)
 	{
 	    if(cmacState->bcount == cmacState->iv.t.size)
 	        {
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 	            ENCRYPT(&keySchedule, cmacState->iv.t.buffer, cmacState->iv.t.buffer);
+#else
+		    if (DoEVPCryptOneBlock(ctx, evp_cipher, keyToUse, cmacState->iv.t.buffer,
+					   inl, out, TRUE))
+			pAssert(false);
+		    memcpy(cmacState->iv.t.buffer, out, inl);
+#endif
 	            cmacState->bcount = 0;
 	        }
 	    for(;(size > 0) && (cmacState->bcount < cmacState->iv.t.size);
@@ -143,8 +171,12 @@ CryptCmacData(
 	            cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
 	        }
 	}
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     if (final)			// libtpms added begin
 	FINAL(&keySchedule);	// libtpms added end
+#else
+    EVP_CIPHER_CTX_free(ctx);
+#endif
 }
 
 /* 10.2.6.3.3	CryptCmacEnd() */
@@ -163,17 +195,29 @@ CryptCmacEnd(
     TPM_ALG_ID               algorithm = cState->symAlg;
     BYTE                    *key = cState->symKey.t.buffer;
     UINT16                   keySizeInBits = cState->keySizeBits;
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     tpmCryptKeySchedule_t    keySchedule;
     TpmCryptSetSymKeyCall_t  encrypt;
     TpmCryptSymFinal_t       final; // libtpms added
+#else
+    const EVP_CIPHER        *evp_cipher;
+    BYTE                     keyToUse[MAX_SYM_KEY_BYTES];
+    UINT16                   keyToUseLen = (UINT16)sizeof(keyToUse);
+    EVP_CIPHER_CTX          *ctx;
+    BYTE                     out[MAX_SYM_BLOCK_SIZE];
+    int                      inl;
+#endif
     TPM2B_IV                 subkey = {{0, {0}}};
     BOOL                     xorVal;
     UINT16                   i;
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
+#endif
 
     subkey.t.size = cState->iv.t.size;
     // Encrypt a block of zero
     // Set up the encryption values based on the algorithm
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     switch (algorithm)
 	{
 	    FOR_EACH_SYM(ENCRYPT_CASE)
@@ -181,6 +225,20 @@ CryptCmacEnd(
 	    return 0;
 	}
     ENCRYPT(&keySchedule, subkey.t.buffer, subkey.t.buffer);
+#else
+    evp_cipher = GetEVPCipher(algorithm, keySizeInBits, TPM_ALG_ECB, key,
+			      keyToUse, &keyToUseLen);
+
+    if (!evp_cipher ||
+        (ctx = EVP_CIPHER_CTX_new()) == NULL ||
+	(inl = EVP_CIPHER_get_block_size(evp_cipher)) <= 0)
+	pAssert(false);
+
+    if (DoEVPCryptOneBlock(ctx, evp_cipher, keyToUse, subkey.t.buffer, inl,
+                           out, TRUE))
+	pAssert(false);
+    memcpy(subkey.t.buffer, out, inl);
+#endif
 
     // shift left by 1 and XOR with 0x0...87 if the MSb was 0
     xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
@@ -204,12 +262,23 @@ CryptCmacEnd(
     // XOR the subkey into the IV
     for(i = 0; i < subkey.t.size; i++)
 	cState->iv.t.buffer[i] ^= subkey.t.buffer[i];
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     ENCRYPT(&keySchedule, cState->iv.t.buffer, cState->iv.t.buffer);
+#else
+    if (DoEVPCryptOneBlock(ctx, evp_cipher, keyToUse, cState->iv.t.buffer, inl,
+                           out, TRUE))
+	pAssert(false);
+    memcpy(cState->iv.t.buffer, out, inl);
+#endif
     i = (UINT16)MIN(cState->iv.t.size, outSize);
     MemoryCopy(outBuffer, cState->iv.t.buffer, i);
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
     if (final)				// libtpms added begin
 	FINAL(&keySchedule);		// libtpms added end
+#else
+    EVP_CIPHER_CTX_free(ctx);
+#endif
     return i;
 }
 
