@@ -91,6 +91,7 @@ BuildRSAKey(EVP_PKEY **ppkey, // OUT
 
 #if USE_OPENSSL_FUNCTIONS_SYMMETRIC
 
+#if ALG_TDES
 TPM_RC
 OpenSSLCryptGenerateKeyDes(
                            TPMT_SENSITIVE *sensitive    // OUT: sensitive area
@@ -114,7 +115,7 @@ OpenSSLCryptGenerateKeyDes(
 
     return retVal;
 }
-
+#endif // ALG_TDES
 
 #define __NUM_ALGS      4 /* AES, TDES, Camellia, SM4 */
 #define __NUM_MODES     5 /* CTR, OFB, CBC, CFB, ECB */

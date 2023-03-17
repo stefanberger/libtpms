@@ -84,7 +84,7 @@ const SYMMETRIC_TEST_VECTOR   c_symTestValues[NUM_SYMS + 1] = {
       dataOut_AES128_CFB, dataOut_AES128_ECB}},
 #endif
 #if ALG_AES && AES_192
-    {TPM_ALG_AES_, 192, key_AES192, 16, sizeof(dataIn_AES192), dataIn_AES192,
+    {TPM_ALG_AES, 192, key_AES192, 16, sizeof(dataIn_AES192), dataIn_AES192,
      {dataOut_AES192_CTR, dataOut_AES192_OFB, dataOut_AES192_CBC,
       dataOut_AES192_CFB, dataOut_AES192_ECB}},
 #endif
