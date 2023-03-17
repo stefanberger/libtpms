@@ -104,6 +104,7 @@ EcdsaDigest(
 /* e) n is the order of the curve */
 /* Error Returns Meaning */
 /* TPM_RC_NO_RESULT the result of the operation was zero or r (mod n) is zero */
+#if ALG_ECSCHNORR						// libtpms added
 static TPM_RC
 BnSchnorrSign(
 	      bigNum                   bnS,           // OUT: s component of the signature
@@ -130,6 +131,7 @@ BnSchnorrSign(
     BnDiv(NULL, bnS, bnT1, bnN);
     return (BnEqualZero(bnS)) ? TPM_RC_NO_RESULT : TPM_RC_SUCCESS;
 }
+#endif // ALG_ECSHNORR - libtpms added
 /* 10.2.12.3 Signing Functions */
 /* 10.2.12.3.1 BnSignEcdsa() */
 /* This function implements the ECDSA signing algorithm. The method is described in the comments
