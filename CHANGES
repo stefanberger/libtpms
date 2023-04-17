@@ -1,5 +1,12 @@
 CHANGES - changes for libtpms
 
+version 0.10.0:
+  - tpm2: Fix of SignedCompareB().
+    NOTE: This fix *may* result in backwards compatibility issues with
+          PCR policies used by TPM2_PolicyCounterTimer and TPM2_PolicyNV
+          when upgrading from v0.9 to v0.10.
+          https://github.com/stefanberger/libtpms/pull/367#issuecomment-1498353831
+
 version 0.9.0:
   - NOTE: Downgrade to previous versions is not possible. See below.
   - The size of the context gap has been adjusted to 0xffff from 0xff.
