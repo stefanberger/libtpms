@@ -342,6 +342,88 @@ AC_CONFIG_FILES(Makefile                   \
 PKG_INSTALLDIR()
 AC_OUTPUT
 
+AC_ARG_WITH([manufacturer],
+            AS_HELP_STRING([--with-manufacturer=MANUFACTURER],[The manufacturer name]),
+            [use_manufacturer="$withval"],
+            [use_manufacturer=""]
+)
+
+if ! test "x$use_manufacturer" = "x"; then
+	CFLAGS="$CFLAGS -DCONFIG_MANUFACTURER=$use_manufacturer"
+fi
+
+AC_ARG_WITH([tpm-vendor-id],
+            AS_HELP_STRING([--with-tpm-vendor-id=VENDOR_ID],[The TPM vendor id in hex, with leading '0x']),
+            [use_vendor_id="$withval"],
+            [use_vendor_id=""]
+)
+
+if ! test "x$use_vendor_id" = "x"; then
+	CFLAGS="$CFLAGS -DMANUFACTURER_ID=$use_vendor_id"
+fi
+
+AC_ARG_WITH([vendor-string-1],
+            AS_HELP_STRING([--with-vendor-string-1=VENDOR_STRING_1],[The first 4-byte vendor string]),
+            [use_vendor_string_1="$withval"],
+            [use_vendor_string_1=""]
+)
+
+if ! test "x$use_vendor_string_1" = "x"; then
+	CFLAGS="$CFLAGS -DCONFIG_VENDOR_STRING_1=$use_vendor_string_1"
+fi
+
+AC_ARG_WITH([vendor-string-2],
+            AS_HELP_STRING([--with-vendor-string-2=VENDOR_STRING_2],[The second 4-byte vendor string]),
+            [use_vendor_string_2="$withval"],
+            [use_vendor_string_2=""]
+)
+
+if ! test "x$use_vendor_string_2" = "x"; then
+	CFLAGS="$CFLAGS -DCONFIG_VENDOR_STRING_2=$use_vendor_string_2"
+fi
+
+AC_ARG_WITH([vendor-string-3],
+            AS_HELP_STRING([--with-vendor-string-3=VENDOR_STRING_3],[The third 4-byte vendor string]),
+            [use_vendor_string_3="$withval"],
+            [use_vendor_string_3=""]
+)
+
+if ! test "x$use_vendor_string_3" = "x"; then
+	CFLAGS="$CFLAGS -DCONFIG_VENDOR_STRING_3=$use_vendor_string_3"
+fi
+
+AC_ARG_WITH([vendor-string-4],
+            AS_HELP_STRING([--with-vendor-string-4=VENDOR_STRING_4],[The fourth 4-byte vendor string]),
+            [use_vendor_string_4="$withval"],
+            [use_vendor_string_4=""]
+)
+
+if ! test "x$use_vendor_string_4" = "x"; then
+	CFLAGS="$CFLAGS -DCONFIG_VENDOR_STRING_4=$use_vendor_string_4"
+fi
+
+AC_ARG_WITH([firmware-v1],
+            AS_HELP_STRING([--with-firmware-v1=FIRMWARE_V1],[The more significant 32-bits of a vendor-specific value indicating the
+        		version of the firmware in hex, without leading '0x']),
+            [use_firmware_v1="$withval"],
+            [use_firmware_v1=""]
+)
+
+if ! test "x$use_firmware_v1" = "x"; then
+	CFLAGS="$CFLAGS -DFIRMWARE_V1=0x$use_firmware_v1"
+fi
+
+AC_ARG_WITH([firmware-v2],
+            AS_HELP_STRING([--with-firmware-v2=FIRMWARE_V2],[The least significant 32-bits of a vendor-specific value indicating the
+        		version of the firmware in hex, without leading '0x']),
+            [use_firmware_v2="$withval"],
+            [use_firmware_v2=""]
+)
+
+if ! test "x$use_firmware_v2" = "x"; then
+	CFLAGS="$CFLAGS -DFIRMWARE_V2=0x$use_firmware_v2"
+fi
+
 if test -z "$enable_debug" ; then
     enable_debug="no"
 fi

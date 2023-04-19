@@ -363,7 +363,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     "}";
     const char *tpmattrs_temp =
     "\"TPMAttributes\":{"
-        "\"manufacturer\":\"id:00001014\","
+        "\"manufacturer\":\"id:%08X\","
         "\"version\":\"id:%08X\","
         "\"model\":\"swtpm\""
     "}";
@@ -398,7 +398,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     if ((flags & TPMLIB_INFO_TPMATTRIBUTES)) {
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&tpmattrs, tpmattrs_temp, FIRMWARE_V1) < 0)
+        if (asprintf(&tpmattrs, tpmattrs_temp, MANUFACTURER_ID, FIRMWARE_V1) < 0)
             goto error;
         if (asprintf(&buffer, fmt,  printed ? "," : "",
                      tpmattrs, "%s%s%s") < 0)
