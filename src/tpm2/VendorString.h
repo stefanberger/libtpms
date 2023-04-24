@@ -62,19 +62,14 @@
 #ifndef VENDORSTRING_H
 #define VENDORSTRING_H
 
-#ifndef _STRINGIFY
-#define _STRINGIFY(x) #x
-#endif
-#ifndef STRINGIFY
-#define STRINGIFY(x) _STRINGIFY(x)
-#endif
+#include "tpm_library_intern.h"
 
 /*      To customize the MANUFACTURER macro, use the configure option "--with-manufacturer=XXXX"
         Define up to a 4-byte string for MANUFACTURER.  This string defines the response for
         TPM_PT_MANUFACTURER in TPM2_GetCapability().
         Must be in the TPM Vendor ID Registry: https://trustedcomputinggroup.org/resource/vendor-id-registry/ */
 #ifndef CONFIG_MANUFACTURER
-#define MANUFACTURER    "SIM0"
+#define MANUFACTURER    "IBM"
 #else
 #define MANUFACTURER STRINGIFY(CONFIG_MANUFACTURER)
 #endif
@@ -85,7 +80,7 @@ _Static_assert(sizeof(MANUFACTURER) - 1U <= 4U, "MANUFACTURER string can be up t
         manufacturer in TPMAttributes for TPM2_GetInfo().
         Must be in the TPM Vendor ID Registry: https://trustedcomputinggroup.org/resource/vendor-id-registry/ */
 #ifndef MANUFACTURER_ID
-#define MANUFACTURER_ID    0x53494d30
+#define MANUFACTURER_ID    0x1014
 #endif
 _Static_assert((sizeof(MANUFACTURER_ID) <= 4U), "MANUFACTURER_ID can be up to 4-bytes");
 
@@ -93,7 +88,8 @@ _Static_assert((sizeof(MANUFACTURER_ID) <= 4U), "MANUFACTURER_ID can be up to 4-
         Define up to 4, 4-byte, vendor-specific strings. The strings must each be 4 bytes long.
         These values define the response for TPM_PT_VENDOR_STRING_(1-4) in TPM2_GetCapability(). */
 #ifndef CONFIG_VENDOR_STRING_1
-#define VENDOR_STRING_1       "fTPM"
+#define VENDOR_STRING_1     "SW  "
+#define VENDOR_STRING_2     " TPM"
 #else
 #define VENDOR_STRING_1 STRINGIFY(CONFIG_VENDOR_STRING_1)
 #endif
@@ -101,8 +97,9 @@ _Static_assert(sizeof(VENDOR_STRING_1) - 1U == 4U, "VENDOR_STRING_1 must be 4-by
 
 #ifdef CONFIG_VENDOR_STRING_2
 #define VENDOR_STRING_2 STRINGIFY(CONFIG_VENDOR_STRING_2)
-_Static_assert(sizeof(VENDOR_STRING_2) - 1U == 4U, "VENDOR_STRING_2 must be 4-bytes");
 #endif
+_Static_assert(sizeof(VENDOR_STRING_2) - 1U == 4U, "VENDOR_STRING_2 must be 4-bytes");
+
 #ifdef CONFIG_VENDOR_STRING_3
 #define VENDOR_STRING_3 STRINGIFY(CONFIG_VENDOR_STRING_3)
 _Static_assert(sizeof(VENDOR_STRING_3) - 1U == 4U, "VENDOR_STRING_3 must be 4-bytes");
@@ -117,12 +114,13 @@ _Static_assert(sizeof(VENDOR_STRING_4) - 1U == 4U, "VENDOR_STRING_4 must be 4-by
         version of the firmware in FIRMWARE_V1. The less significant 32-bits of a vendor-specific
         value indicating the version of the firmware can use the FIRMWARE_V2 macro. */
 #ifndef FIRMWARE_V1
-#define FIRMWARE_V1     0x00000000
+#define FIRMWARE_V1     (0x20191023)
 #endif
 _Static_assert(sizeof(FIRMWARE_V1) == 4U, "FIRMWARE_V1 must be 4-bytes");
 
-#ifdef FIRMWARE_V2
-_Static_assert(sizeof(FIRMWARE_V2) == 4U, "FIRMWARE_V2 must be 4-bytes");
+#ifndef FIRMWARE_V2
+#define FIRMWARE_V2     (0x00163636)
 #endif
+_Static_assert(sizeof(FIRMWARE_V2) == 4U, "FIRMWARE_V2 must be 4-bytes");
 
 #endif
