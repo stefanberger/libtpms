@@ -45,7 +45,7 @@ matrix:
       script:
         ./autogen.sh ${CONFIG} &&
         sudo make -j$(nproc) ${TARGET} &&
-        sudo make -j$(nproc) check &&
+        sudo make -j$(nproc) check VERBOSE=1 &&
         git clone https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
          sudo rm -rf /dev/tpm* &&
@@ -75,7 +75,7 @@ matrix:
            python3-setuptools libjson-glib-dev &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
          export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
-         sudo make -j$(nproc) check &&
+         sudo make -j$(nproc) check VERBOSE=1 &&
         popd
     - env: CONFIG="--with-openssl --prefix=/usr --with-tpm2" "TARGET=check"
            NPROC="sysctl -n hw.ncpu" CFLAGS="-I/usr/local/opt/openssl/include"
