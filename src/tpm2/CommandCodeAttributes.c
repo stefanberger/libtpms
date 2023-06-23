@@ -258,7 +258,7 @@ GetClosestCommandIndex(
 	    // code value of the first entry in the list. Then go find the first
 	    // implemented command.
 	    return NextImplementedIndex(searchIndex
-					- (COMMAND_INDEX)s_ccAttr[0].commandIndex);
+	                                - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex)); // libtpms changed
 #endif
 	}
 }
@@ -279,7 +279,7 @@ CommandCodeToCommandIndex(
 #if !COMPRESSED_LISTS
     if(!vendor)
 	{
-	    commandIndex = searchIndex - (COMMAND_INDEX)s_ccAttr[0].commandIndex;
+	    commandIndex = searchIndex - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex); // libtpms changed
 	    // Check for out of range or unimplemented.
 	    // Note, since a COMMAND_INDEX is unsigned, if searchIndex is smaller than
 	    // the lowest value of command, it will become a 'negative' number making
