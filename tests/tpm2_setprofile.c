@@ -59,10 +59,10 @@ static const struct {
         .exp_profile =
           "{\"ActiveProfile\":{"
             "\"Name\":\"default-v1\","
-            "\"StateFormatLevel\":2,"
+            "\"StateFormatLevel\":3,"
             "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
                            "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
-                           "0x17a-0x193,0x197\","
+                           "0x17a-0x193,0x197,0x199-0x19a\","
             "\"Algorithms\":\"rsa,rsa-min-size=1024,tdes,tdes-min-size=128,"
                              "sha1,hmac,aes,aes-min-size=128,mgf1,keyedhash,"
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
@@ -211,6 +211,43 @@ static const struct {
                // keep last
             }
         }
+    }, {
+        // commands 0x199-0x19a require StateFormatLevel 3
+        .profile = "{"
+                    "\"Name\":\"custom\","
+                    "\"StateFormatLevel\":2,"
+                    "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                                   "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                                   "0x17a-0x193,0x197,0x199-0x19a\","
+                    "\"Description\":\"test\""
+                   "}",
+        .exp_fail = true,
+    }, {
+        .profile = "{"
+                    "\"Name\":\"custom\","
+                    "\"StateFormatLevel\":3,"
+                    "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                                   "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                                   "0x17a-0x193,0x197,0x199-0x19a\","
+                    "\"Description\":\"test\""
+                   "}",
+        .exp_fail = false,
+        .exp_profile =
+          "{\"ActiveProfile\":{"
+            "\"Name\":\"custom\","
+            "\"StateFormatLevel\":3,"
+            "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                           "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                           "0x17a-0x193,0x197,0x199-0x19a\","
+            "\"Algorithms\":\"rsa,rsa-min-size=1024,tdes,tdes-min-size=128,"
+                             "sha1,hmac,aes,aes-min-size=128,mgf1,keyedhash,"
+                             "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
+                             "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
+                             "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
+                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
+                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+            "\"Description\":\"test\""
+          "}}",
     }, {
         // keep last
     }

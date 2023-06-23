@@ -118,8 +118,8 @@
 #define CC_DictionaryAttackLockReset  CC_YES
 #define CC_DictionaryAttackParameters CC_YES
 #define CC_Duplicate                  CC_YES
-#define CC_ECC_Decrypt                (CC_NO)		/* libtpms: NO */
-#define CC_ECC_Encrypt                (CC_NO)		/* libtpms: NO */
+#define CC_ECC_Decrypt                (CC_YES)		/* libtpms: YES since v0.10 */
+#define CC_ECC_Encrypt                (CC_YES)		/* libtpms: YES since v0.10 */
 #define CC_ECC_Parameters             (CC_YES && ALG_ECC)
 #define CC_ECDH_KeyGen                (CC_YES && ALG_ECC)
 #define CC_ECDH_ZGen                  (CC_YES && ALG_ECC)

@@ -4205,7 +4205,16 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
     UINT8 clocksize;
     BOOL has_block;
     BLOCK_SKIP_INIT;
-    UINT16 blob_version = 4;  // FIXME: RuntimeProfile must cause this to become v5!
+    UINT16 blob_version;
+
+    switch (RuntimeProfile->stateFormatLevel) {
+    case 1 ... 2:
+        blob_version = 4;
+        break;
+    default:
+        blob_version = 5; /* since stateFormatLevel 3 */
+        break;
+    }
 
     written = NV_HEADER_Marshal(buffer, size,
                                 blob_version,

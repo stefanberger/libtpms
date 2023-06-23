@@ -184,8 +184,8 @@ static const struct {
     COMMAND(Policy_AC_SendSelect, true, 0), // not supported
     COMMAND(CertifyX509, true, 1),
     COMMAND(ACT_SetTimeout, true, 0), // not supported
-    COMMAND(ECC_Encrypt, true, 0), // not supported
-    COMMAND(ECC_Decrypt, true, 0), // not supported
+    COMMAND(ECC_Encrypt, true, 3),
+    COMMAND(ECC_Decrypt, true, 3),
     COMMAND(PolicyCapability, true, 0), // not supported
     /* all new commands added here MUST have CAN_BE_DISABLE = true */
 #undef COMMAND
