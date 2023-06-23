@@ -54,6 +54,7 @@
 #include "Global.h"
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
+#include "BackwardsCompatibilityBitArray.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
@@ -4066,8 +4067,134 @@ skip_future_versions:
     return rc;
 }
 
+static UINT16
+PERSISTENT_DATA_PPList_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                               UINT16 blob_version, UINT32 commandCount)
+{
+    UINT8 ppList[(110 + 7) / 8];
+    UINT16 array_size;
+    UINT16 written;
+    UINT8 *ptr;
+
+    assert(!COMPRESSED_LISTS);
+    if (blob_version <= 4) {
+        /* Custom profile can get here; v0.9 had 110 commands enabled and
+         * was using a COMPRESSED_LIST.
+         */
+        assert(commandCount <= 110);
+        array_size = (commandCount + 7) / 8;
+        assert(sizeof(ppList) >= array_size);
+        ConvertToCompressedBitArray(data->ppList, sizeof(data->ppList),
+                                    ppList, array_size);
+        ptr = ppList;
+    } else {
+        /* write the array as it is */
+        array_size = sizeof(data->ppList);
+        ptr = data->ppList;
+    }
+    written = UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(ptr, array_size, buffer, size);
+
+    return written;
+}
+
+static TPM_RC
+PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                                 UINT16 blob_version)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT16 array_size;
+
+    assert(!COMPRESSED_LISTS);
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        BYTE buf[array_size];
+
+        rc = Array_Unmarshal(buf, array_size, buffer, size);
+        if (rc == TPM_RC_SUCCESS) {
+            if (blob_version <= 4) {
+                /* version <= 4 used COMPRESSED_LISTS and needs to be converted */
+                rc = ConvertFromCompressedBitArray(buf, array_size,
+                                                   data->ppList, sizeof(data->ppList));
+            } else {
+                memset(data->ppList, 0, sizeof(data->ppList));
+                assert(array_size <= sizeof(data->ppList));
+                memcpy(data->ppList, buf, array_size);
+            }
+        }
+    }
+    return rc;
+}
+
+static UINT16
+PERSISTENT_DATA_AuditCommands_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                                      UINT16 blob_version, UINT32 commandCount)
+{
+    UINT8 auditCommands[(110 + 1 + 7) / 8];
+    UINT16 array_size;
+    UINT16 written;
+    UINT8 *ptr;
+
+    assert(!COMPRESSED_LISTS);
+
+    if (blob_version <= 4) {
+        /* Custom profile can get here; v0.9 had 110 commands enabled and
+         * was using a COMPRESSED_LIST.
+         */
+        assert(commandCount <= 110);
+        array_size = ((commandCount + 1) + 7) / 8;	/* same as in Global.h PERSISTENT_DATA */
+        assert(sizeof(auditCommands) >= array_size);
+        ConvertToCompressedBitArray(data->auditCommands, sizeof(data->auditCommands),
+                                    auditCommands, array_size);
+        ptr = auditCommands;
+    } else {
+        /* write the array as it is */
+        array_size = sizeof(data->auditCommands);
+        ptr = data->auditCommands;
+    }
+    written = UINT16_Marshal(&array_size, buffer, size);
+    written += Array_Marshal(ptr, array_size, buffer, size);
+
+    return written;
+}
+
+static TPM_RC
+PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                                        UINT16 blob_version)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT16 array_size;
+
+    assert(!COMPRESSED_LISTS);
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&array_size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        BYTE buf[array_size];
+
+        rc = Array_Unmarshal(buf, array_size, buffer, size);
+        if (rc == TPM_RC_SUCCESS) {
+            if (blob_version <= 4) {
+                /* version <= 4 used COMPRESSED_LISTS and needs to be converted */
+                rc = ConvertFromCompressedBitArray(buf, array_size,
+                                                   data->auditCommands, sizeof(data->auditCommands));
+            } else {
+                memset(data->auditCommands, 0, sizeof(data->auditCommands));
+                assert(array_size <= sizeof(data->auditCommands));
+                memcpy(data->auditCommands, buf, array_size);
+            }
+        }
+    }
+    return rc;
+}
+
+
 #define PERSISTENT_DATA_MAGIC   0x12213443
-#define PERSISTENT_DATA_VERSION 4
+#define PERSISTENT_DATA_VERSION 5
 
 static UINT16
 PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
@@ -4075,14 +4202,14 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
 {
     UINT32 commandCount = RuntimeCommandsCountEnabled(&RuntimeProfile->RuntimeCommands);
     UINT16 written;
-    UINT16 array_size;
     UINT8 clocksize;
     BOOL has_block;
     BLOCK_SKIP_INIT;
+    UINT16 blob_version = 4;  // FIXME: RuntimeProfile must cause this to become v5!
 
     written = NV_HEADER_Marshal(buffer, size,
-                                PERSISTENT_DATA_VERSION,
-                                PERSISTENT_DATA_MAGIC, 4);
+                                blob_version,
+                                PERSISTENT_DATA_MAGIC, blob_version);
     // platformReserved (added in v0.10) is not persisted
     written += BOOL_Marshal(&data->disableClear, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->ownerAlg, buffer, size);
@@ -4117,15 +4244,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
 
     written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
 
-    /* ppList may grow; use the same math as in Global.h PERSISTENT_DATA to calculate
-     * ppList array size. If commands are disabled then commandCount will be smaller
-     * than COMMAND_COUNT used there.
-     */
-    array_size = (commandCount + 7) / 8;
-    assert(array_size == sizeof(data->ppList));
-    written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal(&data->ppList[0], array_size, buffer, size);
-
+    written += PERSISTENT_DATA_PPList_Marshal(data, buffer, size, blob_version, commandCount);
     written += UINT32_Marshal(&data->failedTries, buffer, size);
     written += UINT32_Marshal(&data->maxTries, buffer, size);
     written += UINT32_Marshal(&data->recoveryTime, buffer, size);
@@ -4133,15 +4252,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
     written += BOOL_Marshal(&data->lockOutAuthEnabled, buffer, size);
     written += UINT16_Marshal(&data->orderlyState, buffer, size);
 
-    /* auditCommands may grow; use the same math as in Global.h PERSISTENT_DATA to
-     * calculate array size.
-     */
-    array_size = ((commandCount + 1) + 7) / 8;		/* same as in Global.h PERSISTENT_DATA */
-    assert(array_size == sizeof(data->auditCommands)); /* for NULL profile only */
-    written += UINT16_Marshal(&array_size, buffer, size);
-    written += Array_Marshal(&data->auditCommands[0], array_size,
-                             buffer, size);
-
+    written += PERSISTENT_DATA_AuditCommands_Marshal(data, buffer, size, blob_version, commandCount);
     written += TPM_ALG_ID_Marshal(&data->auditHashAlg, buffer, size);
     written += UINT64_Marshal(&data->auditCounter, buffer, size);
     written += UINT32_Marshal(&data->algorithmSet, buffer, size);
@@ -4188,7 +4299,6 @@ PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
-    UINT16 array_size;
     UINT8 clocksize;
     BOOL needs_block;
 
@@ -4276,15 +4386,8 @@ skip_num_policy_pcr_group:
         shadow.pcrAllocatedIsNew = TRUE;
     }
 
-    /* ppList array may not be our size */
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT16_Unmarshal(&array_size, buffer, size);
-    }
-    if (rc == TPM_RC_SUCCESS) {
-        BYTE buf[array_size];
-        rc = Array_Unmarshal(buf, array_size, buffer, size);
-        memset(data->ppList, 0, sizeof(data->ppList));
-        memcpy(data->ppList, buf, MIN(array_size, sizeof(data->ppList)));
+        rc = PERSISTENT_DATA_PPList_Unmarshal(data, buffer, size, hdr.version);
     }
 
     if (rc == TPM_RC_SUCCESS) {
@@ -4309,16 +4412,8 @@ skip_num_policy_pcr_group:
 
     /* auditCommands array may not be our size */
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT16_Unmarshal(&array_size, buffer, size);
+        rc = PERSISTENT_DATA_AuditCommands_Unmarshal(data, buffer, size, hdr.version);
     }
-    if (rc == TPM_RC_SUCCESS) {
-        BYTE buf[array_size];
-        rc = Array_Unmarshal(buf, array_size, buffer, size);
-        memset(data->auditCommands, 0, sizeof(data->auditCommands));
-        memcpy(data->auditCommands, buf,
-               MIN(array_size, sizeof(data->auditCommands)));
-    }
-
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_ALG_ID_Unmarshal(&data->auditHashAlg, buffer, size);
     }

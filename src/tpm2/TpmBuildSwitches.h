@@ -217,7 +217,7 @@
 // unimplemented commands. Comment this out to use linear lists.
 // Note: if vendor specific commands are present, the associated list is always
 // in compressed form.
-#define COMPRESSED_LISTS            YES
+#define COMPRESSED_LISTS            NO /* libtpms: change in v0.10 */
 
 // This define is used to eliminate the use of bit-fields. It can be enabled for big-
 // or little-endian machines. For big-endian architectures that numbers bits in
