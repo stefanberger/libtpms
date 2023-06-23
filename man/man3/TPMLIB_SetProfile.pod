@@ -132,6 +132,11 @@ of the state.
 This I<StateFormatLevel> enabled the writing of the profile as part of the
 state.
 
+=item 3: (since v0.10)
+
+This I<StateFormatLevel> enabled the TPM 2 commands ECC_Encrypt (0x199) and
+ECC_Decrypt (0x19a).
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.

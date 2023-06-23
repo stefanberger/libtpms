@@ -52,7 +52,7 @@ struct RuntimeProfile g_RuntimeProfile;
 
 const char defaultCommandsProfile[] =
     "0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,0x15b-0x15e,"
-    "0x160-0x165,0x167-0x174,0x176-0x178,0x17a-0x193,0x197";
+    "0x160-0x165,0x167-0x174,0x176-0x178,0x17a-0x193,0x197,0x199-0x19a";
 
 const char defaultAlgorithmsProfile[] =
     "rsa,rsa-min-size=1024,tdes,tdes-min-size=128,sha1,hmac,"
@@ -73,13 +73,16 @@ static const struct RuntimeProfileDesc {
      * This basically locks the name of the profile to the stateFormatLevel.
      */
     unsigned int stateFormatLevel;
-#define STATE_FORMAT_LEVEL_CURRENT 2
+#define STATE_FORMAT_LEVEL_CURRENT 3
 #define STATE_FORMAT_LEVEL_UNKNOWN 0 /* JSON didn't provide StateFormatLevel; this is only
 					allowed for the 'default' profile or when user
 					passed JSON via SetProfile() */
 /* State Format Levels:
  *  1 : write the state in format of libtpms v0.9 : only 'null' profile may have this
  *  2 : write the state in format of libtpms v0.10: the profile will be written into the state
+ *  3 : Enabled ECC_Encrypt (0x199) & ECC_Decrypt (0x19a) along with disabling COMPRESSED_LIST.
+ *      PERSISTENT_DATA.ppList and PERSISTENT_DATA.auditCommands became bigger and need to
+ *      be written differently.
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
@@ -767,8 +770,8 @@ RuntimeProfileGetSeedCompatLevel(void)
     case 1: /* profile runs on v0.9 */
 	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
 
-    case 2 ... 2: /* profile runs on v0.10 */ {
-	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 2); // force update when this changes
+    case 2 ... 3: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 3); // force update when this changes
 	return SEED_COMPAT_LEVEL_LAST;
     }
 
