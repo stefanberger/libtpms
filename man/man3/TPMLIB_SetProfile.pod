@@ -137,6 +137,10 @@ state.
 This I<StateFormatLevel> enabled the TPM 2 commands ECC_Encrypt (0x199) and
 ECC_Decrypt (0x19a).
 
+=item 4: (since v0.10)
+
+This I<StateFormatLevel> enabled Camellia-192 and AES-192.
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.
