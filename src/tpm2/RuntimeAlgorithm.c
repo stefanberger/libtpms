@@ -131,7 +131,7 @@ static const struct {
     [TPM_ALG_NULL] = OTHER(true, "null", false, 1),
     [TPM_ALG_SM4] = SYMMETRIC(ALG_SM4, "sm4", s_KeySizesSM4, true, 0), // not supported
     [TPM_ALG_RSASSA] = SIGNING(ALG_RSASSA, "rsassa", true, 1),
-    [TPM_ALG_RSAES] = ENCRYPTING(ALG_RSAES, "rsaes", false, 1),
+    [TPM_ALG_RSAES] = ENCRYPTING(ALG_RSAES, "rsaes", true, 1),
     [TPM_ALG_RSAPSS] = SIGNING(ALG_RSAPSS, "rsapss", true, 1),
     [TPM_ALG_OAEP] = ENCRYPTING(ALG_OAEP, "oaep", false, 1), // never disable: CryptSecretEncrypt/Decrypt needs it
     [TPM_ALG_ECDSA] = SIGNING(ALG_ECDSA, "ecdsa", false, 1),
