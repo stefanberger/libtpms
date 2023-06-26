@@ -3691,6 +3691,7 @@ TPMI_ALG_RSA_DECRYPT_Unmarshal(TPMI_ALG_RSA_DECRYPT *target, BYTE **buffer, INT3
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    // libtpms: allow decryption with these algorithms
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
