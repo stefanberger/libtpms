@@ -101,4 +101,8 @@ char *
 RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 		      enum RuntimeAlgorithmType rat);
 
+void
+RuntimeAlgorithmsFilterPCRSelection(TPML_PCR_SELECTION *pcrSelection // IN/OUT: PCRSelection to filter
+				    );
+
 #endif /* RUNTIME_ALGORITHM_H */
