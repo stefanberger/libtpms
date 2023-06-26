@@ -1492,6 +1492,10 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 #if ALG_SM2
 	  case TPM_ALG_SM2:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+					      *target)) {
+		rc = TPM_RC_SCHEME;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1499,9 +1503,11 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 	    }
 	  default:
 	    rc = TPM_RC_SCHEME;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -3879,6 +3885,9 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECMQV
 	  case TPM_ALG_ECMQV:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, *target)) {	// libtpms added begin
+		rc = TPM_RC_SCHEME;
+	    }											// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3886,9 +3895,11 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_SCHEME;
-	    *target = orig_target; //  libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
