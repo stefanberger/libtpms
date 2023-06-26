@@ -129,7 +129,7 @@ static const struct {
     [TPM_ALG_SHA384] = HASH(ALG_SHA384, "sha384", false, 1),
     [TPM_ALG_SHA512] = HASH(ALG_SHA512, "sha512", false, 1),
     [TPM_ALG_NULL] = OTHER(true, "null", false, 1),
-    [TPM_ALG_SM4] = SYMMETRIC(ALG_SM4, "sm4", s_KeySizesSM4, false, 0), // not supported
+    [TPM_ALG_SM4] = SYMMETRIC(ALG_SM4, "sm4", s_KeySizesSM4, true, 0), // not supported
     [TPM_ALG_RSASSA] = SIGNING(ALG_RSASSA, "rsassa", false, 1),
     [TPM_ALG_RSAES] = ENCRYPTING(ALG_RSAES, "rsaes", false, 1),
     [TPM_ALG_RSAPSS] = SIGNING(ALG_RSAPSS, "rsapss", false, 1),
