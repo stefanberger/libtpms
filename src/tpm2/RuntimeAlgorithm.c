@@ -59,7 +59,7 @@ struct KeySizes {
 
 static const struct KeySizes s_KeySizesAES[] = {
     { .enabled = AES_128, .size = 128, .stateFormatLevel = 1 },
-    { .enabled = AES_192, .size = 192, .stateFormatLevel = 0 }, // not supported
+    { .enabled = AES_192, .size = 192, .stateFormatLevel = 4 },
     { .enabled = AES_256, .size = 256, .stateFormatLevel = 1 },
     { .enabled = false  , .size = 0  , .stateFormatLevel = 0 },
 };
@@ -69,7 +69,7 @@ static const struct KeySizes s_KeySizesSM4[] = {
 };
 static const struct KeySizes s_KeySizesCamellia[] = {
     { .enabled = CAMELLIA_128, .size = 128, .stateFormatLevel = 1 },
-    { .enabled = CAMELLIA_192, .size = 192, .stateFormatLevel = 0 }, // not supported
+    { .enabled = CAMELLIA_192, .size = 192, .stateFormatLevel = 4 },
     { .enabled = CAMELLIA_256, .size = 256, .stateFormatLevel = 1 },
     { .enabled = false       , .size = 0  , .stateFormatLevel = 0 },
 };

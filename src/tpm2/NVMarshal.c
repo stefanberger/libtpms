@@ -3894,12 +3894,12 @@ static const struct _entry {
 
     /* added for PA_COMPILE_CONSTANTS_VERSION == 3 */
     { COMPILE_CONSTANT(AES_128, LE) },
-    { COMPILE_CONSTANT(AES_192, LE) },
+    { COMPILE_CONSTANT(0, LE) }, /* was: AES_192; now handled via profile */
     { COMPILE_CONSTANT(AES_256, LE) },
     { COMPILE_CONSTANT(SM4_128, LE) },
     { COMPILE_CONSTANT(ALG_CAMELLIA, LE) },
     { COMPILE_CONSTANT(CAMELLIA_128, LE) },
-    { COMPILE_CONSTANT(CAMELLIA_192, LE) },
+    { COMPILE_CONSTANT(0, LE) }, /* was: CAMELLIA_192; now handled via profile */
     { COMPILE_CONSTANT(CAMELLIA_256, LE) },
     { COMPILE_CONSTANT(ALG_SHA3_256, LE) },
     { COMPILE_CONSTANT(ALG_SHA3_384, LE) },

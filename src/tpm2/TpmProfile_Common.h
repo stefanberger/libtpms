@@ -126,7 +126,7 @@
 #define ALG_AES                     ALG_YES
 
 #define     AES_128                     (YES * ALG_AES)
-#define     AES_192                     (NO  * ALG_AES)
+#define     AES_192                     (YES * ALG_AES) /* since libtpms v0.10 stateFormatLevel 4 */
 #define     AES_256                     (YES * ALG_AES)
 
 #define ALG_SM4                     ALG_NO
@@ -136,7 +136,7 @@
 #define ALG_CAMELLIA                ALG_YES
 
 #define     CAMELLIA_128                (YES * ALG_CAMELLIA)
-#define     CAMELLIA_192                (NO  * ALG_CAMELLIA)
+#define     CAMELLIA_192                (YES * ALG_CAMELLIA) /* since libtpms v0.10 stateFormatLevel 4 */
 #define     CAMELLIA_256                (YES * ALG_CAMELLIA)
 
 #define ALG_TDES                        ALG_YES /* libtpms enabled */
