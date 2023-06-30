@@ -386,6 +386,13 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         "\"Enabled\":%s,"
         "\"Disabled\":%s"
     "}";
+    const char *runtimeCommands_temp =
+    "\"RuntimeCommands\":{"
+        "\"Implemented\":%s,"
+        "\"CanBeDisabled\":%s,"
+        "\"Enabled\":%s,"
+        "\"Disabled\":%s"
+    "}";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
@@ -393,8 +400,11 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     char rsakeys[32];
     char camelliakeys[16];
     char *runtimeAlgos[RUNTIME_ALGO_NUM] = { NULL, };
+    char *runtimeCmds[RUNTIME_CMD_NUM] = { NULL, };
     enum RuntimeAlgorithmType rat;
+    enum RuntimeCommandType rct;
     char *runtimeAlgorithms = NULL;
+    char *runtimeCommands = NULL;
     size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
@@ -469,6 +479,27 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_RUNTIME_COMMANDS)) {
+        fmt = buffer;
+        buffer = NULL;
+        for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++) {
+            runtimeCmds[rct] = RuntimeCommandsPrint(&g_RuntimeProfile.RuntimeCommands, rct);
+            if (!runtimeCmds[rct])
+                goto error;
+        }
+        if (asprintf(&runtimeCommands, runtimeCommands_temp,
+                     runtimeCmds[RUNTIME_CMD_IMPLEMENTED],
+                     runtimeCmds[RUNTIME_CMD_CAN_BE_DISABLED],
+                     runtimeCmds[RUNTIME_CMD_ENABLED],
+                     runtimeCmds[RUNTIME_CMD_DISABLED]) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     runtimeCommands, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
@@ -481,7 +512,10 @@ exit:
     free(tpmfeatures);
     for (rat = RUNTIME_ALGO_IMPLEMENTED; rat < RUNTIME_ALGO_NUM; rat++)
         free(runtimeAlgos[rat]);
+    for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++)
+        free(runtimeCmds[rct]);
     free(runtimeAlgorithms);
+    free(runtimeCommands);
 
     return buffer;
 
