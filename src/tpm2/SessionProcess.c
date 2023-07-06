@@ -1117,7 +1117,8 @@ static TPM_RC RetrieveSessionData(
     s_decryptSessionIndex = UNDEFINED_INDEX;
     s_encryptSessionIndex = UNDEFINED_INDEX;
     s_auditSessionIndex   = UNDEFINED_INDEX;
-
+    int encsize           = 0;	// libtpms added
+    int decsize           = 0;	// libtpms added
     for(sessionIndex = 0; command->authSize > 0; sessionIndex++)
 	{
 	    errorIndex = TPM_RC_S + g_rcIndex[sessionIndex];
@@ -1210,6 +1211,10 @@ static TPM_RC RetrieveSessionData(
 		    // a command parameter.
 		    s_decryptSessionIndex = sessionIndex;
 		}
+	    else		// libtpms added - begin
+		{
+		    decsize += DecryptSize(command->index);
+		}		// libtpms added - end
 	    // Now process encrypt.
 	    if(IS_ATTRIBUTE(sessionAttributes, TPMA_SESSION, encrypt))
 		{
@@ -1226,6 +1231,10 @@ static TPM_RC RetrieveSessionData(
 		    // a response parameter.
 		    s_encryptSessionIndex = sessionIndex;
 		}
+	    else		// libtpms added - begin
+		{
+		    encsize += EncryptSize(command->index);
+		}		// libtpms added - end
 	    // At last process audit.
 	    if(IS_ATTRIBUTE(sessionAttributes, TPMA_SESSION, audit))
 		{
@@ -1253,6 +1262,19 @@ static TPM_RC RetrieveSessionData(
 	    // the handles are processed.
 	    s_associatedHandles[sessionIndex] = TPM_RH_UNASSIGNED;
 	}
+    // libtpms added - begin
+    if ((encsize > 0 && s_encryptSessionIndex == UNDEFINED_INDEX) ||
+	(decsize > 0 && s_decryptSessionIndex == UNDEFINED_INDEX)) {
+	if (RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+					    RUNTIME_ATTRIBUTE_IO_PARAMETER_ENCRYPTION)) {
+	    /* Request and/or response could be encrypted but is not, though the
+	     * profile requires it.
+	     * FIXME: Per 5.2.1.9 Note 1 there are some command exceptions
+	     */
+	    return TPM_RCS_ATTRIBUTES;
+	}
+    }
+    // libtpms added - end
     command->sessionNum = sessionIndex;
     return TPM_RC_SUCCESS;
 }
