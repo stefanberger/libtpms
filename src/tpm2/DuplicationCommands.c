@@ -100,6 +100,13 @@ TPM2_Duplicate(
 	    if(in->newParentHandle == TPM_RH_NULL)
 		return TPM_RCS_HIERARCHY + RC_Duplicate_newParentHandle;
 	}
+    else				// libtpms added - begin
+	{
+	    if(RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+					       RUNTIME_ATTRIBUTE_ENCRYPTED_DUPLICATION))
+		return TPM_RCS_ATTRIBUTES + RC_Duplicate_objectHandle;
+	}				// libtpms added - end
+
     if(in->symmetricAlg.algorithm == TPM_ALG_NULL)
 	{
 	    // if algorithm is TPM_ALG_NULL, input key size must be 0
