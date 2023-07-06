@@ -90,4 +90,8 @@ RuntimeProfileGetByIndex(size_t  idx,
 
 SEED_COMPAT_LEVEL RuntimeProfileGetSeedCompatLevel(void);
 
+BOOL
+RuntimeProfileRequiresAttributeFlags(struct RuntimeProfile *RuntimeProfile,
+                                     unsigned int           attributeFlags);
+
 #endif /* RUNTIME_PROFILE_H */

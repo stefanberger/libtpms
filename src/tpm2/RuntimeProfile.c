@@ -860,3 +860,11 @@ RuntimeProfileGetSeedCompatLevel(void)
 	FAIL(FATAL_ERROR_INTERNAL);
     }
 }
+
+LIB_EXPORT BOOL
+RuntimeProfileRequiresAttributeFlags(struct RuntimeProfile *RuntimeProfile,
+                                     unsigned int           attributeFlags)
+{
+    return RuntimeAttributeCheckRequired(&RuntimeProfile->RuntimeAttributes,
+					 attributeFlags);
+}
