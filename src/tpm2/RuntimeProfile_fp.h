@@ -88,6 +88,13 @@ TPM_RC
 RuntimeProfileGetByIndex(size_t  idx,
 			 char    **runtimeProfileJSON);
 
+
 SEED_COMPAT_LEVEL RuntimeProfileGetSeedCompatLevel(void);
+
+BOOL
+RuntimeProfileRequiresAttribute(
+				struct RuntimeProfile *RuntimeProfile,
+				unsigned int           attributeFlag
+				);
 
 #endif /* RUNTIME_PROFILE_H */
