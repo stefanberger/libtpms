@@ -77,4 +77,10 @@ RuntimeAttributesSwitchProfile(
 			       char                    **oldProfile
 			       );
 
+BOOL
+RuntimeAttributeCheckRequired(
+			      struct RuntimeAttributes *RuntimeAttributes,
+			      unsigned int              attributeFlags
+			      );
+
 #endif
