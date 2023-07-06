@@ -175,3 +175,12 @@ RuntimeAttributesSwitchProfile(
     }
     return retVal;
 }
+
+LIB_EXPORT BOOL
+RuntimeAttributeCheckRequired(
+			      struct RuntimeAttributes *RuntimeAttributes,
+			      unsigned int              attributeFlags
+			      )
+{
+    return (RuntimeAttributes->attributeFlags & attributeFlags) == attributeFlags;
+}
