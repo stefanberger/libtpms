@@ -70,4 +70,8 @@ RuntimeAttributesSwitchProfile(struct RuntimeAttributes *RuntimeAttributes,
 			       unsigned int              maxStateFormatLevel,
 			       char                    **oldProfile);
 
+BOOL
+RuntimeAttributeCheckRequired(struct RuntimeAttributes *RuntimeAttributes,
+			      unsigned int              attributeFlags);
+
 #endif
