@@ -136,7 +136,7 @@ static const struct {
     [TPM_ALG_OAEP] = ENCRYPTING(ALG_OAEP, "oaep", false, 1), // never disable: CryptSecretEncrypt/Decrypt needs it
     [TPM_ALG_ECDSA] = SIGNING(ALG_ECDSA, "ecdsa", false, 1),
     [TPM_ALG_ECDH] = OTHER(ALG_ECDH, "ecdh", false, 1),
-    [TPM_ALG_ECDAA] = OTHER(ALG_ECDAA, "ecdaa", false, 1),
+    [TPM_ALG_ECDAA] = OTHER(ALG_ECDAA, "ecdaa", true, 1),
     [TPM_ALG_SM2] = SIGNING(ALG_SM2, "sm2", false, 1),
     [TPM_ALG_ECSCHNORR] = SIGNING(ALG_ECSCHNORR, "ecschnorr", true, 1),
     [TPM_ALG_ECMQV] = OTHER(ALG_ECMQV, "ecmqv", true, 1),
