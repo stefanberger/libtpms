@@ -315,6 +315,41 @@ static const struct {
             "\"Description\":\"test\""
           "}}",
     }, {
+        .profile = "{"
+                    "\"Name\":\"custom\","
+                    "\"StateFormatLevel\":4,"
+                    "\"Attributes\":\"no-unpadded-encryption\","
+                    "\"Description\":\"test\""
+                   "}",
+        .exp_fail = true, /* StateFormatLevel 7 required */
+    }, {
+        .profile = "{" /* StateFormatLevel 7 is chosen */
+                    "\"Name\":\"custom\","
+                    "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                                   "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                                   "0x17a-0x193,0x197\","
+                    "\"Attributes\":\"no-unpadded-encryption\","
+                    "\"Description\":\"test\""
+                   "}",
+        .exp_fail = false,
+        .exp_profile =
+          "{\"ActiveProfile\":{"
+            "\"Name\":\"custom\","
+            "\"StateFormatLevel\":7,"
+            "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                           "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                           "0x17a-0x193,0x197\","
+            "\"Algorithms\":\"rsa,rsa-min-size=1024,tdes,tdes-min-size=128,"
+                             "sha1,hmac,aes,aes-min-size=128,mgf1,keyedhash,"
+                             "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
+                             "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
+                             "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
+            "\"Attributes\":\"no-unpadded-encryption\","
+            "\"Description\":\"test\""
+          "}}",
+    }, {
         // keep last
     }
 };

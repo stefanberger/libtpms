@@ -42,7 +42,9 @@
 #ifndef RUNTIME_ATTRIBUTES_H
 #define RUNTIME_ATTRIBUTES_H
 
-#define NUM_ENTRIES_ATTRIBUTE_PROPERTIES          0
+#define NUM_ENTRIES_ATTRIBUTE_PROPERTIES          1
+
+#define RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION  (1 << 0)
 
 struct RuntimeAttributes {
     /* */

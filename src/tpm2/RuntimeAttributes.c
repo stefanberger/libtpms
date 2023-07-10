@@ -56,6 +56,8 @@ static const struct {
 } s_AttributeProperties[NUM_ENTRIES_ATTRIBUTE_PROPERTIES] = {
 #define ATTRIBUTE(NAME, FLAGS, SFL) \
     { .name = NAME, .attributeFlags = FLAGS, .stateFormatLevel = SFL }
+    ATTRIBUTE("no-unpadded-encryption", RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION,
+	      7),
 };
 
 LIB_EXPORT void
