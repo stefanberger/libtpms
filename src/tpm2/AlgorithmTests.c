@@ -433,6 +433,12 @@ static TPM_RC TestRsaEncryptDecrypt(TPM_ALG_ID        scheme,  // IN: the scheme
     CLEAR_BOTH(TPM_ALG_NULL);
     if(scheme == TPM_ALG_NULL)
 	{
+	    // libtpms added begin
+	    if (RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+						RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING))
+		return TPM_RC_SUCCESS;	// don't test NULL with RSA
+	    // libtpms added end
+
 	    // This is an encryption scheme using the private key without any encoding.
 	    memcpy(testInput.t.buffer, c_RsaTestValue, sizeof(c_RsaTestValue));
 	    testInput.t.size = sizeof(c_RsaTestValue);

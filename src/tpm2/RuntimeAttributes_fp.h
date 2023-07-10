@@ -44,6 +44,8 @@
 
 #define NUM_ENTRIES_ATTRIBUTE_PROPERTIES          1
 
+#define RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING     (1 << 0)
+
 struct RuntimeAttributes {
     /* */
     unsigned int attributeFlags;
