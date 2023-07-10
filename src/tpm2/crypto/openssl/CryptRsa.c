@@ -1565,6 +1565,10 @@ CryptRsaEncrypt(
     switch(scheme->scheme)
 	{
           case TPM_ALG_NULL:  // 'raw' encryption
+	    if (RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+						RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING))
+		return TPM_RC_SCHEME;
+
 	    {
 		INT32                 i;
 		INT32                 dSize = dIn->size;
@@ -1670,6 +1674,10 @@ CryptRsaDecrypt(
     switch(scheme->scheme)
 	{
 	  case TPM_ALG_NULL:  // 'raw' encryption
+	    if (RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+						RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING))
+		return TPM_RC_SCHEME;
+
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING) <= 0)
                 ERROR_EXIT(TPM_RC_FAILURE);
             break;
