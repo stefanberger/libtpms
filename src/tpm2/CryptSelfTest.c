@@ -162,6 +162,11 @@ CryptIncrementalSelfTest(TPML_ALG* toTest,   // IN: list of algorithms to be tes
 		    // make sure that the algorithm value is not out of range
 		    if((alg > TPM_ALG_LAST) || !TEST_BIT(alg, g_implementedAlgorithms))
 			return TPM_RC_VALUE;
+						// libtpms added begin
+		    if(!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     alg))
+			return TPM_RC_VALUE;
+						// libtpms added end
 		    SET_BIT(alg, toTestVector);
 		}
 	    // Run the test
