@@ -178,6 +178,23 @@ requires '3') or allows to enable key sizes, such as AES-192, when for
 example I<StateFormatLevel> '4' is given. If I<StateFormatLevel> '3'
 is given then AES-192 will not be enabled.
 
+=head1 Attributes
+
+A profile may have the I<Attributes> key which is similar to I<Algorithms> or
+I<Commands>. The following is a list of supported verbs:
+
+=over 4
+
+=item B<no-unpadded-encryption>: (since v0.10)
+
+=over 2
+
+=item * Prevents unpadded (raw) RSA encryption and decryption
+
+=back
+
+=back
+
 =head1 ERRORS
 
 =over 4

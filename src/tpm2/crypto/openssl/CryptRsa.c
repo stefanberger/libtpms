@@ -1108,6 +1108,9 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
 		  // dIn can have more bytes than cOut as long as the extra bytes
 		  // are zero. Note: the more significant bytes of a number in a byte
 		  // buffer are the bytes at the start of the array.
+		  if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+							   RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+		      ERROR_EXIT(TPM_RC_SCHEME);				// libtpms added end
 		  for(i = 0; (i < dSize) && (dIn->buffer[i] == 0); i++)
 		      ;
 		  dSize -= i;
@@ -1182,6 +1185,9 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
 	    switch(scheme->scheme)
 		{
 		  case TPM_ALG_NULL:
+		    if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+							     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+			return TPM_RC_SCHEME;					// libtpms added end
 		    if(dOut->size < cIn->size)
 			return TPM_RC_VALUE;
 		    MemoryCopy2B(dOut, cIn, dOut->size);
@@ -1565,6 +1571,10 @@ CryptRsaEncrypt(
     switch(scheme->scheme)
 	{
           case TPM_ALG_NULL:  // 'raw' encryption
+	    if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+						     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+		return TPM_RC_SCHEME;					// libtpms added end
+
 	    {
 		INT32                 i;
 		INT32                 dSize = dIn->size;
@@ -1670,6 +1680,9 @@ CryptRsaDecrypt(
     switch(scheme->scheme)
 	{
 	  case TPM_ALG_NULL:  // 'raw' encryption
+	    if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+						     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+		ERROR_EXIT(TPM_RC_SCHEME);
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING) <= 0)
                 ERROR_EXIT(TPM_RC_FAILURE);
             break;

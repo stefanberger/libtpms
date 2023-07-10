@@ -92,6 +92,7 @@ static const struct RuntimeProfileDesc {
  *  6 : Only OBJECTs for RSA keys marshal the private exponent; hierachy field is also
  *      marshalled now
  *  7 : Attribute support was added:
+ *      - no-unpadded-encryption
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
