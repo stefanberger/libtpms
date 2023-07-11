@@ -74,6 +74,19 @@ RuntimeAttributesSwitchProfile(struct RuntimeAttributes *RuntimeAttributes,
 			       unsigned int              maxStateFormatLevel,
 			       char                    **oldProfile);
 
+enum RuntimeAttributeType {
+    RUNTIME_ATTR_IMPLEMENTED,
+    RUNTIME_ATTR_ENABLED,
+    RUNTIME_ATTR_DISABLED,
+    RUNTIME_ATTR_CAN_BE_DISABLED,
+
+    RUNTIME_ATTR_NUM, /* keep last */
+};
+
+char *
+RuntimeAttributesGet(struct RuntimeAttributes   *RuntimeAttribute,
+		     enum RuntimeAttributeType   rat);
+
 BOOL
 RuntimeAttributeCheckRequired(struct RuntimeAttributes *RuntimeAttributes,
 			      unsigned int              attributeFlags);
