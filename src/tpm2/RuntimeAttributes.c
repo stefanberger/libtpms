@@ -47,6 +47,7 @@
 #include "tpm_library_intern.h"
 
 #define ATTR_SEPARATOR_C ','
+#define ATTR_SEPARATOR_STR ","
 
 static const struct {
     const char   *name;
@@ -177,6 +178,60 @@ RuntimeAttributesSwitchProfile(
 	*oldProfile = NULL;
     }
     return retVal;
+}
+
+LIB_EXPORT char *
+RuntimeAttributesGet(
+		     struct RuntimeAttributes   *RuntimeAttributes,
+		     enum RuntimeAttributeType  rat
+		     )
+{
+    char *buffer, *nbuffer = NULL;
+    bool first = true;
+    size_t idx;
+    int n;
+
+    buffer = strdup("\"");
+    if (!buffer)
+	return NULL;
+
+    for (idx = 0; idx < ARRAY_SIZE(s_AttributeProperties); idx++) {
+	switch (rat) {
+	case RUNTIME_ATTR_IMPLEMENTED:
+	    // no filter
+	    break;
+	case RUNTIME_ATTR_CAN_BE_DISABLED:
+	    // all of them can be disabled
+	    break;
+	case RUNTIME_ATTR_ENABLED:
+	    // skip over disabled ones
+	    if (!TEST_BIT(idx, RuntimeAttributes->enabledAttributesPrint))
+		continue;
+	    break;
+	case RUNTIME_ATTR_DISABLED:
+	    // skip over enabled ones
+	    if (TEST_BIT(idx, RuntimeAttributes->enabledAttributesPrint))
+		continue;
+	    break;
+	default:
+	    continue;
+	}
+	n = asprintf(&nbuffer, "%s%s%s",
+		     buffer ? buffer : "",
+		     first ? "" : ATTR_SEPARATOR_STR,
+		     s_AttributeProperties[idx].name);
+	free(buffer);
+	if (n < 0)
+	     return NULL;
+
+	buffer = nbuffer;
+	first = false;
+    }
+
+    n = asprintf(&nbuffer, "%s\"", buffer);
+    free(buffer);
+
+    return nbuffer;
 }
 
 LIB_EXPORT BOOL
