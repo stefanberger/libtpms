@@ -397,6 +397,13 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         "\"Enabled\":%s,"
         "\"Disabled\":%s"
     "}";
+    const char *runtimeAttributes_temp =
+    "\"RuntimeAttributes\":{"
+        "\"Implemented\":%s,"
+        "\"CanBeDisabled\":%s,"
+        "\"Enabled\":%s,"
+        "\"Disabled\":%s"
+    "}";
     const char *tpmProfile_temp = "\"ActiveProfile\":%s";
     const char *availableProfiles_temp =
     "\"AvailableProfiles\":["
@@ -410,10 +417,13 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     char camelliakeys[16];
     char *runtimeAlgos[RUNTIME_ALGO_NUM] = { NULL, };
     char *runtimeCmds[RUNTIME_CMD_NUM] = { NULL, };
+    char *runtimeAttrs[RUNTIME_ATTR_NUM] = { NULL, };
     enum RuntimeAlgorithmType rat;
     enum RuntimeCommandType rct;
+    enum RuntimeAttributeType rabt;
     char *runtimeAlgorithms = NULL;
     char *runtimeCommands = NULL;
+    char *runtimeAttributes = NULL;
     char *profile = NULL;
     const char *profileJSON;
     char *availableProfiles = NULL;
@@ -513,6 +523,27 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_RUNTIME_ATTRIBUTES)) {
+        fmt = buffer;
+        buffer = NULL;
+        for (rabt = RUNTIME_ATTR_IMPLEMENTED; rabt < RUNTIME_ATTR_NUM; rabt++) {
+            runtimeAttrs[rabt] = RuntimeAttributesGet(&g_RuntimeProfile.RuntimeAttributes, rabt);
+            if (!runtimeAttrs[rabt])
+                goto error;
+        }
+        if (asprintf(&runtimeAttributes, runtimeAttributes_temp,
+                     runtimeAttrs[RUNTIME_ATTR_IMPLEMENTED],
+                     runtimeAttrs[RUNTIME_ATTR_CAN_BE_DISABLED],
+                     runtimeAttrs[RUNTIME_ATTR_ENABLED],
+                     runtimeAttrs[RUNTIME_ATTR_DISABLED]) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     runtimeAttributes, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
     if ((flags & TPMLIB_INFO_ACTIVE_PROFILE) &&
         (profileJSON = RuntimeProfileGetJSON(&g_RuntimeProfile))) {
         fmt = buffer;
@@ -576,8 +607,11 @@ exit:
         free(runtimeAlgos[rat]);
     for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++)
         free(runtimeCmds[rct]);
+    for (rabt = RUNTIME_ATTR_IMPLEMENTED; rabt < RUNTIME_ATTR_NUM; rabt++)
+        free(runtimeAttrs[rabt]);
     free(runtimeAlgorithms);
     free(runtimeCommands);
+    free(runtimeAttributes);
     free(availableProfiles);
     free(tmp);
 
