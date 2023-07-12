@@ -763,7 +763,7 @@ TPM_RESULT TPM_RSAPrivateDecrypt(unsigned char *decrypt_data,   /* decrypted dat
         }
         if (rc == 0) {
             if (outlen > decrypt_data_size) {
-                printf("TPM_RSAPrivateDecrypt: Error, decrypt_data_size %u too small for message size %u\n",
+                printf("TPM_RSAPrivateDecrypt: Error, decrypt_data_size %zu too small for message size %zu\n",
                        decrypt_data_size, outlen);
                 rc = TPM_DECRYPT_ERROR;
             }
