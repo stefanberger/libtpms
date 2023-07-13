@@ -628,6 +628,8 @@ TPM_RESULT CopyCachedState(enum TPMLIB_StateType st,
     *is_empty_buffer = (*buflen == BUFLEN_EMPTY_BUFFER);
 
     if (cached_blobs[st].buffer) {
+        assert(*buflen != BUFLEN_EMPTY_BUFFER);
+
         *buffer = malloc(*buflen);
         if (!*buffer) {
             TPMLIB_LogError("Could not allocate %u bytes.\n", *buflen);
