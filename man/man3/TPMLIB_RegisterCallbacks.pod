@@ -66,8 +66,8 @@ be implemented.
 
 =item B<tpm_nvram_init>
 
-This function is called before any access to persitent storage is done. It
-allows the user to perform initialization of access to persitent storage.
+This function is called before any access to persistent storage is done. It
+allows the user to perform initialization of access to persistent storage.
 
 Upon success this function should return B<TPM_SUCCESS>, a failure code
 otherwise.
