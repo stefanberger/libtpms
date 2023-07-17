@@ -2725,7 +2725,7 @@ TPMU_SYM_KEY_BITS_Unmarshal(TPMU_SYM_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	rc = TPMI_CAMELLIA_KEY_BITS_Unmarshal(&target->camellia, buffer, size);
 	break;
 #endif
-#if ALG_TDES		// libtpms added beging
+#if ALG_TDES		// libtpms added begin
       case TPM_ALG_TDES:
 	rc = TPMI_TDES_KEY_BITS_Unmarshal(&target->tdes, buffer, size);
 	break;

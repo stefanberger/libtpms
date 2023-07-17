@@ -3907,7 +3907,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
             exp_array_size = 120;
             break;
         default:
-            /* we don't suport anything newer - no downgrade */
+            /* we don't support anything newer - no downgrade */
             TPMLIB_LogTPM2Error("Unsupported PA_COMPILE_CONSTANTS version %d. "
                                 "Supporting up to version %d.\n",
                                 hdr.version, PA_COMPILE_CONSTANTS_VERSION);

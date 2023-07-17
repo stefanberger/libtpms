@@ -213,7 +213,7 @@ TestSymmetricAlgorithm(
     BYTE                            decrypted[MAX_SYM_BLOCK_SIZE * 2];
     TPM2B_IV                        iv;
 
-    // libtpms added beging
+    // libtpms added begin
     if (test->dataOut[mode - TPM_ALG_CTR] == NULL)
         return;
     // libtpms added end
