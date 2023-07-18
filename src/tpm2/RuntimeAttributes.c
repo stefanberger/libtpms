@@ -56,7 +56,8 @@ static const struct {
 } s_AttributeProperties[] = {
 #define ATTRIBUTE(NAME, FLAGS, SFL) \
     { .name = NAME, .attributeFlags = FLAGS, .stateFormatLevel = SFL }
-    ATTRIBUTE("fips-host", RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING,
+    ATTRIBUTE("fips-host", RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING |
+			   RUNTIME_ATTRIBUTE_DISALLOW_SHA1_SIGNING,
 	      5),
 };
 
