@@ -1529,6 +1529,17 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
     // doesn't have a hashAlg member.
     signature->signature.any.hashAlg = signScheme->details.any.hashAlg;
 
+    switch(signKey->publicArea.type)				// libtpms added begin
+	{
+	  case TPM_ALG_RSA:
+	  case TPM_ALG_ECC:
+	    if (signScheme->details.any.hashAlg == TPM_ALG_SHA1 &&
+	        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+						     RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING))
+		return TPM_RC_HASH;
+	  break;
+	}							// libtpms added end
+
     // perform sign operation based on different key type
     switch(signKey->publicArea.type)
 	{
