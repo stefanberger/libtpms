@@ -93,6 +93,7 @@ static const struct RuntimeProfileDesc {
  *      marshalled now
  *  7 : Attribute support was added:
  *      - no-unpadded-encryption
+ *      - no-sha1-signing
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250

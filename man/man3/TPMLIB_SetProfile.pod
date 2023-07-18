@@ -193,6 +193,15 @@ I<Commands>. The following is a list of supported verbs:
 
 =back
 
+=item B<no-sha1-signing>: (since v0.10)
+
+=over 2
+
+=item * Prevents signature generation with a SHA1 with RSA and ECC
+algorithms
+
+=back
+
 =back
 
 =head1 ERRORS

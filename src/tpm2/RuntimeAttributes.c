@@ -58,6 +58,8 @@ static const struct {
     { .name = NAME, .attributeFlags = FLAGS, .stateFormatLevel = SFL }
     ATTRIBUTE("no-unpadded-encryption", RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION,
 	      7),
+    ATTRIBUTE("no-sha1-signing", RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING,
+	      7),
 };
 
 LIB_EXPORT void
