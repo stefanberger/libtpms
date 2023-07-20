@@ -1539,6 +1539,11 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
 	{
 #if ALG_RSA
 	  case TPM_ALG_RSA:
+	    if (signKey->publicArea.unique.rsa.t.size < BITS_TO_BYTES(2048) &&		// libtpms added begin
+		RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+						RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_SIGNING))
+		return TPM_RC_KEY_SIZE;					// libtpms added end
+
 	    result = CryptRsaSign(signature, signKey, digest, NULL);
 	    break;
 #endif  // ALG_RSA

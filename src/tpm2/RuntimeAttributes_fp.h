@@ -46,6 +46,7 @@
 
 #define RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING     (1 << 0)
 #define RUNTIME_ATTRIBUTE_DISALLOW_SHA1_SIGNING   (1 << 1)
+#define RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_SIGNING (1 << 2)
 
 struct RuntimeAttributes {
     /* */
