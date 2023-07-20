@@ -1395,6 +1395,10 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 
     // check for supported key size.
     keySizeInBits = publicArea->parameters.rsaDetail.keyBits;
+    if (keySizeInBits < 2048 &&					// libtpms added begin
+        RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+                                        RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_KEYGEN))
+        return TPM_RC_KEY_SIZE;					// libtpms added end
     if(((keySizeInBits % 1024) != 0)
        || (keySizeInBits > MAX_RSA_KEY_BITS)  // this might be redundant, but...
        || (keySizeInBits == 0))
