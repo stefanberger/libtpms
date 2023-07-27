@@ -146,15 +146,16 @@ static const struct {
     [TPM_ALG_ECC] = ASYMMETRIC(ALG_ECC, "ecc", s_KeySizesECC, false, 1),
     [TPM_ALG_SYMCIPHER] = OTHER(ALG_SYMCIPHER, "symcipher", false, 1),
     [TPM_ALG_CAMELLIA] = SYMMETRIC(ALG_CAMELLIA, "camellia", s_KeySizesCamellia, true, 1),
-    [TPM_ALG_SHA3_256] = HASH(ALG_SHA3_256, "sha3-256", false, 0), // not supported
-    [TPM_ALG_SHA3_384] = HASH(ALG_SHA3_384, "sha3-384", false, 0), // not supported
-    [TPM_ALG_SHA3_512] = HASH(ALG_SHA3_512, "sha3-256", false, 0), // not supported
+    [TPM_ALG_SHA3_256] = HASH(ALG_SHA3_256, "sha3-256", true, 0), // not supported
+    [TPM_ALG_SHA3_384] = HASH(ALG_SHA3_384, "sha3-384", true, 0), // not supported
+    [TPM_ALG_SHA3_512] = HASH(ALG_SHA3_512, "sha3-256", true, 0), // not supported
     [TPM_ALG_CMAC] = SIGNING(ALG_CMAC, "cmac", true, 1),
     [TPM_ALG_CTR] = ENCRYPTING(ALG_CTR, "ctr", true, 1),
     [TPM_ALG_OFB] = ENCRYPTING(ALG_OFB, "ofb", true, 1),
     [TPM_ALG_CBC] = ENCRYPTING(ALG_CBC, "cbc", true, 1),
     [TPM_ALG_CFB] = ENCRYPTING(ALG_CFB, "cfb", false, 1), // never disable: context entryption
     [TPM_ALG_ECB] = ENCRYPTING(ALG_ECB, "ecb", true, 1),
+    /* all newly added algorithms must have .canBedisable=true so they can be disabled */
 };
 
 static const struct {
