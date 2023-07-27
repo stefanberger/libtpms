@@ -151,6 +151,35 @@ requires '3') or allows to enable key sizes, such as AES-192, when for
 example I<StateFormatLevel> '4' is given. If I<StateFormatLevel> '3'
 is given then AES-192 will not be enabled.
 
+=head1 Attributes
+
+A profile may have the I<Attributes> key which is similar to I<Algorithms> or
+I<Commands>. The following is a list of supported verbs:
+
+=over 4
+
+=item B<fips-host>
+
+This verb enables the following:
+
+=over 2
+
+=item * Prohibits raw RSA encryption and decryption
+
+=item * Forbids SHA1 signature generation
+
+=item * Forbids RSA < 2048 signature generation
+
+=item * Forbids RSA < 2048 key generation
+
+=back
+
+By adding this verb to the I<Attributes> a TPM 2 can be run on a
+FIPS-enabled host. Note that this does not provide a FIPS-140-2/3
+compliant TPM 2.
+
+=back
+
 =head1 ERRORS
 
 =over 4
