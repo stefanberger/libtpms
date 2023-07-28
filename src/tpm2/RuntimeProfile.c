@@ -133,6 +133,33 @@ static const struct RuntimeProfileDesc {
 	.description = "This profile allows customization of enabled algorithms and commands. "
 		       "This profile requires at least libtpms v0.10.",
 	.allowModifications = true,
+    }, {
+       .name = "FIPS-host-v1",
+       .commandsProfile   = "0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,0x15b-0x15e,"
+                            "0x160-0x165,0x167-0x174,0x176-0x178,0x17a-0x193,0x197",
+       /*
+        * removed: rsa-1024, rsaes (not available CentOS FIPS mode),
+        *          camellia (CentOS), tdes (CentOS), ecdaa, ecschnorr
+        * CentOS 9 + RSA1024 + FIPS: Cannot verify or sign with sha1
+        *                            Can verify signature with RSA-1024 (>=sha256) but not sign
+        *                            => SHA1 still available but not for signatures
+        *                            => RSA-1024 only available for sign. verification (with >=sha256)
+        *                            => RSA-1536 cannot sign either
+        *                            Key generation only works with RSA >= 2048
+        * Note: Test suites will fail!
+        */
+       .algorithmsProfile = "rsa,rsa-min-size=1024,hmac,aes,aes-min-size=128,mgf1,keyedhash,"
+                            "xor,sha1,sha256,sha384,sha512,null,rsassa,rsapss,oaep,ecdsa,ecdh,"
+                            "sm2,ecmqv,kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,"
+                            "ecc-nist,symcipher,cmac,ctr,ofb,cbc,cfb,ecb,ecc-min-size=256",
+       .attributesProfile = "fips-host",
+       .stateFormatLevel  = 5,
+       .description = "This profile allows the TPM 2 to run on a FIPS-enabled host by disabling "
+                      "several algorithms (tdes, camellia, raw RSA encyption, rsaes) and requiring "
+                      "RSA-2048 for RSA signature generation. This profile does not implement a "
+                      "FIPS-140-2/3 compliant TPM 2. This profile enables compatibility with "
+                      "libtpms >= v0.10.",
+       .allowModifications = false,
     }
 };
 
