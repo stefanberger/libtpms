@@ -112,6 +112,14 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Mon Aug 14 2023 Stefan Berger - 0.9.7-1
+- Object: clear out sensitive area if on load if not provided (Bugfix)
+- tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
+- tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
+- tpm2: Sync CryptParameterDecrypt implementation  with upstream
+- tpm2: Fix issue related to CryptGenerateKeyDes (TPM 2 errata v1.4)
+- tpm2: Check size of TPM2B_NAME buffer before reading 2 bytes from it
+
 * Tue Feb 28 2023 Stefan Berger - 0.9.6-1
 - tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
 
