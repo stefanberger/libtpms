@@ -1,3 +1,14 @@
+libtpms (0.9.7) RELEASED; urgency=medium
+
+  - Object: clear out sensitive area if on load if not provided (Bugfix)
+  - tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
+  - tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
+  - tpm2: Sync CryptParameterDecrypt implementation  with upstream
+  - tpm2: Fix issue related to CryptGenerateKeyDes (TPM 2 errata v1.4)
+  - tpm2: Check size of TPM2B_NAME buffer before reading 2 bytes from it
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 14 Aug 2023 09:00:00 -0500
+
 libtpms (0.9.6) RELEASED; urgency=high
 
   - tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
