@@ -460,10 +460,7 @@ ObjectLoad(
     object->publicArea = *publicArea;
     // If there is a sensitive area, load it
     if(sensitive == NULL)
-	{		// libtpms changed begin
-	    object->attributes.publicOnly = SET;
-	    MemorySet(&object->sensitive, 0, sizeof(object->sensitive)); // needed for libtpms.
-	}		// libtpms changed end
+	object->attributes.publicOnly = SET;
     else
 	{
 	    object->sensitive = *sensitive;
