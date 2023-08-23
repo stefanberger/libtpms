@@ -3,9 +3,8 @@
 /*			     Parameter Unmarshaling				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal.c 1635 2020-06-12 21:48:27Z kgoldman $		*/
 /*										*/
-/* (c) Copyright IBM Corporation 2015 - 2018					*/
+/* (c) Copyright IBM Corporation 2015 - 2023					*/
 /*										*/
 /* All rights reserved.								*/
 /* 										*/
@@ -3638,7 +3637,7 @@ TPM2B_PRIVATE_KEY_RSA_Unmarshal(TPM2B_PRIVATE_KEY_RSA *target, BYTE **buffer, IN
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
-	rc = TPM2B_Unmarshal(&target->b, MAX_RSA_KEY_BYTES/2, buffer, size);
+	rc = TPM2B_Unmarshal(&target->b, RSA_PRIVATE_SIZE, buffer, size);
     }
     return rc;
 }
