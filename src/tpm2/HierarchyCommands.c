@@ -281,7 +281,7 @@ TPM2_SetPrimaryPolicy(
 	      break;
 	    
 	    FOR_EACH_ACT(SET_ACT_POLICY)
-	    
+
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
@@ -512,3 +512,4 @@ TPM2_HierarchyChangeAuth(
     return TPM_RC_SUCCESS;
 }
 #endif // CC_HierarchyChangeAuth
+
