@@ -3,7 +3,6 @@
 /*	 		TPM to OpenSSL BigNum Shim Layer			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslMath.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -74,15 +73,20 @@
 #define SYMMETRIC_ALIGNMENT RADIX_BYTES
 
 #if 0 // libtpms added
-#if OPENSSL_VERSION_NUMBER >= 0x10200000L
-// Check the bignum_st definition in crypto/bn/bn_lcl.h and either update the
-// version check or provide the new definition for this version.
+/*
+ * As of release 3.0.0, OPENSSL_VERSION_NUMBER is a combination of the
+ * major (M), minor (NN) and patch (PP) version into a single integer 0xMNN00PP0L
+ */
+#if OPENSSL_VERSION_NUMBER > 0x30100ff0L
+// Check the bignum_st definition in crypto/bn/bn_lcl.h or crypto/bn/bn_local.h and either update
+// the version check or provide the new definition for this version.
+// Currently safe for all 3.1.x
 #   error Untested OpenSSL version
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 // from crypto/bn/bn_lcl.h
 struct bignum_st {
     BN_ULONG *d;
-    int top; 
+    int top;
 
     int dmax;
     int neg;

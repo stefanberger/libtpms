@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			    Random Number Generator 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: RandomCommands.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
+/*            $Id: RandomCommands.c 1671 2021-06-03 18:30:41Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/

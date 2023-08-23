@@ -117,7 +117,7 @@ TPM2_Sign(
     // Input Validation
     if(!IsSigningObject(signObject))
 	return TPM_RCS_KEY + RC_Sign_keyHandle;
-    
+
     // A key that will be used for x.509 signatures can't be used in TPM2_Sign().
     if(IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, x509sign))
 	return TPM_RCS_ATTRIBUTES + RC_Sign_keyHandle;

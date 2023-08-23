@@ -3,7 +3,6 @@
 /*			Internal Global Type Definitions			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -222,9 +221,9 @@ typedef struct OBJECT
     OBJECT_ATTRIBUTES   attributes;         // object attributes
     TPMT_PUBLIC         publicArea;         // public area of an object
     TPMT_SENSITIVE      sensitive;          // sensitive area of an object
-#if ALG_RSA
+#if ALG_RSA				// libtpms added begin: keep
     privateExponent_t   privateExponent;    // Additional field for the private
-#endif
+#endif					// libtpms added end
     TPM2B_NAME          qualifiedName;      // object qualified name
     TPMI_DH_OBJECT      evictHandle;        // if the object is an evict object,
     // the original handle is kept here.
@@ -480,7 +479,7 @@ typedef UINT32           NV_REF;
 typedef BYTE            *NV_RAM_REF;
 
 /* 5.9.8.3	NV_PIN */
-/* This structure deals with the possible endianness differences between the canonical form of the
+/* This structure deals with the possible endianess differences between the canonical form of the
    TPMS_NV_PIN_COUNTER_PARAMETERS structure and the internal value. The structures allow the data in
    a PIN index to be read as an 8-octet value using NvReadUINT64Data(). That function will byte swap
    all the values on a little endian system. This will put the bytes with the 4-octet values in the

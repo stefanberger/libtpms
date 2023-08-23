@@ -3,7 +3,7 @@
 /*		Splice the OpenSSL() library into the TPM code.    		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSym.h 1619 2020-05-19 16:51:47Z kgoldman $		*/
+/*            $Id: TpmToOsslSym.h 1619M 2021-01-19 21:39:42Z (local) $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 

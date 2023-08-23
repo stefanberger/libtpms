@@ -1,3 +1,4 @@
+
 /********************************************************************************/
 /*										*/
 /*			   Attestation Commands  				*/
@@ -22,7 +23,7 @@
 /*										*/
 /*  2. Source Code Distribution Conditions:					*/
 /*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
+/*  - Redistributions of Source CoDe must retain the above copyright licenses, 	*/
 /*    this list of conditions and the following disclaimers.			*/
 /*										*/
 /*  - Redistributions in binary form must reproduce the above copyright 	*/

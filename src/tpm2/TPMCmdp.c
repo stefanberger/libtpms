@@ -155,7 +155,9 @@ _rpc__ForceFailureMode(
 		       void
 		       )
 {
+#if SIMULATION
     SetForceFailureMode();
+#endif
     return;
 }
 /* D.4.3.5. _rpc__Signal_PhysicalPresenceOn() */
