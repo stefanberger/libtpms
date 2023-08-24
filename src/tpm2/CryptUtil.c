@@ -304,7 +304,6 @@ CryptGenerateKeySymmetric(
 #if ALG_TDES
     else if(publicArea->parameters.symDetail.sym.algorithm == TPM_ALG_TDES)
 	{
-	    sensitive->sensitive.sym.t.size = keyBits / 8;
 	    result = CryptGenerateKeyDes(publicArea, sensitive, rand);
 	}
 #endif
