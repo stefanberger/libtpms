@@ -79,13 +79,31 @@ BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
 #   error   This verson only works with CRT formatted data
 #endif // !CRT_FORMAT_RSA
 
-typedef struct privateExponent
+					// libtpms added begin: keep old privateExponent
+/* The privateExponentOld is part of the OBJECT and we keep it there even though
+ * upstream got rid of it and stores Q, dP, dQ, and qInv by appending them to
+ * P stored in TPMT_SENSITIVE.TPMU_SENSITIVE_COMPOSITE.TPM2B_PRIVATE_KEY_RSA
+ */
+typedef struct privateExponentOld
 {
     bn_prime_t          Q;
     bn_prime_t          dP;
     bn_prime_t          dQ;
     bn_prime_t          qInv;
 } privateExponent_t;
+
+#include "BnMemory_fp.h"
+
+static inline void
+RsaInitializeExponentOld(
+			 privateExponent_t      *pExp
+			)
+{
+    BN_INIT(pExp->Q);
+    BN_INIT(pExp->dP);
+    BN_INIT(pExp->dQ);
+    BN_INIT(pExp->qInv);
+}					// libtpms added end
 
 #endif      // _CRYPT_RSA_H
 

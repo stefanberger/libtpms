@@ -97,17 +97,6 @@ CryptRsaStartup(
    function returns the pointer to the private exponent value so that it can be used in an
    initializer for a data declaration */
 
-void
-RsaInitializeExponent(
-		      privateExponent_t      *pExp
-		      )
-{
-    BN_INIT(pExp->Q);
-    BN_INIT(pExp->dP);
-    BN_INIT(pExp->dQ);
-    BN_INIT(pExp->qInv);
-}
-
 #if 0					// 	libtpms added
 /* 10.2.17.4.2	MakePgreaterThanQ() */
 /* This function swaps the pointers for P and Q if Q happens to be larger than Q. */
@@ -200,7 +189,7 @@ ComputePrivateExponent(
     BOOL                qOK;
     BN_PRIME(pT);
     //
-    RsaInitializeExponent(pExp);
+    RsaInitializeExponentOld(pExp);
     BnCopy((bigNum)&pExp->Q, Q);
     // make p the larger value so that m2 is always less than p
     if(BnUnsignedCmp(P, Q) < 0)
@@ -1007,7 +996,7 @@ CryptRsaLoadPrivateExponent(
 	{
 	    TEST(TPM_ALG_NULL);
 	    // Make sure that the bigNum used for the exponent is properly initialized
-	    RsaInitializeExponent(&rsaKey->privateExponent);
+	    RsaInitializeExponentOld(&rsaKey->privateExponent);
 	    // Find the second prime by division
 	    BnDiv(bnQ, bnQr, bnN, bnP);
 	    if(!BnEqualZero(bnQr))
@@ -1322,7 +1311,7 @@ CryptRsaGenerateKey(
         return OpenSSLCryptRsaGenerateKey(rsaKey, e, keySizeInBits);
 #endif                                 // libtpms added end
     // Need to initialize the privateExponent structure
-    RsaInitializeExponent(&rsaKey->privateExponent);
+    RsaInitializeExponentOld(&rsaKey->privateExponent);
 
     // The prime is computed in P. When a new prime is found, Q is checked to
     // see if it is zero.  If so, P is copied to Q and a new P is found.
