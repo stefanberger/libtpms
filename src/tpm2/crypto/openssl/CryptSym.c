@@ -3,7 +3,7 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
+/*            $Id: CryptSym.c 1661 2021-03-18 19:00:58Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -179,8 +179,9 @@ CryptSymmetricEncrypt(
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
     //
-    memset(&keySchedule, 0, sizeof(keySchedule));	// libtpms added; coverity
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    memset((void *)&keySchedule, 0, sizeof(keySchedule));	/* silence false positive; coverity */
+    memset(tmp, 0, sizeof(tmp));
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
     TEST(algorithm);
@@ -334,7 +335,8 @@ CryptSymmetricDecrypt(
     TpmCryptSymFinal_t             final; /* libtpms added */
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
 
-    memset(&keySchedule, 0, sizeof(keySchedule));	// libtpms added; coverity
+    memset((void *)&keySchedule, 0, sizeof(keySchedule));	/* silence false positive; coverity */
+    memset(tmp, 0, sizeof(tmp));
     // These are used but the compiler can't tell because they are initialized
     // in case statements and it can't tell if they are always initialized
     // when needed, so... Comment these out if the compiler can tell or doesn't
