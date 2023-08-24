@@ -111,6 +111,12 @@ ExecuteCommand(
     // Response local variables
     UINT32               maxResponse = *responseSize;
     TPM_RC               result;            // return code for the command
+
+    /* check for an unreasonably large command size, since it's cast to a signed integer later */
+    if (requestSize > INT32_MAX) {
+	result = TPM_RC_SUCCESS;
+	goto Cleanup;
+    }
     // This next function call is used in development to size the command and response
     // buffers. The values printed are the sizes of the internal structures and
     // not the sizes of the canonical forms of he command response structures. Also,
