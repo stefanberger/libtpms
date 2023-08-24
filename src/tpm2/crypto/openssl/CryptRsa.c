@@ -237,9 +237,10 @@ RSADP(
       )
 {
     BN_RSA_INITIALIZED(bnM, inOut);
-    BN_RSA_INITIALIZED(bnN, &key->publicArea.unique.rsa);
     BN_RSA_INITIALIZED(bnP, &key->sensitive.sensitive.rsa);
-    if(BnUnsignedCmp(bnM, bnN) >= 0)
+    if(UnsignedCompareB(inOut->size, inOut->buffer,
+			key->publicArea.unique.rsa.t.size,
+			key->publicArea.unique.rsa.t.buffer) >= 0)
 	return TPM_RC_SIZE;
     // private key operation requires that private exponent be loaded
     // During self-test, this might not be the case so load it up if it hasn't
@@ -247,10 +248,11 @@ RSADP(
     // been done
     if(!key->attributes.privateExp)
 	CryptRsaLoadPrivateExponent(key);
-    if(!RsaPrivateKeyOp(bnM, bnP, &key->privateExponent))
-	FAIL(FATAL_ERROR_INTERNAL);
-    BnTo2B(bnM, inOut, inOut->size);
+    VERIFY(RsaPrivateKeyOp(bnM, bnP, &key->privateExponent));
+    VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
+ Error:
+    return TPM_RC_FAILURE;
 }
 /* 10.2.17.4.5 OaepEncode() */
 /* This function performs OAEP padding. The size of the buffer to receive the OAEP padded data must
