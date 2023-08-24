@@ -64,14 +64,6 @@
 #ifndef _CRYPT_RSA_H
 #define _CRYPT_RSA_H
 
-/* This structure is a succinct representation of the cryptographic components of an RSA key. It is
-   used in testing */
-typedef struct
-{
-    UINT32        exponent;      // The public exponent pointer
-    TPM2B        *publicKey;     // Pointer to the public modulus
-    TPM2B        *privateKey;    // The private prime
-} RSA_KEY;
 /* These values are used in the bigNum representation of various RSA values. */
 #define RSA_BITS            (MAX_RSA_KEY_BYTES * 8)
 BN_TYPE(rsa, RSA_BITS);
