@@ -78,17 +78,19 @@
 #   if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
 #       undef ALG_SM4
 #       define ALG_SM4  ALG_NO
+#   //elif OPENSSL_VERSION_NUMBER >= 0x10200000L		// libtpms deactivated
+#   //    include <openssl/sm4.h>				// libtpms deactivated
 #   else
-#       include <openssl/evp.h>
+#       include <openssl/evp.h>					// libtpms changed begin
         typedef EVP_CIPHER_CTX* SM4_KEY;
 #       define SM4_ENCRYPT 1
 #       define SM4_DECRYPT 0
 
 int SM4_set_encrypt_key(const uint8_t *key, SM4_KEY *ks);
-int SM4_set_decrypt_key(const uint8_t *key, SM4_KEY *ks);
+int SM4_set_decrypt_key(const uint8_t *key, SM4_KEY *ks);	// libtpms changed end
 void SM4_encrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks);
 void SM4_decrypt(const uint8_t *in, uint8_t *out, const SM4_KEY *ks);
-void SM4_final(const SM4_KEY *ks);
+void SM4_final(const SM4_KEY *ks);				// libtpms added
 #   endif
 #endif // ALG_SM4
 
