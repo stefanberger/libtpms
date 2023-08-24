@@ -401,9 +401,9 @@ ObjectLoad(
 	   )
 {
     TPM_RC           result = TPM_RC_SUCCESS;
-    BOOL             doCheck;
     //
     // Do validations of public area object descriptions
+    pAssert(publicArea != NULL);
     // Is this public only or a no-name object?
     if(sensitive == NULL || publicArea->nameAlg == TPM_ALG_NULL)
 	{
@@ -423,33 +423,22 @@ ObjectLoad(
 	}
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, blamePublic);
-    // If object == NULL, then this is am import. For import, load is not called
-    // unless the parent is fixedTPM.
-    if(object == NULL)
-	doCheck = TRUE;// //
-    // If the parent is not NULL, then this is an ordinary load and we only check
-    // if the parent is not fixedTPM
-    else if(parent != NULL)
-	doCheck = !IS_ATTRIBUTE(parent->publicArea.objectAttributes,
-				TPMA_OBJECT, fixedTPM);
-    else
-	// This is a loadExternal. Check everything.
-	// Note: the check functions will filter things based on the name algorithm
-	// and whether or not both parts are loaded.
-	doCheck = TRUE;
-    // Note: the parent will be NULL if this is a load external. CryptValidateKeys()
-    // will only check the parts that need to be checked based on the settings
-    // of publicOnly and nameAlg.
-    // Note: For an RSA key, the keys sizes are checked but the binding is not
-    // checked.
-    if(doCheck)
+
+    // Sensitive area and binding checks
+
+    // On load, check nothing if the parent is fixedTPM. For all other cases, validate
+    // the keys.
+    if((parent == NULL)
+       || ((parent != NULL) && !IS_ATTRIBUTE(
+			    parent->publicArea.objectAttributes, TPMA_OBJECT, fixedTPM)))
 	{
 	    // Do the cryptographic key validation
-	    result = CryptValidateKeys(publicArea, sensitive, blamePublic,
-				       blameSensitive);
+	    result = CryptValidateKeys(publicArea, sensitive, blamePublic, blameSensitive);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 	}
     // If this is an import, we are done
-    if(object == NULL || result != TPM_RC_SUCCESS)
+    if(object == NULL)
 	return result;
     // Set the name, if one was provided
     if(name != NULL)
