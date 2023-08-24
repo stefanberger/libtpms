@@ -1005,7 +1005,7 @@ CryptCreateObject(
 	}
     // Generate a seedValue that is the size of the digest produced by nameAlg
     sensitive->seedValue.t.size =
-	DRBG_Generate(rand, object->sensitive.seedValue.t.buffer,
+	DRBG_Generate(rand, sensitive->seedValue.t.buffer,
 		      CryptHashGetDigestSize(publicArea->nameAlg));
     if(g_inFailureMode)
 	return TPM_RC_FAILURE;
