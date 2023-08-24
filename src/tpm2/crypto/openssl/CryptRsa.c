@@ -536,11 +536,10 @@ PssEncode(
     pAssert(out != NULL && hLen > 0 && digest != NULL);
     // Get the size of the mask
     mLen = (UINT16)(out->size - hLen - 1);
-    // Maximum possible salt size is mask length - 1
-    saltSize = mLen - 1;
-    // Use the maximum salt size allowed by FIPS 186-4
-    if(saltSize > hLen)
-	saltSize = (UINT16)hLen;
+
+    // Set the salt size
+    saltSize = CryptRsaPssSaltSize((INT16)hLen, (INT16)out->size);
+
     //using eOut for scratch space
     // Set the first 8 bytes to zero
     pOut = out->buffer;
