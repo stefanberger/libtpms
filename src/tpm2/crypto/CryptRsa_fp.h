@@ -69,10 +69,6 @@ BOOL
 CryptRsaStartup(
 		void
 		);
-void
-RsaInitializeExponent(
-		      privateExponent_t      *pExp
-		      );
 INT16
 CryptRsaPssSaltSize(
 		    INT16              hashSize,
