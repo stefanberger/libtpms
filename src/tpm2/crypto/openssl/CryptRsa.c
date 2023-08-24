@@ -111,49 +111,33 @@ static BOOL
 ComputePrivateExponent(
 		       bigNum               P,             // IN: first prime (size is 1/2 of bnN)
 		       bigNum               Q,             // IN: second prime (size is 1/2 of bnN)
-		       bigNum               E,             // IN: the public exponent
-		       bigNum               N,             // IN: the public modulus
+		       bigNum               pubExp,        // IN: the public exponent
 		       privateExponent_t   *pExp           // OUT:
 		       )
 {
     BOOL                pOK;
     BOOL                qOK;
-#if CRT_FORMAT_RSA == NO
-    BN_RSA(bnPhi);
+    BN_PRIME(pT);
     //
-    RsaInitializeExponent(pExp);
-    // Get compute Phi = (p - 1)(q - 1) = pq - p - q + 1 = n - p - q + 1
-    pOK = BnCopy(bnPhi, N);
-    pOK = pOK && BnSub(bnPhi, bnPhi, P);
-    pOK = pOK && BnSub(bnPhi, bnPhi, Q);
-    pOK = pOK && BnAddWord(bnPhi, bnPhi, 1);
-    // Compute the multiplicative inverse d = 1/e mod Phi
-    pOK = pOK && BnModInverse((bigNum)&pExp->D, E, bnPhi);
-    qOK = pOK;
-#else
-    BN_PRIME(temp);
-    bigNum              pT;
-    //
-    NOT_REFERENCED(N);
     RsaInitializeExponent(pExp);
     BnCopy((bigNum)&pExp->Q, Q);
     // make p the larger value so that m2 is always less than p
     if(BnUnsignedCmp(P, Q) < 0)
 	{
-	    pT = P;
+	    bigNum pTemp;
+	    pTemp = P;
 	    P = Q;
-	    Q = pT;
+	    Q = pTemp;
 	}
-    //dP = (1/e) mod (p-1) = d mod (p-1)
-    pOK = BnSubWord(temp, P, 1);
-    pOK = pOK && BnModInverse((bigNum)&pExp->dP, E, temp);
-    //dQ = (1/e) mod (q-1) = d mod (q-1)
-    qOK = BnSubWord(temp, Q, 1);
-    qOK = qOK && BnModInverse((bigNum)&pExp->dQ, E, temp);
+    //dP = (1/e) mod (p-1)
+    pOK = BnSubWord(pT, P, 1);
+    pOK = pOK && BnModInverse((bigNum)&pExp->dP, pubExp, pT);
+    //dQ = (1/e) mod (q-1)
+    qOK = BnSubWord(pT, Q, 1);
+    qOK = qOK && BnModInverse((bigNum)&pExp->dQ, pubExp, pT);
     // qInv = (1/q) mod p
     if(pOK && qOK)
 	pOK = qOK = BnModInverse((bigNum)&pExp->qInv, Q, P);
-#endif
     if(!pOK)
 	BnSetWord(P, 0);
     if(!qOK)
@@ -897,7 +881,7 @@ CryptRsaLoadPrivateExponent(
 	    if(!BnEqualZero(bnQr))
 		ERROR_RETURN(TPM_RC_BINDING);
 	    // Compute the private exponent and return it if found
-	    if(!ComputePrivateExponent(bnP, bnQ, bnE, bnN,
+	    if(!ComputePrivateExponent(bnP, bnQ, bnE,
 				       &rsaKey->privateExponent))
 		ERROR_RETURN(TPM_RC_BINDING);
 	}
@@ -1245,7 +1229,7 @@ CryptRsaGenerateKey(
 	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
 		FAIL(FATAL_ERROR_INTERNAL);
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnP, bnQ, bnE, bnN, &rsaKey->privateExponent) != TRUE)
+	    if(ComputePrivateExponent(bnP, bnQ, bnE, &rsaKey->privateExponent) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
