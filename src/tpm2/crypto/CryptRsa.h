@@ -64,16 +64,22 @@
 #ifndef _CRYPT_RSA_H
 #define _CRYPT_RSA_H
 
-/* These values are used in the bigNum representation of various RSA values. */
-#define RSA_BITS            (MAX_RSA_KEY_BYTES * 8)
-BN_TYPE(rsa, RSA_BITS);
-#define BN_RSA(name)       BN_VAR(name, RSA_BITS)
-#define BN_RSA_INITIALIZED(name, initializer)		\
-    BN_INITIALIZED(name, RSA_BITS, initializer)
-#define BN_PRIME(name)     BN_VAR(name, (RSA_BITS / 2))
-BN_TYPE(prime, (RSA_BITS / 2));
-#define BN_PRIME_INITIALIZED(name, initializer)			\
-    BN_INITIALIZED(name, RSA_BITS / 2, initializer)
+// These values are used in the bigNum representation of various RSA values.
+
+BN_TYPE(rsa, MAX_RSA_KEY_BITS);
+#define BN_RSA(name)       BN_VAR(name, MAX_RSA_KEY_BITS)
+#define BN_RSA_INITIALIZED(name, initializer)			\
+    BN_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
+
+#define BN_PRIME(name)     BN_VAR(name, (MAX_RSA_KEY_BITS / 2))
+BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
+#define BN_PRIME_INITIALIZED(name, initializer)				\
+    BN_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
+
+#if !CRT_FORMAT_RSA
+#   error   This verson only works with CRT formatted data
+#endif // !CRT_FORMAT_RSA
+
 typedef struct privateExponent
 {
 #if CRT_FORMAT_RSA == NO
