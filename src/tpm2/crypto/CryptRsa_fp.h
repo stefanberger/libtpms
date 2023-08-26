@@ -123,10 +123,10 @@ CryptRsaValidateSignature(
 			  );
 LIB_EXPORT TPM_RC
 CryptRsaGenerateKey(
-		    OBJECT              *rsaKey,            // IN/OUT: The object structure in which
-		    //          the key is created.
+		    TPMT_PUBLIC         *publicArea,
+		    TPMT_SENSITIVE      *sensitive,
+		    OBJECT              *rsaKey,            // libtpms added: IN/OUT: The object structure in which the key is created.
 		    RAND_STATE          *rand               // IN: if not NULL, the deterministic
-		    //     RNG state
 		    );
 INT16
 MakeDerTag(
