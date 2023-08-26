@@ -1134,8 +1134,9 @@ int GetCachedRsaKey(OBJECT *key, RAND_STATE *rand);
 /* TPM_RC_VALUE could not find a prime using the provided parameters */
 LIB_EXPORT TPM_RC
 CryptRsaGenerateKey(
-		    OBJECT              *rsaKey,            // IN/OUT: The object structure in which
-		    //          the key is created.
+		    TPMT_PUBLIC         *publicArea,
+		    TPMT_SENSITIVE      *sensitive,
+		    OBJECT              *rsaKey,            // libtpms added IN/OUT: The object structure in which the key is created.
 		    RAND_STATE          *rand               // IN: if not NULL, the deterministic
 		    //     RNG state
 		    )
@@ -1146,12 +1147,13 @@ CryptRsaGenerateKey(
     BN_RSA(bnD);
     BN_RSA(bnN);
     BN_WORD(bnPubExp);
-    TPMT_PUBLIC         *publicArea = &rsaKey->publicArea;
-    TPMT_SENSITIVE      *sensitive = &rsaKey->sensitive;
     UINT32               e = publicArea->parameters.rsaDetail.exponent;
     int                  keySizeInBits;
     TPM_RC               retVal = TPM_RC_NO_RESULT;
     //
+
+    pAssert(publicArea == &rsaKey->publicArea && sensitive == &rsaKey->sensitive); // libtpms added: consistency check
+
     // Need to make sure that the caller did not specify an exponent that is
     // not supported
     e = publicArea->parameters.rsaDetail.exponent;
@@ -1176,7 +1178,7 @@ CryptRsaGenerateKey(
     // Set the prime size for instrumentation purposes
     INSTRUMENT_SET(PrimeIndex, PRIME_INDEX(keySizeInBits / 2));
 #if SIMULATION && USE_RSA_KEY_CACHE
-    if(GET_CACHED_KEY(rsaKey, rand))
+    if(GET_CACHED_KEY(publicArea, sensitive, rand))
 	return TPM_RC_SUCCESS;
 #endif
     // Make sure that key generation has been tested

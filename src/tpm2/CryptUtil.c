@@ -971,7 +971,7 @@ CryptCreateObject(
 	  case TPM_ALG_RSA:
 	    // RSA uses full object so that it has a place to put the private
 	    // exponent
-	    result = CryptRsaGenerateKey(object, rand);
+	    result = CryptRsaGenerateKey(publicArea, sensitive, object, rand); // libtpms: added object
 	    break;
 #endif // TPM_ALG_RSA
 #if ALG_ECC
