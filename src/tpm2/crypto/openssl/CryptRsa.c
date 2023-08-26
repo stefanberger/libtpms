@@ -1144,11 +1144,11 @@ CryptRsaGenerateKey(
     BN_PRIME(bnQ);
     BN_RSA(bnD);
     BN_RSA(bnN);
-    BN_WORD(bnE);
-    UINT32               e;
-    int                  keySizeInBits;
+    BN_WORD(bnPubExp);
     TPMT_PUBLIC         *publicArea = &rsaKey->publicArea;
     TPMT_SENSITIVE      *sensitive = &rsaKey->sensitive;
+    UINT32               e = publicArea->parameters.rsaDetail.exponent;
+    int                  keySizeInBits;
     TPM_RC               retVal = TPM_RC_NO_RESULT;
     //
     // Need to make sure that the caller did not specify an exponent that is
@@ -1156,12 +1156,16 @@ CryptRsaGenerateKey(
     e = publicArea->parameters.rsaDetail.exponent;
     if(e == 0)
 	e = RSA_DEFAULT_PUBLIC_EXPONENT;
-    if(e < 65537)
-	ERROR_RETURN(TPM_RC_RANGE);
-    if(e != RSA_DEFAULT_PUBLIC_EXPONENT && !IsPrimeInt(e))
-	ERROR_RETURN(TPM_RC_RANGE);
-    BnSetWord(bnE, e);
-    // Check that e is prime
+    else
+	{
+	    if(e < 65537)
+		ERROR_RETURN(TPM_RC_RANGE);
+	    // Check that e is prime
+	    if(!IsPrimeInt(e))
+		ERROR_RETURN(TPM_RC_RANGE);
+	}
+    BnSetWord(bnPubExp, e);
+
     // check for supported key size.
     keySizeInBits = publicArea->parameters.rsaDetail.keyBits;
     if(((keySizeInBits % 1024) != 0)
@@ -1229,7 +1233,7 @@ CryptRsaGenerateKey(
 	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
 		FAIL(FATAL_ERROR_INTERNAL);
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnP, bnQ, bnE, &rsaKey->privateExponent) != TRUE)
+	    if(ComputePrivateExponent(bnP, bnQ, bnPubExp, &rsaKey->privateExponent) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
@@ -1246,7 +1250,7 @@ CryptRsaGenerateKey(
 		    BN_RSA(temp2);
 		    BnGenerateRandomInRange(temp1, bnN, rand);
 		    // Encrypt with public exponent...
-		    BnModExp(temp2, temp1, bnE, bnN);
+		    BnModExp(temp2, temp1, bnPubExp, bnN);
 		    // ...  then decrypt with private exponent
 		    RsaPrivateKeyOp(temp2, bnN, bnP, &rsaKey->privateExponent);
 		    // If the starting and ending values are not the same,
