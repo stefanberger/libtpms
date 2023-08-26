@@ -781,11 +781,10 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BIGNUM       *Q = NULL;
     BIGNUM       *Qr = NULL;
     BIGNUM       *D = NULL;
-#if CRT_FORMAT_RSA == YES
+    /* for CRT format: dP, dQ, qInv */
     BIGNUM       *dP = BN_new();
     BIGNUM       *dQ = BN_new();
     BIGNUM       *qInv = BN_new();
-#endif
     BN_CTX       *ctx = NULL;
     TPM_RC        retVal;
 
@@ -820,14 +819,13 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
 
     DoRSACheckKey(P, Q, N, E, D);
 
-#if CRT_FORMAT_RSA == YES
     /* CRT parameters are not absolutely needed but may speed up ops */
     dP = BigInitialized(dP, (bigConst)&rsaKey->privateExponent.dP);
     dQ = BigInitialized(dQ, (bigConst)&rsaKey->privateExponent.dQ);
     qInv = BigInitialized(qInv, (bigConst)&rsaKey->privateExponent.qInv);
     if (dP == NULL || dQ == NULL || qInv == NULL)
         ERROR_RETURN(TPM_RC_FAILURE);
-#endif
+
     if (BuildRSAKey(ppkey, N, E, D, P, Q, dP, dQ, qInv) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
@@ -841,11 +839,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BN_free(N);
     BN_free(E);
     BN_clear_free(D);
-#if CRT_FORMAT_RSA == YES
     BN_clear_free(dP);
     BN_clear_free(dQ);
     BN_clear_free(qInv);
-#endif
 
     if (retVal != TPM_RC_SUCCESS) {
         EVP_PKEY_free(*ppkey);
