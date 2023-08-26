@@ -1205,11 +1205,17 @@ CryptRsaGenerateKey(
     // performed.  If the encrypt/decrypt fails, assume that at least one of the
     // primes is composite. Since we don't know which one, set Q to zero and start
     // over and find a new pair of primes.
-    for(i = 1; (retVal != TPM_RC_SUCCESS) && (i != 100); i++)
+
+    for(i = 1; (retVal == TPM_RC_NO_RESULT) && (i != 100); i++)
 	{
 	    if(_plat__IsCanceled())
 		ERROR_RETURN(TPM_RC_CANCELED);
-	    BnGeneratePrimeForRSA(bnP, keySizeInBits / 2, e, rand);
+
+	    if(BnGeneratePrimeForRSA(bnP, keySizeInBits / 2, e, rand) == TPM_RC_FAILURE)
+		{
+		    retVal = TPM_RC_FAILURE;
+		    goto Exit;
+		}
 	    INSTRUMENT_INC(PrimeCounts[PrimeIndex]);
 	    // If this is the second prime, make sure that it differs from the
 	    // first prime by at least 2^100
@@ -1234,14 +1240,12 @@ CryptRsaGenerateKey(
 	    // And the  prime to the sensitive area
 	    BnTo2B(bnP, &sensitive->sensitive.rsa.b,
 		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);
-	    // Make sure everything came out right. The MSb of the values must be
-	    // one
+	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
 	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
 		FAIL(FATAL_ERROR_INTERNAL);
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnP, bnQ, bnE, bnN, &rsaKey->privateExponent)
-	       != TRUE)
+	    if(ComputePrivateExponent(bnP, bnQ, bnE, bnN, &rsaKey->privateExponent) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
