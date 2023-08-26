@@ -327,6 +327,8 @@ OaepEncode(
     // from the RNG
     CryptRandomGenerate(hLen, mySeed);
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
+    if(g_inFailureMode)
+	ERROR_RETURN(TPM_RC_FAILURE);
     // mask = MGF1 (seed, nSize  hLen  1)
     CryptMGF_KDF(dbSize, mask, hashAlg, hLen, seed, 0);
     // Create the masked db
@@ -445,6 +447,9 @@ RSAES_PKCS1v1_5Encode(
     padded->buffer[1] = 2;
     // Fill with random bytes
     DRBG_Generate(rand, &padded->buffer[2], (UINT16)ps);
+    if(g_inFailureMode)
+	return TPM_RC_FAILURE;
+
     // Set the delimiter for the random field to 0
     padded->buffer[2 + ps] = 0;
     // Now, the only messy part. Make sure that all the 'ps' bytes are non-zero
@@ -470,6 +475,7 @@ RSAES_Decode(
 {
     BOOL        fail = FALSE;
     UINT16      pSize;
+
     fail = (coded->size < 11);
     fail = (coded->buffer[0] != 0x00) | fail;
     fail = (coded->buffer[1] != 0x02) | fail;
@@ -490,6 +496,7 @@ RSAES_Decode(
     return TPM_RC_SUCCESS;
 }
 #endif                                  // libtpms added
+
 /* 10.2.17.4.13	CryptRsaPssSaltSize() */
 /* This function computes the salt size used in PSS. It is broken out so that the X509 code can get
    the same value that is used by the encoding function in this module. */
@@ -546,6 +553,9 @@ PssEncode(
     memset(pOut, 0, 8);
     // Get set the salt
     DRBG_Generate(rand, salt, saltSize);
+    if(g_inFailureMode)
+	return TPM_RC_FAILURE;
+
     // Create the hash of the pad || input hash || salt
     CryptHashStart(&hashState, hashAlg);
     CryptDigestUpdate(&hashState, 8, pOut);
