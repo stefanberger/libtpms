@@ -247,7 +247,11 @@ RSADP(
     // already done
     // been done
     if(!key->attributes.privateExp)
-	CryptRsaLoadPrivateExponent(key);
+	{
+	    if(CryptRsaLoadPrivateExponent(key)
+	       != TPM_RC_SUCCESS)
+		return TPM_RC_BINDING;
+	}
     VERIFY(RsaPrivateKeyOp(bnM, bnP, &key->privateExponent));
     VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
