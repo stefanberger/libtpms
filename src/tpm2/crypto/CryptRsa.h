@@ -82,16 +82,11 @@ BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
 
 typedef struct privateExponent
 {
-#if CRT_FORMAT_RSA == NO
-    bn_rsa_t            D;
-#else
     bn_prime_t          Q;
     bn_prime_t          dP;
     bn_prime_t          dQ;
     bn_prime_t          qInv;
-#endif // CRT_FORMAT_RSA
 } privateExponent_t;
+
 #endif      // _CRYPT_RSA_H
-
-
 
