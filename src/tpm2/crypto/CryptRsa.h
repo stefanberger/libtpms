@@ -79,6 +79,20 @@ BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
 #   error   This verson only works with CRT formatted data
 #endif // !CRT_FORMAT_RSA
 
+typedef struct privateExponent
+{
+    bigNum              P;
+    bigNum              Q;
+    bigNum              dP;
+    bigNum              dQ;
+    bigNum              qInv;
+    bn_prime_t          entries[5];
+} privateExponent;
+
+#define     NEW_PRIVATE_EXPONENT(X)					\
+    privateExponent         _##X;					\
+    privateExponent         *X = RsaInitializeExponent(&(_##X))
+
 					// libtpms added begin: keep old privateExponent
 /* The privateExponentOld is part of the OBJECT and we keep it there even though
  * upstream got rid of it and stores Q, dP, dQ, and qInv by appending them to
