@@ -83,9 +83,9 @@ typedef struct privateExponent
 {
     bigNum              P;
     bigNum              Q;
-    bigNum              dP_unused;
-    bigNum              dQ_unused;
-    bigNum              qInv_unused;
+    bigNum              dP;
+    bigNum              dQ;
+    bigNum              qInv;
     bn_prime_t          entries[5];
 } privateExponent;
 
@@ -119,5 +119,30 @@ RsaInitializeExponentOld(
     BN_INIT(pExp->qInv);
 }					// libtpms added end
 
-#endif      // _CRYPT_RSA_H
+#include "BnMemory_fp.h"
 
+static inline void
+RsaSetExponentOld(
+		  privateExponent_t *pExp,  // OUT
+		  privateExponent   *Z      // IN
+		 )
+{
+    // pExp->Q must be set elsewhere
+    BnCopy((bigNum)&pExp->dP, Z->dP);
+    BnCopy((bigNum)&pExp->dQ, Z->dQ);
+    BnCopy((bigNum)&pExp->qInv, Z->qInv);
+}
+
+static inline void
+RsaSetExponentFromOld(
+		      privateExponent   *Z,     // OUT
+		      privateExponent_t *pExp   // IN
+                     )
+{
+    BnCopy(Z->Q, (bigNum)&pExp->Q);
+    BnCopy(Z->dP, (bigNum)&pExp->dP);
+    BnCopy(Z->dQ, (bigNum)&pExp->dQ);
+    BnCopy(Z->qInv, (bigNum)&pExp->qInv);
+}
+
+#endif      // _CRYPT_RSA_H

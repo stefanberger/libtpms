@@ -193,9 +193,8 @@ UnpackExponent(
 static BOOL
 ComputePrivateExponent(
 		       bigNum               pubExp,        // IN: the public exponent
-		       privateExponent     *Z,             // IN/OUT: on input, has primes P and Q. On
-		       //         output, has P, Q but NOT dP, dQ, and pInv
-		       privateExponent_t   *pExp           // OUT: has Q, dP, dQ and pInv
+		       privateExponent     *Z              // IN/OUT: on input, has primes P and Q. On
+		       //         output, has P, Q, dP, dQ, and pInv
 		       )
 {
     BOOL                pOK;
@@ -203,20 +202,17 @@ ComputePrivateExponent(
     BN_PRIME(pT);
     //
     // make p the larger value so that m2 is always less than p
-    RsaInitializeExponentOld(pExp);
-    BnCopy((bigNum)&pExp->Q, Z->Q);
-
     MakePgreaterThanQ(Z);
 
     //dP = (1/e) mod (p-1)
     pOK = BnSubWord(pT, Z->P, 1);
-    pOK = pOK && BnModInverse((bigNum)&pExp->dP, pubExp, pT);
+    pOK = pOK && BnModInverse(Z->dP, pubExp, pT);
     //dQ = (1/e) mod (q-1)
     qOK = BnSubWord(pT, Z->Q, 1);
-    qOK = qOK && BnModInverse((bigNum)&pExp->dQ, pubExp, pT);
+    qOK = qOK && BnModInverse(Z->dQ, pubExp, pT);
     // qInv = (1/q) mod p
     if(pOK && qOK)
-	pOK = qOK = BnModInverse((bigNum)&pExp->qInv, Z->Q, Z->P);
+	pOK = qOK = BnModInverse(Z->qInv, Z->Q, Z->P);
     if(!pOK)
 	BnSetWord(Z->P, 0);
     if(!qOK)
@@ -233,8 +229,7 @@ ComputePrivateExponent(
 static BOOL
 RsaPrivateKeyOp(
 		bigNum               inOut, // IN/OUT: number to be exponentiated
-		privateExponent     *Z,
-		privateExponent_t   *pExp
+		privateExponent     *Z
 		)
 {
     BN_RSA(M1);
@@ -244,14 +239,14 @@ RsaPrivateKeyOp(
     //
     MakePgreaterThanQ(Z);
     // m1 = cdP mod p
-    VERIFY(BnModExp(M1, inOut, (bigNum)&pExp->dP, Z->P));
+    VERIFY(BnModExp(M1, inOut, Z->dP, Z->P));
     // m2 = cdQ mod q
-    VERIFY(BnModExp(M2, inOut, (bigNum)&pExp->dQ, Z->Q));
+    VERIFY(BnModExp(M2, inOut, Z->dQ, Z->Q));
     // h = qInv * (m1 - m2) mod p = qInv * (m1 + P - m2) mod P because Q < P
     // so m2 < P
     VERIFY(BnSub(H, Z->P, M2));
     VERIFY(BnAdd(H, H, M1));
-    VERIFY(BnModMult(H, H, (bigNum)&pExp->qInv, Z->P));
+    VERIFY(BnModMult(H, H, Z->qInv, Z->P));
     // m = m2 + h * q
     VERIFY(BnMult(M, H, Z->Q));
     VERIFY(BnAdd(inOut, M2, M));
@@ -318,15 +313,15 @@ RSADP(
     // During self-test, this might not be the case so load it up if it hasn't
     // already done
     // been done
-    if(!key->attributes.privateExp)
+    if(!key->attributes.privateExp)					// libtpms changed begin: use older verions
 	{
 	    if(CryptRsaLoadPrivateExponent(key)
 	       != TPM_RC_SUCCESS)
 		return TPM_RC_BINDING;
 	}
     VERIFY(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
-    BnCopy(Z->Q, (bigNum)&key->privateExponent.Q);
-    VERIFY(RsaPrivateKeyOp(bnM, Z, &key->privateExponent));
+    RsaSetExponentFromOld(Z, &key->privateExponent);			// libtpms changed end
+    VERIFY(RsaPrivateKeyOp(bnM, Z));
     VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
  Error:
@@ -1006,15 +1001,17 @@ CryptRsaLoadPrivateExponent(
 	    // Convert first prime to 2B
 	    VERIFY(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
 
-	    // Make sure that the bigNum used for the exponent is properly initialized
-	    RsaInitializeExponentOld(&rsaKey->privateExponent);
 	    // Find the second prime by division. This uses 'bQ' rather than Z->Q
 	    // because the division could make the quotient larger than a prime during
 	    // some intermediate step.
 	    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
 	    VERIFY(BnEqualZero(bnQr));
 	    // Compute the private exponent and return it if found
-	    VERIFY(ComputePrivateExponent(bnE, Z, &rsaKey->privateExponent));
+	    RsaInitializeExponentOld(&rsaKey->privateExponent);	// libtpms added
+	    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
+	    VERIFY(ComputePrivateExponent(bnE, Z));
+	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+
 	}
     rsaKey->attributes.privateExp = TRUE;
     return TPM_RC_SUCCESS;
@@ -1370,11 +1367,13 @@ CryptRsaGenerateKey(
 		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
-	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
+	       || (publicArea->unique.rsa.t.size
+		   != (NUMBYTES)BITS_TO_BYTES(keySizeInBits)))
 		FAIL(FATAL_ERROR_INTERNAL);
 
+	    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnPubExp, Z, &rsaKey->privateExponent) != TRUE)
+	    if(ComputePrivateExponent(bnPubExp, Z) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
@@ -1383,6 +1382,13 @@ CryptRsaGenerateKey(
 			BnCopy(Z->Q, Z->P);
 		    continue;
 		}
+	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+
+	    // Make sure everything came out right. The MSb of the values must be one
+	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
+	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
+		FAIL(FATAL_ERROR_INTERNAL);
+
 	    retVal = TPM_RC_SUCCESS;
 	    // Do a trial encryption decryption if this is a signing key
 	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
@@ -1394,7 +1400,8 @@ CryptRsaGenerateKey(
 		    // Encrypt with public exponent...
 		    BnModExp(temp2, temp1, bnPubExp, bnN);
 		    // ...  then decrypt with private exponent
-		    RsaPrivateKeyOp(temp2, Z, &rsaKey->privateExponent);
+		    RsaPrivateKeyOp(temp2, Z);
+
 		    // If the starting and ending values are not the same,
 		    // start over )-;
 		    if(BnUnsignedCmp(temp2, temp1) != 0)
