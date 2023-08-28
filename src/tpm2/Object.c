@@ -457,7 +457,7 @@ ObjectLoad(
 	    // If this is an RSA key that is not a parent, complete the load by
 	    // computing the private exponent.
 	    if(publicArea->type == ALG_RSA_VALUE)
-		result = CryptRsaLoadPrivateExponent(object);
+		result = CryptRsaLoadPrivateExponent(publicArea, sensitive, object);
 #endif
 	}
     return result;

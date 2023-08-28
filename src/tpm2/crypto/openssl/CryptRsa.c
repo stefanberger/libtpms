@@ -316,7 +316,7 @@ RSADP(
     // been done
     if(!key->attributes.privateExp)					// libtpms changed begin: use older verions
 	{
-	    if(CryptRsaLoadPrivateExponent(key)
+	    if(CryptRsaLoadPrivateExponent(&key->publicArea, &key->sensitive, key)
 	       != TPM_RC_SUCCESS)
 		return TPM_RC_BINDING;
 	}
@@ -977,14 +977,14 @@ CryptRsaSelectScheme(
 /* Error Returns Meaning */
 /* TPM_RC_BINDING public and private parts of rsaKey are not matched */
 TPM_RC
-CryptRsaLoadPrivateExponent(
-			    OBJECT          *rsaKey        // IN: the RSA key object
-			    )
+CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
+			    TPMT_SENSITIVE          *sensitive,
+			    OBJECT                  *rsaKey	// libtpms added: Should only be NULL
+				// in case this function is called for parameter 'testing', such as by
+				// TPM2_Import() -> ObjectLoad().
+			   )
 {
-    TPMT_PUBLIC             *publicArea = &rsaKey->publicArea;
-    TPMT_SENSITIVE          *sensitive = &rsaKey->sensitive;
-
-    if(!rsaKey->attributes.privateExp)					// libtpms changed
+    if(!rsaKey || !rsaKey->attributes.privateExp)			// libtpms changed: still keep rsaKey for privateExp flag
 	{
 	    if((sensitive->sensitive.rsa.t.size * 2) == publicArea->unique.rsa.t.size)
 		{
@@ -1010,14 +1010,19 @@ CryptRsaLoadPrivateExponent(
 		    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
 		    VERIFY(BnEqualZero(bnQr));
 		    // Compute the private exponent and return it if found
-		    RsaInitializeExponentOld(&rsaKey->privateExponent);	// libtpms added
-		    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
+		    if (rsaKey) {					// libtpms added begin
+			RsaInitializeExponentOld(&rsaKey->privateExponent);
+			BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
+		    }							// libtpms added end
 		    VERIFY(ComputePrivateExponent(bnE, Z));
-		    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+		    if (rsaKey)	{					// libtpms added begin
+			RsaSetExponentOld(&rsaKey->privateExponent, Z);	// preserve dP, dQ, qInv
+		    }							// libtpms added end
 		}
 	    else
-		assert(FALSE);						// libtpms changed
-	    rsaKey->attributes.privateExp = TRUE;			// libtpms changed
+		assert(FALSE);						// libtpms changed begin
+	    if (rsaKey)
+		rsaKey->attributes.privateExp = TRUE;
 	}
     return TPM_RC_SUCCESS;
  Error:
