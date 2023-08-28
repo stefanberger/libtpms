@@ -110,7 +110,6 @@ static privateExponent* RsaInitializeExponent(privateExponent* Z)
     return Z;
 }
 
-#if 0					// 	libtpms added
 /* 10.2.17.4.2	MakePgreaterThanQ() */
 /* This function swaps the pointers for P and Q if Q happens to be larger than Q. */
 static void
@@ -126,6 +125,7 @@ MakePgreaterThanQ(
 	}
 }
 
+#if 0					// 	libtpms added
 /* 10.2.17.4.3	PackExponent() */
 /* This function takes the bignum private exponent and converts it into TPM2B form. In this form,
    the size field contains the overall size of the packed data. The buffer contains 5, equal sized
@@ -192,39 +192,35 @@ UnpackExponent(
 /* FALSE(0)	failure */
 static BOOL
 ComputePrivateExponent(
-		       bigNum               P,             // IN: first prime (size is 1/2 of bnN)
-		       bigNum               Q,             // IN: second prime (size is 1/2 of bnN)
 		       bigNum               pubExp,        // IN: the public exponent
-		       privateExponent_t   *pExp           // OUT:
+		       privateExponent     *Z,             // IN/OUT: on input, has primes P and Q. On
+		       //         output, has P, Q but NOT dP, dQ, and pInv
+		       privateExponent_t   *pExp           // OUT: has Q, dP, dQ and pInv
 		       )
 {
     BOOL                pOK;
     BOOL                qOK;
     BN_PRIME(pT);
     //
-    RsaInitializeExponentOld(pExp);
-    BnCopy((bigNum)&pExp->Q, Q);
     // make p the larger value so that m2 is always less than p
-    if(BnUnsignedCmp(P, Q) < 0)
-	{
-	    bigNum pTemp;
-	    pTemp = P;
-	    P = Q;
-	    Q = pTemp;
-	}
+    RsaInitializeExponentOld(pExp);
+    BnCopy((bigNum)&pExp->Q, Z->Q);
+
+    MakePgreaterThanQ(Z);
+
     //dP = (1/e) mod (p-1)
-    pOK = BnSubWord(pT, P, 1);
+    pOK = BnSubWord(pT, Z->P, 1);
     pOK = pOK && BnModInverse((bigNum)&pExp->dP, pubExp, pT);
     //dQ = (1/e) mod (q-1)
-    qOK = BnSubWord(pT, Q, 1);
+    qOK = BnSubWord(pT, Z->Q, 1);
     qOK = qOK && BnModInverse((bigNum)&pExp->dQ, pubExp, pT);
     // qInv = (1/q) mod p
     if(pOK && qOK)
-	pOK = qOK = BnModInverse((bigNum)&pExp->qInv, Q, P);
+	pOK = qOK = BnModInverse((bigNum)&pExp->qInv, Z->Q, Z->P);
     if(!pOK)
-	BnSetWord(P, 0);
+	BnSetWord(Z->P, 0);
     if(!qOK)
-	BnSetWord(Q, 0);
+	BnSetWord(Z->Q, 0);
     return pOK && qOK;
 }
 
@@ -997,31 +993,41 @@ CryptRsaLoadPrivateExponent(
 			    OBJECT          *rsaKey        // IN: the RSA key object
 			    )
 {
-    BN_RSA_INITIALIZED(bnN, &rsaKey->publicArea.unique.rsa);
-    BN_PRIME_INITIALIZED(bnP, &rsaKey->sensitive.sensitive.rsa);
-    BN_RSA(bnQ);
-    BN_PRIME(bnQr);
-    BN_WORD_INITIALIZED(bnE, (rsaKey->publicArea.parameters.rsaDetail.exponent == 0)
-			? RSA_DEFAULT_PUBLIC_EXPONENT
-			: rsaKey->publicArea.parameters.rsaDetail.exponent);
-    TPM_RC          retVal = TPM_RC_SUCCESS;
+    TPMT_PUBLIC             *publicArea = &rsaKey->publicArea;
+    TPMT_SENSITIVE          *sensitive = &rsaKey->sensitive;
+
     if(!rsaKey->attributes.privateExp)
 	{
+	    NEW_PRIVATE_EXPONENT(Z);
+	    BN_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
+	    BN_RSA(bnQr);
+	    BN_VAR(bnE, RADIX_BITS);
+
 	    TEST(TPM_ALG_NULL);
+
+	    VERIFY((sensitive->sensitive.rsa.t.size * 2)
+		   == publicArea->unique.rsa.t.size);
+	    // Initialize the exponent
+	    BnSetWord(bnE, publicArea->parameters.rsaDetail.exponent);
+	    if(BnEqualZero(bnE))
+		BnSetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
+	    // Convert first prime to 2B
+	    VERIFY(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
+
 	    // Make sure that the bigNum used for the exponent is properly initialized
 	    RsaInitializeExponentOld(&rsaKey->privateExponent);
-	    // Find the second prime by division
-	    BnDiv(bnQ, bnQr, bnN, bnP);
-	    if(!BnEqualZero(bnQr))
-		ERROR_RETURN(TPM_RC_BINDING);
+	    // Find the second prime by division. This uses 'bQ' rather than Z->Q
+	    // because the division could make the quotient larger than a prime during
+	    // some intermediate step.
+	    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
+	    VERIFY(BnEqualZero(bnQr));
 	    // Compute the private exponent and return it if found
-	    if(!ComputePrivateExponent(bnP, bnQ, bnE,
-				       &rsaKey->privateExponent))
-		ERROR_RETURN(TPM_RC_BINDING);
+	    VERIFY(ComputePrivateExponent(bnE, Z, &rsaKey->privateExponent));
 	}
- Exit:
-    rsaKey->attributes.privateExp = (retVal == TPM_RC_SUCCESS);
-    return retVal;
+    rsaKey->attributes.privateExp = TRUE;
+    return TPM_RC_SUCCESS;
+ Error:
+    return TPM_RC_BINDING;
 }
 #if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 
@@ -1376,7 +1382,7 @@ CryptRsaGenerateKey(
 		FAIL(FATAL_ERROR_INTERNAL);
 
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(Z->P, Z->Q, bnPubExp, &rsaKey->privateExponent) != TRUE)
+	    if(ComputePrivateExponent(bnPubExp, Z, &rsaKey->privateExponent) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
