@@ -792,7 +792,8 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
         return TPM_RC_FAILURE;
 
     if(!rsaKey->attributes.privateExp)
-        CryptRsaLoadPrivateExponent(rsaKey);
+        CryptRsaLoadPrivateExponent(&rsaKey->publicArea, &rsaKey->sensitive,
+                                    rsaKey);
 
     P = BN_bin2bn(rsaKey->sensitive.sensitive.rsa.t.buffer,
                   rsaKey->sensitive.sensitive.rsa.t.size, NULL);
@@ -905,7 +906,8 @@ OpenSSLCryptRsaGenerateKey(
 
     // CryptRsaGenerateKey calls ComputePrivateExponent; we have to call
     // it via CryptRsaLoadPrivateExponent
-    retVal = CryptRsaLoadPrivateExponent(rsaKey);
+    retVal = CryptRsaLoadPrivateExponent(&rsaKey->publicArea, &rsaKey->sensitive,
+                                         rsaKey);
 
  Exit:
     OSSL_PARAM_BLD_free(bld);
@@ -964,7 +966,8 @@ OpenSSLCryptRsaGenerateKey(
 
     // CryptRsaGenerateKey calls ComputePrivateExponent; we have to call
     // it via CryptRsaLoadPrivateExponent
-    retVal = CryptRsaLoadPrivateExponent(rsaKey);
+    retVal = CryptRsaLoadPrivateExponent(&rsaKey->publicArea, &rsaKey->sensitive,
+                                         rsaKey);
 
  Exit:
     BN_free(bnE);

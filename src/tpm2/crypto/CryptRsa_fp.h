@@ -80,8 +80,9 @@ CryptRsaSelectScheme(
 		     TPMT_RSA_DECRYPT    *scheme         // IN: a sign or decrypt scheme
 		     );
 TPM_RC
-CryptRsaLoadPrivateExponent(
-			    OBJECT          *rsaKey        // IN: the RSA key object
+CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
+			    TPMT_SENSITIVE          *sensitive,
+			    OBJECT                  *rsaKey        // libtpms added
 			    );
 LIB_EXPORT TPM_RC
 CryptRsaEncrypt(
