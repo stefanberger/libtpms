@@ -319,7 +319,7 @@ RSADP(
       )
 {
     BN_RSA_INITIALIZED(bnM, inOut);
-    BN_RSA_INITIALIZED(bnP, &key->sensitive.sensitive.rsa);
+    NEW_PRIVATE_EXPONENT(Z);
     if(UnsignedCompareB(inOut->size, inOut->buffer,
 			key->publicArea.unique.rsa.t.size,
 			key->publicArea.unique.rsa.t.buffer) >= 0)
@@ -334,7 +334,8 @@ RSADP(
 	       != TPM_RC_SUCCESS)
 		return TPM_RC_BINDING;
 	}
-    VERIFY(RsaPrivateKeyOp(bnM, bnP, &key->privateExponent));
+    VERIFY(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
+    VERIFY(RsaPrivateKeyOp(bnM, Z->P, &key->privateExponent));
     VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
  Error:
