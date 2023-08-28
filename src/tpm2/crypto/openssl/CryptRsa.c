@@ -97,6 +97,19 @@ CryptRsaStartup(
    function returns the pointer to the private exponent value so that it can be used in an
    initializer for a data declaration */
 
+static privateExponent* RsaInitializeExponent(privateExponent* Z)
+{
+    bigNum              *bn = (bigNum *)&Z->P;
+    int                  i;
+    //
+    for(i = 0; i < 5; i++)
+	{
+	    bn[i] = (bigNum)&Z->entries[i];
+	    BnInit(bn[i], BYTES_TO_CRYPT_WORDS(sizeof(Z->entries[0].d)));
+	}
+    return Z;
+}
+
 #if 0					// 	libtpms added
 /* 10.2.17.4.2	MakePgreaterThanQ() */
 /* This function swaps the pointers for P and Q if Q happens to be larger than Q. */
@@ -1263,17 +1276,17 @@ CryptRsaGenerateKey(
 		    )
 {
     UINT32               i;
-    BN_PRIME(bnP); // These four declarations initialize the number to 0
-    BN_PRIME(bnQ);
     BN_RSA(bnD);
     BN_RSA(bnN);
     BN_WORD(bnPubExp);
     UINT32               e = publicArea->parameters.rsaDetail.exponent;
     int                  keySizeInBits;
     TPM_RC               retVal = TPM_RC_NO_RESULT;
+    NEW_PRIVATE_EXPONENT(Z);
     //
-
+    pAssert(BnEqualZero(Z->Q)); // libtpms added: Z->Q must be Zero
     pAssert(publicArea == &rsaKey->publicArea && sensitive == &rsaKey->sensitive); // libtpms added: consistency check
+
     // Need to make sure that the caller did not specify an exponent that is
     // not supported
     e = publicArea->parameters.rsaDetail.exponent;
@@ -1326,7 +1339,7 @@ CryptRsaGenerateKey(
 	    if(_plat__IsCanceled())
 		ERROR_RETURN(TPM_RC_CANCELED);
 
-	    if(BnGeneratePrimeForRSA(bnP, keySizeInBits / 2, e, rand) == TPM_RC_FAILURE)
+	    if(BnGeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand) == TPM_RC_FAILURE)
 		{
 		    retVal = TPM_RC_FAILURE;
 		    goto Exit;
@@ -1335,27 +1348,27 @@ CryptRsaGenerateKey(
 
 	    // If this is the second prime, make sure that it differs from the
 	    // first prime by at least 2^100
-	    if(BnEqualZero(bnQ))
+	    if(BnEqualZero(Z->Q))
 		{
 		    // copy p to q and compute another prime in p
-		    BnCopy(bnQ, bnP);
+		    BnCopy(Z->Q, Z->P);
 		    continue;
 		}
 	    // Make sure that the difference is at least 100 bits. Need to do it this
 	    // way because the big numbers are only positive values
-	    if(BnUnsignedCmp(bnP, bnQ) < 0)
-		BnSub(bnD, bnQ, bnP);
+	    if(BnUnsignedCmp(Z->P, Z->Q) < 0)
+		BnSub(bnD, Z->Q, Z->P);
 	    else
-		BnSub(bnD, bnP, bnQ);
+		BnSub(bnD, Z->P, Z->Q);
 	    if(BnMsb(bnD) < 100)
 		continue;
 
 	    //Form the public modulus and set the unique value
-	    BnMult(bnN, bnP, bnQ);
+	    BnMult(bnN, Z->P, Z->Q);
 	    BnTo2B(bnN, &publicArea->unique.rsa.b,
 		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
 	    // And the  prime to the sensitive area
-	    BnTo2B(bnP, &sensitive->sensitive.rsa.b,
+	    BnTo2B(Z->P, &sensitive->sensitive.rsa.b,
 		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
@@ -1363,13 +1376,13 @@ CryptRsaGenerateKey(
 		FAIL(FATAL_ERROR_INTERNAL);
 
 	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnP, bnQ, bnPubExp, &rsaKey->privateExponent) != TRUE)
+	    if(ComputePrivateExponent(Z->P, Z->Q, bnPubExp, &rsaKey->privateExponent) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
 		    // cause both to be recomputed if P is also zero
-		    if(BnEqualZero(bnQ))
-			BnCopy(bnQ, bnP);
+		    if(BnEqualZero(Z->Q))
+			BnCopy(Z->Q, Z->P);
 		    continue;
 		}
 	    retVal = TPM_RC_SUCCESS;
@@ -1383,12 +1396,12 @@ CryptRsaGenerateKey(
 		    // Encrypt with public exponent...
 		    BnModExp(temp2, temp1, bnPubExp, bnN);
 		    // ...  then decrypt with private exponent
-		    RsaPrivateKeyOp(temp2, bnP, &rsaKey->privateExponent);
+		    RsaPrivateKeyOp(temp2, Z->P, &rsaKey->privateExponent);
 		    // If the starting and ending values are not the same,
 		    // start over )-;
 		    if(BnUnsignedCmp(temp2, temp1) != 0)
 			{
-			    BnSetWord(bnQ, 0);
+			    BnSetWord(Z->Q, 0);
 			    retVal = TPM_RC_NO_RESULT;
 			}
 		}
