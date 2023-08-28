@@ -68,6 +68,7 @@
 #include "Tpm.h"
 #include "Helpers_fp.h"  // libtpms added
 
+#include <assert.h>	 // libtpms added
 #include <openssl/rsa.h> // libtpms added
 
 #if ALG_RSA
@@ -983,37 +984,41 @@ CryptRsaLoadPrivateExponent(
     TPMT_PUBLIC             *publicArea = &rsaKey->publicArea;
     TPMT_SENSITIVE          *sensitive = &rsaKey->sensitive;
 
-    if(!rsaKey->attributes.privateExp)
+    if(!rsaKey->attributes.privateExp)					// libtpms changed
 	{
-	    NEW_PRIVATE_EXPONENT(Z);
-	    BN_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
-	    BN_RSA(bnQr);
-	    BN_VAR(bnE, RADIX_BITS);
+	    if((sensitive->sensitive.rsa.t.size * 2) == publicArea->unique.rsa.t.size)
+		{
+		    NEW_PRIVATE_EXPONENT(Z);
+		    BN_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
+		    BN_RSA(bnQr);
+		    BN_VAR(bnE, RADIX_BITS);
 
-	    TEST(TPM_ALG_NULL);
+		    TEST(TPM_ALG_NULL);
 
-	    VERIFY((sensitive->sensitive.rsa.t.size * 2)
-		   == publicArea->unique.rsa.t.size);
-	    // Initialize the exponent
-	    BnSetWord(bnE, publicArea->parameters.rsaDetail.exponent);
-	    if(BnEqualZero(bnE))
-		BnSetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
-	    // Convert first prime to 2B
-	    VERIFY(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
+		    VERIFY((sensitive->sensitive.rsa.t.size * 2)
+			   == publicArea->unique.rsa.t.size);
+		    // Initialize the exponent
+		    BnSetWord(bnE, publicArea->parameters.rsaDetail.exponent);
+		    if(BnEqualZero(bnE))
+			BnSetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
+		    // Convert first prime to 2B
+		    VERIFY(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
 
-	    // Find the second prime by division. This uses 'bQ' rather than Z->Q
-	    // because the division could make the quotient larger than a prime during
-	    // some intermediate step.
-	    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
-	    VERIFY(BnEqualZero(bnQr));
-	    // Compute the private exponent and return it if found
-	    RsaInitializeExponentOld(&rsaKey->privateExponent);	// libtpms added
-	    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
-	    VERIFY(ComputePrivateExponent(bnE, Z));
-	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
-
+		    // Find the second prime by division. This uses 'bQ' rather than Z->Q
+		    // because the division could make the quotient larger than a prime during
+		    // some intermediate step.
+		    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
+		    VERIFY(BnEqualZero(bnQr));
+		    // Compute the private exponent and return it if found
+		    RsaInitializeExponentOld(&rsaKey->privateExponent);	// libtpms added
+		    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
+		    VERIFY(ComputePrivateExponent(bnE, Z));
+		    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+		}
+	    else
+		assert(FALSE);						// libtpms changed
+	    rsaKey->attributes.privateExp = TRUE;			// libtpms changed
 	}
-    rsaKey->attributes.privateExp = TRUE;
     return TPM_RC_SUCCESS;
  Error:
     return TPM_RC_BINDING;
