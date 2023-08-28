@@ -17,6 +17,7 @@ addons:
       - bash
       - dh-exec
       - libseccomp-dev
+      - libgmp-dev
   coverity_scan:
     project:
       name: libtpms
