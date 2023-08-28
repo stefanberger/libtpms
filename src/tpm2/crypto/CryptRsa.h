@@ -83,9 +83,9 @@ typedef struct privateExponent
 {
     bigNum              P;
     bigNum              Q;
-    bigNum              dP;
-    bigNum              dQ;
-    bigNum              qInv;
+    bigNum              dP_unused;
+    bigNum              dQ_unused;
+    bigNum              qInv_unused;
     bn_prime_t          entries[5];
 } privateExponent;
 
