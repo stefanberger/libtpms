@@ -3,7 +3,6 @@
 /*		Manage the object store of the TPM.    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -437,28 +436,33 @@ ObjectLoad(
 	    if(result != TPM_RC_SUCCESS)
 		return result;
 	}
-    // If this is an import, we are done
-    if(object == NULL)
-	return result;
-    // Set the name, if one was provided
-    if(name != NULL)
-	object->name = *name;
-    else
-	object->name.t.size = 0;
-    // Initialize public
-    object->publicArea = *publicArea;
-    // If there is a sensitive area, load it
-    if(sensitive == NULL)
-	object->attributes.publicOnly = SET;
-    else
-	{
-	    object->sensitive = *sensitive;
 #if ALG_RSA
-	    // If this is an RSA key that is not a parent, complete the load by
-	    // computing the private exponent.
-	    if(publicArea->type == ALG_RSA_VALUE)
-		result = CryptRsaLoadPrivateExponent(publicArea, sensitive, object);
-#endif
+    // If this is an RSA key, then expand the private exponent.
+    // Note: ObjectLoad() is only called by TPM2_Import() if the parent is fixedTPM.
+    // For any key that does not have a fixedTPM parent, the exponent is computed
+    // whenever it is loaded
+    if((publicArea->type == TPM_ALG_RSA) && (sensitive != NULL))
+	{
+	    result = CryptRsaLoadPrivateExponent(publicArea, sensitive, object); // libtpms: Added object (may be NULL)
+	    if(result != TPM_RC_SUCCESS)
+		return result;
+	}
+#endif  // ALG_RSA
+    // See if there is an object to populate
+    if((result == TPM_RC_SUCCESS) && (object != NULL))
+	{
+	    // Initialize public
+	    object->publicArea = *publicArea;
+	    // Copy sensitive if there is one
+	    if(sensitive == NULL)
+		object->attributes.publicOnly = SET;
+	    else
+		object->sensitive = *sensitive;
+	    // Set the name, if one was provided
+	    if(name != NULL)
+		object->name = *name;
+	    else
+		object->name.t.size = 0;
 	}
     return result;
 }
