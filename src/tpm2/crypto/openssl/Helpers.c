@@ -877,9 +877,6 @@ OpenSSLCryptRsaGenerateKey(
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
 
-    // Need to initialize the privateExponent structure
-    RsaInitializeExponentOld(&rsaKey->privateExponent);
-
     if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL)) == NULL ||
         EVP_PKEY_keygen_init(ctx) != 1 ||
         (bld = OSSL_PARAM_BLD_new()) == NULL ||
@@ -943,9 +940,6 @@ OpenSSLCryptRsaGenerateKey(
 
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
         ERROR_RETURN(TPM_RC_FAILURE);
-
-    // Need to initialize the privateExponent structure
-    RsaInitializeExponentOld(&rsaKey->privateExponent);
 
     rsa = RSA_new();
     if (rsa == NULL)

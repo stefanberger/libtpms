@@ -321,7 +321,8 @@ RSADP(
 		return TPM_RC_BINDING;
 	}
     VERIFY(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
-    RsaSetExponentFromOld(Z, &key->privateExponent);			// libtpms changed end
+    RsaSetExponentFromOld(Z, &key->privateExponent);
+    // VERIFY(UnpackExponent(&key->sensitive.sensitive.rsa, Z));	// libtpms changed end
     VERIFY(RsaPrivateKeyOp(bnM, Z));
     VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
@@ -1015,6 +1016,8 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
 			BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
 		    }							// libtpms added end
 		    VERIFY(ComputePrivateExponent(bnE, Z));
+		    // VERIFY(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
+
 		    if (rsaKey)	{					// libtpms added begin
 			RsaSetExponentOld(&rsaKey->privateExponent, Z);	// preserve dP, dQ, qInv
 		    }							// libtpms added end
@@ -1324,12 +1327,12 @@ CryptRsaGenerateKey(
 
     // Make sure that key generation has been tested
     TEST(TPM_ALG_NULL);
-#if USE_OPENSSL_FUNCTIONS_RSA          // libtpms added begin
+    // Need to initialize the privateExponent structure			// libtpms added begin
+    RsaInitializeExponentOld(&rsaKey->privateExponent);
+#if USE_OPENSSL_FUNCTIONS_RSA
     if (rand == NULL)
         return OpenSSLCryptRsaGenerateKey(rsaKey, e, keySizeInBits);
-#endif                                 // libtpms added end
-    // Need to initialize the privateExponent structure
-    RsaInitializeExponentOld(&rsaKey->privateExponent);
+#endif									// libtpms added end
 
     // The prime is computed in P. When a new prime is found, Q is checked to
     // see if it is zero.  If so, P is copied to Q and a new P is found.
@@ -1372,14 +1375,15 @@ CryptRsaGenerateKey(
 	    BnMult(bnN, Z->P, Z->Q);
 	    BnTo2B(bnN, &publicArea->unique.rsa.b,
 		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
-	    // And the  prime to the sensitive area
-	    BnTo2B(Z->P, &sensitive->sensitive.rsa.b,
-		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
 	       || (publicArea->unique.rsa.t.size
 		   != (NUMBYTES)BITS_TO_BYTES(keySizeInBits)))
 		FAIL(FATAL_ERROR_INTERNAL);
+
+	    // Add the prime to the sensitive area		// libtpms added begin
+	    BnTo2B(Z->P, &sensitive->sensitive.rsa.b,
+		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);	// libtpms added end
 
 	    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
 	    // Make sure that we can form the private exponent values
@@ -1393,6 +1397,9 @@ CryptRsaGenerateKey(
 		    continue;
 		}
 	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+
+	    // Pack the private exponent into the sensitive area
+	    // PackExponent(&sensitive->sensitive.rsa, Z);	// libtpms changed: never pack
 
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
