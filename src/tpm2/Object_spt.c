@@ -3,7 +3,6 @@
 /*			    Object Command Support 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Object_spt.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -876,21 +875,48 @@ UnwrapOuter(
    Returns the size of the marshaled area. */
 static UINT16
 MarshalSensitive(
+		 OBJECT              *parent,     // IN: the object parent (optional)
 		 BYTE                *buffer,            // OUT: receiving buffer
 		 TPMT_SENSITIVE      *sensitive,         // IN: the sensitive area to marshal
 		 TPMI_ALG_HASH        nameAlg            // IN:
 		 )
 {
-    BYTE                *sizeField = buffer;    	// saved so that size can be
-    	                                                // marshaled after it is known
+    BYTE                *sizeField = buffer;    // saved so that size can be
+    // marshaled after it is known
     UINT16               retVal;
+    //
     // Pad the authValue if needed
     MemoryPad2B(&sensitive->authValue.b, CryptHashGetDigestSize(nameAlg));
     buffer += 2;
+
     // Marshal the structure
-    retVal = TPMT_SENSITIVE_Marshal(sensitive, &buffer, NULL);
+#if 0 /* ALG_RSA */			// libtpms changed: We never set the RSA_prime_flag!
+    // If the sensitive size is the special case for a prime in the type
+    if((sensitive->sensitive.rsa.t.size & RSA_prime_flag) > 0)
+	{
+	    UINT16               sizeSave = sensitive->sensitive.rsa.t.size;
+	    //
+	    // Turn off the flag that indicates that the sensitive->sensitive contains
+	    // the CRT form of the exponent.
+	    sensitive->sensitive.rsa.t.size &= ~(RSA_prime_flag);
+	    // If the parent isn't fixedTPM, then truncate the sensitive data to be
+	    // the size of the prime. Otherwise, leave it at the current size which
+	    // is the full CRT size.
+	    if(parent == NULL
+	       || !IS_ATTRIBUTE(parent->publicArea.objectAttributes,
+				TPMA_OBJECT, fixedTPM))
+		sensitive->sensitive.rsa.t.size /= 5;
+	    retVal = TPMT_SENSITIVE_Marshal(sensitive, &buffer, NULL);
+	    // Restore the flag and the size.
+	    sensitive->sensitive.rsa.t.size = sizeSave;
+	}
+    else
+#endif
+	retVal = TPMT_SENSITIVE_Marshal(sensitive, &buffer, NULL);
+
     // Marshal the size
     retVal = (UINT16)(retVal + UINT16_Marshal(&retVal, &sizeField, NULL));
+
     return retVal;
 }
 /* 7.6.3.11 SensitiveToPrivate() */
@@ -940,7 +966,7 @@ SensitiveToPrivate(
     // Reserve space for iv
     sensitiveData += ivSize;
     // Marshal the sensitive area including authValue size adjustments.
-    dataSize = MarshalSensitive(sensitiveData, sensitive, nameAlg);
+    dataSize = MarshalSensitive(parent, sensitiveData, sensitive, nameAlg);
     //Produce outer wrap, including encryption and HMAC
     outPrivate->t.size = ProduceOuterWrap(parent, &name->b, hashAlg, NULL,
 					  TRUE, dataSize, outPrivate->t.buffer);
@@ -1089,7 +1115,7 @@ SensitiveToDuplicate(
 	    sensitiveData += sizeof(UINT16) + CryptHashGetDigestSize(outerHash);
 	}
     // Marshal sensitive area
-    dataSize = MarshalSensitive(sensitiveData, sensitive, nameAlg);
+    dataSize = MarshalSensitive(NULL, sensitiveData, sensitive, nameAlg);
     // Apply inner wrap for duplication blob.  It includes both integrity and
     // encryption
     if(doInnerWrap)
