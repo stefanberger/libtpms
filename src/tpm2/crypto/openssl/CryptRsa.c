@@ -233,7 +233,7 @@ ComputePrivateExponent(
 static BOOL
 RsaPrivateKeyOp(
 		bigNum               inOut, // IN/OUT: number to be exponentiated
-		bigNum               P,     // IN: one of the primes (can be NULL if not CRT)
+		privateExponent     *Z,
 		privateExponent_t   *pExp
 		)
 {
@@ -242,28 +242,18 @@ RsaPrivateKeyOp(
     BN_RSA(M);
     BN_RSA(H);
     //
-    bigNum              Q = (bigNum)&pExp->Q;
-    // Make P the larger prime.
-    // NOTE that when the CRT form of the private key is created, dP will always
-    // be computed using the larger of p and q so the only thing needed here is that
-    // the primes be selected so that they agree with dP.
-    if(BnUnsignedCmp(P, Q) < 0)
-	{
-	    bigNum      T = P;
-	    P = Q;
-	    Q = T;
-	}
+    MakePgreaterThanQ(Z);
     // m1 = cdP mod p
-    VERIFY(BnModExp(M1, inOut, (bigNum)&pExp->dP, P));
+    VERIFY(BnModExp(M1, inOut, (bigNum)&pExp->dP, Z->P));
     // m2 = cdQ mod q
-    VERIFY(BnModExp(M2, inOut, (bigNum)&pExp->dQ, Q));
+    VERIFY(BnModExp(M2, inOut, (bigNum)&pExp->dQ, Z->Q));
     // h = qInv * (m1 - m2) mod p = qInv * (m1 + P - m2) mod P because Q < P
     // so m2 < P
-    VERIFY(BnSub(H, P, M2));
+    VERIFY(BnSub(H, Z->P, M2));
     VERIFY(BnAdd(H, H, M1));
-    VERIFY(BnModMult(H, H, (bigNum)&pExp->qInv, P));
+    VERIFY(BnModMult(H, H, (bigNum)&pExp->qInv, Z->P));
     // m = m2 + h * q
-    VERIFY(BnMult(M, H, Q));
+    VERIFY(BnMult(M, H, Z->Q));
     VERIFY(BnAdd(inOut, M2, M));
     return TRUE;
  Error:
@@ -335,7 +325,8 @@ RSADP(
 		return TPM_RC_BINDING;
 	}
     VERIFY(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
-    VERIFY(RsaPrivateKeyOp(bnM, Z->P, &key->privateExponent));
+    BnCopy(Z->Q, (bigNum)&key->privateExponent.Q);
+    VERIFY(RsaPrivateKeyOp(bnM, Z, &key->privateExponent));
     VERIFY(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
  Error:
@@ -1403,7 +1394,7 @@ CryptRsaGenerateKey(
 		    // Encrypt with public exponent...
 		    BnModExp(temp2, temp1, bnPubExp, bnN);
 		    // ...  then decrypt with private exponent
-		    RsaPrivateKeyOp(temp2, Z->P, &rsaKey->privateExponent);
+		    RsaPrivateKeyOp(temp2, Z, &rsaKey->privateExponent);
 		    // If the starting and ending values are not the same,
 		    // start over )-;
 		    if(BnUnsignedCmp(temp2, temp1) != 0)
