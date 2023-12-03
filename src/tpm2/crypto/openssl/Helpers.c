@@ -471,7 +471,7 @@ GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg)
 }
 
 static BOOL
-ComputePrivateExponentD(
+ComputePrivateExponentD_Euler(
 		       const BIGNUM   *P,      // IN: first prime (size is 1/2 of bnN)
 		       const BIGNUM   *Q,      // IN: second prime (size is 1/2 of bnN)
 		       const BIGNUM   *E,      // IN: the public exponent
@@ -498,6 +498,78 @@ ComputePrivateExponentD(
     BN_clear_free(phi);
 
     return pOK;
+}
+
+static BOOL
+ComputePrivateExponentD_Carmichael(
+			    const BIGNUM   *P,      // IN: first prime (size is 1/2 of bnN)
+			    const BIGNUM   *Q,      // IN: second prime (size is 1/2 of bnN)
+			    const BIGNUM   *E,      // IN: the public exponent
+			    const BIGNUM   *N,      // IN: the public modulus
+			    BIGNUM        **D       // OUT:
+                           )
+{
+    BOOL   pOK = FALSE;
+    BN_CTX *ctx;
+    BIGNUM *pm1, *qm1, *pm1qm1, *gcd, *lcm;
+
+    ctx = BN_CTX_new();
+    if (!ctx)
+        return FALSE;
+
+    BN_CTX_start(ctx);
+    pm1 = BN_CTX_get(ctx);
+    qm1 = BN_CTX_get(ctx);
+    pm1qm1 = BN_CTX_get(ctx);
+    gcd = BN_CTX_get(ctx);
+    lcm = BN_CTX_get(ctx);
+    if (pm1 && qm1 && pm1qm1 && gcd && lcm) {
+        BN_set_flags(pm1, BN_FLG_CONSTTIME);
+        BN_set_flags(qm1, BN_FLG_CONSTTIME);
+        BN_set_flags(pm1qm1, BN_FLG_CONSTTIME);
+        BN_set_flags(gcd, BN_FLG_CONSTTIME);
+        BN_set_flags(lcm, BN_FLG_CONSTTIME);
+
+        /* Carmichael */
+        pOK = BN_sub(pm1, P, BN_value_one());
+        pOK = pOK && BN_sub(qm1, Q, BN_value_one());
+        pOK = pOK && BN_mul(pm1qm1, pm1, qm1, ctx);
+        pOK = pOK && BN_gcd(gcd, pm1, qm1, ctx);
+        pOK = pOK && BN_div(lcm, NULL, pm1qm1, gcd, ctx);
+        pOK = pOK && (*D = BN_mod_inverse(NULL, E, lcm, ctx)) != NULL;
+    }
+    BN_CTX_end(ctx);
+    BN_CTX_free(ctx);
+
+    return pOK;
+}
+
+static BOOL
+ComputePrivateExponentD(
+			const BIGNUM   *P,      // IN: first prime (size is 1/2 of bnN)
+			const BIGNUM   *Q,      // IN: second prime (size is 1/2 of bnN)
+			const BIGNUM   *E,      // IN: the public exponent
+			const BIGNUM   *N,      // IN: the public modulus
+			BIGNUM        **D       // OUT:
+                       )
+{
+    int nbits = BN_num_bits(N);
+    /* like OpenSSL:
+     *  < 2048 bits               : Euler totient function
+     * >= 2048 bits & e >= 0x10000: Carmichael function
+     */
+    if (nbits >= 2048 && BN_num_bits(E) > 16) {
+       if (ComputePrivateExponentD_Carmichael(P, Q, E, N, D) == FALSE)
+           return FALSE;
+       /* D too small? A key generated following SP800-56B rev 1
+        * 6.3.1.1 step 3 should not exist -> fall back to Euler
+        */
+       if (BN_num_bits(*D) <= (nbits >> 1))
+           return ComputePrivateExponentD_Euler(P, Q, E, N, D);
+       return TRUE;
+    } else {
+       return ComputePrivateExponentD_Euler(P, Q, E, N, D);
+    }
 }
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
