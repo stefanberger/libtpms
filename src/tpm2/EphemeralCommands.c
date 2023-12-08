@@ -3,7 +3,6 @@
 /*			 	Ephemeral EC Keys    				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: EphemeralCommands.c 1490 2019-07-26 21:13:22Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,33 +54,53 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Commit_fp.h"
+
 #if CC_Commit  // Conditional expansion of this file
+
+/*(See part 3 specification)
+// This command performs the point multiply operations for anonymous signing
+// scheme.
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES       'keyHandle' references a restricted key that is not a
+//                              signing key
+//      TPM_RC_ECC_POINT        either 'P1' or the point derived from 's2' is not on
+//                              the curve of 'keyHandle'
+//      TPM_RC_HASH             invalid name algorithm in 'keyHandle'
+//      TPM_RC_KEY              'keyHandle' does not reference an ECC key
+//      TPM_RC_SCHEME           the scheme of 'keyHandle' is not an anonymous scheme
+//      TPM_RC_NO_RESULT        'K', 'L' or 'E' was a point at infinity; or
+//                              failed to generate "r" value
+//      TPM_RC_SIZE             's2' is empty but 'y2' is not or 's2' provided but
+//                              'y2' is not
 TPM_RC
-TPM2_Commit(
-	    Commit_In       *in,            // IN: input parameter list
-	    Commit_Out      *out            // OUT: output parameter list
+TPM2_Commit(Commit_In*  in,  // IN: input parameter list
+	    Commit_Out* out  // OUT: output parameter list
 	    )
 {
-    OBJECT                  *eccKey;
-    TPMS_ECC_POINT           P2;
-    TPMS_ECC_POINT          *pP2 = NULL;
-    TPMS_ECC_POINT          *pP1 = NULL;
-    TPM2B_ECC_PARAMETER      r;
-    TPM2B_ECC_PARAMETER      p;
-    TPM_RC                   result;
-    TPMS_ECC_PARMS          *parms;
+    OBJECT*             eccKey;
+    TPMS_ECC_POINT      P2;
+    TPMS_ECC_POINT*     pP2 = NULL;
+    TPMS_ECC_POINT*     pP1 = NULL;
+    TPM2B_ECC_PARAMETER r;
+    TPM2B_ECC_PARAMETER p;
+    TPM_RC              result;
+    TPMS_ECC_PARMS*     parms;
     // Input Validation
+
     eccKey = HandleToObject(in->signHandle);
-    parms = &eccKey->publicArea.parameters.eccDetail;
+    parms  = &eccKey->publicArea.parameters.eccDetail;
+
     // Input key must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_Commit_signHandle;
+
     // This command may only be used with a sign-only key using an anonymous
     // scheme.
     // NOTE: a sign + decrypt key has no scheme so it will not be an anonymous one
@@ -89,24 +108,31 @@ TPM2_Commit(
     // be use in Commit()
     if(!CryptIsSchemeAnonymous(parms->scheme.scheme))
 	return TPM_RCS_SCHEME + RC_Commit_signHandle;
+
     // Make sure that both parts of P2 are present if either is present
     if((in->s2.t.size == 0) != (in->y2.t.size == 0))
 	return TPM_RCS_SIZE + RC_Commit_y2;
+
     // Get prime modulus for the curve. This is needed later but getting this now
     // allows confirmation that the curve exists.
     if(!CryptEccGetParameter(&p, 'p', parms->curveID))
 	return TPM_RCS_KEY + RC_Commit_signHandle;
+
     // Get the random value that will be used in the point multiplications
     // Note: this does not commit the count.
     if(!CryptGenerateR(&r, NULL, parms->curveID, &eccKey->name))
 	return TPM_RC_NO_RESULT;
+
     // Set up P2 if s2 and Y2 are provided
     if(in->s2.t.size != 0)
 	{
-	    TPM2B_DIGEST             x2;
+	    TPM2B_DIGEST x2;
+
 	    pP2 = &P2;
+
 	    // copy y2 for P2
 	    P2.y = in->y2;
+
 	    // Compute x2  HnameAlg(s2) mod p
 	    //      do the hash operation on s2 with the size of curve 'p'
 	    x2.t.size = CryptHashBlock(eccKey->publicArea.nameAlg,
@@ -114,6 +140,7 @@ TPM2_Commit(
 				       in->s2.t.buffer,
 				       sizeof(x2.t.buffer),
 				       x2.t.buffer);
+
 	    // If there were error returns in the hash routine, indicate a problem
 	    // with the hash algorithm selection
 	    if(x2.t.size == 0)
@@ -124,8 +151,10 @@ TPM2_Commit(
 	    //  set p2.x = hash(s2) mod p
 	    if(DivideB(&x2.b, &p.b, NULL, &P2.x.b) != TPM_RC_SUCCESS)
 		return TPM_RC_NO_RESULT;
+
 	    if(!CryptEccIsPointOnCurve(parms->curveID, pP2))
 		return TPM_RCS_ECC_POINT + RC_Commit_s2;
+
 	    if(eccKey->attributes.publicOnly == SET)
 		return TPM_RCS_KEY + RC_Commit_signHandle;
 	}
@@ -138,6 +167,7 @@ TPM2_Commit(
 	    if(!CryptEccIsPointOnCurve(parms->curveID, pP1))
 		return TPM_RCS_ECC_POINT + RC_Commit_P1;
 	}
+
     // Pass the parameters to CryptCommit.
     // The work is not done in-line because it does several point multiplies
     // with the same curve.  It saves work by not having to reload the curve
@@ -152,12 +182,16 @@ TPM2_Commit(
 				   &r);
     if(result != TPM_RC_SUCCESS)
 	return result;
+
     // The commit computation was successful so complete the commit by setting
     // the bit
     out->counter = CryptCommit();
+
     return TPM_RC_SUCCESS;
 }
-#endif // CC_Commit
+
+#endif  // CC_Commit
+
 #include "Tpm.h"
 #include "EC_Ephemeral_fp.h"
 #if CC_EC_Ephemeral  // Conditional expansion of this file

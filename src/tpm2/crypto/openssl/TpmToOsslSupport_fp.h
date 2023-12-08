@@ -3,7 +3,6 @@
 /*		Initialization of the Interface to the OpenSSL Library		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport_fp.h 1476 2019-06-10 19:32:03Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,29 +54,35 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef TPMTOOSSLSUPPORT_FP_H
-#define TPMTOOSSLSUPPORT_FP_H
+/*(Auto-generated)
+ *  Created by TpmPrototypes; Version 3.0 July 18, 2017
+ *  Date: Mar 28, 2019  Time: 08:25:19PM
+ */
 
-BN_CTX *
-OsslContextEnter(
-		 void
-		 );
-void
-OsslContextLeave(
-		 BN_CTX          *context
-		 );
-BN_CTX *
-OsslPushContext(
-		BN_CTX          *CTX
-		);
-void
-OsslPopContext(
-	       BN_CTX          *CTX
-	       );
+#ifndef _TPM_TO_OSSL_SUPPORT_FP_H_
+#define _TPM_TO_OSSL_SUPPORT_FP_H_
 
+//*** OsslContextEnter()
+// This function is used to initialize an OpenSSL context at the start of a function
+// that will call to an OpenSSL math function.
+BN_CTX* OsslContextEnter(void);
 
-#endif
+//*** OsslContextLeave()
+// This is the companion function to OsslContextEnter().
+void OsslContextLeave(BN_CTX* CTX);
+
+//*** OsslPushContext()
+// This function is used to create a frame in a context. All values allocated within
+// this context after the frame is started will be automatically freed when the
+// context (OsslPopContext()
+BN_CTX* OsslPushContext(BN_CTX* CTX);
+
+//*** OsslPopContext()
+// This is the companion function to OsslPushContext().
+void OsslPopContext(BN_CTX* CTX);
+
+#endif  // _TPM_TO_OSSL_SUPPORT_FP_H_

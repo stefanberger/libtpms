@@ -3,7 +3,6 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnConvert_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,48 +54,74 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef BNCONVERT_FP_H
-#define BNCONVERT_FP_H
+/*(Auto-generated)
+ *  Created by TpmPrototypes; Version 3.0 July 18, 2017
+ *  Date: Mar 28, 2019  Time: 08:25:18PM
+ */
 
-LIB_EXPORT bigNum
-BnFromBytes(
-	    bigNum           bn,
-	    const BYTE      *bytes,
-	    NUMBYTES         nBytes
-	    );
-LIB_EXPORT bigNum
-BnFrom2B(
-	 bigNum           bn,         // OUT:
-	 const TPM2B     *a2B         // IN: number to convert
-	 );
+#ifndef _BN_CONVERT_FP_H_
+#define _BN_CONVERT_FP_H_
+
+//*** BnFromBytes()
+// This function will convert a big-endian byte array to the internal number
+// format. If bn is NULL, then the output is NULL. If bytes is null or the
+// required size is 0, then the output is set to zero
+LIB_EXPORT bigNum BnFromBytes(bigNum bn, const BYTE* bytes, NUMBYTES nBytes);
+
+//*** BnFrom2B()
+// Convert an TPM2B to a BIG_NUM.
+// If the input value does not exist, or the output does not exist, or the input
+// will not fit into the output the function returns NULL
+LIB_EXPORT bigNum BnFrom2B(bigNum       bn,  // OUT:
+			   const TPM2B* a2B  // IN: number to convert
+			   );
+
 LIB_EXPORT bigNum
 BnFromHex(
 	  bigNum          bn,         // OUT:
 	  const char      *hex        // IN:
 	  );
-LIB_EXPORT BOOL
-BnToBytes(
-	  bigConst             bn,
-	  BYTE                *buffer,
-	  NUMBYTES            *size           // This the number of bytes that are
-	  // available in the buffer. The result
-	  // should be this big.
-	  );
-LIB_EXPORT BOOL
-BnTo2B(
-       bigConst         bn,                // IN:
-       TPM2B           *a2B,               // OUT:
-       NUMBYTES         size               // IN: the desired size
-       );
+
+//*** BnToBytes()
+// This function converts a BIG_NUM to a byte array. It converts the bigNum to a
+// big-endian byte string and sets 'size' to the normalized value. If  'size' is an
+// input 0, then the receiving buffer is guaranteed to be large enough for the result
+// and the size will be set to the size required for bigNum (leading zeros
+// suppressed).
+//
+// The conversion for a little-endian machine simply requires that all significant
+// bytes of the bigNum be reversed. For a big-endian machine, rather than
+// unpack each word individually, the bigNum is converted to little-endian words,
+// copied, and then converted back to big-endian.
+LIB_EXPORT BOOL BnToBytes(bigConst  bn,
+			  BYTE*     buffer,
+			  NUMBYTES* size  // This the number of bytes that are
+			  // available in the buffer. The result
+			  // should be this big.
+			  );
+
+//*** BnTo2B()
+// Function to convert a BIG_NUM to TPM2B.
+// The TPM2B size is set to the requested 'size' which may require padding.
+// If 'size' is non-zero and less than required by the value in 'bn' then an error
+// is returned. If 'size' is zero, then the TPM2B is assumed to be large enough
+// for the data and a2b->size will be adjusted accordingly.
+LIB_EXPORT BOOL BnTo2B(bigConst bn,   // IN:
+		       TPM2B*   a2B,  // OUT:
+		       NUMBYTES size  // IN: the desired size
+		       );
+
+
 LIB_EXPORT bn_point_t   *
 BnPointFrom2B(
 	      bigPoint             ecP,         // OUT: the preallocated point structure
 	      TPMS_ECC_POINT      *p            // IN: the number to convert
 	      );
+
 LIB_EXPORT BOOL
 BnPointTo2B(
 	    TPMS_ECC_POINT  *p,             // OUT: the converted 2B structure
@@ -104,5 +129,4 @@ BnPointTo2B(
 	    bigCurve         E              // IN: curve descriptor for the point
 	    );
 
-
-#endif
+#endif  // _BN_CONVERT_FP_H_

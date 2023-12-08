@@ -3,7 +3,6 @@
 /*			Performs the manufacturing of the TPM			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Manufacture_fp.h 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,27 +54,26 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef MANUFACTURE_FP_H
-#define MANUFACTURE_FP_H
+#ifndef _MANUFACTURE_FP_H_
+#define _MANUFACTURE_FP_H_
 
 #include "CompilerDependencies.h"	/* kgold */
 
-LIB_EXPORT int
-TPM_Manufacture(
-		int             firstTime
-		);
-LIB_EXPORT int
-TPM_TearDown(
-	     void
-	     );
-LIB_EXPORT void
-TpmEndSimulation(
-		 void
-		 );
+LIB_EXPORT int TPM_Manufacture(
+			       int firstTime  // IN: indicates if this is the first call from
+			       //     main()
+			       );
 
+LIB_EXPORT int TPM_TearDown(void);
 
-#endif
+//*** TpmEndSimulation()
+// This function is called at the end of the simulation run. It is used to provoke
+// printing of any statistics that might be needed.
+LIB_EXPORT void TpmEndSimulation(void);
+
+#endif  // _MANUFACTURE_FP_H_
+

@@ -3,7 +3,6 @@
 /*		Signing and Signature Verification	   			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: SigningCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,64 +54,100 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "VerifySignature_fp.h"
+
+#include "Tpm.h"
+#include "VerifySignature_fp.h"
+
 #if CC_VerifySignature  // Conditional expansion of this file
+
+/*(See part 3 specification)
+// This command uses loaded key to validate an asymmetric signature on a message
+// with the message digest passed to the TPM.
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES         'keyHandle' does not reference a signing key
+//      TPM_RC_SIGNATURE          signature is not genuine
+//      TPM_RC_SCHEME             CryptValidateSignature()
+//      TPM_RC_HANDLE             the input handle is references an HMAC key but
+//                                the private portion is not loaded
 TPM_RC
-TPM2_VerifySignature(
-		     VerifySignature_In      *in,            // IN: input parameter list
-		     VerifySignature_Out     *out            // OUT: output parameter list
+TPM2_VerifySignature(VerifySignature_In*  in,  // IN: input parameter list
+		     VerifySignature_Out* out  // OUT: output parameter list
 		     )
 {
-    TPM_RC                   result;
-    OBJECT                  *signObject = HandleToObject(in->keyHandle);
-    TPMI_RH_HIERARCHY        hierarchy;
+    TPM_RC            result;
+    OBJECT*           signObject = HandleToObject(in->keyHandle);
+    TPMI_RH_HIERARCHY hierarchy;
     // Input Validation
     // The object to validate the signature must be a signing key.
     if(!IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, sign))
 	return TPM_RCS_ATTRIBUTES + RC_VerifySignature_keyHandle;
+
     // Validate Signature.  TPM_RC_SCHEME, TPM_RC_HANDLE or TPM_RC_SIGNATURE
     // error may be returned by CryptCVerifySignatrue()
     result = CryptValidateSignature(in->keyHandle, &in->digest, &in->signature);
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, RC_VerifySignature_signature);
+
     // Command Output
-    hierarchy = GetHieriarchy(in->keyHandle);
-    if(hierarchy == TPM_RH_NULL
-       || signObject->publicArea.nameAlg == TPM_ALG_NULL)
+
+    hierarchy = GetHierarchy(in->keyHandle);
+    if(hierarchy == TPM_RH_NULL || signObject->publicArea.nameAlg == TPM_ALG_NULL)
 	{
 	    // produce empty ticket if hierarchy is TPM_RH_NULL or nameAlg is
 	    // TPM_ALG_NULL
-	    out->validation.tag = TPM_ST_VERIFIED;
-	    out->validation.hierarchy = TPM_RH_NULL;
+	    out->validation.tag           = TPM_ST_VERIFIED;
+	    out->validation.hierarchy     = TPM_RH_NULL;
 	    out->validation.digest.t.size = 0;
 	}
     else
 	{
 	    // Compute ticket
-	    TicketComputeVerified(hierarchy, &in->digest, &signObject->name,
-				  &out->validation);
+	    TicketComputeVerified(
+					   hierarchy, &in->digest, &signObject->name, &out->validation);
 	}
+
     return TPM_RC_SUCCESS;
 }
-#endif // CC_VerifySignature
+
+#endif  // CC_VerifySignature
+
 #include "Tpm.h"
 #include "Sign_fp.h"
+
 #if CC_Sign  // Conditional expansion of this file
-#include "Attest_spt_fp.h"
+
+#  include "Attest_spt_fp.h"
+
+/*(See part 3 specification)
+// sign an externally provided hash using an asymmetric signing key
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_BINDING          The public and private portions of the key are not
+//                              properly bound.
+//      TPM_RC_KEY              'signHandle' does not reference a signing key;
+//      TPM_RC_SCHEME           the scheme is not compatible with sign key type,
+//                              or input scheme is not compatible with default
+//                              scheme, or the chosen scheme is not a valid
+//                              sign scheme
+//      TPM_RC_TICKET           'validation' is not a valid ticket
+//      TPM_RC_VALUE            the value to sign is larger than allowed for the
+//                              type of 'keyHandle'
+
 TPM_RC
-TPM2_Sign(
-	  Sign_In         *in,            // IN: input parameter list
-	  Sign_Out        *out            // OUT: output parameter list
+TPM2_Sign(Sign_In*  in,  // IN: input parameter list
+	  Sign_Out* out  // OUT: output parameter list
 	  )
 {
-    TPM_RC                   result;
-    TPMT_TK_HASHCHECK        ticket;
-    OBJECT                  *signObject = HandleToObject(in->keyHandle);
+    TPM_RC            result;
+    TPMT_TK_HASHCHECK ticket;
+    OBJECT*           signObject = HandleToObject(in->keyHandle);
     //
     // Input Validation
     if(!IsSigningObject(signObject))
@@ -126,14 +161,18 @@ TPM2_Sign(
     // the default scheme, return an error.
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
 	return TPM_RCS_SCHEME + RC_Sign_inScheme;
+
     // If validation is provided, or the key is restricted, check the ticket
     if(in->validation.digest.t.size != 0
-       || IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, restricted))
+       || IS_ATTRIBUTE(
+		       signObject->publicArea.objectAttributes, TPMA_OBJECT, restricted))
 	{
 	    // Compute and compare ticket
 	    TicketComputeHashCheck(in->validation.hierarchy,
-				   in->inScheme.details.any.hashAlg,
-				   &in->digest, &ticket);
+					    in->inScheme.details.any.hashAlg,
+					    &in->digest,
+					    &ticket);
+
 	    if(!MemoryEqual2B(&in->validation.digest.b, &ticket.digest.b))
 		return TPM_RCS_TICKET + RC_Sign_validation;
 	}
@@ -147,10 +186,13 @@ TPM2_Sign(
 	       != CryptHashGetDigestSize(in->inScheme.details.any.hashAlg))
 		return TPM_RCS_SIZE + RC_Sign_digest;
 	}
+
     // Command Output
     // Sign the hash. A TPM_RC_VALUE or TPM_RC_SCHEME
     // error may be returned at this point
     result = CryptSign(signObject, &in->inScheme, &in->digest, &out->signature);
+
     return result;
 }
-#endif // CC_Sign
+
+#endif  // CC_Sign

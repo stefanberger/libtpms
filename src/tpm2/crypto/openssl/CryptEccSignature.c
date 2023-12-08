@@ -3,7 +3,6 @@
 /*			     ECC Signatures					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccSignature.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +54,11 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.12 CryptEccSignature.c */
-/* 10.2.12.1 Includes and Defines */
+//** Includes and Defines
 #include "Tpm.h"
 #include "CryptEccSignature_fp.h"
 #include "TpmToOsslMath_fp.h"  // libtpms added
@@ -259,6 +257,7 @@ BnSignEcdsa(
     return retVal;
 }
 #endif  // USE_OPENSSL_FUNCTIONS_ECDSA libtpms added end
+
 #if ALG_ECDAA
 /* 10.2.12.3.2 BnSignEcdaa() */
 /* This function performs s = r + T * d mod q where */
@@ -886,24 +885,27 @@ BnValidateSignatureEcSchnorr(
     return (OK) ? TPM_RC_SUCCESS : TPM_RC_SIGNATURE;
 }
 #endif  // ALG_ECSCHNORR
-/* 10.2.12.3.10 CryptEccValidateSignature() */
-/* This function validates an EcDsa() or EcSchnorr() signature. The point Qin needs to have been
-   validated to be on the curve of curveId. */
-/* Error Returns Meaning */
-/* TPM_RC_SIGNATURE not a valid signature */
-LIB_EXPORT TPM_RC
-CryptEccValidateSignature(
-			  TPMT_SIGNATURE          *signature,     // IN: signature to be verified
-			  OBJECT                  *signKey,       // IN: ECC key signed the hash
-			  const TPM2B_DIGEST      *digest         // IN: digest that was signed
-			  )
+
+//********************* Signature Validation   ********************
+
+//*** CryptEccValidateSignature()
+// This function validates an EcDsa or EcSchnorr signature.
+// The point 'Qin' needs to have been validated to be on the curve of 'curveId'.
+//  Return Type: TPM_RC
+//      TPM_RC_SIGNATURE            not a valid signature
+LIB_EXPORT TPM_RC CryptEccValidateSignature(
+					    TPMT_SIGNATURE*     signature,  // IN: signature to be verified
+					    OBJECT*             signKey,    // IN: ECC key signed the hash
+					    const TPM2B_DIGEST* digest      // IN: digest that was signed
+					    )
 {
     CURVE_INITIALIZED(E, signKey->publicArea.parameters.eccDetail.curveID);
     ECC_NUM(bnR);
     ECC_NUM(bnS);
     POINT_INITIALIZED(ecQ, &signKey->publicArea.unique.ecc);
     bigConst                 order;
-    TPM_RC                   retVal;
+    TPM_RC           retVal;
+
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_VALUE);
     order = CurveGetOrder(AccessCurveData(E));
@@ -911,12 +913,12 @@ CryptEccValidateSignature(
     switch(signature->sigAlg)
 	{
 	  case TPM_ALG_ECDSA:
-#if ALG_ECSCHNORR
+#  if ALG_ECSCHNORR
 	  case TPM_ALG_ECSCHNORR:
-#endif
-#if ALG_SM2
+#  endif
+#  if ALG_SM2
 	  case TPM_ALG_SM2:
-#endif
+#  endif
 	    break;
 	  default:
 	    ERROR_RETURN(TPM_RC_SCHEME);
@@ -957,26 +959,33 @@ CryptEccValidateSignature(
     CURVE_FREE(E);
     return retVal;
 }
-/* 10.2.12.3.11 CryptEccCommitCompute() */
-/* This function performs the point multiply operations required by TPM2_Commit(). */
-/* If B or M is provided, they must be on the curve defined by curveId. This routine does not check
-   that they are on the curve and results are unpredictable if they are not. */
-/* It is a fatal error if r is NULL. If B is not NULL, then it is a fatal error if d is NULL or if K
-   and L are both NULL. If M is not NULL, then it is a fatal error if E is NULL. */
-/* Error Returns Meaning */
-/* TPM_RC_NO_RESULT if K, L or E was computed to be the point at infinity */
-/* TPM_RC_CANCELED a cancel indication was asserted during this function */
-LIB_EXPORT TPM_RC
-CryptEccCommitCompute(
-		      TPMS_ECC_POINT          *K,             // OUT: [d]B or [r]Q
-		      TPMS_ECC_POINT          *L,             // OUT: [r]B
-		      TPMS_ECC_POINT          *E,             // OUT: [r]M
-		      TPM_ECC_CURVE            curveId,       // IN: the curve for the computations
-		      TPMS_ECC_POINT          *M,             // IN: M (optional)
-		      TPMS_ECC_POINT          *B,             // IN: B (optional)
-		      TPM2B_ECC_PARAMETER     *d,             // IN: d (optional)
-		      TPM2B_ECC_PARAMETER     *r              // IN: the computed r value (required)
-		      )
+
+//***CryptEccCommitCompute()
+// This function performs the point multiply operations required by TPM2_Commit.
+//
+// If 'B' or 'M' is provided, they must be on the curve defined by 'curveId'. This
+// routine does not check that they are on the curve and results are unpredictable
+// if they are not.
+//
+// It is a fatal error if 'r' is NULL. If 'B' is not NULL, then it is a
+// fatal error if 'd' is NULL or if 'K' and 'L' are both NULL.
+// If 'M' is not NULL, then it is a fatal error if 'E' is NULL.
+//
+//  Return Type: TPM_RC
+//      TPM_RC_NO_RESULT        if 'K', 'L' or 'E' was computed to be the point
+//                              at infinity
+//      TPM_RC_CANCELED         a cancel indication was asserted during this
+//                              function
+LIB_EXPORT TPM_RC CryptEccCommitCompute(
+					TPMS_ECC_POINT*      K,        // OUT: [d]B or [r]Q
+					TPMS_ECC_POINT*      L,        // OUT: [r]B
+					TPMS_ECC_POINT*      E,        // OUT: [r]M
+					TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+					TPMS_ECC_POINT*      M,        // IN: M (optional)
+					TPMS_ECC_POINT*      B,        // IN: B (optional)
+					TPM2B_ECC_PARAMETER* d,        // IN: d (optional)
+					TPM2B_ECC_PARAMETER* r         // IN: the computed r value (required)
+					)
 {
     CURVE_INITIALIZED(curve, curveId);  	// Normally initialize E as the curve, but E means
 						// something else in this function
@@ -987,12 +996,15 @@ CryptEccCommitCompute(
     // Note: E has to be provided if computing E := [r]Q or E := [r]M. Will do
     // E := [r]Q if both M and B are NULL.
     pAssert(r != NULL && E != NULL);
+
     // Initialize the output points in case they are not computed
     ClearPoint2B(K);
     ClearPoint2B(L);
     ClearPoint2B(E);
+
     // Sizes of the r parameter may not be zero
     pAssert(r->t.size > 0);
+
     // If B is provided, compute K=[d]B and L=[r]B
     if(B != NULL)
 	{
@@ -1027,6 +1039,7 @@ CryptEccCommitCompute(
 	    //
 	    // Make sure that a place was provided for the result
 	    pAssert(E != NULL);
+
 	    // if this is the third point multiply, check for cancel first
 	    if((B != NULL) && _plat__IsCanceled())
 		ERROR_RETURN(TPM_RC_CANCELED);
@@ -1042,4 +1055,5 @@ CryptEccCommitCompute(
     CURVE_FREE(curve);
     return retVal;
 }
-#endif  // TPM_ALG_ECC
+
+#endif  // ALG_ECC

@@ -3,7 +3,6 @@
 /*		Initialization of the Interface to the OpenSSL Library.	   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmToOsslSupport.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,58 +54,53 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* B.2.3.3. TpmToOsslSupport.c */
-/* B.2.3.3.1. Introduction */
-/* The functions in this file are used for initialization of the interface to the OpenSSL
-   library. */
-/* B.2.3.3.2. Defines and Includes */
+//** Introduction
+//
+// The functions in this file are used for initialization of the interface to the
+// OpenSSL library.
+
+//** Defines and Includes
+
 #include "Tpm.h"
 
 #if defined(HASH_LIB_OSSL) || defined(MATH_LIB_OSSL) || defined(SYM_LIB_OSSL)
+// Used to pass the pointers to the correct sub-keys
+typedef const BYTE* desKeyPointers[3];
 
-/*     Used to pass the pointers to the correct sub-keys */
-typedef const BYTE *desKeyPointers[3];
-/* B.2.3.3.2.1. SupportLibInit() */
-/* This does any initialization required by the support library. */
-LIB_EXPORT int
-SupportLibInit(
-	       void
-	       )
+//*** BnSupportLibInit()
+// This does any initialization required by the support library.
+LIB_EXPORT int SupportLibInit(void)
 {
     return TRUE;
 }
-/* B.2.3.3.2.2. OsslContextEnter() */
-/* This function is used to initialize an OpenSSL context at the start of a function that will
-   call to an OpenSSL math function. */
-BN_CTX *
-OsslContextEnter(
-		 void
-		 )
+
+//*** OsslContextEnter()
+// This function is used to initialize an OpenSSL context at the start of a function
+// that will call to an OpenSSL math function.
+BN_CTX* OsslContextEnter(void)
 {
-    BN_CTX              *CTX = BN_CTX_new();
+    BN_CTX* CTX = BN_CTX_new();
+    //
     return OsslPushContext(CTX);
 }
-/* B.2.3.3.2.3. OsslContextLeave() */
-/* This is the companion function to OsslContextEnter(). */
-void
-OsslContextLeave(
-		 BN_CTX          *CTX
-		 )
+
+//*** OsslContextLeave()
+// This is the companion function to OsslContextEnter().
+void OsslContextLeave(BN_CTX* CTX)
 {
     OsslPopContext(CTX);
     BN_CTX_free(CTX);
 }
 
-/* B.2.3.3.2.4.	OsslPushContext() */
-/* This function is used to create a frame in a context. All values allocated within this context after the frame is started will be automatically freed when the context (OsslPopContext() */
-BN_CTX *
-OsslPushContext(
-		BN_CTX          *CTX
-		)
+//*** OsslPushContext()
+// This function is used to create a frame in a context. All values allocated within
+// this context after the frame is started will be automatically freed when the
+// context (OsslPopContext()
+BN_CTX* OsslPushContext(BN_CTX* CTX)
 {
     if(CTX == NULL)
 	FAIL(FATAL_ERROR_ALLOCATION);
@@ -114,16 +108,13 @@ OsslPushContext(
     return CTX;
 }
 
-/* B.2.3.3.2.5.	OsslPopContext() */
-/* This is the companion function to OsslPushContext(). */
-void
-OsslPopContext(
-	       BN_CTX          *CTX
-	       )
+//*** OsslPopContext()
+// This is the companion function to OsslPushContext().
+void OsslPopContext(BN_CTX* CTX)
 {
     // BN_CTX_end can't be called with NULL. It will blow up.
     if(CTX != NULL)
 	BN_CTX_end(CTX);
 }
 
-#endif // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL
+#endif  // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL

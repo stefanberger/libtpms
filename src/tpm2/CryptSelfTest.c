@@ -3,7 +3,6 @@
 /*			Self-Test of Cryptographic Functions 			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSelfTest.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,94 +54,103 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.7 CryptSelfTest.c */
-/* 10.2.7.1 Introduction */
-/* The functions in this file are designed to support self-test of cryptographic functions in the
-   TPM. The TPM allows the user to decide whether to run self-test on a demand basis or to run all
-   the self-tests before proceeding. */
-/* The self-tests are controlled by a set of bit vectors. The g_untestedDecryptionAlgorithms vector
-   has a bit for each decryption algorithm that needs to be tested and
-   g_untestedEncryptionAlgorithms has a bit for each encryption algorithm that needs to be
-   tested. Before an algorithm is used, the appropriate vector is checked (indexed using the
-   algorithm ID). If the bit is 1, then the test function should be called. */
-/* For more information, see TpmSelfTests().txt */
+//** Introduction
+// The functions in this file are designed to support self-test of cryptographic
+// functions in the TPM. The TPM allows the user to decide whether to run self-test
+// on a demand basis or to run all the self-tests before proceeding.
+//
+// The self-tests are controlled by a set of bit vectors. The
+// 'g_untestedDecryptionAlgorithms' vector has a bit for each decryption algorithm
+// that needs to be tested and 'g_untestedEncryptionAlgorithms' has a bit for
+// each encryption algorithm that needs to be tested. Before an algorithm
+// is used, the appropriate vector is checked (indexed using the algorithm ID).
+// If the bit is 1, then the test function should be called.
+//
+// For more information, see TpmSelfTests.txt
+
 #include "Tpm.h"
-/*     10.2.7.2 Functions */
-/* 10.2.7.2.1 RunSelfTest() */
-/* Local function to run self-test */
-static TPM_RC
-CryptRunSelfTests(
-		  ALGORITHM_VECTOR    *toTest         // IN: the vector of the algorithms to test
-		  )
+
+//** Functions
+
+//*** RunSelfTest()
+// Local function to run self-test
+static TPM_RC CryptRunSelfTests(
+				ALGORITHM_VECTOR* toTest  // IN: the vector of the algorithms to test
+				)
 {
-    TPM_ALG_ID           alg;
+    TPM_ALG_ID alg;
+
     // For each of the algorithms that are in the toTestVecor, need to run a
     // test
     for(alg = TPM_ALG_FIRST; alg <= TPM_ALG_LAST; alg++)
 	{
 	    if(TEST_BIT(alg, *toTest))
 		{
-		    TPM_RC          result = CryptTestAlgorithm(alg, toTest);
+		    TPM_RC result = CryptTestAlgorithm(alg, toTest);
 		    if(result != TPM_RC_SUCCESS)
 			return result;
 		}
 	}
     return TPM_RC_SUCCESS;
 }
-/* 10.2.7.2.2 CryptSelfTest() */
-/* This function is called to start/complete a full self-test. If fullTest is NO, then only the
-   untested algorithms will be run. If fullTest is YES, then g_untestedDecryptionAlgorithms is
-   reinitialized and then all tests are run. This implementation of the reference design does not
-   support processing outside the framework of a TPM command. As a consequence, this command does
-   not complete until all tests are done. Since this can take a long time, the TPM will check after
-   each test to see if the command is canceled. If so, then the TPM will returned
-   TPM_RC_CANCELLED. To continue with the self-tests, call TPM2_SelfTest(fullTest == No) and the TPM
-   will complete the testing. */
-/* Error Returns Meaning */
-/* TPM_RC_CANCELED if the command is canceled */
+
+//*** CryptSelfTest()
+// This function is called to start/complete a full self-test.
+// If 'fullTest' is NO, then only the untested algorithms will be run. If
+// 'fullTest' is YES, then 'g_untestedDecryptionAlgorithms' is reinitialized and then
+// all tests are run.
+// This implementation of the reference design does not support processing outside
+// the framework of a TPM command. As a consequence, this command does not
+// complete until all tests are done. Since this can take a long time, the TPM
+// will check after each test to see if the command is canceled. If so, then the
+// TPM will returned TPM_RC_CANCELLED. To continue with the self-tests, call
+// TPM2_SelfTest(fullTest == No) and the TPM will complete the testing.
+//  Return Type: TPM_RC
+//      TPM_RC_CANCELED        if the command is canceled
 LIB_EXPORT
 TPM_RC
-CryptSelfTest(
-	      TPMI_YES_NO      fullTest       // IN: if full test is required
+CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
 	      )
 {
 #if SIMULATION
     if(g_forceFailureMode)
 	FAIL(FATAL_ERROR_FORCED);
 #endif
+
     // If the caller requested a full test, then reset the to test vector so that
     // all the tests will be run
     if(fullTest == YES)
 	{
-	    MemoryCopy(g_toTest,
-		       g_implementedAlgorithms,
-		       sizeof(g_toTest));
+	    MemoryCopy(g_toTest, g_implementedAlgorithms, sizeof(g_toTest));
 	}
     return CryptRunSelfTests(&g_toTest);
 }
-/* 10.2.7.2.3 CryptIncrementalSelfTest() */
-/* This function is used to perform an incremental self-test. This implementation will perform the
-   toTest values before returning. That is, it assumes that the TPM cannot perform background tasks
-   between commands. */
-/* This command may be canceled. If it is, then there is no return result. However, this command can
-   be run again and the incremental progress will not be lost. */
-/* Error Returns Meaning */
-/* TPM_RC_CANCELED processing of this command was canceled */
-/* TPM_RC_TESTING if toTest list is not empty */
-/* TPM_RC_VALUE an algorithm in the toTest list is not implemented */
+
+//*** CryptIncrementalSelfTest()
+// This function is used to perform an incremental self-test. This implementation
+// will perform the toTest values before returning. That is, it assumes that the
+// TPM cannot perform background tasks between commands.
+//
+// This command may be canceled. If it is, then there is no return result.
+// However, this command can be run again and the incremental progress will not
+// be lost.
+//  Return Type: TPM_RC
+//      TPM_RC_CANCELED         processing of this command was canceled
+//      TPM_RC_TESTING          if toTest list is not empty
+//      TPM_RC_VALUE            an algorithm in the toTest list is not implemented
 TPM_RC
-CryptIncrementalSelfTest(
-			 TPML_ALG            *toTest,        // IN: list of algorithms to be tested
-			 TPML_ALG            *toDoList       // OUT: list of algorithms needing test
+CryptIncrementalSelfTest(TPML_ALG* toTest,   // IN: list of algorithms to be tested
+			 TPML_ALG* toDoList  // OUT: list of algorithms needing test
 			 )
 {
-    ALGORITHM_VECTOR     toTestVector = {0};
-    TPM_ALG_ID           alg;
-    UINT32               i;
+    ALGORITHM_VECTOR toTestVector = {0};
+    TPM_ALG_ID       alg;
+    UINT32           i;
+
     pAssert(toTest != NULL && toDoList != NULL);
     if(toTest->count > 0)
 	{
@@ -150,6 +158,7 @@ CryptIncrementalSelfTest(
 	    for(i = 0; i < toTest->count; i++)
 		{
 		    alg = toTest->algorithms[i];
+
 		    // make sure that the algorithm value is not out of range
 		    if((alg > TPM_ALG_LAST) || !TEST_BIT(alg, g_implementedAlgorithms))
 			return TPM_RC_VALUE;
@@ -161,6 +170,7 @@ CryptIncrementalSelfTest(
 	}
     // Fill in the toDoList with the algorithms that are still untested
     toDoList->count = 0;
+
     for(alg = TPM_ALG_FIRST;
 	toDoList->count < MAX_ALG_LIST_SIZE && alg <= TPM_ALG_LAST;
 	alg++)
@@ -170,41 +180,43 @@ CryptIncrementalSelfTest(
 	}
     return TPM_RC_SUCCESS;
 }
-/* 10.2.7.2.4 CryptInitializeToTest() */
-/* This function will initialize the data structures for testing all the algorithms. This should not
-   be called unless CryptAlgsSetImplemented() has been called */
-void
-CryptInitializeToTest(
-		      void
-		      )
+
+//*** CryptInitializeToTest()
+// This function will initialize the data structures for testing all the
+// algorithms. This should not be called unless CryptAlgsSetImplemented() has
+// been called
+void CryptInitializeToTest(void)
 {
     // Indicate that nothing has been tested
     memset(&g_cryptoSelfTestState, 0, sizeof(g_cryptoSelfTestState));
+
     // Copy the implemented algorithm vector
     MemoryCopy(g_toTest, g_implementedAlgorithms, sizeof(g_toTest));
+
     // Setting the algorithm to null causes the test function to just clear
     // out any algorithms for which there is no test.
     CryptTestAlgorithm(TPM_ALG_ERROR, &g_toTest);
+
     return;
 }
-/* 10.2.7.2.5 CryptTestAlgorithm() */
-/* Only point of contact with the actual self tests. If a self-test fails, there is no return and
-   the TPM goes into failure mode. The call to TestAlgorithm() uses an algorithm selector and a bit
-   vector. When the test is run, the corresponding bit in toTest and in g_toTest is CLEAR. If toTest
-   is NULL, then only the bit in g_toTest is CLEAR. There is a special case for the call to
-   TestAlgorithm(). When alg is TPM_ALG_ERROR, TestAlgorithm() will CLEAR any bit in toTest for
-   which it has no test. This allows the knowledge about which algorithms have test to be accessed
-   through the interface that provides the test. */
-/* Error Returns Meaning */
-/* TPM_RC_CANCELED test was canceled */
+
+//*** CryptTestAlgorithm()
+// Only point of contact with the actual self tests. If a self-test fails, there
+// is no return and the TPM goes into failure mode.
+// The call to TestAlgorithm uses an algorithm selector and a bit vector. When the
+// test is run, the corresponding bit in 'toTest' and in 'g_toTest' is CLEAR. If
+// 'toTest' is NULL, then only the bit in 'g_toTest' is CLEAR.
+// There is a special case for the call to TestAlgorithm(). When 'alg' is
+// ALG_ERROR, TestAlgorithm() will CLEAR any bit in 'toTest' for which it has
+// no test. This allows the knowledge about which algorithms have test to be
+// accessed through the interface that provides the test.
+//  Return Type: TPM_RC
+//      TPM_RC_CANCELED     test was canceled
 LIB_EXPORT
 TPM_RC
-CryptTestAlgorithm(
-		   TPM_ALG_ID           alg,
-		   ALGORITHM_VECTOR    *toTest
-		   )
+CryptTestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
 {
-    TPM_RC                   result;
+    TPM_RC result;
 #if SELF_TEST
     result = TestAlgorithm(alg, toTest);
 #else

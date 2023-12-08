@@ -3,7 +3,6 @@
 /*			    Build Switches	 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmBuildSwitches.h 1619 2020-05-19 16:51:47Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,28 +54,17 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 5.19	TpmBuildSwitches.h */
-
-/* This file contains the build switches. This contains switches for multiple versions of the
-   crypto-library so some may not apply to your environment. */
-/* The switches are guarded so that they can either be set on the command line or set here. If the
-   switch is listed on the command line (-DSOME_SWITCH) with no setting, then the switch will be set
-   to YES. If the switch setting is not on the command line or if the setting is other than YES or
-   NO, then the switch will be set to the default value. The default can either be YES or NO as
-   indicated on each line where the default is selected. */
-/* A caution. Do not try to test these macros by inserting #defines in this file. For some curious
-   reason, a variable set on the command line with no setting will have a value of 1. An #if
-   SOME_VARIABLE will work if the variable is not defined or is defined on the command line with no
-   initial setting. However, a #define SOME_VARIABLE is a null string and when used in #if
-   SOME_VARIABLE will not be a proper expression. If you want to test various switches, either use
-   the command line or change the default. */
-
-#ifndef TPMBUILDSWITCHES_H
-#define TPMBUILDSWITCHES_H
+// This file contains the build switches. This contains switches for multiple
+// versions of the crypto-library so some may not apply to your environment.
+// Each switch has an accompanying description below.
+//
+// clang-format off
+#ifndef _TPM_BUILD_SWITCHES_H_
+#define _TPM_BUILD_SWITCHES_H_
 
 #undef YES
 #define YES 1
@@ -93,12 +81,12 @@
 
 // Need an unambiguous definition for DEBUG. Don't change this
 #ifndef DEBUG
-#   ifdef NDEBUG
-#       define  DEBUG   NO
-#   else
-#       define  DEBUG   YES
-#   endif
-#elif (DEBUG != NO) && (DEBUG != YES)
+#  ifdef NDEBUG
+#    define DEBUG NO
+#  else
+#    define DEBUG YES
+#  endif
+#elif(DEBUG != NO) && (DEBUG != YES)
 #   undef   DEBUG
 #   define  DEBUG       YES       // Default: Either YES or NO
 #endif
@@ -110,6 +98,9 @@
 #   define  USE_BN_ECC_DATA     YES     // Default: Either YES or NO
 #endif
 
+////////////////////////////////////////////////////////////////
+// DEBUG OPTIONS
+////////////////////////////////////////////////////////////////
 /* The SIMULATION switch allows certain other macros to be enabled. The things that can be enabled
    in a simulation include key caching, reproducible random sequences, instrumentation of the RSA
    key generation process, and certain other debug code. SIMULATION Needs to be defined as either
@@ -360,5 +351,5 @@
 #define      ALG_NO       NO
 #define      CC_YES       YES
 #define      CC_NO        NO
-#endif // _TPM_BUILD_SWITCHES_H_
 
+#endif  // _TPM_BUILD_SWITCHES_H_

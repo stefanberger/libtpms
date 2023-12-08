@@ -3,7 +3,6 @@
 /*		Implementation of the symmetric block cipher modes 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,28 +54,34 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2017 - 2021 				*/
+/*  (c) Copyright IBM Corp. and others, 2017 - 2023 				*/
 /*										*/
 /********************************************************************************/
 
+//** Introduction
+//
+// This file contains the implementation of the symmetric block cipher modes
+// allowed for a TPM. These functions only use the single block encryption functions
+// of the selected symmetric cryptographic library.
 
-#ifndef CRYPTSYM_H
-#define CRYPTSYM_H
+//** Includes, Defines, and Typedefs
+#ifndef CRYPT_SYM_H
+#define CRYPT_SYM_H
 
 #if ALG_AES
-#   define IF_IMPLEMENTED_AES(op)    op(AES, aes)
+#  define IF_IMPLEMENTED_AES(op) op(AES, aes)
 #else
-#   define IF_IMPLEMENTED_AES(op)
+#  define IF_IMPLEMENTED_AES(op)
 #endif
 #if ALG_SM4
-#   define IF_IMPLEMENTED_SM4(op)    op(SM4, sm4)
+#  define IF_IMPLEMENTED_SM4(op) op(SM4, sm4)
 #else
-#   define IF_IMPLEMENTED_SM4(op)
+#  define IF_IMPLEMENTED_SM4(op)
 #endif
 #if ALG_CAMELLIA
-#   define IF_IMPLEMENTED_CAMELLIA(op)    op(CAMELLIA, camellia)
+#  define IF_IMPLEMENTED_CAMELLIA(op) op(CAMELLIA, camellia)
 #else
-#   define IF_IMPLEMENTED_CAMELLIA(op)
+#  define IF_IMPLEMENTED_CAMELLIA(op)
 #endif
 #if ALG_TDES
 #   define IF_IMPLEMENTED_TDES(op)    op(TDES, tdes)
@@ -84,10 +89,10 @@
 #   define IF_IMPLEMENTED_TDES(op)
 #endif
 
-#define FOR_EACH_SYM(op)		\
-    IF_IMPLEMENTED_AES(op)		\
-    IF_IMPLEMENTED_SM4(op)		\
-    IF_IMPLEMENTED_CAMELLIA(op)		\
+#define FOR_EACH_SYM(op)	   \
+    IF_IMPLEMENTED_AES(op)	   \
+    IF_IMPLEMENTED_SM4(op)			\
+    IF_IMPLEMENTED_CAMELLIA(op)    \
     IF_IMPLEMENTED_TDES(op)
 
 						/* libtpms added begin */
@@ -96,9 +101,8 @@
     IF_IMPLEMENTED_SM4(op)		\
     IF_IMPLEMENTED_CAMELLIA(op)			/* libtpms added end */
 
-/* Macros for creating the key schedule union */
-
-#define     KEY_SCHEDULE(SYM, sym)      tpmKeySchedule##SYM sym;
+// Macros for creating the key schedule union
+#define KEY_SCHEDULE(SYM, sym) tpmKeySchedule##SYM sym;
 //#define     TDES    DES[3]			/* libtpms commented */
 typedef union tpmCryptKeySchedule_t {
     FOR_EACH_SYM_WITHOUT_TDES(KEY_SCHEDULE)	/* libtpms changed from FOR_EACH_SYM */
@@ -108,29 +112,32 @@ typedef union tpmCryptKeySchedule_t {
 #endif                                  // libtpms added
 
 #if SYMMETRIC_ALIGNMENT == 8
-    uint64_t            alignment;
+    uint64_t alignment;
 #else
-    uint32_t            alignment;
+    uint32_t alignment;
 #endif
 } tpmCryptKeySchedule_t;
 
-/* Each block cipher within a library is expected to conform to the same calling conventions with
-   three parameters (keySchedule, in, and out) in the same order. That means that all algorithms
-   would use the same order of the same parameters. The code is written assuming the (keySchedule,
-   in, and out) order. However, if the library uses a different order, the order can be changed with
-   a SWIZZLE macro that puts the parameters in the correct order. Note that all algorithms have to
-   use the same order and number of parameters because the code to build the calling list is common
-   for each call to encrypt or decrypt with the algorithm chosen by setting a function pointer to
-   select the algorithm that is used. */
-#   define ENCRYPT(keySchedule, in, out)	\
-    encrypt(SWIZZLE(keySchedule, in, out))
-#   define DECRYPT(keySchedule, in, out)	\
-    decrypt(SWIZZLE(keySchedule, in, out))
+// Each block cipher within a library is expected to conform to the same calling
+// conventions with three parameters ('keySchedule', 'in', and 'out') in the same
+// order. That means that all algorithms would use the same order of the same
+// parameters. The code is written assuming the ('keySchedule', 'in', and 'out')
+// order. However, if the library uses a different order, the order can be changed
+// with a SWIZZLE macro that puts the parameters in the correct order.
+// Note that all algorithms have to use the same order and number of parameters
+// because the code to build the calling list is common for each call to encrypt
+// or decrypt with the algorithm chosen by setting a function pointer to select
+// the algorithm that is used.
+
+#define ENCRYPT(keySchedule, in, out) encrypt(SWIZZLE(keySchedule, in, out))
+
+#define DECRYPT(keySchedule, in, out) decrypt(SWIZZLE(keySchedule, in, out))
+
 #define FINAL(keySchedule) final((void *)(keySchedule)) // libtpms added
 
-/* Note that the macros rely on encrypt as local values in the functions that use these
-   macros. Those parameters are set by the macro that set the key schedule to be used for the
-   call. */
+// Note that the macros rely on 'encrypt' as local values in the
+// functions that use these macros. Those parameters are set by the macro that
+// set the key schedule to be used for the call.
 
 #define ENCRYPT_CASE(ALG, alg)						\
     case TPM_ALG_##ALG:							\
@@ -145,4 +152,4 @@ typedef union tpmCryptKeySchedule_t {
     final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;          \
     break;  // libtpms changed
 
-#endif
+#endif  // CRYPT_SYM_H

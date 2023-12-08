@@ -64,7 +64,7 @@
 /* This module provides the platform specific entry and fail processing. The _plat__RunCommand()
    function is used to call to ExecuteCommand() in the TPM code. This function does whatever
    processing is necessary to set up the platform in anticipation of the call to the TPM including
-   setup for error processing. */
+   settup for error processing. */
 /* The _plat__Fail() function is called when there is a failure in the TPM. The TPM code will have
    set the flag to indicate that the TPM is in failure mode. This call will then recursively call
    ExecuteCommand() in order to build the failure mode response. When ExecuteCommand() returns to

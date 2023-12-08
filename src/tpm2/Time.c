@@ -3,7 +3,6 @@
 /*		Functions relating to the TPM's time functions 	 		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Time.c 1519 2019-11-15 20:43:51Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,41 +54,42 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 8.10.1 Introduction */
-/* This file contains the functions relating to the TPM's time functions including the interface to
-   the implementation-specific time functions. */
-/* 8.10.2 Includes */
+//** Introduction
+// This file contains the functions relating to the TPM's time functions including
+// the interface to the implementation-specific time functions.
+//
+//** Includes
 #include "Tpm.h"
 #include "PlatformClock.h"
-/* 8.10.3 Functions */
-/* 8.10.3.1 TimePowerOn() */
-/* This function initialize time info at _TPM_Init(). */
-/* This function is called at _TPM_Init() so that the TPM time can start counting as soon as the TPM
-   comes out of reset and doesn't have to wait until TPM2_Startup() in order to begin the new time
-   epoch. This could be significant for systems that could get powered up but not run any TPM
-   commands for some period of time. */
-void
-TimePowerOn(
-	    void
-	    )
+
+//** Functions
+
+//*** TimePowerOn()
+// This function initialize time info at _TPM_Init().
+//
+// This function is called at _TPM_Init() so that the TPM time can start counting
+// as soon as the TPM comes out of reset and doesn't have to wait until
+// TPM2_Startup() in order to begin the new time epoch. This could be significant
+// for systems that could get powered up but not run any TPM commands for some
+// period of time.
+//
+void TimePowerOn(void)
 {
     g_time = _plat__TimerRead();
 }
-/* 8.10.3.2 TimeNewEpoch() */
-/* This function does the processing to generate a new time epoch nonce and set NV for update. This
-   function is only called when NV is known to be available and the clock is running. The epoch is
-   updated to persistent data. */
-static void
-TimeNewEpoch(
-	     void
-	     )
+
+//*** TimeNewEpoch()
+// This function does the processing to generate a new time epoch nonce and
+// set NV for update. This function is only called when NV is known to be available
+// and the clock is running. The epoch is updated to persistent data.
+static void TimeNewEpoch(void)
 {
 #if CLOCK_STOPS
-    CryptRandomGenerate(sizeof(CLOCK_NONCE), (BYTE *)&g_timeEpoch);
+    CryptRandomGenerate(sizeof(CLOCK_NONCE), (BYTE*)&g_timeEpoch);
 #else
     // if the epoch is kept in NV, update it.
     gp.timeEpoch++;
@@ -98,17 +98,18 @@ TimeNewEpoch(
     // Clean out any lingering state
     _plat__TimerWasStopped();
 }
-/* 8.10.3.3 TimeStartup() */
-/* This function updates the resetCount and restartCount components of TPMS_CLOCK_INFO structure at
-   TPM2_Startup(). */
-/* This function will deal with the deferred creation of a new epoch. TimeUpdateToCurrent() will not
-   start a new epoch even if one is due when TPM_Startup() has not been run. This is because the
-   state of NV is not known until startup completes. When Startup is done, then it will create the
-   epoch nonce to complete the initializations by calling this function. */
-BOOL
-TimeStartup(
-	    STARTUP_TYPE     type           // IN: start up type
-	    )
+
+//*** TimeStartup()
+// This function updates the resetCount and restartCount components of
+// TPMS_CLOCK_INFO structure at TPM2_Startup().
+//
+// This function will deal with the deferred creation of a new epoch.
+// TimeUpdateToCurrent() will not start a new epoch even if one is due when
+// TPM_Startup() has not been run. This is because the state of NV is not known
+// until startup completes. When Startup is done, then it will create the epoch
+// nonce to complete the initializations by calling this function.
+BOOL TimeStartup(STARTUP_TYPE type  // IN: start up type
+		 )
 {
     NOT_REFERENCED(type);
     // If the previous cycle is orderly shut down, the value of the safe bit
@@ -117,23 +118,26 @@ TimeStartup(
 	go.clockSafe = NO;
     return TRUE;
 }
-/* 8.10.3.4 TimeClockUpdate() */
-/* This function updates go.clock. If newTime requires an update of NV, then NV is checked for
-   availability. If it is not available or is rate limiting, then go.clock is not updated and the
-   function returns an error. If newTime would not cause an NV write, then go.clock is updated. If
-   an NV write occurs, then go.safe is SET. */
-void
-TimeClockUpdate(
-		UINT64           newTime    // IN: New time value in mS.
-		)
+
+//*** TimeClockUpdate()
+// This function updates go.clock. If 'newTime' requires an update of NV, then
+// NV is checked for availability. If it is not available or is rate limiting, then
+// go.clock is not updated and the function returns an error. If 'newTime' would
+// not cause an NV write, then go.clock is updated. If an NV write occurs, then
+// go.safe is SET.
+void TimeClockUpdate(UINT64 newTime  // IN: New time value in mS.
+		     )
 {
-#define CLOCK_UPDATE_MASK  ((1ULL << NV_CLOCK_UPDATE_INTERVAL)- 1)
+#define CLOCK_UPDATE_MASK ((1ULL << NV_CLOCK_UPDATE_INTERVAL) - 1)
+
     // Check to see if the update will cause a need for an nvClock update
     if((newTime | CLOCK_UPDATE_MASK) > (go.clock | CLOCK_UPDATE_MASK))
 	{
 	    pAssert(g_NvStatus == TPM_RC_SUCCESS);
+
 	    // Going to update the NV time state so SET the safe flag
 	    go.clockSafe = YES;
+
 	    // update the time
 	    go.clock = newTime;
 
@@ -151,19 +155,18 @@ TimeClockUpdate(
 	// No NV update needed so just update
 	go.clock = newTime;
 }
-/* 8.10.3.5 TimeUpdate() */
-/* This function is used to update the time and clock values. If the TPM has run TPM2_Startup(),
-   this function is called at the start of each command. If the TPM has not run TPM2_Startup(), this
-   is called from TPM2_Startup() to get the clock values initialized. It is not called on command
-   entry because, in this implementation, the go structure is not read from NV until
-   TPM2_Startup(). The reason for this is that the initialization code (_TPM_Init()) may run before
-   NV is accessible. */
-void
-TimeUpdate(
-	   void
-	   )
+
+//*** TimeUpdate()
+// This function is used to update the time and clock values. If the TPM
+// has run TPM2_Startup(), this function is called at the start of each command.
+// If the TPM has not run TPM2_Startup(), this is called from TPM2_Startup() to
+// get the clock values initialized. It is not called on command entry because, in
+// this implementation, the go structure is not read from NV until TPM2_Startup().
+// The reason for this is that the initialization code (_TPM_Init()) may run before
+// NV is accessible.
+void TimeUpdate(void)
 {
-    UINT64          elapsed;
+    UINT64 elapsed;
     //
     // Make sure that we consume the current _plat__TimerWasStopped() state.
     if(_plat__TimerWasStopped())
@@ -175,39 +178,46 @@ TimeUpdate(
     elapsed = _plat__TimerRead() - g_time;
     // Don't read +
     g_time += elapsed;
+
     // Don't need to check the result because it has to be success because have
     // already checked that NV is available.
     TimeClockUpdate(go.clock + elapsed);
+
     // Call self healing logic for dictionary attack parameters
     DASelfHeal();
 }
-/* 8.10.3.6 TimeUpdateToCurrent() */
-/* This function updates the Time and Clock in the global TPMS_TIME_INFO structure. */
-/* In this implementation, Time and Clock are updated at the beginning of each command and the
-   values are unchanged for the duration of the command. */
-/* Because Clock updates may require a write to NV memory, Time and Clock are not allowed to advance
-   if NV is not available. When clock is not advancing, any function that uses Clock will fail and
-   return TPM_RC_NV_UNAVAILABLE or TPM_RC_NV_RATE. */
-/* This implementation does not do rate limiting. If the implementation does do rate limiting, then
-   the Clock update should not be inhibited even when doing rate limiting. */
-void
-TimeUpdateToCurrent(
-		    void
-		    )
+
+//*** TimeUpdateToCurrent()
+// This function updates the 'Time' and 'Clock' in the global
+// TPMS_TIME_INFO structure.
+//
+// In this implementation, 'Time' and 'Clock' are updated at the beginning
+// of each command and the values are unchanged for the duration of the
+// command.
+//
+// Because 'Clock' updates may require a write to NV memory, 'Time' and 'Clock'
+// are not allowed to advance if NV is not available. When clock is not advancing,
+// any function that uses 'Clock' will fail and return TPM_RC_NV_UNAVAILABLE or
+// TPM_RC_NV_RATE.
+//
+// This implementation does not do rate limiting. If the implementation does do
+// rate limiting, then the 'Clock' update should not be inhibited even when doing
+// rate limiting.
+void TimeUpdateToCurrent(void)
 {
     // Can't update time during the dark interval or when rate limiting so don't
     // make any modifications to the internal clock value. Also, defer any clock
     // processing until TPM has run TPM2_Startup()
     if(!NV_IS_AVAILABLE || !TPMIsStarted())
 	return;
+
     TimeUpdate();
 }
-/* 8.10.3.7 TimeSetAdjustRate() */
-/* This function is used to perform rate adjustment on Time and Clock. */
-void
-TimeSetAdjustRate(
-		  TPM_CLOCK_ADJUST     adjust         // IN: adjust constant
-		  )
+
+//*** TimeSetAdjustRate()
+// This function is used to perform rate adjustment on 'Time' and 'Clock'.
+void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
+		       )
 {
     switch(adjust)
 	{
@@ -232,42 +242,46 @@ TimeSetAdjustRate(
 	  case TPM_CLOCK_NO_CHANGE:
 	    break;
 	  default:
+	    // should have been blocked sooner
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
 	}
+
     return;
 }
-/* 8.10.3.8 TimeGetMarshaled() */
-/* This function is used to access TPMS_TIME_INFO in canonical form. The function collects the time
-   information and marshals it into dataBuffer and returns the marshaled size */
-/* Return Value Meaning */
+
+//*** TimeGetMarshaled()
+// This function is used to access TPMS_TIME_INFO in canonical form.
+// The function collects the time information and marshals it into 'dataBuffer'
+// and returns the marshaled size
 UINT16
-TimeGetMarshaled(
-		 TIME_INFO       *dataBuffer     // OUT: result buffer
+TimeGetMarshaled(TIME_INFO* dataBuffer  // OUT: result buffer
 		 )
 {
-    TPMS_TIME_INFO      timeInfo;
+    TPMS_TIME_INFO timeInfo;
+
     // Fill TPMS_TIME_INFO structure
     timeInfo.time = g_time;
     TimeFillInfo(&timeInfo.clockInfo);
+
     // Marshal TPMS_TIME_INFO to canonical form
-    return TPMS_TIME_INFO_Marshal(&timeInfo, (BYTE **)&dataBuffer, NULL);
+    return TPMS_TIME_INFO_Marshal(&timeInfo, (BYTE**)&dataBuffer, NULL);
 }
-/* 8.10.3.9 TimeFillInfo */
-/* This function gathers information to fill in a TPMS_CLOCK_INFO structure. */
-void
-TimeFillInfo(
-	     TPMS_CLOCK_INFO     *clockInfo
-	     )
+
+//*** TimeFillInfo
+// This function gathers information to fill in a TPMS_CLOCK_INFO structure.
+void TimeFillInfo(TPMS_CLOCK_INFO* clockInfo)
 {
-    clockInfo->clock = go.clock;
-    clockInfo->resetCount = gp.resetCount;
+    clockInfo->clock        = go.clock;
+    clockInfo->resetCount   = gp.resetCount;
     clockInfo->restartCount = gr.restartCount;
+
     // If NV is not available, clock stopped advancing and the value reported is
     // not "safe".
     if(NV_IS_AVAILABLE)
 	clockInfo->safe = go.clockSafe;
     else
 	clockInfo->safe = NO;
+
     return;
 }

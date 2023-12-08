@@ -3,7 +3,6 @@
 /*		 Used by the simulator to mimic a hardware clock  		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Clock.c 1529 2019-11-21 23:29:01Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,25 +54,21 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* added for portability because Linux clock is 32 bits */
+//** Description
+//
+// This file contains the routines that are used by the simulator to mimic
+// a hardware clock on a TPM.
+//
+// In this implementation, all the time values are measured in millisecond.
+// However, the precision of the clock functions may be implementation dependent.
 
-#include <stdint.h>
-#include <stdio.h>
-#include <time.h>
-
-/* C.3 Clock.c */
-/* C.3.1. Description */
-/* This file contains the routines that are used by the simulator to mimic a hardware clock on a
-   TPM. In this implementation, all the time values are measured in millisecond. However, the
-   precision of the clock functions may be implementation dependent. */
-/* C.3.2. Includes and Data Definitions */
+//** Includes and Data Definitions
 #include <assert.h>
 #include "Platform.h"
-#include "TpmFail_fp.h"
 
 /* libtpms added begin */
 /* ClockGetTime -- get time given a specified clock type */
@@ -117,59 +112,54 @@ ClockAdjustPostResume(UINT64 backthen, BOOL timesAreRealtime)
 }
 /* libtpms added end */
 
-/* C.3.3. Simulator Functions */
-/* C.3.3.1. Introduction */
-/* This set of functions is intended to be called by the simulator environment in order to simulate
-   hardware events. */
-/* C.3.3.2. _plat__TimerReset() */
-/* This function sets current system clock time as t0 for counting TPM time. This function is called
-   at a power on event to reset the clock.  When the clock is reset, the indication that the clock
-   was stopped is also set. */
-LIB_EXPORT void
-_plat__TimerReset(
-		  void
-		  )
+//** Simulator Functions
+//*** Introduction
+// This set of functions is intended to be called by the simulator environment in
+// order to simulate hardware events.
+
+//***_plat__TimerReset()
+// This function sets current system clock time as t0 for counting TPM time.
+// This function is called at a power on event to reset the clock. When the clock
+// is reset, the indication that the clock was stopped is also set.
+LIB_EXPORT void _plat__TimerReset(void)
 {
     s_lastSystemTime = 0;
-    s_tpmTime = 0;
-    s_adjustRate = CLOCK_NOMINAL;
-    s_timerReset = TRUE;
-    s_timerStopped = TRUE;
+    s_tpmTime        = 0;
+    s_adjustRate     = CLOCK_NOMINAL;
+    s_timerReset     = TRUE;
+    s_timerStopped   = TRUE;
     s_hostMonotonicAdjustTime = 0; /* libtpms added */
     s_suspendedElapsedTime = 0; /* libtpms added */
     return;
 }
-/* C.3.3.3. _plat__TimerRestart() */
-/* This function should be called in order to simulate the restart of the timer should it be stopped
-   while power is still applied. */
-LIB_EXPORT void
-_plat__TimerRestart(
-		    void
-		    )
+
+//*** _plat__TimerRestart()
+// This function should be called in order to simulate the restart of the timer
+// should it be stopped while power is still applied.
+LIB_EXPORT void _plat__TimerRestart(void)
 {
     s_timerStopped = TRUE;
     return;
 }
 
-/* C.3.4. Functions Used by TPM */
-/* C.3.4.1. Introduction */
-/* These functions are called by the TPM code. They should be replaced by appropriated hardware
-   functions. */
+//** Functions Used by TPM
+//*** Introduction
+// These functions are called by the TPM code. They should be replaced by
+// appropriated hardware functions.
 
-clock_t     debugTime;
-/* C.3.4.2.	_plat__Time() */
-/* This is another, probably futile, attempt to define a portable function that will return a 64-bit
-   clock value that has mSec resolution. */
-LIB_EXPORT uint64_t
-_plat__RealTime(
-		void
-		)
+#include <time.h>
+clock_t debugTime;
+
+//*** _plat__RealTime()
+// This is another, probably futile, attempt to define a portable function
+// that will return a 64-bit clock value that has mSec resolution.
+LIB_EXPORT uint64_t _plat__RealTime(void)
 {
-    clock64_t           time;
+    clock64_t time;
     //#ifdef _MSC_VER	kgold
 #ifdef TPM_WINDOWS
     #include <sys/timeb.h>
-    struct _timeb       sysTime;
+    struct _timeb sysTime;
     //
     _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
     time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
@@ -178,7 +168,7 @@ _plat__RealTime(
 	time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
 #else
     // hopefully, this will work with most UNIX systems
-    struct timespec     systime;
+    struct timespec systime;
     //
     clock_gettime(CLOCK_MONOTONIC, &systime);
     time = (clock64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
@@ -198,38 +188,38 @@ _plat__RealTime(
     return time;
 }
 
-
-
-/* C.3.4.3. _plat__TimerRead() */
-/* This function provides access to the tick timer of the platform. The TPM code uses this value to
-   drive the TPM Clock. */
-/* The tick timer is supposed to run when power is applied to the device. This timer should not be
-   reset by time events including _TPM_Init(). It should only be reset when TPM power is
-   re-applied. */
-/* If the TPM is run in a protected environment, that environment may provide the tick time to the
-   TPM as long as the time provided by the environment is not allowed to go backwards. If the time
-   provided by the system can go backwards during a power discontinuity, then the
-   _plat__Signal_PowerOn() should call _plat__TimerReset(). */
-LIB_EXPORT uint64_t
-_plat__TimerRead(
-		 void
-		 )
+//***_plat__TimerRead()
+// This function provides access to the tick timer of the platform. The TPM code
+// uses this value to drive the TPM Clock.
+//
+// The tick timer is supposed to run when power is applied to the device. This timer
+// should not be reset by time events including _TPM_Init. It should only be reset
+// when TPM power is re-applied.
+//
+// If the TPM is run in a protected environment, that environment may provide the
+// tick time to the TPM as long as the time provided by the environment is not
+// allowed to go backwards. If the time provided by the system can go backwards
+// during a power discontinuity, then the _plat__Signal_PowerOn should call
+// _plat__TimerReset().
+LIB_EXPORT uint64_t _plat__TimerRead(void)
 {
 #ifdef HARDWARE_CLOCK
-#error      "need a definition for reading the hardware clock"
+#  error "need a defintion for reading the hardware clock"
     return HARDWARE_CLOCK
 #else
-    clock64_t         timeDiff;
-    clock64_t         adjustedTimeDiff;
-    clock64_t         timeNow;
-    clock64_t         readjustedTimeDiff;
+	clock64_t timeDiff;
+    clock64_t adjustedTimeDiff;
+    clock64_t timeNow;
+    clock64_t readjustedTimeDiff;
+
     // This produces a timeNow that is basically locked to the system clock.
     timeNow = _plat__RealTime();
+
     // if this hasn't been initialized, initialize it
     if(s_lastSystemTime == 0)
 	{
-	    s_lastSystemTime = timeNow;
-	    debugTime = clock();
+	    s_lastSystemTime   = timeNow;
+	    debugTime          = clock();
 	    s_lastReportedTime = 0;
 	    s_realTimePrevious = 0;
 	}
@@ -239,8 +229,9 @@ _plat__TimerRead(
     if(timeNow < s_lastReportedTime)
 	s_lastSystemTime = timeNow;
     s_lastReportedTime = s_lastReportedTime + timeNow - s_lastSystemTime;
-    s_lastSystemTime = timeNow;
-    timeNow = s_lastReportedTime;
+    s_lastSystemTime   = timeNow;
+    timeNow            = s_lastReportedTime;
+
     // The code above produces a timeNow that is similar to the value returned
     // by Clock(). The difference is that timeNow does not max out, and it is
     // at a ms. rate rather than at a CLOCKS_PER_SEC rate. The code below
@@ -250,65 +241,67 @@ _plat__TimerRead(
 	return s_tpmTime;
     // Compute the amount of time since the last update of the system clock
     timeDiff = timeNow - s_realTimePrevious;
+
     // Do the time rate adjustment and conversion from CLOCKS_PER_SEC to mSec
     adjustedTimeDiff = (timeDiff * CLOCK_NOMINAL) / ((uint64_t)s_adjustRate);
+
     // update the TPM time with the adjusted timeDiff
     s_tpmTime += (clock64_t)adjustedTimeDiff;
+
     // Might have some rounding error that would loose CLOCKS. See what is not
     // being used. As mentioned above, this could result in putting back more than
     // is taken out. Here, we are trying to recreate timeDiff.
-    readjustedTimeDiff = (adjustedTimeDiff * (uint64_t)s_adjustRate )
-			 / CLOCK_NOMINAL;
+    readjustedTimeDiff = (adjustedTimeDiff * (uint64_t)s_adjustRate) / CLOCK_NOMINAL;
+
     // adjusted is now converted back to being the amount we should advance the
     // previous sampled time. It should always be less than or equal to timeDiff.
     // That is, we could not have use more time than we started with.
     s_realTimePrevious = s_realTimePrevious + readjustedTimeDiff;
-#ifdef  DEBUGGING_TIME
+
+#  ifdef DEBUGGING_TIME
     // Put this in so that TPM time will pass much faster than real time when
     // doing debug.
     // A value of 1000 for DEBUG_TIME_MULTIPLER will make each ms into a second
     // A good value might be 100
     return (s_tpmTime * DEBUG_TIME_MULTIPLIER);
-#endif
+#  endif
     return s_tpmTime;
 #endif
 }
 
-
-/* C.3.4.3. _plat__TimerWasReset() */
-/* This function is used to interrogate the flag indicating if the tick timer has been reset. */
-/* If the resetFlag parameter is SET, then the flag will be CLEAR before the function returns. */
-LIB_EXPORT int
-_plat__TimerWasReset(
-		     void
-		     )
+//*** _plat__TimerWasReset()
+// This function is used to interrogate the flag indicating if the tick timer has
+// been reset.
+//
+// If the resetFlag parameter is SET, then the flag will be CLEAR before the
+// function returns.
+LIB_EXPORT int _plat__TimerWasReset(void)
 {
-    int retVal = s_timerReset;
+    int retVal   = s_timerReset;
     s_timerReset = FALSE;
     return retVal;
 }
-/* C.3.4.4. _plat__TimerWasStopped() */
-/* This function is used to interrogate the flag indicating if the tick timer has been stopped. If
-   so, this is typically a reason to roll the nonce. */
-/* This function will CLEAR the s_timerStopped flag before returning. This provides functionality
-   that is similar to status register that is cleared when read. This is the model used here because
-   it is the one that has the most impact on the TPM code as the flag can only be accessed by one
-   entity in the TPM. Any other implementation of the hardware can be made to look like a read-once
-   register. */
-LIB_EXPORT int
-_plat__TimerWasStopped(
-		       void
-		       )
+
+//*** _plat__TimerWasStopped()
+// This function is used to interrogate the flag indicating if the tick timer has
+// been stopped. If so, this is typically a reason to roll the nonce.
+//
+// This function will CLEAR the s_timerStopped flag before returning. This provides
+// functionality that is similar to status register that is cleared when read. This
+// is the model used here because it is the one that has the most impact on the TPM
+// code as the flag can only be accessed by one entity in the TPM. Any other
+// implementation of the hardware can be made to look like a read-once register.
+LIB_EXPORT int _plat__TimerWasStopped(void)
 {
-    BOOL         retVal = s_timerStopped;
+    int retVal     = s_timerStopped;
     s_timerStopped = FALSE;
     return retVal;
 }
-/* C.3.4.5. _plat__ClockAdjustRate() */
-/* Adjust the clock rate */
-LIB_EXPORT void
-_plat__ClockAdjustRate(
-		       int	adjust         // IN: the adjust number.  It could be positive
+
+//***_plat__ClockAdjustRate()
+// Adjust the clock rate
+LIB_EXPORT void _plat__ClockAdjustRate(
+int	adjust         // IN: the adjust number.  It could be positive
 		       //     or negative
 		       )
 {
@@ -338,9 +331,49 @@ _plat__ClockAdjustRate(
 	    // ignore any other values;
 	    break;
 	}
+
     if(s_adjustRate > (CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT))
 	s_adjustRate = CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT;
     if(s_adjustRate < (CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT))
 	s_adjustRate = CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT;
+
     return;
 }
+
+#if 0
+
+/* added for portability because Linux clock is 32 bits */
+
+#include <stdint.h>
+#include <stdio.h>
+#include <time.h>
+
+#include "TpmFail_fp.h"
+
+LIB_EXPORT uint64_t
+_plat__RealTime(
+		void
+		)
+{
+    clock64_t           time;
+    //#ifdef _MSC_VER	kgold
+#ifdef TPM_WINDOWS
+    #include <sys/timeb.h>
+    struct _timeb       sysTime;
+    //
+    _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
+    time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
+    // set the time back by one hour if daylight savings
+    if(sysTime.dstflag)
+	time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
+#else
+    // hopefully, this will work with most UNIX systems
+    struct timespec     systime;
+    //
+    clock_gettime(CLOCK_MONOTONIC, &systime);
+    time = (clock64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
+#endif
+    return time;
+}
+
+#endif

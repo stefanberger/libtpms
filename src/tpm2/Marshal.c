@@ -3,7 +3,6 @@
 /*			  Parameter Marshaling   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Marshal.c 1642 2020-08-18 19:42:24Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -84,7 +83,7 @@ UINT8_Marshal(UINT8 *source, BYTE **buffer, INT32 *size)
     }
     return sizeof(UINT8);
 }
-    
+
 UINT16
 UINT16_Marshal(UINT16 *source, BYTE **buffer, INT32 *size)
 {
@@ -182,7 +181,7 @@ TPM2B_Marshal(TPM2B *source, UINT32 maxSize, BYTE **buffer, INT32 *size)
     UINT16 written = 0;
     assert(source->size <= maxSize); // libtpms added
     written += UINT16_Marshal(&(source->size), buffer, size);
-    written += Array_Marshal(source->buffer, source->size, buffer, size); 
+    written += Array_Marshal(source->buffer, source->size, buffer, size);
     return written;
 }
 
@@ -195,7 +194,7 @@ TPM_KEY_BITS_Marshal(TPM_KEY_BITS *source, BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(source, buffer, size);
     return written;
 }
-   
+
 /* Table 2:7 - Definition of TPM_CONSTANTS32 Constants (EnumTable()) */
 UINT16
 TPM_CONSTANTS32_Marshal(TPM_CONSTANTS32 *source, BYTE **buffer, INT32 *size)
@@ -225,7 +224,7 @@ TPM_ECC_CURVE_Marshal(TPM_ECC_CURVE *source, BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(source, buffer, size);
     return written;
 }
-#endif 
+#endif
 
 /* Table 12 - Definition of TPM_CC Constants */
 
@@ -256,7 +255,7 @@ TPM_ST_Marshal(TPM_ST *source, BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(source, buffer, size);
     return written;
 }
- 
+
 /* Table 2:22 - Definition of TPM_CAP Constants (EnumTable()) */
 
 INT16
@@ -316,7 +315,7 @@ TPMA_OBJECT_Marshal(TPMA_OBJECT *source, BYTE **buffer, INT32 *size)
     written += UINT32_Marshal((UINT32 *)source, buffer, size);
     return written;
 }
- 
+
 /* Table 2:32 - Definition of TPMA_SESSION Bits (BitsTable()) */
 
 UINT16
@@ -386,7 +385,7 @@ TPMI_RH_HIERARCHY_Marshal(TPMI_RH_HIERARCHY *source, BYTE **buffer, INT32 *size)
     written += TPM_HANDLE_Marshal(source, buffer, size);
     return written;
 }
-   
+
 /* Table 2:59 - Definition of TPMI_RH_NV_INDEX Type (InterfaceTable()) */
 
 UINT16
@@ -457,12 +456,12 @@ TPMU_HA_Marshal(TPMU_HA *source, BYTE **buffer, INT32 *size, UINT32 selector)
     switch (selector) {
 #if ALG_SHA1
       case TPM_ALG_SHA1:
-	written += Array_Marshal(&source->sha1[0], SHA1_DIGEST_SIZE, buffer, size); 
+	written += Array_Marshal(&source->sha1[0], SHA1_DIGEST_SIZE, buffer, size);
 	break;
 #endif
 #if ALG_SHA256
       case TPM_ALG_SHA256:
-	written += Array_Marshal(&source->sha256[0], SHA256_DIGEST_SIZE, buffer, size); 
+	written += Array_Marshal(&source->sha256[0], SHA256_DIGEST_SIZE, buffer, size);
 	break;
 #endif
 #if ALG_SHA384
@@ -722,7 +721,7 @@ TPML_CC_Marshal(TPML_CC *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPM_CC_Marshal(&source->commandCodes[i], buffer, size);
@@ -737,7 +736,7 @@ TPML_CCA_Marshal(TPML_CCA *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMA_CC_Marshal(&source->commandAttributes[i], buffer, size);
@@ -752,7 +751,7 @@ TPML_ALG_Marshal(TPML_ALG *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPM_ALG_ID_Marshal(&source->algorithms[i], buffer, size);
@@ -767,7 +766,7 @@ TPML_HANDLE_Marshal(TPML_HANDLE *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPM_HANDLE_Marshal(&source->handle[i], buffer, size);
@@ -782,7 +781,7 @@ TPML_DIGEST_Marshal(TPML_DIGEST *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPM2B_DIGEST_Marshal(&source->digests[i], buffer, size);
@@ -797,7 +796,7 @@ TPML_DIGEST_VALUES_Marshal(TPML_DIGEST_VALUES *source, BYTE **buffer, INT32 *siz
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMT_HA_Marshal(&source->digests[i], buffer, size);
@@ -812,7 +811,7 @@ TPML_PCR_SELECTION_Marshal(TPML_PCR_SELECTION *source, BYTE **buffer, INT32 *siz
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_PCR_SELECTION_Marshal(&source->pcrSelections[i], buffer, size);
@@ -828,7 +827,7 @@ TPML_ALG_PROPERTY_Marshal(TPML_ALG_PROPERTY *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_ALG_PROPERTY_Marshal(&source->algProperties[i], buffer, size);
@@ -843,7 +842,7 @@ TPML_TAGGED_TPM_PROPERTY_Marshal(TPML_TAGGED_TPM_PROPERTY *source, BYTE **buffer
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_TAGGED_PROPERTY_Marshal(&source->tpmProperty[i], buffer, size);
@@ -858,7 +857,7 @@ TPML_TAGGED_PCR_PROPERTY_Marshal(TPML_TAGGED_PCR_PROPERTY *source, BYTE **buffer
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_TAGGED_PCR_SELECT_Marshal(&source->pcrProperty[i], buffer, size);
@@ -874,7 +873,7 @@ TPML_ECC_CURVE_Marshal(TPML_ECC_CURVE *source, BYTE **buffer, INT32 *size)
     UINT16 written = 0;
 
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPM_ECC_CURVE_Marshal(&source->eccCurves[i], buffer, size);
@@ -889,14 +888,14 @@ TPML_TAGGED_POLICY_Marshal(TPML_TAGGED_POLICY *source, BYTE **buffer, INT32 *siz
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_TAGGED_POLICY_Marshal(&source->policies[i], buffer, size);
     }
     return written;
 }
- 
+
 /* Table 2:118 - Definition of TPML_ACT_DATA Structure (StructuresTable()) */
 
 UINT16
@@ -996,7 +995,7 @@ TPMS_TIME_INFO_Marshal(TPMS_TIME_INFO *source, BYTE **buffer, INT32 *size)
     written += TPMS_CLOCK_INFO_Marshal(&source->clockInfo, buffer, size);
     return written;
 }
-    
+
 /* Table 2:114 - Definition of TPMS_TIME_ATTEST_INFO Structure (StructuresTable()) */
 
 UINT16
@@ -1339,7 +1338,7 @@ TPMS_SCHEME_HASH_Marshal(TPMS_SCHEME_HASH *source, BYTE **buffer, INT32 *size)
     written += TPMI_ALG_HASH_Marshal(&source->hashAlg, buffer, size);
     return written;
 }
-    
+
 /* Table 2:143 - Definition of TPMS_SCHEME_ECDAA Structure (StructuresTable()) */
 
 UINT16
@@ -1789,7 +1788,7 @@ UINT16
 TPMS_ALGORITHM_DETAIL_ECC_Marshal(TPMS_ALGORITHM_DETAIL_ECC *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
-    
+
     written += TPM_ECC_CURVE_Marshal(&source->curveID, buffer, size);
     written += UINT16_Marshal(&source->keySize, buffer, size);
     written += TPMT_KDF_SCHEME_Marshal(&source->kdf, buffer, size);
@@ -1803,7 +1802,7 @@ TPMS_ALGORITHM_DETAIL_ECC_Marshal(TPMS_ALGORITHM_DETAIL_ECC *source, BYTE **buff
     written += TPM2B_ECC_PARAMETER_Marshal(&source->h, buffer, size);
     return written;
 }
-    
+
 /* Table 2:175 - Definition of TPMS_SIGNATURE_RSA Structure (StructuresTable()) */
 
 UINT16
@@ -1844,7 +1843,7 @@ TPMS_SIGNATURE_ECC_Marshal(TPMS_SIGNATURE_ECC *source, BYTE **buffer, INT32 *siz
     written += TPM2B_ECC_PARAMETER_Marshal(&source->signatureS, buffer, size);
     return written;
 }
-    
+
 /* Table 2:178 - Definition of Types for TPMS_SIGNATURE_ECC (TypedefTable()) */
 
 UINT16
@@ -1853,7 +1852,7 @@ TPMS_SIGNATURE_ECDSA_Marshal(TPMS_SIGNATURE_ECDSA *source, BYTE **buffer, INT32 
     UINT16 written = 0;
     written += TPMS_SIGNATURE_ECC_Marshal(source, buffer, size);
     return written;
-}	
+}
 
 UINT16
 TPMS_SIGNATURE_ECDAA_Marshal(TPMS_SIGNATURE_ECDAA *source, BYTE **buffer, INT32 *size)
@@ -1950,7 +1949,7 @@ TPM2B_ENCRYPTED_SECRET_Marshal(TPM2B_ENCRYPTED_SECRET *source, BYTE **buffer, IN
     written += TPM2B_Marshal(&source->b, sizeof(source->t.secret), buffer, size); // libtpms changed
     return written;
 }
- 
+
 /* Table 2:183 - Definition of TPMI_ALG_PUBLIC Type (InterfaceTable()) */
 
 
@@ -1993,7 +1992,7 @@ TPMU_PUBLIC_ID_Marshal(TPMU_PUBLIC_ID *source, BYTE **buffer, INT32 *size, UINT3
 	pAssert(FALSE);
     }
     return written;
-} 
+}
 
 /* Table 2:185 - Definition of TPMS_KEYEDHASH_PARMS Structure (StructuresTable()) */
 
@@ -2020,7 +2019,7 @@ TPMS_RSA_PARMS_Marshal(TPMS_RSA_PARMS *source, BYTE **buffer, INT32 *size)
 }
 
 /* Table 2:188 - Definition of TPMS_ECC_PARMS Structure (StructuresTable()) */
-	
+
 UINT16
 TPMS_ECC_PARMS_Marshal(TPMS_ECC_PARMS *source, BYTE **buffer, INT32 *size)
 {
@@ -2036,7 +2035,7 @@ TPMS_ECC_PARMS_Marshal(TPMS_ECC_PARMS *source, BYTE **buffer, INT32 *size)
 /* Table 2:189 - Definition of TPMU_PUBLIC_PARMS Union (StructuresTable()) */
 
 UINT16
-TPMU_PUBLIC_PARMS_Marshal(TPMU_PUBLIC_PARMS *source, BYTE **buffer, INT32 *size, UINT32 selector) 
+TPMU_PUBLIC_PARMS_Marshal(TPMU_PUBLIC_PARMS *source, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     UINT16 written = 0;
 
@@ -2144,7 +2143,7 @@ UINT16
 TPMT_SENSITIVE_Marshal(TPMT_SENSITIVE *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;
- 
+
     written += TPMI_ALG_PUBLIC_Marshal(&source->sensitiveType, buffer, size);
     written += TPM2B_AUTH_Marshal(&source->authValue, buffer, size);
     written += TPM2B_DIGEST_Marshal(&source->seedValue, buffer, size);
@@ -2311,7 +2310,7 @@ TPML_AC_CAPABILITIES_Marshal(TPML_AC_CAPABILITIES *source, BYTE **buffer, INT32 
 {
     UINT16 written = 0;
     UINT32 i;
-    
+
     written += UINT32_Marshal(&source->count, buffer, size);
     for (i = 0 ; i < source->count ; i++) {
 	written += TPMS_AC_OUTPUT_Marshal(&source->acCapabilities[i], buffer, size);

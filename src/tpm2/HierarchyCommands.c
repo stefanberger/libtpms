@@ -3,7 +3,6 @@
 /*			     Hierarchy Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: HierarchyCommands.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -80,8 +79,10 @@ TPM2_CreatePrimary(
 	return TPM_RC_OBJECT_MEMORY;
     // Get the address of the public area in the new object
     // (this is just to save typing)
-    publicArea = &newObject->publicArea;
+    publicArea  = &newObject->publicArea;
+
     *publicArea = in->inPublic.publicArea;
+
     // Check attributes in input public area. CreateChecks() checks the things that
     // are unique to creation and then validates the attributes and values that are
     // common to create and load.
@@ -90,8 +91,7 @@ TPM2_CreatePrimary(
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, RC_CreatePrimary_inPublic);
     // Validate the sensitive area values
-    if(!AdjustAuthSize(&in->inSensitive.sensitive.userAuth,
-		       publicArea->nameAlg))
+    if(!AdjustAuthSize(&in->inSensitive.sensitive.userAuth, publicArea->nameAlg))
 	return TPM_RCS_SIZE + RC_CreatePrimary_inSensitive;
     // Command output
     // Compute the name using out->name as a scratch area (this is not the value
@@ -99,33 +99,44 @@ TPM2_CreatePrimary(
     // used as a random number generator during the object creation.
     // The caller does not know the seed values so the actual name does not have
     // to be over the input, it can be over the unmarshaled structure.
-    result = DRBG_InstantiateSeeded(&rand,
-				    &HierarchyGetPrimarySeed(in->primaryHandle)->b,
-				    PRIMARY_OBJECT_CREATION,
-				    (TPM2B *)PublicMarshalAndComputeName(publicArea, &name),
-				    &in->inSensitive.sensitive.data.b,
-				    HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
-    if (result == TPM_RC_SUCCESS)
+    result =
+ 	DRBG_InstantiateSeeded(&rand,
+			       &HierarchyGetPrimarySeed(in->primaryHandle)->b,
+			       PRIMARY_OBJECT_CREATION,
+			       (TPM2B*)PublicMarshalAndComputeName(publicArea, &name),
+			       &in->inSensitive.sensitive.data.b,
+			       HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
+    if(result == TPM_RC_SUCCESS)
 	{
 	    newObject->attributes.primary = SET;
 	    if(in->primaryHandle == TPM_RH_ENDORSEMENT)
 		newObject->attributes.epsHierarchy = SET;
+
 	    // Create the primary object.
-	    result = CryptCreateObject(newObject, &in->inSensitive.sensitive,
-				       (RAND_STATE *)&rand);
+	    result = CryptCreateObject(
+				       newObject, &in->inSensitive.sensitive, (RAND_STATE*)&rand);
 	}
     if(result != TPM_RC_SUCCESS)
 	return result;
+
     // Set the publicArea and name from the computed values
     out->outPublic.publicArea = newObject->publicArea;
-    out->name = newObject->name;
+    out->name                 = newObject->name;
+
     // Fill in creation data
-    FillInCreationData(in->primaryHandle, publicArea->nameAlg,
-		       &in->creationPCR, &in->outsideInfo, &out->creationData,
+    FillInCreationData(in->primaryHandle,
+		       publicArea->nameAlg,
+		       &in->creationPCR,
+		       &in->outsideInfo,
+		       &out->creationData,
 		       &out->creationHash);
+
     // Compute creation ticket
-    TicketComputeCreation(EntityGetHierarchy(in->primaryHandle), &out->name,
-			  &out->creationHash, &out->creationTicket);
+    TicketComputeCreation(EntityGetHierarchy(in->primaryHandle),
+				   &out->name,
+				   &out->creationHash,
+				   &out->creationTicket);
+
     // Set the remaining attributes for a loaded object
     ObjectSetLoadedAttributes(newObject, in->primaryHandle,
                               HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
@@ -240,7 +251,7 @@ TPM2_SetPrimaryPolicy(
     if(in->authPolicy.t.size != CryptHashGetDigestSize(in->hashAlg))
 	return TPM_RCS_SIZE + RC_SetPrimaryPolicy_authPolicy;
     // The command need NV update for OWNER and ENDORSEMENT hierarchy, and
-    // might need orderlyState update for PLATFORM hierarchy.
+    // might need orderlyState update for PLATFROM hierarchy.
     // Check if NV is available.  A TPM_RC_NV_UNAVAILABLE or TPM_RC_NV_RATE
     // error may be returned at this point
     RETURN_IF_NV_IS_NOT_AVAILABLE;
@@ -279,7 +290,7 @@ TPM2_SetPrimaryPolicy(
 	      go.ACT_##N.authPolicy = in->authPolicy;			\
 	      g_clearOrderly = TRUE;					\
 	      break;
-	    
+
 	    FOR_EACH_ACT(SET_ACT_POLICY)
 
 	  default:
@@ -512,4 +523,3 @@ TPM2_HierarchyChangeAuth(
     return TPM_RC_SUCCESS;
 }
 #endif // CC_HierarchyChangeAuth
-

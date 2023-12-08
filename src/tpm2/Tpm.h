@@ -3,7 +3,6 @@
 /*		Root header file for building any TPM.lib code			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Tpm.h 1594 2020-03-26 22:15:48Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,14 +54,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 5.18	Tpm.h */
-/* Root header file for building any TPM.lib code */
-#ifndef     _TPM_H_
-#define     _TPM_H_
+// Root header file for building any TPM.lib code
+
+#ifndef _TPM_H_
+#define _TPM_H_
 
 #include "TpmBuildSwitches.h"
 #include "BaseTypes.h"
@@ -70,12 +69,12 @@
 #include "MinMax.h"
 #include "TpmProfile.h"
 #include "TpmAlgorithmDefines.h"
-#include "LibSupport.h"         // Types from the library. These need to come before
+#include "LibSupport.h"        // Types from the library. These need to come before
 // Global.h because some of the structures in
 // that file depend on the structures used by the
 // cryptographic libraries.
-#include "GpMacros.h"           // Define additional macros
-#include "Global.h"             // Define other TPM types
-#include "InternalRoutines.h"   // Function prototypes
+#include "GpMacros.h"          // Define additional macros
+#include "Global.h"            // Define other TPM types
+#include "InternalRoutines.h"  // Function prototypes
 
-#endif // _TPM_H_
+#endif  // _TPM_H_

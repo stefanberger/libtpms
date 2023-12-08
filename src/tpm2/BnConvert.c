@@ -3,7 +3,6 @@
 /*	conversion functions that will convert TPM2B to/from internal format	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnConvert.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,38 +54,41 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.2 BnConvert.c */
-/* 10.2.2.1 Introduction */
-/* This file contains the basic conversion functions that will convert TPM2B to/from the internal
-   format. The internal format is a bigNum, */
-/* 10.2.2.2 Includes */
+//** Introduction
+// This file contains the basic conversion functions that will convert TPM2B
+// to/from the internal format. The internal format is a bigNum,
+//
+
+//** Includes
+
 #include "Tpm.h"
-/* 10.2.2.3 Functions */
-/* 10.2.2.3.1 BnFromBytes() */
-/* This function will convert a big-endian byte array to the internal number format. If bn is NULL,
-   then the output is NULL. If bytes is null or the required size is 0, then the output is set to
-   zero */
-LIB_EXPORT bigNum
-BnFromBytes(
-	    bigNum           bn,
-	    const BYTE      *bytes,
-	    NUMBYTES         nBytes
-	    )
+
+//** Functions
+
+//*** BnFromBytes()
+// This function will convert a big-endian byte array to the internal number
+// format. If bn is NULL, then the output is NULL. If bytes is null or the
+// required size is 0, then the output is set to zero
+LIB_EXPORT bigNum BnFromBytes(bigNum bn, const BYTE* bytes, NUMBYTES nBytes)
 {
-    const BYTE      *pFrom; // 'p' points to the least significant bytes of source
-    BYTE            *pTo;   // points to least significant bytes of destination
-    crypt_uword_t    size;
+    const BYTE*   pFrom;  // 'p' points to the least significant bytes of source
+    BYTE*         pTo;    // points to least significant bytes of destination
+    crypt_uword_t size;
     //
+
     size = (bytes != NULL) ? BYTES_TO_CRYPT_WORDS(nBytes) : 0;
+
     // If nothing in, nothing out
     if(bn == NULL)
 	return NULL;
+
     // make sure things fit
     pAssert(BnGetAllocated(bn) >= size);
+
     if(size > 0)
 	{
 	    // Clear the topmost word in case it is not filled with data
@@ -94,7 +96,7 @@ BnFromBytes(
 	    // Moving the input bytes from the end of the list (LSB) end
 	    pFrom = bytes + nBytes - 1;
 	    // To the LS0 of the LSW of the bigNum.
-	    pTo = (BYTE *)bn->d;
+	    pTo = (BYTE*)bn->d;
 	    for(; nBytes != 0; nBytes--)
 		*pTo++ = *pFrom--;
 	    // For a little-endian machine, the conversion is a straight byte
@@ -102,7 +104,7 @@ BnFromBytes(
 	    // big-endian byte order
 #if BIG_ENDIAN_TPM
 	    {
-		crypt_word_t   t;
+		crypt_word_t t;
 		for(t = (crypt_word_t)size - 1; t >= 0; t--)
 		    bn->d[t] = SWAP_CRYPT_WORD(bn->d[t]);
 	    }
@@ -111,20 +113,20 @@ BnFromBytes(
     BnSetTop(bn, size);
     return bn;
 }
-/* 10.2.2.3.2 BnFrom2B() */
-/* Convert an TPM2B to a BIG_NUM. If the input value does not exist, or the output does not exist,
-   or the input will not fit into the output the function returns NULL */
-LIB_EXPORT bigNum
-BnFrom2B(
-	 bigNum           bn,         // OUT:
-	 const TPM2B     *a2B         // IN: number to convert
-	 )
+
+//*** BnFrom2B()
+// Convert an TPM2B to a BIG_NUM.
+// If the input value does not exist, or the output does not exist, or the input
+// will not fit into the output the function returns NULL
+LIB_EXPORT bigNum BnFrom2B(bigNum       bn,  // OUT:
+			   const TPM2B* a2B  // IN: number to convert
+			   )
 {
     if(a2B != NULL)
 	return BnFromBytes(bn, a2B->buffer, a2B->size);
     // Make sure that the number has an initialized value rather than whatever
     // was there before
-    BnSetTop(bn, 0);    // Function accepts NULL
+    BnSetTop(bn, 0);  // Function accepts NULL
     return NULL;
 }
 /* 10.2.2.3.3 BnFromHex() */
@@ -171,35 +173,39 @@ BnFromHex(
     return bn;
 }
 #endif                                 // libtpms added
-/* 10.2.2.3.4 BnToBytes() */
-/* This function converts a BIG_NUM to a byte array. It converts the bigNum to a big-endian byte
-   string and sets size to the normalized value. If size is an input 0, then the receiving buffer is
-   guaranteed to be large enough for the result and the size will be set to the size required for
-   bigNum (leading zeros suppressed). */
-/* The conversion for a little-endian machine simply requires that all significant bytes of the
-   bigNum be reversed. For a big-endian machine, rather than unpack each word individually,
-   the bigNum is converted to little-endian words, copied, and then converted back to big-endian. */
-LIB_EXPORT BOOL
-BnToBytes(
-	  bigConst             bn,
-	  BYTE                *buffer,
-	  NUMBYTES            *size           // This the number of bytes that are
-	  // available in the buffer. The result
-	  // should be this big.
-	  )
+
+
+//*** BnToBytes()
+// This function converts a BIG_NUM to a byte array. It converts the bigNum to a
+// big-endian byte string and sets 'size' to the normalized value. If  'size' is an
+// input 0, then the receiving buffer is guaranteed to be large enough for the result
+// and the size will be set to the size required for bigNum (leading zeros
+// suppressed).
+//
+// The conversion for a little-endian machine simply requires that all significant
+// bytes of the bigNum be reversed. For a big-endian machine, rather than
+// unpack each word individually, the bigNum is converted to little-endian words,
+// copied, and then converted back to big-endian.
+LIB_EXPORT BOOL BnToBytes(bigConst  bn,
+			  BYTE*     buffer,
+			  NUMBYTES* size  // This the number of bytes that are
+			  // available in the buffer. The result
+			  // should be this big.
+			  )
 {
-    crypt_uword_t        requiredSize;
-    BYTE                *pFrom;
-    BYTE                *pTo;
-    crypt_uword_t        count;
+    crypt_uword_t requiredSize;
+    BYTE*         pFrom;
+    BYTE*         pTo;
+    crypt_uword_t count;
     //
     // validate inputs
     pAssert(bn && buffer && size);
+
     requiredSize = (BnSizeInBits(bn) + 7) / 8;
     if(requiredSize == 0)
 	{
 	    // If the input value is 0, return a byte of zero
-	    *size = 1;
+	    *size   = 1;
 	    *buffer = 0;
 	}
     else
@@ -220,8 +226,9 @@ BnToBytes(
 	    count = *size;
 	    // Start from the least significant word and offset to the most significant
 	    // byte which is in some high word
-	    pFrom = (BYTE *)(&bn->d[0]) + requiredSize - 1;
-	    pTo = buffer;
+	    pFrom = (BYTE*)(&bn->d[0]) + requiredSize - 1;
+	    pTo   = buffer;
+
 	    // If the number of output bytes is larger than the number bytes required
 	    // for the input number, pad with zeros
 	    for(count = *size; count > requiredSize; count--)
@@ -233,17 +240,17 @@ BnToBytes(
 	}
     return TRUE;
 }
-/* 10.2.2.3.5 BnTo2B() */
-/* Function to convert a BIG_NUM to TPM2B. The TPM2B size is set to the requested size which may
-   require padding. If size is non-zero and less than required by the value in bn then an error is
-   returned. If size is zero, then the TPM2B is assumed to be large enough for the data and
-   a2b->size will be adjusted accordingly. */
-LIB_EXPORT BOOL
-BnTo2B(
-       bigConst         bn,                // IN:
-       TPM2B           *a2B,               // OUT:
-       NUMBYTES         size               // IN: the desired size
-       )
+
+//*** BnTo2B()
+// Function to convert a BIG_NUM to TPM2B.
+// The TPM2B size is set to the requested 'size' which may require padding.
+// If 'size' is non-zero and less than required by the value in 'bn' then an error
+// is returned. If 'size' is zero, then the TPM2B is assumed to be large enough
+// for the data and a2b->size will be adjusted accordingly.
+LIB_EXPORT BOOL BnTo2B(bigConst bn,   // IN:
+		       TPM2B*   a2B,  // OUT:
+		       NUMBYTES size  // IN: the desired size
+		       )
 {
     // Set the output size
     if(bn && a2B)
@@ -253,7 +260,9 @@ BnTo2B(
 	}
     return FALSE;
 }
+
 #if ALG_ECC
+
 /* 10.2.2.3.6 BnPointFrom2B() */
 /* Function to create a BIG_POINT structure from a 2B point. A point is going to be two ECC values
    in the same buffer. The values are going to be the size of the modulus.  They are in modular
@@ -266,6 +275,7 @@ BnPointFrom2B(
 {
     if(p == NULL)
 	return NULL;
+
     if(NULL != ecP)
 	{
 	    BnFrom2B(ecP->x, &p->x.b);
@@ -274,6 +284,7 @@ BnPointFrom2B(
 	}
     return ecP;
 }
+
 /* 10.2.2.3.7 BnPointTo2B() */
 /* This function converts a BIG_POINT into a TPMS_ECC_POINT. A TPMS_ECC_POINT contains two
    TPM2B_ECC_PARAMETER values. The maximum size of the parameters is dependent on the maximum EC key
@@ -296,4 +307,5 @@ BnPointTo2B(
     BnTo2B(ecP->y, &p->y.b, size);
     return TRUE;
 }
-#endif // TPM_ALG_ECC
+
+#endif  // ALG_ECC

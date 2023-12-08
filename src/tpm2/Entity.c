@@ -502,6 +502,6 @@ EntityGetHierarchy(
 	    break;
 	}
     // this is unreachable but it provides a return value for the default
-    // case which makes the compiler happy
+    // case which makes the complier happy
     return hierarchy;
 }

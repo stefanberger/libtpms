@@ -3,7 +3,6 @@
 /*		This file is a collection of miscellaneous macros.     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: GpMacros.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,39 +54,43 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef GPMACROS_H
-#define GPMACROS_H
+//** Introduction
+// This file is a collection of miscellaneous macros.
 
-/* 5.10.1	Introduction */
-/* This file is a collection of miscellaneous macros. */
+#ifndef GP_MACROS_H
+#define GP_MACROS_H
+
 #ifndef NULL
-#define NULL 0
+#  define NULL 0
 #endif
+
 #include "swap.h"
 #include "VendorString.h"
-/* 5.10.2	For Self-test */
-/* These macros are used in CryptUtil() to invoke the incremental self test. */
+
+//** For Self-test
+// These macros are used in CryptUtil to invoke the incremental self test.
 #if SELF_TEST
-#   define     TEST(alg) if(TEST_BIT(alg, g_toTest)) CryptTestAlgorithm(alg, NULL)
-/* Use of TPM_ALG_NULL is reserved for RSAEP/RSADP testing. If someone is wanting to test a hash
-   with that value, don't do it. */
+#  define TEST(alg)				     \
+	    if(TEST_BIT(alg, g_toTest))				\
+		CryptTestAlgorithm(alg, NULL)
 #   define     TEST_HASH(alg)						\
     if(TEST_BIT(alg, g_toTest)						\
        &&  (alg != TPM_ALG_NULL))					\
 	CryptTestAlgorithm(alg, NULL)
 #else
-#   define TEST(alg)
+#  define TEST(alg)
 #   define TEST_HASH(alg)
-#endif // SELF_TEST
-/* 5.10.3	For Failures */
+#endif  // SELF_TEST
+
+	//** For Failures
 #if defined _POSIX_
-#   define FUNCTION_NAME        __func__     /* libtpms changed */
+#  define FUNCTION_NAME __func__     /* libtpms changed */
 #else
-#   define FUNCTION_NAME        __FUNCTION__
+#  define FUNCTION_NAME __FUNCTION__
 #endif
 #if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
@@ -160,30 +163,34 @@
 #  define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 #ifndef IsOdd
-#  define IsOdd(a)        (((a) & 1) != 0)
+#  define IsOdd(a) (((a)&1) != 0)
 #endif
+
 #ifndef BITS_TO_BYTES
 #  define BITS_TO_BYTES(bits) (((bits) + 7) >> 3)
 #endif
 #ifndef DIV_UP
 #  define DIV_UP(var, div) ((var + div - 1) / (div))
 #endif
-/* These are defined for use when the size of the vector being checked is known at compile time. */
-#define TEST_BIT(bit, vector)   TestBit((bit), (BYTE *)&(vector), sizeof(vector))
-#define SET_BIT(bit, vector)    SetBit((bit), (BYTE *)&(vector), sizeof(vector))
-#define CLEAR_BIT(bit, vector) ClearBit((bit), (BYTE *)&(vector), sizeof(vector))
-/* The following definitions are used if they have not already been defined. The defaults for these
-   settings are compatible with ISO/IEC 9899:2011 (E) */
+// These are defined for use when the size of the vector being checked is known
+// at compile time.
+#define TEST_BIT(bit, vector)  TestBit((bit), (BYTE*)&(vector), sizeof(vector))
+#define SET_BIT(bit, vector)   SetBit((bit), (BYTE*)&(vector), sizeof(vector))
+#define CLEAR_BIT(bit, vector) ClearBit((bit), (BYTE*)&(vector), sizeof(vector))
+
+// The following definitions are used if they have not already been defined. The
+// defaults for these settings are compatible with ISO/IEC 9899:2011 (E)
 #ifndef LIB_EXPORT
-#   define LIB_EXPORT
-#   define LIB_IMPORT
+#  define LIB_EXPORT
+#  define LIB_IMPORT
 #endif
 #ifndef NORETURN
-#   define NORETURN _Noreturn
+#  define NORETURN _Noreturn
 #endif
 #ifndef NOT_REFERENCED
-#   define NOT_REFERENCED(x = x)   ((void) (x))
+#  define NOT_REFERENCED(x = x) ((void)(x))
 #endif
+
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
 #define JOIN(x,y) x##y
 #define JOIN3(x, y, z) x##y##z
@@ -311,44 +318,46 @@
 #if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && USE_BIT_FIELD_STRUCTURES
 #   error "Settings not consistent"
 #endif
-/* These macros are used to handle the variation in handling of bit fields. If */
-#if USE_BIT_FIELD_STRUCTURES // The default, old version, with bit fields
-#   define IS_ATTRIBUTE(a, type, b)        ((a.b) != 0)
-#   define SET_ATTRIBUTE(a, type, b)       (a.b = SET)
-#   define CLEAR_ATTRIBUTE(a, type, b)     (a.b = CLEAR)
-#   define GET_ATTRIBUTE(a, type, b)       (a.b)
-#   define TPMA_ZERO_INITIALIZER()          {0}
+// These macros are used to handle the variation in handling of bit fields. If
+#if USE_BIT_FIELD_STRUCTURES  // The default, old version, with bit fields
+#  define IS_ATTRIBUTE(a, type, b)    ((a.b) != 0)
+#  define SET_ATTRIBUTE(a, type, b)   (a.b = SET)
+#  define CLEAR_ATTRIBUTE(a, type, b) (a.b = CLEAR)
+#  define GET_ATTRIBUTE(a, type, b)   (a.b)
+#  define TPMA_ZERO_INITIALIZER()		  \
+    {							  \
+	0						  \
+    }
 #else
-#   define IS_ATTRIBUTE(a, type, b)        ((a & type##_##b) != 0)
-#   define SET_ATTRIBUTE(a, type, b)       (a |= type##_##b)
-#   define CLEAR_ATTRIBUTE(a, type, b)     (a &= ~type##_##b)
-#   define GET_ATTRIBUTE(a, type, b)					\
-    (type)((a & type##_##b) >> type##_##b##_SHIFT)
-#   define TPMA_ZERO_INITIALIZER()         (0)
+#  define IS_ATTRIBUTE(a, type, b)    ((a & type##_##b) != 0)
+#  define SET_ATTRIBUTE(a, type, b)   (a |= type##_##b)
+#  define CLEAR_ATTRIBUTE(a, type, b) (a &= ~type##_##b)
+#  define GET_ATTRIBUTE(a, type, b)   (type)((a & type##_##b) >> type##_##b##_SHIFT)
+#  define TPMA_ZERO_INITIALIZER()     (0)
 #endif
 #define VERIFY(_X) if(!(_X)) goto Error
+
 // These macros determine if the values in this file are referenced or instanced.
 // Global.c defines GLOBAL_C so all the values in this file will be instanced in
 // Global.obj. For all other files that include this file, the values will simply
 // be external references. For constants, there can be an initializer.
 
 #ifdef GLOBAL_C
-#define EXTERN
-#define INITIALIZER(_value_)  = _value_
+#  define EXTERN
+#  define INITIALIZER(_value_) = _value_
 #else
-#define EXTERN  extern
-#define INITIALIZER(_value_)
+#  define EXTERN  extern
+#  define INITIALIZER(_value_)
 #endif
 
 // This macro will create an OID. All OIDs are in DER form with a first octet of
 // 0x06 indicating an OID fallowed by an octet indicating the number of octets in the
 // rest of the OID. This allows a user of this OID to know how much/little to copy.
-#define MAKE_OID(NAME)							\
-    EXTERN  const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
+#define MAKE_OID(NAME) EXTERN const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
 
-/* This definition is moved from TpmProfile.h because it is not actually vendor- specific. It has to
-   be the same size as the sequence parameter of a TPMS_CONTEXT and that is a UINT64. So, this is an
-   invariant value */
-#define CONTEXT_COUNTER         UINT64
+// This definition is moved from TpmProfile.h because it is not actually vendor-
+// specific. It has to be the same size as the 'sequence' parameter of a TPMS_CONTEXT
+// and that is a UINT64. So, this is an invariant value
+#define CONTEXT_COUNTER UINT64
 
-#endif // GP_MACROS_H
+#endif  // GP_MACROS_H

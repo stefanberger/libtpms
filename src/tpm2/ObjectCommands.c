@@ -3,7 +3,6 @@
 /*			     Object Commands					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ObjectCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,71 +54,136 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
 #include "Object_spt_fp.h"
 #include "Create_fp.h"
+
 #if CC_Create  // Conditional expansion of this file
+
+/*(See part 3 specification)
+// Create a regular object
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES       'sensitiveDataOrigin' is CLEAR when 'sensitive.data'
+//                              is an Empty Buffer, or is SET when 'sensitive.data' is
+//                              not empty;
+//                              'fixedTPM', 'fixedParent', or 'encryptedDuplication'
+//                              attributes are inconsistent between themselves or with
+//                              those of the parent object;
+//                              inconsistent 'restricted', 'decrypt' and 'sign'
+//                              attributes;
+//                              attempt to inject sensitive data for an asymmetric
+//                              key;
+//      TPM_RC_HASH             non-duplicable storage key and its parent have
+//                              different name algorithm
+//      TPM_RC_KDF              incorrect KDF specified for decrypting keyed hash
+//                              object
+//      TPM_RC_KEY              invalid key size values in an asymmetric key public
+//                              area or a provided symmetric key has a value that is
+//                              not allowed
+//      TPM_RC_KEY_SIZE         key size in public area for symmetric key differs from
+//                              the size in the sensitive creation area; may also be
+//                              returned if the TPM does not allow the key size to be
+//                              used for a Storage Key
+//      TPM_RC_OBJECT_MEMORY    a free slot is not available as scratch memory for
+//                              object creation
+//      TPM_RC_RANGE            the exponent value of an RSA key is not supported.
+//      TPM_RC_SCHEME           inconsistent attributes 'decrypt', 'sign', or
+//                              'restricted' and key's scheme ID; or hash algorithm is
+//                              inconsistent with the scheme ID for keyed hash object
+//      TPM_RC_SIZE             size of public authPolicy or sensitive authValue does
+//                              not match digest size of the name algorithm
+//                              sensitive data size for the keyed hash object is
+//                              larger than is allowed for the scheme
+//      TPM_RC_SYMMETRIC        a storage key with no symmetric algorithm specified;
+//                              or non-storage key with symmetric algorithm different
+//                              from TPM_ALG_NULL
+//      TPM_RC_TYPE             unknown object type;
+//                              'parentHandle' does not reference a restricted
+//                              decryption key in the storage hierarchy with both
+//                              public and sensitive portion loaded
+//      TPM_RC_VALUE            exponent is not prime or could not find a prime using
+//                              the provided parameters for an RSA key;
+//                              unsupported name algorithm for an ECC key
+//      TPM_RC_OBJECT_MEMORY    there is no free slot for the object
 TPM_RC
-TPM2_Create(
-	    Create_In       *in,            // IN: input parameter list
-	    Create_Out      *out            // OUT: output parameter list
+TPM2_Create(Create_In*  in,  // IN: input parameter list
+	    Create_Out* out  // OUT: output parameter list
 	    )
 {
-    TPM_RC                   result = TPM_RC_SUCCESS;
-    OBJECT                  *parentObject;
-    OBJECT                  *newObject;
-    TPMT_PUBLIC             *publicArea;
+    TPM_RC       result = TPM_RC_SUCCESS;
+    OBJECT*      parentObject;
+    OBJECT*      newObject;
+    TPMT_PUBLIC* publicArea;
     // Input Validation
     parentObject = HandleToObject(in->parentHandle);
     pAssert(parentObject != NULL);
+
     // Does parent have the proper attributes?
     if(!ObjectIsParent(parentObject))
 	return TPM_RCS_TYPE + RC_Create_parentHandle;
+
     // Get a slot for the creation
     newObject = FindEmptyObjectSlot(NULL);
     if(newObject == NULL)
 	return TPM_RC_OBJECT_MEMORY;
     // If the TPM2B_PUBLIC was passed as a structure, marshal it into is canonical
     // form for processing
+
     // to save typing.
     publicArea = &newObject->publicArea;
+
     // Copy the input structure to the allocated structure
     *publicArea = in->inPublic.publicArea;
+
     // Check attributes in input public area. CreateChecks() checks the things that
     // are unique to creation and then validates the attributes and values that are
     // common to create and load.
-    result = CreateChecks(parentObject, publicArea,
+    result = CreateChecks(parentObject,
+			  publicArea,
 			  in->inSensitive.sensitive.data.t.size);
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, RC_Create_inPublic);
     // Clean up the authValue if necessary
     if(!AdjustAuthSize(&in->inSensitive.sensitive.userAuth, publicArea->nameAlg))
 	return TPM_RCS_SIZE + RC_Create_inSensitive;
+
     // Command Output
     // Create the object using the default TPM random-number generator
     result = CryptCreateObject(newObject, &in->inSensitive.sensitive, NULL);
     if(result != TPM_RC_SUCCESS)
 	return result;
     // Fill in creation data
-    FillInCreationData(in->parentHandle, publicArea->nameAlg,
-		       &in->creationPCR, &in->outsideInfo,
-		       &out->creationData, &out->creationHash);
+    FillInCreationData(in->parentHandle,
+		       publicArea->nameAlg,
+		       &in->creationPCR,
+		       &in->outsideInfo,
+		       &out->creationData,
+		       &out->creationHash);
+
     // Compute creation ticket
-    TicketComputeCreation(EntityGetHierarchy(in->parentHandle), &newObject->name,
-			  &out->creationHash, &out->creationTicket);
+    TicketComputeCreation(EntityGetHierarchy(in->parentHandle),
+				   &newObject->name,
+				   &out->creationHash,
+				   &out->creationTicket);
+
     // Prepare output private data from sensitive
-    SensitiveToPrivate(&newObject->sensitive, &newObject->name, parentObject,
+    SensitiveToPrivate(&newObject->sensitive,
+		       &newObject->name,
+		       parentObject,
 		       publicArea->nameAlg,
 		       &out->outPrivate);
     // Finish by copying the remaining return values
     out->outPublic.publicArea = newObject->publicArea;
     return TPM_RC_SUCCESS;
 }
-#endif // CC_Create
+
+#endif  // CC_Create
+
 #include "Tpm.h"
 #include "Load_fp.h"
 #if CC_Load  // Conditional expansion of this file
@@ -405,38 +469,87 @@ TPM2_ObjectChangeAuth(
     return TPM_RC_SUCCESS;
 }
 #endif // CC_ObjectChangeAuth
+
 #include "Tpm.h"
 #include "CreateLoaded_fp.h"
+
 #if CC_CreateLoaded  // Conditional expansion of this file
+
+/*(See part 3 of specification)
+ * Create and load any type of key, including a temporary key.
+ * The input template is a marshaled public area rather than an unmarshaled one as
+ * used in Create and CreatePrimary. This is so that the label and context that
+ * could be in the template can be processed without changing the formats for the
+ * calls to Create and CreatePrimary.
+ */
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES       'sensitiveDataOrigin' is CLEAR when 'sensitive.data'
+//                              is an Empty Buffer;
+//                              'fixedTPM', 'fixedParent', or 'encryptedDuplication'
+//                              attributes are inconsistent between themselves or with
+//                              those of the parent object;
+//                              inconsistent 'restricted', 'decrypt' and 'sign'
+//                              attributes;
+//                              attempt to inject sensitive data for an asymmetric
+//                              key;
+//                              attempt to create a symmetric cipher key that is not
+//                              a decryption key
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects or the TPM failed
+//                              to derive the Firmware Secret.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the TPM failed
+//                              to derive the Firmware SVN Secret for the requested
+//                              SVN.
+//      TPM_RC_KDF              incorrect KDF specified for decrypting keyed hash
+//                              object
+//      TPM_RC_KEY              the value of a provided symmetric key is not allowed
+//      TPM_RC_OBJECT_MEMORY    there is no free slot for the object
+//      TPM_RC_SCHEME           inconsistent attributes 'decrypt', 'sign',
+//                              'restricted' and key's scheme ID; or hash algorithm is
+//                              inconsistent with the scheme ID for keyed hash object
+//      TPM_RC_SIZE             size of public authorization policy or sensitive
+//                              authorization value does not match digest size of the
+//                              name algorithm sensitive data size for the keyed hash
+//                              object is larger than is allowed for the scheme
+//      TPM_RC_SYMMETRIC        a storage key with no symmetric algorithm specified;
+//                              or non-storage key with symmetric algorithm different
+//                              from TPM_ALG_NULL
+//      TPM_RC_TYPE             cannot create the object of the indicated type
+//                              (usually only occurs if trying to derive an RSA key).
 TPM_RC
-TPM2_CreateLoaded(
-		  CreateLoaded_In    *in,            // IN: input parameter list
-		  CreateLoaded_Out   *out            // OUT: output parameter list
+TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
+		  CreateLoaded_Out* out  // OUT: output parameter list
 		  )
 {
-    TPM_RC                       result = TPM_RC_SUCCESS;
-    OBJECT                      *parent = HandleToObject(in->parentHandle);
-    OBJECT                      *newObject;
-    BOOL                         derivation;
-    TPMT_PUBLIC                 *publicArea;
-    RAND_STATE                   randState;
-    RAND_STATE                  *rand = &randState;
-    TPMS_DERIVE                  labelContext;
+    TPM_RC       result = TPM_RC_SUCCESS;
+    OBJECT*      parent = HandleToObject(in->parentHandle);
+    OBJECT*      newObject;
+    BOOL         derivation;
+    TPMT_PUBLIC* publicArea;
+    RAND_STATE   randState;
+    RAND_STATE*  rand = &randState;
+    TPMS_DERIVE  labelContext;
     SEED_COMPAT_LEVEL            seedCompatLevel = SEED_COMPAT_LEVEL_LAST; // libtpms added
     // Input Validation
+
     // How the public area is unmarshaled is determined by the parent, so
     // see if parent is a derivation parent
     derivation = (parent != NULL && parent->attributes.derivation);
+
     // If the parent is an object, then make sure that it is either a parent or
     // derivation parent
     if(parent != NULL && !parent->attributes.isParent && !derivation)
 	return TPM_RCS_TYPE + RC_CreateLoaded_parentHandle;
+
     // Get a spot in which to create the newObject
     newObject = FindEmptyObjectSlot(&out->objectHandle);
     if(newObject == NULL)
 	return TPM_RC_OBJECT_MEMORY;
+
     // Do this to save typing
     publicArea = &newObject->publicArea;
+
     // Unmarshal the template into the object space. TPM2_Create() and
     // TPM2_CreatePrimary() have the publicArea unmarshaled by CommandDispatcher.
     // This command is different because of an unfortunate property of the
@@ -445,18 +558,20 @@ TPM2_CreateLoaded(
     // unmarshaled like other public areas. Since it is not, this command needs its
     // on template that is a TPM2B that is unmarshaled as a BYTE array with a
     // its own unmarshal function.
-    result = UnmarshalToPublic(publicArea, &in->inPublic, derivation,
-			       &labelContext);
+    result = UnmarshalToPublic(publicArea, &in->inPublic, derivation, &labelContext);
     if(result != TPM_RC_SUCCESS)
 	return result + RC_CreateLoaded_inPublic;
+
     // Validate that the authorization size is appropriate
     if(!AdjustAuthSize(&in->inSensitive.sensitive.userAuth, publicArea->nameAlg))
 	return TPM_RCS_SIZE + RC_CreateLoaded_inSensitive;
+
     // Command output
     if(derivation)
 	{
-	    TPMT_KEYEDHASH_SCHEME       *scheme;
+	    TPMT_KEYEDHASH_SCHEME* scheme;
 	    scheme = &parent->publicArea.parameters.keyedHashDetail.scheme;
+
 	    // SP800-108 is the only KDF supported by this implementation and there is
 	    // no default hash algorithm.
 	    pAssert(scheme->details.xorr.hashAlg != TPM_ALG_NULL
@@ -466,10 +581,10 @@ TPM2_CreateLoaded(
 		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
 	    // sensitiveDataOrigin has to be CLEAR in a derived object. Since this
 	    // is specific to a derived object, it is checked here.
-	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT,
-			    sensitiveDataOrigin))
+	    if(IS_ATTRIBUTE(
+			    publicArea->objectAttributes, TPMA_OBJECT, sensitiveDataOrigin))
 		return TPM_RCS_ATTRIBUTES;
-	    // Check the reset of the attributes
+	    // Check the rest of the attributes
 	    result = PublicAttributesValidation(parent, publicArea);
 	    if(result != TPM_RC_SUCCESS)
 		return RcSafeAddToResult(result, RC_CreateLoaded_inPublic);
@@ -479,7 +594,7 @@ TPM2_CreateLoaded(
 	    if(result != TPM_RC_SUCCESS)
 		return result;
 	    // Set up the KDF for object generation
-	    DRBG_InstantiateSeededKdf((KDF_STATE *)rand,
+	    DRBG_InstantiateSeededKdf((KDF_STATE*)rand,
 				      scheme->details.xorr.hashAlg,
 				      scheme->details.xorr.kdf,
 				      &parent->sensitive.sensitive.bits.b,
@@ -498,31 +613,34 @@ TPM2_CreateLoaded(
 	    // that are common to create and load.
 	    result = CreateChecks(parent, publicArea,
 				  in->inSensitive.sensitive.data.t.size);
+
 	    if(result != TPM_RC_SUCCESS)
 		return RcSafeAddToResult(result, RC_CreateLoaded_inPublic);
 	    // Creating a primary object
 	    if(parent == NULL)
 		{
-		    TPM2B_NAME              name;
-	            newObject->attributes.primary = SET;
-	            if(in->parentHandle == TPM_RH_ENDORSEMENT)
-	                newObject->attributes.epsHierarchy = SET;
-		    seedCompatLevel =
-		        HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
-	            // If so, use the primary seed and the digest of the template
-	            // to seed the DRBG
+		    TPM2B_NAME name;
+
+		    newObject->attributes.primary = SET;
+		    if(in->parentHandle == TPM_RH_ENDORSEMENT)
+			newObject->attributes.epsHierarchy = SET;
+		    seedCompatLevel = HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
+		    // If so, use the primary seed and the digest of the template
+		    // to seed the DRBG
 		    result = DRBG_InstantiateSeeded((DRBG_STATE *)rand,
 						    &HierarchyGetPrimarySeed(in->parentHandle)->b,
 						    PRIMARY_OBJECT_CREATION,
 						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
 						    &in->inSensitive.sensitive.data.b,
 						    seedCompatLevel);        // libtpms added
-		    if (result != TPM_RC_SUCCESS)
+		    if(result != TPM_RC_SUCCESS)
 			return result;
-	        }
+		}
 	    else
-		// This is an ordinary object so use the normal random number generator
-		rand = NULL;
+		{
+		    // This is an ordinary object so use the normal random number generator
+		    rand = NULL;
+		}
 	}
     // Internal data update
     // Create the object
@@ -533,17 +651,20 @@ TPM2_CreateLoaded(
     // area
     if(parent != NULL && !derivation)
 	// Prepare output private data from sensitive
-	SensitiveToPrivate(&newObject->sensitive, &newObject->name,
-			   parent, newObject->publicArea.nameAlg,
+	SensitiveToPrivate(&newObject->sensitive,
+			   &newObject->name,
+			   parent,
+			   newObject->publicArea.nameAlg,
 			   &out->outPrivate);
     else
 	out->outPrivate.t.size = 0;
     // Set the remaining return values
     out->outPublic.publicArea = newObject->publicArea;
-    out->name = newObject->name;
+    out->name                 = newObject->name;
     // Set the remaining attributes for a loaded object
     ObjectSetLoadedAttributes(newObject, in->parentHandle,
                               seedCompatLevel); // libtpms added
-    return result;
+   return result;
 }
-#endif // CC_CreateLoaded
+
+#endif  // CC_CreateLoaded

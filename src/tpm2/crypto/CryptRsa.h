@@ -58,8 +58,8 @@
 /*										*/
 /********************************************************************************/
 
-// 10.1.5	CryptRsa.h
 // This file contains the RSA-related structures and defines.
+
 #ifndef _CRYPT_RSA_H
 #define _CRYPT_RSA_H
 
@@ -76,8 +76,8 @@ BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
     BN_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
 
 #if !CRT_FORMAT_RSA
-#   error   This verson only works with CRT formatted data
-#endif // !CRT_FORMAT_RSA
+#  error This verson only works with CRT formatted data
+#endif  // !CRT_FORMAT_RSA
 
 typedef struct privateExponent
 {
@@ -89,9 +89,9 @@ typedef struct privateExponent
     bn_prime_t          entries[5];
 } privateExponent;
 
-#define     NEW_PRIVATE_EXPONENT(X)					\
-    privateExponent         _##X;					\
-    privateExponent         *X = RsaInitializeExponent(&(_##X))
+#define NEW_PRIVATE_EXPONENT(X)		\
+    privateExponent  _##X;					\
+    privateExponent* X = RsaInitializeExponent(&(_##X))
 
 					// libtpms added begin: keep old privateExponent
 /* The privateExponentOld is part of the OBJECT and we keep it there even though
@@ -145,4 +145,4 @@ RsaSetExponentFromOld(
     BnCopy(Z->qInv, (bigNum)&pExp->qInv);
 }
 
-#endif      // _CRYPT_RSA_H
+#endif  // _CRYPT_RSA_H

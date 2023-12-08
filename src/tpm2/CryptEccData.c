@@ -3,7 +3,6 @@
 /*			ECC curve data 						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccData.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,18 +54,25 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2018 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2018 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.8	CryptEccData.c */
+/*(Auto-generated)
+ *  Created by TpmStructures; Version 4.4 Mar 26, 2019
+ *  Date: Aug 30, 2019  Time: 02:11:52PM
+ */
+
 #include "Tpm.h"
 #include "OIDs.h"
-/* This file contains the ECC curve data. The format of the data depends on the setting of
-   USE_BN_ECC_DATA. If it is defined, then the TPM's BigNum() format is used. Otherwise, it is kept
-   in TPM2B format. The purpose of having the data in BigNum() format is so that it does not have to
-   be reformatted before being used by the crypto library. */
+
 #if ALG_ECC
+
+// This file contains the TPM Specific ECC curve metadata and pointers to the ecc-lib specific
+// constant structure.
+// The CURVE_NAME macro is used to remove the name string from normal builds, but leaves the
+// string available in the initialization lists for potenial use during debugging by changing this
+// macro (and the structure declaration)
 #if USE_BN_ECC_DATA
 #       define TO_ECC_64                        TO_CRYPT_WORD_64
 #       define TO_ECC_56(a, b, c, d, e, f, g)   TO_ECC_64(0, a, b, c, d, e, f, g)
@@ -516,9 +522,9 @@ const ECC_CURVE_DATA SM2_P256 = {
 				 {&SM2_P256_gX.b, &SM2_P256_gY.b, &SM2_P256_gZ.b}};
 #endif // USE_BN_ECC_DATA
 #endif // ECC_SM2_P256
-#define comma
-const ECC_CURVE   eccCurves[] = {
-#if ECC_NIST_P192
+#  define comma
+const ECC_CURVE eccCurves[] = {
+#  if ECC_NIST_P192
 				 comma
 				 {TPM_ECC_NIST_P192,
 				  192,
@@ -527,10 +533,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &NIST_P192,
 				  OID_ECC_NIST_P192
 				  CURVE_NAME("NIST_P192")}
-#   undef comma
-#   define comma ,
-#endif // ECC_NIST_P192
-#if ECC_NIST_P224
+#    undef comma
+#    define comma ,
+#  endif  // ECC_NIST_P192
+#  if ECC_NIST_P224
 				 comma
 				 {TPM_ECC_NIST_P224,
 				  224,
@@ -539,10 +545,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &NIST_P224,
 				  OID_ECC_NIST_P224
 				  CURVE_NAME("NIST_P224")}
-#   undef comma
-#   define comma ,
-#endif // ECC_NIST_P224
-#if ECC_NIST_P256
+#    undef comma
+#    define comma ,
+#  endif  // ECC_NIST_P224
+#  if ECC_NIST_P256
 				 comma
 				 {TPM_ECC_NIST_P256,
 				  256,
@@ -551,10 +557,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &NIST_P256,
 				  OID_ECC_NIST_P256
 				  CURVE_NAME("NIST_P256")}
-#   undef comma
-#   define comma ,
-#endif // ECC_NIST_P256
-#if ECC_NIST_P384
+#    undef comma
+#    define comma ,
+#  endif  // ECC_NIST_P256
+#  if ECC_NIST_P384
 				 comma
 				 {TPM_ECC_NIST_P384,
 				  384,
@@ -563,10 +569,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &NIST_P384,
 				  OID_ECC_NIST_P384
 				  CURVE_NAME("NIST_P384")}
-#   undef comma
-#   define comma ,
-#endif // ECC_NIST_P384
-#if ECC_NIST_P521
+#    undef comma
+#    define comma ,
+#  endif  // ECC_NIST_P384
+#  if ECC_NIST_P521
 				 comma
 				 {TPM_ECC_NIST_P521,
 				  521,
@@ -575,10 +581,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &NIST_P521,
 				  OID_ECC_NIST_P521
 				  CURVE_NAME("NIST_P521")}
-#   undef comma
-#   define comma ,
-#endif // ECC_NIST_P521
-#if ECC_BN_P256
+#    undef comma
+#    define comma ,
+#  endif  // ECC_NIST_P521
+#  if ECC_BN_P256
 				 comma
 				 {TPM_ECC_BN_P256,
 				  256,
@@ -587,10 +593,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &BN_P256,
 				  OID_ECC_BN_P256
 				  CURVE_NAME("BN_P256")}
-#   undef comma
-#   define comma ,
-#endif // ECC_BN_P256
-#if ECC_BN_P638
+#    undef comma
+#    define comma ,
+#  endif  // ECC_BN_P256
+#  if ECC_BN_P638
 				 comma
 				 {TPM_ECC_BN_P638,
 				  638,
@@ -599,10 +605,10 @@ const ECC_CURVE   eccCurves[] = {
 				  &BN_P638,
 				  OID_ECC_BN_P638
 				  CURVE_NAME("BN_P638")}
-#   undef comma
-#   define comma ,
-#endif // ECC_BN_P638
-#if ECC_SM2_P256
+#    undef comma
+#    define comma ,
+#  endif  // ECC_BN_P638
+#  if ECC_SM2_P256
 				 comma
 				 {TPM_ECC_SM2_P256,
 				  256,
@@ -611,8 +617,9 @@ const ECC_CURVE   eccCurves[] = {
 				  &SM2_P256,
 				  OID_ECC_SM2_P256
 				  CURVE_NAME("SM2_P256")}
-#   undef comma
-#   define comma ,
-#endif // ECC_SM2_P256
+#    undef comma
+#    define comma ,
+#  endif  // ECC_SM2_P256
 };
-#endif // TPM_ALG_ECC
+
+#endif  // TPM_ALG_ECC

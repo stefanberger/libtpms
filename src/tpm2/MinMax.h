@@ -3,7 +3,6 @@
 /*		  	Min Max Macros 						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: MinMax.h 1529 2019-11-21 23:29:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,19 +54,19 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-// 5.13	MinMax.h
 
 #ifndef _MIN_MAX_H_
 #define _MIN_MAX_H_
+
 #ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#  define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 #ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#  define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
-#endif // _MIN_MAX_H_
+#endif  // _MIN_MAX_H_
 
