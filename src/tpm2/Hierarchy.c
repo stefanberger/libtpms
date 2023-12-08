@@ -3,7 +3,6 @@
 /*			Managing and accessing the hierarchy-related values   	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,51 +54,58 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
-/* 8.3 Hierarchy.c */
-/* 8.3.1 Introduction */
-/* This file contains the functions used for managing and accessing the hierarchy-related values. */
-/* 8.3.2 Includes */
+
+//** Introduction
+// This file contains the functions used for managing and accessing the
+// hierarchy-related values.
+
+//** Includes
+
 #include "Tpm.h"
-/* 8.3.3 Functions */
-/* 8.3.3.1 HierarchyPreInstall() */
-/* This function performs the initialization functions for the hierarchy when the TPM is
-   simulated. This function should not be called if the TPM is not in a manufacturing mode at the
-   manufacturer, or in a simulated environment. */
-void
-HierarchyPreInstall_Init(
-			 void
-			 )
+
+//** Functions
+
+//*** HierarchyPreInstall()
+// This function performs the initialization functions for the hierarchy
+// when the TPM is simulated. This function should not be called if the
+// TPM is not in a manufacturing mode at the manufacturer, or in a simulated
+// environment.
+void HierarchyPreInstall_Init(void)
 {
     // Allow lockout clear command
     gp.disableClear = FALSE;
+
     // Initialize Primary Seeds
     gp.EPSeed.t.size = sizeof(gp.EPSeed.t.buffer);
     gp.SPSeed.t.size = sizeof(gp.SPSeed.t.buffer);
     gp.PPSeed.t.size = sizeof(gp.PPSeed.t.buffer);
-#if (defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
+#if(defined USE_PLATFORM_EPS) && (USE_PLATFORM_EPS != NO)
     _plat__GetEPS(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
 #else
     CryptRandomGenerate(gp.EPSeed.t.size, gp.EPSeed.t.buffer);
 #endif
     CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
     CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
+
     gp.EPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added begin
     gp.SPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;
     gp.PPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added end
     // Initialize owner, endorsement and lockout authorization
-    gp.ownerAuth.t.size = 0;
+    gp.ownerAuth.t.size       = 0;
     gp.endorsementAuth.t.size = 0;
-    gp.lockoutAuth.t.size = 0;
+    gp.lockoutAuth.t.size     = 0;
+
     // Initialize owner, endorsement, and lockout policy
-    gp.ownerAlg = TPM_ALG_NULL;
-    gp.ownerPolicy.t.size = 0;
-    gp.endorsementAlg = TPM_ALG_NULL;
+    gp.ownerAlg                 = TPM_ALG_NULL;
+    gp.ownerPolicy.t.size       = 0;
+    gp.endorsementAlg           = TPM_ALG_NULL;
     gp.endorsementPolicy.t.size = 0;
-    gp.lockoutAlg = TPM_ALG_NULL;
-    gp.lockoutPolicy.t.size = 0;
+    gp.lockoutAlg               = TPM_ALG_NULL;
+    gp.lockoutPolicy.t.size     = 0;
+
     // Initialize ehProof, shProof and phProof
     gp.phProof.t.size = sizeof(gp.phProof.t.buffer);
     gp.shProof.t.size = sizeof(gp.shProof.t.buffer);
@@ -107,6 +113,7 @@ HierarchyPreInstall_Init(
     CryptRandomGenerate(gp.phProof.t.size, gp.phProof.t.buffer);
     CryptRandomGenerate(gp.shProof.t.size, gp.shProof.t.buffer);
     CryptRandomGenerate(gp.ehProof.t.size, gp.ehProof.t.buffer);
+
     // Write hierarchy data to NV
     NV_SYNC_PERSISTENT(disableClear);
     NV_SYNC_PERSISTENT(EPSeed);
@@ -127,27 +134,31 @@ HierarchyPreInstall_Init(
     NV_SYNC_PERSISTENT(phProof);
     NV_SYNC_PERSISTENT(shProof);
     NV_SYNC_PERSISTENT(ehProof);
+
     return;
 }
-/* 8.3.3.2 HierarchyStartup() */
-/* This function is called at TPM2_Startup() to initialize the hierarchy related values. */
-BOOL
-HierarchyStartup(
-		 STARTUP_TYPE     type           // IN: start up type
-		 )
+
+//*** HierarchyStartup()
+// This function is called at TPM2_Startup() to initialize the hierarchy
+// related values.
+BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
+		      )
 {
     // phEnable is SET on any startup
     g_phEnable = TRUE;
+
     // Reset platformAuth, platformPolicy; enable SH and EH at TPM_RESET and
     // TPM_RESTART
     if(type != SU_RESUME)
 	{
-	    gc.platformAuth.t.size = 0;
+	    gc.platformAuth.t.size   = 0;
 	    gc.platformPolicy.t.size = 0;
-	    gc.platformAlg = TPM_ALG_NULL;
+	    gc.platformAlg           = TPM_ALG_NULL;
+
 	    // enable the storage and endorsement hierarchies and the platformNV
 	    gc.shEnable = gc.ehEnable = gc.phEnableNV = TRUE;
 	}
+
     // nullProof and nullSeed are updated at every TPM_RESET
     if((type != SU_RESTART) && (type != SU_RESUME))
 	{
@@ -157,62 +168,66 @@ HierarchyStartup(
 	    CryptRandomGenerate(gr.nullSeed.t.size, gr.nullSeed.t.buffer);
 	    gr.nullSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;  // libtpms added
 	}
+
     return TRUE;
 }
-/* 8.3.3.3 HierarchyGetProof() */
-/* This function finds the proof value associated with a hierarchy.It returns a pointer to the proof
-   value. */
+
+//*** HierarchyGetProof()
+// This function derives the proof value associated with a hierarchy. It returns a
+// buffer containing the proof value.
 TPM2B_PROOF *
 HierarchyGetProof(
 		  TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy constant
 		  )
 {
-    TPM2B_PROOF         *proof = NULL;
+    TPM2B_PROOF*       base_proof = NULL;
+
     switch(hierarchy)
 	{
 	  case TPM_RH_PLATFORM:
 	    // phProof for TPM_RH_PLATFORM
-	    proof = &gp.phProof;
+	    base_proof = &gp.phProof;
 	    break;
 	  case TPM_RH_ENDORSEMENT:
 	    // ehProof for TPM_RH_ENDORSEMENT
-	    proof = &gp.ehProof;
+	    base_proof = &gp.ehProof;
 	    break;
 	  case TPM_RH_OWNER:
 	    // shProof for TPM_RH_OWNER
-	    proof = &gp.shProof;
+	    base_proof = &gp.shProof;
 	    break;
 	  default:
 	    // nullProof for TPM_RH_NULL or anything else
-	    proof = &gr.nullProof;
+	    base_proof = &gr.nullProof;
 	    break;
 	}
-    return proof;
+    return base_proof;
 }
-/* 8.3.3.4 HierarchyGetPrimarySeed() */
-/* This function returns the primary seed of a hierarchy. */
+
+//*** HierarchyGetPrimarySeed()
+// This function derives the primary seed of a hierarchy.
 TPM2B_SEED *
-HierarchyGetPrimarySeed(
-			TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy
+HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 			)
 {
-    TPM2B_SEED          *seed = NULL;
+    TPM2B_SEED*        base_seed = NULL;
+
     switch(hierarchy)
 	{
 	  case TPM_RH_PLATFORM:
-	    seed = &gp.PPSeed;
+	    base_seed = &gp.PPSeed;
 	    break;
 	  case TPM_RH_OWNER:
-	    seed = &gp.SPSeed;
+	    base_seed = &gp.SPSeed;
 	    break;
 	  case TPM_RH_ENDORSEMENT:
-	    seed = &gp.EPSeed;
+	    base_seed = &gp.EPSeed;
 	    break;
 	  default:
-	    seed = &gr.nullSeed;
+	    base_seed = &gr.nullSeed;
 	    break;
 	}
-    return seed;
+    return base_seed;
 }
 // libtpms added begin
 SEED_COMPAT_LEVEL
@@ -239,16 +254,15 @@ HierarchyGetPrimarySeedCompatLevel(
 	}
 }
 // libtpms added end
-/* 8.3.3.5 HierarchyIsEnabled() */
-/* This function checks to see if a hierarchy is enabled. */
-/* NOTE: The TPM_RH_NULL hierarchy is always enabled. */
-/* Return Values Meaning */
-/* TRUE hierarchy is enabled */
-/* FALSE hierarchy is disabled */
-BOOL
-HierarchyIsEnabled(
-		   TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy
-		   )
+
+//*** HierarchyIsEnabled()
+// This function checks to see if a hierarchy is enabled.
+// NOTE: The TPM_RH_NULL hierarchy is always enabled.
+//  Return Type: BOOL
+//      TRUE(1)         hierarchy is enabled
+//      FALSE(0)        hierarchy is disabled
+BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
+			)
 {
     BOOL            enabled = FALSE;
     switch(hierarchy)

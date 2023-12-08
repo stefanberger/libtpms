@@ -3,7 +3,6 @@
 /*		fUnctions that return the type of a handle.	     		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Handle.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,33 +54,34 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.6 Handle.c */
-/* 9.6.1 Description */
-/* This file contains the functions that return the type of a handle. */
-/* 9.6.2 Includes */
+//** Description
+// This file contains the functions that return the type of a handle.
+
+//** Includes
 #include "Tpm.h"
-/* 9.6.3 Functions */
-/* 9.6.3.1 HandleGetType() */
-/* This function returns the type of a handle which is the MSO of the handle. */
+
+//** Functions
+
+//*** HandleGetType()
+// This function returns the type of a handle which is the MSO of the handle.
 TPM_HT
-HandleGetType(
-	      TPM_HANDLE       handle         // IN: a handle to be checked
+HandleGetType(TPM_HANDLE handle  // IN: a handle to be checked
 	      )
 {
     // return the upper bytes of input data
     return (TPM_HT)((handle & HR_RANGE_MASK) >> HR_SHIFT);
 }
-/* 9.6.3.2 NextPermanentHandle() */
-/* This function returns the permanent handle that is equal to the input value or is the next higher
-   value. If there is no handle with the input value and there is no next higher value, it returns
-   0: */
+
+//*** NextPermanentHandle()
+// This function returns the permanent handle that is equal to the input value or
+// is the next higher value. If there is no handle with the input value and there
+// is no next higher value, it returns 0:
 TPM_HANDLE
-NextPermanentHandle(
-		    TPM_HANDLE       inHandle       // IN: the handle to check
+NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
 		    )
 {
     // If inHandle is below the start of the range of permanent handles
@@ -105,12 +105,11 @@ NextPermanentHandle(
 		  case VENDOR_PERMANENT:
 #endif
 		    // Each of the implemented ACT
-#define ACT_IMPLEMENTED_CASE(N)						\
-	            case TPM_RH_ACT_##N:
+#define ACT_IMPLEMENTED_CASE(N) case TPM_RH_ACT_##N:
 		    
-	            FOR_EACH_ACT(ACT_IMPLEMENTED_CASE)
+		    FOR_EACH_ACT(ACT_IMPLEMENTED_CASE)
 			
-	                return inHandle;
+			return inHandle;
 		    break;
 		  default:
 		    break;
@@ -119,29 +118,34 @@ NextPermanentHandle(
     // Out of range on the top
     return 0;
 }
-/* 9.6.3.3 PermanentCapGetHandles() */
-/* This function returns a list of the permanent handles of PCR, started from handle. If handle is
-   larger than the largest permanent handle, an empty list will be returned with more set to NO. */
-/* Return Values Meaning */
-/* YES if there are more handles available */
-/* NO all the available handles has been returned */
+
+//*** PermanentCapGetHandles()
+// This function returns a list of the permanent handles of PCR, started from
+// 'handle'. If 'handle' is larger than the largest permanent handle, an empty list
+// will be returned with 'more' set to NO.
+//  Return Type: TPMI_YES_NO
+//      YES         if there are more handles available
+//      NO          all the available handles has been returned
 TPMI_YES_NO
-PermanentCapGetHandles(
-		       TPM_HANDLE       handle,        // IN: start handle
-		       UINT32           count,         // IN: count of returned handles
-		       TPML_HANDLE     *handleList     // OUT: list of handle
+PermanentCapGetHandles(TPM_HANDLE   handle,     // IN: start handle
+		       UINT32       count,      // IN: count of returned handles
+		       TPML_HANDLE* handleList  // OUT: list of handle
 		       )
 {
-    TPMI_YES_NO     more = NO;
-    UINT32          i;
+    TPMI_YES_NO more = NO;
+    UINT32      i;
+    
     pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    
     // Initialize output handle list
     handleList->count = 0;
+    
     // The maximum count of handles we may return is MAX_CAP_HANDLES
-    if(count > MAX_CAP_HANDLES) count = MAX_CAP_HANDLES;
+    if(count > MAX_CAP_HANDLES)
+	count = MAX_CAP_HANDLES;
+    
     // Iterate permanent handle range
-    for(i = NextPermanentHandle(handle);
-	i != 0; i = NextPermanentHandle(i + 1))
+    for(i = NextPermanentHandle(handle); i != 0; i = NextPermanentHandle(i + 1))
 	{
 	    if(handleList->count < count)
 		{
@@ -160,33 +164,36 @@ PermanentCapGetHandles(
 	}
     return more;
 }
-/* 9.6.3.4 PermanentHandleGetPolicy() */
-/* This function returns a list of the permanent handles of PCR, started from handle. If handle is
-   larger than the largest permanent handle, an empty list will be returned with more set to NO. */
-/* Return Values Meaning */
-/* YES if there are more handles available */
-/* NO all the available handles has been returned */
+//*** PermanentHandleGetPolicy()
+// This function returns a list of the permanent handles of PCR, started from
+// 'handle'. If 'handle' is larger than the largest permanent handle, an empty list
+// will be returned with 'more' set to NO.
+//  Return Type: TPMI_YES_NO
+//      YES         if there are more handles available
+//      NO          all the available handles has been returned
 TPMI_YES_NO
-PermanentHandleGetPolicy(
-			 TPM_HANDLE           handle,        // IN: start handle
-			 UINT32               count,         // IN: max count of returned handles
-			 TPML_TAGGED_POLICY  *policyList     // OUT: list of handle
+PermanentHandleGetPolicy(TPM_HANDLE handle,  // IN: start handle
+			 UINT32     count,   // IN: max count of returned handles
+			 TPML_TAGGED_POLICY* policyList  // OUT: list of handle
 			 )
 {
-    TPMI_YES_NO     more = NO;
+    TPMI_YES_NO more = NO;
+    
     pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    
     // Initialize output handle list
     policyList->count = 0;
+    
     // The maximum count of policies we may return is MAX_TAGGED_POLICIES
     if(count > MAX_TAGGED_POLICIES)
 	count = MAX_TAGGED_POLICIES;
+    
     // Iterate permanent handle range
-    for(handle = NextPermanentHandle(handle);
-	handle != 0;
+    for(handle = NextPermanentHandle(handle); handle != 0;
 	handle = NextPermanentHandle(handle + 1))
 	{
-	    TPM2B_DIGEST    policyDigest;
-	    TPM_ALG_ID      policyAlg;
+	    TPM2B_DIGEST policyDigest;
+	    TPM_ALG_ID   policyAlg;
 	    // Check to see if this permanent handle has a policy
 	    policyAlg = EntityGetAuthPolicy(handle, &policyDigest);
 	    if(policyAlg == TPM_ALG_ERROR)
@@ -195,10 +202,11 @@ PermanentHandleGetPolicy(
 		{
 		    // If we have not filled up the return list, add this
 		    // policy to the list;
-		    policyList->policies[policyList->count].handle = handle;
+		    policyList->policies[policyList->count].handle             = handle;
 		    policyList->policies[policyList->count].policyHash.hashAlg = policyAlg;
 		    MemoryCopy(&policyList->policies[policyList->count].policyHash.digest,
-			       policyDigest.t.buffer, policyDigest.t.size);
+			       policyDigest.t.buffer,
+			       policyDigest.t.size);
 		    policyList->count++;
 		}
 	    else

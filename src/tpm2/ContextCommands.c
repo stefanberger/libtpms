@@ -3,7 +3,6 @@
 /*			   Context Management	  				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: ContextCommands.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,33 +54,41 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
 #include "Tpm.h"
-#include "ContextSave_fp.h"
-#include "NVMarshal.h" // libtpms added
+
 #if CC_ContextSave  // Conditional expansion of this file
-#include "Context_spt_fp.h"
-/* Error Returns Meaning */
-/* TPM_RC_CONTEXT_GAP a contextID could not be assigned for a session context save */
-/* TPM_RC_TOO_MANY_CONTEXTS no more contexts can be saved as the counter has maxed out */
+
+#  include "ContextSave_fp.h"
+#  include "NVMarshal.h" // libtpms added
+#  include "Context_spt_fp.h"
+
+/*(See part 3 specification)
+  Save context
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_CONTEXT_GAP          a contextID could not be assigned for a session
+//                                  context save
+//      TPM_RC_TOO_MANY_CONTEXTS    no more contexts can be saved as the counter has
+//                                  maxed out
 TPM_RC
-TPM2_ContextSave(
-		 ContextSave_In      *in,            // IN: input parameter list
-		 ContextSave_Out     *out            // OUT: output parameter list
+TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
+		 ContextSave_Out* out  // OUT: output parameter list
 		 )
 {
-    TPM_RC          result = TPM_RC_SUCCESS;
-    UINT16          fingerprintSize;    // The size of fingerprint in context
+    TPM_RC result = TPM_RC_SUCCESS;
+    UINT16 fingerprintSize;  // The size of fingerprint in context
     // blob.
-    UINT64          contextID = 0;      // session context ID
-    TPM2B_SYM_KEY   symKey;
-    TPM2B_IV        iv;
-    TPM2B_DIGEST    integrity;
-    UINT16          integritySize;
-    BYTE            *buffer;
+    UINT64        contextID = 0;  // session context ID
+    TPM2B_SYM_KEY symKey;
+    TPM2B_IV      iv;
+
+    TPM2B_DIGEST  integrity;
+    UINT16        integritySize;
+    BYTE*         buffer;
     // This command may cause the orderlyState to be cleared due to
     // the update of state reset data. If the state is orderly and
     // cannot be changed, exit early.
@@ -102,31 +109,34 @@ TPM2_ContextSave(
     // handle of an object will be replaced, while the output handle
     // for a session will be the same as input
     out->context.savedHandle = in->saveHandle;
+
     // Get the size of fingerprint in context blob.  The sequence value in
     // TPMS_CONTEXT structure is used as the fingerprint
     fingerprintSize = sizeof(out->context.sequence);
+
     // Compute the integrity size at the beginning of context blob
-    integritySize = sizeof(integrity.t.size)
-		    + CryptHashGetDigestSize(CONTEXT_INTEGRITY_HASH_ALG);
+    integritySize =
+	sizeof(integrity.t.size) + CryptHashGetDigestSize(CONTEXT_INTEGRITY_HASH_ALG);
+
     // Perform object or session specific context save
     switch(HandleGetType(in->saveHandle))
 	{
 	  case TPM_HT_TRANSIENT:
 	      {
-		  OBJECT              *object = HandleToObject(in->saveHandle);
-		  ANY_OBJECT_BUFFER   *outObject;
-		  unsigned char        buffer[sizeof(OBJECT) * 2];		// libtpms changed begin
-		  BYTE                *bufptr = &buffer[0];
-		  INT32                size = sizeof(buffer);
-		  UINT16               objectSize;				// libtpms changed end
-		  outObject = (ANY_OBJECT_BUFFER *)(out->context.contextBlob.t.buffer
-						    + integritySize + fingerprintSize);
+		  OBJECT*            object = HandleToObject(in->saveHandle);
+		  ANY_OBJECT_BUFFER* outObject;
+		  unsigned char      buffer[sizeof(OBJECT) * 2];		// libtpms changed begin
+		  BYTE*              bufptr = &buffer[0];
+		  INT32              size = sizeof(buffer);
+		  UINT16             objectSize;				// libtpms changed end
+		  outObject         = (ANY_OBJECT_BUFFER*)(out->context.contextBlob.t.buffer
+							   + integritySize + fingerprintSize);
 		  // Set size of the context data.  The contents of context blob is vendor
 		  // defined.  In this implementation, the size is size of integrity
 		  // plus fingerprint plus the whole internal OBJECT structure
 #  if 0											// libtpms: added
-		  out->context.contextBlob.t.size = integritySize +
-						    fingerprintSize + objectSize;
+		  out->context.contextBlob.t.size =
+		      integritySize + fingerprintSize + objectSize;
 #  endif										// libtpms: added
 #  if ALG_RSA
 		  // For an RSA key, make sure that the key has had the private exponent
@@ -137,9 +147,8 @@ TPM2_ContextSave(
 #  endif
 		  objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size);		// libtpms: added begin
 
-		  out->context.contextBlob.t.size = integritySize +
-						    fingerprintSize + objectSize;	// libtpms: added end
-
+		  out->context.contextBlob.t.size =
+		      integritySize + fingerprintSize + objectSize;
 		  // Make sure things fit
 		  pAssert(out->context.contextBlob.t.size
 			  <= sizeof(out->context.contextBlob.t.buffer));
@@ -150,6 +159,7 @@ TPM2_ContextSave(
 		  // If object context ID overflows, TPM should be put in failure mode
 		  if(gr.objectContextID == 0)
 		      FAIL(FATAL_ERROR_INTERNAL);
+
 		  // Fill in other return values for an object.
 		  out->context.sequence = gr.objectContextID;
 		  // For regular object, savedHandle is 0x80000000.  For sequence object,
@@ -159,13 +169,13 @@ TPM2_ContextSave(
 		      {
 			  out->context.savedHandle = 0x80000001;
 			/* ANY_OBJECT_Marshal already wrote it			// libtpms changed begin
-			  SequenceDataExport((HASH_OBJECT *)object,
-					     (HASH_OBJECT_BUFFER *)outObject);
+			  SequenceDataExport((HASH_OBJECT*)object,
+					     (HASH_OBJECT_BUFFER*)outObject);
 			 */							// libtpms changed end
 		      }
 		  else
-		      out->context.savedHandle = (object->attributes.stClear == SET)
-						 ? 0x80000002 : 0x80000000;
+		      out->context.savedHandle =
+			  (object->attributes.stClear == SET) ? 0x80000002 : 0x80000000;
 		  // Get object hierarchy
 		  out->context.hierarchy = ObjectGetHierarchy(object);
 		  break;
@@ -173,24 +183,29 @@ TPM2_ContextSave(
 	  case TPM_HT_HMAC_SESSION:
 	  case TPM_HT_POLICY_SESSION:
 	      {
-		  SESSION         *session = SessionGet(in->saveHandle);
+		  SESSION* session = SessionGet(in->saveHandle);
+
 		  // Set size of the context data.  The contents of context blob is vendor
 		  // defined.  In this implementation, the size of context blob is the
 		  // size of a internal session structure plus the size of
 		  // fingerprint plus the size of integrity
-		  out->context.contextBlob.t.size = integritySize +
-						    fingerprintSize + sizeof(*session);
+		  out->context.contextBlob.t.size =
+		      integritySize + fingerprintSize + sizeof(*session);
+
 		  // Make sure things fit
 		  pAssert(out->context.contextBlob.t.size
 			  < sizeof(out->context.contextBlob.t.buffer));
+
 		  // Copy the whole internal SESSION structure to context blob.
 		  // Save space for fingerprint at the beginning of the buffer
 		  // This is done before anything else so that the actual context
 		  // can be reclaimed after this call
 		  pAssert(sizeof(*session) <= sizeof(out->context.contextBlob.t.buffer)
 			  - integritySize - fingerprintSize);
-		  MemoryCopy(out->context.contextBlob.t.buffer + integritySize
-			     + fingerprintSize, session, sizeof(*session));
+		  MemoryCopy(
+			     out->context.contextBlob.t.buffer + integritySize + fingerprintSize,
+			     session,
+			     sizeof(*session));
 		  // Fill in the other return parameters for a session
 		  // Get a context ID and set the session tracking values appropriately
 		  // TPM_RC_CONTEXT_GAP is a possible error.
@@ -201,8 +216,10 @@ TPM2_ContextSave(
 		      return result;
 		  // sequence number is the current session contextID
 		  out->context.sequence = contextID;
+
 		  // use TPM_RH_NULL as hierarchy for session context
 		  out->context.hierarchy = TPM_RH_NULL;
+
 		  break;
 	      }
 	  default:
@@ -211,20 +228,27 @@ TPM2_ContextSave(
 	    FAIL(FATAL_ERROR_INTERNAL);
 	    break;
 	}
+
     // Save fingerprint at the beginning of encrypted area of context blob.
     // Reserve the integrity space
-    pAssert(sizeof(out->context.sequence) <=
-	    sizeof(out->context.contextBlob.t.buffer) - integritySize);
+    pAssert(sizeof(out->context.sequence)
+	    <= sizeof(out->context.contextBlob.t.buffer) - integritySize);
     MemoryCopy(out->context.contextBlob.t.buffer + integritySize,
-	       &out->context.sequence, sizeof(out->context.sequence));
+	       &out->context.sequence,
+	       sizeof(out->context.sequence));
+
     // Compute context encryption key
     ComputeContextProtectionKey(&out->context, &symKey, &iv);
     // Encrypt context blob
     CryptSymmetricEncrypt(out->context.contextBlob.t.buffer + integritySize,
-			  CONTEXT_ENCRYPT_ALG, CONTEXT_ENCRYPT_KEY_BITS,
-			  symKey.t.buffer, &iv, TPM_ALG_CFB,
+			  CONTEXT_ENCRYPT_ALG,
+			  CONTEXT_ENCRYPT_KEY_BITS,
+			  symKey.t.buffer,
+			  &iv,
+			  TPM_ALG_CFB,
 			  out->context.contextBlob.t.size - integritySize,
 			  out->context.contextBlob.t.buffer + integritySize);
+
     // Compute integrity hash for the object
     // In this implementation, the same routine is used for both sessions
     // and objects.
@@ -232,56 +256,83 @@ TPM2_ContextSave(
     // add integrity at the beginning of context blob
     buffer = out->context.contextBlob.t.buffer;
     TPM2B_DIGEST_Marshal(&integrity, &buffer, NULL);
+
     // orderly state should be cleared because of the update of state reset and
     // state clear data
     g_clearOrderly = TRUE;
+
     return result;
 }
-#endif // CC_ContextSave
+
+#endif  // CC_ContextSave
+
 #include "Tpm.h"
-#include "ContextLoad_fp.h"
+
 #if CC_ContextLoad  // Conditional expansion of this file
-#include "Context_spt_fp.h"
+
+#  include "ContextLoad_fp.h"
+#  include "Context_spt_fp.h"
+
+/*(See part 3 specification)
+// Load context
+*/
+
+//  Return Type: TPM_RC
+//      TPM_RC_CONTEXT_GAP          there is only one available slot and this is not
+//                                  the oldest saved session context
+//      TPM_RC_HANDLE               'context.savedHandle' does not reference a saved
+//                                  session
+//      TPM_RC_HIERARCHY            'context.hierarchy' is disabled
+//      TPM_RC_INTEGRITY            'context' integrity check fail
+//      TPM_RC_OBJECT_MEMORY        no free slot for an object
+//      TPM_RC_SESSION_MEMORY       no free session slots
+//      TPM_RC_SIZE                 incorrect context blob size
 TPM_RC
-TPM2_ContextLoad(
-		 ContextLoad_In      *in,            // IN: input parameter list
-		 ContextLoad_Out     *out            // OUT: output parameter list
+TPM2_ContextLoad(ContextLoad_In*  in,  // IN: input parameter list
+		 ContextLoad_Out* out  // OUT: output parameter list
 		 )
 {
-    TPM_RC              result;
-    TPM2B_DIGEST        integrityToCompare;
-    TPM2B_DIGEST        integrity;
-    BYTE                *buffer;    // defined to save some typing
-    INT32               size;       // defined to save some typing
-    TPM_HT              handleType;
-    TPM2B_SYM_KEY       symKey;
-    TPM2B_IV            iv;
+    TPM_RC        result;
+    TPM2B_DIGEST  integrityToCompare;
+    TPM2B_DIGEST  integrity;
+    BYTE*         buffer;  // defined to save some typing
+    INT32         size;    // defined to save some typing
+    TPM_HT        handleType;
+    TPM2B_SYM_KEY symKey;
+    TPM2B_IV      iv;
+
     // Input Validation
 
     // See discussion about the context format in TPM2_ContextSave Detailed Actions
 
     // IF this is a session context, make sure that the sequence number is
     // consistent with the version in the slot
+
     // Check context blob size
     handleType = HandleGetType(in->context.savedHandle);
+
     // Get integrity from context blob
     buffer = in->context.contextBlob.t.buffer;
-    size = (INT32)in->context.contextBlob.t.size;
+    size   = (INT32)in->context.contextBlob.t.size;
     result = TPM2B_DIGEST_Unmarshal(&integrity, &buffer, &size);
     if(result != TPM_RC_SUCCESS)
 	return result;
+
     // the size of the integrity value has to match the size of digest produced
     // by the integrity hash
     if(integrity.t.size != CryptHashGetDigestSize(CONTEXT_INTEGRITY_HASH_ALG))
 	return TPM_RCS_SIZE + RC_ContextLoad_context;
+
     // Make sure that the context blob has enough space for the fingerprint. This
     // is elastic pants to go with the belt and suspenders we already have to make
     // sure that the context is complete and untampered.
     if((unsigned)size < sizeof(in->context.sequence))
 	return TPM_RCS_SIZE + RC_ContextLoad_context;
+
     // After unmarshaling the integrity value, 'buffer' is pointing at the first
     // byte of the integrity protected and encrypted buffer and 'size' is the number
     // of integrity protected and encrypted bytes.
+
     // Compute context integrity
     ComputeContextIntegrity(&in->context, &integrityToCompare);
     // Compare integrity
@@ -290,35 +341,49 @@ TPM2_ContextLoad(
     // Compute context encryption key
     ComputeContextProtectionKey(&in->context, &symKey, &iv);
     // Decrypt context data in place
-    CryptSymmetricDecrypt(buffer, CONTEXT_ENCRYPT_ALG, CONTEXT_ENCRYPT_KEY_BITS,
-			  symKey.t.buffer, &iv, TPM_ALG_CFB, size, buffer);
+    CryptSymmetricDecrypt(buffer,
+			  CONTEXT_ENCRYPT_ALG,
+			  CONTEXT_ENCRYPT_KEY_BITS,
+			  symKey.t.buffer,
+			  &iv,
+			  TPM_ALG_CFB,
+			  size,
+			  buffer);
     // See if the fingerprint value matches. If not, it is symptomatic of either
     // a broken TPM or that the TPM is under attack so go into failure mode.
     if(!MemoryEqual(buffer, &in->context.sequence, sizeof(in->context.sequence)))
 	FAIL(FATAL_ERROR_INTERNAL);
+
     // step over fingerprint
     buffer += sizeof(in->context.sequence);
+
     // set the remaining size of the context
     size -= sizeof(in->context.sequence);
+
     // Perform object or session specific input check
     switch(handleType)
 	{
 	  case TPM_HT_TRANSIENT:
 	      {
-		  OBJECT      *outObject;
+		  OBJECT* outObject;
+
 		  if(size > (INT32)sizeof(OBJECT))
 		      FAIL(FATAL_ERROR_INTERNAL);
+
 		  // Discard any changes to the handle that the TRM might have made
 		  in->context.savedHandle = TRANSIENT_FIRST;
+
 		  // If hierarchy is disabled, no object context can be loaded in this
 		  // hierarchy
 		  if(!HierarchyIsEnabled(in->context.hierarchy))
 		      return TPM_RCS_HIERARCHY + RC_ContextLoad_context;
+
 		  // Restore object. If there is no empty space, indicate as much
 		  outObject = ObjectContextLoadLibtpms(buffer, size,       // libtpms changed
 						       &out->loadedHandle);
 		  if(outObject == NULL)
 		      return TPM_RC_OBJECT_MEMORY;
+
 		  break;
 	      }
 	  case TPM_HT_POLICY_SESSION:
@@ -326,24 +391,30 @@ TPM2_ContextLoad(
 	      {
 		  if(size != sizeof(SESSION))
 		      FAIL(FATAL_ERROR_INTERNAL);
+
 		  // This command may cause the orderlyState to be cleared due to
 		  // the update of state reset data.  If this is the case, check if NV is
 		  // available first
 		  RETURN_IF_ORDERLY;
+
 		  // Check if input handle points to a valid saved session and that the
 		  // sequence number makes sense
 		  if(!SequenceNumberForSavedContextIsValid(&in->context))
 		      return TPM_RCS_HANDLE + RC_ContextLoad_context;
+
 		  // Restore session.  A TPM_RC_SESSION_MEMORY, TPM_RC_CONTEXT_GAP error
 		  // may be returned at this point
-		  result = SessionContextLoad((SESSION_BUF *)buffer,
-					      &in->context.savedHandle);
+		  result =
+		      SessionContextLoad((SESSION_BUF*)buffer, &in->context.savedHandle);
 		  if(result != TPM_RC_SUCCESS)
 		      return result;
+
 		  out->loadedHandle = in->context.savedHandle;
+
 		  // orderly state should be cleared because of the update of state
 		  // reset and state clear data
 		  g_clearOrderly = TRUE;
+
 		  break;
 	      }
 	  default:
@@ -354,7 +425,9 @@ TPM2_ContextLoad(
 	}
     return TPM_RC_SUCCESS;
 }
+
 #endif // CC_ContextLoad
+
 #include "Tpm.h"
 #include "FlushContext_fp.h"
 #if CC_FlushContext  // Conditional expansion of this file
@@ -395,17 +468,36 @@ TPM2_FlushContext(
     return TPM_RC_SUCCESS;
 }
 #endif // CC_FlushContext
+
 #include "Tpm.h"
 #include "EvictControl_fp.h"
+
 #if CC_EvictControl  // Conditional expansion of this file
+
+/*(See part 3 specification)
+// Make a transient object persistent or evict a persistent object
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES   an object with 'temporary', 'stClear' or 'publicOnly'
+//                          attribute SET cannot be made persistent
+//      TPM_RC_HIERARCHY    'auth' cannot authorize the operation in the hierarchy
+//                          of 'evictObject';
+//                          an object in a firmware-bound or SVN-bound hierarchy
+//                          cannot be made persistent.
+//      TPM_RC_HANDLE       'evictHandle' of the persistent object to be evicted is
+//                          not the same as the 'persistentHandle' argument
+//      TPM_RC_NV_HANDLE    'persistentHandle' is unavailable
+//      TPM_RC_NV_SPACE     no space in NV to make 'evictHandle' persistent
+//      TPM_RC_RANGE        'persistentHandle' is not in the range corresponding to
+//                          the hierarchy of 'evictObject'
 TPM_RC
-TPM2_EvictControl(
-		  EvictControl_In     *in             // IN: input parameter list
+TPM2_EvictControl(EvictControl_In* in  // IN: input parameter list
 		  )
 {
-    TPM_RC      result;
-    OBJECT      *evictObject;
+    TPM_RC  result;
+    OBJECT* evictObject;
     // Input Validation
+
     // Get internal object pointer
     evictObject = HandleToObject(in->objectHandle);
     // Temporary, stClear or public only objects can not be made persistent
@@ -413,25 +505,27 @@ TPM2_EvictControl(
        || evictObject->attributes.stClear == SET
        || evictObject->attributes.publicOnly == SET)
 	return TPM_RCS_ATTRIBUTES + RC_EvictControl_objectHandle;
+
     // If objectHandle refers to a persistent object, it should be the same as
     // input persistentHandle
     if(evictObject->attributes.evict == SET
        && evictObject->evictHandle != in->persistentHandle)
 	return TPM_RCS_HANDLE + RC_EvictControl_objectHandle;
+
     // Additional authorization validation
     if(in->auth == TPM_RH_PLATFORM)
 	{
 	    // To make persistent
 	    if(evictObject->attributes.evict == CLEAR)
-	        {
-	            // PlatformAuth can not set evict object in storage or endorsement
-	            // hierarchy
-	            if(evictObject->attributes.ppsHierarchy == CLEAR)
-	                return TPM_RCS_HIERARCHY + RC_EvictControl_objectHandle;
-	            // Platform cannot use a handle outside of platform persistent range.
-	            if(!NvIsPlatformPersistentHandle(in->persistentHandle))
-	                return TPM_RCS_RANGE + RC_EvictControl_persistentHandle;
-	        }
+		{
+		    // PlatformAuth can not set evict object in storage or endorsement
+		    // hierarchy
+		    if(evictObject->attributes.ppsHierarchy == CLEAR)
+			return TPM_RCS_HIERARCHY + RC_EvictControl_objectHandle;
+		    // Platform cannot use a handle outside of platform persistent range.
+		    if(!NvIsPlatformPersistentHandle(in->persistentHandle))
+			return TPM_RCS_RANGE + RC_EvictControl_persistentHandle;
+		}
 	    // PlatformAuth can delete any persistent object
 	}
     else if(in->auth == TPM_RH_OWNER)
@@ -439,6 +533,7 @@ TPM2_EvictControl(
 	    // OwnerAuth can not set or clear evict object in platform hierarchy
 	    if(evictObject->attributes.ppsHierarchy == SET)
 		return TPM_RCS_HIERARCHY + RC_EvictControl_objectHandle;
+
 	    // Owner cannot use a handle outside of owner persistent range.
 	    if(evictObject->attributes.evict == CLEAR
 	       && !NvIsOwnerPersistentHandle(in->persistentHandle))
@@ -468,4 +563,5 @@ TPM2_EvictControl(
 	}
     return result;
 }
-#endif // CC_EvictControl
+
+#endif  // CC_EvictControl

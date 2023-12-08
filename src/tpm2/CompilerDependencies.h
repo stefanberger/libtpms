@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			   Compiler Dependencies  				*/
+/*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CompilerDependencies.h 1453 2019-04-05 16:43:36Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +54,16 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
-#ifndef COMPILERDEPEDENCIES_H
-#define COMPILERDEPEDENCIES_H
+// This file contains the build switches. This contains switches for multiple
+// versions of the crypto-library so some may not apply to your environment.
+//
+
+#ifndef _COMPILER_DEPENDENCIES_H_
+#define _COMPILER_DEPENDENCIES_H_
 
 /* kgold - Not in the original code.  A user reported that it was required for a non-Visual Studio
    environment.
@@ -166,28 +169,29 @@
 
 // Things that are not defined should be defined as NULL
 #ifndef NORETURN
-#   define NORETURN
+#  define NORETURN
 #endif
 #ifndef LIB_EXPORT
-#   define LIB_EXPORT
+#  define LIB_EXPORT
 #endif
 #ifndef LIB_IMPORT
-#   define LIB_IMPORT
+#  define LIB_IMPORT
 #endif
 #ifndef _REDUCE_WARNING_LEVEL_
-#   define _REDUCE_WARNING_LEVEL_(n)
+#  define _REDUCE_WARNING_LEVEL_(n)
 #endif
 #ifndef _NORMAL_WARNING_LEVEL_
-#   define _NORMAL_WARNING_LEVEL_
+#  define _NORMAL_WARNING_LEVEL_
 #endif
 #ifndef NOT_REFERENCED
-#   define  NOT_REFERENCED(x) (x = x)
+#  define NOT_REFERENCED(x) (x = x)
 #endif
+
 #ifdef _POSIX_
 typedef int SOCKET;
 #endif
 // #ifdef TPM_POSIX
 // typedef int SOCKET;
 // #endif
-#endif // _COMPILER_DEPENDENCIES_H_
 
+#endif  // _COMPILER_DEPENDENCIES_H_

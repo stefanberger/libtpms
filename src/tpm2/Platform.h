@@ -3,7 +3,6 @@
 /*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Platform.h 1521 2019-11-15 21:00:47Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019.				  	*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2023			  	*/
 /*										*/
 /********************************************************************************/
 

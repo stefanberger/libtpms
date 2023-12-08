@@ -3,7 +3,6 @@
 /*			     CryptPrimeSieve					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptPrimeSieve.c 1519 2019-11-15 20:43:51Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,41 +54,47 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.17 CryptPrimeSieve.c */
-/* 10.2.17.1 Includes and defines */
+//** Includes and defines
+
 #include "Tpm.h"
+
 #if RSA_KEY_SIEVE
-#include "CryptPrimeSieve_fp.h"
-/* This determines the number of bits in the largest sieve field. */
-#define MAX_FIELD_SIZE  2048
+
+#  include "CryptPrimeSieve_fp.h"
+
+// This determines the number of bits in the largest sieve field.
+#  define MAX_FIELD_SIZE 2048
+
 extern const uint32_t      s_LastPrimeInTable;
 extern const uint32_t      s_PrimeTableSize;
 extern const uint32_t      s_PrimesInTable;
 extern const unsigned char s_PrimeTable[];
-/* This table is set of prime markers. Each entry is the prime value for the ((n + 1) * 1024)
-   prime. That is, the entry in s_PrimeMarkers[1] is the value for the 2,048th prime. This is used
-   in the PrimeSieve() to adjust the limit for the prime search. When processing smaller prime
-   candidates, fewer primes are checked directly before going to Miller-Rabin. As the prime grows,
-   it is worth spending more time eliminating primes as, a) the density is lower, and b) the cost of
-   Miller-Rabin is higher. */
-const uint32_t      s_PrimeMarkersCount = 6;
-const uint32_t      s_PrimeMarkers[] = {
-    8167, 17881, 28183, 38891, 49871, 60961 };
-uint32_t   primeLimit;
 
-/* 10.2.17.1.1 RsaAdjustPrimeLimit() */
-/* This used during the sieve process. The iterator for getting the next prime (RsaNextPrime()) will
-   return primes until it hits the limit (primeLimit) set up by this function. This causes the sieve
-   process to stop when an appropriate number of primes have been sieved. */
+// This table is set of prime markers. Each entry is the prime value
+// for the ((n + 1) * 1024) prime. That is, the entry in s_PrimeMarkers[1]
+// is the value for the 2,048th prime. This is used in the PrimeSieve
+// to adjust the limit for the prime search. When processing smaller
+// prime candidates, fewer primes are checked directly before going to
+// Miller-Rabin. As the prime grows, it is worth spending more time eliminating
+// primes as, a) the density is lower, and b) the cost of Miller-Rabin is
+// higher.
+const uint32_t s_PrimeMarkersCount = 6;
+const uint32_t s_PrimeMarkers[]    = {8167, 17881, 28183, 38891, 49871, 60961};
+uint32_t       primeLimit;
 
-void
-RsaAdjustPrimeLimit(
-		    uint32_t        requestedPrimes
-		    )
+//** Functions
+
+//*** RsaAdjustPrimeLimit()
+// This used during the sieve process. The iterator for getting the
+// next prime (RsaNextPrime()) will return primes until it hits the
+// limit (primeLimit) set up by this function. This causes the sieve
+// process to stop when an appropriate number of primes have been
+// sieved.
+LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes)
 {
     if(requestedPrimes == 0 || requestedPrimes > s_PrimesInTable)
 	requestedPrimes = s_PrimesInTable;
@@ -101,14 +106,12 @@ RsaAdjustPrimeLimit(
     primeLimit >>= 1;
 }
 
-/* 10.2.17.1.2 RsaNextPrime() */
-/* This the iterator used during the sieve process. The input is the last prime returned (or any
-   starting point) and the output is the next higher prime. The function returns 0 when the
-   primeLimit is reached. */
-uint32_t
-RsaNextPrime(
-	     uint32_t    lastPrime
-	     )
+//*** RsaNextPrime()
+// This the iterator used during the sieve process. The input is the
+// last prime returned (or any starting point) and the output is the
+// next higher prime. The function returns 0 when the primeLimit is
+// reached.
+LIB_EXPORT uint32_t RsaNextPrime(uint32_t lastPrime)
 {
     if(lastPrime == 0)
 	return 0;
@@ -120,101 +123,100 @@ RsaNextPrime(
 	}
     return 0;
 }
-/* This table contains a previously sieved table. It has the bits for 3, 5, and 7 removed. Because
-   of the factors, it needs to be aligned to 105 and has a repeat of 105. */
-const BYTE   seedValues[] = {
-    0x16, 0x29, 0xcb, 0xa4, 0x65, 0xda, 0x30, 0x6c,
-    0x99, 0x96, 0x4c, 0x53, 0xa2, 0x2d, 0x52, 0x96,
-    0x49, 0xcb, 0xb4, 0x61, 0xd8, 0x32, 0x2d, 0x99,
-    0xa6, 0x44, 0x5b, 0xa4, 0x2c, 0x93, 0x96, 0x69,
-    0xc3, 0xb0, 0x65, 0x5a, 0x32, 0x4d, 0x89, 0xb6,
-    0x48, 0x59, 0x26, 0x2d, 0xd3, 0x86, 0x61, 0xcb,
-    0xb4, 0x64, 0x9a, 0x12, 0x6d, 0x91, 0xb2, 0x4c,
-    0x5a, 0xa6, 0x0d, 0xc3, 0x96, 0x69, 0xc9, 0x34,
-    0x25, 0xda, 0x22, 0x65, 0x99, 0xb4, 0x4c, 0x1b,
-    0x86, 0x2d, 0xd3, 0x92, 0x69, 0x4a, 0xb4, 0x45,
-    0xca, 0x32, 0x69, 0x99, 0x36, 0x0c, 0x5b, 0xa6,
-    0x25, 0xd3, 0x94, 0x68, 0x8b, 0x94, 0x65, 0xd2,
-    0x32, 0x6d, 0x18, 0xb6, 0x4c, 0x4b, 0xa6, 0x29,
-    0xd1};
-#define USE_NIBBLE
-#ifndef USE_NIBBLE
-static const BYTE bitsInByte[256] = {
-    0x00, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x03,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07,
-    0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07,
-    0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
-    0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07,
-    0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07,
-    0x05, 0x06, 0x06, 0x07, 0x06, 0x07, 0x07, 0x08
-};
-#define BitsInByte(x)   bitsInByte[(unsigned char)x]
-#else
-const BYTE bitsInNibble[16] = {
-    0x00, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x03,
-    0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04};
-#define BitsInByte(x)						    \
-    (bitsInNibble[(unsigned char)(x) & 0xf]				\
-     +   bitsInNibble[((unsigned char)(x) >> 4) & 0xf])
-#endif
 
-/* 10.2.17.1.3 BitsInArry() */
-/* This function counts the number of bits set in an array of bytes. */
-static int
-BitsInArray(
-	    const unsigned char     *a,             // IN: A pointer to an array of bytes
-	    unsigned int             aSize          // IN: the number of bytes to sum
-	    )
+// This table contains a previously sieved table. It has
+// the bits for 3, 5, and 7 removed. Because of the
+// factors, it needs to be aligned to 105 and has
+// a repeat of 105.
+const BYTE seedValues[] = {0x16, 0x29, 0xcb, 0xa4, 0x65, 0xda, 0x30, 0x6c, 0x99, 0x96,
+			   0x4c, 0x53, 0xa2, 0x2d, 0x52, 0x96, 0x49, 0xcb, 0xb4, 0x61,
+			   0xd8, 0x32, 0x2d, 0x99, 0xa6, 0x44, 0x5b, 0xa4, 0x2c, 0x93,
+			   0x96, 0x69, 0xc3, 0xb0, 0x65, 0x5a, 0x32, 0x4d, 0x89, 0xb6,
+			   0x48, 0x59, 0x26, 0x2d, 0xd3, 0x86, 0x61, 0xcb, 0xb4, 0x64,
+			   0x9a, 0x12, 0x6d, 0x91, 0xb2, 0x4c, 0x5a, 0xa6, 0x0d, 0xc3,
+			   0x96, 0x69, 0xc9, 0x34, 0x25, 0xda, 0x22, 0x65, 0x99, 0xb4,
+			   0x4c, 0x1b, 0x86, 0x2d, 0xd3, 0x92, 0x69, 0x4a, 0xb4, 0x45,
+			   0xca, 0x32, 0x69, 0x99, 0x36, 0x0c, 0x5b, 0xa6, 0x25, 0xd3,
+			   0x94, 0x68, 0x8b, 0x94, 0x65, 0xd2, 0x32, 0x6d, 0x18, 0xb6,
+			   0x4c, 0x4b, 0xa6, 0x29, 0xd1};
+
+#  define USE_NIBBLE
+
+#  ifndef USE_NIBBLE
+static const BYTE bitsInByte[256] =
+    {0x00, 0x01, 0x01, 0x02, 0x01, 0x02, 0x02, 0x03, 0x01, 0x02, 0x02, 0x03, 0x02,
+     0x03, 0x03, 0x04, 0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04, 0x02, 0x03,
+     0x03, 0x04, 0x03, 0x04, 0x04, 0x05, 0x01, 0x02, 0x02, 0x03, 0x02, 0x03, 0x03,
+     0x04, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05, 0x02, 0x03, 0x03, 0x04,
+     0x03, 0x04, 0x04, 0x05, 0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06, 0x01,
+     0x02, 0x02, 0x03, 0x02, 0x03, 0x03, 0x04, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04,
+     0x04, 0x05, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05, 0x03, 0x04, 0x04,
+     0x05, 0x04, 0x05, 0x05, 0x06, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05,
+     0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06, 0x03, 0x04, 0x04, 0x05, 0x04,
+     0x05, 0x05, 0x06, 0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07, 0x01, 0x02,
+     0x02, 0x03, 0x02, 0x03, 0x03, 0x04, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04,
+     0x05, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05, 0x03, 0x04, 0x04, 0x05,
+     0x04, 0x05, 0x05, 0x06, 0x02, 0x03, 0x03, 0x04, 0x03, 0x04, 0x04, 0x05, 0x03,
+     0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06, 0x03, 0x04, 0x04, 0x05, 0x04, 0x05,
+     0x05, 0x06, 0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06, 0x07, 0x02, 0x03, 0x03,
+     0x04, 0x03, 0x04, 0x04, 0x05, 0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06,
+     0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06, 0x04, 0x05, 0x05, 0x06, 0x05,
+     0x06, 0x06, 0x07, 0x03, 0x04, 0x04, 0x05, 0x04, 0x05, 0x05, 0x06, 0x04, 0x05,
+     0x05, 0x06, 0x05, 0x06, 0x06, 0x07, 0x04, 0x05, 0x05, 0x06, 0x05, 0x06, 0x06,
+     0x07, 0x05, 0x06, 0x06, 0x07, 0x06, 0x07, 0x07, 0x08};
+#    define BitsInByte(x) bitsInByte[(unsigned char)x]
+#  else
+const BYTE bitsInNibble[16] = {0x00,
+			       0x01,
+			       0x01,
+			       0x02,
+			       0x01,
+			       0x02,
+			       0x02,
+			       0x03,
+			       0x01,
+			       0x02,
+			       0x02,
+			       0x03,
+			       0x02,
+			       0x03,
+			       0x03,
+			       0x04};
+#    define BitsInByte(x)			\
+    (bitsInNibble[(unsigned char)(x)&0xf]				\
+     + bitsInNibble[((unsigned char)(x) >> 4) & 0xf])
+#  endif
+
+//*** BitsInArry()
+// This function counts the number of bits set in an array of bytes.
+static int BitsInArray(const unsigned char* a,  // IN: A pointer to an array of bytes
+		       unsigned int         aSize  // IN: the number of bytes to sum
+		       )
 {
-    int     j = 0;
+    int j = 0;
     for(; aSize; a++, aSize--)
 	j += BitsInByte(*a);
     return j;
 }
 
-/* 10.2.17.1.4 FindNthSetBit() */
-/* This function finds the nth SET bit in a bit array. The n parameter is between 1 and the number
-   of bits in the array (always a multiple of 8). If called when the array does not have n bits set,
-   it will return -1 */
-/* Return Values Meaning */
-/* <0 no bit is set or no bit with the requested number is set */
-/* >=0 the number of the bit in the array that is the nth set */
-int
-FindNthSetBit(
-	      const UINT16     aSize,         // IN: the size of the array to check
-	      const BYTE      *a,             // IN: the array to check
-	      const UINT32     n              // IN, the number of the SET bit
-	      )
+//*** FindNthSetBit()
+// This function finds the nth SET bit in a bit array. The 'n' parameter is
+// between 1 and the number of bits in the array (always a multiple of 8).
+// If called when the array does not have n bits set, it will return -1
+//  Return Type: unsigned int
+//      <0      no bit is set or no bit with the requested number is set
+//      >=0    the number of the bit in the array that is the nth set
+LIB_EXPORT int FindNthSetBit(
+			     const UINT16 aSize,  // IN: the size of the array to check
+			     const BYTE*  a,      // IN: the array to check
+			     const UINT32 n       // IN, the number of the SET bit
+			     )
 {
-    UINT16       i;
-    int          retValue;
-    UINT32       sum = 0;
-    BYTE         sel;
+    UINT16 i;
+    int    retValue;
+    UINT32 sum = 0;
+    BYTE   sel;
+
     //find the bit
     for(i = 0; (i < (int)aSize) && (sum < n); i++)
 	sum += BitsInByte(a[i]);
@@ -222,7 +224,7 @@ FindNthSetBit(
     // The chosen bit is in the byte that was just accessed
     // Compute the offset to the start of that byte
     retValue = i * 8 - 1;
-    sel = a[i];
+    sel      = a[i];
     // Subtract the bits in the last byte added.
     sum -= BitsInByte(sel);
     // Now process the byte, one bit at a time.
@@ -230,24 +232,32 @@ FindNthSetBit(
 	sum += (sel & 1) != 0;
     return (sum == n) ? retValue : -1;
 }
+
 typedef struct
 {
-    UINT16      prime;
-    UINT16      count;
+    UINT32 prime;
+    UINT16 count;
 } SIEVE_MARKS;
-const SIEVE_MARKS sieveMarks[5] = {
-    {31, 7}, {73, 5}, {241, 4}, {1621, 3}, {UINT16_MAX, 2}};
+const SIEVE_MARKS sieveMarks[5] = {{31, 7},
+				   {73, 5},
+				   {241, 4},
+				   {1621, 3},
+				   {UINT16_MAX, 2}};
 
-/* 10.2.17.1.5 PrimeSieve() */
-/* This function does a prime sieve over the input field which has as its starting address the value
-   in bnN. Since this initializes the Sieve using a precomputed field with the bits associated with
-   3, 5 and 7 already turned off, the value of pnN may need to be adjusted by a few counts to allow
-   the precomputed field to be used without modification. */
-/* To get better performance, one could address the issue of developing the composite numbers. When
-   the size of the prime gets large, the time for doing the divisions goes up, noticeably. It could
-   be better to develop larger composite numbers even if they need to be bigNum's themselves. The
-   object would be to reduce the number of times that the large prime is divided into a few large
-   divides and then use smaller divides to get to the final 16 bit (or smaller) remainders. */
+//*** PrimeSieve()
+// This function does a prime sieve over the input 'field' which has as its
+// starting address the value in bnN. Since this initializes the Sieve
+// using a precomputed field with the bits associated with 3, 5 and 7 already
+// turned off, the value of pnN may need to be adjusted by a few counts to allow
+// the precomputed field to be used without modification.
+//
+// To get better performance, one could address the issue of developing the
+// composite numbers. When the size of the prime gets large, the time for doing
+// the divisions goes up, noticeably. It could be better to develop larger composite
+// numbers even if they need to be Crypt_Int*'s themselves. The object would be to
+// reduce the number of times that the large prime is divided into a few large
+// divides and then use smaller divides to get to the final 16 bit (or smaller)
+// remainders.
 UINT32
 PrimeSieve(
 	   bigNum           bnN,       // IN/OUT: number to sieve
@@ -255,26 +265,29 @@ PrimeSieve(
 	   BYTE            *field      // IN: field
 	   )
 {
-    UINT32            i;
-    UINT32            j;
-    UINT32           fieldBits = fieldSize * 8;
-    UINT32           r;
-    BYTE            *pField;
-    INT32            iter;
-    UINT32           adjust;
-    UINT32           mark = 0;
-    UINT32           count = sieveMarks[0].count;
-    UINT32           stop = sieveMarks[0].prime;
-    UINT32           composite;
-    UINT32           pList[8];
-    UINT32           next;
+    UINT32 i;
+    UINT32 j;
+    UINT32 fieldBits = fieldSize * 8;
+    UINT32 r;
+    BYTE*  pField;
+    INT32  iter;
+    UINT32 adjust;
+    UINT32 mark  = 0;
+    UINT32 count = sieveMarks[0].count;
+    UINT32 stop  = sieveMarks[0].prime;
+    UINT32 composite;
+    UINT32 pList[8];
+    UINT32 next;
+
     pAssert(field != NULL && bnN != NULL);
+
     // If the remainder is odd, then subtracting the value will give an even number,
     // but we want an odd number, so subtract the 105+rem. Otherwise, just subtract
     // the even remainder.
     adjust = (UINT32)BnModWord(bnN, 105);
     if(adjust & 1)
 	adjust += 105;
+
     // Adjust the input number so that it points to the first number in a
     // aligned field.
     BnSubWord(bnN, bnN, adjust);
@@ -287,19 +300,21 @@ PrimeSieve(
 	}
     if(i != 0)
 	memcpy(pField, seedValues, i);
+
     // Cycle through the primes, clearing bits
     // Have already done 3, 5, and 7
     iter = 7;
-#define NEXT_PRIME(iter)    (iter = RsaNextPrime(iter))
+
+#  define NEXT_PRIME(iter) (iter = RsaNextPrime(iter))
     // Get the next N primes where N is determined by the mark in the sieveMarks
     while((composite = NEXT_PRIME(iter)) != 0)
 	{
-	    next = 0;
-	    i = count;
+	    next       = 0;
+	    i          = count;
 	    pList[i--] = composite;
 	    for(; i > 0; i--)
 		{
-		    next = NEXT_PRIME(iter);
+		    next     = NEXT_PRIME(iter);
 		    pList[i] = next;
 		    if(next != 0)
 			composite *= next;
@@ -338,17 +353,19 @@ PrimeSieve(
 		    // only contains odd numbers and our stride is actually 2 * stride. If the
 		    // quoitent is even, then that means that when we add 2 * stride, we are going
 		    // to hit another even number. So, we have to know if we need to back off
-		    // by 1 stride before we start counting by 2 * stride.
+		    // by 1 stride before we start couting by 2 * stride.
 		    // We can tell from the remainder whether we are on an even or odd
 		    // stride when we hit the beginning of the table. If we are on an odd stride
 		    // (r & 1), we would start half a stride in (next - r)/2. If we are on an
 		    // even stride, we need 0.5 strides (next - r/2) because the table only has
 		    // odd numbers. If the remainder happens to be zero, then the start of the
 		    // table is on stride so no adjustment is necessary.
-
-		    if(r & 1)           j = (next - r) / 2;
-		    else if(r == 0)     j = 0;
-		    else                 j = next - (r / 2);
+		    if(r & 1)
+			j = (next - r) / 2;
+		    else if(r == 0)
+			j = 0;
+		    else
+			j = next - (r / 2);
 		    for(; j < fieldBits; j += next)
 			ClearBit(j, field, fieldSize);
 		}
@@ -356,7 +373,7 @@ PrimeSieve(
 		{
 		    mark++;
 		    count = sieveMarks[mark].count;
-		    stop = sieveMarks[mark].prime;
+		    stop  = sieveMarks[mark].prime;
 		}
 	}
  done:
@@ -366,15 +383,13 @@ PrimeSieve(
     INSTRUMENT_ADD(emptyFieldsSieved[PrimeIndex], (i == 0));
     return i;
 }
-#ifdef SIEVE_DEBUG
+
+#  ifdef SIEVE_DEBUG
 static uint32_t fieldSize = 210;
 
-/* 10.2.17.1.6 SetFieldSize() */
-/* Function to set the field size used for prime generation. Used for tuning. */
-uint32_t
-SetFieldSize(
-	     uint32_t         newFieldSize
-	     )
+//***SetFieldSize()
+// Function to set the field size used for prime generation. Used for tuning.
+LIB_EXPORT uint32_t SetFieldSize(uint32_t newFieldSize)
 {
     if(newFieldSize == 0 || newFieldSize > MAX_FIELD_SIZE)
 	fieldSize = MAX_FIELD_SIZE;
@@ -382,7 +397,7 @@ SetFieldSize(
 	fieldSize = newFieldSize;
     return fieldSize;
 }
-#endif // SIEVE_DEBUG
+#  endif  // SIEVE_DEBUG
 
 /* 10.2.17.1.7 PrimeSelectWithSieve() */
 /* This function will sieve the field around the input prime candidate. If the sieve field is not
@@ -395,23 +410,21 @@ SetFieldSize(
 /* TPM_RC_FAILURE TPM in failure mode, probably due to entropy source */
 /* TPM_RC_SUCCESS candidate is probably prime */
 /* TPM_RC_NO_RESULT candidate is not prime and couldn't find and alternative in the field */
-LIB_EXPORT TPM_RC
-PrimeSelectWithSieve(
-		     bigNum           candidate,         // IN/OUT: The candidate to filter
-		     UINT32           e,                 // IN: the exponent
-		     RAND_STATE      *rand               // IN: the random number generator state
-		     )
+LIB_EXPORT TPM_RC PrimeSelectWithSieve(
+				       bigNum      candidate,  // IN/OUT: The candidate to filter
+				       UINT32      e,          // IN: the exponent
+				       RAND_STATE* rand    // IN: the random number generator state
+				       )
 {
-    BYTE             field[MAX_FIELD_SIZE];
-    UINT32           first;
-    UINT32           ones;
-    INT32            chosen;
+    BYTE   field[MAX_FIELD_SIZE];
+    UINT32 ones;
+    INT32  chosen;
     BN_PRIME(test);
-    UINT32           modE;
-#ifndef SIEVE_DEBUG
-    UINT32           fieldSize = MAX_FIELD_SIZE;
-#endif
-    UINT32           primeSize;
+    UINT32 modE;
+#  ifndef SIEVE_DEBUG
+    UINT32 fieldSize = MAX_FIELD_SIZE;
+#  endif
+    UINT32 primeSize;
     //
     // Adjust the field size and prime table list to fit the size of the prime
     // being tested. This is done to try to optimize the trade-off between the
@@ -420,26 +433,27 @@ PrimeSelectWithSieve(
     // cost of the sieving. However, the time for Miller-Rabin goes up considerably
     // faster than the cost of dividing by a number of primes.
     primeSize = BnSizeInBits(candidate);
-    
+
     if(primeSize <= 512)
 	{
-	    RsaAdjustPrimeLimit(1024); // Use just the first 1024 primes
+	    RsaAdjustPrimeLimit(1024);  // Use just the first 1024 primes
 	}
     else if(primeSize <= 1024)
 	{
-	    RsaAdjustPrimeLimit(4096); // Use just the first 4K primes
+	    RsaAdjustPrimeLimit(4096);  // Use just the first 4K primes
 	}
     else
 	{
-	    RsaAdjustPrimeLimit(0);     // Use all available
+	    RsaAdjustPrimeLimit(0);  // Use all available
 	}
-    
+
     // Save the low-order word to use as a search generator and make sure that
     // it has some interesting range to it
-    first = (UINT32)(candidate->d[0] | 0x80000000);
-    
+    uint32_t first = (UINT32)(candidate->d[0] | 0x80000000);
+
     // Sieve the field
     ones = PrimeSieve(candidate, fieldSize, field);
+
     pAssert(ones > 0 && ones < (fieldSize * 8));
     for(; ones > 0; ones--)
 	{
@@ -469,26 +483,24 @@ PrimeSelectWithSieve(
     return (g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_NO_RESULT);
 }
 
-#if RSA_INSTRUMENT
-static char            a[256];
-char *
-PrintTuple(
-	   UINT32      *i
-	   )
+#  if RSA_INSTRUMENT
+static char a[256];
+
+//*** PrintTuple()
+char* PrintTuple(UINT32* i)
 {
     sprintf(a, "{%d, %d, %d}", i[0], i[1], i[2]);
     return a;
 }
-#define CLEAR_VALUE(x)    memset(x, 0, sizeof(x))
- 
-void
-RsaSimulationEnd(
-		 void
-		 )
+
+#    define CLEAR_VALUE(x) memset(x, 0, sizeof(x))
+
+//*** RsaSimulationEnd()
+void RsaSimulationEnd(void)
 {
-    int         i;
-    UINT32      averages[3];
-    UINT32      nonFirst = 0;
+    int    i;
+    UINT32 averages[3];
+    UINT32 nonFirst = 0;
     if((PrimeCounts[0] + PrimeCounts[1] + PrimeCounts[2]) != 0)
 	{
 	    printf("Primes generated = %s\n", PrintTuple(PrimeCounts));
@@ -497,8 +509,8 @@ RsaSimulationEnd(
 	    printf("Primes checked with Miller-Rabin = %s\n",
 		   PrintTuple(MillerRabinTrials));
 	    for(i = 0; i < 3; i++)
-		averages[i] = (totalFieldsSieved[i]
-			       != 0 ? bitsInFieldAfterSieve[i] / totalFieldsSieved[i]
+		averages[i] = (totalFieldsSieved[i] != 0
+			       ? bitsInFieldAfterSieve[i] / totalFieldsSieved[i]
 			       : 0);
 	    printf("Average candidates in field %s\n", PrintTuple(averages));
 	    for(i = 1; i < (sizeof(failedAtIteration) / sizeof(failedAtIteration[0]));
@@ -512,21 +524,18 @@ RsaSimulationEnd(
     CLEAR_VALUE(MillerRabinTrials);
     CLEAR_VALUE(bitsInFieldAfterSieve);
 }
-void
-GetSieveStats(
-	      uint32_t        *trials,
-	      uint32_t        *emptyFields,
-	      uint32_t        *averageBits
-	      )
+
+//*** GetSieveStats()
+LIB_EXPORT void GetSieveStats(
+			      uint32_t* trials, uint32_t* emptyFields, uint32_t* averageBits)
 {
-    uint32_t        totalBits;
-    uint32_t        fields;
-    *trials = MillerRabinTrials[0] + MillerRabinTrials[1] + MillerRabinTrials[2];
+    uint32_t totalBits;
+    uint32_t fields;
+    *trials      = MillerRabinTrials[0] + MillerRabinTrials[1] + MillerRabinTrials[2];
     *emptyFields = noPrimeFields[0] + noPrimeFields[1] + noPrimeFields[2];
-    fields = totalFieldsSieved[0] + totalFieldsSieved[1]
-	     + totalFieldsSieved[2];
-    totalBits = bitsInFieldAfterSieve[0] + bitsInFieldAfterSieve[1]
-		+ bitsInFieldAfterSieve[2];
+    fields       = totalFieldsSieved[0] + totalFieldsSieved[1] + totalFieldsSieved[2];
+    totalBits    = bitsInFieldAfterSieve[0] + bitsInFieldAfterSieve[1]
+		   + bitsInFieldAfterSieve[2];
     if(fields != 0)
 	*averageBits = totalBits / fields;
     else
@@ -537,16 +546,16 @@ GetSieveStats(
     CLEAR_VALUE(MillerRabinTrials);
     CLEAR_VALUE(bitsInFieldAfterSieve);
 }
-#endif
-#endif // RSA_KEY_SIEVE
+#  endif
+
+#endif  // RSA_KEY_SIEVE
+
 #if !RSA_INSTRUMENT
+
 //*** RsaSimulationEnd()
 // Stub for call when not doing instrumentation.
 #if 0		// libtpms added
-void
-RsaSimulationEnd(
-		 void
-		 )
+void RsaSimulationEnd(void)
 {
     return;
 }

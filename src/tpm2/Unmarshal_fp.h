@@ -3,7 +3,6 @@
 /*			    Unmarshal Prototypes				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unmarshal_fp.h 1603 2020-04-03 17:48:43Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2012 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2012 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -473,7 +472,7 @@ extern "C" {
     TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPM_AT_Unmarshal(TPM_AT *target, BYTE **buffer, INT32 *size);
-    
+
 #ifdef __cplusplus
 }
 #endif

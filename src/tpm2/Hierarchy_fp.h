@@ -3,7 +3,6 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Hierarchy_fp.h 1490 2019-07-26 21:13:22Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,39 +54,78 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef HIERARCHY_FP_H
-#define HIERARCHY_FP_H
+/*(Auto-generated)
+ *  Created by TpmPrototypes; Version 3.0 July 18, 2017
+ *  Date: Apr  2, 2019  Time: 04:23:27PM
+ */
 
-void
-HierarchyPreInstall_Init(
-			 void
-			 );
-BOOL
-HierarchyStartup(
-		 STARTUP_TYPE     type           // IN: start up type
-		 );
+#ifndef _HIERARCHY_FP_H_
+#define _HIERARCHY_FP_H_
+
+//*** HierarchyPreInstall()
+// This function performs the initialization functions for the hierarchy
+// when the TPM is simulated. This function should not be called if the
+// TPM is not in a manufacturing mode at the manufacturer, or in a simulated
+// environment.
+void HierarchyPreInstall_Init(void);
+
+//*** HierarchyStartup()
+// This function is called at TPM2_Startup() to initialize the hierarchy
+// related values.
+BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
+		      );
+
+//*** HierarchyGetProof()
+// This function derives the proof value associated with a hierarchy. It returns a
+// buffer containing the proof value.
+//
+//  Return Type: TPM_RC
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects or the TPM failed
+//                              to derive the Firmware Secret.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the TPM failed
+//                              to derive the Firmware SVN Secret for the requested
+//                              SVN.
 TPM2B_PROOF *
-HierarchyGetProof(
-		  TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy constant
-		  );
+HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy constant
+		 );
+
+//*** HierarchyGetPrimarySeed()
+// This function derives the primary seed of a hierarchy.
+//
+//  Return Type: TPM_RC
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects or the TPM failed
+//                              to derive the Firmware Secret.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the TPM failed
+//                              to derive the Firmware SVN Secret for the requested
+//                              SVN.
 TPM2B_SEED *
 HierarchyGetPrimarySeed(
-			TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy
+			TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 			);
+
 // libtpms added begin
 SEED_COMPAT_LEVEL
 HierarchyGetPrimarySeedCompatLevel(
                                    TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
                                    );
 // libtpms added end
-BOOL
-HierarchyIsEnabled(
-		   TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy
-		   );
+
+//*** HierarchyIsEnabled()
+// This function checks to see if a hierarchy is enabled.
+// NOTE: The TPM_RH_NULL hierarchy is always enabled.
+//  Return Type: BOOL
+//      TRUE(1)         hierarchy is enabled
+//      FALSE(0)        hierarchy is disabled
+BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
+			);
 
 
-#endif
+#endif  // _HIERARCHY_FP_H_

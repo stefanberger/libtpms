@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
 /*										*/
 /********************************************************************************/
 
@@ -263,7 +263,7 @@ TPM2_Import(
     TPM2B_NAME               name;
     TPMA_OBJECT              attributes;
     UINT16                   innerKeySize = 0;       // encrypt key size for inner
-    // wrapper
+   // wrapper
     // Input Validation
     // to save typing
     attributes = in->objectPublic.publicArea.objectAttributes;

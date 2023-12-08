@@ -3,7 +3,6 @@
 /*		 select the library code that gets included in the TPM build 	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: LibSupport.h 1656 2021-01-15 21:45:18Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,52 +54,27 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-// 5.12	LibSupport.h
-// This header file is used to select the library code that gets included in the TPM build
+// This header file is used to select the library code that gets included in the
+// TPM build.
+
 #ifndef _LIB_SUPPORT_H_
 #define _LIB_SUPPORT_H_
-
-#if 0 // libtpms added
-/* kgold added power and s390 */
-#ifndef RADIX_BITS
-#   if defined(__x86_64__) || defined(__x86_64)				\
-    || defined(__amd64__) || defined(__amd64)				\
-    || defined(_WIN64) || defined(_M_X64)		 		\
-    || defined(_M_ARM64) || defined(__aarch64__) 			\
-    || defined(__powerpc64__) || defined(__PPC64__) || defined(__ppc64__) \
-    || defined(__s390x__)
-#       define RADIX_BITS                      64
-#   elif defined(__i386__) || defined(__i386) || defined(i386)		\
-    || defined(_WIN32) || defined(_M_IX86)				\
-    || defined(_M_ARM) || defined(__arm__) || defined(__thumb__)	\
-    || defined(__powerpc__) || defined(__PPC__)
-#       define RADIX_BITS                      32
-#   elif defined(__riscv) || defined(__riscv__)
-#       if __riscv_xlen == 32
-#            define RADIX_BITS                 32
-#       elif __riscv_xlen == 64
-#            define RADIX_BITS                 64
-#       else
-#            error Unsupported __riscv_xlen value
-#       endif
-#   else
-#       error Unable to determine RADIX_BITS from compiler environment
-#   endif
-#endif // RADIX_BITS
-#endif // libtpms added
 
 // These macros use the selected libraries to the proper include files.
 #define LIB_QUOTE(_STRING_) #_STRING_
 #define LIB_INCLUDE2(_LIB_, _TYPE_) LIB_QUOTE(TpmTo##_LIB_##_TYPE_.h)
 #define LIB_INCLUDE(_LIB_, _TYPE_) LIB_INCLUDE2(_LIB_, _TYPE_)
-// Include the options for hashing and symmetric. Defer the load of the math package until the
-// bignum parameters are defined.
+// Include the options for hashing and symmetric. Defer the load of the math package
+// Until the bignum parameters are defined.
+
 #include LIB_INCLUDE(SYM_LIB, Sym)
 #include LIB_INCLUDE(HASH_LIB, Hash)
+
 #undef MIN
 #undef MAX
-#endif // _LIB_SUPPORT_H_
+
+#endif  // _LIB_SUPPORT_H_

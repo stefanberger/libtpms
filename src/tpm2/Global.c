@@ -3,7 +3,6 @@
 /*		TPM variables that are not stack allocated			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Global.c 1519 2019-11-15 20:43:51Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,29 +54,35 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.5	Global.c */
-/* 9.5.1 Description */
-/* This file will instance the TPM variables that are not stack allocated. Descriptions of global
-   variables are in Global.h. There macro macro definitions that allows a variable to be instanced
-   or simply defined as an external variable. When global.h is included from this .c file, GLOBAL_C
-   is defined and values are instanced (and possibly initialized), but when global.h is included by
-   any other file, they are simply defined as external values. DO NOT DEFINE GLOBAL_C IN ANY OTHER
-   FILE. */
-/* NOTE: This is a change from previous implementations where Global.h just contained the extern
-   declaration and values were instanced in this file. This change keeps the definition and
-   instance in one file making maintenance easier. The instanced data will still be in the
-   global.obj file. */
-/* The OIDs.h file works in a way that is similar to the Global.h with the definition of the
-   values in OIDs.h such that they are instanced in global.obj. The macros that are defined in
-   Global.h are used in OIDs.h in the same way as they are in Global.h. */
+//** Description
+// This file will instance the TPM variables that are not stack allocated.
 
+// Descriptions of global variables are in Global.h. There macro macro definitions
+// that allows a variable to be instanced or simply defined as an external variable.
+// When global.h is included from this .c file, GLOBAL_C is defined and values are
+// instanced (and possibly initialized), but when global.h is included by any other
+// file, they are simply defined as external values. DO NOT DEFINE GLOBAL_C IN ANY
+// OTHER FILE.
+//
+// NOTE: This is a change from previous implementations where Global.h just contained
+// the extern declaration and values were instanced in this file. This change keeps
+// the definition and instance in one file making maintenance easier. The instanced
+// data will still be in the global.obj file.
+//
+// The OIDs.h file works in a way that is similar to the Global.h with the definition
+// of the values in OIDs.h such that they are instanced in global.obj. The macros
+// that are defined in Global.h are used in OIDs.h in the same way as they are in
+// Global.h.
+
+//** Defines and Includes
 #define GLOBAL_C
 #include "Tpm.h"
 #include "OIDs.h"
+
 #if CC_CertifyX509
-#   include "X509.h"
-#endif // CC_CertifyX509
+#  include "X509.h"
+#endif  // CC_CertifyX509

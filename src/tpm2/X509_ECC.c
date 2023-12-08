@@ -3,7 +3,6 @@
 /*			     TPM X509 ECC					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: X509_ECC.c 1658 2021-01-22 23:14:01Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +54,11 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.24	X509_ECC.c */
-/* 10.2.24.1	Includes */
+//** Includes
 #include "Tpm.h"
 #include "X509.h"
 #include "OIDs.h"
@@ -69,41 +67,37 @@
 #include "X509_spt_fp.h"
 #include "CryptHash_fp.h"
 
-/* 10.2.24.2	Functions */
-/* 10.2.24.2.1	X509PushPoint() */
-/* This seems like it might be used more than once so... */
-/* Return Value	Meaning */
-/* > 0	number of bytes added */
-/* == 0	failure */
+//** Functions
+
+//*** X509PushPoint()
+// This seems like it might be used more than once so...
+//  Return Type: INT16
+//      > 0         number of bytes added
+//     == 0         failure
 INT16
-X509PushPoint(
-	      ASN1MarshalContext      *ctx,
-	      TPMS_ECC_POINT          *p
-	      )
+X509PushPoint(ASN1MarshalContext* ctx, TPMS_ECC_POINT* p)
 {
     // Push a bit string containing the public key. For now, push the x, and y
     // coordinates of the public point, bottom up
-    ASN1StartMarshalContext(ctx); // BIT STRING
+    ASN1StartMarshalContext(ctx);  // BIT STRING
     {
 	ASN1PushBytes(ctx, p->y.t.size, p->y.t.buffer);
 	ASN1PushBytes(ctx, p->x.t.size, p->x.t.buffer);
 	ASN1PushByte(ctx, 0x04);
     }
-    return ASN1EndEncapsulation(ctx, ASN1_BITSTRING); // Ends BIT STRING
+    return ASN1EndEncapsulation(ctx, ASN1_BITSTRING);  // Ends BIT STRING
 }
-/* 10.2.24.2.2	X509AddSigningAlgorithmECC() */
-/* This creates the singing algorithm data. */
-/* Return Value	Meaning */
-/* > 0	number of bytes added */
-/* == 0	failure */
+
+//*** X509AddSigningAlgorithmECC()
+// This creates the singing algorithm data.
+//  Return Type: INT16
+//      > 0         number of bytes added
+//     == 0         failure
 INT16
 X509AddSigningAlgorithmECC(
-			   OBJECT              *signKey,
-			   TPMT_SIG_SCHEME     *scheme,
-			   ASN1MarshalContext  *ctx
-			   )
+			   OBJECT* signKey, TPMT_SIG_SCHEME* scheme, ASN1MarshalContext* ctx)
 {
-    PHASH_DEF            hashDef = CryptGetHashDef(scheme->details.any.hashAlg);
+    PHASH_DEF hashDef = CryptGetHashDef(scheme->details.any.hashAlg);
     //
     NOT_REFERENCED(signKey);
     // If the desired hashAlg definition wasn't found...
@@ -124,26 +118,24 @@ X509AddSigningAlgorithmECC(
 	    ASN1StartMarshalContext(ctx);
 	    ASN1PushOID(ctx, hashDef->ECDSA);
 	    return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
-#endif	// ALG_ECDSA
+#endif  //  ALG_ECDSA
 	  default:
 	    break;
 	}
     return 0;
 }
-/* 10.2.24.2.3	X509AddPublicECC() */
-/* This function will add the publicKey description to the DER data. If ctx is NULL, then no data is
-   transferred and this function will indicate if the TPM has the values for DER-encoding of the
-   public key. */
-/*     Return Value	Meaning */
-/*     > 0	number of bytes added */
-/*     == 0	failure */
+
+//*** X509AddPublicECC()
+// This function will add the publicKey description to the DER data. If ctx is
+// NULL, then no data is transferred and this function will indicate if the TPM
+// has the values for DER-encoding of the public key.
+//  Return Type: INT16
+//      > 0         number of bytes added
+//     == 0         failure
 INT16
-X509AddPublicECC(
-		 OBJECT                *object,
-		 ASN1MarshalContext    *ctx
-		 )
+X509AddPublicECC(OBJECT* object, ASN1MarshalContext* ctx)
 {
-    const BYTE      *curveOid =
+    const BYTE* curveOid =
 	CryptEccGetOID(object->publicArea.parameters.eccDetail.curveID);
     if((curveOid == NULL) || (*curveOid != ASN1_OBJECT_IDENTIFIER))
 	return 0;
@@ -159,15 +151,15 @@ X509AddPublicECC(
     // Need to mark the end sequence
     if(ctx == NULL)
 	return 1;
-    ASN1StartMarshalContext(ctx); // SEQUENCE (2 elem) 1st
+    ASN1StartMarshalContext(ctx);  // SEQUENCE (2 elem) 1st
     {
-	X509PushPoint(ctx, &object->publicArea.unique.ecc); // BIT STRING
-	ASN1StartMarshalContext(ctx); // SEQUENCE (2 elem) 2nd
+	X509PushPoint(ctx, &object->publicArea.unique.ecc);  // BIT STRING
+	ASN1StartMarshalContext(ctx);                        // SEQUENCE (2 elem) 2nd
 	{
-	    ASN1PushOID(ctx, curveOid); // curve dependent
-	    ASN1PushOID(ctx, OID_ECC_PUBLIC); // (1.2.840.10045.2.1)
+	    ASN1PushOID(ctx, curveOid);        // curve dependent
+	    ASN1PushOID(ctx, OID_ECC_PUBLIC);  // (1.2.840.10045.2.1)
 	}
-	ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE); // Ends SEQUENCE 2nd
+	ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 2nd
     }
-    return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE); // Ends SEQUENCE 1st
+    return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 1st
 }

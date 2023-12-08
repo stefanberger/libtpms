@@ -3,7 +3,6 @@
 /*	Functions that are used for the two-phase, ECC, key-exchange protocols	*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange.c 1658 2021-01-22 23:14:01Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,11 +54,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-/* 10.2.11 CryptEccKeyExchange.c */
+//** Introduction
+// This file contains the functions that are used for the two-phase, ECC,
+// key-exchange protocols
+
 #include "Tpm.h"
 
 LIB_EXPORT TPM_RC
@@ -73,45 +75,53 @@ SM2KeyExchange(
 	       );
 
 #if CC_ZGen_2Phase == YES
-#if ALG_ECMQV
-/*     10.2.11.1.1 avf1() */
-/* This function does the associated value computation required by MQV key exchange. Process: */
-/* a) Convert xQ to an integer xqi using the convention specified in Appendix C.3. */
-/* b) Calculate xqm = xqi mod 2^ceil(f/2) (where f = ceil(log2(n)). */
-/* c) Calculate the associate value function avf(Q) = xqm + 2ceil(f / 2) */
-/*  Always returns TRUE(1). */
-static BOOL
-avf1(
-     bigNum               bnX,           // IN/OUT: the reduced value
-     bigNum               bnN            // IN: the order of the curve
-     )
+
+//** Functions
+
+#  if ALG_ECMQV
+
+//*** avf1()
+// This function does the associated value computation required by MQV key
+// exchange.
+// Process:
+// 1. Convert 'xQ' to an integer 'xqi' using the convention specified in Appendix C.3.
+// 2. Calculate
+//        xqm = xqi mod 2^ceil(f/2) (where f = ceil(log2(n)).
+// 3. Calculate the associate value function
+//        avf(Q) = xqm + 2ceil(f / 2)
+// Always returns TRUE(1).
+static BOOL avf1(bigNum bnX,  // IN/OUT: the reduced value
+		 bigNum bnN   // IN: the order of the curve
+		 )
 {
     // compute f = 2^(ceil(ceil(log2(n)) / 2))
-    int                      f = (BnSizeInBits(bnN) + 1) / 2;
+    int f = (BnSizeInBits(bnN) + 1) / 2;
     // x' = 2^f + (x mod 2^f)
     BnMaskBits(bnX, f);   // This is mod 2*2^f but it doesn't matter because
     // the next operation will SET the extra bit anyway
     BnSetBit(bnX, f);
     return TRUE;
 }
-/* 	  10.2.11.1.2 C_2_2_MQV() */
-/* This function performs the key exchange defined in SP800-56A 6.1.1.4 Full MQV, C(2, 2, ECC
-   MQV). */
-/* CAUTION: Implementation of this function may require use of essential claims in patents not owned
-   by TCG members. */
-/* Points QsB() and QeB() are required to be on the curve of inQsA. The function will fail, possibly
-   catastrophically, if this is not the case. */
-/* Error Returns Meaning */
-/* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
-static TPM_RC
-C_2_2_MQV(
-	  TPMS_ECC_POINT        *outZ,         // OUT: the computed point
-	  TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
-	  TPM2B_ECC_PARAMETER   *dsA,          // IN: static private TPM key
-	  TPM2B_ECC_PARAMETER   *deA,          // IN: ephemeral private TPM key
-	  TPMS_ECC_POINT        *QsB,          // IN: static public party B key
-	  TPMS_ECC_POINT        *QeB           // IN: ephemeral public party B key
-	  )
+
+//*** C_2_2_MQV()
+// This function performs the key exchange defined in SP800-56A
+// 6.1.1.4 Full MQV, C(2, 2, ECC MQV).
+//
+// CAUTION: Implementation of this function may require use of essential claims in
+// patents not owned by TCG members.
+//
+// Points 'QsB' and 'QeB' are required to be on the curve of 'inQsA'. The function
+// will fail, possibly catastrophically, if this is not the case.
+//  Return Type: TPM_RC
+//      TPM_RC_NO_RESULT        the value for dsA does not give a valid point on the
+//                              curve
+static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
+			TPM_ECC_CURVE curveId,  // IN: the curve for the computations
+			TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
+			TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
+			TPMS_ECC_POINT*      QsB,  // IN: static public party B key
+			TPMS_ECC_POINT*      QeB   // IN: ephemeral public party B key
+			)
 {
     CURVE_INITIALIZED(E, curveId);
     const ECC_CURVE_DATA          *C;
@@ -123,23 +133,25 @@ C_2_2_MQV(
     ECC_INITIALIZED(bnDsA, dsA);
     ECC_NUM(bnN);
     ECC_NUM(bnXeB);
-    TPM_RC                 retVal;
+    TPM_RC retVal;
     //
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_VALUE);
-    pAssert(outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL
-	    && dsA != NULL);
+    pAssert(
+	    outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL && dsA != NULL);
     C = AccessCurveData(E);
     // Process:
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
     //  2. P = h(implicitsigA)(Qe,B + avf(Qe,B)Qs,B).
     //  3. If P = O, output an error indicator.
     //  4. Z=xP, where xP is the x-coordinate of P.
+
     // Compute the public ephemeral key pQeA = [de,A]G
     if((retVal = BnPointMult(pQeA, CurveGetG(C), bnDeA, NULL, NULL, E))
        != TPM_RC_SUCCESS)
 	goto Exit;
+
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
     //  tA := (ds,A + de,A  avf(Xe,A)) mod n    (3)
     //  Compute 'tA' = ('deA' +  'dsA'  avf('XeA')) mod n
@@ -159,8 +171,10 @@ C_2_2_MQV(
 	BnModMult(bnTa, bnTa, CurveGetCofactor(C), CurveGetOrder(C));
     // Now that 'tA' is (h * 'tA' mod n)
     // 'outZ' = (tA)(Qe,B + avf(Qe,B)Qs,B).
+
     // first, compute XeB = avf(XeB)
     avf1(bnXeB, bnN);
+
     // QsB := [XeB]QsB
     BnPointMult(pQsB, pQsB, bnXeB, NULL, NULL, E);
     BnEccAdd(pQeB, pQeB, pQsB, E);
@@ -175,20 +189,21 @@ C_2_2_MQV(
     CURVE_FREE(E);
     return retVal;
 }
-#endif // ALG_ECMQV
-/* 10.2.11.1.3 C_2_2_ECDH() */
-/* This function performs the two phase key exchange defined in SP800-56A, 6.1.1.2 Full Unified
-   Model, C(2, 2, ECC CDH). */
-static TPM_RC
-C_2_2_ECDH(
-	   TPMS_ECC_POINT          *outZs,         // OUT: Zs
-	   TPMS_ECC_POINT          *outZe,         // OUT: Ze
-	   TPM_ECC_CURVE            curveId,       // IN: the curve for the computations
-	   TPM2B_ECC_PARAMETER     *dsA,           // IN: static private TPM key
-	   TPM2B_ECC_PARAMETER     *deA,           // IN: ephemeral private TPM key
-	   TPMS_ECC_POINT          *QsB,           // IN: static public party B key
-	   TPMS_ECC_POINT          *QeB            // IN: ephemeral public party B key
-	   )
+
+#  endif  // ALG_ECMQV
+
+//*** C_2_2_ECDH()
+// This function performs the two phase key exchange defined in SP800-56A,
+// 6.1.1.2 Full Unified Model, C(2, 2, ECC CDH).
+//
+static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
+			 TPMS_ECC_POINT* outZe,  // OUT: Ze
+			 TPM_ECC_CURVE curveId,  // IN: the curve for the computations
+			 TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
+			 TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
+			 TPMS_ECC_POINT*      QsB,  // IN: static public party B key
+			 TPMS_ECC_POINT*      QeB  // IN: ephemeral public party B key
+			 )
 {
     CURVE_INITIALIZED(E, curveId);
     ECC_INITIALIZED(bnAs, dsA);
@@ -196,13 +211,14 @@ C_2_2_ECDH(
     POINT_INITIALIZED(ecBs, QsB);
     POINT_INITIALIZED(ecBe, QeB);
     POINT(ecZ);
-    TPM_RC            retVal;
+    TPM_RC retVal;
     //
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_CURVE);
-    pAssert(outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL
-	    && QeB != NULL);
+    pAssert(
+	    outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+
     // Do the point multiply for the Zs value ([dsA]QsB)
     retVal = BnPointMult(ecZ, ecBs, bnAs, NULL, NULL, E);
     if(retVal == TPM_RC_SUCCESS)
@@ -218,26 +234,26 @@ C_2_2_ECDH(
     CURVE_FREE(E);
     return retVal;
 }
-/* 10.2.11.1.4 CryptEcc2PhaseKeyExchange() */
-/* This function is the dispatch routine for the EC key exchange functions that use two ephemeral
-   and two static keys. */
-/* Error Returns Meaning */
-/* TPM_RC_SCHEME scheme is not defined */
-LIB_EXPORT TPM_RC
-CryptEcc2PhaseKeyExchange(
-			  TPMS_ECC_POINT          *outZ1,         // OUT: a computed point
-			  TPMS_ECC_POINT          *outZ2,         // OUT: and optional second point
-			  TPM_ECC_CURVE            curveId,   // IN: the curve for the computations
-			  TPM_ALG_ID               scheme,        // IN: the key exchange scheme
-			  TPM2B_ECC_PARAMETER     *dsA,           // IN: static private TPM key
-			  TPM2B_ECC_PARAMETER     *deA,           // IN: ephemeral private TPM key
-			  TPMS_ECC_POINT          *QsB,           // IN: static public party B key
-			  TPMS_ECC_POINT          *QeB            // IN: ephemeral public party B key
-			  )
+
+//*** CryptEcc2PhaseKeyExchange()
+// This function is the dispatch routine for the EC key exchange functions that use
+// two ephemeral and two static keys.
+//  Return Type: TPM_RC
+//      TPM_RC_SCHEME             scheme is not defined
+LIB_EXPORT TPM_RC CryptEcc2PhaseKeyExchange(
+					    TPMS_ECC_POINT*      outZ1,    // OUT: a computed point
+					    TPMS_ECC_POINT*      outZ2,    // OUT: and optional second point
+					    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+					    TPM_ALG_ID           scheme,   // IN: the key exchange scheme
+					    TPM2B_ECC_PARAMETER* dsA,      // IN: static private TPM key
+					    TPM2B_ECC_PARAMETER* deA,      // IN: ephemeral private TPM key
+					    TPMS_ECC_POINT*      QsB,      // IN: static public party B key
+					    TPMS_ECC_POINT*      QeB       // IN: ephemeral public party B key
+					    )
 {
-    pAssert(outZ1 != NULL
-	    && dsA != NULL && deA != NULL
-	    && QsB != NULL && QeB != NULL);
+    pAssert(
+	    outZ1 != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+
     // Initialize the output points so that they are empty until one of the
     // functions decides otherwise
     outZ1->x.b.size = 0;
@@ -252,37 +268,38 @@ CryptEcc2PhaseKeyExchange(
 	  case TPM_ALG_ECDH:
 	    return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
 	    break;
-#if ALG_ECMQV
+#  if ALG_ECMQV
 	  case TPM_ALG_ECMQV:
 	    return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
-#endif
-#if ALG_SM2
+#  endif
+#  if ALG_SM2
 	  case TPM_ALG_SM2:
 	    return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
 	    break;
-#endif
+#  endif
 	  default:
 	    return TPM_RC_SCHEME;
 	}
 }
-#if ALG_SM2
-/* 10.2.11.1.5 ComputeWForSM2() */
-/* Compute the value for w used by SM2 */
-static UINT32
-ComputeWForSM2(
-	       bigCurve        E
-	       )
+
+#  if ALG_SM2
+
+//*** ComputeWForSM2()
+// Compute the value for w used by SM2
+static UINT32 ComputeWForSM2(bigCurve E)
 {
     //  w := ceil(ceil(log2(n)) / 2) - 1
     return (BnMsb(CurveGetOrder(AccessCurveData(E))) / 2 - 1);
 }
-/* 10.2.11.1.6 avfSm2() */
-/* This function does the associated value computation required by SM2 key exchange. This is
-   different form the avf() in the international standards because it returns a value that is half
-   the size of the value returned by the standard avf. For example, if n is 15, Ws (w in the
-   standard) is 2 but the W here is 1. This means that an input value of 14 (1110b) would return a
-   value of 110b with the standard but 10b with the scheme in SM2. */
+
+//*** avfSm2()
+// This function does the associated value computation required by SM2 key
+// exchange. This is different from the avf() in the international standards
+// because it returns a value that is half the size of the value returned by the
+// standard avf(). For example, if 'n' is 15, 'Ws' ('w' in the standard) is 2 but
+// the 'W' here is 1. This means that an input value of 14 (1110b) would return a
+// value of 110b with the standard but 10b with the scheme in SM2.
 static bigNum
 avfSm2(
        bigNum              bn,           // IN/OUT: the reduced value
@@ -298,22 +315,28 @@ avfSm2(
     BnSetBit(bn, w);
     return bn;
 }
-/* SM2KeyExchange() This function performs the key exchange defined in SM2. The first step is to
-   compute tA = (dsA + deA avf(Xe,A)) mod n Then, compute the Z value from outZ = (h tA mod n) (QsA
-   + [avf(QeB().x)](QeB())). The function will compute the ephemeral public key from the ephemeral
-   private key. All points are required to be on the curve of inQsA. The function will fail
-   catastrophically if this is not the case */
-/* Error Returns Meaning */
-/* TPM_RC_NO_RESULT the value for dsA does not give a valid point on the curve */
-LIB_EXPORT TPM_RC
-SM2KeyExchange(
-	       TPMS_ECC_POINT        *outZ,         // OUT: the computed point
-	       TPM_ECC_CURVE          curveId,      // IN: the curve for the computations
-	       TPM2B_ECC_PARAMETER   *dsAIn,        // IN: static private TPM key
-	       TPM2B_ECC_PARAMETER   *deAIn,        // IN: ephemeral private TPM key
-	       TPMS_ECC_POINT        *QsBIn,        // IN: static public party B key
-	       TPMS_ECC_POINT        *QeBIn         // IN: ephemeral public party B key
-	       )
+
+//*** SM2KeyExchange()
+// This function performs the key exchange defined in SM2.
+// The first step is to compute
+//  'tA' = ('dsA' + 'deA'  avf(Xe,A)) mod 'n'
+// Then, compute the 'Z' value from
+// 'outZ' = ('h'  'tA' mod 'n') ('QsA' + [avf('QeB.x')]('QeB')).
+// The function will compute the ephemeral public key from the ephemeral
+// private key.
+// All points are required to be on the curve of 'inQsA'. The function will fail
+// catastrophically if this is not the case
+//  Return Type: TPM_RC
+//      TPM_RC_NO_RESULT        the value for dsA does not give a valid point on the
+//                              curve
+LIB_EXPORT TPM_RC SM2KeyExchange(
+				 TPMS_ECC_POINT*      outZ,     // OUT: the computed point
+				 TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+				 TPM2B_ECC_PARAMETER* dsAIn,    // IN: static private TPM key
+				 TPM2B_ECC_PARAMETER* deAIn,    // IN: ephemeral private TPM key
+				 TPMS_ECC_POINT*      QsBIn,    // IN: static public party B key
+				 TPMS_ECC_POINT*      QeBIn     // IN: ephemeral public party B key
+				 )
 {
     CURVE_INITIALIZED(E, curveId);
     const ECC_CURVE_DATA      *C;
@@ -326,20 +349,22 @@ SM2KeyExchange(
     ECC_NUM(XeB);
     POINT(Z);
     ECC_NUM(Ta);
-    UINT32                   w;
-    TPM_RC                 retVal = TPM_RC_NO_RESULT;
+    UINT32 w;
+    TPM_RC retVal = TPM_RC_NO_RESULT;
     //
     // Parameter checks
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_CURVE);
     C = AccessCurveData(E);
-    pAssert(outZ != NULL && dsA != NULL && deA != NULL &&  QsB != NULL
-	    && QeB != NULL);
+    pAssert(outZ != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+
     // Compute the value for w
     w = ComputeWForSM2(E);
+
     // Compute the public ephemeral key pQeA = [de,A]G
     if(!BnEccModMult(QeA, CurveGetG(C), deA, E))
 	goto Exit;
+
     //  tA := (ds,A + de,A  avf(Xe,A)) mod n    (3)
     //  Compute 'tA' = ('dsA' +  'deA'  avf('XeA')) mod n
     // Ta = avf(XeA);
@@ -369,5 +394,6 @@ SM2KeyExchange(
     CURVE_FREE(E);
     return retVal;
 }
-#endif
-#endif // CC_ZGen_2Phase
+#  endif
+
+#endif  // CC_ZGen_2Phase

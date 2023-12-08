@@ -55,7 +55,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019					*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2021				*/
 /*										*/
 /********************************************************************************/
 

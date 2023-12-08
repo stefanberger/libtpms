@@ -3,7 +3,6 @@
 /*			  TPM Part 2 Headers	   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmTypes.h 1606 2020-04-14 16:26:05Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -735,10 +734,10 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  HR_PCR                  (TPM_HC)((TPM_HT_PCR<<HR_SHIFT))
 #define  HR_HMAC_SESSION         (TPM_HC)((TPM_HT_HMAC_SESSION<<HR_SHIFT))
 #define  HR_POLICY_SESSION       (TPM_HC)((TPM_HT_POLICY_SESSION<<HR_SHIFT))
-#define  HR_TRANSIENT            (TPM_HC)(((UINT32)TPM_HT_TRANSIENT<<HR_SHIFT))  /* libtpms cast (ubsan) */
-#define  HR_PERSISTENT           (TPM_HC)(((UINT32)TPM_HT_PERSISTENT<<HR_SHIFT)) /* libtpms cast (ubsan) */
-#define  HR_NV_INDEX             (TPM_HC)((TPM_HT_NV_INDEX<<HR_SHIFT))
-#define  HR_PERMANENT            (TPM_HC)((TPM_HT_PERMANENT<<HR_SHIFT))
+#define  HR_TRANSIENT		 (TPM_HC)((((UINT32)TPM_HT_TRANSIENT) << HR_SHIFT))
+#define  HR_PERSISTENT           (TPM_HC)((((UINT32)TPM_HT_PERSISTENT) << HR_SHIFT))
+#define  HR_NV_INDEX             (TPM_HC)((TPM_HT_NV_INDEX << HR_SHIFT))
+#define  HR_PERMANENT            (TPM_HC)((TPM_HT_PERMANENT << HR_SHIFT))
 #define  PCR_FIRST               (TPM_HC)((HR_PCR+0))
 #define  PCR_LAST                (TPM_HC)((PCR_FIRST+IMPLEMENTATION_PCR-1))
 #define  HMAC_SESSION_FIRST      (TPM_HC)((HR_HMAC_SESSION+0))
@@ -866,19 +865,19 @@ typedef struct TPMA_OBJECT {                        // Table 2:31
 // This implements Table 2:31 TPMA_OBJECT using bit masking
 typedef UINT32                              TPMA_OBJECT;
 #define TYPE_OF_TPMA_OBJECT                 UINT32
-#define TPMA_OBJECT_Reserved_bit_at_0       ((TPMA_OBJECT)1 << 0)
-#define TPMA_OBJECT_fixedTPM                ((TPMA_OBJECT)1 << 1)
-#define TPMA_OBJECT_stClear                 ((TPMA_OBJECT)1 << 2)
-#define TPMA_OBJECT_fixedParent             ((TPMA_OBJECT)1 << 4)
-#define TPMA_OBJECT_sensitiveDataOrigin     ((TPMA_OBJECT)1 << 5)
-#define TPMA_OBJECT_userWithAuth            ((TPMA_OBJECT)1 << 6)
-#define TPMA_OBJECT_adminWithPolicy         ((TPMA_OBJECT)1 << 7)
-#define TPMA_OBJECT_noDA                    ((TPMA_OBJECT)1 << 10)
-#define TPMA_OBJECT_encryptedDuplication    ((TPMA_OBJECT)1 << 11)
-#define TPMA_OBJECT_restricted              ((TPMA_OBJECT)1 << 16)
-#define TPMA_OBJECT_decrypt                 ((TPMA_OBJECT)1 << 17)
-#define TPMA_OBJECT_sign                    ((TPMA_OBJECT)1 << 18)
-#define TPMA_OBJECT_x509sign                ((TPMA_OBJECT)1 << 19)
+#define TPMA_OBJECT_Reserved_bit_at_0       ((TPMA_OBJECT)(1 << 0))
+#define TPMA_OBJECT_fixedTPM                ((TPMA_OBJECT)(1 << 1))
+#define TPMA_OBJECT_stClear                 ((TPMA_OBJECT)(1 << 2))
+#define TPMA_OBJECT_fixedParent             ((TPMA_OBJECT)(1 << 4))
+#define TPMA_OBJECT_sensitiveDataOrigin     ((TPMA_OBJECT)(1 << 5))
+#define TPMA_OBJECT_userWithAuth            ((TPMA_OBJECT)(1 << 6))
+#define TPMA_OBJECT_adminWithPolicy         ((TPMA_OBJECT)(1 << 7))
+#define TPMA_OBJECT_noDA                    ((TPMA_OBJECT)(1 << 10))
+#define TPMA_OBJECT_encryptedDuplication    ((TPMA_OBJECT)(1 << 11))
+#define TPMA_OBJECT_restricted              ((TPMA_OBJECT)(1 << 16))
+#define TPMA_OBJECT_decrypt                 ((TPMA_OBJECT)(1 << 17))
+#define TPMA_OBJECT_sign                    ((TPMA_OBJECT)(1 << 18))
+#define TPMA_OBJECT_x509sign                ((TPMA_OBJECT)(1 << 19))
 #define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f309)
 //  This is the initializer for a TPMA_OBJECT bit array.
 #define TPMA_OBJECT_INITIALIZER(                                                   \

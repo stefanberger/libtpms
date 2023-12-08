@@ -128,10 +128,15 @@ EXTERN unsigned char    s_NV[NV_MEMORY_SIZE];
 EXTERN int              s_NvIsAvailable;
 EXTERN int              s_NV_unrecoverable;
 EXTERN int              s_NV_recoverable;
-/* From PPPlat.c Physical presence.  It is initialized to FALSE */
+
+/* From PPPlat.c Physical presence. */
+/* It is initialized to FALSE */
+
 EXTERN int        s_physicalPresence;
+
 /* From Power */
 EXTERN int        s_powerLost;
+
 /* From Entropy.c */
 EXTERN uint32_t        lastEntropy;
 

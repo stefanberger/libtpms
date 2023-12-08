@@ -3,7 +3,6 @@
 /*			    Non-Volatile Storage 				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: NVCommands.c 1490 2019-07-26 21:13:22Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2019				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -661,27 +660,27 @@ TPM2_NV_Certify(
     if(in->size > MAX_NV_BUFFER_SIZE)
 	return TPM_RCS_VALUE + RC_NV_Certify_size;
     // Command Output
- 
+
     // Fill in attest information common fields
     FillInAttestInfo(in->signHandle, &in->inScheme, &in->qualifyingData,
 		     &certifyInfo);
-    
+
     // Get the name of the index
     NvGetIndexName(nvIndex, &certifyInfo.attested.nv.indexName);
-    
+
     // See if this is old format or new format
     if ((in->size != 0) || (in->offset != 0))
 	{
 	    // NV certify specific fields
 	    // Attestation type
 	    certifyInfo.type = TPM_ST_ATTEST_NV;
-	    
+
 	    // Set the return size
 	    certifyInfo.attested.nv.nvContents.t.size = in->size;
-	    
+
 	    // Set the offset
 	    certifyInfo.attested.nv.offset = in->offset;
-	    
+
 	    // Perform the read
 	    NvGetIndexData(nvIndex, locator, in->offset, in->size,
 			   certifyInfo.attested.nv.nvContents.t.buffer);

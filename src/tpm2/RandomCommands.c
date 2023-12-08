@@ -76,7 +76,7 @@ TPM2_GetRandom(
     else
 	out->randomBytes.t.size = in->bytesRequested;
     CryptRandomGenerate(out->randomBytes.t.size, out->randomBytes.t.buffer);
-    return TPM_RC_SUCCESS;
+   return TPM_RC_SUCCESS;
 }
 #endif // CC_GetRandom
 #include "Tpm.h"

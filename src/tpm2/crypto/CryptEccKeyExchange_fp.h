@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptEccKeyExchange_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,24 +54,35 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef CRYPTECCKEYEXCHANGE_FP_H
-#define CRYPTECCKEYEXCHANGE_FP_H
+/*(Auto-generated)
+ *  Created by TpmPrototypes; Version 3.0 July 18, 2017
+ *  Date: Mar 28, 2019  Time: 08:25:18PM
+ */
 
-LIB_EXPORT TPM_RC
-CryptEcc2PhaseKeyExchange(
-			  TPMS_ECC_POINT          *outZ1,         // OUT: a computed point
-			  TPMS_ECC_POINT          *outZ2,         // OUT: and optional second point
-			  TPM_ECC_CURVE            curveId,       // IN: the curve for the computations
-			  TPM_ALG_ID               scheme,        // IN: the key exchange scheme
-			  TPM2B_ECC_PARAMETER     *dsA,           // IN: static private TPM key
-			  TPM2B_ECC_PARAMETER     *deA,           // IN: ephemeral private TPM key
-			  TPMS_ECC_POINT          *QsB,           // IN: static public party B key
-			  TPMS_ECC_POINT          *QeB            // IN: ephemeral public party B key
-			  );
+#ifndef _CRYPT_ECC_KEY_EXCHANGE_FP_H_
+#define _CRYPT_ECC_KEY_EXCHANGE_FP_H_
 
+#if CC_ZGen_2Phase == YES
 
-#endif
+//*** CryptEcc2PhaseKeyExchange()
+// This function is the dispatch routine for the EC key exchange functions that use
+// two ephemeral and two static keys.
+//  Return Type: TPM_RC
+//      TPM_RC_SCHEME             scheme is not defined
+LIB_EXPORT TPM_RC CryptEcc2PhaseKeyExchange(
+					    TPMS_ECC_POINT*      outZ1,    // OUT: a computed point
+					    TPMS_ECC_POINT*      outZ2,    // OUT: and optional second point
+					    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+					    TPM_ALG_ID           scheme,   // IN: the key exchange scheme
+					    TPM2B_ECC_PARAMETER* dsA,      // IN: static private TPM key
+					    TPM2B_ECC_PARAMETER* deA,      // IN: ephemeral private TPM key
+					    TPMS_ECC_POINT*      QsB,      // IN: static public party B key
+					    TPMS_ECC_POINT*      QeB       // IN: ephemeral public party B key
+					    );
+#endif  // CC_ZGen_2Phase
+
+#endif  // _CRYPT_ECC_KEY_EXCHANGE_FP_H_

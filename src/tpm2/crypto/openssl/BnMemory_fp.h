@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: BnMemory_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
@@ -89,6 +88,7 @@ BnCopy(
        bigNum           out,
        bigConst         in
        );
+#if ALG_ECC
 #if 0   /* libtpms added */
 LIB_EXPORT BOOL
 BnPointCopy(
@@ -104,5 +104,5 @@ BnInitializePoint(
 		  bigNum               z      // IN: x coordinate
 		  );
 
-
+#endif  // ALG_ECC
 #endif
