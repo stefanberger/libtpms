@@ -90,7 +90,6 @@
 #   undef   DEBUG
 #   define  DEBUG       YES       // Default: Either YES or NO
 #endif
-#include "CompilerDependencies.h"
 
 // This definition is required for the re-factored code
 #if (!defined USE_BN_ECC_DATA) || ((USE_BN_ECC_DATA != NO) && (USE_BN_ECC_DATA != YES))
@@ -351,5 +350,8 @@
 #define      ALG_NO       NO
 #define      CC_YES       YES
 #define      CC_NO        NO
+
+// TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
+#include "CompilerDependencies.h"
 
 #endif  // _TPM_BUILD_SWITCHES_H_

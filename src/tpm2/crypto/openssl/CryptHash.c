@@ -249,7 +249,7 @@ void CryptHashExportState(
 {
     BYTE* outBuf = (BYTE*)externalFmt;
     //
-    cAssert(sizeof(HASH_STATE) <= sizeof(EXPORT_HASH_STATE));
+    MUST_BE(sizeof(HASH_STATE) <= sizeof(EXPORT_HASH_STATE));
     // the following #define is used to move data from an aligned internal data
     // structure to a byte buffer (external format data.
 #define CopyToOffset(value)				   \

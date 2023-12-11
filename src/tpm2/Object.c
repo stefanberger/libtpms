@@ -497,7 +497,7 @@ static HASH_OBJECT* AllocateSequenceSlot(
     // Validate that the proper location of the hash state data relative to the
     // object state data. It would be good if this could have been done at compile
     // time but it can't so do it in something that can be removed after debug.
-    cAssert(offsetof(HASH_OBJECT, auth) == offsetof(OBJECT, publicArea.authPolicy));
+    MUST_BE(offsetof(HASH_OBJECT, auth) == offsetof(OBJECT, publicArea.authPolicy));
 
     if(object != NULL)
 	{

@@ -1179,7 +1179,8 @@ PCRCapGetProperties(TPM_PT_PCR property,  // IN: the starting PCR property
 
     // TPM_PT_PCR_FIRST is defined as 0 in spec.  It ensures that property
     // value would never be less than TPM_PT_PCR_FIRST
-    cAssert(TPM_PT_PCR_FIRST == 0);
+    MUST_BE(TPM_PT_PCR_FIRST == 0);
+
     // Iterate PCR properties. TPM_PT_PCR_LAST is the index of the last property
     // implemented on the TPM.
     for(i = property; i <= TPM_PT_PCR_LAST; i++)
