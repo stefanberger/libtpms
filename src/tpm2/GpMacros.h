@@ -142,6 +142,21 @@
 	retVal = returnCode;			\
 	goto Exit;				\
     }
+
+// braces are necessary for this usage:
+// if (y)
+//     GOTO_ERROR_UNLESS(x)
+// else ...
+// without braces the else would attach to the GOTO macro instead of the
+// outer if statement; given the amount of TPM code that doesn't use braces on
+// if statements, this is a live risk.
+#define GOTO_ERROR_UNLESS(_X)		      \
+    do					      \
+	{				      \
+	    if(!(_X))				      \
+		goto Error;			      \
+	} while(0)
+
 #ifndef MAX
 #  define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -321,7 +336,6 @@
 #  define GET_ATTRIBUTE(a, type, b)   (type)((a & type##_##b) >> type##_##b##_SHIFT)
 #  define TPMA_ZERO_INITIALIZER()     (0)
 #endif
-#define VERIFY(_X) if(!(_X)) goto Error
 
 // These macros determine if the values in this file are referenced or instanced.
 // Global.c defines GLOBAL_C so all the values in this file will be instanced in

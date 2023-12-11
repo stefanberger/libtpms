@@ -105,10 +105,10 @@ BOOL X509FindExtensionByOID(ASN1UnmarshalContext* ctxIn,  // IN: the context to 
     // Now, search in the extension context
     for(; ctx->size > ctx->offset; ctx->offset += length)
 	{
-	    VERIFY((length = ASN1NextTag(ctx)) >= 0);
+	    GOTO_ERROR_UNLESS((length = ASN1NextTag(ctx)) >= 0);
 	    // If this is not a constructed sequence, then it doesn't belong
 	    // in the extensions.
-	    VERIFY(ctx->tag == ASN1_CONSTRUCTED_SEQUENCE);
+	    GOTO_ERROR_UNLESS(ctx->tag == ASN1_CONSTRUCTED_SEQUENCE);
 	    // Make sure that this entry could hold the OID
 	    if(length >= OID_SIZE(OID))
 		{
@@ -124,7 +124,7 @@ BOOL X509FindExtensionByOID(ASN1UnmarshalContext* ctxIn,  // IN: the context to 
 			}
 		}
 	}
-    VERIFY(ctx->offset == ctx->size);
+    GOTO_ERROR_UNLESS(ctx->offset == ctx->size);
     return FALSE;
  Error:
     ctxIn->size = -1;

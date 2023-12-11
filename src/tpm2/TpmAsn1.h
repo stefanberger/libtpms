@@ -111,14 +111,14 @@
 //** Macros
 
 //*** Unmarshaling Macros
-#ifndef VERIFY
-#define VERIFY(_X_) {if(!(_X_)) goto Error; }
+#ifndef GOTO_ERROR_UNLESS
+#  error missing GOTO_ERROR_UNLESS definition
 #endif
 
 // Checks the validity of the size making sure that there is no wrap around
 #define CHECK_SIZE(context, length)					\
-    VERIFY(   (((length) + (context)->offset) >= (context)->offset) \
-	      && (((length) + (context)->offset) <= (context)->size))
+    GOTO_ERROR_UNLESS((((length) + (context)->offset) >= (context)->offset) \
+		      && (((length) + (context)->offset) <= (context)->size))
 #define NEXT_OCTET(context) ((context)->buffer[(context)->offset++])
 #define PEEK_NEXT(context)  ((context)->buffer[(context)->offset])
 
@@ -129,7 +129,7 @@
 // encoded it can be moved to the top of the buffer. This happens when the last
 // context is closed.
 
-#define CHECK_SPACE(context, length) VERIFY(context->offset > length)
+#define CHECK_SPACE(context, length) GOTO_ERROR_UNLESS(context->offset > length)
 
 //** Structures
 

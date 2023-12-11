@@ -95,7 +95,7 @@ OsslToTpmBn(
 	    const BIGNUM   *osslBn   // libtpms: added 'const'
 	    )
 {
-    VERIFY(osslBn != NULL);
+    GOTO_ERROR_UNLESS(osslBn != NULL);
     // If the bn is NULL, it means that an output value pointer was NULL meaning that
     // the results is simply to be discarded.
     unsigned char buffer[LARGEST_NUMBER + 1];	// libtpms added
@@ -107,13 +107,13 @@ OsslToTpmBn(
 	    int num_bytes;
 
 	    num_bytes = BN_num_bytes(osslBn);
-	    VERIFY(num_bytes >= 0 && sizeof(buffer) >= (size_t)num_bytes);
+	    GOTO_ERROR_UNLESS(num_bytes >= 0 && sizeof(buffer) >= (size_t)num_bytes);
 	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
 	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
 #else // libtpms added end
 	    int         i;
 	    //
-	    VERIFY((unsigned)osslBn->top <= BnGetAllocated(bn));
+	    GOTO_ERROR_UNLESS((unsigned)osslBn->top <= BnGetAllocated(bn));
 	    for(i = 0; i < osslBn->top; i++)
 		bn->d[i] = osslBn->d[i];
 	    BnSetTop(bn, osslBn->top);
@@ -249,9 +249,9 @@ MathLibraryCompatibilityCheck(
     BN_bin2bn(test, sizeof(test), osslTemp);
     // Make sure the values are consistent
 #if 0
-    VERIFY(osslTemp->top == (int)tpmTemp->size);
+    GOTO_ERROR_UNLESS(osslTemp->top == (int)tpmTemp->size);
     for(i = 0; i < tpmTemp->size; i++)
-	VERIFY(osslTemp->d[i] == tpmTemp->d[i]);
+	GOTO_ERROR_UNLESS(osslTemp->d[i] == tpmTemp->d[i]);
 #endif
     OSSL_LEAVE();
     return 1;
@@ -285,9 +285,9 @@ BnModMult(
     BIG_INITIALIZED(bnOp2, op2);
     BIG_INITIALIZED(bnMod, modulus);
     //
-    VERIFY(BN_mul(bnTemp, bnOp1, bnOp2, CTX));
-    VERIFY(BN_div(NULL, bnResult, bnTemp, bnMod, CTX));
-    VERIFY(OsslToTpmBn(result, bnResult));
+    GOTO_ERROR_UNLESS(BN_mul(bnTemp, bnOp1, bnOp2, CTX));
+    GOTO_ERROR_UNLESS(BN_div(NULL, bnResult, bnTemp, bnMod, CTX));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
  Error:
     OK = FALSE;
@@ -318,8 +318,8 @@ BnMult(
     BIG_INITIALIZED(bnA, multiplicand);
     BIG_INITIALIZED(bnB, multiplier);
     //
-    VERIFY(BN_mul(bnTemp, bnA, bnB, CTX));
-    VERIFY(OsslToTpmBn(result, bnTemp));
+    GOTO_ERROR_UNLESS(BN_mul(bnTemp, bnA, bnB, CTX));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnTemp));
     goto Exit;
  Error:
     OK = FALSE;
@@ -354,9 +354,9 @@ BnDiv(
     //
     if(BnEqualZero(divisor))
 	FAIL(FATAL_ERROR_DIVIDE_ZERO);
-    VERIFY(BN_div(bnQ, bnR, bnDend, bnSor, CTX));
-    VERIFY(OsslToTpmBn(quotient, bnQ));
-    VERIFY(OsslToTpmBn(remainder, bnR));
+    GOTO_ERROR_UNLESS(BN_div(bnQ, bnR, bnDend, bnSor, CTX));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(quotient, bnQ));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(remainder, bnR));
     DEBUG_PRINT("In BnDiv:\n");
     BIGNUM_PRINT("   bnDividend: ", bnDend, TRUE);
     BIGNUM_PRINT("    bnDivisor: ", bnSor, TRUE);
@@ -394,8 +394,8 @@ BnGcd(
     BIG_INITIALIZED(bn2, number2);
     //
     BN_set_flags(bn1, BN_FLG_CONSTTIME); // number1 is secret prime number
-    VERIFY(BN_gcd(bnGcd, bn1, bn2, CTX));
-    VERIFY(OsslToTpmBn(gcd, bnGcd));
+    GOTO_ERROR_UNLESS(BN_gcd(bnGcd, bn1, bn2, CTX));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(gcd, bnGcd));
     goto Exit;
  Error:
     OK = FALSE;
@@ -430,8 +430,8 @@ BnModExp(
     BIG_INITIALIZED(bnM, modulus);
     //
     BN_set_flags(bnE, BN_FLG_CONSTTIME); // exponent may be private
-    VERIFY(BN_mod_exp(bnResult, bnN, bnE, bnM, CTX));
-    VERIFY(OsslToTpmBn(result, bnResult));
+    GOTO_ERROR_UNLESS(BN_mod_exp(bnResult, bnN, bnE, bnM, CTX));
+    GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
  Error:
     OK = FALSE;
@@ -463,8 +463,8 @@ BnModInverse(
     BIG_INITIALIZED(bnM, modulus);
     //
     BN_set_flags(bnN, BN_FLG_CONSTTIME); // number may be private
-    VERIFY(BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
-    VERIFY(OsslToTpmBn(result, bnResult));
+    GOTO_ERROR_UNLESS(BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
+    GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
  Error:
     OK = FALSE;
@@ -586,22 +586,22 @@ BnCurveInitialize(
 	    // from the parameter data
 	    // Create a group structure
 	    E->G = EC_GROUP_new_curve_GFp(bnP, bnA, bnB, CTX);
-	    VERIFY(E->G != NULL);
+	    GOTO_ERROR_UNLESS(E->G != NULL);
 	    
 	    // Allocate a point in the group that will be used in setting the
 	    // generator. This is not needed after the generator is set.
 	    P = EC_POINT_new(E->G);
-	    VERIFY(P != NULL);
+	    GOTO_ERROR_UNLESS(P != NULL);
 	    
 	    // Need to use this in case Montgomery method is being used
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
     !defined(LIBRESSL_VERSION_NUMBER)						// libtpms added begin
-	    VERIFY(EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, CTX));
+	    GOTO_ERROR_UNLESS(EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, CTX));
 #else										// libtpms added end
-	    VERIFY(EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
+	    GOTO_ERROR_UNLESS(EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
 #endif										// libtpms added
 	    // Now set the generator
-	    VERIFY(EC_GROUP_set_generator(E->G, P, bnN, bnH));
+	    GOTO_ERROR_UNLESS(EC_GROUP_set_generator(E->G, P, bnN, bnH));
 	    
 	    EC_POINT_free(P);
 	    goto Exit_free;  // libtpms changed
