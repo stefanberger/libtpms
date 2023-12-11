@@ -58,49 +58,66 @@
 /*										*/
 /********************************************************************************/
 
-// This file contains the build switches. This contains switches for multiple
-// versions of the crypto-library so some may not apply to your environment.
+// This file contains compiler specific switches.
+// These definitions are for the GCC compiler
 //
 
-#ifndef _COMPILER_DEPENDENCIES_H_
-#define _COMPILER_DEPENDENCIES_H_
+#ifndef _COMPILER_DEPENDENCIES_GCC_H_
+#define _COMPILER_DEPENDENCIES_GCC_H_
 
-#if defined(__GNUC__)
-#  include "CompilerDependencies_gcc.h"
-#elif defined(_MSC_VER)
-#  include "CompilerDependencies_msvc.h"
+#if !defined(__GNUC__)
+#  error CompilerDependencies_gcc.h included for wrong compiler
+#endif
+
+// don't warn on unused local typedefs, they are used as a
+// cross-compiler static_assert
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#pragma GCC diagnostic pop
+
+#undef _MSC_VER
+#undef WIN32
+
+#ifndef WINAPI
+#  define WINAPI
+#endif
+#ifndef __pragma
+#  define __pragma(x)
+#endif
+    /* libtpms added begin */
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)
+#  define REVERSE_ENDIAN_16(_Number) __builtin_bswap16(_Number)
+#  define REVERSE_ENDIAN_32(_Number) __builtin_bswap32(_Number)
+#  define REVERSE_ENDIAN_64(_Number) __builtin_bswap64(_Number)
 #else
-#  error unexpected
+#  if defined __linux__ || defined __CYGWIN__
+#    include <byteswap.h>
+#    define REVERSE_ENDIAN_16(_Number) bswap_16(_Number)
+#    define REVERSE_ENDIAN_32(_Number) bswap_32(_Number)
+#    define REVERSE_ENDIAN_64(_Number) bswap_64(_Number)
+#  elif defined __OpenBSD__
+#    include <endian.h>
+#    define REVERSE_ENDIAN_16(_Number) swap16(_Number)
+#    define REVERSE_ENDIAN_32(_Number) swap32(_Number)
+#    define REVERSE_ENDIAN_64(_Number) swap64(_Number)
+#  elif defined __APPLE__
+#    include <libkern/OSByteOrder.h>
+#    define REVERSE_ENDIAN_16(_Number) _OSSwapInt16(_Number)
+#    define REVERSE_ENDIAN_32(_Number) _OSSwapInt32(_Number)
+#    define REVERSE_ENDIAN_64(_Number) _OSSwapInt64(_Number)
+#  elif defined __FreeBSD__
+#    include <sys/endian.h>
+#    define REVERSE_ENDIAN_16(_Number) bswap16(_Number)
+#    define REVERSE_ENDIAN_32(_Number) bswap32(_Number)
+#    define REVERSE_ENDIAN_64(_Number) bswap64(_Number)
+#  else
+#    error Unsupported OS
+#  endif
 #endif
+    /* libtpms added end */
 
-#include <stdint.h>
+#define NORETURN __attribute__((noreturn))
 
-// Things that are not defined should be defined as NULL
-
-#ifndef NORETURN
-#  define NORETURN
-#endif
-#ifndef LIB_EXPORT
-#  define LIB_EXPORT
-#endif
-#ifndef LIB_IMPORT
-#  define LIB_IMPORT
-#endif
-#ifndef _REDUCE_WARNING_LEVEL_
-#  define _REDUCE_WARNING_LEVEL_(n)
-#endif
-#ifndef _NORMAL_WARNING_LEVEL_
-#  define _NORMAL_WARNING_LEVEL_
-#endif
-#ifndef NOT_REFERENCED
-#  define NOT_REFERENCED(x) (x = x)
-#endif
-
-#ifdef _POSIX_
-typedef int SOCKET;
-#endif
-// #ifdef TPM_POSIX
-// typedef int SOCKET;
-// #endif
-
+#define TPM_INLINE           inline __attribute__((always_inline))
+#define TPM_STATIC_ASSERT(e) _Static_assert(e, "static assert")
 #endif  // _COMPILER_DEPENDENCIES_H_

@@ -338,6 +338,8 @@ noinst_HEADERS += \
 	tpm2/CommandDispatcher_fp.h \
 	tpm2/Commit_fp.h \
 	tpm2/CompilerDependencies.h \
+	tpm2/CompilerDependencies_gcc.h \
+	tpm2/CompilerDependencies_msvc.h \
 	tpm2/ContextLoad_fp.h \
 	tpm2/ContextSave_fp.h \
 	tpm2/Context_spt_fp.h \
