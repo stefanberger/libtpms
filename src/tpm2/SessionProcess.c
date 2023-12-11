@@ -70,6 +70,7 @@
 
 #include "Tpm.h"
 #include "ACT.h"
+#include "Marshal.h"
 
 //
 //**  Authorization Support Functions
