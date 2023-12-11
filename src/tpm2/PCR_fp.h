@@ -122,10 +122,12 @@ TPMI_ALG_HASH
 PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
 		 TPM2B_DIGEST* policy   // OUT: policy of PCR
 		 );
-void
-PCRSimStart(
-	    void
-	    );
+
+//*** PCRManufacture()
+// This function is used to initialize the policies when a TPM is manufactured.
+// This function would only be called in a manufacturing environment or in
+// a TPM simulator.
+void PCRManufacture(void);
 
 //*** PcrIsAllocated()
 // This function indicates if a PCR number for the particular hash algorithm
