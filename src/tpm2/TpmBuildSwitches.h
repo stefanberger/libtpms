@@ -66,12 +66,25 @@
 #ifndef _TPM_BUILD_SWITCHES_H_
 #define _TPM_BUILD_SWITCHES_H_
 
-#undef YES
-#define YES 1
-#undef NO
-#define NO 0
+#if defined(YES) || defined(NO)
+#  error YES and NO should be defined in TpmBuildSwitches.h
+#endif
+#if defined(SET) || defined(CLEAR)
+#  error SET and CLEAR should be defined in TpmBuildSwitches.h
+#endif
 
-/* Allow the command line to specify a profile file */
+#define YES   1
+#define SET   1
+#define NO    0
+#define CLEAR 0
+
+// TRUE/FALSE may be coming from system headers, but if not, provide them.
+#ifndef TRUE
+#  define TRUE 1
+#endif
+#ifndef FALSE
+#  define FALSE 0
+#endif
 
 #ifdef PROFILE
 #   define PROFILE_QUOTE(a) #a
@@ -79,7 +92,7 @@
 #   include PROFILE_INCLUDE(PROFILE)
 #endif
 
-// Need an unambiguous definition for DEBUG. Don't change this
+// Need an unambiguous definition for DEBUG. Do not change this
 #ifndef DEBUG
 #  ifdef NDEBUG
 #    define DEBUG NO
@@ -343,13 +356,6 @@
 #   undef   TABLE_DRIVEN_MARSHAL
 #   define  TABLE_DRIVEN_MARSHAL NO    // Default: Either YES or NO  libtpms: NO
 #endif
-
-/* Change these definitions to turn all algorithms or commands ON or OFF. That is, to turn all
-   algorithms on, set ALG_NO to YES. This is mostly useful as a debug feature. */
-#define      ALG_YES      YES
-#define      ALG_NO       NO
-#define      CC_YES       YES
-#define      CC_NO        NO
 
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
 #include "CompilerDependencies.h"

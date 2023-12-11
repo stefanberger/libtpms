@@ -502,6 +502,9 @@ noinst_HEADERS += \
 	tpm2/TpmError.h \
 	tpm2/TpmFail_fp.h \
 	tpm2/TpmProfile.h \
+	tpm2/TpmProfile_CommandList.h \
+	tpm2/TpmProfile_Common.h \
+	tpm2/TpmProfile_Misc.h \
 	tpm2/Tpm.h \
 	tpm2/_TPM_Hash_Data_fp.h \
 	tpm2/_TPM_Hash_End_fp.h \

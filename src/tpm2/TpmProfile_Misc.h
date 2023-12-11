@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
+/*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,49 +54,81 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
-// FOR LIBTPMS: DO NOT EDIT THIS or INCLUDED FILES!
-// ANY MODIFICATION WILL LEAD TO AN UNSUPPORTED CONFIGURATION
+// Misc profile settings that don't currently have a better home.
+// These are rarely changed, but available for vendor customization.
 
-// The primary configuration file that collects all configuration options for a
-// TPM build.
-#ifndef _TPM_PROFILE_H_
-#define _TPM_PROFILE_H_
+#ifndef _TPM_PROFILE_MISC_H_
+#define _TPM_PROFILE_MISC_H_
 
-#include "TpmBuildSwitches.h"
-#include "TpmProfile_Common.h"
-#include "TpmProfile_CommandList.h"
-#include "TpmProfile_Misc.h"
-
-// Table 0:7 - Defines for Implementation Values
-
-#ifdef TPM_POSIX                       // libtpms added begin
-# include <openssl/bn.h>
-# ifdef THIRTY_TWO_BIT
-#  define RADIX_BITS                     32
-# endif
-# ifdef SIXTY_FOUR_BIT_LONG
-#  define RADIX_BITS                     64
-# endif
-# ifndef RADIX_BITS
-#  error Need to determine RADIX_BITS value
-# endif
-#endif
-#ifdef TPM_WINDOWS
-#define  RADIX_BITS                      32
-#endif                                 // libtpms added end
-
-#ifndef HASH_LIB
-#define HASH_LIB                        Ossl
-#endif
-#ifndef SYM_LIB
-#define SYM_LIB                         Ossl
-#endif
-#ifndef MATH_LIB
-#define MATH_LIB                        Ossl
+// YES & NO defined by TpmBuildSwitches.h
+#if(YES != 1 || NO != 0)
+#  error YES or NO incorrectly set
 #endif
 
-#endif  // _TPM_PROFILE_H_
+// clang-format off
+// clang-format off to preserve horizontal spacing
+#define IMPLEMENTATION_PCR         24
+#define PLATFORM_PCR               24
+#define DRTM_PCR                   17
+#define HCRTM_PCR                  0
+#define NUM_LOCALITIES             5
+#define MAX_HANDLE_NUM             3
+#define MAX_ACTIVE_SESSIONS        64
+#define MAX_LOADED_SESSIONS        3
+#define MAX_SESSION_NUM            3
+#define MAX_LOADED_OBJECTS         3
+#define MIN_EVICT_OBJECTS          7	/* libtpms: for PC client */
+#define NUM_POLICY_PCR_GROUP       1
+#define NUM_AUTHVALUE_PCR_GROUP    1
+//#define MAX_CONTEXT_SIZE           2168
+#define MAX_CONTEXT_SIZE           2680	/* libtpms: changed for RSA-3072 */
+#define MAX_DIGEST_BUFFER          1024
+#define MAX_NV_INDEX_SIZE          2048
+#define MAX_NV_BUFFER_SIZE         1024
+#define MAX_CAP_BUFFER             1024
+/* libtmps: 65 OBJECTs in USER NVRAM expanded by 704 bytes due to size
+ * increase of OBJECT from 2048 bit RSA keys to 3072 bit by 704 bytes*/
+#define NV_MEMORY_SIZE                  (128 * 1024 + 65 * 704)  /* libtpms changed */
+#define MIN_COUNTER_INDICES        8
+#define NUM_STATIC_PCR             16
+#define MAX_ALG_LIST_SIZE          64
+#define PRIMARY_SEED_SIZE          64 /* libtpms: 64 per define USE_SPEC_COMPLIANT_PROOFS */
+#define CONTEXT_ENCRYPT_ALGORITHM  AES
+#define NV_CLOCK_UPDATE_INTERVAL   12 /* libtpms: keep old value */
+#define NUM_POLICY_PCR             1
+
+#define ORDERLY_BITS               8
+#define MAX_SYM_DATA               128
+#define MAX_RNG_ENTROPY_SIZE       64
+#define RAM_INDEX_SPACE            512
+#define ENABLE_PCR_NO_INCREMENT    YES
+
+#define SIZE_OF_X509_SERIAL_NUMBER 20
+
+// amount of space the platform can provide in PERSISTENT_DATA during
+// manufacture
+#define PERSISTENT_DATA_PLATFORM_SPACE  16
+
+// structure padding space for these structures.  Used if a
+// particular configuration needs them to be aligned to a
+// specific size
+#define ORDERLY_DATA_PADDING            0
+#define STATE_CLEAR_DATA_PADDING        0
+#define STATE_RESET_DATA_PADDING        0
+
+// configuration values that may vary by SIMULATION/DEBUG
+#if SIMULATION && DEBUG
+// This forces the use of a smaller context slot size. This reduction reduces the
+// range of the epoch allowing the tester to force the epoch to occur faster than
+// the normal production size
+#  define CONTEXT_SLOT UINT8
+#  error SIMULATION & DEBUG is not supported /* libtpms: added */
+#else
+#  define CONTEXT_SLOT UINT16		/* libtpms: changed from UINT8 in v0.9.0 */
+#endif
+
+#endif  // _TPM_PROFILE_MISC_H_
