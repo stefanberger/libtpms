@@ -219,8 +219,6 @@
 #endif
 #define MAX_TDES_BLOCK_SIZE_BYTES   TDES_MAX_BLOCK_SIZE
 // Additional values for benefit of code
-#define TPM_CC_FIRST                        0x0000011F
-#define TPM_CC_LAST                         0x0000019A
 #if COMPRESSED_LISTS
 #define ADD_FILL            0
 #else
