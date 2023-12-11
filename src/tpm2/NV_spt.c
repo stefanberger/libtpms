@@ -182,3 +182,37 @@ BOOL NvIsPinPassIndex(TPM_HANDLE index  // IN: Handle to check
 	}
     return FALSE;
 }
+
+//*** NvGetIndexName()
+// This function computes the Name of an index
+// The 'name' buffer receives the bytes of the Name and the return value
+// is the number of octets in the Name.
+//
+// This function requires that the NV Index is defined.
+TPM2B_NAME* NvGetIndexName(
+			   NV_INDEX* nvIndex,  // IN: the index over which the name is to be
+			   //     computed
+			   TPM2B_NAME* name    // OUT: name of the index
+			   )
+{
+    UINT16           dataSize, digestSize;
+    BYTE             marshalBuffer[sizeof(TPMS_NV_PUBLIC)];
+    BYTE*            buffer;
+    HASH_STATE       hashState;
+
+    // Marshal public area
+    buffer = marshalBuffer;
+    dataSize = TPMS_NV_PUBLIC_Marshal(&nvIndex->publicArea, &buffer, NULL);
+    // hash public area
+    digestSize = CryptHashStart(&hashState, nvIndex->publicArea.nameAlg);
+    CryptDigestUpdate(&hashState, dataSize, marshalBuffer);
+
+    // Complete digest leaving room for the nameAlg
+    CryptHashEnd(&hashState, digestSize, &name->b.buffer[2]);
+
+    // Include the nameAlg
+    UINT16_TO_BYTE_ARRAY(nvIndex->publicArea.nameAlg, name->b.buffer);
+    name->t.size = digestSize + 2;
+    return name;
+}
+

@@ -83,4 +83,9 @@ BOOL
 NvIsPinPassIndex(
 		 TPM_HANDLE          index       // IN: Handle to check
 		 );
+TPM2B_NAME* NvGetIndexName(
+			   NV_INDEX* nvIndex,  // IN: the index over which the name is to be
+			   //     computed
+			   TPM2B_NAME* name    // OUT: name of the index
+			   );
 #endif
