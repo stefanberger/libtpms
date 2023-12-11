@@ -238,13 +238,12 @@ PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
 	    return TPM_ALG_NULL;
 	}
 }
-/* 8.7.2.7 PCRSimStart() */
-/* This function is used to initialize the policies when a TPM is manufactured. This function would
-   only be called in a manufacturing environment or in a TPM simulator. */
-void
-PCRSimStart(
-	    void
-	    )
+
+//*** PCRManufacture()
+// This function is used to initialize the policies when a TPM is manufactured.
+// This function would only be called in a manufacturing environment or in
+// a TPM simulator.
+void PCRManufacture(void)
 {
     UINT32 i;
 #if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0

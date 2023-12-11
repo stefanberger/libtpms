@@ -129,7 +129,8 @@ TPM_Manufacture(
         return -1;
     }                                      // libtpms added end
     // default configuration for PCR
-    PCRSimStart();
+    PCRManufacture();
+
     // initialize pre-installed hierarchy data
     // This should happen after NV is initialized because hierarchy data is
     // stored in NV.
