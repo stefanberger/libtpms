@@ -394,6 +394,7 @@ noinst_HEADERS += \
 	tpm2/MAC_Start_fp.h \
 	tpm2/MakeCredential_fp.h \
 	tpm2/Manufacture_fp.h \
+	tpm2/Marshal.h \
 	tpm2/Marshal_fp.h \
 	tpm2/MathOnByteBuffers_fp.h \
 	tpm2/Memory_fp.h \

@@ -491,6 +491,7 @@ TPM2_PolicyOR(PolicyOR_In* in  // IN: input parameter list
 #if CC_PolicyPCR  // Conditional expansion of this file
 
 #  include "PolicyPCR_fp.h"
+#  include "Marshal.h"
 
 /*(See part 3 specification)
 // Add a PCR gate for a policy session
@@ -624,6 +625,7 @@ TPM2_PolicyPhysicalPresence(PolicyPhysicalPresence_In* in  // IN: input paramete
 
 #include "Tpm.h"
 #include "PolicyLocality_fp.h"
+#include "Marshal.h"
 
 #if CC_PolicyLocality  // Conditional expansion of this file
 
@@ -1533,6 +1535,7 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
 
 #  include "PolicyAuthorizeNV_fp.h"
 #  include "Policy_spt_fp.h"
+#  include "Marshal.h"
 
 /*(See part 3 specification)
 // Change policy by a signature from authority

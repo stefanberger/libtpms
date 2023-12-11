@@ -65,6 +65,7 @@
 #define OBJECT_C
 
 #include "Tpm.h"
+#include "Marshal.h"
 #include "NVMarshal.h" // libtpms added
 #include "BackwardsCompatibilityObject.h" // libtpms added
 

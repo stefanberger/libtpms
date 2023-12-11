@@ -98,6 +98,7 @@
 //** Includes, Defines and Data Definitions
 #define NV_C
 #include "Tpm.h"
+#include "Marshal.h"
 
 //** Local Functions
 

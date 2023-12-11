@@ -63,8 +63,9 @@
 #if CC_ContextSave  // Conditional expansion of this file
 
 #  include "ContextSave_fp.h"
-#  include "NVMarshal.h" // libtpms added
+#  include "Marshal.h"
 #  include "Context_spt_fp.h"
+#  include "NVMarshal.h" // libtpms added
 
 /*(See part 3 specification)
   Save context
@@ -271,6 +272,7 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
 #if CC_ContextLoad  // Conditional expansion of this file
 
 #  include "ContextLoad_fp.h"
+#  include "Marshal.h"
 #  include "Context_spt_fp.h"
 
 /*(See part 3 specification)
