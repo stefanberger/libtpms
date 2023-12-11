@@ -99,8 +99,16 @@
 #ifdef _POSIX_
 typedef int SOCKET;
 #endif
-// #ifdef TPM_POSIX
-// typedef int SOCKET;
-// #endif
+
+#if !defined(TPM_STATIC_ASSERT) || !defined(COMPILER_CHECKS)
+#  error Expect definitions of COMPILER_CHECKS and TPM_STATIC_ASSERT
+#elif COMPILER_CHECKS
+// pre static_assert static_assert
+#  define MUST_BE(e) TPM_STATIC_ASSERT(e)
+
+#else
+// intentionally disabled, fine.
+#  define MUST_BE(e)
+#endif
 
 #endif  // _COMPILER_DEPENDENCIES_H_

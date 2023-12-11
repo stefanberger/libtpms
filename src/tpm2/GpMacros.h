@@ -135,20 +135,6 @@
 #define RSA_MAX_PRIME           (MAX_RSA_KEY_BYTES / 2)
 #define RSA_PRIVATE_SIZE        (RSA_MAX_PRIME * 5)
 
-/* 5.10.5	Compile-time Checks */
-/* In some cases, the relationship between two values may be dependent on things that change based
-   on various selections like the chosen cryptographic libraries. It is possible that these
-   selections will result in incompatible settings. These are often detectable by the compiler but
-   it isn't always possible to do the check in the preprocessor code. For example, when the check
-   requires use of sizeof then the preprocessor can't do the comparison. For these cases, we include
-   a special macro that, depending on the compiler will generate a warning to indicate if the check
-   always passes or always fails because it involves fixed constants. To run these checks, define
-   COMPILER_CHECKS in TpmBuildSwitches.h */
-#if COMPILER_CHECKS
-#   define  cAssert     pAssert
-#else
-#   define cAssert(value)
-#endif
 /* This is used commonly in the Crypt code as a way to keep listings from getting too long. This is
    not to save paper but to allow one to see more useful stuff on the screen at any given time. */
 #define     ERROR_RETURN(returnCode)		\
