@@ -164,13 +164,13 @@ static BOOL UnpackExponent(TPM2B_PRIVATE_KEY_RSA* b, privateExponent* Z)
     int                  i;
     bigNum              *bn = &Z->P;
     //
-    VERIFY(b->t.size & RSA_prime_flag);
+    GOTO_ERROR_UNLESS(b->t.size & RSA_prime_flag);
     RsaInitializeExponent(Z);
-    VERIFY((primeSize % 5) == 0);
+    GOTO_ERROR_UNLESS((primeSize % 5) == 0);
     primeSize /= 5;
     for(i = 0; i < 5; i++)
-	VERIFY(BnFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
-	       != NULL);
+	GOTO_ERROR_UNLESS(BnFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
+			  != NULL);
     MakePgreaterThanQ(Z);
     return TRUE;
  Error:
@@ -232,17 +232,17 @@ RsaPrivateKeyOp(
     //
     MakePgreaterThanQ(Z);
     // m1 = cdP mod p
-    VERIFY(BnModExp(M1, inOut, Z->dP, Z->P));
+    GOTO_ERROR_UNLESS(BnModExp(M1, inOut, Z->dP, Z->P));
     // m2 = cdQ mod q
-    VERIFY(BnModExp(M2, inOut, Z->dQ, Z->Q));
+    GOTO_ERROR_UNLESS(BnModExp(M2, inOut, Z->dQ, Z->Q));
     // h = qInv * (m1 - m2) mod p = qInv * (m1 + P - m2) mod P because Q < P
     // so m2 < P
-    VERIFY(BnSub(H, Z->P, M2));
-    VERIFY(BnAdd(H, H, M1));
-    VERIFY(BnModMult(H, H, Z->qInv, Z->P));
+    GOTO_ERROR_UNLESS(BnSub(H, Z->P, M2));
+    GOTO_ERROR_UNLESS(BnAdd(H, H, M1));
+    GOTO_ERROR_UNLESS(BnModMult(H, H, Z->qInv, Z->P));
     // m = m2 + h * q
-    VERIFY(BnMult(M, H, Z->Q));
-    VERIFY(BnAdd(inOut, M2, M));
+    GOTO_ERROR_UNLESS(BnMult(M, H, Z->Q));
+    GOTO_ERROR_UNLESS(BnAdd(inOut, M2, M));
     return TRUE;
  Error:
     return FALSE;
@@ -317,11 +317,11 @@ static TPM_RC RSADP(TPM2B*  inOut,  // IN/OUT: the value to encrypt
 	       != TPM_RC_SUCCESS)
 		return TPM_RC_BINDING;
 	}
-    VERIFY(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
+    GOTO_ERROR_UNLESS(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
     RsaSetExponentFromOld(Z, &key->privateExponent);
-    // VERIFY(UnpackExponent(&key->sensitive.sensitive.rsa, Z));	// libtpms changed end
-    VERIFY(RsaPrivateKeyOp(bnM, Z));
-    VERIFY(BnTo2B(bnM, inOut, inOut->size));
+    // GOTO_ERROR_UNLESS(UnpackExponent(&key->sensitive.sensitive.rsa, Z));	// libtpms changed end
+    GOTO_ERROR_UNLESS(RsaPrivateKeyOp(bnM, Z));
+    GOTO_ERROR_UNLESS(BnTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
  Error:
     return TPM_RC_FAILURE;
@@ -810,10 +810,10 @@ MakeDerTag(TPM_ALG_ID hashAlg, INT16 sizeOfBuffer, BYTE* buffer)
     HASH_DEF* info = CryptGetHashDef(hashAlg);
     INT16     oidSize;
     // If no OID, can't do encode
-    VERIFY(info != NULL);
+    GOTO_ERROR_UNLESS(info != NULL);
     oidSize = 2 + (info->OID)[1];
     // make sure this fits in the buffer
-    VERIFY(sizeOfBuffer >= (oidSize + 8));
+    GOTO_ERROR_UNLESS(sizeOfBuffer >= (oidSize + 8));
     *buffer++ = 0x30;  // 1st SEQUENCE
     // Size of the 1st SEQUENCE is 6 bytes + size of the hash OID + size of the
     // digest size
@@ -1016,27 +1016,27 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
 
 		    TEST(TPM_ALG_NULL);
 
-		    VERIFY((sensitive->sensitive.rsa.t.size * 2)
-			   == publicArea->unique.rsa.t.size);
+		    GOTO_ERROR_UNLESS((sensitive->sensitive.rsa.t.size * 2)
+				      == publicArea->unique.rsa.t.size);
 		    // Initialize the exponent
 		    BnSetWord(bnE, publicArea->parameters.rsaDetail.exponent);
 		    if(BnEqualZero(bnE))
 			BnSetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
 		    // Convert first prime to 2B
-		    VERIFY(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
+		    GOTO_ERROR_UNLESS(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
 
 		    // Find the second prime by division. This uses 'bQ' rather than Z->Q
 		    // because the division could make the quotient larger than a prime during
 		    // some intermediate step.
-		    VERIFY(BnDiv(Z->Q, bnQr, bnN, Z->P));
-		    VERIFY(BnEqualZero(bnQr));
+		    GOTO_ERROR_UNLESS(BnDiv(Z->Q, bnQr, bnN, Z->P));
+		    GOTO_ERROR_UNLESS(BnEqualZero(bnQr));
 		    // Compute the private exponent and return it if found
 		    if (rsaKey) {					// libtpms added begin
 			RsaInitializeExponentOld(&rsaKey->privateExponent);
 			BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
 		    }							// libtpms added end
-		    VERIFY(ComputePrivateExponent(bnE, Z));
-		    // VERIFY(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
+		    GOTO_ERROR_UNLESS(ComputePrivateExponent(bnE, Z));
+		    // GOTO_ERROR_UNLESS(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
 
 		    if (rsaKey)	{					// libtpms added begin
 			RsaSetExponentOld(&rsaKey->privateExponent, Z);	// preserve dP, dQ, qInv
