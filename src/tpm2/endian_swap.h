@@ -3,7 +3,6 @@
 /*			     	Swap						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: swap.h 1490 2019-07-26 21:13:22Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +54,12 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2018				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
 /*										*/
 /********************************************************************************/
 
-#ifndef SWAP_H
-#define SWAP_H
+#ifndef _ENDIAN_SWAP_H
+#define _ENDIAN_SWAP_H
 
 #if LITTLE_ENDIAN_TPM
 #define TO_BIG_ENDIAN_UINT16(i)     REVERSE_ENDIAN_16(i)

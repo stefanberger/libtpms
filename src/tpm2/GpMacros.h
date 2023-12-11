@@ -68,7 +68,7 @@
 #  define NULL 0
 #endif
 
-#include "swap.h"
+#include "endian_swap.h"
 #include "VendorString.h"
 
 //** For Self-test
