@@ -154,12 +154,6 @@ NvWriteUINT64Data(
 		  UINT64           intValue       // IN: the value to write
 		  );
 TPM2B_NAME *
-NvGetIndexName(
-	       NV_INDEX        *nvIndex,       // IN: the index over which the name is to be
-	       //     computed
-	       TPM2B_NAME      *name           // OUT: name of the index
-	       );
-TPM2B_NAME *
 NvGetNameByIndexHandle(
 		       TPMI_RH_NV_INDEX     handle,        // IN: handle of the index
 		       TPM2B_NAME          *name           // OUT: name of the index
