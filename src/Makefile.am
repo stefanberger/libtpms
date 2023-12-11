@@ -360,6 +360,7 @@ noinst_HEADERS += \
 	tpm2/EncryptDecrypt2_fp.h \
 	tpm2/EncryptDecrypt_fp.h \
 	tpm2/EncryptDecrypt_spt_fp.h \
+	tpm2/endian_swap.h \
 	tpm2/Entity_fp.h \
 	tpm2/EventSequenceComplete_fp.h \
 	tpm2/EvictControl_fp.h \
@@ -489,7 +490,6 @@ noinst_HEADERS += \
 	tpm2/SupportLibraryFunctionPrototypes_fp.h \
 	tpm2/SymmetricTest.h \
 	tpm2/SymmetricTestData.h \
-	tpm2/swap.h \
 	tpm2/TcpServerPosix_fp.h \
 	tpm2/TestParms_fp.h \
 	tpm2/Ticket_fp.h \
