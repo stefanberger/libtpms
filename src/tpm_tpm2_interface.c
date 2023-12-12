@@ -131,7 +131,7 @@ static TPM_RESULT TPM2_MainInit(void)
 
     if (!has_cached_state) {
         if (!has_nvram_file) {
-            ret = _plat__NVEnable(NULL);
+            ret = _plat__NVEnable(NULL, 0);
             if (ret)
                 TPMLIB_LogTPM2Error(
                     "%s: _plat__NVEnable(NULL) failed: %d\n",

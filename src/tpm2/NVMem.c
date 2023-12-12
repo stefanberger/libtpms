@@ -87,6 +87,7 @@ static int   s_NeedsManufacture = FALSE;
 //**Functions
 
 #if FILE_BACKED_NV
+const char* s_NvFilePath = "NVChip";
 
 //*** NvFileOpen()
 // This function opens the file used to hold the NV image.
@@ -95,16 +96,6 @@ static int   s_NeedsManufacture = FALSE;
 //  -1          error
 static int NvFileOpen(const char* mode)
 {
-#if defined(NV_FILE_PATH)
-#   define TO_STRING(s) TO_STRING_IMPL(s)
-#   define TO_STRING_IMPL(s) #s
-    const char* s_NvFilePath = TO_STRING(NV_FILE_PATH);
-#   undef TO_STRING
-#   undef TO_STRING_IMPL
-#else
-    const char* s_NvFilePath = "NVChip";
-#endif
-
     // Try to open an exist NVChip file for read/write
 #  if defined _MSC_VER && 1
     if(fopen_s(&s_NvFile, s_NvFilePath, mode) != 0)
@@ -204,11 +195,15 @@ LIB_EXPORT void _plat__NvErrors(int recoverable, int unrecoverable)
 //      <0          if unrecoverable error
 #define NV_ENABLE_SUCCESS 0
 #define NV_ENABLE_FAILED  (-1)
-LIB_EXPORT int
-_plat__NVEnable(
-		void            *platParameter  // IN: platform specific parameters
-		)
+LIB_EXPORT int _plat__NVEnable(
+			       void*  platParameter,  // platform specific parameter
+			       size_t paramSize       // size of parameter. If size == 0, then
+			       // parameter is a sizeof(void*) scalar and should
+			       // be cast to an integer (intptr_t), not dereferenced.
+			       )
 {
+    NOT_REFERENCED(platParameter);  // to keep compiler quiet
+    NOT_REFERENCED(paramSize);      // to keep compiler quiet
 #ifdef TPM_LIBTPMS_CALLBACKS
     int ret;
 #endif
