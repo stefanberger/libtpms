@@ -65,7 +65,6 @@
 //** Includes
 #include "Tpm.h"
 #include "Marshal.h"
-#include "PlatformClock.h"	// libtpms: added
 
 //** Functions
 
@@ -223,22 +222,22 @@ void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
     switch(adjust)
 	{
 	  case TPM_CLOCK_COARSE_SLOWER:
-	    _plat__ClockAdjustRate(CLOCK_ADJUST_COARSE);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER);
 	    break;
 	  case TPM_CLOCK_COARSE_FASTER:
-	    _plat__ClockAdjustRate(-CLOCK_ADJUST_COARSE);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER);
 	    break;
 	  case TPM_CLOCK_MEDIUM_SLOWER:
-	    _plat__ClockAdjustRate(CLOCK_ADJUST_MEDIUM);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER);
 	    break;
 	  case TPM_CLOCK_MEDIUM_FASTER:
-	    _plat__ClockAdjustRate(-CLOCK_ADJUST_MEDIUM);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER);
 	    break;
 	  case TPM_CLOCK_FINE_SLOWER:
-	    _plat__ClockAdjustRate(CLOCK_ADJUST_FINE);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER);
 	    break;
 	  case TPM_CLOCK_FINE_FASTER:
-	    _plat__ClockAdjustRate(-CLOCK_ADJUST_FINE);
+	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_FASTER);
 	    break;
 	  case TPM_CLOCK_NO_CHANGE:
 	    break;
