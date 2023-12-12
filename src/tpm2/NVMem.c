@@ -177,7 +177,6 @@ static long NvFileSize(int leaveAt)
 #endif
 
 #if 0 /* libtpms added */
-
 //*** _plat__NvErrors()
 // This function is used by the simulator to set the error flags in the NV
 // subsystem to simulate an error in the NV loading process
@@ -203,6 +202,8 @@ LIB_EXPORT void _plat__NvErrors(int recoverable, int unrecoverable)
 //      0           if success
 //      > 0         if receive recoverable error
 //      <0          if unrecoverable error
+#define NV_ENABLE_SUCCESS 0
+#define NV_ENABLE_FAILED  (-1)
 LIB_EXPORT int
 _plat__NVEnable(
 		void            *platParameter  // IN: platform specific parameters
@@ -236,7 +237,7 @@ _plat__NVEnable_NVChipFile(
     s_NV_recoverable   = FALSE;
 #if FILE_BACKED_NV
     if(s_NvFile != NULL)
-	return 0;
+	return NV_ENABLE_SUCCESS;
     // Initialize all the bytes in the ram copy of the NV
     _plat__NvMemoryClear(0, NV_MEMORY_SIZE);
 
@@ -275,7 +276,7 @@ _plat__NVEnable_NVChipFile(
     // simulation purposes, use the signaling interface to indicate if an error is
     // to be simulated and the type of the error.
     if(s_NV_unrecoverable)
-	return -1;
+	return NV_ENABLE_FAILED;
     return s_NV_recoverable;
 }
 
@@ -342,19 +343,25 @@ _plat__IsNvAvailable(
     return retVal;
 }
 
-/* C.6.2.8. _plat__NvMemoryRead() */
-/* Function: Read a chunk of NV memory */
-LIB_EXPORT void
-_plat__NvMemoryRead(
-		    unsigned int     startOffset,   // IN: read start
-		    unsigned int     size,          // IN: size of bytes to read
-		    void            *data           // OUT: data buffer
-		    )
+//***_plat__NvMemoryRead()
+// Function: Read a chunk of NV memory
+//  Return Type: int
+//      TRUE(1)         offset and size is within available NV size
+//      FALSE(0)        otherwise; also trigger failure mode
+LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
+				   unsigned int size,  // IN: size of bytes to read
+				   void*        data   // OUT: data buffer
+				   )
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
-    memcpy(data, &s_NV[startOffset], size);  // Copy data from RAM
-    return;
+    if(startOffset + size <= NV_MEMORY_SIZE)
+	{
+	    memcpy(data, &s_NV[startOffset], size);  // Copy data from RAM
+	    return TRUE;
+	}
+    return FALSE;
 }
+
 /* C.6.2.9. _plat__NvIsDifferent() */
 /* This function checks to see if the NV is different from the test value. This is so that NV will
    not be written if it has not changed. */
@@ -398,38 +405,43 @@ LIB_EXPORT int _plat__NvMemoryWrite(unsigned int startOffset,  // IN: write star
 //***_plat__NvMemoryClear()
 // Function is used to set a range of NV memory bytes to an implementation-dependent
 // value. The value represents the erase state of the memory.
-LIB_EXPORT void
-_plat__NvMemoryClear(
-		     unsigned int     start,         // IN: clear start
-		     unsigned int     size           // IN: number of bytes to clear
-		     )
+LIB_EXPORT int _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear start
+				    unsigned int size  // IN: number of bytes to clear
+				    )
 {
-    assert(start + size <= NV_MEMORY_SIZE);
-    // In this implementation, assume that the erase value for NV is all 1s
-    memset(&s_NV[start], 0xff, size);
+    assert(startOffset + size <= NV_MEMORY_SIZE);
+    if(startOffset + size <= NV_MEMORY_SIZE)
+	{
+	    // In this implementation, assume that the erase value for NV is all 1s
+	    memset(&s_NV[startOffset], 0xff, size);
+	    return TRUE;
+	}
+    return FALSE;
 }
 
 //***_plat__NvMemoryMove()
 // Function: Move a chunk of NV memory from source to destination
 //      This function should ensure that if there overlap, the original data is
 //      copied before it is written
-LIB_EXPORT void
-_plat__NvMemoryMove(
-		    unsigned int sourceOffset,  // IN: source offset
-		    unsigned int destOffset,  // IN: destination offset
-		    unsigned int size  // IN: size of data being moved
-		    )
+LIB_EXPORT int _plat__NvMemoryMove(unsigned int sourceOffset,  // IN: source offset
+				   unsigned int destOffset,  // IN: destination offset
+				   unsigned int size  // IN: size of data being moved
+				   )
 {
     assert(sourceOffset + size <= NV_MEMORY_SIZE);
     assert(destOffset + size <= NV_MEMORY_SIZE);
-    memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);	// Move data in RAM
+    if(sourceOffset + size <= NV_MEMORY_SIZE && destOffset + size <= NV_MEMORY_SIZE)
+	{
+	    memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);  // Move data in RAM
 #if 1    /* libtpms added begin */
-    if (destOffset > sourceOffset)
-        memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
-    else
-        memset(&s_NV[destOffset+size], 0, sourceOffset-destOffset);
+	    if (destOffset > sourceOffset)
+	        memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
+	    else
+	        memset(&s_NV[destOffset+size], 0, sourceOffset-destOffset);
 #endif   /* libtpms added end */
-    return;
+	    return TRUE;
+	}
+    return FALSE;
 }
 
 //***_plat__NvCommit()

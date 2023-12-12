@@ -230,7 +230,7 @@ _plat__IsNvAvailable(
 //  Return Type: int
 //      TRUE(1)         offset and size is within available NV size
 //      FALSE(0)        otherwise; also trigger failure mode
-LIB_EXPORT void _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
+LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
 				   unsigned int size,  // IN: size of bytes to read
 				   void*        data   // OUT: data buffer
 				   );
@@ -278,7 +278,7 @@ LIB_EXPORT int _plat__NvMemoryWrite(unsigned int startOffset,  // IN: write star
 //***_plat__NvMemoryClear()
 // Function is used to set a range of NV memory bytes to an implementation-dependent
 // value. The value represents the erase state of the memory.
-LIB_EXPORT void _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear start
+LIB_EXPORT int _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear start
 				    unsigned int size  // IN: number of bytes to clear
 				    );
 
@@ -286,7 +286,7 @@ LIB_EXPORT void _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear sta
 // Function: Move a chunk of NV memory from source to destination
 //      This function should ensure that if there overlap, the original data is
 //      copied before it is written
-LIB_EXPORT void _plat__NvMemoryMove(unsigned int sourceOffset,  // IN: source offset
+LIB_EXPORT int _plat__NvMemoryMove(unsigned int sourceOffset,  // IN: source offset
 				   unsigned int destOffset,  // IN: destination offset
 				   unsigned int size  // IN: size of data being moved
 				   );
@@ -305,7 +305,6 @@ LIB_EXPORT int _plat__NvCommit(void);
 #if 0					// libtpms: added begin
 LIB_EXPORT void _plat__TearDown(void);
 #endif					// libtpms: added end
-
 
 //** From PlatformACT.c
 
