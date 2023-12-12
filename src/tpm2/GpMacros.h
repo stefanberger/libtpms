@@ -69,7 +69,8 @@
 #endif
 
 #include "endian_swap.h"
-#include "VendorString.h"
+#include "VendorInfo.h"
+#include "VendorString.h"	// libtpms: temporary
 
 //** For Self-test
 // These macros are used in CryptUtil to invoke the incremental self test.

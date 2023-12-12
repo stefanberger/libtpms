@@ -358,8 +358,8 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     const char *tpmspec =
     "\"TPMSpecification\":{"
         "\"family\":\"2.0\","
-        "\"level\":" STRINGIFY(SPEC_LEVEL_NUM) ","
-        "\"revision\":" STRINGIFY(SPEC_VERSION)
+        "\"level\":" STRINGIFY(TPM_SPEC_LEVEL_NUM) ","
+        "\"revision\":" STRINGIFY(TPM_SPEC_VERSION)
     "}";
     const char *tpmattrs_temp =
     "\"TPMAttributes\":{"

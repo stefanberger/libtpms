@@ -521,6 +521,7 @@ noinst_HEADERS += \
 	tpm2/TpmTypes.h \
 	tpm2/Unmarshal_fp.h \
 	tpm2/Unseal_fp.h \
+	tpm2/VendorInfo.h \
 	tpm2/VendorString.h \
 	tpm2/Vendor_TCG_Test_fp.h \
 	tpm2/VerifySignature_fp.h \

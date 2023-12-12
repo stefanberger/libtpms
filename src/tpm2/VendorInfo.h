@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*	Constants Reflecting a Particular TPM Implementation (e.g. PC Client)	*/
+/*			     	Vendor Info					*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,51 +54,28 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023					*/
 /*										*/
 /********************************************************************************/
 
-// FOR LIBTPMS: DO NOT EDIT THIS or INCLUDED FILES!
-// ANY MODIFICATION WILL LEAD TO AN UNSUPPORTED CONFIGURATION
+#ifndef _VENDORINFO_H
+#define _VENDORINFO_H
 
-// The primary configuration file that collects all configuration options for a
-// TPM build.
-#ifndef _TPM_PROFILE_H_
-#define _TPM_PROFILE_H_
+// Define the TPM specification-specific capability values.
+#define TPM_SPEC_FAMILY      (0x322E3000)
+#define TPM_SPEC_LEVEL_NUM   0		// libtpms added: TPM_SPEC_LEVEL without leading zeros and '()'
+#define TPM_SPEC_LEVEL       (00)
+#define TPM_SPEC_VERSION     164	// libtpms changed: removed '()'
+#define TPM_SPEC_YEAR        (2021)
+#define TPM_SPEC_DAY_OF_YEAR (75)
+#define MAX_VENDOR_PROPERTY  (1)
 
-#include "TpmBuildSwitches.h"
-#include "TpmProfile_Common.h"
-#include "TpmProfile_CommandList.h"
-#include "TpmProfile_Misc.h"
-#include "TpmProfile_ErrorCodes.h"
-#include "VendorInfo.h"
+// Define the platform specification-specific capability values.
+#define PLATFORM_FAMILY      (1)		/* kgold changed for PC Client */
+#define PLATFORM_LEVEL       TPM_SPEC_LEVEL_NUM
+#define PLATFORM_VERSION     (0x00000106)
+#define PLATFORM_YEAR        TPM_SPEC_YEAR		// libtpms: changed
+#define PLATFORM_DAY_OF_YEAR TPM_SPEC_DAY_OF_YEAR	// libtpms: changed
 
-// Table 0:7 - Defines for Implementation Values
-
-#ifdef TPM_POSIX                       // libtpms added begin
-# include <openssl/bn.h>
-# ifdef THIRTY_TWO_BIT
-#  define RADIX_BITS                     32
-# endif
-# ifdef SIXTY_FOUR_BIT_LONG
-#  define RADIX_BITS                     64
-# endif
-# ifndef RADIX_BITS
-#  error Need to determine RADIX_BITS value
-# endif
-#endif
-#ifdef TPM_WINDOWS
-#define  RADIX_BITS                      32
-#endif                                 // libtpms added end
-
-#ifndef HASH_LIB
-#define HASH_LIB                        Ossl
-#endif
-#ifndef SYM_LIB
-#define SYM_LIB                         Ossl
-#endif
-#ifndef MATH_LIB
-#define MATH_LIB                        Ossl
 #endif
 
-#endif  // _TPM_PROFILE_H_
