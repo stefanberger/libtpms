@@ -103,7 +103,7 @@ OpenSSLCryptGenerateKeyDes(
     if (!(ctx = EVP_CIPHER_CTX_new()))
         return TPM_RC_MEMORY;
 
-    pAssert(sizeof(sensitive->sensitive.sym.t.buffer) >= 3 * sizeof(DES_cblock))
+    pAssert(sizeof(sensitive->sensitive.sym.t.buffer) >= 3 * sizeof(DES_cblock));
 
     if (EVP_CipherInit_ex(ctx, EVP_des_ede3(), NULL, NULL, NULL, 0) != 1 ||
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_RAND_KEY, 0,
@@ -172,7 +172,7 @@ GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     if (i < 0 || i > 2)
         return NULL;
 
-    pAssert(*keyToUseLen >= keySizeInBytes)
+    pAssert(*keyToUseLen >= keySizeInBytes);
     memcpy(keyToUse, key, keySizeInBytes);
 
     switch (algorithm) {
@@ -219,7 +219,7 @@ GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     case TPM_ALG_TDES:
         algIdx = 1;
         if (keySizeInBits == 128) {
-            pAssert(*keyToUseLen >= BITS_TO_BYTES(192))
+            pAssert(*keyToUseLen >= BITS_TO_BYTES(192));
             // stretch the key
             memcpy(&keyToUse[16], &keyToUse[0], 8);
             *keyToUseLen = BITS_TO_BYTES(192);
