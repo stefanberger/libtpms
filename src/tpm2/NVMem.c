@@ -353,20 +353,27 @@ LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
     return FALSE;
 }
 
-/* C.6.2.9. _plat__NvIsDifferent() */
-/* This function checks to see if the NV is different from the test value. This is so that NV will
-   not be written if it has not changed. */
-/* Return Values Meaning */
-/* TRUE(1) the NV location is different from the test value */
-/* FALSE(0) the NV location is the same as the test value */
-LIB_EXPORT int
-_plat__NvIsDifferent(
-		     unsigned int     startOffset,   // IN: read start
-		     unsigned int     size,          // IN: size of bytes to read
-		     void            *data           // IN: data buffer
-		     )
+//*** _plat__NvGetChangedStatus()
+// This function checks to see if the NV is different from the test value. This is
+// so that NV will not be written if it has not changed.
+//  Return Type: int
+//      NV_HAS_CHANGED(1)       the NV location is different from the test value
+//      NV_IS_SAME(0)           the NV location is the same as the test value
+//      NV_INVALID_LOCATION(-1) the NV location is invalid; also triggers failure mode
+LIB_EXPORT int _plat__NvGetChangedStatus(
+					 unsigned int startOffset,  // IN: read start
+					 unsigned int size,         // IN: size of bytes to read
+					 void*        data          // IN: data buffer
+					 )
 {
-    return (memcmp(&s_NV[startOffset], data, size) != 0);
+    assert(startOffset + size <= NV_MEMORY_SIZE);
+    if(startOffset + size <= NV_MEMORY_SIZE)
+	{
+	    return (memcmp(&s_NV[startOffset], data, size) != 0);
+	}
+    // the NV location is invalid; the assert above should have triggered failure
+    // mode
+    return NV_INVALID_LOCATION;
 }
 
 //***_plat__NvMemoryWrite()
