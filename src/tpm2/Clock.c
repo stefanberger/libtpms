@@ -70,6 +70,25 @@
 #include <assert.h>
 #include "Platform.h"
 
+// CLOCK_NOMINAL is the number of hardware ticks per ms. A value of 30000 means
+// that the nominal clock rate used to drive the hardware clock is 30 MHz. The
+// adjustment rates are used to determine the conversion of the hardware ticks to
+// internal hardware clock value. In practice, we would expect that there would be
+// a hardware register will accumulated mS. It would be incremented by the output
+// of a pre-scaler. The pre-scaler would divide the ticks from the clock by some
+// value that would compensate for the difference between clock time and real time.
+// The code in Clock does the emulation of this function.
+#define CLOCK_NOMINAL 30000
+// A 1% change in rate is 300 counts
+#define CLOCK_ADJUST_COARSE 300
+// A 0.1% change in rate is 30 counts
+#define CLOCK_ADJUST_MEDIUM 30
+// A minimum change in rate is 1 count
+#define CLOCK_ADJUST_FINE 1
+// The clock tolerance is +/-15% (4500 counts)
+// Allow some guard band (16.7%)
+#define CLOCK_ADJUST_LIMIT 5000
+
 /* libtpms added begin */
 /* ClockGetTime -- get time given a specified clock type */
 uint64_t
@@ -300,35 +319,31 @@ LIB_EXPORT int _plat__TimerWasStopped(void)
 
 //***_plat__ClockAdjustRate()
 // Adjust the clock rate
-LIB_EXPORT void _plat__ClockAdjustRate(
-int	adjust         // IN: the adjust number.  It could be positive
-		       //     or negative
-		       )
+LIB_EXPORT void _plat__ClockRateAdjust(_plat__ClockAdjustStep adjust)
 {
     // We expect the caller should only use a fixed set of constant values to
     // adjust the rate
     switch(adjust)
 	{
-	  case CLOCK_ADJUST_COARSE:
+	    // slower increases the divisor
+	  case PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER:
 	    s_adjustRate += CLOCK_ADJUST_COARSE;
 	    break;
-	  case -CLOCK_ADJUST_COARSE:
-	    s_adjustRate -= CLOCK_ADJUST_COARSE;
-	    break;
-	  case CLOCK_ADJUST_MEDIUM:
+	  case PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER:
 	    s_adjustRate += CLOCK_ADJUST_MEDIUM;
 	    break;
-	  case -CLOCK_ADJUST_MEDIUM:
-	    s_adjustRate -= CLOCK_ADJUST_MEDIUM;
-	    break;
-	  case CLOCK_ADJUST_FINE:
+	  case PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER:
 	    s_adjustRate += CLOCK_ADJUST_FINE;
 	    break;
-	  case -CLOCK_ADJUST_FINE:
+	    // faster decreases the divisor
+	  case PLAT_TPM_CLOCK_ADJUST_FINE_FASTER:
 	    s_adjustRate -= CLOCK_ADJUST_FINE;
 	    break;
-	  default:
-	    // ignore any other values;
+	  case PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER:
+	    s_adjustRate -= CLOCK_ADJUST_MEDIUM;
+	    break;
+	  case PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER:
+	    s_adjustRate -= CLOCK_ADJUST_COARSE;
 	    break;
 	}
 

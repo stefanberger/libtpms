@@ -111,7 +111,6 @@ LIB_EXPORT int _plat__TimerWasReset(void);
 // implementation of the hardware can be made to look like a read-once register.
 LIB_EXPORT int _plat__TimerWasStopped(void);
 
-#if 0					// libtpms: added
 //***_plat__ClockRateAdjust()
 // Adjust the clock rate
 // the old function name is ClockAdjustRate, and took a value which was an absolute
@@ -136,14 +135,6 @@ typedef enum _plat__ClockAdjustStep
 	PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER = 3
     } _plat__ClockAdjustStep;
 LIB_EXPORT void _plat__ClockRateAdjust(_plat__ClockAdjustStep adjustment);
-#endif					// libtpms: added
-
-LIB_EXPORT void
-_plat__ClockAdjustRate(
-		       int              adjust         // IN: the adjust number.  It could be positive
-		       //     or negative
-		       );
-
 
 					// libtpms: added begin
 #include <time.h>
