@@ -217,16 +217,10 @@ _plat__NVEnable_NVChipFile(
 //      0               NV is available
 //      1               NV is not available due to write failure
 //      2               NV is not available due to rate limit
-#if 0					// libtpms: added begin
 #define NV_READY        0
 #define NV_WRITEFAILURE 1
 #define NV_RATE_LIMIT   2
 LIB_EXPORT int _plat__GetNvReadyState(void);
-#endif					// libtpms: added end
-LIB_EXPORT int
-_plat__IsNvAvailable(
-		     void
-		     );
 
 //***_plat__NvMemoryRead()
 // Function: Read a chunk of NV memory

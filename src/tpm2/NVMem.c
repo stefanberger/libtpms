@@ -310,27 +310,23 @@ _plat__NVDisable(
     return;
 }
 
-/* C.6.2.7. _plat__IsNvAvailable() */
-/* Check if NV is available */
-/* Return Values Meaning */
-/* 0 NV is available */
-/* 1 NV is not available due to write failure */
-/* 2 NV is not available due to rate limit */
-LIB_EXPORT int
-_plat__IsNvAvailable(
-		     void
-		     )
+//***_plat__GetNvReadyState()
+// Check if NV is available
+//  Return Type: int
+//      0               NV is available
+//      1               NV is not available due to write failure
+//      2               NV is not available due to rate limit
+LIB_EXPORT int _plat__GetNvReadyState(void)
 {
-    int         retVal = 0;
+    int retVal = NV_READY;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     if (libtpms_plat__IsNvAvailable() == 1)
-        return 0;
+        return NV_READY;
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
-    // NV is not available if the TPM is in failure mode
     if(!s_NvIsAvailable)
-	retVal = 1;
+	retVal = NV_WRITEFAILURE;
 #if FILE_BACKED_NV
     else
 	retVal = (s_NvFile == NULL);
