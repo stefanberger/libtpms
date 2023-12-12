@@ -132,13 +132,22 @@ void NvCheckState(void)
 {
     int func_return;
     //
-    func_return = _plat__IsNvAvailable();
-    if(func_return == 0)
-	g_NvStatus = TPM_RC_SUCCESS;
-    else if(func_return == 1)
-	g_NvStatus = TPM_RC_NV_UNAVAILABLE;
+    func_return = _plat__GetNvReadyState();
+    if(func_return == NV_READY)
+	{
+	    g_NvStatus = TPM_RC_SUCCESS;
+	}
+    else if(func_return == NV_WRITEFAILURE)
+	{
+	    g_NvStatus = TPM_RC_NV_UNAVAILABLE;
+	}
     else
-	g_NvStatus = TPM_RC_NV_RATE;
+	{
+	    // if(func_return == NV_RATE_LIMIT) or anything else
+	    // assume retry later might work
+	    g_NvStatus = TPM_RC_NV_RATE;
+	}
+    
     return;
 }
 
