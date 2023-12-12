@@ -70,5 +70,7 @@
 #include "PlatformACT.h"
 #include "PlatformClock.h"
 #include "PlatformData.h"
+#include "platform_public_interface.h"
 #include "Platform_fp.h"
+
 #endif  // _PLATFORM_H_
