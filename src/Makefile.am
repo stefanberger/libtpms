@@ -436,6 +436,7 @@ noinst_HEADERS += \
 	tpm2/PlatformClock.h \
 	tpm2/PlatformData.h \
 	tpm2/platform_public_interface.h \
+	tpm2/platform_to_tpm_interface.h \
 	tpm2/Platform_fp.h \
 	tpm2/PolicyAuthorize_fp.h \
 	tpm2/PolicyAuthorizeNV_fp.h \
