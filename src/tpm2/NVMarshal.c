@@ -2376,7 +2376,7 @@ NV_TPMT_SENSITIVE_Marshal(TPMT_SENSITIVE *source, BYTE **buffer, INT32 *size)
         /* we wrote these but they must have been 0 in this case */
         pAssert(source->authValue.t.size == 0);
         pAssert(source->seedValue.t.size == 0);
-        pAssert(source->sensitiveType == TPM_ALG_ERROR)
+        pAssert(source->sensitiveType == TPM_ALG_ERROR);
         /* public keys */
     }
     return written;
@@ -2409,7 +2409,7 @@ NV_TPMT_SENSITIVE_Unmarshal(TPMT_SENSITIVE *target, BYTE **buffer, INT32 *size)
 	default:
             pAssert(target->authValue.t.size == 0);
             pAssert(target->seedValue.t.size == 0);
-            pAssert(target->sensitiveType == TPM_ALG_ERROR)
+            pAssert(target->sensitiveType == TPM_ALG_ERROR);
 	    /* nothing do to do */
 	}
     }
