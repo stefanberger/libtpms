@@ -631,7 +631,13 @@ static TPM_RC NvConditionallyWrite(NV_REF entryAddr,  // IN: stating address
 				   )
 {
     // If the index data is actually changed, then a write to NV is required
-    if(_plat__NvIsDifferent(entryAddr, size, data))
+    int isDifferent = _plat__NvGetChangedStatus(entryAddr, size, data);
+    if(isDifferent == NV_INVALID_LOCATION)
+	{
+	    // invalid request, we should be in failure mode by now.
+	    return TPM_RC_FAILURE;
+	}
+    else if(isDifferent == NV_HAS_CHANGED)
 	{
 	    // Write the data if NV is available
 	    if(g_NvStatus == TPM_RC_SUCCESS)
@@ -640,7 +646,12 @@ static TPM_RC NvConditionallyWrite(NV_REF entryAddr,  // IN: stating address
 		}
 	    return g_NvStatus;
 	}
-    return TPM_RC_SUCCESS;
+    else if(isDifferent == NV_IS_SAME)
+	{
+	    return TPM_RC_SUCCESS;
+	}
+    // the platform gave us an invalid response.
+    FAIL_RC(FATAL_ERROR_PLATFORM);
 }
 
 //*** NvReadNvIndexAttributes()

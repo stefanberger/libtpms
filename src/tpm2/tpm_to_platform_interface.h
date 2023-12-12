@@ -239,7 +239,6 @@ LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
 //      NV_HAS_CHANGED(1)       the NV location is different from the test value
 //      NV_IS_SAME(0)           the NV location is the same as the test value
 //      NV_INVALID_LOCATION(-1) the NV location is invalid; also triggers failure mode
-#if 0					// libtpms: added begin
 #define NV_HAS_CHANGED      (1)
 #define NV_IS_SAME          (0)
 #define NV_INVALID_LOCATION (-1)
@@ -248,14 +247,6 @@ LIB_EXPORT int _plat__NvGetChangedStatus(
 					 unsigned int size,         // IN: size of bytes to read
 					 void*        data          // IN: data buffer
 					 );
-#endif					// libtpms: added end
-
-LIB_EXPORT int
-_plat__NvIsDifferent(
-		     unsigned int     startOffset,   // IN: read start
-		     unsigned int     size,          // IN: size of bytes to read
-		     void            *data           // IN: data buffer
-		     );
 
 //***_plat__NvMemoryWrite()
 // This function is used to update NV memory. The "write" is to a memory copy of

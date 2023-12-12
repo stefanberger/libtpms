@@ -92,6 +92,12 @@
 #else
 #  define FUNCTION_NAME __FUNCTION__
 #endif
+
+	// SETFAILED calls TpmFail.  It may or may not return based on the NO_LONGJMP flag.
+	// CODELOCATOR is a macro that expands to either one 64-bit value that encodes the
+	// location, or two parameters: Function Name and Line Number.
+#define SETFAILED(errorCode) (TpmFail(FUNCTION_NAME, __LINE__, errorCode))
+
 #if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
 #   define LOG_FAILURE(errorCode) (TpmLogFailure(errorCode))
@@ -99,6 +105,7 @@
 #   define FAIL(errorCode)        TpmFail(FUNCTION_NAME, __LINE__, errorCode)
 #   define LOG_FAILURE(errorCode) TpmLogFailure(FUNCTION_NAME, __LINE__, errorCode)
 #endif
+#  define FAIL_RC(failCode)                SETFAILED(failCode)
 /* If implementation is using longjmp, then the call to TpmFail() does not return and the compiler
    will complain about unreachable code that comes after. To allow for not having longjmp, TpmFail()
    will return and the subsequent code will be executed. This macro accounts for the difference. */
