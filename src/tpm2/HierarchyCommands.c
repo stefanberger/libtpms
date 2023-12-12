@@ -72,6 +72,7 @@ TPM2_CreatePrimary(
     DRBG_STATE           rand;
     OBJECT              *newObject;
     TPM2B_NAME           name;
+    TPM2B_SEED     	primary_seed;
     // Input Validation
     // Will need a place to put the result
     newObject = FindEmptyObjectSlot(&out->objectHandle);
@@ -99,13 +100,20 @@ TPM2_CreatePrimary(
     // used as a random number generator during the object creation.
     // The caller does not know the seed values so the actual name does not have
     // to be over the input, it can be over the unmarshaled structure.
+
+    result = HierarchyGetPrimarySeed(in->primaryHandle, &primary_seed);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     result =
- 	DRBG_InstantiateSeeded(&rand,
-			       &HierarchyGetPrimarySeed(in->primaryHandle)->b,
+	DRBG_InstantiateSeeded(&rand,
+			       &primary_seed.b,
 			       PRIMARY_OBJECT_CREATION,
 			       (TPM2B*)PublicMarshalAndComputeName(publicArea, &name),
 			       &in->inSensitive.sensitive.data.b,
 			       HierarchyGetPrimarySeedCompatLevel(in->primaryHandle)); // libtpms added
+    MemorySet(primary_seed.b.buffer, 0, primary_seed.b.size);
+
     if(result == TPM_RC_SUCCESS)
 	{
 	    newObject->attributes.primary = SET;
@@ -132,10 +140,12 @@ TPM2_CreatePrimary(
 		       &out->creationHash);
 
     // Compute creation ticket
-    TicketComputeCreation(EntityGetHierarchy(in->primaryHandle),
+    result = TicketComputeCreation(EntityGetHierarchy(in->primaryHandle),
 				   &out->name,
 				   &out->creationHash,
 				   &out->creationTicket);
+    if(result != TPM_RC_SUCCESS)
+	return result;
 
     // Set the remaining attributes for a loaded object
     ObjectSetLoadedAttributes(newObject, in->primaryHandle,

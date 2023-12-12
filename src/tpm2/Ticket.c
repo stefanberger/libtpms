@@ -108,23 +108,29 @@ BOOL TicketIsSafe(TPM2B* buffer)
 //      digest              the signed digest
 //      keyName             the Name of the key that signed digest
 */
-void TicketComputeVerified(
+TPM_RC TicketComputeVerified(
 			     TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant for ticket
 			     TPM2B_DIGEST*     digest,     // IN: digest
 			     TPM2B_NAME*       keyName,    // IN: name of key that signed the values
 			     TPMT_TK_VERIFIED* ticket      // OUT: verified ticket
 			     )
 {
-    TPM2B_PROOF*proof;
+    TPM_RC      result = TPM_RC_SUCCESS;
+    TPM2B_PROOF proof;
     HMAC_STATE  hmacState;
     //
     // Fill in ticket fields
     ticket->tag       = TPM_ST_VERIFIED;
     ticket->hierarchy = hierarchy;
-    proof = HierarchyGetProof(hierarchy);
+    result            = HierarchyGetProof(hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Start HMAC using the proof value of the hierarchy as the HMAC key
-    ticket->digest.t.size = CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG,
-					     &proof->b);
+    ticket->digest.t.size =
+	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     //  TPM_ST_VERIFIED
     CryptDigestUpdateInt(&hmacState, sizeof(TPM_ST), ticket->tag);
     //  digest
@@ -133,7 +139,8 @@ void TicketComputeVerified(
     CryptDigestUpdate2B(&hmacState.hashState, &keyName->b);
     // done
     CryptHmacEnd2B(&hmacState, &ticket->digest.b);
-    return;
+
+    return TPM_RC_SUCCESS;
 }
 
 //*** TicketComputeAuth()
@@ -154,7 +161,7 @@ void TicketComputeVerified(
 //      policyRef   optional reference to a policy value
 //      keyName name of the key that signed the authorization
 */
-void TicketComputeAuth(
+TPM_RC TicketComputeAuth(
 			 TPM_ST            type,            // IN: the type of ticket.
 			 TPMI_RH_HIERARCHY hierarchy,       // IN: hierarchy constant for ticket
 			 UINT64            timeout,         // IN: timeout
@@ -166,18 +173,24 @@ void TicketComputeAuth(
 			 TPMT_TK_AUTH* ticket               // OUT: Created ticket
 			 )
 {
-    TPM2B_PROOF*proof;
+    TPM_RC      result = TPM_RC_SUCCESS;
+    TPM2B_PROOF proof;
     HMAC_STATE  hmacState;
     //
     // Get proper proof
-    proof = HierarchyGetProof(hierarchy);
+    result = HierarchyGetProof(hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Fill in ticket fields
     ticket->tag       = type;
     ticket->hierarchy = hierarchy;
 
     // Start HMAC with hierarchy proof as the HMAC key
-    ticket->digest.t.size = CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG,
-					     &proof->b);
+    ticket->digest.t.size =
+	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     //  TPM_ST_AUTH_SECRET or TPM_ST_AUTH_SIGNED,
     CryptDigestUpdateInt(&hmacState, sizeof(UINT16), ticket->tag);
     // cpHash
@@ -200,7 +213,7 @@ void TicketComputeAuth(
     // done
     CryptHmacEnd2B(&hmacState, &ticket->digest.b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** TicketComputeHashCheck()
@@ -215,25 +228,31 @@ void TicketComputeAuth(
 //              a value to differentiate the tickets
 //      digest  the digest of the data
 */
-void TicketComputeHashCheck(
+TPM_RC TicketComputeHashCheck(
 			      TPMI_RH_HIERARCHY  hierarchy,  // IN: hierarchy constant for ticket
 			      TPM_ALG_ID         hashAlg,    // IN: the hash algorithm for 'digest'
 			      TPM2B_DIGEST*      digest,     // IN: input digest
 			      TPMT_TK_HASHCHECK* ticket      // OUT: Created ticket
 			      )
 {
-    TPM2B_PROOF*proof;
+    TPM_RC      result = TPM_RC_SUCCESS;
+    TPM2B_PROOF proof;
     HMAC_STATE  hmacState;
     //
     // Get proper proof
-    proof = HierarchyGetProof(hierarchy);
+    result = HierarchyGetProof(hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Fill in ticket fields
     ticket->tag       = TPM_ST_HASHCHECK;
     ticket->hierarchy = hierarchy;
 
     // Start HMAC using hierarchy proof as HMAC key
-    ticket->digest.t.size = CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG,
-					     &proof->b);
+    ticket->digest.t.size =
+	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     //  TPM_ST_HASHCHECK
     CryptDigestUpdateInt(&hmacState, sizeof(TPM_ST), ticket->tag);
     //  hash algorithm
@@ -243,7 +262,7 @@ void TicketComputeHashCheck(
     // done
     CryptHmacEnd2B(&hmacState, &ticket->digest.b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** TicketComputeCreation()
@@ -258,24 +277,30 @@ void TicketComputeHashCheck(
 //  Name    the Name of the object to which the creation data is to be associated
 //  TPMS_CREATION_DATA  the creation data structure associated with Name
 */
-void TicketComputeCreation(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy for ticket
+TPM_RC TicketComputeCreation(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy for ticket
 			     TPM2B_NAME*       name,       // IN: object name
 			     TPM2B_DIGEST*     creation,   // IN: creation hash
 			     TPMT_TK_CREATION* ticket      // OUT: created ticket
 			     )
 {
-    TPM2B_PROOF*proof;
+    TPM_RC      result = TPM_RC_SUCCESS;
+    TPM2B_PROOF proof;
     HMAC_STATE  hmacState;
 
     // Get proper proof
-    proof = HierarchyGetProof(hierarchy);
+    result = HierarchyGetProof(hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Fill in ticket fields
     ticket->tag       = TPM_ST_CREATION;
     ticket->hierarchy = hierarchy;
 
     // Start HMAC using hierarchy proof as HMAC key
-    ticket->digest.t.size = CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG,
-					     &proof->b);
+    ticket->digest.t.size =
+	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     //  TPM_ST_CREATION
     CryptDigestUpdateInt(&hmacState, sizeof(TPM_ST), ticket->tag);
     //  name if provided
@@ -286,5 +311,5 @@ void TicketComputeCreation(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy for ti
     // Done
     CryptHmacEnd2B(&hmacState, &ticket->digest.b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }

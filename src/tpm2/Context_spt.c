@@ -91,21 +91,19 @@
 //                              does not support SVN-limited objects or the TPM
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
-void
-ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
-			   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
-			   TPM2B_IV*      iv       // OUT: the IV.
-			   )
+TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
+				   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
+				   TPM2B_IV*      iv       // OUT: the IV.
+				   )
 {
+    TPM_RC result = TPM_RC_SUCCESS;
     UINT16 symKeyBits;  // number of bits in the parent's
     //   symmetric key
-    TPM2B_PROOF *proof = NULL;  // the proof value to use
+    TPM2B_PROOF proof;  // the proof value to use
 
     BYTE        kdfResult[sizeof(TPMU_HA) * 2];  // Value produced by the KDF
 
     TPM2B_DATA  sequence2B, handle2B;
-    // Get proof value
-    proof = HierarchyGetProof(contextBlob->hierarchy);
 
     // Get sequence value in 2B format
     sequence2B.t.size = sizeof(contextBlob->sequence);
@@ -122,9 +120,15 @@ ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
     symKeyBits     = CONTEXT_ENCRYPT_KEY_BITS;
     // Get the size of the IV for the algorithm
     iv->t.size = CryptGetSymmetricBlockSize(CONTEXT_ENCRYPT_ALG, symKeyBits);
+
+    // Get proof value
+    result = HierarchyGetProof(contextBlob->hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // KDFa to generate symmetric key and IV value
     CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG,
-	      &proof->b,
+	      &proof.b,
 	      CONTEXT_KEY,
 	      &sequence2B.b,
 	      &handle2B.b,
@@ -132,6 +136,9 @@ ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
 	      kdfResult,
 	      NULL,
 	      FALSE);
+
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     // Copy part of the returned value as the key
     pAssert(symKey->t.size <= sizeof(symKey->t.buffer));
     MemoryCopy(symKey->t.buffer, kdfResult, symKey->t.size);
@@ -139,7 +146,8 @@ ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
     // Copy the rest as the IV
     pAssert(iv->t.size <= sizeof(iv->t.buffer));
     MemoryCopy(iv->t.buffer, &kdfResult[symKey->t.size], iv->t.size);
-    return;
+
+    return TPM_RC_SUCCESS;
 }
 
 //*** ComputeContextIntegrity()
@@ -173,19 +181,26 @@ ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
 //                              does not support SVN-limited objects or the TPM
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
-void ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
+TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
 			       TPM2B_DIGEST* integrity     // OUT: integrity
 			       )
 {
+    TPM_RC      result = TPM_RC_SUCCESS;
     HMAC_STATE  hmacState;
-    TPM2B_PROOF *proof;
+    TPM2B_PROOF proof;
     UINT16      integritySize;
 
     // Get proof value
-    proof = HierarchyGetProof(contextBlob->hierarchy);
+    result = HierarchyGetProof(contextBlob->hierarchy, &proof);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Start HMAC
     integrity->t.size =
-	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof->b);
+	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+
+    MemorySet(proof.b.buffer, 0, proof.b.size);
+
     // Compute integrity size at the beginning of context blob
     integritySize = sizeof(integrity->t.size) + integrity->t.size;
 
@@ -218,7 +233,7 @@ void ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
     // Complete HMAC
     CryptHmacEnd2B(&hmacState, &integrity->b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 #if 0

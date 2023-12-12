@@ -66,6 +66,25 @@
 
 #include "Tpm.h"
 
+//**HIERARCHY_MODIFIER_TYPE
+// This enumerates the possible hierarchy modifiers.
+typedef enum
+    {
+	HM_NONE = 0,
+	HM_FW_LIMITED,  // Hierarchy is firmware-limited.
+	HM_SVN_LIMITED  // Hierarchy is SVN-limited.
+    } HIERARCHY_MODIFIER_TYPE;
+
+//*** HIERARCHY_MODIFIER Structure
+// A HIERARCHY_MODIFIER structure holds metadata about an OBJECT's
+// hierarchy modifier.
+typedef struct HIERARCHY_MODIFIER
+{
+    HIERARCHY_MODIFIER_TYPE type;  // The type of modification.
+    uint16_t min_svn;  // The minimum SVN to which the hierarchy is limited.
+    // Only valid if 'type' is HM_SVN_LIMITED.
+} HIERARCHY_MODIFIER;
+
 //** Functions
 
 //*** HierarchyPreInstall()
@@ -172,17 +191,59 @@ BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
     return TRUE;
 }
 
+//*** DecomposeHandle()
+// This function extracts the base hierarchy and modifier from a given handle.
+// Returns the base hierarchy.
+static TPMI_RH_HIERARCHY DecomposeHandle(TPMI_RH_HIERARCHY   handle,   // IN
+					 HIERARCHY_MODIFIER* modifier  // OUT
+					 )
+{
+    modifier->type                   = HM_NONE;
+
+    // Handle is neither FW- nor SVN-bound; return it unmodified.
+    return handle;
+}
+
+//***MixAdditionalSecret()
+// This function obtains the additional secret for the hierarchy and
+// mixes it into the base secret. The output buffer must have the same
+// capacity as the base secret. The output buffer's size is set to the
+// base secret size. If no additional secret is needed, the base secret
+// is copied to the output buffer.
+//
+//  Return Type: TPM_RC
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects or the TPM failed
+//                              to derive the Firmware Secret.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the TPM failed
+//                              to derive the Firmware SVN Secret for the requested
+//                              SVN.
+static
+TPM_RC MixAdditionalSecret(const TPM2B*              base_secret,        // IN
+			   TPM2B*                    output_secret       // OUT
+			   )
+{
+    output_secret->size = base_secret->size;
+
+    if(1)
+	{
+	    memcpy(output_secret->buffer, base_secret->buffer, base_secret->size);
+	}
+    return TPM_RC_SUCCESS;
+}
+
 //*** HierarchyGetProof()
 // This function derives the proof value associated with a hierarchy. It returns a
 // buffer containing the proof value.
-TPM2B_PROOF *
-HierarchyGetProof(
-		  TPMI_RH_HIERARCHY    hierarchy      // IN: hierarchy constant
-		  )
+TPM_RC HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant
+			 TPM2B_PROOF*      proof       // OUT: proof buffer
+			 )
 {
     TPM2B_PROOF*       base_proof = NULL;
+    HIERARCHY_MODIFIER modifier;
 
-    switch(hierarchy)
+    switch(DecomposeHandle(hierarchy, &modifier))
 	{
 	  case TPM_RH_PLATFORM:
 	    // phProof for TPM_RH_PLATFORM
@@ -201,18 +262,20 @@ HierarchyGetProof(
 	    base_proof = &gr.nullProof;
 	    break;
 	}
-    return base_proof;
+
+    return MixAdditionalSecret(&base_proof->b, &proof->b);
 }
 
 //*** HierarchyGetPrimarySeed()
 // This function derives the primary seed of a hierarchy.
-TPM2B_SEED *
-HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
-			)
+TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
+			       TPM2B_SEED*       seed        // OUT: seed buffer
+			       )
 {
     TPM2B_SEED*        base_seed = NULL;
+    HIERARCHY_MODIFIER modifier;
 
-    switch(hierarchy)
+    switch(DecomposeHandle(hierarchy, &modifier))
 	{
 	  case TPM_RH_PLATFORM:
 	    base_seed = &gp.PPSeed;
@@ -227,8 +290,10 @@ HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 	    base_seed = &gr.nullSeed;
 	    break;
 	}
-    return base_seed;
+
+    return MixAdditionalSecret(&base_seed->b, &seed->b);
 }
+
 // libtpms added begin
 SEED_COMPAT_LEVEL
 HierarchyGetPrimarySeedCompatLevel(

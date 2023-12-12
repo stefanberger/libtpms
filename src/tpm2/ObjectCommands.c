@@ -166,10 +166,12 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
 		       &out->creationHash);
 
     // Compute creation ticket
-    TicketComputeCreation(EntityGetHierarchy(in->parentHandle),
+    result = TicketComputeCreation(EntityGetHierarchy(in->parentHandle),
 				   &newObject->name,
 				   &out->creationHash,
 				   &out->creationTicket);
+    if(result != TPM_RC_SUCCESS)
+	return result;
 
     // Prepare output private data from sensitive
     SensitiveToPrivate(&newObject->sensitive,
@@ -620,6 +622,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 	    if(parent == NULL)
 		{
 		    TPM2B_NAME name;
+		    TPM2B_SEED primary_seed;
 
 		    newObject->attributes.primary = SET;
 		    if(in->parentHandle == TPM_RH_ENDORSEMENT)
@@ -627,12 +630,22 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 		    seedCompatLevel = HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
 		    // If so, use the primary seed and the digest of the template
 		    // to seed the DRBG
-		    result = DRBG_InstantiateSeeded((DRBG_STATE *)rand,
-						    &HierarchyGetPrimarySeed(in->parentHandle)->b,
+
+		    result = HierarchyGetPrimarySeed(in->parentHandle, &primary_seed);
+		    if(result != TPM_RC_SUCCESS)
+			return result;
+
+		    // If so, use the primary seed and the digest of the template
+		    // to seed the DRBG
+		    result = DRBG_InstantiateSeeded(
+						    (DRBG_STATE*)rand,
+						    &primary_seed.b,
 						    PRIMARY_OBJECT_CREATION,
-						    (TPM2B *)PublicMarshalAndComputeName(publicArea,&name),
+						    (TPM2B*)PublicMarshalAndComputeName(publicArea, &name),
 						    &in->inSensitive.sensitive.data.b,
 						    seedCompatLevel);        // libtpms added
+		    MemorySet(primary_seed.b.buffer, 0, primary_seed.b.size);
+
 		    if(result != TPM_RC_SUCCESS)
 			return result;
 		}

@@ -239,7 +239,10 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
 	       sizeof(out->context.sequence));
 
     // Compute context encryption key
-    ComputeContextProtectionKey(&out->context, &symKey, &iv);
+    result = ComputeContextProtectionKey(&out->context, &symKey, &iv);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Encrypt context blob
     CryptSymmetricEncrypt(out->context.contextBlob.t.buffer + integritySize,
 			  CONTEXT_ENCRYPT_ALG,
@@ -253,7 +256,10 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
     // Compute integrity hash for the object
     // In this implementation, the same routine is used for both sessions
     // and objects.
-    ComputeContextIntegrity(&out->context, &integrity);
+    result = ComputeContextIntegrity(&out->context, &integrity);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // add integrity at the beginning of context blob
     buffer = out->context.contextBlob.t.buffer;
     TPM2B_DIGEST_Marshal(&integrity, &buffer, NULL);
@@ -336,12 +342,18 @@ TPM2_ContextLoad(ContextLoad_In*  in,  // IN: input parameter list
     // of integrity protected and encrypted bytes.
 
     // Compute context integrity
-    ComputeContextIntegrity(&in->context, &integrityToCompare);
+    result = ComputeContextIntegrity(&in->context, &integrityToCompare);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Compare integrity
     if(!MemoryEqual2B(&integrity.b, &integrityToCompare.b))
 	return TPM_RCS_INTEGRITY + RC_ContextLoad_context;
     // Compute context encryption key
-    ComputeContextProtectionKey(&in->context, &symKey, &iv);
+    result = ComputeContextProtectionKey(&in->context, &symKey, &iv);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     // Decrypt context data in place
     CryptSymmetricDecrypt(buffer,
 			  CONTEXT_ENCRYPT_ALG,

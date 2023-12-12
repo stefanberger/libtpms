@@ -78,7 +78,7 @@
 //                              does not support SVN-limited objects or the TPM
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
-void   ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
+TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
 				   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
 				   TPM2B_IV*      iv       // OUT: the IV.
 				   );
@@ -95,7 +95,7 @@ void   ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
 //                              does not support SVN-limited objects or the TPM
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
-void  ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
+TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
 			       TPM2B_DIGEST* integrity     // OUT: integrity
 			       );
 
