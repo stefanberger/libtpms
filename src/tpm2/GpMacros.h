@@ -75,15 +75,13 @@
 // These macros are used in CryptUtil to invoke the incremental self test.
 #if SELF_TEST
 #  define TEST(alg)				     \
-	    if(TEST_BIT(alg, g_toTest))				\
-		CryptTestAlgorithm(alg, NULL)
-#   define     TEST_HASH(alg)						\
-    if(TEST_BIT(alg, g_toTest)						\
-       &&  (alg != TPM_ALG_NULL))					\
-	CryptTestAlgorithm(alg, NULL)
+    do						     \
+	{						     \
+	    if(TEST_BIT(alg, g_toTest))			     \
+		CryptTestAlgorithm(alg, NULL);		     \
+	} while(0)
 #else
 #  define TEST(alg)
-#   define TEST_HASH(alg)
 #endif  // SELF_TEST
 
 	//** For Failures
@@ -93,11 +91,57 @@
 #  define FUNCTION_NAME __FUNCTION__
 #endif
 
+#if defined(FAIL_TRACE) && FAIL_TRACE != 0
+#  define CODELOCATOR() FUNCTION_NAME, __LINE__
+#else  // !FAIL_TRACE
+// if provided, use the definition of CODELOCATOR from TpmConfiguration so
+// implementor can customize this.
+#  ifndef CODELOCATOR
+#    define CODELOCATOR() 0
+#  endif
+#endif  // FAIL_TRACE
+
 	// SETFAILED calls TpmFail.  It may or may not return based on the NO_LONGJMP flag.
 	// CODELOCATOR is a macro that expands to either one 64-bit value that encodes the
 	// location, or two parameters: Function Name and Line Number.
-#define SETFAILED(errorCode) (TpmFail(FUNCTION_NAME, __LINE__, errorCode))
+#define SETFAILED(errorCode) (TpmFail(CODELOCATOR(), errorCode))
 
+// If implementation is using longjmp, then calls to TpmFail() will never
+// return.  However, without longjmp facility, TpmFail will return while most of
+// the code currently expects FAIL() calls to immediately abort the current
+// command. If they don't, some commands return success instead of failure.  The
+// family of macros below are provided to allow the code to be modified to
+// correctly propagate errors correctly, based on the context.
+//
+// * Some functions, particularly the ECC crypto have state cleanup at the end
+//   of the function and need to use the goto Exit pattern.
+// * Other functions return TPM_RC values, which should return TPM_RC_FAILURE
+// * Still other functions return an isOK boolean and need to return FALSE.
+//
+// if longjmp is available, all these macros just call SETFAILED and immediately
+// abort.  Note any of these approaches could leak memory if the crypto adapter
+// libraries are using dynamic memory.
+//
+// FAIL vs. FAIL_NORET
+// ===================
+// Be cautious with these macros.  FAIL_NORET is intended as an affirmation
+// that the upstream code calling the function using this macro has been
+// investigated to confirm that upstream functions correctly handle this
+// function putting the TPM into failure mode without returning an error.
+//
+// The TPM library was originally written with a lot of error checking omitted,
+// which means code occurring after a FAIL macro may not expect to be called
+// when the TPM is in failure mode.  When NO_LONGJMP is false (the system has a
+// longjmp API), then none of that code is executed because the sample platform
+// sets up longjmp before calling ExecuteCommand.  However, in the NO_LONGJMP
+// case, code following a FAIL or FAIL_NORET macro will get run.  The
+// conservative assumption is that code is untested and may be unsafe in such a
+// situation.  FAIL_NORET can replace FAIL when the code has been reviewed to
+// ensure the post-FAIL code is safe.  Of course, this is a point-in-time
+// assertion that is only true when the FAIL_NORET macro is first inserted;
+// hence it is better to use one of the early-exit macros to immediately return.
+// However, the necessary return-code plumbing may be large and FAIL/FAIL_NORET
+// are provided to support gradual improvement over time.
 #if !FAIL_TRACE
 #   define FAIL(errorCode) (TpmFail(errorCode))
 #   define LOG_FAILURE(errorCode) (TpmLogFailure(errorCode))
@@ -109,31 +153,30 @@
 /* If implementation is using longjmp, then the call to TpmFail() does not return and the compiler
    will complain about unreachable code that comes after. To allow for not having longjmp, TpmFail()
    will return and the subsequent code will be executed. This macro accounts for the difference. */
+
 #ifndef NO_LONGJMP
-#   define FAIL_RETURN(returnCode)
-#   define TPM_FAIL_RETURN     NORETURN void
-#else
-#   define FAIL_RETURN(returnCode) return (returnCode)
-#   define TPM_FAIL_RETURN     void
+// has longjmp
+// necesary to reference Exit, even though the code is no-return
+#  define FAIL_RETURN(returnCode)
+#  define TPM_FAIL_RETURN NORETURN void
+#else  // NO_LONGJMP
+// no longjmp service is available
+#  define FAIL_RETURN(returnCode) return(returnCode)
+#  define TPM_FAIL_RETURN      void
+
 #endif
-/* This macro tests that a condition is TRUE and puts the TPM into failure mode if it is not. If
-   longjmp is being used, then the FAIL(FATAL_ERROR_) macro makes a call from which there is no
-   return. Otherwise, it returns and the function will exit with the appropriate return code. */
-#define REQUIRE(condition, errorCode, returnCode)		\
-    {								\
-	if(!!(condition))					\
-	    {							\
-		FAIL(FATAL_ERROR_errorCode);			\
-		FAIL_RETURN(returnCode);			\
-	    }							\
-    }
-#define PARAMETER_CHECK(condition, returnCode)		\
-    REQUIRE((condition), PARAMETER, returnCode)
-#if defined EMPTY_ASSERT && (EMPTY_ASSERT != NO)
-#   define pAssert(a)  ((void)0)
+
+#if(defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
+#  define pAssert(a) ((void)0)
 #else
-#   define pAssert(a) {if(!(a)) FAIL(FATAL_ERROR_PARAMETER);}
+#  define pAssert(a)					   \
+    do							   \
+	{							   \
+	    if(!(a))						   \
+		FAIL(FATAL_ERROR_PARAMETER);			   \
+	} while(0)
 #endif
+
 /* 5.10.4	Derived from Vendor-specific values */
 /* Values derived from vendor specific settings in TpmProfile.h */
 #define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
@@ -164,12 +207,8 @@
 		goto Error;			      \
 	} while(0)
 
-#ifndef MAX
-#  define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef MIN
-#  define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
+#include "MinMax.h"
+
 #ifndef IsOdd
 #  define IsOdd(a) (((a)&1) != 0)
 #endif
@@ -177,9 +216,7 @@
 #ifndef BITS_TO_BYTES
 #  define BITS_TO_BYTES(bits) (((bits) + 7) >> 3)
 #endif
-#ifndef DIV_UP
-#  define DIV_UP(var, div) ((var + div - 1) / (div))
-#endif
+
 // These are defined for use when the size of the vector being checked is known
 // at compile time.
 #define TEST_BIT(bit, vector)  TestBit((bit), (BYTE*)&(vector), sizeof(vector))
@@ -315,17 +352,20 @@
 #ifndef LABEL_MAX_BUFFER
 #define LABEL_MAX_BUFFER MIN(32, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
 #endif
-/* This bit is used to indicate that an authorization ticket expires on TPM Reset and TPM Restart.It
-   is added to the timeout value returned by TPM2_PoliySigned() and TPM2_PolicySecret() and used by
-   TPM2_PolicyTicket(). The timeout value is relative to Time (g_time). Time is reset whenever the
-   TPM loses power and cannot be moved forward by the user (as can Clock). g_time is a 64-bit value
-   expressing time in ms. Stealing the MSb() for a flag means that the TPM needs to be reset at least
-   once every 292,471,208 years rather than once every 584,942,417 years. */
+// This bit is used to indicate that an authorization ticket expires on TPM Reset
+// and TPM Restart. It is added to the timeout value returned by TPM2_PoliySigned()
+// and TPM2_PolicySecret() and used by TPM2_PolicyTicket(). The timeout value is
+// relative to Time (g_time). Time is reset whenever the TPM loses power and cannot
+// be moved forward by the user (as can Clock). 'g_time' is a 64-bit value expressing
+// time in ms. Stealing the MSb for a flag means that the TPM needs to be reset
+// at least once every 292,471,208 years rather than once every 584,942,417 years.
 #define EXPIRATION_BIT ((UINT64)1 << 63)
-/* Check for consistency of the bit ordering of bit fields */
+
+// Check for consistency of the bit ordering of bit fields
 #if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && USE_BIT_FIELD_STRUCTURES
-#   error "Settings not consistent"
+#  error "Settings not consistent"
 #endif
+
 // These macros are used to handle the variation in handling of bit fields. If
 #if USE_BIT_FIELD_STRUCTURES  // The default, old version, with bit fields
 #  define IS_ATTRIBUTE(a, type, b)    ((a.b) != 0)
@@ -348,12 +388,17 @@
 // Global.c defines GLOBAL_C so all the values in this file will be instanced in
 // Global.obj. For all other files that include this file, the values will simply
 // be external references. For constants, there can be an initializer.
+#ifndef EXTERN
+#  ifdef GLOBAL_C
+#    define EXTERN
+#  else
+#    define EXTERN extern
+#  endif
+#endif  // EXTERN
 
 #ifdef GLOBAL_C
-#  define EXTERN
 #  define INITIALIZER(_value_) = _value_
 #else
-#  define EXTERN  extern
 #  define INITIALIZER(_value_)
 #endif
 

@@ -60,7 +60,7 @@
 
 
 #ifndef _MIN_MAX_H_
-#define _MIN_MAX_H_
+//#define _MIN_MAX_H_
 
 #ifndef MAX
 #  define MAX(a, b) ((a) > (b) ? (a) : (b))
