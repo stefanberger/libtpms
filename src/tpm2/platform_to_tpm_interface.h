@@ -54,23 +54,19 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2023			  	*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
-/* C.14	Platform.h */
+#ifndef _PLATFORM_TO_TPM_INTERFACE_H_
+#define _PLATFORM_TO_TPM_INTERFACE_H_
 
-#ifndef    _PLATFORM_H_
-#define    _PLATFORM_H_
-#include "TpmBuildSwitches.h"
-#include "TpmProfile.h"
-#include "BaseTypes.h"
-#include "TPMB.h"
-#include "MinMax.h"
-#include "PlatformACT.h"
-#include "PlatformClock.h"
-#include "PlatformData.h"
-#include "platform_public_interface.h"
-#include "platform_to_tpm_interface.h"
-
-#endif  // _PLATFORM_H_
+#include "_TPM_Hash_Data_fp.h"
+#include "_TPM_Hash_End_fp.h"
+#include "_TPM_Hash_Start_fp.h"
+#include "_TPM_Init_fp.h"
+#include "ExecCommand_fp.h"
+#include "Manufacture_fp.h"
+// TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
+#include "TpmFail_fp.h"
+#endif
