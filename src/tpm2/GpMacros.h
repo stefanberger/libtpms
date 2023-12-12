@@ -159,10 +159,16 @@
 // necesary to reference Exit, even though the code is no-return
 #  define FAIL_RETURN(returnCode)
 #  define TPM_FAIL_RETURN NORETURN void
+
+#  define FAIL_BOOL(failCode)              SETFAILED(failCode)
+
 #else  // NO_LONGJMP
 // no longjmp service is available
 #  define FAIL_RETURN(returnCode) return(returnCode)
 #  define TPM_FAIL_RETURN      void
+
+// fail and return FALSE
+#  define FAIL_BOOL(failCode) FAIL_IMMEDIATE(failCode, FALSE)
 
 #endif
 
@@ -175,6 +181,14 @@
 	    if(!(a))						   \
 		FAIL(FATAL_ERROR_PARAMETER);			   \
 	} while(0)
+
+#  define pAssert_BOOL(a)			     \
+    do						     \
+	{						     \
+	    if(!(a))					     \
+		FAIL_BOOL(FATAL_ERROR_ASSERT);		     \
+	} while(0);
+
 #endif
 
 /* 5.10.4	Derived from Vendor-specific values */

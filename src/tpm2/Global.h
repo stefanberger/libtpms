@@ -1414,23 +1414,8 @@ EXTERN OBJECT s_objects[MAX_LOADED_OBJECTS];
 //*** From PCR.c
 //*****************************************************************************
 #  if defined PCR_C || defined GLOBAL_C
+#    include "pcrstruct.h"
 
-#define PCR_ALL_HASH(HASH, Hash)    BYTE    Hash##Pcr[HASH##_DIGEST_SIZE];
-
-typedef struct
-{
-    FOR_EACH_HASH(PCR_ALL_HASH)
-} PCR;
-
-typedef struct
-{
-    unsigned int    stateSave : 1;              // if the PCR value should be
-    // saved in state save
-    unsigned int    resetLocality : 5;          // The locality that the PCR
-    // can be reset
-    unsigned int    extendLocality : 5;         // The locality that the PCR
-    // can be extend
-} PCR_Attributes;
 EXTERN PCR s_pcrs[IMPLEMENTATION_PCR];
 
 #  endif  // PCR_C
