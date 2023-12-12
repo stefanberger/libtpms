@@ -579,11 +579,7 @@ EXTERN ALGORITHM_VECTOR g_toTest;
 // code when it is a parameter-, handle-, or session-related error.
 // This is an implementation choice and the same result can be achieved by using
 // a macro.
-#define g_rcIndexInitializer {  TPM_RC_1, TPM_RC_2, TPM_RC_3, TPM_RC_4,	\
-	    TPM_RC_5, TPM_RC_6, TPM_RC_7, TPM_RC_8,			\
-	    TPM_RC_9, TPM_RC_A, TPM_RC_B, TPM_RC_C,			\
-	    TPM_RC_D, TPM_RC_E, TPM_RC_F }
-EXTERN const UINT16 g_rcIndex[15] INITIALIZER(g_rcIndexInitializer);
+extern const UINT16 g_rcIndex[15];
 
 //*** g_exclusiveAuditSession
 // This location holds the session handle for the current exclusive audit
