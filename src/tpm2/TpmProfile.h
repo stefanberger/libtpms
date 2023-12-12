@@ -70,6 +70,7 @@
 #include "TpmProfile_Common.h"
 #include "TpmProfile_CommandList.h"
 #include "TpmProfile_Misc.h"
+#include "TpmProfile_ErrorCodes.h"
 
 // Table 0:7 - Defines for Implementation Values
 
