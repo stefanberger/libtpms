@@ -313,10 +313,9 @@ TPM2_GetTime(
 #include "TpmAsn1_fp.h"
 #include "X509_spt_fp.h"
 #include "Attest_spt_fp.h"
-#include "Platform_fp.h"
 #if CC_CertifyX509 // Conditional expansion of this file
 #if CERTIFYX509_DEBUG
-#include "DebugHelpers_fp.h"
+#  include "tpm_to_platform_interface.h"
 #endif
 
 /* Error Returns	Meaning*/
