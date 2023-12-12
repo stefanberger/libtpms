@@ -109,8 +109,10 @@ TPM2_VerifySignature(VerifySignature_In*  in,  // IN: input parameter list
     else
 	{
 	    // Compute ticket
-	    TicketComputeVerified(
+	    result = TicketComputeVerified(
 					   hierarchy, &in->digest, &signObject->name, &out->validation);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 	}
 
     return TPM_RC_SUCCESS;
@@ -168,10 +170,12 @@ TPM2_Sign(Sign_In*  in,  // IN: input parameter list
 		       signObject->publicArea.objectAttributes, TPMA_OBJECT, restricted))
 	{
 	    // Compute and compare ticket
-	    TicketComputeHashCheck(in->validation.hierarchy,
+	    result = TicketComputeHashCheck(in->validation.hierarchy,
 					    in->inScheme.details.any.hashAlg,
 					    &in->digest,
 					    &ticket);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 
 	    if(!MemoryEqual2B(&in->validation.digest.b, &ticket.digest.b))
 		return TPM_RCS_TICKET + RC_Sign_validation;

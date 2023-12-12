@@ -174,7 +174,7 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
 	    // Compute policy ticket
 	    authTimeout &= ~EXPIRATION_BIT;
 
-	    TicketComputeAuth(TPM_ST_AUTH_SIGNED,
+	    result = TicketComputeAuth(TPM_ST_AUTH_SIGNED,
 				       EntityGetHierarchy(in->authObject),
 				       authTimeout,
 				       expiresOnReset,
@@ -182,6 +182,8 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
 				       &in->policyRef,
 				       &entityName,
 				       &out->policyTicket);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 
 	    // Generate timeout buffer.  The format of output timeout buffer is
 	    // TPM-specific.
@@ -280,7 +282,7 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
 	    BOOL expiresOnReset = (in->nonceTPM.t.size == 0);
 	    // Compute policy ticket
 	    authTimeout &= ~EXPIRATION_BIT;
-	    TicketComputeAuth(TPM_ST_AUTH_SECRET,
+	    result = TicketComputeAuth(TPM_ST_AUTH_SECRET,
 				       EntityGetHierarchy(in->authHandle),
 				       authTimeout,
 				       expiresOnReset,
@@ -288,6 +290,8 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
 				       &in->policyRef,
 				       &entityName,
 				       &out->policyTicket);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 
 	    // Generate timeout buffer.  The format of output timeout buffer is
 	    // TPM-specific.
@@ -382,7 +386,7 @@ TPM2_PolicyTicket(PolicyTicket_In* in  // IN: input parameter list
 	return result;
     // Validate Ticket
     // Re-generate policy ticket by input parameters
-    TicketComputeAuth(in->ticket.tag,
+    result = TicketComputeAuth(in->ticket.tag,
 			       in->ticket.hierarchy,
 			       authTimeout,
 			       expiresOnReset,
@@ -390,6 +394,8 @@ TPM2_PolicyTicket(PolicyTicket_In* in  // IN: input parameter list
 			       &in->policyRef,
 			       &in->authName,
 			       &ticketToCompare);
+    if(result != TPM_RC_SUCCESS)
+	return result;
 
     // Compare generated digest with input ticket digest
     if(!MemoryEqual2B(&in->ticket.digest.b, &ticketToCompare.digest.b))
@@ -1218,6 +1224,7 @@ TPM_RC
 TPM2_PolicyAuthorize(PolicyAuthorize_In* in  // IN: input parameter list
 		     )
 {
+    TPM_RC           result = TPM_RC_SUCCESS;
     SESSION*         session;
     TPM2B_DIGEST     authHash;
     HASH_STATE       hashState;
@@ -1270,8 +1277,10 @@ TPM2_PolicyAuthorize(PolicyAuthorize_In* in  // IN: input parameter list
 	    CryptHashEnd2B(&hashState, &authHash.b);
 
 	    // re-compute TPMT_TK_VERIFIED
-	    TicketComputeVerified(in->checkTicket.hierarchy, &authHash,
+	    result = TicketComputeVerified(in->checkTicket.hierarchy, &authHash,
 					   &in->keySign, &ticket);
+	    if(result != TPM_RC_SUCCESS)
+		return result;
 
 	    // Compare ticket digest.  If not match, return error
 	    if(!MemoryEqual2B(&in->checkTicket.digest.b, &ticket.digest.b))

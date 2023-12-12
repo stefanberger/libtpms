@@ -91,9 +91,9 @@ BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
 //                              does not support SVN-limited objects or the TPM failed
 //                              to derive the Firmware SVN Secret for the requested
 //                              SVN.
-TPM2B_PROOF *
-HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy constant
-		 );
+TPM_RC HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant
+			 TPM2B_PROOF*      proof       // OUT: proof buffer
+			 );
 
 //*** HierarchyGetPrimarySeed()
 // This function derives the primary seed of a hierarchy.
@@ -106,10 +106,9 @@ HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy constant
 //                              does not support SVN-limited objects or the TPM failed
 //                              to derive the Firmware SVN Secret for the requested
 //                              SVN.
-TPM2B_SEED *
-HierarchyGetPrimarySeed(
-			TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
-			);
+TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
+			       TPM2B_SEED*       seed        // OUT: seed buffer
+			       );
 
 // libtpms added begin
 SEED_COMPAT_LEVEL
