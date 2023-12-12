@@ -70,8 +70,8 @@
 //** Includes
 #include "Tpm.h"
 #include "ACT_spt_fp.h"
-#include "Platform_fp.h"
-#include "PlatformACT_fp.h"		/* added kgold */
+// TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
+#include "tpm_to_platform_interface.h"
 
 //** Functions
 

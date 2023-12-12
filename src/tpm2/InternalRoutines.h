@@ -140,7 +140,9 @@
 #endif
 /* Support library */
 #include "SupportLibraryFunctionPrototypes_fp.h"
-/* Linkage to platform functions */
-#include "Platform_fp.h"
+
+// Linkage to platform functions
+// TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
+#include "tpm_to_platform_interface.h"
 
 #endif

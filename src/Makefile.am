@@ -508,6 +508,7 @@ noinst_HEADERS += \
 	tpm2/TpmProfile_Common.h \
 	tpm2/TpmProfile_Misc.h \
 	tpm2/Tpm.h \
+	tpm2/tpm_to_platform_interface.h \
 	tpm2/_TPM_Hash_Data_fp.h \
 	tpm2/_TPM_Hash_End_fp.h \
 	tpm2/_TPM_Hash_Start_fp.h \
