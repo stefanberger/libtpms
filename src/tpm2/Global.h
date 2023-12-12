@@ -101,7 +101,6 @@ _NORMAL_WARNING_LEVEL_
 #  include "CryptEcc.h"
 #  include "CryptRsa.h"
 #  include "CryptTest.h"
-#  include "TpmError.h"
 #  include "NV.h"
 #  include "ACT.h"
 #  include "Utils.h"		    // libtpms added

@@ -501,11 +501,11 @@ noinst_HEADERS += \
 	tpm2/TpmAsn1.h \
 	tpm2/TpmAsn1_fp.h \
 	tpm2/TpmBuildSwitches.h \
-	tpm2/TpmError.h \
 	tpm2/TpmFail_fp.h \
 	tpm2/TpmProfile.h \
 	tpm2/TpmProfile_CommandList.h \
 	tpm2/TpmProfile_Common.h \
+	tpm2/TpmProfile_ErrorCodes.h \
 	tpm2/TpmProfile_Misc.h \
 	tpm2/Tpm.h \
 	tpm2/tpm_to_platform_interface.h \
