@@ -247,6 +247,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PCR.c \
 	tpm2/PlatformACT.c \
 	tpm2/PlatformData.c \
+	tpm2/PlatformPCR.c \
 	tpm2/Policy_spt.c \
 	tpm2/Power.c \
 	tpm2/PowerPlat.c \
@@ -422,6 +423,7 @@ noinst_HEADERS += \
 	tpm2/ObjectChangeAuth_fp.h \
 	tpm2/Object_fp.h \
 	tpm2/Object_spt_fp.h \
+	tpm2/pcrstruct.h \
 	tpm2/PCR_Allocate_fp.h \
 	tpm2/PCR_Event_fp.h \
 	tpm2/PCR_Extend_fp.h \
@@ -436,6 +438,7 @@ noinst_HEADERS += \
 	tpm2/PlatformClock.h \
 	tpm2/PlatformData.h \
 	tpm2/platform_public_interface.h \
+	tpm2/platform_pcr_fp.h \
 	tpm2/platform_to_tpm_interface.h \
 	tpm2/Platform_fp.h \
 	tpm2/PolicyAuthorize_fp.h \

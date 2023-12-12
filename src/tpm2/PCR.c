@@ -75,26 +75,13 @@
 //** Includes, Defines, and Data Definitions
 #define PCR_C
 #include "Tpm.h"
-/* The initial value of PCR attributes.  The value of these fields should be consistent with PC
-   Client specification In this implementation, we assume the total number of implemented PCR is
-   24. */
-static const PCR_Attributes s_initAttributes[] =
-    {
-	// PCR 0 - 15, static RTM
-	{1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F},
-	{1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F},
-	{1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F},
-	{1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F}, {1, 0, 0x1F},
-	{0, 0x0F, 0x1F},        // PCR 16, Debug
-	{0, 0x10, 0x1C},        // PCR 17, Locality 4
-	{0, 0x10, 0x1C},        // PCR 18, Locality 3
-	{0, 0x10, 0x0C},        // PCR 19, Locality 2
-	{0, 0x14, 0x0E},        // PCR 20, Locality 1
-	{0, 0x14, 0x04},        // PCR 21, Dynamic OS
-	{0, 0x14, 0x04},        // PCR 22, Dynamic OS
-	{0, 0x0F, 0x1F},        // PCR 23, Application specific
-	{0, 0x0F, 0x1F}         // PCR 24, testing policy
-    };
+#include "platform_pcr_fp.h"		// libtpms: temporary
+
+// verify values from pcrstruct.h. not <= because group #0 is reserved
+// indicating no auth/policy support
+TPM_STATIC_ASSERT(NUM_AUTHVALUE_PCR_GROUP < (1 << MAX_PCR_GROUP_BITS));
+TPM_STATIC_ASSERT(NUM_POLICY_PCR_GROUP < (1 << MAX_PCR_GROUP_BITS));
+
 //** Functions
 
 //*** PCRBelongsAuthGroup()
@@ -486,13 +473,23 @@ BOOL PCRStartup(STARTUP_TYPE type,     // IN: startup type
 	    // PCR generation counter is cleared at TPM_RESET
 	    gr.pcrCounter = 0;
 	}
+
+    // check the TPM library and platform are properly paired.
+    // if this fails the platform and library are compiled with different
+    // definitions of the number of PCRs - immediately enter FAILURE mode and
+    // return FALSE
+    pAssert_BOOL(_platPcr__NumberOfPcrs() == IMPLEMENTATION_PCR);
+
     // Initialize/Restore PCR values
     for(pcr = 0; pcr < IMPLEMENTATION_PCR; pcr++)
 	{
 	    // On resume, need to know if this PCR had its state saved or not
 	    UINT32 stateSaved;
+	    // note structure is a bitfield and returned by value.
+	    PCR_Attributes currentPcrAttributes =
+		_platPcr__GetPcrInitializationAttributes(pcr);
 
-	    if(type == SU_RESUME &&  s_initAttributes[pcr].stateSave == SET)
+	    if(type == SU_RESUME && currentPcrAttributes.stateSave == SET)
 		{
 		    stateSaved = 1;
 		}
@@ -533,7 +530,7 @@ BOOL PCRStartup(STARTUP_TYPE type,     // IN: startup type
 				    // If the reset locality of the PCR is 4, then
 				    // the reset value is all one's, otherwise it is
 				    // all zero.
-				    if((s_initAttributes[pcr].resetLocality & 0x10) != 0)
+				    if((currentPcrAttributes.resetLocality & 0x10) != 0)
 					MemorySet(pcrData, 0xFF, pcrSize);
 				    else
 					{
@@ -569,7 +566,11 @@ void PCRStateSave(TPM_SU type  // IN: startup type
     // Copy PCR values to the structure that should be saved to NV
     for(pcr = 0; pcr < IMPLEMENTATION_PCR; pcr++)
 	{
-	    UINT32 stateSaved = (s_initAttributes[pcr].stateSave == SET) ? 1 : 0;
+	    PCR_Attributes currentPcrAttributes =
+		_platPcr__GetPcrInitializationAttributes(pcr);
+
+	    UINT32 stateSaved = (currentPcrAttributes.stateSave == SET) ? 1 : 0;
+
 	    // Iterate each hash algorithm bank
 	    for(j = 0; j < gp.pcrAllocated.count; j++)
 		{
@@ -609,8 +610,10 @@ BOOL PCRIsStateSaved(TPMI_DH_PCR handle  // IN: PCR handle to be extended
 		     )
 {
     UINT32         pcr = handle - PCR_FIRST;
+    PCR_Attributes currentPcrAttributes =
+	_platPcr__GetPcrInitializationAttributes(pcr);
 
-    if(s_initAttributes[pcr].stateSave == SET)
+    if(currentPcrAttributes.stateSave == SET)
 	return TRUE;
     else
 	return FALSE;
@@ -628,6 +631,9 @@ BOOL PCRIsResetAllowed(TPMI_DH_PCR handle  // IN: PCR handle to be extended
     UINT8          commandLocality;
     UINT8          localityBits = 1;
     UINT32         pcr          = handle - PCR_FIRST;
+    PCR_Attributes currentPcrAttributes =
+	_platPcr__GetPcrInitializationAttributes(pcr);
+
     // Check for the locality
     commandLocality = _plat__LocalityGet();
 
@@ -638,7 +644,7 @@ BOOL PCRIsResetAllowed(TPMI_DH_PCR handle  // IN: PCR handle to be extended
 #endif
 
     localityBits = localityBits << commandLocality;
-    if((localityBits & s_initAttributes[pcr].resetLocality) == 0)
+    if((localityBits & currentPcrAttributes.resetLocality) == 0)
 	return FALSE;
     else
 	return TRUE;
@@ -675,10 +681,13 @@ BOOL PCRIsExtendAllowed(TPMI_DH_PCR handle  // IN: PCR handle to be extended
     UINT8          commandLocality;
     UINT8          localityBits = 1;
     UINT32         pcr          = handle - PCR_FIRST;
+    PCR_Attributes currentPcrAttributes =
+	_platPcr__GetPcrInitializationAttributes(pcr);
+
     // Check for the locality
     commandLocality = _plat__LocalityGet();
     localityBits    = localityBits << commandLocality;
-    if((localityBits & s_initAttributes[pcr].extendLocality) == 0)
+    if((localityBits & currentPcrAttributes.extendLocality) == 0)
 	return FALSE;
     else
 	return TRUE;
@@ -891,7 +900,7 @@ PCRAllocate(TPML_PCR_SELECTION* allocate,      // IN: required allocation
 	}
 
     // Max PCR in a bank is MIN(implemented PCR, PCR with attributes defined)
-    *maxPCR = sizeof(s_initAttributes) / sizeof(PCR_Attributes);
+    *maxPCR = _platPcr__NumberOfPcrs();
     if(*maxPCR > IMPLEMENTATION_PCR)
 	*maxPCR = IMPLEMENTATION_PCR;
 
@@ -1007,6 +1016,9 @@ void PCRResetDynamics(void)
 		{
 		    BYTE*          pcrData;
 		    UINT32         pcrSize;
+		    PCR_Attributes currentPcrAttributes =
+			_platPcr__GetPcrInitializationAttributes(pcr);
+
 		    pcrData = GetPcrPointer(gp.pcrAllocated.pcrSelections[i].hash, pcr);
 
 		    if(pcrData != NULL)
@@ -1016,7 +1028,7 @@ void PCRResetDynamics(void)
 
 			    // Reset PCR
 			    // Any PCR can be reset by locality 4 should be reset to 0
-			    if((s_initAttributes[pcr].resetLocality & 0x10) != 0)
+			    if((currentPcrAttributes.resetLocality & 0x10) != 0)
 				MemorySet(pcrData, 0, pcrSize);
 			}
 		}
@@ -1076,55 +1088,58 @@ static BOOL PCRGetProperty(TPM_PT_PCR property, TPMS_TAGGED_PCR_SELECT* select)
     // Collecting properties
     for(pcr = 0; pcr < IMPLEMENTATION_PCR; pcr++)
 	{
+	    PCR_Attributes currentPcrAttributes =
+		_platPcr__GetPcrInitializationAttributes(pcr);
+
 	    switch(property)
 		{
 		  case TPM_PT_PCR_SAVE:
-		    if(s_initAttributes[pcr].stateSave == SET)
+		    if(currentPcrAttributes.stateSave == SET)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_EXTEND_L0:
-		    if((s_initAttributes[pcr].extendLocality & 0x01) != 0)
+		    if((currentPcrAttributes.extendLocality & 0x01) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_RESET_L0:
-		    if((s_initAttributes[pcr].resetLocality & 0x01) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x01) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_EXTEND_L1:
-		    if((s_initAttributes[pcr].extendLocality & 0x02) != 0)
+		    if((currentPcrAttributes.extendLocality & 0x02) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_RESET_L1:
-		    if((s_initAttributes[pcr].resetLocality & 0x02) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x02) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_EXTEND_L2:
-		    if((s_initAttributes[pcr].extendLocality & 0x04) != 0)
+		    if((currentPcrAttributes.extendLocality & 0x04) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_RESET_L2:
-		    if((s_initAttributes[pcr].resetLocality & 0x04) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x04) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_EXTEND_L3:
-		    if((s_initAttributes[pcr].extendLocality & 0x08) != 0)
+		    if((currentPcrAttributes.extendLocality & 0x08) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_RESET_L3:
-		    if((s_initAttributes[pcr].resetLocality & 0x08) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x08) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_EXTEND_L4:
-		    if((s_initAttributes[pcr].extendLocality & 0x10) != 0)
+		    if((currentPcrAttributes.extendLocality & 0x10) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_RESET_L4:
-		    if((s_initAttributes[pcr].resetLocality & 0x10) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x10) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 		  case TPM_PT_PCR_DRTM_RESET:
 		    // DRTM reset PCRs are the PCR reset by locality 4
-		    if((s_initAttributes[pcr].resetLocality & 0x10) != 0)
+		    if((currentPcrAttributes.resetLocality & 0x10) != 0)
 			PCRSetSelectBit(pcr, select->pcrSelect);
 		    break;
 #if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
