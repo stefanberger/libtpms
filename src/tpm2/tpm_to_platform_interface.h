@@ -198,7 +198,10 @@ LIB_EXPORT unsigned char _plat__LocalityGet(void);
 //      >0          if recoverable error
 //      <0          if unrecoverable error
 LIB_EXPORT int _plat__NVEnable(
-			       void*  platParameter  // platform specific parameter
+			       void*  platParameter,  // platform specific parameter
+			       size_t paramSize       // size of parameter. If size == 0, then
+			       // parameter is a sizeof(void*) scalar and should
+			       // be cast to an integer (intptr_t), not dereferenced.
 			       );
 
 					// libtpms: added begin

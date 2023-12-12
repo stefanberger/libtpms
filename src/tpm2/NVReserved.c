@@ -162,7 +162,7 @@ BOOL NvPowerOn(void)
     // NV and initialize the static variables
     if(g_powerWasLost)
 	{
-	    if((nvError = _plat__NVEnable(0)) < 0)
+	    if((nvError = _plat__NVEnable(NULL, 0)) < 0)
 		LOG_FAILURE(FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
 	    NvInitStatic();
 	}
