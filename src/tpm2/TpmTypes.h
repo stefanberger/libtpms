@@ -312,21 +312,6 @@ typedef UINT16              TPM_KEY_SIZE;
 typedef UINT16              TPM_KEY_BITS;
 #define TYPE_OF_TPM_KEY_BITS    UINT16
 
-/* Table 2:6 - Definition of TPM_SPEC Constants */
-typedef  UINT32             TPM_SPEC;
-#define TYPE_OF_TPM_SPEC        UINT32
-#define SPEC_FAMILY             0x322E3000
-#define TPM_SPEC_FAMILY         (TPM_SPEC)(SPEC_FAMILY)
-#define SPEC_LEVEL              00
-#define SPEC_LEVEL_NUM          0  // libtpms added: SPEC_LEVEL without leading zeros
-#define TPM_SPEC_LEVEL          (TPM_SPEC)(SPEC_LEVEL)
-#define SPEC_VERSION            164
-#define TPM_SPEC_VERSION        (TPM_SPEC)(SPEC_VERSION)
-#define SPEC_YEAR               2021
-#define TPM_SPEC_YEAR           (TPM_SPEC)(SPEC_YEAR)
-#define SPEC_DAY_OF_YEAR        75
-#define TPM_SPEC_DAY_OF_YEAR    (TPM_SPEC)(SPEC_DAY_OF_YEAR)
-
 /* Table 2:7 - Definition of TPM_CONSTANTS32 Constants */
 
 typedef UINT32			TPM_CONSTANTS32;
