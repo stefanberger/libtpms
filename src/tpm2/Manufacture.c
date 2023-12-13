@@ -92,19 +92,26 @@ TPM_Manufacture(
     // Call the function to verify the sizes of values that result from different
     // compile options.
     if(!TpmSizeChecks())
-	return -1;
+	return MANUF_INVALID_CONFIG;
 #endif
 
 #if LIBRARY_COMPATIBILITY_CHECK
     // Make sure that the attached library performs as expected.
     if(!MathLibraryCompatibilityCheck())
-	return -1;
+	return MANUF_INVALID_CONFIG;
 #endif
 
     // If TPM has been manufactured, return indication.
     if(!firstTime && g_manufactured)
-	return 1;
-    // Do power on initializations of the cryptographic libraries.
+	return MANUF_ALREADY_DONE;
+    // trigger failure mode if called in error.
+
+    int nvReadyState = _plat__GetNvReadyState();
+    pAssert(nvReadyState == NV_READY);  // else failure mode
+    if(nvReadyState != NV_READY)
+	{
+	    return MANUF_NV_NOT_READY;
+	}    // Do power on initializations of the cryptographic libraries.
     CryptInit();
     s_DAPendingOnNV = FALSE;
 

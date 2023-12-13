@@ -272,6 +272,7 @@ _plat__NVEnable_NVChipFile(
     // to be simulated and the type of the error.
     if(s_NV_unrecoverable)
 	return NV_ENABLE_FAILED;
+    s_NvIsAvailable = TRUE;
     return s_NV_recoverable;
 }
 
