@@ -219,9 +219,9 @@ X509ProcessExtensions(
 	    // 3) 'fixedTPM' is SET if Key Usage is non-repudiation
 	    badFixedTPM = IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, nonrepudiation)
 			  && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM);
-	    // 4)'restricted' is SET if Key Usage is for key agreement.
+	    // 4)'restricted' is SET if Key Usage is for key encipherment.
 	    badRestricted =
-		IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyAgreement)
+		IS_ATTRIBUTE(keyUsage.x509, TPMA_X509_KEY_USAGE, keyEncipherment)
 		&& !IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted);
 	    if(badSign || badDecrypt || badFixedTPM || badRestricted)
 		return TPM_RCS_VALUE;
