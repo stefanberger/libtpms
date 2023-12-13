@@ -62,8 +62,8 @@
 #include "Tpm.h"
 #define _OIDS_
 #include "OIDs.h"
-#include "TpmAsn1.h"
-#include "TpmAsn1_fp.h"
+#include "TpmASN1.h"
+#include "TpmASN1_fp.h"
 
 #if CC_CertifyX509
 

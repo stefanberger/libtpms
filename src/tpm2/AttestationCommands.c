@@ -310,7 +310,7 @@ TPM2_GetTime(
 #include "Tpm.h"
 #include "CertifyX509_fp.h"
 #include "X509.h"
-#include "TpmAsn1_fp.h"
+#include "TpmASN1_fp.h"
 #include "X509_spt_fp.h"
 #include "Attest_spt_fp.h"
 #if CC_CertifyX509 // Conditional expansion of this file

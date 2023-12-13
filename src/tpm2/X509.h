@@ -66,7 +66,7 @@
 #define _X509_H_
 // 10.1.16.2	Includes
 #include "Tpm.h"
-#include "TpmAsn1.h"
+#include "TpmASN1.h"
 // 10.1.16.3	Defined Constants
 // 10.1.16.3.1	X509 Application-specific types
 #define X509_SELECTION          0xA0

@@ -502,8 +502,8 @@ noinst_HEADERS += \
 	tpm2/Time_fp.h \
 	tpm2/TPMB.h \
 	tpm2/TpmAlgorithmDefines.h \
-	tpm2/TpmAsn1.h \
-	tpm2/TpmAsn1_fp.h \
+	tpm2/TpmASN1.h \
+	tpm2/TpmASN1_fp.h \
 	tpm2/TpmBuildSwitches.h \
 	tpm2/TpmFail_fp.h \
 	tpm2/TpmProfile.h \
