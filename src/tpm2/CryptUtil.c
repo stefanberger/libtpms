@@ -462,7 +462,7 @@ BOOL CryptInit(void)
 
     // Do any library initializations that are necessary. If any fails,
     // the caller should go into failure mode;
-    ok = SupportLibInit();
+    ok = BnSupportLibInit();
     ok = ok && CryptSymInit();
     ok = ok && CryptRandInit();
     ok = ok && CryptHashInit();

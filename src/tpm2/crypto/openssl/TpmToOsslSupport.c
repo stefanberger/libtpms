@@ -73,7 +73,7 @@ typedef const BYTE* desKeyPointers[3];
 
 //*** BnSupportLibInit()
 // This does any initialization required by the support library.
-LIB_EXPORT int SupportLibInit(void)
+LIB_EXPORT int BnSupportLibInit(void)
 {
     return TRUE;
 }
