@@ -65,7 +65,6 @@
 
 #ifndef _TPM_FAIL_FP_H_
 #define _TPM_FAIL_FP_H_
-#include "BaseTypes.h"
 
 #if 0 /* libtpms added */
 //*** SetForceFailureMode()
@@ -95,15 +94,6 @@ NORETURN void TpmFail(
 		      uint64_t locationCode,
 #endif
 		      int failureCode);
-
-void
-TpmSetFailureMode(
-#if FAIL_TRACE   /* libtpms added end */
-	const char      *function,
-	int              line,
-#endif
-	int              code
-	);
 
 //*** TpmFailureMode(
 // This function is called by the interface code when the platform is in failure

@@ -191,6 +191,44 @@ LIB_EXPORT void SetForceFailureMode(void)
 }
 #endif /* libtpms added */
 
+
+/* libtpms added begin */
+static void
+TpmSetFailureMode(
+#if FAIL_TRACE
+	const char      *function,
+	int              line,
+#endif
+	int              code
+	)
+{
+    // Save the values that indicate where the error occurred.
+    // On a 64-bit machine, this may truncate the address of the string
+    // of the function name where the error occurred.
+#if FAIL_TRACE
+    s_failFunction = *(UINT32 *)function;
+    s_failLine = line;
+#else
+    s_failFunction = (UINT32)0;
+    s_failLine = 0;
+#endif
+    s_failCode = code;
+
+    TPMLIB_LogTPM2Error("Entering failure mode; code: %d"
+#if FAIL_TRACE
+    ", location: %s line %d"
+#endif
+    "\n", s_failCode
+#if FAIL_TRACE
+    , function, s_failLine
+#endif
+    );
+
+    // We are in failure mode
+    g_inFailureMode = TRUE;
+}
+/* libtpms added end */
+
 /* 9.17.4.2	TpmLogFailure() */
 /* This function saves the failure values when the code will continue to operate. It if similar to
    TpmFail() but returns to the caller. The assumption is that the caller will propagate a failure
@@ -289,43 +327,6 @@ NORETURN void TpmFail(
     // failure reply.
     _plat__Fail();
 }
-
-/* libtpms added begin */
-void
-TpmSetFailureMode(
-#if FAIL_TRACE
-	const char      *function,
-	int              line,
-#endif
-	int              code
-	)
-{
-    // Save the values that indicate where the error occurred.
-    // On a 64-bit machine, this may truncate the address of the string
-    // of the function name where the error occurred.
-#if FAIL_TRACE
-    s_failFunction = *(UINT32 *)function;
-    s_failLine = line;
-#else
-    s_failFunction = (UINT32)0;
-    s_failLine = 0;
-#endif
-    s_failCode = code;
-
-    TPMLIB_LogTPM2Error("Entering failure mode; code: %d"
-#if FAIL_TRACE
-    ", location: %s line %d"
-#endif
-    "\n", s_failCode
-#if FAIL_TRACE
-    , function, s_failLine
-#endif
-    );
-
-    // We are in failure mode
-    g_inFailureMode = TRUE;
-}
-/* libtpms added end */
 
 //*** TpmFailureMode(
 // This function is called by the interface code when the platform is in failure
