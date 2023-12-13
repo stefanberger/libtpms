@@ -566,16 +566,24 @@ CryptSecretEncrypt(OBJECT*      encryptKey,  // IN: encryption key object
 		   TPM2B_ENCRYPTED_SECRET* secret  // OUT: secret structure
 		   )
 {
-    TPMT_RSA_DECRYPT         scheme;
-    TPM_RC                   result = TPM_RC_SUCCESS;
+    TPM_RC result = TPM_RC_SUCCESS;
     //
     if(data == NULL || secret == NULL)
 	return TPM_RC_FAILURE;
+
+    // CryptKDFe was fixed to not add a NULL byte as per NIST.SP.800-56Cr2.pdf
+    // (required for ACVP tests). This check ensures backwards compatibility with
+    // previous versions of the TPM reference code by verifying the label itself
+    // has a NULL terminator.  Note the TPM spec specifies that the label must be NULL
+    // terminated.  This is only a "new" failure path in the sense that it adds a
+    // runtime check of hardcoded constants; provided the code is correct it will never
+    // fail, and running the compliance tests will verify this isn't hit.
+    if((label == NULL) || (label->size == 0) || (label->buffer[label->size - 1] != 0))
+	return TPM_RC_FAILURE;
+
     // The output secret value has the size of the digest produced by the nameAlg.
     data->t.size = CryptHashGetDigestSize(encryptKey->publicArea.nameAlg);
-    // The encryption scheme is OAEP using the nameAlg of the encrypt key.
-    scheme.scheme = TPM_ALG_OAEP;
-    scheme.details.anySig.hashAlg = encryptKey->publicArea.nameAlg;
+
     if(!IS_ATTRIBUTE(encryptKey->publicArea.objectAttributes, TPMA_OBJECT, decrypt))
 	return TPM_RC_ATTRIBUTES;
     switch(encryptKey->publicArea.type)
@@ -583,6 +591,11 @@ CryptSecretEncrypt(OBJECT*      encryptKey,  // IN: encryption key object
 #if ALG_RSA
 	  case TPM_ALG_RSA:
 	      {
+		  // The encryption scheme is OAEP using the nameAlg of the encrypt key.
+		  TPMT_RSA_DECRYPT scheme;
+		  scheme.scheme                 = TPM_ALG_OAEP;
+		  scheme.details.anySig.hashAlg = encryptKey->publicArea.nameAlg;
+
 		  // Create secret data from RNG
 		  CryptRandomGenerate(data->t.size, data->t.buffer);
 
@@ -706,6 +719,17 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
 		   )
 {
     TPM_RC result = TPM_RC_SUCCESS;
+
+    // CryptKDFe was fixed to not add a NULL byte as per NIST.SP.800-56Cr2.pdf
+    // (required for ACVP tests). This check ensures backwards compatibility with
+    // previous versions of the TPM reference code by verifying the label itself
+    // has a NULL terminator.  Note the TPM spec specifies that the label must be NULL
+    // terminated.  This is only a "new" failure path in the sense that it adds a
+    // runtime check of hardcoded constants; provided the code is correct it will never
+    // fail, and running the compliance tests will verify this isn't hit.
+    if((label == NULL) || (label->size == 0) || (label->buffer[label->size - 1] != 0))
+	return TPM_RC_FAILURE;
+
     // Decryption for secret
     switch(decryptKey->publicArea.type)
 	{
