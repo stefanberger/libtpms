@@ -426,7 +426,7 @@ ObjectLoad(OBJECT* object,           // IN: pointer to object slot
 	    //   consistency with the parent, OR
 	    // - parent is NULL but the object is not a primary object, either
 	    result =
-		PublicAttributesValidation(parent, publicArea);
+		PublicAttributesValidation(parent, /*primaryHierarchy = */ 0, publicArea);
 	}
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, blamePublic);

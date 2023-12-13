@@ -144,6 +144,7 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
     // are unique to creation and then validates the attributes and values that are
     // common to create and load.
     result = CreateChecks(parentObject,
+			  /* primaryHierarchy = */ 0,
 			  publicArea,
 			  in->inSensitive.sensitive.data.t.size);
     if(result != TPM_RC_SUCCESS)
@@ -587,7 +588,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 			    publicArea->objectAttributes, TPMA_OBJECT, sensitiveDataOrigin))
 		return TPM_RCS_ATTRIBUTES;
 	    // Check the rest of the attributes
-	    result = PublicAttributesValidation(parent, publicArea);
+	    result = PublicAttributesValidation(parent, 0, publicArea);
 	    if(result != TPM_RC_SUCCESS)
 		return RcSafeAddToResult(result, RC_CreateLoaded_inPublic);
 	    // Process the template and sensitive areas to get the actual 'label' and
@@ -613,7 +614,9 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 	    // Check attributes in input public area. CreateChecks() checks the things
 	    // that are unique to creation and then validates the attributes and values
 	    // that are common to create and load.
-	    result = CreateChecks(parent, publicArea,
+	    result = CreateChecks(parent,
+				  (parent == NULL) ? in->parentHandle : 0,
+				  publicArea,
 				  in->inSensitive.sensitive.data.t.size);
 
 	    if(result != TPM_RC_SUCCESS)

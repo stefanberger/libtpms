@@ -87,8 +87,8 @@ TPM2_CreatePrimary(
     // Check attributes in input public area. CreateChecks() checks the things that
     // are unique to creation and then validates the attributes and values that are
     // common to create and load.
-    result = CreateChecks(NULL, publicArea,
-			  in->inSensitive.sensitive.data.t.size);
+    result = CreateChecks(
+			  NULL, in->primaryHandle, publicArea, in->inSensitive.sensitive.data.t.size);
     if(result != TPM_RC_SUCCESS)
 	return RcSafeAddToResult(result, RC_CreatePrimary_inPublic);
     // Validate the sensitive area values
