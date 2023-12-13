@@ -97,7 +97,7 @@ TPM_Manufacture(
 
 #if LIBRARY_COMPATIBILITY_CHECK
     // Make sure that the attached library performs as expected.
-    if(!MathLibraryCompatibilityCheck())
+    if(!BnMathLibraryCompatibilityCheck())
 	return MANUF_INVALID_CONFIG;
 #endif
 

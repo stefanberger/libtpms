@@ -322,6 +322,7 @@ noinst_HEADERS += \
 	tpm2/Attest_spt_fp.h \
 	tpm2/BaseTypes.h \
 	tpm2/Bits_fp.h \
+	tpm2/BnSupport_interface.h \
 	tpm2/Capabilities.h \
 	tpm2/CertifyCreation_fp.h \
 	tpm2/CertifyX509_fp.h \
@@ -493,7 +494,6 @@ noinst_HEADERS += \
 	tpm2/StartAuthSession_fp.h \
 	tpm2/Startup_fp.h \
 	tpm2/StirRandom_fp.h \
-	tpm2/SupportLibraryFunctionPrototypes_fp.h \
 	tpm2/SymmetricTest.h \
 	tpm2/SymmetricTestData.h \
 	tpm2/TcpServerPosix_fp.h \

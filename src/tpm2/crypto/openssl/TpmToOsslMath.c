@@ -227,10 +227,7 @@ BnNewVariable(
 
 #if LIBRARY_COMPATIBILITY_CHECK
 
-BOOL
-MathLibraryCompatibilityCheck(
-			      void
-			      )
+BOOL BnMathLibraryCompatibilityCheck(void)
 {
     OSSL_ENTER();
     BIGNUM              *osslTemp = BnNewVariable(CTX);

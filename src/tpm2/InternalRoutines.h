@@ -139,7 +139,7 @@
 #   endif
 #endif
 /* Support library */
-#include "SupportLibraryFunctionPrototypes_fp.h"
+#include "BnSupport_interface.h"
 
 // Linkage to platform functions
 // TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
