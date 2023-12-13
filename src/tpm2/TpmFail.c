@@ -421,73 +421,45 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
 		    {
 		      case TPM_PT_MANUFACTURER:
 			// the vendor ID unique to each TPM manufacturer
-#ifdef  MANUFACTURER
-			pt = *(UINT32*)MANUFACTURER;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetManufacturerCapabilityCode();
 			break;
 
 		      case TPM_PT_VENDOR_STRING_1:
 			// the first four characters of the vendor ID string
-#ifdef  VENDOR_STRING_1
-			pt = *(UINT32*)VENDOR_STRING_1;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetVendorCapabilityCode(1);
 			break;
 
 		      case TPM_PT_VENDOR_STRING_2:
 			// the second four characters of the vendor ID string
-#ifdef  VENDOR_STRING_2
-			pt = *(UINT32*)VENDOR_STRING_2;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetVendorCapabilityCode(2);
 			break;
 
 		      case TPM_PT_VENDOR_STRING_3:
 			// the third four characters of the vendor ID string
-#ifdef  VENDOR_STRING_3
-			pt = *(UINT32*)VENDOR_STRING_3;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetVendorCapabilityCode(3);
 			break;
 
 		      case TPM_PT_VENDOR_STRING_4:
 			// the fourth four characters of the vendor ID string
-#ifdef  VENDOR_STRING_4
-			pt = *(UINT32*)VENDOR_STRING_4;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetVendorCapabilityCode(4);
 			break;
 
 		      case TPM_PT_VENDOR_TPM_TYPE:
 			// vendor-defined value indicating the TPM model
 			// We just make up a number here
-			pt = 1;
+			pt = _plat__GetTpmType();
 			break;
 
 		      case TPM_PT_FIRMWARE_VERSION_1:
 			// the more significant 32-bits of a vendor-specific value
 			// indicating the version of the firmware
-#ifdef  FIRMWARE_V1
-			pt = FIRMWARE_V1;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetTpmFirmwareVersionHigh();
 			break;
 
 		      default:  // TPM_PT_FIRMWARE_VERSION_2:
 			// the less significant 32-bits of a vendor-specific value
 			// indicating the version of the firmware
-#ifdef  FIRMWARE_V2
-			pt = FIRMWARE_V2;
-#else
-			pt = 0;
-#endif
+			pt = _plat__GetTpmFirmwareVersionLow();
 			break;
 		    }
 	    marshalSize += MarshalUint32(pt, &buffer);
