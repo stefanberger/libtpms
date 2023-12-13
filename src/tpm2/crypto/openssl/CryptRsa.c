@@ -363,17 +363,17 @@ static TPM_RC OaepEncode(
     // Basic size checks
     //  make sure digest isn't too big for key size
     if(padded->size < (2 * hLen) + 2)
-	ERROR_RETURN(TPM_RC_HASH);
+	ERROR_EXIT(TPM_RC_HASH);
 
     // and that message will fit messageSize <= k - 2hLen - 2
     if(message->size > (padded->size - (2 * hLen) - 2))
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
 
     // Hash L even if it is null
     // Offset into padded leaving room for masked seed and byte of zero
     pp = &padded->buffer[hLen + 1];
     if(CryptHashBlock(hashAlg, label->size, (BYTE*)label->buffer, hLen, pp) != hLen)
-	ERROR_RETURN(TPM_RC_FAILURE);
+	ERROR_EXIT(TPM_RC_FAILURE);
 
     // concatenate PS of k  mLen  2hLen  2
     padLen = padded->size - message->size - (2 * hLen) - 2;
@@ -390,7 +390,7 @@ static TPM_RC OaepEncode(
     CryptRandomGenerate(hLen, mySeed);
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
     if(g_inFailureMode)
-	ERROR_RETURN(TPM_RC_FAILURE);
+	ERROR_EXIT(TPM_RC_FAILURE);
     // mask = MGF1 (seed, nSize  hLen  1)
     CryptMGF_KDF(dbSize, mask, hashAlg, hLen, seed, 0);
 
@@ -403,8 +403,7 @@ static TPM_RC OaepEncode(
     // Run the masked data through MGF1
     if(CryptMGF_KDF(hLen, &padded->buffer[1], hashAlg, dbSize, pp, 0)
        != (unsigned)hLen)
-	ERROR_RETURN(TPM_RC_VALUE);
-
+	ERROR_EXIT(TPM_RC_VALUE);
     // Now XOR the seed to create masked seed
     pp = &padded->buffer[1];
     pm = seed;
@@ -452,7 +451,7 @@ static TPM_RC OaepDecode(
     // Strange size (anything smaller can't be an OAEP padded block)
     // Also check for no leading 0
     if((padded->size < (unsigned)((2 * hLen) + 2)) || (padded->buffer[0] != 0))
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     // Use the hash size to determine what to put through MGF1 in order
     // to recover the seedMask
     CryptMGF_KDF(hLen,
@@ -484,7 +483,7 @@ static TPM_RC OaepDecode(
        != hLen)
 	FAIL(FATAL_ERROR_INTERNAL);
     if(memcmp(seedMask, mask, hLen) != 0)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
 
     // find the start of the data
     pm = &mask[hLen];
@@ -495,7 +494,7 @@ static TPM_RC OaepDecode(
 	}
     // If we ran out of data or didn't end with 0x01, then return an error
     if(i == 0 || pm[-1] != 0x01)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
 
     // pm should be pointing at the first part of the data
     // and i is one greater than the number of bytes to move
@@ -717,7 +716,7 @@ static TPM_RC PssDecode(
 
     // check the hash scheme
     if(hLen == 0)
-	ERROR_RETURN(TPM_RC_SCHEME);
+	ERROR_EXIT(TPM_RC_SCHEME);
 
     // most significant bit must be zero
     fail = pe[0] & 0x80;
@@ -855,18 +854,18 @@ static TPM_RC RSASSA_Encode(TPM2B* pOut,  // IN:OUT on in, the size of the publi
 
     // Can't use this scheme if the algorithm doesn't have a DER string defined.
     if(derSize == 0)
-	ERROR_RETURN(TPM_RC_SCHEME);
+	ERROR_EXIT(TPM_RC_SCHEME);
 
     // If the digest size of 'hashAl' doesn't match the input digest size, then
     // the DER will misidentify the digest so return an error
     if(CryptHashGetDigestSize(hashAlg) != hIn->size)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     fillSize = pOut->size - derSize - hIn->size - 3;
     eOut     = pOut->buffer;
 
     // Make sure that this combination will fit in the provided space
     if(fillSize < 8)
-	ERROR_RETURN(TPM_RC_SIZE);
+	ERROR_EXIT(TPM_RC_SIZE);
 
     // Start filling
     *eOut++ = 0;  // initial byte of zero
@@ -913,7 +912,7 @@ static TPM_RC RSASSA_Decode(
     // Can't use this scheme if the algorithm doesn't have a DER string
     // defined or if the provided hash isn't the right size
     if(derSize == 0 || (unsigned)hashSize != hIn->size)
-	ERROR_RETURN(TPM_RC_SCHEME);
+	ERROR_EXIT(TPM_RC_SCHEME);
 
     // Make sure that this combination will fit in the provided space
     // Since no data movement takes place, can just walk though this
@@ -1112,7 +1111,7 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
 		      ;
 		  dSize -= i;
 		  if(dSize > cOut->t.size)
-		      ERROR_RETURN(TPM_RC_VALUE);
+		      ERROR_EXIT(TPM_RC_VALUE);
 		  // Pad cOut with zeros if dIn is smaller
 		  memset(cOut->t.buffer, 0, cOut->t.size - dSize);
 		  // And copy the rest of the value
@@ -1130,7 +1129,7 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
 		OaepEncode(&cOut->b, scheme->details.oaep.hashAlg, label, dIn, rand);
 	    break;
 	  default:
-	    ERROR_RETURN(TPM_RC_SCHEME);
+	    ERROR_EXIT(TPM_RC_SCHEME);
 	    break;
 	}
     // All the schemes that do padding will come here for the encryption step
@@ -1169,7 +1168,8 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
 
     // Size is checked to make sure that the encrypted value is the right size
     if(cIn->size != key->publicArea.unique.rsa.t.size)
-	ERROR_RETURN(TPM_RC_SIZE);
+	ERROR_EXIT(TPM_RC_SIZE);
+
     TEST(scheme->scheme);
 
     // For others that do padding, do the decryption in place and then
@@ -1285,7 +1285,8 @@ LIB_EXPORT TPM_RC CryptRsaValidateSignature(
 
     // Errors that might be caused by calling parameters
     if(sig->signature.rsassa.sig.t.size != key->publicArea.unique.rsa.t.size)
-	ERROR_RETURN(TPM_RC_SIGNATURE);
+	ERROR_EXIT(TPM_RC_SIGNATURE);
+
     TEST(sig->sigAlg);
 
     // Decrypt the block
@@ -1383,10 +1384,10 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     else
 	{
 	    if(e < 65537)
-		ERROR_RETURN(TPM_RC_RANGE);
+		ERROR_EXIT(TPM_RC_RANGE);
 	    // Check that e is prime
 	    if(!IsPrimeInt(e))
-		ERROR_RETURN(TPM_RC_RANGE);
+		ERROR_EXIT(TPM_RC_RANGE);
 	}
     BnSetWord(bnPubExp, e);
 
@@ -1395,7 +1396,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     if(((keySizeInBits % 1024) != 0)
        || (keySizeInBits > MAX_RSA_KEY_BITS)  // this might be redundant, but...
        || (keySizeInBits == 0))
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
 
     // Set the prime size for instrumentation purposes
     INSTRUMENT_SET(PrimeIndex, PRIME_INDEX(keySizeInBits / 2));
@@ -1425,7 +1426,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     for(i = 1; (retVal == TPM_RC_NO_RESULT) && (i != 100); i++)
 	{
 	    if(_plat__IsCanceled())
-		ERROR_RETURN(TPM_RC_CANCELED);
+		ERROR_EXIT(TPM_RC_CANCELED);
 
 	    if(BnGeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand) == TPM_RC_FAILURE)
 		{
@@ -1557,7 +1558,7 @@ CryptRsaEncrypt(
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (ctx == NULL ||
         EVP_PKEY_encrypt_init(ctx) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     switch(scheme->scheme)
 	{
@@ -1573,7 +1574,7 @@ CryptRsaEncrypt(
 		scratch.t.size = cOut->t.size;
 		pAssert(scratch.t.size <= sizeof(scratch.t.buffer));
 		if(dSize > scratch.t.size)
-		    ERROR_RETURN(TPM_RC_VALUE);
+		    ERROR_EXIT(TPM_RC_VALUE);
 		// Pad cOut with zeros if dIn is smaller
 		memset(scratch.t.buffer, 0, scratch.t.size - dSize);
 		// And copy the rest of the value; value is then right-aligned
@@ -1582,35 +1583,35 @@ CryptRsaEncrypt(
 		dIn = &scratch.b;
 	    }
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
             break;
           case TPM_ALG_RSAES:
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
             break;
           case TPM_ALG_OAEP:
             digestname = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg);
             if (digestname == NULL)
-                ERROR_RETURN(TPM_RC_VALUE);
+                ERROR_EXIT(TPM_RC_VALUE);
 
             md = EVP_get_digestbyname(digestname);
             if (md == NULL ||
                 EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
                 EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
 
             if (label->size > 0) {
                 tmp = malloc(label->size);
                 if (tmp == NULL)
-                    ERROR_RETURN(TPM_RC_FAILURE);
+                    ERROR_EXIT(TPM_RC_FAILURE);
                 memcpy(tmp, label->buffer, label->size);
                 if (EVP_PKEY_CTX_set0_rsa_oaep_label(ctx, tmp, label->size) <= 0)
-                    ERROR_RETURN(TPM_RC_FAILURE);
+                    ERROR_EXIT(TPM_RC_FAILURE);
             }
             tmp = NULL;
             break;
           default:
-            ERROR_RETURN(TPM_RC_SCHEME);
+            ERROR_EXIT(TPM_RC_SCHEME);
             break;
 	}
 
@@ -1618,7 +1619,7 @@ CryptRsaEncrypt(
 
     if (EVP_PKEY_encrypt(ctx, cOut->t.buffer, &outlen,
                          dIn->buffer, dIn->size) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     cOut->t.size = outlen;
 
@@ -1652,7 +1653,7 @@ CryptRsaDecrypt(
     pAssert(cIn != NULL && dOut != NULL && key != NULL);
     // Size is checked to make sure that the encrypted value is the right size
     if(cIn->size != key->publicArea.unique.rsa.t.size)
-        ERROR_RETURN(TPM_RC_SIZE);
+        ERROR_EXIT(TPM_RC_SIZE);
     TEST(scheme->scheme);
 
     retVal = InitOpenSSLRSAPrivateKey(key, &pkey);
@@ -1662,42 +1663,42 @@ CryptRsaDecrypt(
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (ctx == NULL ||
         EVP_PKEY_decrypt_init(ctx) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     switch(scheme->scheme)
 	{
 	  case TPM_ALG_NULL:  // 'raw' encryption
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_NO_PADDING) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
             break;
 	  case TPM_ALG_RSAES:
             if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_PADDING) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
             break;
 	  case TPM_ALG_OAEP:
             digestname = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg);
             if (digestname == NULL)
-                ERROR_RETURN(TPM_RC_VALUE);
+                ERROR_EXIT(TPM_RC_VALUE);
 
             md = EVP_get_digestbyname(digestname);
             if (md == NULL ||
                 EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0 ||
                 EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0)
-                ERROR_RETURN(TPM_RC_FAILURE);
+                ERROR_EXIT(TPM_RC_FAILURE);
 
             if (label->size > 0) {
                 tmp = malloc(label->size);
                 if (tmp == NULL)
-                    ERROR_RETURN(TPM_RC_FAILURE);
+                    ERROR_EXIT(TPM_RC_FAILURE);
                 memcpy(tmp, label->buffer, label->size);
 
                 if (EVP_PKEY_CTX_set0_rsa_oaep_label(ctx, tmp, label->size) <= 0)
-                    ERROR_RETURN(TPM_RC_FAILURE);
+                    ERROR_EXIT(TPM_RC_FAILURE);
                 tmp = NULL;
             }
             break;
 	  default:
-            ERROR_RETURN(TPM_RC_SCHEME);
+            ERROR_EXIT(TPM_RC_SCHEME);
             break;
 	}
 
@@ -1705,10 +1706,10 @@ CryptRsaDecrypt(
     outlen = sizeof(buffer);
     if (EVP_PKEY_decrypt(ctx, buffer, &outlen,
                          cIn->buffer, cIn->size) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (outlen > dOut->size)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     memcpy(dOut->buffer, buffer, outlen);
     dOut->size = outlen;
@@ -1763,16 +1764,16 @@ CryptRsaSign(
             hashAlg = sigOut->signature.rsassa.hash;
             break;
           default:
-            ERROR_RETURN(TPM_RC_SCHEME);
+            ERROR_EXIT(TPM_RC_SCHEME);
          }
 
     digestname = GetDigestNameByHashAlg(hashAlg);
     if (digestname == NULL)
-        ERROR_RETURN(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     md = EVP_get_digestbyname(digestname);
     if (md == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     retVal = InitOpenSSLRSAPrivateKey(key, &pkey);
     if (retVal != TPM_RC_SUCCESS)
@@ -1781,11 +1782,11 @@ CryptRsaSign(
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (ctx == NULL ||
         EVP_PKEY_sign_init(ctx) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0 ||
         EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     /* careful with PSS padding: Use salt length = hash length (-1) if
      *   length(digest) + length(hash-to-sign) + 2 <= modSize
@@ -1795,13 +1796,13 @@ CryptRsaSign(
     if (padding == RSA_PKCS1_PSS_PADDING &&
         EVP_MD_size(md) + hIn->b.size + 2 <= modSize && /* OSSL: RSA_padding_add_PKCS1_PSS_mgf1 */
         EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, -1) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     outlen = sigOut->signature.rsapss.sig.t.size;
     if (EVP_PKEY_sign(ctx,
                       sigOut->signature.rsapss.sig.t.buffer, &outlen,
                       hIn->b.buffer, hIn->b.size) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     sigOut->signature.rsapss.sig.t.size = outlen;
 
@@ -1842,7 +1843,7 @@ CryptRsaValidateSignature(
 	}
     // Errors that might be caused by calling parameters
     if(sig->signature.rsassa.sig.t.size != key->publicArea.unique.rsa.t.size)
-	ERROR_RETURN(TPM_RC_SIGNATURE);
+	ERROR_EXIT(TPM_RC_SIGNATURE);
     TEST(sig->sigAlg);
 
     retVal = InitOpenSSLRSAPublicKey(key, &pkey);
@@ -1851,22 +1852,22 @@ CryptRsaValidateSignature(
 
     digestname = GetDigestNameByHashAlg(sig->signature.any.hashAlg);
     if (digestname == NULL)
-        ERROR_RETURN(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     md = EVP_get_digestbyname(digestname);
     ctx = EVP_PKEY_CTX_new(pkey, NULL);
     if (md == NULL || ctx == NULL ||
         EVP_PKEY_verify_init(ctx) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) <= 0 ||
         EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EVP_PKEY_verify(ctx,
                         sig->signature.rsassa.sig.t.buffer, sig->signature.rsassa.sig.t.size,
                         digest->t.buffer, digest->t.size) <= 0)
-        ERROR_RETURN(TPM_RC_SIGNATURE);
+        ERROR_EXIT(TPM_RC_SIGNATURE);
 
     retVal = TPM_RC_SUCCESS;
 

@@ -206,13 +206,15 @@
 #define RSA_MAX_PRIME           (MAX_RSA_KEY_BYTES / 2)
 #define RSA_PRIVATE_SIZE        (RSA_MAX_PRIME * 5)
 
-/* This is used commonly in the Crypt code as a way to keep listings from getting too long. This is
-   not to save paper but to allow one to see more useful stuff on the screen at any given time. */
-#define     ERROR_RETURN(returnCode)		\
-    {						\
-	retVal = returnCode;			\
-	goto Exit;				\
-    }
+// These macros are commonly used in the "Crypt" code as a way to keep listings from
+// getting too long. This is not to save paper but to allow one to see more
+// useful stuff on the screen at any given time.  Neither macro sets failure mode.
+#define ERROR_EXIT(returnCode)	       \
+    do				       \
+	{				       \
+	    retVal = returnCode;	       \
+	    goto Exit;			       \
+	} while(0)
 
 // braces are necessary for this usage:
 // if (y)

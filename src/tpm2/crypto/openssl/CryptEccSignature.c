@@ -231,17 +231,17 @@ BnSignEcdsa(
     eckey = EC_KEY_new();
 
     if (d == NULL || eckey == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EC_KEY_set_group(eckey, E->G) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EC_KEY_set_private_key(eckey, d) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     sig = ECDSA_do_sign(digest->b.buffer, digest->b.size, eckey);
     if (sig == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     ECDSA_SIG_get0(sig, &r, &s);
     OsslToTpmBn(bnR, r);
@@ -396,7 +396,7 @@ BnSignEcSchnorr(
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     C = AccessCurveData(E);
     order = CurveGetOrder(C);
     prime = CurveGetOrder(C);
@@ -406,7 +406,7 @@ BnSignEcSchnorr(
 	{
 	    BnSetWord(bnR, 0);
 	    BnSetWord(bnS, 0);
-	    ERROR_RETURN(TPM_RC_SCHEME);
+	    ERROR_EXIT(TPM_RC_SCHEME);
 	}
     do
 	{
@@ -600,7 +600,7 @@ CryptEccSign(
     //
     NOT_REFERENCED(scheme);
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     C = AccessCurveData(E);
     signature->signature.ecdaa.signatureR.t.size
 	= sizeof(signature->signature.ecdaa.signatureR.t.buffer);
@@ -730,16 +730,16 @@ BnValidateSignatureEcdsa(
     eckey = EC_KEY_new();
 
     if (r == NULL || s == NULL || q == NULL || sig == NULL || eckey == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EC_KEY_set_group(eckey, E->G) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EC_KEY_set_public_key(eckey, q) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (ECDSA_SIG_set0(sig, r, s) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     /* sig now owns r and s */
     r = NULL;
@@ -907,7 +907,7 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
     TPM_RC           retVal;
 
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     order = CurveGetOrder(AccessCurveData(E));
     //    // Make sure that the scheme is valid
     switch(signature->sigAlg)
@@ -921,7 +921,7 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
 #  endif
 	    break;
 	  default:
-	    ERROR_RETURN(TPM_RC_SCHEME);
+	    ERROR_EXIT(TPM_RC_SCHEME);
 	    break;
 	}
     // Can convert r and s after determining that the scheme is an ECC scheme. If
@@ -931,10 +931,11 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
     BnFrom2B(bnS, &signature->signature.ecdsa.signatureS.b);
     // r and s have to be greater than 0 but less than the curve order
     if(BnEqualZero(bnR) || BnEqualZero(bnS))
-	ERROR_RETURN(TPM_RC_SIGNATURE);
+	ERROR_EXIT(TPM_RC_SIGNATURE);
     if((BnUnsignedCmp(bnS, order) >= 0)
        || (BnUnsignedCmp(bnR, order) >= 0))
-	ERROR_RETURN(TPM_RC_SIGNATURE);
+	ERROR_EXIT(TPM_RC_SIGNATURE);
+
     switch(signature->sigAlg)
 	{
 	  case TPM_ALG_ECDSA:
@@ -1015,7 +1016,7 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 	    //
 	    pAssert(d != NULL && K != NULL && L != NULL);
 	    if(!BnIsOnCurve(pB, AccessCurveData(curve)))
-		ERROR_RETURN(TPM_RC_VALUE);
+		ERROR_EXIT(TPM_RC_VALUE);
 	    // do the math for K = [d]B
 	    if((retVal = BnPointMult(pK, pB, bnD, NULL, NULL, curve)) != TPM_RC_SUCCESS)
 		goto Exit;
@@ -1023,10 +1024,10 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 	    BnPointTo2B(K, pK, curve);
 	    //  compute L= [r]B after checking for cancel
 	    if(_plat__IsCanceled())
-		ERROR_RETURN(TPM_RC_CANCELED);
+		ERROR_EXIT(TPM_RC_CANCELED);
 	    // compute L = [r]B
 	    if(!BnIsValidPrivateEcc(bnR, curve))
-		ERROR_RETURN(TPM_RC_VALUE);
+		ERROR_EXIT(TPM_RC_VALUE);
 	    if((retVal = BnPointMult(pL, pB, bnR, NULL, NULL, curve)) != TPM_RC_SUCCESS)
 		goto Exit;
 	    // Convert BN L to TPM2B L
@@ -1042,7 +1043,8 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 
 	    // if this is the third point multiply, check for cancel first
 	    if((B != NULL) && _plat__IsCanceled())
-		ERROR_RETURN(TPM_RC_CANCELED);
+		ERROR_EXIT(TPM_RC_CANCELED);
+
 	    // If M provided, then pM will not be NULL and will compute E = [r]M.
 	    // However, if M was not provided, then pM will be NULL and E = [r]G
 	    // will be computed

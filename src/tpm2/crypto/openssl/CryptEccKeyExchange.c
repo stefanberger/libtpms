@@ -127,7 +127,7 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
     pAssert(
 	    outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL && dsA != NULL);
     C = AccessCurveData(E);
@@ -172,7 +172,7 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     // If the result is not the point at infinity, return QeB
     BnPointMult(pQeB, pQeB, bnTa, NULL, NULL, E);
     if(BnEqualZero(pQeB->z))
-	ERROR_RETURN(TPM_RC_NO_RESULT);
+	ERROR_EXIT(TPM_RC_NO_RESULT);
     // Convert BIGNUM E to TPM2B E
     BnPointTo2B(outZ, pQeB, E);
  Exit:
@@ -205,7 +205,7 @@ static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_CURVE);
+	ERROR_EXIT(TPM_RC_CURVE);
     pAssert(
 	    outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
@@ -344,7 +344,7 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_CURVE);
+	ERROR_EXIT(TPM_RC_CURVE);
     C = AccessCurveData(E);
     pAssert(outZ != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 

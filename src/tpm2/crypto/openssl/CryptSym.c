@@ -592,7 +592,7 @@ CryptSymmetricEncrypt(
         buffersize = TPM2_ROUNDUP(dSize, blockSize);
         buffer = malloc(buffersize);
         if (buffer == NULL)
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
 
         pOut = buffer;
     }
@@ -601,7 +601,7 @@ CryptSymmetricEncrypt(
     if (algorithm == TPM_ALG_TDES && mode == TPM_ALG_CTR) {
         TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, pOut, blockSize);
         outlen1 = dSize;
-        ERROR_RETURN(TPM_RC_SUCCESS);
+        ERROR_EXIT(TPM_RC_SUCCESS);
     }
 #endif
 
@@ -610,21 +610,21 @@ CryptSymmetricEncrypt(
         EVP_EncryptInit_ex(ctx, evp_cipher, NULL, keyToUse, iv) != 1 ||
         EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
         EVP_EncryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     pAssert(outlen1 <= dSize || dSize >= outlen1 + blockSize);
 
     if (EVP_EncryptFinal_ex(ctx, pOut + outlen1, &outlen2) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (ivInOut) {
         ivLen = EVP_CIPHER_CTX_iv_length(ctx);
         if (ivLen < 0 || (size_t)ivLen > sizeof(ivInOut->t.buffer))
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
 
         ivInOut->t.size = ivLen;
         if (ivLen > 0 && DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
     }
  Exit:
     if (retVal == TPM_RC_SUCCESS && pOut != dOut)
@@ -715,13 +715,13 @@ CryptSymmetricDecrypt(
     buffersize = TPM2_ROUNDUP(dSize + blockSize, blockSize);
     buffer = malloc(buffersize);
     if (buffer == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
 #if ALG_TDES && ALG_CTR
     if (algorithm == TPM_ALG_TDES && mode == TPM_ALG_CTR) {
         TDES_CTR(keyToUse, keyToUseLen * 8, dSize, dIn, iv, buffer, blockSize);
         outlen1 = dSize;
-        ERROR_RETURN(TPM_RC_SUCCESS);
+        ERROR_EXIT(TPM_RC_SUCCESS);
     }
 #endif
 
@@ -730,24 +730,24 @@ CryptSymmetricDecrypt(
         EVP_DecryptInit_ex(ctx, evp_cipher, NULL, keyToUse, iv) != 1 ||
         EVP_CIPHER_CTX_set_padding(ctx, 0) != 1 ||
         EVP_DecryptUpdate(ctx, buffer, &outlen1, dIn, dSize) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     pAssert((int)buffersize >= outlen1);
 
     if ((int)buffersize <= outlen1 /* coverity */ ||
         EVP_DecryptFinal(ctx, &buffer[outlen1], &outlen2) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     pAssert((int)buffersize >= outlen1 + outlen2);
 
     if (ivInOut) {
         ivLen = EVP_CIPHER_CTX_iv_length(ctx);
         if (ivLen < 0 || (size_t)ivLen > sizeof(ivInOut->t.buffer))
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
 
         ivInOut->t.size = ivLen;
         if (ivLen > 0 && DoEVPGetIV(ctx, ivInOut->t.buffer, ivInOut->t.size))
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
     }
 
  Exit:

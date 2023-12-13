@@ -133,9 +133,9 @@ LIB_EXPORT TPM_RC CryptEccEncrypt(
 #    define RANDOM NULL
 #  endif
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_CURVE);
+	ERROR_EXIT(TPM_RC_CURVE);
     if(TPM_ALG_KDF2 != scheme->scheme)
-	ERROR_RETURN(TPM_RC_SCHEME);
+	ERROR_EXIT(TPM_RC_SCHEME);
     // generate an ephemeral key from a random k
     if (!BnEccGenerateKeyPair(D, Px, E, RANDOM)
 	// C1 is the public part of the ephemeral key
@@ -143,11 +143,11 @@ LIB_EXPORT TPM_RC CryptEccEncrypt(
 	// Compute P2
 	|| (BnPointMult(Px, PB, D, NULL, NULL, E) != TPM_RC_SUCCESS)
 	|| !BnPointTo2B(&p2, Px, E))
-	ERROR_RETURN(TPM_RC_NO_RESULT);
+	ERROR_EXIT(TPM_RC_NO_RESULT);
 
     //Compute the C3 value hash(x2 || M || y2)
     if(0 == CryptHashStart(&hashState, scheme->details.mgf1.hashAlg))
-	ERROR_RETURN(TPM_RC_HASH);
+	ERROR_EXIT(TPM_RC_HASH);
     CryptDigestUpdate2B(&hashState, &p2.x.b);
     CryptDigestUpdate2B(&hashState, &plainText->b);
     CryptDigestUpdate2B(&hashState, &p2.y.b);
@@ -200,16 +200,16 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
     TPM_RC       retVal = TPM_RC_SUCCESS;
     //
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_CURVE);
+	ERROR_EXIT(TPM_RC_CURVE);
     if(TPM_ALG_KDF2 != scheme->scheme)
-	ERROR_RETURN(TPM_RC_SCHEME);
+	ERROR_EXIT(TPM_RC_SCHEME);
     // Generate the Z value
     BnPointMult(C1, C1, D, NULL, NULL, E);
     BnPointTo2B(&p2, C1, E);
 
     // Start the hash to check the algorithm
     if(0 == CryptHashStart(&hashState, scheme->details.mgf1.hashAlg))
-	ERROR_RETURN(TPM_RC_HASH);
+	ERROR_EXIT(TPM_RC_HASH);
     CryptDigestUpdate2B(&hashState, &p2.x.b);
 
     MemoryCopy2B(&z.b, &p2.x.b, sizeof(z.t.buffer));
@@ -231,7 +231,7 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
     CryptDigestUpdate2B(&hashState, &p2.y.b);
     check.t.size = CryptHashEnd(&hashState, sizeof(check.t.buffer), check.t.buffer);
     if(!MemoryEqual2B(&check.b, &c3->b))
-	ERROR_RETURN(TPM_RC_VALUE);
+	ERROR_EXIT(TPM_RC_VALUE);
  Exit:
     CURVE_FREE(E);
     return retVal;

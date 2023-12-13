@@ -167,9 +167,9 @@ ModExpB(UINT32 cSize,  // IN: the size of the output buffer. It will
     // Make sure that the output is big enough to hold the result
     // and that 'm' is less than 'n' (the modulus)
     if(cSize < nSize)
-	ERROR_RETURN(TPM_RC_NO_RESULT);
+	ERROR_EXIT(TPM_RC_NO_RESULT);
     if(BnUnsignedCmp(bnM, bnN) >= 0)
-	ERROR_RETURN(TPM_RC_SIZE);
+	ERROR_EXIT(TPM_RC_SIZE);
     BnModExp(bnC, bnM, bnE, bnN);
     BnToBytes(bnC, c, &tSize);
  Exit:
