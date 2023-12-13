@@ -108,11 +108,6 @@ LIB_EXPORT int BnUnsignedCmpWord(bigConst op1, crypt_uword_t word);
 // word value.
 LIB_EXPORT crypt_word_t BnModWord(bigConst numerator, crypt_word_t modulus);
 
-LIB_EXPORT int
-Msb(
-    crypt_uword_t           word
-    );
-
 //*** BnMsb()
 // This function returns the number of the MSb of a bigNum value.
 //  Return Type: int

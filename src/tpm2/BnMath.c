@@ -321,7 +321,7 @@ LIB_EXPORT crypt_word_t BnModWord(bigConst numerator, crypt_word_t modulus)
 //  Return Type: int
 //      -1              the word was zero
 //      n               the bit number of the most significant bit in the word
-LIB_EXPORT int Msb(crypt_uword_t word)
+static int Msb(crypt_uword_t word)
 {
     int retVal = -1;
     //
