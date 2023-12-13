@@ -61,8 +61,25 @@
 #ifndef _MANUFACTURE_FP_H_
 #define _MANUFACTURE_FP_H_
 
-#include "CompilerDependencies.h"	/* kgold */
-
+//*** TPM_Manufacture()
+// This function initializes the TPM values in preparation for the TPM's first
+// use. This function will fail if previously called. The TPM can be re-manufactured
+// by calling TPM_Teardown() first and then calling this function again.
+// NV must be enabled first (typically with NvPowerOn() via _TPM_Init)
+//
+// return type: int
+//      -2          NV System not available
+//      -1          FAILURE - System is incorrectly compiled.
+//      0           success
+//      1           manufacturing process previously performed
+// returns
+#define MANUF_NV_NOT_READY   (-2)
+#define MANUF_INVALID_CONFIG (-1)
+#define MANUF_OK             0
+#define MANUF_ALREADY_DONE   1
+// params
+#define MANUF_FIRST_TIME    1
+#define MANUF_REMANUFACTURE 0
 LIB_EXPORT int TPM_Manufacture(
 			       int firstTime  // IN: indicates if this is the first call from
 			       //     main()
