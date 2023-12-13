@@ -111,11 +111,12 @@ LIB_EXPORT void _plat__NvErrors(int recoverable, int unrecoverable);
 
 //***_plat__NVDisable()
 // Disable NV memory
-LIB_EXPORT void
-_plat__NVDisable(
-		 int             delete           // IN: If TRUE, delete the NV contents.
-		 );
-
+LIB_EXPORT void _plat__NVDisable(
+				 void*  platParameter,  // platform specific parameter
+				 size_t paramSize       // size of parameter. If size == 0, then
+				 // parameter is a sizeof(void*) scalar and should
+				 // be cast to an integer (intptr_t), not dereferenced.
+				 );
 
 //***_plat__SetNvAvail()
 // Set the current NV state to available.  This function is for testing purpose

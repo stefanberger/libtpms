@@ -277,11 +277,16 @@ _plat__NVEnable_NVChipFile(
 
 //***_plat__NVDisable()
 // Disable NV memory
-LIB_EXPORT void
-_plat__NVDisable(
-		 int             delete           // IN: If TRUE, delete the NV contents.
-		 )
+LIB_EXPORT void _plat__NVDisable(
+				 void*  platParameter,  // platform specific parameter
+				 size_t paramSize       // size of parameter. If size == 0, then
+				 // parameter is a sizeof(void*) scalar and should
+				 // be cast to an integer (intptr_t), not dereferenced.
+				 )
 {
+    NOT_REFERENCED(paramSize);  // to keep compiler quiet
+    int delete =
+	(intptr_t)platParameter;  // IN: If TRUE (!=0), delete the NV contents.
 #ifdef TPM_LIBTPMS_CALLBACKS
     int ret = libtpms_plat__NVDisable();
     if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
