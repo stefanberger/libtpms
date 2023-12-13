@@ -306,7 +306,7 @@ RsaCheckPrime(
 	// 0 != (p - 1) mod e
 	BnSubWord(prime, prime, 2);
     if(BnIsProbablyPrime(prime, rand) == 0)
-	ERROR_RETURN(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
+	ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
  Exit:
     return retVal;
 #  else

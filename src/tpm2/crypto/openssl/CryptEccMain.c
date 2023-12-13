@@ -842,7 +842,8 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 
     // Validate parameters
     if(E == NULL)
-	ERROR_RETURN(TPM_RC_CURVE);
+	ERROR_EXIT(TPM_RC_CURVE);
+
     publicArea->unique.ecc.x.t.size = 0;
     publicArea->unique.ecc.y.t.size = 0;
     sensitive->sensitive.ecc.t.size = 0;

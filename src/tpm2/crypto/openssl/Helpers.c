@@ -108,7 +108,7 @@ OpenSSLCryptGenerateKeyDes(
     if (EVP_CipherInit_ex(ctx, EVP_des_ede3(), NULL, NULL, NULL, 0) != 1 ||
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_RAND_KEY, 0,
                             sensitive->sensitive.sym.t.buffer) != 1)
-        ERROR_RETURN(TPM_RC_NO_RESULT);
+        ERROR_EXIT(TPM_RC_NO_RESULT);
 
  Exit:
     EVP_CIPHER_CTX_free(ctx);
@@ -757,7 +757,7 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
 
     if (ObjectGetPublicParameters(key, &N, &E) != 1 ||
         BuildRSAKey(pkey, N, E, NULL, NULL, NULL, NULL, NULL, NULL) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE)
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     retVal = TPM_RC_SUCCESS;
 
@@ -870,7 +870,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     P = BN_bin2bn(rsaKey->sensitive.sensitive.rsa.t.buffer,
                   rsaKey->sensitive.sensitive.rsa.t.size, NULL);
     if (P == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE)
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     D = ExpDCacheFind(P, N, E, &Q);
     if (D == NULL) {
@@ -878,15 +878,15 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
         Q = BN_new();
         Qr = BN_new();
         if (ctx == NULL || Q == NULL || Qr == NULL)
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
         /* Q = N/P; no remainder */
         BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
         if (!BN_div(Q, Qr, N, P, ctx) || !BN_is_zero(Qr))
-            ERROR_RETURN(TPM_RC_BINDING);
+            ERROR_EXIT(TPM_RC_BINDING);
         BN_set_flags(Q, BN_FLG_CONSTTIME); // Q is secret
 
         if (ComputePrivateExponentD(P, Q, E, N, &D) == FALSE)
-            ERROR_RETURN(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_FAILURE);
         ExpDCacheAdd(P, N, E, Q, D);
     }
 
@@ -897,10 +897,10 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     dQ = BigInitialized(dQ, (bigConst)&rsaKey->privateExponent.dQ);
     qInv = BigInitialized(qInv, (bigConst)&rsaKey->privateExponent.qInv);
     if (dP == NULL || dQ == NULL || qInv == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (BuildRSAKey(ppkey, N, E, D, P, Q, dP, dQ, qInv) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     retVal = TPM_RC_SUCCESS;
 
@@ -947,7 +947,7 @@ OpenSSLCryptRsaGenerateKey(
     BN_RSA(tmp);
 
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL)) == NULL ||
         EVP_PKEY_keygen_init(ctx) != 1 ||
@@ -956,19 +956,19 @@ OpenSSLCryptRsaGenerateKey(
         OSSL_PARAM_BLD_push_uint(bld, "bits", keySizeInBits) != 1 ||
         (params = OSSL_PARAM_BLD_to_param(bld)) == NULL ||
         EVP_PKEY_CTX_set_params(ctx, params) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if (EVP_PKEY_generate(ctx, &pkey) != 1)
-        ERROR_RETURN(TPM_RC_NO_RESULT);
+        ERROR_EXIT(TPM_RC_NO_RESULT);
 
     if (EVP_PKEY_get_bn_param(pkey,  OSSL_PKEY_PARAM_RSA_N, &bnN) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     OsslToTpmBn(tmp, bnN);
     BnTo2B((bigNum)tmp, &publicArea->unique.rsa.b, 0);
 
     if (EVP_PKEY_get_bn_param(pkey,  OSSL_PKEY_PARAM_RSA_FACTOR1, &bnP) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     OsslToTpmBn(tmp, bnP);
     BnTo2B((bigNum)tmp, &sensitive->sensitive.rsa.b, 0);
@@ -1011,15 +1011,15 @@ OpenSSLCryptRsaGenerateKey(
     BN_RSA(tmp);
 
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     rsa = RSA_new();
     if (rsa == NULL)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     rc = RSA_generate_key_ex(rsa, keySizeInBits, bnE, NULL);
     if (rc == 0)
-        ERROR_RETURN(TPM_RC_NO_RESULT);
+        ERROR_EXIT(TPM_RC_NO_RESULT);
 
     RSA_get0_key(rsa, &bnN, NULL, NULL);
     RSA_get0_factors(rsa, &bnP, NULL);
