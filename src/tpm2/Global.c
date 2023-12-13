@@ -87,6 +87,46 @@
 #  include "X509.h"
 #endif  // CC_CertifyX509
 
+// Global string constants for consistency in KDF function calls.
+// These string constants are shared across functions to make sure that they
+// are all using consistent string values.
+
+// each instance must define a different struct since the buffer sizes vary.
+#define TPM2B_STRING(name, value)				     \
+    typedef union name##_					     \
+    {									\
+	struct								\
+	{								\
+	    UINT16 size;						\
+	    BYTE   buffer[sizeof(value)];				\
+	} t;								\
+	TPM2B b;							\
+    } TPM2B_##name##_;							\
+    const TPM2B_##name##_ name##_data = {{sizeof(value), {value}}};	\
+    const TPM2B*          name        = &name##_data.b
+
+TPM2B_STRING(PRIMARY_OBJECT_CREATION, "Primary Object Creation");
+TPM2B_STRING(CFB_KEY, "CFB");
+TPM2B_STRING(CONTEXT_KEY, "CONTEXT");
+TPM2B_STRING(INTEGRITY_KEY, "INTEGRITY");
+TPM2B_STRING(SECRET_KEY, "SECRET");
+#if 0					// libtpms: added
+TPM2B_STRING(HIERARCHY_PROOF_SECRET_LABEL, "H_PROOF_SECRET");
+TPM2B_STRING(HIERARCHY_SEED_SECRET_LABEL, "H_SEED_SECRET");
+TPM2B_STRING(HIERARCHY_FW_SECRET_LABEL, "H_FW_SECRET");
+TPM2B_STRING(HIERARCHY_SVN_SECRET_LABEL, "H_SVN_SECRET");
+#endif					// libtpms: added
+TPM2B_STRING(SESSION_KEY, "ATH");
+TPM2B_STRING(STORAGE_KEY, "STORAGE");
+TPM2B_STRING(XOR_KEY, "XOR");
+TPM2B_STRING(COMMIT_STRING, "ECDAA Commit");
+TPM2B_STRING(DUPLICATE_STRING, "DUPLICATE");
+TPM2B_STRING(IDENTITY_STRING, "IDENTITY");
+TPM2B_STRING(OBFUSCATE_STRING, "OBFUSCATE");
+#if SELF_TEST
+TPM2B_STRING(OAEP_TEST_STRING, "OAEP Test Value");
+#endif  // SELF_TEST
+
 //*** g_rcIndex[]
 const UINT16 g_rcIndex[15]  = {TPM_RC_1,
 			       TPM_RC_2,

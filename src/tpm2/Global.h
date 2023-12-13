@@ -1246,34 +1246,27 @@ typedef struct COMMAND
     FOR_EACH_HASH(RP_HASH)               // space for the RP hashes
 } COMMAND;
 
-// Global string constants for consistency in KDF function calls. These string constants are shared
-// across functions to make sure that they are all using consistent string values.
-#define STRING_INITIALIZER(value)   {{sizeof(value), {value}}}
-#define TPM2B_STRING(name, value)					\
-    typedef union name##_ {						\
-	struct  {							\
-	    UINT16  size;						\
-	    BYTE    buffer[sizeof(value)];				\
-	} t;								\
-	TPM2B   b;							\
-    } TPM2B_##name##_;							\
-    EXTERN  const TPM2B_##name##_      name##_ INITIALIZER(STRING_INITIALIZER(value)); \
-    EXTERN  const TPM2B               *name INITIALIZER(&name##_.b)
-TPM2B_STRING(PRIMARY_OBJECT_CREATION, "Primary Object Creation");
-TPM2B_STRING(CFB_KEY, "CFB");
-TPM2B_STRING(CONTEXT_KEY, "CONTEXT");
-TPM2B_STRING(INTEGRITY_KEY, "INTEGRITY");
-TPM2B_STRING(SECRET_KEY, "SECRET");
-TPM2B_STRING(SESSION_KEY, "ATH");
-TPM2B_STRING(STORAGE_KEY, "STORAGE");
-TPM2B_STRING(XOR_KEY, "XOR");
-TPM2B_STRING(COMMIT_STRING, "ECDAA Commit");
-TPM2B_STRING(DUPLICATE_STRING, "DUPLICATE");
-TPM2B_STRING(IDENTITY_STRING, "IDENTITY");
-TPM2B_STRING(OBFUSCATE_STRING, "OBFUSCATE");
-#if SELF_TEST
-TPM2B_STRING(OAEP_TEST_STRING, "OAEP Test Value");
-#endif // SELF_TEST
+// TPM2B String constants used for KDFs.
+// actual definition in global.c
+extern const TPM2B* PRIMARY_OBJECT_CREATION;
+extern const TPM2B* CFB_KEY;
+extern const TPM2B* CONTEXT_KEY;
+extern const TPM2B* INTEGRITY_KEY;
+extern const TPM2B* SECRET_KEY;
+extern const TPM2B* HIERARCHY_PROOF_SECRET_LABEL;
+extern const TPM2B* HIERARCHY_SEED_SECRET_LABEL;
+extern const TPM2B* HIERARCHY_FW_SECRET_LABEL;
+extern const TPM2B* HIERARCHY_SVN_SECRET_LABEL;
+extern const TPM2B* SESSION_KEY;
+extern const TPM2B* STORAGE_KEY;
+extern const TPM2B* XOR_KEY;
+extern const TPM2B* COMMIT_STRING;
+extern const TPM2B* DUPLICATE_STRING;
+extern const TPM2B* IDENTITY_STRING;
+extern const TPM2B* OBFUSCATE_STRING;
+#  if SELF_TEST
+extern const TPM2B* OAEP_TEST_STRING;
+#  endif  // SELF_TEST
 
 //*****************************************************************************
 //** From CryptTest.c
