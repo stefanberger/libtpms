@@ -396,9 +396,11 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     }
 
     if ((flags & TPMLIB_INFO_TPMATTRIBUTES)) {
+        uint32_t firmware_v1 = _plat__GetTpmFirmwareVersionHigh();
+
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&tpmattrs, tpmattrs_temp, FIRMWARE_V1) < 0)
+        if (asprintf(&tpmattrs, tpmattrs_temp, firmware_v1) < 0)
             goto error;
         if (asprintf(&buffer, fmt,  printed ? "," : "",
                      tpmattrs, "%s%s%s") < 0)

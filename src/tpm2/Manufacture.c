@@ -145,12 +145,9 @@ TPM_Manufacture(
     orderlyShutdown = TPM_SU_CLEAR;
     NV_WRITE_PERSISTENT(orderlyState, orderlyShutdown);
     // initialize the firmware version
-    gp.firmwareV1 = FIRMWARE_V1;
-#ifdef FIRMWARE_V2
-    gp.firmwareV2 = FIRMWARE_V2;
-#else
-    gp.firmwareV2 = 0;
-#endif
+    gp.firmwareV1 = _plat__GetTpmFirmwareVersionHigh();
+    gp.firmwareV2 = _plat__GetTpmFirmwareVersionLow();
+
     NV_SYNC_PERSISTENT(firmwareV1);
     NV_SYNC_PERSISTENT(firmwareV2);
 

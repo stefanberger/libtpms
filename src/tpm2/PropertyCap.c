@@ -105,40 +105,26 @@ TPMPropertyIsDefined(
 	    *value = TPM_SPEC_YEAR;
 	    break;
 	  case TPM_PT_MANUFACTURER:
+	    *value = _plat__GetManufacturerCapabilityCode();
 	    // vendor ID unique to each TPM manufacturer
-	    *value = BYTE_ARRAY_TO_UINT32(MANUFACTURER);
 	    break;
 	  case TPM_PT_VENDOR_STRING_1:
 	    // first four characters of the vendor ID string
-	    *value = BYTE_ARRAY_TO_UINT32(VENDOR_STRING_1);
+	    *value = _plat__GetVendorCapabilityCode(1);
 	    break;
 	  case TPM_PT_VENDOR_STRING_2:
-	    // second four characters of the vendor ID string
-#ifdef VENDOR_STRING_2
-	    *value = BYTE_ARRAY_TO_UINT32(VENDOR_STRING_2);
-#else
-	    *value = 0;
-#endif
+	    *value = _plat__GetVendorCapabilityCode(2);
 	    break;
 	  case TPM_PT_VENDOR_STRING_3:
 	    // third four characters of the vendor ID string
-#ifdef VENDOR_STRING_3
-	    *value = BYTE_ARRAY_TO_UINT32(VENDOR_STRING_3);
-#else
-	    *value = 0;
-#endif
+	    *value = _plat__GetVendorCapabilityCode(3);
 	    break;
 	  case TPM_PT_VENDOR_STRING_4:
 	    // fourth four characters of the vendor ID string
-#ifdef VENDOR_STRING_4
-	    *value = BYTE_ARRAY_TO_UINT32(VENDOR_STRING_4);
-#else
-	    *value = 0;
-#endif
+	    *value = _plat__GetVendorCapabilityCode(4);
 	    break;
 	  case TPM_PT_VENDOR_TPM_TYPE:
-	    // vendor-defined value indicating the TPM model
-	    *value = 1;
+	    *value = _plat__GetTpmType();
 	    break;
 	  case TPM_PT_FIRMWARE_VERSION_1:
 	    // more significant 32-bits of a vendor-specific value

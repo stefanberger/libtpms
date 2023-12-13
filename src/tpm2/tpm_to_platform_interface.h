@@ -399,10 +399,11 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 // to the Core library.
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
 						  uint32_t bufferSize);
+#endif							// libtpms: added
 
 // return the 4 character Manufacturer Capability code.  This
 // should come from the platform library since that is provided by the manufacturer
-LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode();
+LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);
 
 // return the 4 character VendorStrings for Capabilities.
 // Index is ONE-BASED, and may be in the range [1,4] inclusive.
@@ -412,12 +413,13 @@ LIB_EXPORT uint32_t _plat__GetVendorCapabilityCode(int index);
 
 // return the most-significant 32-bits of the TPM Firmware Version reported by
 // getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh();
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);
 
 // return the least-significant 32-bits of the TPM Firmware Version reported by
 // getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow();
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);
 
+#if 0							// libtpms: added
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
 
@@ -452,11 +454,13 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 					   uint16_t* secret_size       // OUT: secret buffer
 					   );
 #endif  // FW_LIMITED_SUPPORT
+#endif						// libtpms: added
 
 	// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
-LIB_EXPORT uint32_t _plat__GetTpmType();
+LIB_EXPORT uint32_t _plat__GetTpmType(void);
 
 // platform PCR initialization functions
+#if 0						// libtpms: added
 #include "platform_pcr_fp.h"
 #endif						// libtpms: added
 
