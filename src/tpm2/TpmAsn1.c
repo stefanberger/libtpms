@@ -293,10 +293,6 @@ ASN1EndMarshalContext(ASN1MarshalContext* ctx)
     pAssert(ctx->depth >= 0);
     length   = ctx->end - ctx->offset;
     ctx->end = ctx->ends[ctx->depth--];
-    if((ctx->depth == -1) && (ctx->buffer))
-	{
-	    MemoryCopy(ctx->buffer, ctx->buffer + ctx->offset, ctx->end - ctx->offset);
-	}
     return length;
 }
 
