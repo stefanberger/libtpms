@@ -99,6 +99,7 @@ BOOL ObjectIsParent(OBJECT* parentObject  // IN: parent handle
 //      other                   returns from PublicAttributesValidation()
 TPM_RC
 CreateChecks(OBJECT*           parentObject,
+	     TPMI_RH_HIERARCHY primaryHierarchy,
 	     TPMT_PUBLIC*      publicArea,
 	     UINT16            sensitiveDataSize);
 
@@ -145,6 +146,8 @@ TPM_RC
 PublicAttributesValidation(
 			   // IN: input parent object (if ordinary or derived object; NULL otherwise)
 			   OBJECT* parentObject,
+			   // IN: hierarchy (if primary object; 0 otherwise)
+			   TPMI_RH_HIERARCHY primaryHierarchy,
 			   // IN: public area of the object
 			   TPMT_PUBLIC* publicArea);
 
