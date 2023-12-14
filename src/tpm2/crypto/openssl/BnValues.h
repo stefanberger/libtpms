@@ -83,6 +83,11 @@
 
 #ifndef _BN_NUMBERS_H
 #define _BN_NUMBERS_H
+// TODO_RENAME_INC_FOLDER:private refers to the TPM_CoreLib private headers
+#include "TpmAlgorithmDefines.h"
+#include "GpMacros.h"  // required for TpmFail_fp.h
+#include "Capabilities.h"
+#include "TpmTypes.h"  // requires capabilities & GpMacros
 
 // These are the basic big number formats. This is convertible to the library-
 // specific format without too much difficulty. For the math performed using

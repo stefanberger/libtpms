@@ -65,7 +65,7 @@
 
 //** Includes
 
-#include "Tpm.h"
+#include "TpmBigNum.h"
 
 //** Functions
 
