@@ -63,6 +63,8 @@
 
 #include "Tpm.h"
 #include "CryptPrime_fp.h"
+#include "TpmMath_Util_fp.h"
+
 //#define CPRI_PRIME
 //#include "PrimeTable.h"
 
@@ -187,27 +189,24 @@ MillerRabinRounds(UINT32 bits  // IN: Number of bits in the RSA prime
 //  Return Type: BOOL
 //      TRUE(1)         probably prime
 //      FALSE(0)        composite
-BOOL MillerRabin(
-	    bigNum           bnW,
-	    RAND_STATE      *rand
-	    )
+BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand)
 {
-    BN_MAX(bnWm1);
-    BN_PRIME(bnM);
-    BN_PRIME(bnB);
-    BN_PRIME(bnZ);
+    CRYPT_INT_MAX(bnWm1);
+    CRYPT_PRIME_VAR(bnM);
+    CRYPT_PRIME_VAR(bnB);
+    CRYPT_PRIME_VAR(bnZ);
     BOOL         ret = FALSE;  // Assumed composite for easy exit
     unsigned int a;
     unsigned int j;
     int          wLen;
     int          i;
-    int          iterations = MillerRabinRounds(BnSizeInBits(bnW));
+    int          iterations = MillerRabinRounds(ExtMath_SizeInBits(bnW));
     //
     INSTRUMENT_INC(MillerRabinTrials[PrimeIndex]);
 
     pAssert(bnW->size > 1);
     // Let a be the largest integer such that 2^a divides w1.
-    BnSubWord(bnWm1, bnW, 1);
+    ExtMath_SubtractWord(bnWm1, bnW, 1);
     pAssert(bnWm1->size != 0);
 
     // Since w is odd (w-1) is even so start at bit number 1 rather than 0
@@ -215,44 +214,46 @@ BOOL MillerRabin(
     // on each iteration.
     i = (int)(bnWm1->size * RADIX_BITS);
     // Now find the largest power of 2 that divides w1
-    for(a = 1;
-	(a < (bnWm1->size * RADIX_BITS)) &&
-	    (BnTestBit(bnWm1, a) == 0);
-	a++);
+    for(a = 1; (a < (bnWm1->size * RADIX_BITS)) && (ExtMath_TestBit(bnWm1, a) == 0);
+	a++)
+	{
+	}
     // 2. m = (w1) / 2^a
-    BnShiftRight(bnM, bnWm1, a);
+    ExtMath_ShiftRight(bnM, bnWm1, a);
     // 3. wlen = len (w).
-    wLen = BnSizeInBits(bnW);
+    wLen = ExtMath_SizeInBits(bnW);
     // 4. For i = 1 to iterations do
     for(i = 0; i < iterations; i++)
 	{
 	    // 4.1 Obtain a string b of wlen bits from an RBG.
 	    // Ensure that 1 < b < w1.
 	    // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
-	    while(BnGetRandomBits(bnB, wLen, rand) && ((BnUnsignedCmpWord(bnB, 1) <= 0)
-						       || (BnUnsignedCmp(bnB, bnWm1) >= 0)));
+	    while(BnGetRandomBits((bigNum)bnB, wLen, rand)
+		  && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
+		      || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
+		;
 	    if(g_inFailureMode)
 		return FALSE;
 
 	    // 4.3 z = b^m mod w.
 	    // if ModExp fails, then say this is not
 	    // prime and bail out.
-	    BnModExp(bnZ, bnB, bnM, bnW);
-	    
+	    ExtMath_ModExp(bnZ, bnB, bnM, bnW);
+
 	    // 4.4 If ((z == 1) or (z = w == 1)), then go to step 4.7.
-	    if((BnUnsignedCmpWord(bnZ, 1) == 0)
-	       || (BnUnsignedCmp(bnZ, bnWm1) == 0))
+	    if((ExtMath_UnsignedCmpWord(bnZ, 1) == 0)
+	       || (ExtMath_UnsignedCmp(bnZ, bnWm1) == 0))
 		goto step4point7;
 	    // 4.5 For j = 1 to a  1 do.
 	    for(j = 1; j < a; j++)
 		{
 		    // 4.5.1 z = z^2 mod w.
-		    BnModMult(bnZ, bnZ, bnZ, bnW);
+		    ExtMath_ModMult(bnZ, bnZ, bnZ, bnW);
 		    // 4.5.2 If (z = w1), then go to step 4.7.
-		    if(BnUnsignedCmp(bnZ, bnWm1) == 0)
+		    if(ExtMath_UnsignedCmp(bnZ, bnWm1) == 0)
 			goto step4point7;
 		    // 4.5.3 If (z = 1), then go to step 4.6.
-		    if(BnEqualWord(bnZ, 1))
+		    if(ExtMath_IsEqualWord(bnZ, 1))
 			goto step4point6;
 		}
 	    // 4.6 Return COMPOSITE.
@@ -284,28 +285,25 @@ BOOL MillerRabin(
 // If sieving is used, the number is used to root a sieving process.
 //
 TPM_RC
-RsaCheckPrime(
-	      bigNum           prime,
-	      UINT32           exponent,
-	      RAND_STATE      *rand
-	      )
+RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand)
 {
 #  if !RSA_KEY_SIEVE
     TPM_RC retVal = TPM_RC_SUCCESS;
-    UINT32 modE   = BnModWord(prime, exponent);
+    UINT32 modE   = ExtMath_ModWord(prime, exponent);
 
     NOT_REFERENCED(rand);
 
     if(modE == 0)
 	// evenly divisible so add two keeping the number odd
-	BnAddWord(prime, prime, 2);
+	ExtMath_AddWord(prime, prime, 2);
     // want 0 != (p - 1) mod e
     // which is 1 != p mod e
     else if(modE == 1)
 	// subtract 2 keeping number odd and insuring that
 	// 0 != (p - 1) mod e
-	BnSubWord(prime, prime, 2);
-    if(BnIsProbablyPrime(prime, rand) == 0)
+	ExtMath_SubtractWord(prime, prime, 2);
+
+    if(TpmMath_IsProbablyPrime(prime, rand) == 0)
 	ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
  Exit:
     return retVal;
@@ -313,13 +311,14 @@ RsaCheckPrime(
     return PrimeSelectWithSieve(prime, exponent, rand);
 #  endif
 }
+
 /*
  * RsaAdjustPrimeCandidate_PreRev155 is the pre-rev.155 algorithm used; we
  * still have to use it for old seeds to maintain backwards compatibility.
  */
 static void
 RsaAdjustPrimeCandidate_PreRev155(
-                            bigNum      prime
+                            Crypt_Int* prime
                            )
 {
     UINT16  highBytes;
@@ -365,16 +364,13 @@ RsaAdjustPrimeCandidate_PreRev155(
 //
 static void
 RsaAdjustPrimeCandidate_New(
-			    bigNum          prime
+			    Crypt_Int* prime
 			   )
 {
-    UINT32          msw;
-    UINT32          adjusted;
-    
     // If the radix is 32, the compiler should turn this into a simple assignment
-    msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
+    uint32_t msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
     // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
-    adjusted = (msw >> 16) * 0x4AFB;
+    uint32_t adjusted = (msw >> 16) * 0x4AFB;
     adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
     adjusted += 0xB5050000UL;
 #if RADIX_BITS == 64
@@ -390,11 +386,9 @@ RsaAdjustPrimeCandidate_New(
 }
 
 
-LIB_EXPORT void
-RsaAdjustPrimeCandidate(
-			bigNum          prime,
-			SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level; libtpms added
-			)
+LIB_EXPORT void RsaAdjustPrimeCandidate(Crypt_Int*        prime,
+				        SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level; libtpms added
+					)
 {
     switch (seedCompatLevel) {
     case SEED_COMPAT_LEVEL_ORIGINAL:
@@ -409,14 +403,17 @@ RsaAdjustPrimeCandidate(
     }
 }
 
-TPM_RC
-BnGeneratePrimeForRSA(
-		      bigNum          prime,          // IN/OUT: points to the BN that will get the
-		      //  random value
-		      UINT32          bits,           // IN: number of bits to get
-		      UINT32          exponent,       // IN: the exponent
-		      RAND_STATE      *rand           // IN: the random state
-		      )
+//***TpmRsa_GeneratePrimeForRSA()
+// Function to generate a prime of the desired size with the proper attributes
+// for an RSA prime.
+// succeeds, or enters failure mode.
+TPM_RC TpmRsa_GeneratePrimeForRSA(
+				  Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
+				  //  random value
+				  UINT32      bits,      // IN: number of bits to get
+				  UINT32      exponent,  // IN: the exponent
+				  RAND_STATE* rand       // IN: the random state
+				  )
 {
     BOOL            found = FALSE;
     //
@@ -442,7 +439,7 @@ BnGeneratePrimeForRSA(
 		break;
 	    case SEED_COMPAT_LEVEL_LAST:
             /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
-		if(!BnGetRandomBits(prime, bits, rand))                              // new
+		if(!BnGetRandomBits((bigNum)prime, bits, rand))                              // new
 		    return TPM_RC_FAILURE;
                 break;
             default:

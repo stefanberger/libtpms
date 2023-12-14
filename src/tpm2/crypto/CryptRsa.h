@@ -63,7 +63,9 @@
 #ifndef _CRYPT_RSA_H
 #define _CRYPT_RSA_H
 
-// These values are used in the bigNum representation of various RSA values.
+// These values are used in the Crypt_Int* representation of various RSA values.
+
+#define CRYPT_PRIME_VAR(name) CRYPT_INT_VAR(name, (MAX_RSA_KEY_BITS / 2))
 
 BN_TYPE(rsa, MAX_RSA_KEY_BITS);
 #define BN_RSA(name)       BN_VAR(name, MAX_RSA_KEY_BITS)

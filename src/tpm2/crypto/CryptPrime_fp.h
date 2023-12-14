@@ -70,12 +70,14 @@
 // This will do a test of a word of up to 32-bits in size.
 BOOL IsPrimeInt(uint32_t n);
 
-BOOL
-BnIsProbablyPrime(
-		  bigNum          prime,           // IN:
-		  RAND_STATE      *rand            // IN: the random state just
-		  //     in case Miller-Rabin is required
-		  );
+//*** TpmMath_IsProbablyPrime()
+// This function is used when the key sieve is not implemented. This function
+// Will try to eliminate some of the obvious things before going on
+// to perform MillerRabin as a final verification of primeness.
+BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
+			     RAND_STATE* rand    // IN: the random state just
+			     //     in case Miller-Rabin is required
+			     );
 
 //*** MillerRabinRounds()
 // Function returns the number of Miller-Rabin rounds necessary to give an
@@ -92,7 +94,7 @@ MillerRabinRounds(UINT32 bits  // IN: Number of bits in the RSA prime
 //  Return Type: BOOL
 //      TRUE(1)         probably prime
 //      FALSE(0)        composite
-BOOL MillerRabin(bigNum bnW, RAND_STATE* rand);
+BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand);
 #if ALG_RSA
 
 //*** RsaCheckPrime()
@@ -108,21 +110,26 @@ BOOL MillerRabin(bigNum bnW, RAND_STATE* rand);
 // If sieving is used, the number is used to root a sieving process.
 //
 TPM_RC
-RsaCheckPrime(bigNum prime, UINT32 exponent, RAND_STATE* rand);
+RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand);
 
-LIB_EXPORT void
-RsaAdjustPrimeCandidate(
-			bigNum          prime,
-			SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level; libtpms added
-			);
-
+//*** TpmRsa_GeneratePrimeForRSA()
+// Function to generate a prime of the desired size with the proper attributes
+// for an RSA prime.
 TPM_RC
-BnGeneratePrimeForRSA(
-		      bigNum          prime,
-		      UINT32          bits,
-		      UINT32          exponent,
-		      RAND_STATE      *rand
-		      );
+TpmRsa_GeneratePrimeForRSA(
+			   Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
+			   //  random value
+			   UINT32      bits,      // IN: number of bits to get
+			   UINT32      exponent,  // IN: the exponent
+			   RAND_STATE* rand       // IN: the random state
+			   );
+
+				// libtpms: added begin
+void RsaAdjustPrimeCandidate(Crypt_Int*        prime,
+			     SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level
+			     );
+				// libtpms: added end
+
 #endif  // ALG_RSA
 
 #endif  // _CRYPT_PRIME_FP_H_

@@ -116,6 +116,7 @@
 #include "CryptHash_fp.h"
 #include "CryptSym_fp.h"
 #include "CryptDes_fp.h"
+#include "TpmToTpmBigNumMath.h" // libtpms: temp
 #include "CryptPrime_fp.h"
 #include "CryptRand_fp.h"
 #include "CryptSelfTest_fp.h"
@@ -140,7 +141,6 @@
 #endif
 // Asymmetric Support library Interface
 // TODO_RENAME_INC_FOLDER: needs a component prefix
-#include "TpmToTpmBigNumMath.h" // libtpms: temp
 #include "MathLibraryInterface.h"
 
 // Linkage to platform functions

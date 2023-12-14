@@ -258,12 +258,10 @@ const SIEVE_MARKS sieveMarks[5] = {{31, 7},
 // reduce the number of times that the large prime is divided into a few large
 // divides and then use smaller divides to get to the final 16 bit (or smaller)
 // remainders.
-UINT32
-PrimeSieve(
-	   bigNum           bnN,       // IN/OUT: number to sieve
-	   UINT32           fieldSize, // IN: size of the field area in bytes
-	   BYTE            *field      // IN: field
-	   )
+LIB_EXPORT UINT32 PrimeSieve(Crypt_Int* bnN,    // IN/OUT: number to sieve
+			     UINT32 fieldSize,  // IN: size of the field area in bytes
+			     BYTE*  field       // IN: field
+			     )
 {
     UINT32 i;
     UINT32 j;
@@ -284,14 +282,14 @@ PrimeSieve(
     // If the remainder is odd, then subtracting the value will give an even number,
     // but we want an odd number, so subtract the 105+rem. Otherwise, just subtract
     // the even remainder.
-    adjust = (UINT32)BnModWord(bnN, 105);
+    adjust = (UINT32)ExtMath_ModWord(bnN, 105);
     if(adjust & 1)
 	adjust += 105;
 
     // Adjust the input number so that it points to the first number in a
     // aligned field.
-    BnSubWord(bnN, bnN, adjust);
-    //    pAssert(BnModWord(bnN, 105) == 0);
+    ExtMath_SubtractWord(bnN, bnN, adjust);
+    //    pAssert(ExtMath_ModWord(bnN, 105) == 0);
     pField = field;
     for(i = fieldSize; i >= sizeof(seedValues);
 	pField += sizeof(seedValues), i -= sizeof(seedValues))
@@ -321,7 +319,7 @@ PrimeSieve(
 		}
 	    // Get the remainder when dividing the base field address
 	    // by the composite
-	    composite = (UINT32)BnModWord(bnN, composite);
+	    composite = (UINT32)ExtMath_ModWord(bnN, composite);
 	    // 'composite' is divisible by the composite components. for each of the
 	    // composite components, divide 'composite'. That remainder (r) is used to
 	    // pick a starting point for clearing the array. The stride is equal to the
@@ -399,19 +397,22 @@ LIB_EXPORT uint32_t SetFieldSize(uint32_t newFieldSize)
 }
 #  endif  // SIEVE_DEBUG
 
-/* 10.2.17.1.7 PrimeSelectWithSieve() */
-/* This function will sieve the field around the input prime candidate. If the sieve field is not
-   empty, one of the one bits in the field is chosen for testing with Miller-Rabin. If the value is
-   prime, pnP is updated with this value and the function returns success. If this value is not
-   prime, another pseudo-random candidate is chosen and tested. This process repeats until all
-   values in the field have been checked. If all bits in the field have been checked and none is
-   prime, the function returns FALSE and a new random value needs to be chosen. */
-/* Error Returns Meaning */
-/* TPM_RC_FAILURE TPM in failure mode, probably due to entropy source */
-/* TPM_RC_SUCCESS candidate is probably prime */
-/* TPM_RC_NO_RESULT candidate is not prime and couldn't find and alternative in the field */
+//*** PrimeSelectWithSieve()
+// This function will sieve the field around the input prime candidate. If the
+// sieve field is not empty, one of the one bits in the field is chosen for testing
+// with Miller-Rabin. If the value is prime, 'pnP' is updated with this value
+// and the function returns success. If this value is not prime, another
+// pseudo-random candidate is chosen and tested. This process repeats until
+// all values in the field have been checked. If all bits in the field have
+// been checked and none is prime, the function returns FALSE and a new random
+// value needs to be chosen.
+//  Return Type: TPM_RC
+//      TPM_RC_FAILURE      TPM in failure mode, probably due to entropy source
+//      TPM_RC_SUCCESS      candidate is probably prime
+//      TPM_RC_NO_RESULT    candidate is not prime and couldn't find and alternative
+//                          in the field
 LIB_EXPORT TPM_RC PrimeSelectWithSieve(
-				       bigNum      candidate,  // IN/OUT: The candidate to filter
+				       Crypt_Int*  candidate,  // IN/OUT: The candidate to filter
 				       UINT32      e,          // IN: the exponent
 				       RAND_STATE* rand    // IN: the random number generator state
 				       )
@@ -419,7 +420,7 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
     BYTE   field[MAX_FIELD_SIZE];
     UINT32 ones;
     INT32  chosen;
-    BN_PRIME(test);
+    CRYPT_PRIME_VAR(test);
     UINT32 modE;
 #  ifndef SIEVE_DEBUG
     UINT32 fieldSize = MAX_FIELD_SIZE;
@@ -432,7 +433,7 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
     // of the prime is large, the cost of Miller-Rabin is fairly high, as is the
     // cost of the sieving. However, the time for Miller-Rabin goes up considerably
     // faster than the cost of dividing by a number of primes.
-    primeSize = BnSizeInBits(candidate);
+    primeSize = ExtMath_SizeInBits(candidate);
 
     if(primeSize <= 512)
 	{
@@ -449,7 +450,8 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
 
     // Save the low-order word to use as a search generator and make sure that
     // it has some interesting range to it
-    uint32_t first = (UINT32)(candidate->d[0] | 0x80000000);
+    uint32_t first = ExtMath_GetLeastSignificant32bits(candidate);
+    first |= 0x80000000;
 
     // Sieve the field
     ones = PrimeSieve(candidate, fieldSize, field);
@@ -464,15 +466,15 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
 		FAIL(FATAL_ERROR_INTERNAL);
 	    
 	    // Set this as the trial prime
-	    BnAddWord(test, candidate, (crypt_uword_t)(chosen * 2));
+	    ExtMath_AddWord(test, candidate, (crypt_uword_t)(chosen * 2));
 	    
 	    // The exponent might not have been one of the tested primes so
 	    // make sure that it isn't divisible and make sure that 0 != (p-1) mod e
 	    // Note: This is the same as 1 != p mod e
-	    modE = (UINT32)BnModWord(test, e);
+	    modE = (UINT32)ExtMath_ModWord(test, e);
 	    if((modE != 0) && (modE != 1) && MillerRabin(test, rand))
 		{
-		    BnCopy(candidate, test);
+		    ExtMath_Copy(candidate, test);
 		    return TPM_RC_SUCCESS;
 		}
 	    // Clear the bit just tested

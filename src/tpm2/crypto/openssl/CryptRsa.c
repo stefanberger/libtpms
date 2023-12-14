@@ -1428,7 +1428,8 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 	    if(_plat__IsCanceled())
 		ERROR_EXIT(TPM_RC_CANCELED);
 
-	    if(BnGeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand) == TPM_RC_FAILURE)
+	    if(TpmRsa_GeneratePrimeForRSA((Crypt_Int*)Z->P, keySizeInBits / 2, e, rand)
+	       == TPM_RC_FAILURE)
 		{
 		    retVal = TPM_RC_FAILURE;
 		    goto Exit;

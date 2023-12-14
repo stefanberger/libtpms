@@ -116,14 +116,15 @@ LIB_EXPORT BOOL ExtMath_IntToBytes(
 // Copy Functions
 // #################
 
+//*** ExtMath_Copy()
+// Function to copy a bignum_t. If the output is NULL, then
+// nothing happens. If the input is NULL, the output is set to zero.
+LIB_EXPORT BOOL ExtMath_Copy(Crypt_Int* out, const Crypt_Int* in);
+
 // ###############################
 // Ordinary Arithmetic, writ large
 // ###############################
 
-
-// ###############################
-// Modular Arithmetic, writ large
-// ###############################
 
 //** ExtMath_Divide()
 // This function divides two Crypt_Int* values. The function returns FALSE if there is
@@ -134,6 +135,27 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 			       const Crypt_Int* dividend,
 			       const Crypt_Int* divisor);
 
+//*** ExtMath_AddWord()
+// This function adds a word value to a Crypt_Int*. This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_AddWord(
+				Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
+
+//*** ExtMath_SubtractWord()
+// This function subtracts a word value from a Crypt_Int*. This function always
+// returns TRUE.
+LIB_EXPORT BOOL ExtMath_SubtractWord(
+				     Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
+
+// ###############################
+// Modular Arithmetic, writ large
+// ###############################
+
+//** ExtMath_ModMult()
+// Compute result = (op1 * op2) mod modulus
+LIB_EXPORT BOOL ExtMath_ModMult(Crypt_Int*       result,
+				const Crypt_Int* op1,
+				const Crypt_Int* op2,
+				const Crypt_Int* modulus);
 //** ExtMath_ModExp()
 // Compute result = (number ^ exponent) mod modulus
 // where ^ indicates exponentiation.
@@ -142,6 +164,13 @@ LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
 			       const Crypt_Int* number,
 			       const Crypt_Int* exponent,
 			       const Crypt_Int* modulus);
+
+//*** ExtMath_ModWord()
+// compute numerator
+// This function does modular division of a big number when the modulus is a
+// word value.
+LIB_EXPORT crypt_word_t ExtMath_ModWord(const Crypt_Int* numerator,
+					crypt_word_t     modulus);
 
 // ###############################
 // Queries
@@ -156,5 +185,52 @@ LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
 //      0               op1 is equal to op2
 //      > 0             op1 is greater than op2
 LIB_EXPORT int ExtMath_UnsignedCmp(const Crypt_Int* op1, const Crypt_Int* op2);
+
+//*** ExtMath_UnsignedCmpWord()
+// Compare a Crypt_Int* to a crypt_uword_t.
+//  Return Type: int
+//      -1              op1 is less that word
+//      0               op1 is equal to word
+//      1               op1 is greater than word
+LIB_EXPORT int ExtMath_UnsignedCmpWord(const Crypt_Int* op1, crypt_uword_t word);
+
+//*** ExtMath_IsEqualWord()
+// Compare a Crypt_Int* to a crypt_uword_t for equality
+//  Return Type: BOOL
+LIB_EXPORT BOOL ExtMath_IsEqualWord(const Crypt_Int* bn, crypt_uword_t word);
+
+//*** ExtMath_GetLeastSignificant32bits()
+//
+// This function returns the least significant 32-bits of an integer value
+// Return Type: uint32_t
+LIB_EXPORT uint32_t ExtMath_GetLeastSignificant32bits(const Crypt_Int* bn);
+
+//*** ExtMath_SizeInBits()
+//
+// This function returns the number of bits required to hold a number. It is one
+// greater than the Msb.  This function is expected to be side channel safe, and
+// may be O(size) or O(1) where 'size' is the allocated (not actual) size of the
+// value.
+LIB_EXPORT unsigned ExtMath_SizeInBits(const Crypt_Int* n);
+
+// ###############################
+// Bitwise Operations
+// ###############################
+
+//*** ExtMath_TestBit()
+// This function is used to check to see if a bit is SET in a bignum_t. The 0th bit
+// is the LSb of d[0].
+//  Return Type: BOOL
+//      TRUE(1)         the bit is set
+//      FALSE(0)        the bit is not set or the number is out of range
+LIB_EXPORT BOOL ExtMath_TestBit(Crypt_Int*   bn,     // IN: number to check
+				unsigned int bitNum  // IN: bit to test
+				);
+
+//*** ExtMath_ShiftRight()
+// This function will shift a Crypt_Int* to the right by the shiftAmount.
+// This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_ShiftRight(
+				   Crypt_Int* result, const Crypt_Int* toShift, uint32_t shiftAmount);
 
 #endif
