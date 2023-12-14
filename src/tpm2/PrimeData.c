@@ -65,7 +65,7 @@
 // and this number will eliminate many prime candidates from
 // consideration before running Miller-Rabin on the result.
 
-const BN_STRUCT(43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
+const BN_STRUCT(smallprimecomp, 43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
     {44, 44, {0x2ED42696, 0x2BBFA177, 0x4820594F, 0xF73F4841, 0xBFAC313A, 0xCAC3EB81,
 	      0xF6F26BF8, 0x7FAB5061, 0x59746FB7, 0xF71377F6, 0x3B19855B, 0xCBD03132,
 	      0xBB92EF1B, 0x3AC3152C, 0xE87C8273, 0xC0AE0E69, 0x74A9E295, 0x448CCE86,
