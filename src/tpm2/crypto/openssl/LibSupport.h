@@ -63,18 +63,16 @@
 
 #ifndef _LIB_SUPPORT_H_
 #define _LIB_SUPPORT_H_
+// TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
+#include "tpm_radix.h"
 
-// These macros use the selected libraries to the proper include files.
-#define LIB_QUOTE(_STRING_) #_STRING_
-#define LIB_INCLUDE2(_LIB_, _TYPE_) LIB_QUOTE(TpmTo##_LIB_##_TYPE_.h)
-#define LIB_INCLUDE(_LIB_, _TYPE_) LIB_INCLUDE2(_LIB_, _TYPE_)
 // Include the options for hashing and symmetric. Defer the load of the math package
 // Until the bignum parameters are defined.
 
 #include LIB_INCLUDE(SYM_LIB, Sym)
 #include LIB_INCLUDE(HASH_LIB, Hash)
 
-#undef MIN
-#undef MAX
+//TODO: was #undef MIN
+//was #undef MAX
 
 #endif  // _LIB_SUPPORT_H_

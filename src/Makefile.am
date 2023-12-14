@@ -575,7 +575,8 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/TpmToOsslMath_fp.h \
 	tpm2/crypto/openssl/TpmToOsslMath.h \
 	tpm2/crypto/openssl/TpmToOsslSupport_fp.h \
-	tpm2/crypto/openssl/TpmToOsslSym.h
+	tpm2/crypto/openssl/TpmToOsslSym.h \
+	tpm2/crypto/openssl/tpm_radix.h
 
 libtpms_tpm2_la_CFLAGS += \
 	-I $(srcdir)/tpm2 \
