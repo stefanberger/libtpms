@@ -123,13 +123,15 @@ typedef int32_t     crypt_word_t;
 // These are the basic big number formats. This is convertible to the library-
 // specific format without too much difficulty. For the math performed using
 // these numbers, the value is always positive.
-#define BN_STRUCT_DEF(count) struct {			    \
+#define BN_STRUCT_DEF(struct_type, count)	  \
+    struct st_##struct_type##_t			  \
+    {						  \
 	crypt_uword_t allocated;		  \
 	crypt_uword_t size;			  \
 	crypt_uword_t d[count + BN_PAD + BN_PAD + BN_PAD]; /* libtpms changed */ \
     }
 
-typedef BN_STRUCT_DEF(1) bignum_t;
+typedef BN_STRUCT_DEF(bnroot, 1) bignum_t;
 
 #ifndef bigNum
 typedef bignum_t*       bigNum;
@@ -188,21 +190,21 @@ extern const bignum_t BnConstZero;
 #define BN_STRUCT_ALLOCATION(bits) (BITS_TO_CRYPT_WORDS(bits) + 1)
 
 // Create a structure of the correct size.
-#define BN_STRUCT(bits)					\
-    BN_STRUCT_DEF(BN_STRUCT_ALLOCATION(bits))
+#define BN_STRUCT(struct_type, bits)					\
+    BN_STRUCT_DEF(struct_type, BN_STRUCT_ALLOCATION(bits))
 
 // Define a bigNum type with a specific allocation
-#define BN_TYPE(name, bits) typedef BN_STRUCT(bits) bn_##name##_t
+#define BN_TYPE(name, bits) typedef BN_STRUCT(name, bits) bn_##name##_t
 
 // This creates a local bigNum variable of a specific size and
 // initializes it from a TPM2B input parameter.
 #define BN_INITIALIZED(name, bits, initializer)		\
-    BN_STRUCT(bits) name##_;					\
+    BN_STRUCT(name, bits) name##_;					\
     bigNum name = BnFrom2B(BN_INIT(name##_), (const TPM2B*)initializer)
 
 // Create a local variable that can hold a number with 'bits'
 #define BN_VAR(name, bits)					 \
-    BN_STRUCT(bits)  _##name;				 \
+    BN_STRUCT(name, bits) _##name;				 \
     bigNum name = BN_INIT(_##name)
 
 // Create a type that can hold the largest number defined by the
@@ -217,7 +219,7 @@ extern const bignum_t BnConstZero;
 // This is used to create a word-size bigNum and initialize it with
 // an input parameter to a function.
 #define BN_WORD_INITIALIZED(name, initial)				\
-    BN_STRUCT(RADIX_BITS) name##_;					\
+    BN_STRUCT(name##_, RADIX_BITS) name##_;				\
     bigNum name =							\
 									BnInitializeWord((bigNum)&name##_, BN_STRUCT_ALLOCATION(RADIX_BITS), initial)
 
@@ -252,11 +254,11 @@ BN_TYPE(ecc, ECC_BITS);
 #define ECC_INITIALIZED(name, initializer)		\
     BN_INITIALIZED(name, ECC_BITS, initializer)
 #define POINT_INSTANCE(name, bits)					\
-    BN_STRUCT (bits)    name##_x =					\
+    BN_STRUCT (name##_x, bits)    name##_x =					\
     {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
-    BN_STRUCT ( bits )    name##_y =					\
+    BN_STRUCT (name##_y, bits )    name##_y =					\
     {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
-    BN_STRUCT ( bits )    name##_z =					\
+    BN_STRUCT (name##_z, bits )    name##_z =					\
     {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
     bn_point_t name##_
 #define POINT_INITIALIZER(name)						\
