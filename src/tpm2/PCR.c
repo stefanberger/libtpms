@@ -301,7 +301,7 @@ static BYTE* GetSavedPcrPointer(TPM_ALG_ID alg,      // IN: algorithm for bank
 #undef HASH_CASE
 
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
+	    FAIL_NULL(FATAL_ERROR_INTERNAL);
 	}
     return retVal;
 }

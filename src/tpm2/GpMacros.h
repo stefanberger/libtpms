@@ -160,15 +160,32 @@
 #  define FAIL_RETURN(returnCode)
 #  define TPM_FAIL_RETURN NORETURN void
 
+#  define FAIL_IMMEDIATE(failCode, retval) SETFAILED(failCode)
 #  define FAIL_BOOL(failCode)              SETFAILED(failCode)
+#  define FAIL_RC(failCode)                SETFAILED(failCode)
+#  define FAIL_NULL(failCode)              SETFAILED(failCode)
 
 #else  // NO_LONGJMP
 // no longjmp service is available
 #  define FAIL_RETURN(returnCode) return(returnCode)
 #  define TPM_FAIL_RETURN      void
 
+// fail and immediately return a value
+#  define FAIL_IMMEDIATE(failCode, retval)			   \
+    do								   \
+	{								\
+	    SETFAILED(failCode);					\
+	    return retval;						\
+	} while(0)
+
 // fail and return FALSE
 #  define FAIL_BOOL(failCode) FAIL_IMMEDIATE(failCode, FALSE)
+
+// fail and return TPM_RC_FAILURE
+#  define FAIL_RC(failCode)   FAIL_IMMEDIATE(failCode, TPM_RC_FAILURE)
+
+// fail and return NULL
+#  define FAIL_NULL(failCode) FAIL_IMMEDIATE(failCode, NULL)
 
 #endif
 
