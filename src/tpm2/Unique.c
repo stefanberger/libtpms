@@ -3,7 +3,6 @@
 /*			  Secret Value to the TPM   				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Unique.c 1490 2019-07-26 21:13:22Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -68,6 +67,7 @@
 
 //** Includes
 #include "Platform.h"
+#include "Memory_fp.h"	// libtpms: temporary
 
 const char notReallyUnique[] = "This is not really a unique value. A real "
 			       "unique value should"
@@ -90,28 +90,16 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t which,  // which vendor value to r
 				     unsigned char* b  // output buffer
 				     )
 {
-    const char* from   = notReallyUnique;
+    //const char* from   = notReallyUnique;	// libtpms: deactivated
     uint32_t    retVal = 0;
 
-    if(which == 0) // the authorities value
+    if(which == 1)
 	{
-	    for(retVal = 0;
-		*from != 0 && retVal < bSize;
-		retVal++)
-		{
-		    *b++ = *from++;
-		}
+	    const size_t uSize =
+		sizeof(notReallyUnique) <= bSize ? sizeof(notReallyUnique) : bSize;
+	    MemoryCopy(b, notReallyUnique, uSize);
 	}
-    else
-	{
-#define uSize  sizeof(notReallyUnique)
-	    b = &b[((bSize < uSize) ? bSize : uSize) - 1];
-	    for(retVal = 0;
-		*from != 0 && retVal < bSize;
-		retVal++)
-		{
-		    *b-- = *from++;
-		}
-	}
+    // else fall through to default 0
+
     return retVal;
 }
