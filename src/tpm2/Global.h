@@ -94,7 +94,11 @@ _NORMAL_WARNING_LEVEL_
 #  include "TpmTypes.h"  // requires GpMacros & Capabilities
 #  include "CommandAttributes.h"
 #  include "CryptTest.h"
-#  include "BnValues.h"
+
+#  ifndef MATH_LIB
+#    error MATH_LIB required
+#  endif
+#  include LIB_INCLUDE(TpmTo, MATH_LIB, Math)
 
 #  include "CryptHash.h"
 #  include "CryptSym.h"

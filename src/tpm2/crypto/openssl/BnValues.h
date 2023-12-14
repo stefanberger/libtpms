@@ -356,8 +356,4 @@ typedef struct
 
 #endif
 
-/* Add implementation dependent definitions for other ECC Values and for linkages */
-
-#include LIB_INCLUDE(MATH_LIB, Math)
-
 #endif  // _BN_NUMBERS_H

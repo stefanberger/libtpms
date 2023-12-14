@@ -83,4 +83,25 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
 				NUMBYTES         size    // IN: Size of output buffer - see comments.
 				);
 
+LIB_EXPORT BOOL
+BnGetRandomBits(
+		bigNum           n,
+		size_t           bits,
+		RAND_STATE      *rand
+		);
+
+LIB_EXPORT BOOL
+BnGenerateRandomInRange(
+			bigNum           dest,
+			bigConst         limit,
+			RAND_STATE      *rand
+			);
+							// libtpms added begin
+LIB_EXPORT BOOL
+BnGenerateRandomInRangeAllBytes(
+			bigNum           dest,
+			bigConst         limit,
+			RAND_STATE      *rand
+			);
+
 #endif  //_TPM_MATH_FP_H_

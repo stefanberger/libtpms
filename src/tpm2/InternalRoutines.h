@@ -147,4 +147,6 @@
 // TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
 #include "tpm_to_platform_interface.h"
 
+#include "TpmMath_Util_fp.h" // libtpms: temporary
+
 #endif

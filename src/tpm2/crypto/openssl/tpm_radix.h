@@ -162,6 +162,6 @@ typedef int32_t  crypt_word_t;
 // clang-format off
 #define LIB_QUOTE(_STRING_)                    #_STRING_
 /* kgold removed subdirectory */
-#define LIB_INCLUDE2(_LIB_, _TYPE_)  LIB_QUOTE(TpmTo##_LIB_##_TYPE_.h)
-#define LIB_INCLUDE(_LIB_, _TYPE_)   LIB_INCLUDE2(_LIB_, _TYPE_)
+#define LIB_INCLUDE2(_PREFIX_, _LIB_, _TYPE_)  LIB_QUOTE(_PREFIX_##_LIB_##_TYPE_.h)
+#define LIB_INCLUDE(_PREFIX_, _LIB_, _TYPE_)   LIB_INCLUDE2(_PREFIX_,_LIB_, _TYPE_)
 // clang-format on
