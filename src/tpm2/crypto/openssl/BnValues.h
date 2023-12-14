@@ -83,43 +83,7 @@
 
 #ifndef _BN_NUMBERS_H
 #define _BN_NUMBERS_H
-#if RADIX_BITS == 64
-# define RADIX_LOG2         6
-#elif RADIX_BITS == 32
-#define RADIX_LOG2          5
-#else
-# error "Unsupported radix"
-#endif
-#define RADIX_MOD(x)        ((x) & ((1 << RADIX_LOG2) - 1))
-#define RADIX_DIV(x)        ((x) >> RADIX_LOG2)
-#define RADIX_MASK  ((((crypt_uword_t)1) << RADIX_LOG2) - 1)
-#define BITS_TO_CRYPT_WORDS(bits)       RADIX_DIV((bits) + (RADIX_BITS - 1))
-#define BYTES_TO_CRYPT_WORDS(bytes)     BITS_TO_CRYPT_WORDS(bytes * 8)
-#define SIZE_IN_CRYPT_WORDS(thing)      BYTES_TO_CRYPT_WORDS(sizeof(thing))
-#if RADIX_BITS == 64
-#define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_64(x)
-typedef uint64_t    crypt_uword_t;
-typedef int64_t     crypt_word_t;
-#   define TO_CRYPT_WORD_64             BIG_ENDIAN_BYTES_TO_UINT64
-#   define TO_CRYPT_WORD_32(a, b, c, d) TO_CRYPT_WORD_64(0, 0, 0, 0, a, b, c, d)
-#define BN_PAD      0    /* libtpms added */
-#elif RADIX_BITS == 32
-#define SWAP_CRYPT_WORD(x)  REVERSE_ENDIAN_32((x))
-typedef uint32_t    crypt_uword_t;
-typedef int32_t     crypt_word_t;
-#   define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h)			\
-    BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h),				\
-    BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
-#  define TO_CRYPT_WORD_32 		BIG_ENDIAN_BYTES_TO_UINT32
-#define BN_PAD      1    /* libtpms added */
-#endif
-#define MAX_CRYPT_UWORD (~((crypt_uword_t)0))
-#define MAX_CRYPT_WORD  ((crypt_word_t)(MAX_CRYPT_UWORD >> 1))
-#define MIN_CRYPT_WORD  (~MAX_CRYPT_WORD)
-#define LARGEST_NUMBER (MAX((ALG_RSA * MAX_RSA_KEY_BYTES),		\
-			    MAX((ALG_ECC * MAX_ECC_KEY_BYTES), MAX_DIGEST_SIZE)))
-#define LARGEST_NUMBER_BITS (LARGEST_NUMBER * 8)
-#define MAX_ECC_PARAMETER_BYTES (MAX_ECC_KEY_BYTES * ALG_ECC)
+
 // These are the basic big number formats. This is convertible to the library-
 // specific format without too much difficulty. For the math performed using
 // these numbers, the value is always positive.
@@ -342,16 +306,6 @@ typedef struct
     (((UINT64)(a) << 56) + ((UINT64)(b) << 48) + ((UINT64)(c) << 40)	\
      + ((UINT64)(d) << 32) + ((UINT64)(e) << 24) + ((UINT64)(f) << 16)	\
      + ((UINT64)(g) << 8) + ((UINT64)(h)))
-
-#ifndef RADIX_BYTES
-#   if RADIX_BITS == 32
-#       define RADIX_BYTES 4
-#   elif RADIX_BITS == 64
-#       define RADIX_BYTES 8
-#   else
-#       error "RADIX_BITS must either be 32 or 64"
-#   endif
-#endif
 
 // These macros are used for data initialization of big number ECC constants
 // These two macros combine a macro for data definition with a macro for
