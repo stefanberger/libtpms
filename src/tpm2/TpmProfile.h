@@ -73,8 +73,7 @@
 #include "TpmProfile_ErrorCodes.h"
 #include "VendorInfo.h"
 
-// Table 0:7 - Defines for Implementation Values
-
+//					libtpms: added begin
 #ifndef HASH_LIB
 #define HASH_LIB                        Ossl
 #endif
@@ -82,7 +81,11 @@
 #define SYM_LIB                         Ossl
 #endif
 #ifndef MATH_LIB
-#define MATH_LIB                        Ossl
+#define MATH_LIB                        TpmBigNum
 #endif
+#ifndef BN_MATH_LIB
+#define BN_MATH_LIB			Ossl
+#endif
+//					libtpms: added end
 
 #endif  // _TPM_PROFILE_H_

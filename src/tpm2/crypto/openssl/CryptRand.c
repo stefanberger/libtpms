@@ -124,6 +124,8 @@ const BYTE DRBG_NistTestVector_Generated[]       = {DRBG_TEST_GENERATED};
 #  error "CryptRand.c only written for AES with 128- or 256-bit keys."
 #endif
 
+typedef tpmKeyScheduleAES DRBG_KEY_SCHEDULE;
+
 typedef struct
 {
     DRBG_KEY_SCHEDULE keySchedule;

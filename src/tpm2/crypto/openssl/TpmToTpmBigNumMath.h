@@ -71,10 +71,21 @@
 #include "TpmTypes.h"  // requires capabilities & GpMacros
 #include "BnValues.h"
 
+#ifndef LIB_INCLUDE
+#  error include ordering error, LIB_INCLUDE not defined
+#endif
+#ifndef BN_MATH_LIB
+#  error BN_MATH_LIB not defined, required to provide BN library functions.
+#endif
+
 // Define macros and types necessary for the math library abstraction layer
 // Create a data object backing a Crypt_Int big enough for the given number of
 // data bits
 #define CRYPT_INT_BUF(buftypename, bits) BN_STRUCT(buftypename, bits)
+
+// Add support library dependent definitions.
+// For TpmBigNum, we expect bigCurveData to be a defined type.
+#include LIB_INCLUDE(BnTo, BN_MATH_LIB, Math)
 
 #include "BnConvert_fp.h"
 #include "BnMath_fp.h"

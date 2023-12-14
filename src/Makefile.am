@@ -552,6 +552,7 @@ noinst_HEADERS += \
 if LIBTPMS_USE_OPENSSL
 
 libtpms_tpm2_la_SOURCES += \
+	tpm2/crypto/openssl/BnToOsslMath.c \
 	tpm2/crypto/openssl/CryptCmac.c \
 	tpm2/crypto/openssl/CryptDes.c \
 	tpm2/crypto/openssl/CryptEccCrypt.c \
@@ -568,10 +569,10 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/ExpDCache.c \
 	tpm2/crypto/openssl/Helpers.c \
 	tpm2/crypto/openssl/TpmToOsslDesSupport.c \
-	tpm2/crypto/openssl/TpmToOsslMath.c \
 	tpm2/crypto/openssl/TpmToOsslSupport.c
 
 noinst_HEADERS += \
+	tpm2/crypto/openssl/BnToOsslMath.h \
 	tpm2/crypto/openssl/ConsttimeUtils.h \
 	tpm2/crypto/openssl/BnConvert_fp.h \
 	tpm2/crypto/openssl/BnMath_fp.h \
@@ -584,7 +585,6 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/TpmToOsslDesSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslHash.h \
 	tpm2/crypto/openssl/TpmToOsslMath_fp.h \
-	tpm2/crypto/openssl/TpmToOsslMath.h \
 	tpm2/crypto/openssl/TpmToOsslSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslSym.h \
 	tpm2/crypto/openssl/tpm_radix.h

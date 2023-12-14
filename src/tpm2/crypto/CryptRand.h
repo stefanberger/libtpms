@@ -82,7 +82,6 @@
 #define DRBG_IV_SIZE_BITS  (AES_MAX_BLOCK_SIZE * 8)
 #define DRBG_ALGORITHM     TPM_ALG_AES
 
-typedef tpmKeyScheduleAES DRBG_KEY_SCHEDULE;
 #define DRBG_ENCRYPT_SETUP(key, keySizeInBits, schedule)		\
     TpmCryptSetEncryptKeyAES(key, keySizeInBits, schedule)
 #define DRBG_ENCRYPT(keySchedule, in, out)			\
