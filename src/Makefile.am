@@ -512,6 +512,7 @@ noinst_HEADERS += \
 	tpm2/TpmProfile_ErrorCodes.h \
 	tpm2/TpmProfile_Misc.h \
 	tpm2/Tpm.h \
+	tpm2/tpm_public.h \
 	tpm2/tpm_to_platform_interface.h \
 	tpm2/_TPM_Hash_Data_fp.h \
 	tpm2/_TPM_Hash_End_fp.h \
@@ -525,6 +526,7 @@ noinst_HEADERS += \
 	tpm2/Unseal_fp.h \
 	tpm2/VendorInfo.h \
 	tpm2/Vendor_TCG_Test_fp.h \
+	tpm2/VerifyConfiguration.h \
 	tpm2/VerifySignature_fp.h \
 	tpm2/X509.h \
 	tpm2/X509_ECC_fp.h \

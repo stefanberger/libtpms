@@ -89,6 +89,7 @@ _REDUCE_WARNING_LEVEL_(2)
 _NORMAL_WARNING_LEVEL_
 #include "BackwardsCompatibility.h" // libtpms added
 
+#  include "GpMacros.h"
 #  include "Capabilities.h"
 #  include "TpmTypes.h"  // requires GpMacros & Capabilities
 #  include "CommandAttributes.h"
