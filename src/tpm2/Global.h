@@ -1277,7 +1277,7 @@ EXTERN CRYPTO_SELF_TEST_STATE g_cryptoSelfTestState;
 //*****************************************************************************
 //** From Manufacture.c
 //*****************************************************************************
-EXTERN BOOL g_manufactured;
+extern BOOL g_manufactured;
 
 // This value indicates if a TPM2_Startup commands has been
 // receive since the power on event.  This flag is maintained in power
