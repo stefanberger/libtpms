@@ -215,14 +215,6 @@
 
 #endif
 
-/* 5.10.4	Derived from Vendor-specific values */
-/* Values derived from vendor specific settings in TpmProfile.h */
-#define PCR_SELECT_MIN          ((PLATFORM_PCR+7)/8)
-#define PCR_SELECT_MAX          ((IMPLEMENTATION_PCR+7)/8)
-#define MAX_ORDERLY_COUNT       ((1 << ORDERLY_BITS) - 1)
-#define RSA_MAX_PRIME           (MAX_RSA_KEY_BYTES / 2)
-#define RSA_PRIVATE_SIZE        (RSA_MAX_PRIME * 5)
-
 // These macros are commonly used in the "Crypt" code as a way to keep listings from
 // getting too long. This is not to save paper but to allow one to see more
 // useful stuff on the screen at any given time.  Neither macro sets failure mode.
@@ -277,129 +269,6 @@
 #endif
 
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
-#define JOIN(x,y) x##y
-#define JOIN3(x, y, z) x##y##z
-#define CONCAT(x,y) JOIN(x, y)
-#define CONCAT3(x, y, z) JOIN3(x,y,z)
-
-/*     If CONTEXT_INTEGRITY_HASH_ALG is defined, then the vendor is using the old style
-       table. Otherwise, pick the strongest implemented hash algorithm as the context hash. */
-
-#ifndef CONTEXT_HASH_ALGORITHM
-#   if defined ALG_SHA3_512 && ALG_SHA3_512 == YES
-#       define CONTEXT_HASH_ALGORITHM   SHA3_512
-#   elif defined ALG_SHA512 && ALG_SHA512 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA512
-#   elif defined ALG_SHA3_384 && ALG_SHA3_384 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA3_384
-#   elif defined ALG_SHA384 && ALG_SHA384 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA384
-#   elif defined ALG_SHA3_256 && ALG_SHA3_256 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA3_256
-#   elif defined ALG_SHA256 && ALG_SHA256 == YES
-#       define CONTEXT_HASH_ALGORITHM    SHA256
-#   elif defined ALG_SM3_256 && ALG_SM3_256 == YES
-#       define CONTEXT_HASH_ALGORITHM    SM3_256
-#   elif defined ALG_SHA1 && ALG_SHA1 == YES
-#       define CONTEXT_HASH_ALGORITHM  SHA1
-#   endif
-#   define CONTEXT_INTEGRITY_HASH_ALG  CONCAT(TPM_ALG_, CONTEXT_HASH_ALGORITHM)
-#if CONTEXT_HASH_ALGORITHM != SHA512	// libtpms added begin
-#error CONTEXT_HASH_ALGORITHM must remain SHA512
-#endif					// libtpms added end
-#endif
-
-#ifndef CONTEXT_INTEGRITY_HASH_SIZE
-#define CONTEXT_INTEGRITY_HASH_SIZE CONCAT(CONTEXT_HASH_ALGORITHM, _DIGEST_SIZE)
-#endif
-#if ALG_RSA
-#define     RSA_SECURITY_STRENGTH (MAX_RSA_KEY_BITS >= 15360 ? 256 :	\
-				  (MAX_RSA_KEY_BITS >=  7680 ? 192 :	\
-				  (MAX_RSA_KEY_BITS >=  3072 ? 128 :	\
-				  (MAX_RSA_KEY_BITS >=  2048 ? 112 :    \
-				  (MAX_RSA_KEY_BITS >=  1024 ?  80 :  0)))))
-#else
-#define     RSA_SECURITY_STRENGTH   0
-#endif // ALG_RSA
-#if ALG_ECC
-#define     ECC_SECURITY_STRENGTH (MAX_ECC_KEY_BITS >= 521 ? 256 :	\
-				  (MAX_ECC_KEY_BITS >= 384 ? 192 :	\
-				  (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
-#else
-#define     ECC_SECURITY_STRENGTH   0
-#endif // ALG_ECC
-#define     MAX_ASYM_SECURITY_STRENGTH					\
-    MAX(RSA_SECURITY_STRENGTH, ECC_SECURITY_STRENGTH)
-#define     MAX_HASH_SECURITY_STRENGTH  ((CONTEXT_INTEGRITY_HASH_SIZE * 8) / 2)
-
-/*     Unless some algorithm is broken... */
-
-#define     MAX_SYM_SECURITY_STRENGTH   MAX_SYM_KEY_BITS
-#define MAX_SECURITY_STRENGTH_BITS					\
-    MAX(MAX_ASYM_SECURITY_STRENGTH,					\
-	MAX(MAX_SYM_SECURITY_STRENGTH,					\
-	    MAX_HASH_SECURITY_STRENGTH))
-/*     This is the size that was used before the 1.38 errata requiring that P1.14.4 be followed */
-#define PROOF_SIZE      CONTEXT_INTEGRITY_HASH_SIZE
-/*     As required by P1.14.4 */
-#define COMPLIANT_PROOF_SIZE						\
-    (MAX(CONTEXT_INTEGRITY_HASH_SIZE, (2 * MAX_SYM_KEY_BYTES)))
-/*     As required by P1.14.3.1 */
-#define COMPLIANT_PRIMARY_SEED_SIZE				\
-    BITS_TO_BYTES(MAX_SECURITY_STRENGTH_BITS * 2)
-/*     This is the pre-errata version */
-#ifndef PRIMARY_SEED_SIZE
-#   define PRIMARY_SEED_SIZE    PROOF_SIZE
-#endif
-#if USE_SPEC_COMPLIANT_PROOFS
-#   undef PROOF_SIZE
-#   define PROOF_SIZE           COMPLIANT_PROOF_SIZE
-#   undef PRIMARY_SEED_SIZE
-#   define PRIMARY_SEED_SIZE    COMPLIANT_PRIMARY_SEED_SIZE
-#endif  // USE_SPEC_COMPLIANT_PROOFS
-#if !SKIP_PROOF_ERRORS
-#   if PROOF_SIZE < COMPLIANT_PROOF_SIZE
-#       error "PROOF_SIZE is not compliant with TPM specification"
-#   endif
-#   if PRIMARY_SEED_SIZE < COMPLIANT_PRIMARY_SEED_SIZE
-#       error  "Non-compliant PRIMARY_SEED_SIZE"
-#   endif
-#endif	// !SKIP_PROOF_ERRORS
-
-/* If CONTEXT_ENCRYPT_ALG is defined, then the vendor is using the old style table */
-#if defined CONTEXT_ENCRYPT_ALG
-#   undef CONTEXT_ENCRYPT_ALGORITHM
-#   if CONTEXT_ENCRYPT_ALG == ALG_AES_VALUE
-#       define CONTEXT_ENCRYPT_ALGORITHM  AES
-#   elif CONTEXT_ENCRYPT_ALG == ALG_SM4_VALUE
-#       define CONTEXT_ENCRYPT_ALGORITHM  SM4
-#   elif CONTEXT_ENCRYPT_ALG == ALG_CAMELLIA_VALUE
-#       define CONTEXT_ENCRYPT_ALGORITHM  CAMELLIA
-#   elif CONTEXT_ENCRYPT_ALG == ALG_TDES_VALUE
-#   error Are you kidding?
-#   else
-#       error Unknown value for CONTEXT_ENCRYPT_ALG
-#   endif // CONTEXT_ENCRYPT_ALG == ALG_AES_VALUE
-#else
-#   define CONTEXT_ENCRYPT_ALG						\
-    CONCAT3(ALG_, CONTEXT_ENCRYPT_ALGORITHM, _VALUE)
-#endif  // CONTEXT_ENCRYPT_ALG
-#define CONTEXT_ENCRYPT_KEY_BITS					\
-    CONCAT(CONTEXT_ENCRYPT_ALGORITHM, _MAX_KEY_SIZE_BITS)
-#define CONTEXT_ENCRYPT_KEY_BYTES       ((CONTEXT_ENCRYPT_KEY_BITS+7)/8)
-
-/* This is updated to follow the requirement of P2 that the label not be larger than 32 bytes. */
-#ifndef LABEL_MAX_BUFFER
-#define LABEL_MAX_BUFFER MIN(32, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE))
-#endif
-// This bit is used to indicate that an authorization ticket expires on TPM Reset
-// and TPM Restart. It is added to the timeout value returned by TPM2_PoliySigned()
-// and TPM2_PolicySecret() and used by TPM2_PolicyTicket(). The timeout value is
-// relative to Time (g_time). Time is reset whenever the TPM loses power and cannot
-// be moved forward by the user (as can Clock). 'g_time' is a 64-bit value expressing
-// time in ms. Stealing the MSb for a flag means that the TPM needs to be reset
-// at least once every 292,471,208 years rather than once every 584,942,417 years.
-#define EXPIRATION_BIT ((UINT64)1 << 63)
 
 // Check for consistency of the bit ordering of bit fields
 #if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && USE_BIT_FIELD_STRUCTURES
@@ -446,10 +315,5 @@
 // 0x06 indicating an OID fallowed by an octet indicating the number of octets in the
 // rest of the OID. This allows a user of this OID to know how much/little to copy.
 #define MAKE_OID(NAME) EXTERN const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
-
-// This definition is moved from TpmProfile.h because it is not actually vendor-
-// specific. It has to be the same size as the 'sequence' parameter of a TPMS_CONTEXT
-// and that is a UINT64. So, this is an invariant value
-#define CONTEXT_COUNTER UINT64
 
 #endif  // GP_MACROS_H

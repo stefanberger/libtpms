@@ -63,6 +63,14 @@
 #ifndef TPMTYPES_H
 #define TPMTYPES_H
 
+#ifndef MAX_CAP_BUFFER
+#  error MAX_CAP_BUFFER must be defined before this file so it can calculate maximum capability sizes
+#endif
+#include "Capabilities.h"
+#include "TpmAlgorithmDefines.h"
+#include "TpmCalculatedAttributes.h"
+#include "GpMacros.h"
+
 /* TCG Algorithm Registry: Table 1:2 - Definition of TPM_ALG_ID Constants */
 
 typedef UINT16                          TPM_ALG_ID;

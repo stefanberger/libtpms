@@ -517,6 +517,7 @@ noinst_HEADERS += \
 	tpm2/_TPM_Hash_End_fp.h \
 	tpm2/_TPM_Hash_Start_fp.h \
 	tpm2/_TPM_Init_fp.h \
+	tpm2/TpmCalculatedAttributes.h \
 	tpm2/TpmSizeChecks_fp.h \
 	tpm2/TpmTcpProtocol.h \
 	tpm2/TpmTypes.h \
