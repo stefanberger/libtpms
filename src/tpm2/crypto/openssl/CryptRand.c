@@ -696,8 +696,7 @@ LIB_EXPORT TPM_RC DRBG_InstantiateSeeded(
     // DRBG should have been tested, but...
     if(!IsDrbgTested() && !DRBG_SelfTest())
 	{
-	    LOG_FAILURE(FATAL_ERROR_SELF_TEST);
-	    return TPM_RC_FAILURE;
+	    FAIL_RC(FATAL_ERROR_SELF_TEST);
 	}
     // Initialize the DRBG state
     memset(drbgState, 0, sizeof(DRBG_STATE));
@@ -905,8 +904,7 @@ LIB_EXPORT UINT16 DRBG_Generate(
 			{
 			    // If this is a PRNG then the only way to get
 			    // here is if the SW has run away.
-			    LOG_FAILURE(FATAL_ERROR_INTERNAL);
-			    return 0;
+			    FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, 0);
 			}
 		}
 	    // if the allowed number of bytes in a request is larger than the
@@ -920,8 +918,7 @@ LIB_EXPORT UINT16 DRBG_Generate(
 				  (BYTE*)pDRBG_KEY(seed), DRBG_KEY_SIZE_BITS, &keySchedule)
 	       != 0)
 		{
-		    LOG_FAILURE(FATAL_ERROR_INTERNAL);
-		    return 0;
+		    FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, 0);
 		}
 	    // Generate the random data
 	    EncryptDRBG(
@@ -934,8 +931,8 @@ LIB_EXPORT UINT16 DRBG_Generate(
 	}
     else
 	{
-	    LOG_FAILURE(FATAL_ERROR_INTERNAL);
-	    return 0; // libtpms changed from FALSE
+	    // invalid DRBG state structure
+	    FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, 0);
 	}
     return randomSize;
 }

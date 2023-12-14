@@ -1008,8 +1008,7 @@ CryptParameterDecryption(
     // Parameter encryption for a non-2B is not supported.
     if(leadingSizeInByte != 2)
 	{
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    return TPM_RC_FAILURE;
+	    FAIL_RC(FATAL_ERROR_INTERNAL);
 	}
 
     // Retrieve encrypted data size.
