@@ -111,7 +111,7 @@ LIB_EXPORT int FindNthSetBit(
 // reduce the number of times that the large prime is divided into a few large
 // divides and then use smaller divides to get to the final 16 bit (or smaller)
 // remainders.
-LIB_EXPORT UINT32 PrimeSieve(bigNum bnN,    // IN/OUT: number to sieve
+LIB_EXPORT UINT32 PrimeSieve(Crypt_Int* bnN,    // IN/OUT: number to sieve
 			     UINT32 fieldSize,  // IN: size of the field area in bytes
 			     BYTE*  field       // IN: field
 			     );
@@ -137,7 +137,7 @@ LIB_EXPORT uint32_t SetFieldSize(uint32_t newFieldSize);
 //      TPM_RC_NO_RESULT    candidate is not prime and couldn't find and alternative
 //                          in the field
 LIB_EXPORT TPM_RC PrimeSelectWithSieve(
-				       bigNum      candidate,  // IN/OUT: The candidate to filter
+				       Crypt_Int*  candidate,  // IN/OUT: The candidate to filter
 				       UINT32      e,          // IN: the exponent
 				       RAND_STATE* rand        // IN: the random number generator state
 				       );
