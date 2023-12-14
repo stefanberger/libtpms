@@ -65,6 +65,7 @@
 // big-endian bytes.
 //
 #include "Tpm.h"
+#include "TpmMath_Util_fp.h"
 
 //** Functions
 
@@ -152,26 +153,26 @@ ModExpB(UINT32 cSize,  // IN: the size of the output buffer. It will
 	const BYTE*  n  // IN: modulus
 	)
 {
-    BN_MAX(bnC);
-    BN_MAX(bnM);
-    BN_MAX(bnE);
-    BN_MAX(bnN);
+    CRYPT_INT_MAX(bnC);
+    CRYPT_INT_MAX(bnM);
+    CRYPT_INT_MAX(bnE);
+    CRYPT_INT_MAX(bnN);
     NUMBYTES tSize  = (NUMBYTES)nSize;
     TPM_RC   retVal = TPM_RC_SUCCESS;
     
     // Convert input parameters
-    BnFromBytes(bnM, m, (NUMBYTES)mSize);
-    BnFromBytes(bnE, e, (NUMBYTES)eSize);
-    BnFromBytes(bnN, n, (NUMBYTES)nSize);
+    ExtMath_IntFromBytes(bnM, m, (NUMBYTES)mSize);
+    ExtMath_IntFromBytes(bnE, e, (NUMBYTES)eSize);
+    ExtMath_IntFromBytes(bnN, n, (NUMBYTES)nSize);
     
     // Make sure that the output is big enough to hold the result
     // and that 'm' is less than 'n' (the modulus)
     if(cSize < nSize)
 	ERROR_EXIT(TPM_RC_NO_RESULT);
-    if(BnUnsignedCmp(bnM, bnN) >= 0)
+    if(ExtMath_UnsignedCmp(bnM, bnN) >= 0)
 	ERROR_EXIT(TPM_RC_SIZE);
-    BnModExp(bnC, bnM, bnE, bnN);
-    BnToBytes(bnC, c, &tSize);
+    ExtMath_ModExp(bnC, bnM, bnE, bnN);
+    ExtMath_IntToBytes(bnC, c, &tSize);
  Exit:
     return retVal;
 }
@@ -191,21 +192,21 @@ LIB_EXPORT TPM_RC DivideB(const TPM2B* n,  // IN: numerator
 			  TPM2B*       r   // OUT: remainder
 			  )
 {
-    BN_MAX_INITIALIZED(bnN, n);
-    BN_MAX_INITIALIZED(bnD, d);
-    BN_MAX(bnQ);
-    BN_MAX(bnR);
+    CRYPT_INT_MAX_INITIALIZED(bnN, n);
+    CRYPT_INT_MAX_INITIALIZED(bnD, d);
+    CRYPT_INT_MAX(bnQ);
+    CRYPT_INT_MAX(bnR);
     //
     // Do divide with converted values
-    BnDiv(bnQ, bnR, bnN, bnD);
-
-    // Convert the BIGNUM result back to 2B format using the size of the original
+    ExtMath_Divide(bnQ, bnR, bnN, bnD);
+    
+    // Convert the Crypt_Int* result back to 2B format using the size of the original
     // number
     if(q != NULL)
-	if(!BnTo2B(bnQ, q, q->size))
+	if(!TpmMath_IntTo2B(bnQ, q, q->size))
 	    return TPM_RC_NO_RESULT;
     if(r != NULL)
-	if(!BnTo2B(bnR, r, r->size))
+	if(!TpmMath_IntTo2B(bnR, r, r->size))
 	    return TPM_RC_NO_RESULT;
     return TPM_RC_SUCCESS;
 }

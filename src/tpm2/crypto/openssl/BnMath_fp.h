@@ -159,6 +159,8 @@ LIB_EXPORT BOOL BnMaskBits(bigNum        bn,      // IN/OUT: number to mask
 // This function always returns TRUE.
 LIB_EXPORT BOOL BnShiftRight(bigNum result, bigConst toShift, uint32_t shiftAmount);
 
+#ifdef _CRYPT_RAND_H
+
 LIB_EXPORT BOOL
 BnGetRandomBits(
 		bigNum           n,
@@ -180,5 +182,7 @@ BnGenerateRandomInRangeAllBytes(
 			RAND_STATE      *rand
 			);
 							// libtpms added end
+
+#endif
 
 #endif

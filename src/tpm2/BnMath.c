@@ -86,7 +86,10 @@
 // where the BnSomething() function should not be called if OK isn't true.
 
 //** Includes
-#include "Tpm.h"
+#include "Tpm.h"		// libtpms: for CryptRand.h
+#include "TpmMath_Util_fp.h"
+#include "TpmBigNum.h"
+extern BOOL g_inFailureMode;  // can't use global.h because we can't use tpm.h
 
 // A constant value of zero as a stand in for NULL bigNum values
 const bignum_t BnConstZero = {1, 0, {0}};

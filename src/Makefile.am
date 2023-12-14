@@ -269,6 +269,8 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Ticket.c \
 	tpm2/Time.c \
 	tpm2/TpmAsn1.c \
+	tpm2/TpmBigNumThunks.c \
+	tpm2/TpmMath_Util.c \
 	tpm2/TpmSizeChecks.c \
 	tpm2/TPMCmdp.c \
 	tpm2/TpmFail.c \
@@ -322,7 +324,8 @@ noinst_HEADERS += \
 	tpm2/Attest_spt_fp.h \
 	tpm2/BaseTypes.h \
 	tpm2/Bits_fp.h \
-	tpm2/BnSupport_interface.h \
+	tpm2/BnSupport_Interface.h \
+	tpm2/BnUtil_fp.h \
 	tpm2/Capabilities.h \
 	tpm2/CertifyCreation_fp.h \
 	tpm2/CertifyX509_fp.h \
@@ -400,6 +403,8 @@ noinst_HEADERS += \
 	tpm2/Manufacture_fp.h \
 	tpm2/Marshal.h \
 	tpm2/Marshal_fp.h \
+	tpm2/MathLibraryInterface.h \
+	tpm2/MathLibraryInterfaceTypes.h \
 	tpm2/MathOnByteBuffers_fp.h \
 	tpm2/Memory_fp.h \
 	tpm2/MinMax.h \
@@ -506,12 +511,14 @@ noinst_HEADERS += \
 	tpm2/TpmASN1_fp.h \
 	tpm2/TpmBuildSwitches.h \
 	tpm2/TpmFail_fp.h \
+	tpm2/TpmMath_Util_fp.h \
 	tpm2/TpmProfile.h \
 	tpm2/TpmProfile_CommandList.h \
 	tpm2/TpmProfile_Common.h \
 	tpm2/TpmProfile_ErrorCodes.h \
 	tpm2/TpmProfile_Misc.h \
 	tpm2/Tpm.h \
+	tpm2/TpmBigNum.h \
 	tpm2/tpm_public.h \
 	tpm2/tpm_to_platform_interface.h \
 	tpm2/_TPM_Hash_Data_fp.h \
@@ -573,6 +580,7 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/ExpDCache_fp.h \
 	tpm2/crypto/openssl/Helpers_fp.h \
 	tpm2/crypto/openssl/LibSupport.h \
+	tpm2/crypto/openssl/TpmToTpmBigNumMath.h \
 	tpm2/crypto/openssl/TpmToOsslDesSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslHash.h \
 	tpm2/crypto/openssl/TpmToOsslMath_fp.h \
