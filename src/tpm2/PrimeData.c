@@ -65,7 +65,7 @@
 // and this number will eliminate many prime candidates from
 // consideration before running Miller-Rabin on the result.
 
-const BN_STRUCT(smallprimecomp, 43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
+const CRYPT_INT_BUF(smallprimecomp, 43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
     {44, 44, {0x2ED42696, 0x2BBFA177, 0x4820594F, 0xF73F4841, 0xBFAC313A, 0xCAC3EB81,
 	      0xF6F26BF8, 0x7FAB5061, 0x59746FB7, 0xF71377F6, 0x3B19855B, 0xCBD03132,
 	      0xBB92EF1B, 0x3AC3152C, 0xE87C8273, 0xC0AE0E69, 0x74A9E295, 0x448CCE86,
@@ -75,7 +75,8 @@ const BN_STRUCT(smallprimecomp, 43 * RADIX_BITS) s_CompositeOfSmallPrimes_ =
 	      0x96658ED2, 0x1753EFE5, 0x3AE4A5A6, 0x8FD4A97F, 0x8B15E7EB, 0x0243C3E1,
 	      0xE0F0C31D, 0x0000000B}};
 
-bigConst        s_CompositeOfSmallPrimes = (const bigNum)&s_CompositeOfSmallPrimes_;
+const Crypt_Int* s_CompositeOfSmallPrimes =
+    (const Crypt_Int*)&s_CompositeOfSmallPrimes_;
 
 // This table contains a bit for each of the odd values between 1 and 2^16 + 1.
 // This table allows fast checking of the primes in that range.

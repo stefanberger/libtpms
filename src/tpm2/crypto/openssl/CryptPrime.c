@@ -74,7 +74,7 @@ extern const uint32_t      s_LastPrimeInTable;
 extern const uint32_t      s_PrimeTableSize;
 extern const uint32_t      s_PrimesInTable;
 extern const unsigned char s_PrimeTable[];
-extern bigConst            s_CompositeOfSmallPrimes;
+extern const Crypt_Int*    s_CompositeOfSmallPrimes;
 
 //** Functions
 
