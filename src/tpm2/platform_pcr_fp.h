@@ -93,9 +93,9 @@ TPM_RC _platPcr__GetInitialValueForPcr(
 				       BYTE*      pcrBuffer,        // OUT: buffer to put PCR initialization value into
 				       uint16_t   bufferSize,       // IN: maximum size of value buffer can hold
 				       uint16_t*  pcrLength);  // OUT: size of initialization value returned in pcrBuffer
+#endif					// libtpms: added
 
 // should the given PCR algorithm default to active in a new TPM?
 BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg);
-#endif					// libtpms: added
 
 #endif  // _PLATFORM_PCR_FP_H_

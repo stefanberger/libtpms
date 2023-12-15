@@ -263,13 +263,18 @@ void PCRManufacture(void)
     for(gp.pcrAllocated.count = 0; gp.pcrAllocated.count < HASH_COUNT;
 	gp.pcrAllocated.count++)
 	{
-	    gp.pcrAllocated.pcrSelections[gp.pcrAllocated.count].hash
-		= CryptHashGetAlgByIndex(gp.pcrAllocated.count);
+	    TPM_ALG_ID currentBank  = CryptHashGetAlgByIndex(gp.pcrAllocated.count);
+	    BOOL       isBankActive = _platPcr_IsPcrBankDefaultActive(currentBank);
+
+	    gp.pcrAllocated.pcrSelections[gp.pcrAllocated.count].hash = currentBank;
+
 	    gp.pcrAllocated.pcrSelections[gp.pcrAllocated.count].sizeofSelect =
 		PCR_SELECT_MAX;
 	    for(i = 0; i < PCR_SELECT_MAX; i++)
-		gp.pcrAllocated.pcrSelections[gp.pcrAllocated.count].pcrSelect[i]
-		    = 0xFF;
+		{
+		    gp.pcrAllocated.pcrSelections[gp.pcrAllocated.count].pcrSelect[i] =
+			isBankActive ? 0xFF : 0;
+		}
 	}
 
     // Store the initial configuration to NV

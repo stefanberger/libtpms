@@ -126,9 +126,14 @@ MUST_BE(ARRAYSIZE(s_initAttributes) == IMPLEMENTATION_PCR);
 #  error No default PCR banks defined
 #endif
 
-#if 0					// libtpms: added
 static const TPM_ALG_ID DefaultActivePcrBanks[] = {
+#if ALG_SHA1			// libtpms: added begin
+    TPM_ALG_SHA1
+#endif				// libtpms: added end
 #if ALG_SHA256
+#  if ALG_SHA1			// libtpms: added begin
+    ,
+#  endif			// libtpms: added end
     TPM_ALG_SHA256
 #endif
 #if ALG_SHA384
@@ -137,8 +142,13 @@ static const TPM_ALG_ID DefaultActivePcrBanks[] = {
 #  endif
     TPM_ALG_SHA384
 #endif
+#if ALG_SHA512			// libtpms: added begin
+#  if ALG_SHA1 || ALG_SHA256 || ALG_SHA384
+    ,
+#  endif
+    TPM_ALG_SHA512
+#endif				// libtpms: added end
 };
-#endif					// libtpms: added
 
 UINT32 _platPcr__NumberOfPcrs()
 {
@@ -157,7 +167,6 @@ PCR_Attributes _platPcr__GetPcrInitializationAttributes(UINT32 pcrNumber)
     return s_initAttributes[pcrNumber];
 }
 
-#if 0					// libtpms: added
 // should the given PCR algorithm default to active in a new TPM?
 BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg)
 {
@@ -172,6 +181,7 @@ BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg)
     return FALSE;
 }
 
+#if 0					// libtpms: added
 // Fill a given buffer with the PCR initialization value for a particular PCR and hash
 // combination, and return its length.  If the platform doesn't have a value, then
 // the result size is expected to be zero, and the rfunction will return TPM_RC_PCR.
