@@ -1084,7 +1084,7 @@ static void PCRSetSelectBit(UINT32 pcr,    // IN: PCR number
 //  Return Type: BOOL
 //      TRUE(1)         the property type is implemented
 //      FALSE(0)        the property type is not implemented
-static BOOL PCRGetProperty(TPM_PT_PCR property, TPMS_TAGGED_PCR_SELECT* select)
+BOOL PCRGetProperty(TPM_PT_PCR property, TPMS_TAGGED_PCR_SELECT* select)
 {
     UINT32 pcr;
     UINT32 groupIndex;
