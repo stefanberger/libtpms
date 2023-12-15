@@ -79,6 +79,14 @@ LIB_EXPORT int ExtMath_LibInit(void)
     return BnSupportLibInit();
 }
 
+//** MathLibraryCompatibililtyCheck()
+// This function is only used during development to make sure that the library
+// that is being referenced is using the same size of data structures as the TPM.
+LIB_EXPORT BOOL ExtMath_Debug_CompatibilityCheck(void)
+{
+    return BnMathLibraryCompatibilityCheck();
+}
+
 // ***************************************************************************
 // Integer/Number Functions (non-ECC)
 // ***************************************************************************
