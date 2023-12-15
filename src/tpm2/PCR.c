@@ -107,9 +107,15 @@ BOOL PCRBelongsAuthGroup(TPMI_DH_PCR handle,     // IN: handle of PCR
     // one authorization group which contains PCR[20-22].  If the platform
     // specification requires differently, the implementation should be changed
     // accordingly
-    if(handle >= 20 && handle <= 22)
+    UINT32         pcr = handle - PCR_FIRST;
+    PCR_Attributes currentPcrAttributes =
+	_platPcr__GetPcrInitializationAttributes(pcr);
+
+    if(currentPcrAttributes.authValuesGroup != 0)
 	{
-	    *groupIndex = 0;
+	    // turn 1-based group number into actual array index expected by callers
+	    *groupIndex = currentPcrAttributes.authValuesGroup - 1;
+	    pAssert_BOOL(*groupIndex < NUM_AUTHVALUE_PCR_GROUP);
 	    return TRUE;
 	}
 
@@ -133,14 +139,19 @@ BOOL PCRBelongsPolicyGroup(
 			   //     parameter is zero
 			   )
 {
+    *groupIndex = 0;
+
 #if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     // Platform specification decides if a PCR belongs to a policy group and
-    // belongs to which group.  In this implementation, we assume there is only
-    // one policy group which contains PCR20-22.  If the platform specification
-    // requires differently, the implementation should be changed accordingly
-    if(handle >= 20 && handle <= 22)
+    // belongs to which group.
+    UINT32         pcr = handle - PCR_FIRST;
+    PCR_Attributes currentPcrAttributes =
+	_platPcr__GetPcrInitializationAttributes(pcr);
+    if(currentPcrAttributes.policyAuthGroup != 0)
 	{
-	    *groupIndex = 0;
+	    // turn 1-based group number into actual array index expected by callers
+	    *groupIndex = currentPcrAttributes.policyAuthGroup - 1;
+	    pAssert_BOOL(*groupIndex < NUM_POLICY_PCR_GROUP);
 	    return TRUE;
 	}
 #endif
