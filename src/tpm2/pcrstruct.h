@@ -141,7 +141,6 @@ typedef struct
     unsigned int extendLocality : 5;
 } PCR_Attributes;
 
-#if 0				// libtpms: added
 // Get pointer to particular PCR from array if that PCR is allocated.
 // otherwise returns NULL
 BYTE* GetPcrPointerIfAllocated(PCR*       pPcrArray,
@@ -154,6 +153,5 @@ BYTE* GetPcrPointerIfAllocated(PCR*       pPcrArray,
 BYTE* GetPcrPointer(TPM_ALG_ID alg,       // IN: algorithm for bank
 		    UINT32     pcrNumber  // IN: PCR number
 		    );
-#endif				// libtpms: added
 
 #endif

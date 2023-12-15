@@ -344,6 +344,71 @@ BOOL PcrIsAllocated(UINT32        pcr,     // IN: The number of the PCR
     return allocated;
 }
 
+// Get pointer to particular PCR from bank (array)
+// CAUTION: This function does not validate the pcrNumber
+// vs the size of the array.
+// See Also: GetPcrPointerIfAllocated
+static BYTE* GetPcrPointerFromPcrArray(PCR*       pPcrArray,
+				       TPM_ALG_ID alg,       // IN: algorithm for bank
+				       UINT32     pcrNumber  // IN: PCR number
+				       )
+{
+    switch(alg)
+	{
+#if ALG_SHA1
+	  case TPM_ALG_SHA1:
+	    return pPcrArray[pcrNumber].Sha1Pcr;
+#endif
+#if ALG_SHA256
+	  case TPM_ALG_SHA256:
+	    return pPcrArray[pcrNumber].Sha256Pcr;
+#endif
+#if ALG_SHA384
+	  case TPM_ALG_SHA384:
+	    return pPcrArray[pcrNumber].Sha384Pcr;	// libtpms: appended 'Pcr'
+#endif
+#if ALG_SHA512
+	  case TPM_ALG_SHA512:
+	    return pPcrArray[pcrNumber].Sha512Pcr;	// libtpms: appended 'Pcr'
+#endif
+#if ALG_SM3_256
+	  case TPM_ALG_SM3_256:
+	    return pPcrArray[pcrNumber].Sm3_256;
+#endif
+#if ALG_SHA3_256
+	  case TPM_ALG_SHA3_256:
+	    return pPcrArray[pcrNumber].Sha3_256;
+#endif
+#if ALG_SHA3_384
+	  case TPM_ALG_SHA3_384:
+	    return pPcrArray[pcrNumber].Sha3_384;
+#endif
+#if ALG_SHA3_512
+	  case TPM_ALG_SHA3_512:
+	    return pPcrArray[pcrNumber].Sha3_512;
+#endif
+	  default:
+	    FAIL(FATAL_ERROR_INTERNAL);
+	    break;
+	}
+    return NULL;
+}
+
+BYTE* GetPcrPointerIfAllocated(PCR*       pPcrArray,
+			       TPM_ALG_ID alg,       // IN: algorithm for bank
+			       UINT32     pcrNumber  // IN: PCR number
+			       )
+{
+    //
+    if(!PcrIsAllocated(pcrNumber, alg))
+	return NULL;
+
+    return GetPcrPointerFromPcrArray(pPcrArray,
+				     alg,       // IN: algorithm for bank
+				     pcrNumber  // IN: PCR number
+				     );
+}
+
 //*** GetPcrPointer()
 // This function returns the address of an array of PCR based on the
 // hash algorithm.
@@ -351,29 +416,11 @@ BOOL PcrIsAllocated(UINT32        pcr,     // IN: The number of the PCR
 //  Return Type: BYTE *
 //      NULL            no such algorithm
 //      != NULL         pointer to the 0th byte of the requested PCR
-static BYTE* GetPcrPointer(TPM_ALG_ID alg,       // IN: algorithm for bank
+BYTE* GetPcrPointer(TPM_ALG_ID alg,       // IN: algorithm for bank
 		    UINT32     pcrNumber  // IN: PCR number
 		    )
 {
-    static BYTE     *pcr = NULL;
-
-    if(!PcrIsAllocated(pcrNumber, alg))
-	return NULL;
-    switch(alg)
-	{
-#define HASH_CASE(HASH, Hash)						\
-	    case TPM_ALG_##HASH:					\
-	      pcr = s_pcrs[pcrNumber].Hash##Pcr;			\
-	      break;
-
-	    FOR_EACH_HASH(HASH_CASE)
-#undef HASH_CASE
-
-	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    break;
-	}
-    return pcr;
+    return GetPcrPointerIfAllocated(s_pcrs, alg, pcrNumber);
 }
 
 //*** IsPcrSelected()
