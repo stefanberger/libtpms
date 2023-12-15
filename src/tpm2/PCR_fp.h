@@ -277,6 +277,13 @@ PCRCapGetProperties(TPM_PT_PCR property,  // IN: the starting PCR property
 		    TPML_TAGGED_PCR_PROPERTY* select  // OUT: PCR select
 		    );
 
+//*** PCRGetProperty()
+// This function returns the selected PCR property.
+//  Return Type: BOOL
+//      TRUE(1)         the property type is implemented
+//      FALSE(0)        the property type is not implemented
+BOOL PCRGetProperty(TPM_PT_PCR property, TPMS_TAGGED_PCR_SELECT* select);
+
 //*** PCRCapGetHandles()
 // This function is used to get a list of handles of PCR, started from 'handle'.
 // If 'handle' exceeds the maximum PCR handle range, an empty list will be
