@@ -132,35 +132,41 @@ BOOL IsPrimeInt(uint32_t n)
 	}
     return TRUE;
 }
+
 #if !RSA_KEY_SIEVE	// libtpms added
-/* 10.2.14.1.3 BnIsProbablyPrime() */
-/* This function is used when the key sieve is not implemented. This function Will try to eliminate
-   some of the obvious things before going on to perform MillerRabin() as a final verification of
-   primeness. */
-BOOL
-BnIsProbablyPrime(
-		  bigNum          prime,           // IN:
-		  RAND_STATE      *rand            // IN: the random state just
-		  //     in case Miller-Rabin is required
-		  )
+//*** TpmMath_IsProbablyPrime()
+// This function is used when the key sieve is not implemented. This function
+// Will try to eliminate some of the obvious things before going on
+// to perform MillerRabin as a final verification of primeness.
+BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
+			     RAND_STATE* rand    // IN: the random state just
+			     //     in case Miller-Rabin is required
+			     )
 {
-#if RADIX_BITS > 32
-    if(BnUnsignedCmpWord(prime, UINT32_MAX) <= 0)
-#else
-	if(BnGetSize(prime) == 1)
-#endif
-	    return IsPrimeInt((uint32_t)prime->d[0]);
-    if(BnIsEven(prime))
+    uint32_t leastSignificant32 = ExtMath_GetLeastSignificant32bits(prime);
+    // is even?
+    if((leastSignificant32 & 0x1) == 0)
 	return FALSE;
-    if(BnUnsignedCmpWord(prime, s_LastPrimeInTable) <= 0)
-	{
-	    crypt_uword_t       temp = prime->d[0] >> 1;
-	    return ((s_PrimeTable[temp >> 3] >> (temp & 7)) & 1);
-	}
+
+    if(ExtMath_SizeInBits(prime) <= 32)
+	return IsPrimeInt(leastSignificant32);
+
+    // this s_LastPrimeInTable check guarantees that the full prime table check
+    // is incorporated in IsPrimeInt.  If this fails then something like this
+    // old code needs to be added back.
+    // if(ExtMath_UnsignedCmpWord(prime, s_LastPrimeInTable) <= 0)
+    // {
+    //     // check fast prime table before doing slower checks
+    //     crypt_uword_t temp = prime->d[0] >> 1;
+    //     return ((s_PrimeTable[temp >> 3] >> (temp & 7)) & 1);
+    // }
+    MUST_BE(sizeof(s_LastPrimeInTable) <= 4);
+
+    // check using GCD before doing a full Miller Rabin.
     {
-	BN_VAR(n, LARGEST_NUMBER_BITS);
-	BnGcd(n, prime, s_CompositeOfSmallPrimes);
-	if(!BnEqualWord(n, 1))
+	CRYPT_INT_VAR(gcd, LARGEST_NUMBER_BITS);
+	ExtMath_GCD(gcd, prime, s_CompositeOfSmallPrimes);
+	if(!ExtMath_IsEqualWord(gcd, 1))
 	    return FALSE;
     }
     return MillerRabin(prime, rand);
