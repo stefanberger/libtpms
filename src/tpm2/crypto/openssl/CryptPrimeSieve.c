@@ -244,6 +244,8 @@ const SIEVE_MARKS sieveMarks[5] = {{31, 7},
 				   {1621, 3},
 				   {UINT16_MAX, 2}};
 
+const size_t MAX_SIEVE_MARKS = (sizeof(sieveMarks) / sizeof(sieveMarks[0]));
+
 //*** PrimeSieve()
 // This function does a prime sieve over the input 'field' which has as its
 // starting address the value in bnN. Since this initializes the Sieve
@@ -370,13 +372,20 @@ LIB_EXPORT UINT32 PrimeSieve(Crypt_Int* bnN,    // IN/OUT: number to sieve
 	    if(next >= stop)
 		{
 		    mark++;
+		    if(mark >= MAX_SIEVE_MARKS)
+			{
+			    // prime iteration should have broken out of the loop before this.
+			    FAIL_EXIT(FATAL_ERROR_INTERNAL, i, 0);
+			}
 		    count = sieveMarks[mark].count;
 		    stop  = sieveMarks[mark].prime;
 		}
 	}
  done:
-    INSTRUMENT_INC(totalFieldsSieved[PrimeIndex]);
     i = BitsInArray(field, fieldSize);
+
+ Exit:
+    INSTRUMENT_INC(totalFieldsSieved[PrimeIndex]);
     INSTRUMENT_ADD(bitsInFieldAfterSieve[PrimeIndex], i);
     INSTRUMENT_ADD(emptyFieldsSieved[PrimeIndex], (i == 0));
     return i;
@@ -456,32 +465,36 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
     // Sieve the field
     ones = PrimeSieve(candidate, fieldSize, field);
 
-    pAssert(ones > 0 && ones < (fieldSize * 8));
-    for(; ones > 0; ones--)
+    // PrimeSieve shouldn't fail, but does call functions that may.
+    if(!g_inFailureMode)
 	{
-	    // Decide which bit to look at and find its offset
-	    chosen = FindNthSetBit((UINT16)fieldSize, field, ((first % ones) + 1));
-	    
-	    if((chosen < 0) || (chosen >= (INT32)(fieldSize * 8)))
-		FAIL(FATAL_ERROR_INTERNAL);
-	    
-	    // Set this as the trial prime
-	    ExtMath_AddWord(test, candidate, (crypt_uword_t)(chosen * 2));
-	    
-	    // The exponent might not have been one of the tested primes so
-	    // make sure that it isn't divisible and make sure that 0 != (p-1) mod e
-	    // Note: This is the same as 1 != p mod e
-	    modE = (UINT32)ExtMath_ModWord(test, e);
-	    if((modE != 0) && (modE != 1) && MillerRabin(test, rand))
+	    pAssert(ones > 0 && ones < (fieldSize * 8));
+	    for(; ones > 0; ones--)
 		{
-		    ExtMath_Copy(candidate, test);
-		    return TPM_RC_SUCCESS;
+		    // Decide which bit to look at and find its offset
+		    chosen = FindNthSetBit((UINT16)fieldSize, field, ((first % ones) + 1));
+
+		    if((chosen < 0) || (chosen >= (INT32)(fieldSize * 8)))
+			FAIL(FATAL_ERROR_INTERNAL);
+
+		    // Set this as the trial prime
+		    ExtMath_AddWord(test, candidate, (crypt_uword_t)(chosen * 2));
+
+		    // The exponent might not have been one of the tested primes so
+		    // make sure that it isn't divisible and make sure that 0 != (p-1) mod e
+		    // Note: This is the same as 1 != p mod e
+		    modE = (UINT32)ExtMath_ModWord(test, e);
+		    if((modE != 0) && (modE != 1) && MillerRabin(test, rand))
+			{
+			    ExtMath_Copy(candidate, test);
+			    return TPM_RC_SUCCESS;
+			}
+		    // Clear the bit just tested
+		    ClearBit(chosen, field, fieldSize);
 		}
-	    // Clear the bit just tested
-	    ClearBit(chosen, field, fieldSize);
+	    // Ran out of bits and couldn't find a prime in this field
+	    INSTRUMENT_INC(noPrimeFields[PrimeIndex]);
 	}
-    // Ran out of bits and couldn't find a prime in this field
-    INSTRUMENT_INC(noPrimeFields[PrimeIndex]);
     return (g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_NO_RESULT);
 }
 

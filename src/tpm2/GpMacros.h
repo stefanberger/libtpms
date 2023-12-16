@@ -164,6 +164,12 @@
 #  define FAIL_BOOL(failCode)              SETFAILED(failCode)
 #  define FAIL_RC(failCode)                SETFAILED(failCode)
 #  define FAIL_NULL(failCode)              SETFAILED(failCode)
+#  define FAIL_EXIT(failCode, returnVar, returnCode)	     \
+    do								     \
+	{							     \
+	    SETFAILED(failCode);				     \
+	    goto Exit;						     \
+	} while(0)
 
 #else  // NO_LONGJMP
 // no longjmp service is available
@@ -186,6 +192,15 @@
 
 // fail and return NULL
 #  define FAIL_NULL(failCode) FAIL_IMMEDIATE(failCode, NULL)
+
+// fail and return using the goto exit pattern
+#  define FAIL_EXIT(failCode, returnVar, returnCode)			\
+    do									\
+	{								\
+	    SETFAILED(failCode);					\
+	    returnVar = returnCode;					\
+	    goto Exit;							\
+	} while(0)
 
 #endif
 
