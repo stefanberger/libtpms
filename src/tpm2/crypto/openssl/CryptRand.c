@@ -381,8 +381,7 @@ static BOOL EncryptDRBG(BYTE*              dOut,
 	    if((lastValue[0] == temp[0]) && (lastValue[1] == temp[1])
 	       && (lastValue[2] == temp[2]) && (lastValue[3] == temp[3]))
 		{
-		    LOG_FAILURE(FATAL_ERROR_ENTROPY);
-		    return FALSE;
+		    FAIL_BOOL(FATAL_ERROR_ENTROPY);
 		}
 	    lastValue[0] = temp[0];
 	    lastValue[1] = temp[1];
@@ -450,8 +449,7 @@ static BOOL DRBG_Update(
 	{
 	    if(DRBG_ENCRYPT_SETUP((BYTE*)key, DRBG_KEY_SIZE_BITS, &localKeySchedule) != 0)
 		{
-		    LOG_FAILURE(FATAL_ERROR_INTERNAL);
-		    return FALSE;
+		    FAIL_BOOL(FATAL_ERROR_INTERNAL);
 		}
 	    keySchedule = &localKeySchedule;
 	}
