@@ -68,6 +68,7 @@
 // Need this define to get the 'private' defines for this function
 #define CRYPT_RSA_C
 #include "Tpm.h"
+#include "TpmMath_Util_fp.h"
 #include "Helpers_fp.h"  // libtpms added
 
 #include <assert.h>	 // libtpms added
@@ -100,13 +101,17 @@ BOOL CryptRsaStartup(void)
 
 static privateExponent* RsaInitializeExponent(privateExponent* Z)
 {
-    bigNum              *bn = (bigNum *)&Z->P;
-    int                  i;
+    // verify privateExponent packing matches the usage of the bn pointer as an
+    // array in below function
+    MUST_BE(offsetof(privateExponent, Q) == SIZEOF_MEMBER(privateExponent, P));
+
+    Crypt_Int** bn = (Crypt_Int**)&Z->P;
+    int         i;
     //
     for(i = 0; i < 5; i++)
 	{
-	    bn[i] = (bigNum)&Z->entries[i];
-	    BnInit(bn[i], BYTES_TO_CRYPT_WORDS(sizeof(Z->entries[0].d)));
+	    bn[i] = (Crypt_Int*)&(Z->entries[i]);
+	    ExtMath_Initialize_Int(bn[i], MAX_RSA_KEY_BITS / 2);
 	}
     return Z;
 }
@@ -115,11 +120,11 @@ static privateExponent* RsaInitializeExponent(privateExponent* Z)
 // This function swaps the pointers for P and Q if Q happens to be larger than Q.
 static void MakePgreaterThanQ(privateExponent* Z)
 {
-    if(BnUnsignedCmp(Z->P, Z->Q) < 0)
+    if(ExtMath_UnsignedCmp(Z->P, Z->Q) < 0)
 	{
-	    bigNum          bnT = Z->P;
-	    Z->P = Z->Q;
-	    Z->Q = bnT;
+	    Crypt_Int* bnT = Z->P;
+	    Z->P           = Z->Q;
+	    Z->Q           = bnT;
 	}
 }
 
@@ -139,13 +144,14 @@ static void MakePgreaterThanQ(privateExponent* Z)
 static BOOL PackExponent(TPM2B_PRIVATE_KEY_RSA* packed, privateExponent* Z)
 {
     int    i;
-    UINT16 primeSize = (UINT16)BITS_TO_BYTES(BnMsb(Z->P));
+    UINT16 primeSize = (UINT16)BITS_TO_BYTES(ExtMath_MostSigBitNum(Z->P));
     UINT16 pS        = primeSize;
     //
     pAssert((primeSize * 5) <= sizeof(packed->t.buffer));
     packed->t.size = (primeSize * 5) + RSA_prime_flag;
     for(i = 0; i < 5; i++)
-	if(!BnToBytes((bigNum)&Z->entries[i], &packed->t.buffer[primeSize * i], &pS))
+	if(!ExtMath_IntToBytes(
+			       (Crypt_Int*)&Z->entries[i], &packed->t.buffer[primeSize * i], &pS))
 	    return FALSE;
     if(pS != primeSize)
 	return FALSE;
@@ -160,16 +166,17 @@ static BOOL PackExponent(TPM2B_PRIVATE_KEY_RSA* packed, privateExponent* Z)
 //      FALSE(0)        TPM2B is not the correct size
 static BOOL UnpackExponent(TPM2B_PRIVATE_KEY_RSA* b, privateExponent* Z)
 {
-    UINT16               primeSize = b->t.size & ~RSA_prime_flag;
-    int                  i;
-    bigNum              *bn = &Z->P;
+    UINT16      primeSize = b->t.size & ~RSA_prime_flag;
+    int         i;
+    Crypt_Int** bn = &Z->P;
     //
     GOTO_ERROR_UNLESS(b->t.size & RSA_prime_flag);
     RsaInitializeExponent(Z);
     GOTO_ERROR_UNLESS((primeSize % 5) == 0);
     primeSize /= 5;
     for(i = 0; i < 5; i++)
-	GOTO_ERROR_UNLESS(BnFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
+	GOTO_ERROR_UNLESS(
+			  ExtMath_IntFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
 			  != NULL);
     MakePgreaterThanQ(Z);
     return TRUE;
@@ -178,71 +185,68 @@ static BOOL UnpackExponent(TPM2B_PRIVATE_KEY_RSA* b, privateExponent* Z)
 }
 #endif					// libtpms added
 
-/* 10.2.17.4.5 ComputePrivateExponent() */
-/* This function computes the private exponent from the primes. */
-/* Return Value	Meaning */
-/* TRUE(1)	success */
-/* FALSE(0)	failure */
-static BOOL
-ComputePrivateExponent(
-		       bigNum               pubExp,        // IN: the public exponent
-		       privateExponent     *Z              // IN/OUT: on input, has primes P and Q. On
-		       //         output, has P, Q, dP, dQ, and pInv
-		       )
+//*** ComputePrivateExponent()
+// This function computes the private exponent from the primes.
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure
+static BOOL ComputePrivateExponent(
+				   Crypt_Int*       pubExp,  // IN: the public exponent
+				   privateExponent* Z        // IN/OUT: on input, has primes P and Q. On
+				   //         output, has P, Q, dP, dQ, and pInv
+				   )
 {
     BOOL pOK;
     BOOL qOK;
-    BN_PRIME(pT);
+    CRYPT_PRIME_VAR(pT);
     //
     // make p the larger value so that m2 is always less than p
     MakePgreaterThanQ(Z);
 
     //dP = (1/e) mod (p-1)
-    pOK = BnSubWord(pT, Z->P, 1);
-    pOK = pOK && BnModInverse(Z->dP, pubExp, pT);
+    pOK = ExtMath_SubtractWord(pT, Z->P, 1);
+    pOK = pOK && ExtMath_ModInverse(Z->dP, pubExp, pT);
     //dQ = (1/e) mod (q-1)
-    qOK = BnSubWord(pT, Z->Q, 1);
-    qOK = qOK && BnModInverse(Z->dQ, pubExp, pT);
+    qOK = ExtMath_SubtractWord(pT, Z->Q, 1);
+    qOK = qOK && ExtMath_ModInverse(Z->dQ, pubExp, pT);
     // qInv = (1/q) mod p
     if(pOK && qOK)
-	pOK = qOK = BnModInverse(Z->qInv, Z->Q, Z->P);
+	pOK = qOK = ExtMath_ModInverse(Z->qInv, Z->Q, Z->P);
     if(!pOK)
-	BnSetWord(Z->P, 0);
+	ExtMath_SetWord(Z->P, 0);
     if(!qOK)
-	BnSetWord(Z->Q, 0);
+	ExtMath_SetWord(Z->Q, 0);
     return pOK && qOK;
 }
 
-/* 10.2.17.4.6 RsaPrivateKeyOp() */
-/* This function is called to do the exponentiation with the private key. Compile options allow use
-   of the simple (but slow) private exponent, or the more complex but faster CRT method. */
-/* Return Value	Meaning */
-/* TRUE(1)	success */
-/* FALSE(0)	failure */
-static BOOL
-RsaPrivateKeyOp(
-		bigNum               inOut, // IN/OUT: number to be exponentiated
-		privateExponent     *Z
-		)
+//*** RsaPrivateKeyOp()
+// This function is called to do the exponentiation with the private key. Compile
+// options allow use of the simple (but slow) private exponent, or the more complex
+// but faster CRT method.
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure
+static BOOL RsaPrivateKeyOp(Crypt_Int* inOut,  // IN/OUT: number to be exponentiated
+			    privateExponent* Z)
 {
-    BN_RSA(M1);
-    BN_RSA(M2);
-    BN_RSA(M);
-    BN_RSA(H);
+    CRYPT_RSA_VAR(M1);
+    CRYPT_RSA_VAR(M2);
+    CRYPT_RSA_VAR(M);
+    CRYPT_RSA_VAR(H);
     //
     MakePgreaterThanQ(Z);
     // m1 = cdP mod p
-    GOTO_ERROR_UNLESS(BnModExp(M1, inOut, Z->dP, Z->P));
+    GOTO_ERROR_UNLESS(ExtMath_ModExp(M1, inOut, Z->dP, Z->P));
     // m2 = cdQ mod q
-    GOTO_ERROR_UNLESS(BnModExp(M2, inOut, Z->dQ, Z->Q));
+    GOTO_ERROR_UNLESS(ExtMath_ModExp(M2, inOut, Z->dQ, Z->Q));
     // h = qInv * (m1 - m2) mod p = qInv * (m1 + P - m2) mod P because Q < P
     // so m2 < P
-    GOTO_ERROR_UNLESS(BnSub(H, Z->P, M2));
-    GOTO_ERROR_UNLESS(BnAdd(H, H, M1));
-    GOTO_ERROR_UNLESS(BnModMult(H, H, Z->qInv, Z->P));
+    GOTO_ERROR_UNLESS(ExtMath_Subtract(H, Z->P, M2));
+    GOTO_ERROR_UNLESS(ExtMath_Add(H, H, M1));
+    GOTO_ERROR_UNLESS(ExtMath_ModMult(H, H, Z->qInv, Z->P));
     // m = m2 + h * q
-    GOTO_ERROR_UNLESS(BnMult(M, H, Z->Q));
-    GOTO_ERROR_UNLESS(BnAdd(inOut, M2, M));
+    GOTO_ERROR_UNLESS(ExtMath_Multiply(M, H, Z->Q));
+    GOTO_ERROR_UNLESS(ExtMath_Add(inOut, M2, M));
     return TRUE;
  Error:
     return FALSE;
@@ -299,7 +303,7 @@ static TPM_RC RSADP(TPM2B*  inOut,  // IN/OUT: the value to encrypt
 		    OBJECT* key     // IN: the key
 		    )
 {
-    BN_RSA_INITIALIZED(bnM, inOut);
+    CRYPT_RSA_INITIALIZED(bnM, inOut);
     NEW_PRIVATE_EXPONENT(Z);
     if(UnsignedCompareB(inOut->size,
 			inOut->buffer,
@@ -317,11 +321,11 @@ static TPM_RC RSADP(TPM2B*  inOut,  // IN/OUT: the value to encrypt
 	       != TPM_RC_SUCCESS)
 		return TPM_RC_BINDING;
 	}
-    GOTO_ERROR_UNLESS(BnFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
+    GOTO_ERROR_UNLESS(TpmMath_IntFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
     RsaSetExponentFromOld(Z, &key->privateExponent);
     // GOTO_ERROR_UNLESS(UnpackExponent(&key->sensitive.sensitive.rsa, Z));	// libtpms changed end
     GOTO_ERROR_UNLESS(RsaPrivateKeyOp(bnM, Z));
-    GOTO_ERROR_UNLESS(BnTo2B(bnM, inOut, inOut->size));
+    GOTO_ERROR_UNLESS(TpmMath_IntTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
  Error:
     return TPM_RC_FAILURE;
@@ -385,9 +389,6 @@ static TPM_RC OaepEncode(
     // The total size of db = hLen + pad + mSize;
     dbSize = hLen + padLen + message->size;
 
-    // If testing, then use the provided seed. Otherwise, use values
-    // from the RNG
-    CryptRandomGenerate(hLen, mySeed);
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
     if(g_inFailureMode)
 	ERROR_EXIT(TPM_RC_FAILURE);
@@ -997,8 +998,7 @@ TPMT_RSA_DECRYPT* CryptRsaSelectScheme(
 //  Return Type: TPM_RC
 //      TPM_RC_BINDING      public and private parts of 'rsaKey' are not matched
 TPM_RC
-CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
-			    TPMT_SENSITIVE          *sensitive,
+CryptRsaLoadPrivateExponent(TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive,
 			    OBJECT                  *rsaKey	// libtpms added: Should only be NULL
 				// in case this function is called for parameter 'testing', such as by
 				// TPM2_Import() -> ObjectLoad().
@@ -1009,30 +1009,31 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC             *publicArea,
 	    if((sensitive->sensitive.rsa.t.size * 2) == publicArea->unique.rsa.t.size)
 		{
 		    NEW_PRIVATE_EXPONENT(Z);
-		    BN_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
-		    BN_RSA(bnQr);
-		    BN_VAR(bnE, RADIX_BITS);
+		    CRYPT_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
+		    CRYPT_RSA_VAR(bnQr);
+		    CRYPT_INT_VAR(bnE, RADIX_BITS);
 
 		    TEST(TPM_ALG_NULL);
 
 		    GOTO_ERROR_UNLESS((sensitive->sensitive.rsa.t.size * 2)
 				      == publicArea->unique.rsa.t.size);
 		    // Initialize the exponent
-		    BnSetWord(bnE, publicArea->parameters.rsaDetail.exponent);
-		    if(BnEqualZero(bnE))
-			BnSetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
+		    ExtMath_SetWord(bnE, publicArea->parameters.rsaDetail.exponent);
+		    if(ExtMath_IsZero(bnE))
+			ExtMath_SetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
 		    // Convert first prime to 2B
-		    GOTO_ERROR_UNLESS(BnFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
+		    GOTO_ERROR_UNLESS(
+				      TpmMath_IntFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
 
 		    // Find the second prime by division. This uses 'bQ' rather than Z->Q
 		    // because the division could make the quotient larger than a prime during
 		    // some intermediate step.
-		    GOTO_ERROR_UNLESS(BnDiv(Z->Q, bnQr, bnN, Z->P));
-		    GOTO_ERROR_UNLESS(BnEqualZero(bnQr));
+		    GOTO_ERROR_UNLESS(ExtMath_Divide(Z->Q, bnQr, bnN, Z->P));
+		    GOTO_ERROR_UNLESS(ExtMath_IsZero(bnQr));
 		    // Compute the private exponent and return it if found
 		    if (rsaKey) {					// libtpms added begin
 			RsaInitializeExponentOld(&rsaKey->privateExponent);
-			BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
+			ExtMath_Copy((Crypt_Int *)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
 		    }							// libtpms added end
 		    GOTO_ERROR_UNLESS(ComputePrivateExponent(bnE, Z));
 		    // GOTO_ERROR_UNLESS(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
@@ -1316,9 +1317,10 @@ LIB_EXPORT TPM_RC CryptRsaValidateSignature(
 
 #  if SIMULATION && USE_RSA_KEY_CACHE
 extern int s_rsaKeyCacheEnabled;
-int        GetCachedRsaKey(OBJECT *key, RAND_STATE *rand);
-#    define GET_CACHED_KEY(key, rand)					\
-    (s_rsaKeyCacheEnabled && GetCachedRsaKey(key, rand))
+int        GetCachedRsaKey(
+			   TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive, RAND_STATE* rand);
+#    define GET_CACHED_KEY(publicArea, sensitive, rand)			\
+    (s_rsaKeyCacheEnabled && GetCachedRsaKey(publicArea, sensitive, rand))
 #  else
 #    define GET_CACHED_KEY(key, rand)
 #  endif
@@ -1365,15 +1367,15 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 				      )
 {
     UINT32 i;
-    BN_RSA(bnD);
-    BN_RSA(bnN);
-    BN_WORD(bnPubExp);
+    CRYPT_RSA_VAR(bnD);
+    CRYPT_RSA_VAR(bnN);
+    CRYPT_INT_WORD(bnPubExp);
     UINT32 e = publicArea->parameters.rsaDetail.exponent;
     int    keySizeInBits;
     TPM_RC retVal = TPM_RC_NO_RESULT;
     NEW_PRIVATE_EXPONENT(Z);
     //
-    pAssert(BnEqualZero(Z->Q)); // libtpms added: Z->Q must be Zero
+    pAssert(ExtMath_IsZero(Z->Q)); // libtpms added: Z->Q must be Zero
     pAssert(publicArea == &rsaKey->publicArea && sensitive == &rsaKey->sensitive); // libtpms added: consistency check
 
     // Need to make sure that the caller did not specify an exponent that is
@@ -1389,7 +1391,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 	    if(!IsPrimeInt(e))
 		ERROR_EXIT(TPM_RC_RANGE);
 	}
-    BnSetWord(bnPubExp, e);
+    ExtMath_SetWord(bnPubExp, e);
 
     // check for supported key size.
     keySizeInBits = publicArea->parameters.rsaDetail.keyBits;
@@ -1428,7 +1430,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 	    if(_plat__IsCanceled())
 		ERROR_EXIT(TPM_RC_CANCELED);
 
-	    if(TpmRsa_GeneratePrimeForRSA((Crypt_Int*)Z->P, keySizeInBits / 2, e, rand)
+	    if(TpmRsa_GeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand)
 	       == TPM_RC_FAILURE)
 		{
 		    retVal = TPM_RC_FAILURE;
@@ -1439,25 +1441,25 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 
 	    // If this is the second prime, make sure that it differs from the
 	    // first prime by at least 2^100
-	    if(BnEqualZero(Z->Q))
+	    if(ExtMath_IsZero(Z->Q))
 		{
 		    // copy p to q and compute another prime in p
-		    BnCopy(Z->Q, Z->P);
+		    ExtMath_Copy(Z->Q, Z->P);
 		    continue;
 		}
 	    // Make sure that the difference is at least 100 bits. Need to do it this
 	    // way because the big numbers are only positive values
-	    if(BnUnsignedCmp(Z->P, Z->Q) < 0)
-		BnSub(bnD, Z->Q, Z->P);
+	    if(ExtMath_UnsignedCmp(Z->P, Z->Q) < 0)
+		ExtMath_Subtract(bnD, Z->Q, Z->P);
 	    else
-		BnSub(bnD, Z->P, Z->Q);
-	    if(BnMsb(bnD) < 100)
+		ExtMath_Subtract(bnD, Z->P, Z->Q);
+	    if(ExtMath_MostSigBitNum(bnD) < 100)
 		continue;
 
 	    //Form the public modulus and set the unique value
-	    BnMult(bnN, Z->P, Z->Q);
-	    BnTo2B(bnN, &publicArea->unique.rsa.b,
-		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
+	    ExtMath_Multiply(bnN, Z->P, Z->Q);
+	    TpmMath_IntTo2B(
+			    bnN, &publicArea->unique.rsa.b, (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
 	       || (publicArea->unique.rsa.t.size
@@ -1465,25 +1467,24 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 		FAIL(FATAL_ERROR_INTERNAL);
 
 	    // Add the prime to the sensitive area		// libtpms added begin
-	    BnTo2B(Z->P, &sensitive->sensitive.rsa.b,
-		   (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);	// libtpms added end
+	    TpmMath_IntTo2B(Z->P, &sensitive->sensitive.rsa.b,
+			    (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);	// libtpms added end
 
-	    BnCopy((bigNum)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
+	    ExtMath_Copy((Crypt_Int*)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
 	    // Make sure that we can form the private exponent values
 	    if(ComputePrivateExponent(bnPubExp, Z) != TRUE)
 		{
 		    // If ComputePrivateExponent could not find an inverse for
 		    // Q, then copy P and recompute P. This might
 		    // cause both to be recomputed if P is also zero
-		    if(BnEqualZero(Z->Q))
-			BnCopy(Z->Q, Z->P);
+		    if(ExtMath_IsZero(Z->Q))
+			ExtMath_Copy(Z->Q, Z->P);
 		    continue;
 		}
 	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
 
 	    // Pack the private exponent into the sensitive area
 	    // PackExponent(&sensitive->sensitive.rsa, Z);	// libtpms changed: never pack
-
 	    // Make sure everything came out right. The MSb of the values must be one
 	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
 	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
@@ -1493,20 +1494,20 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 	    // Do a trial encryption decryption if this is a signing key
 	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
 		{
-		    BN_RSA(temp1);
-		    BN_RSA(temp2);
-		    BnGenerateRandomInRange(temp1, bnN, rand);
+		    CRYPT_RSA_VAR(temp1);
+		    CRYPT_RSA_VAR(temp2);
+		    BnGenerateRandomInRange((bigNum)temp1, (bigConst)bnN, rand);
 
 		    // Encrypt with public exponent...
-		    BnModExp(temp2, temp1, bnPubExp, bnN);
+		    ExtMath_ModExp(temp2, temp1, bnPubExp, bnN);
 		    // ...  then decrypt with private exponent
 		    RsaPrivateKeyOp(temp2, Z);
 
 		    // If the starting and ending values are not the same,
 		    // start over )-;
-		    if(BnUnsignedCmp(temp2, temp1) != 0)
+		    if(ExtMath_UnsignedCmp(temp2, temp1) != 0)
 			{
-			    BnSetWord(Z->Q, 0);
+			    ExtMath_SetWord(Z->Q, 0);
 			    retVal = TPM_RC_NO_RESULT;
 			}
 		}

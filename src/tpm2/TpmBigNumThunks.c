@@ -113,6 +113,10 @@ LIB_EXPORT BOOL ExtMath_IntToBytes(
     return BnToBytes((bigConst)value, output, pByteCount);
 }
 
+LIB_EXPORT Crypt_Int* ExtMath_SetWord(Crypt_Int* n, crypt_uword_t w)
+{
+    return (Crypt_Int*)BnSetWord((bigNum)n, w);
+}
 // #################
 // Copy Functions
 // #################
@@ -124,6 +128,14 @@ LIB_EXPORT BOOL ExtMath_Copy(Crypt_Int* out, const Crypt_Int* in)
 // ###############################
 // Ordinary Arithmetic, writ large
 // ###############################
+
+//** ExtMath_Multiply()
+// Multiplies two numbers and returns the result
+LIB_EXPORT BOOL ExtMath_Multiply(
+				 Crypt_Int* result, const Crypt_Int* multiplicand, const Crypt_Int* multiplier)
+{
+    return BnMult((bigNum)result, (bigConst)multiplicand, (bigConst)multiplier);
+}
 
 //** ExtMath_Divide()
 // This function divides two Crypt_Int* values. The function returns FALSE if there is
@@ -138,12 +150,30 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 		 (bigNum)quotient, (bigNum)remainder, (bigConst)dividend, (bigConst)divisor);
 }
 
+	//*** ExtMath_Add()
+	// This function adds two Crypt_Int* values. This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_Add(
+			    Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2)
+{
+    return BnAdd((bigNum)result, (bigConst)op1, (bigConst)op2);
+}
+
 //*** ExtMath_AddWord()
 // This function adds a word value to a Crypt_Int*. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_AddWord(
 				Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word)
 {
     return BnAddWord((bigNum)result, (bigConst)op, word);
+}
+
+//*** ExtMath_Subtract()
+// This function does subtraction of two Crypt_Int* values and returns result = op1 - op2
+// when op1 is greater than op2. If op2 is greater than op1, then a fault is
+// generated. This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_Subtract(
+				 Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2)
+{
+    return BnSub((bigNum)result, (bigConst)op1, (bigConst)op2);
 }
 
 //*** ExtMath_SubtractWord()
@@ -183,6 +213,14 @@ LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
 		    (bigNum)result, (bigConst)number, (bigConst)exponent, (bigConst)modulus);
 }
 #endif  // ALG_RSA
+
+	//** ExtMath_ModInverse()
+	// Modular multiplicative inverse.
+LIB_EXPORT BOOL ExtMath_ModInverse(
+				   Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* modulus)
+{
+    return BnModInverse((bigNum)result, (bigConst)number, (bigConst)modulus);
+}
 
 //*** ExtMath_ModWord()
 // This function does modular division of a big number when the modulus is a
@@ -224,6 +262,21 @@ LIB_EXPORT int ExtMath_UnsignedCmpWord(const Crypt_Int* op1, crypt_uword_t word)
 LIB_EXPORT BOOL ExtMath_IsEqualWord(const Crypt_Int* bn, crypt_uword_t word)
 {
     return BnEqualWord((bigConst)bn, word);
+}
+
+LIB_EXPORT BOOL ExtMath_IsZero(const Crypt_Int* op1)
+{
+    return BnEqualZero((bigConst)op1);
+}
+
+//*** ExtMath_MostSigBitNum()
+// This function returns the number of the MSb of a Crypt_Int* value.
+//  Return Type: int
+//      -1              the word was zero or 'bn' was NULL
+//      n               the bit number of the most significant bit in the word
+LIB_EXPORT int ExtMath_MostSigBitNum(const Crypt_Int* bn)
+{
+    return BnMsb((bigConst)bn);
 }
 
 LIB_EXPORT uint32_t ExtMath_GetLeastSignificant32bits(const Crypt_Int* bn)

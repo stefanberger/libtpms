@@ -116,6 +116,8 @@ LIB_EXPORT Crypt_Int* ExtMath_IntFromBytes(
 // Convert Crypt_Int into external format as a byte array.
 LIB_EXPORT BOOL ExtMath_IntToBytes(
 				   const Crypt_Int* value, BYTE* output, NUMBYTES* pByteCount);
+// Set Crypt_Int to a given small value. Words are native format.
+LIB_EXPORT Crypt_Int* ExtMath_SetWord(Crypt_Int* buffer, crypt_uword_t word);
 
 // #################
 // Copy Functions
@@ -130,6 +132,10 @@ LIB_EXPORT BOOL ExtMath_Copy(Crypt_Int* out, const Crypt_Int* in);
 // Ordinary Arithmetic, writ large
 // ###############################
 
+//** ExtMath_Multiply()
+// Multiplies two numbers and returns the result
+LIB_EXPORT BOOL ExtMath_Multiply(
+				 Crypt_Int* result, const Crypt_Int* multiplicand, const Crypt_Int* multiplier);
 
 //** ExtMath_Divide()
 // This function divides two Crypt_Int* values. The function returns FALSE if there is
@@ -140,10 +146,22 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 			       const Crypt_Int* dividend,
 			       const Crypt_Int* divisor);
 
+//*** ExtMath_Add()
+// This function adds two Crypt_Int* values. This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_Add(
+			    Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
+
 //*** ExtMath_AddWord()
 // This function adds a word value to a Crypt_Int*. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_AddWord(
 				Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
+
+//*** ExtMath_Subtract()
+// This function does subtraction of two Crypt_Int* values and returns result = op1 - op2
+// when op1 is greater than op2. If op2 is greater than op1, then a fault is
+// generated. This function always returns TRUE.
+LIB_EXPORT BOOL ExtMath_Subtract(
+				 Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
 
 //*** ExtMath_SubtractWord()
 // This function subtracts a word value from a Crypt_Int*. This function always
@@ -161,6 +179,7 @@ LIB_EXPORT BOOL ExtMath_ModMult(Crypt_Int*       result,
 				const Crypt_Int* op1,
 				const Crypt_Int* op2,
 				const Crypt_Int* modulus);
+
 //** ExtMath_ModExp()
 // Compute result = (number ^ exponent) mod modulus
 // where ^ indicates exponentiation.
@@ -169,6 +188,13 @@ LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
 			       const Crypt_Int* number,
 			       const Crypt_Int* exponent,
 			       const Crypt_Int* modulus);
+
+//** ExtMath_ModInverse()
+// Compute the modular multiplicative inverse.
+// result = (number ^ -1) mod modulus
+// This function is only needed when the TPM implements RSA.
+LIB_EXPORT BOOL ExtMath_ModInverse(
+				   Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* modulus);
 
 //*** ExtMath_ModWord()
 // compute numerator
@@ -203,6 +229,22 @@ LIB_EXPORT int ExtMath_UnsignedCmpWord(const Crypt_Int* op1, crypt_uword_t word)
 // Compare a Crypt_Int* to a crypt_uword_t for equality
 //  Return Type: BOOL
 LIB_EXPORT BOOL ExtMath_IsEqualWord(const Crypt_Int* bn, crypt_uword_t word);
+
+//*** ExtMath_IsZero()
+// Compare a Crypt_Int* to zero, expected to be O(1) time.
+//  Return Type: BOOL
+LIB_EXPORT BOOL ExtMath_IsZero(const Crypt_Int* op1);
+
+//*** ExtMath_MostSigBitNum()
+//
+// This function returns the zero-based number of the MSb (Most significant bit)
+// of a Crypt_Int* value.
+//
+// Return Type: int
+//
+//      -1              the word was zero or 'bn' was NULL
+//      n               the bit number of the most significant bit in the word
+LIB_EXPORT int ExtMath_MostSigBitNum(const Crypt_Int* bn);
 
 //*** ExtMath_GetLeastSignificant32bits()
 //
