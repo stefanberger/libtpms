@@ -944,7 +944,7 @@ OpenSSLCryptRsaGenerateKey(
     OSSL_PARAM_BLD      *bld = NULL;
     OSSL_PARAM          *params = NULL;
     EVP_PKEY            *pkey = NULL;
-    BN_RSA(tmp);
+    CRYPT_RSA_VAR(tmp);
 
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
@@ -964,14 +964,14 @@ OpenSSLCryptRsaGenerateKey(
     if (EVP_PKEY_get_bn_param(pkey,  OSSL_PKEY_PARAM_RSA_N, &bnN) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
-    OsslToTpmBn(tmp, bnN);
-    BnTo2B((bigNum)tmp, &publicArea->unique.rsa.b, 0);
+    OsslToTpmBn((bigNum)tmp, bnN);
+    TpmMath_IntTo2B(tmp, &publicArea->unique.rsa.b, 0);
 
     if (EVP_PKEY_get_bn_param(pkey,  OSSL_PKEY_PARAM_RSA_FACTOR1, &bnP) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
-    OsslToTpmBn(tmp, bnP);
-    BnTo2B((bigNum)tmp, &sensitive->sensitive.rsa.b, 0);
+    OsslToTpmBn((bigNum)tmp, bnP);
+    TpmMath_IntTo2B(tmp, &sensitive->sensitive.rsa.b, 0);
 
     // CryptRsaGenerateKey calls ComputePrivateExponent; we have to call
     // it via CryptRsaLoadPrivateExponent
@@ -1008,7 +1008,7 @@ OpenSSLCryptRsaGenerateKey(
     const BIGNUM        *bnP = NULL;
     const BIGNUM        *bnN = NULL;
     BIGNUM              *bnE = BN_new();
-    BN_RSA(tmp);
+    CRYPT_RSA_VAR(tmp);
 
     if (bnE == NULL || BN_set_word(bnE, e) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
@@ -1024,11 +1024,11 @@ OpenSSLCryptRsaGenerateKey(
     RSA_get0_key(rsa, &bnN, NULL, NULL);
     RSA_get0_factors(rsa, &bnP, NULL);
 
-    OsslToTpmBn(tmp, bnN);
-    BnTo2B((bigNum)tmp, &publicArea->unique.rsa.b, 0);
+    OsslToTpmBn((bigNum)tmp, bnN);
+    TpmMath_IntTo2B(tmp, &publicArea->unique.rsa.b, 0);
 
-    OsslToTpmBn(tmp, bnP);
-    BnTo2B((bigNum)tmp, &sensitive->sensitive.rsa.b, 0);
+    OsslToTpmBn((bigNum)tmp, bnP);
+    TpmMath_IntTo2B(tmp, &sensitive->sensitive.rsa.b, 0);
 
     // CryptRsaGenerateKey calls ComputePrivateExponent; we have to call
     // it via CryptRsaLoadPrivateExponent

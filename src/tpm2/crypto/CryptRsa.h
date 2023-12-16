@@ -64,13 +64,14 @@
 #define _CRYPT_RSA_H
 
 // These values are used in the Crypt_Int* representation of various RSA values.
+// define ci_rsa_t as buffer containing a CRYPT_INT object with space for
+// (MAX_RSA_KEY_BITS) of actual data.
+CRYPT_INT_TYPE(rsa, MAX_RSA_KEY_BITS);
+#define CRYPT_RSA_VAR(name) CRYPT_INT_VAR(name, MAX_RSA_KEY_BITS)
+#define CRYPT_RSA_INITIALIZED(name, initializer)			\
+    CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
 
 #define CRYPT_PRIME_VAR(name) CRYPT_INT_VAR(name, (MAX_RSA_KEY_BITS / 2))
-
-BN_TYPE(rsa, MAX_RSA_KEY_BITS);
-#define BN_RSA(name)       BN_VAR(name, MAX_RSA_KEY_BITS)
-#define BN_RSA_INITIALIZED(name, initializer)			\
-    BN_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
 
 #define BN_PRIME(name)     BN_VAR(name, (MAX_RSA_KEY_BITS / 2))
 BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
@@ -83,12 +84,12 @@ BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
 
 typedef struct privateExponent
 {
-    bigNum              P;
-    bigNum              Q;
-    bigNum              dP;
-    bigNum              dQ;
-    bigNum              qInv;
-    bn_prime_t          entries[5];
+    Crypt_Int* P;
+    Crypt_Int* Q;
+    Crypt_Int* dP;
+    Crypt_Int* dQ;
+    Crypt_Int* qInv;
+    bn_prime_t entries[5];
 } privateExponent;
 
 #define NEW_PRIVATE_EXPONENT(X)		\
@@ -130,9 +131,9 @@ RsaSetExponentOld(
 		 )
 {
     // pExp->Q must be set elsewhere
-    BnCopy((bigNum)&pExp->dP, Z->dP);
-    BnCopy((bigNum)&pExp->dQ, Z->dQ);
-    BnCopy((bigNum)&pExp->qInv, Z->qInv);
+    ExtMath_Copy((Crypt_Int*)&pExp->dP, Z->dP);
+    ExtMath_Copy((Crypt_Int*)&pExp->dQ, Z->dQ);
+    ExtMath_Copy((Crypt_Int*)&pExp->qInv, Z->qInv);
 }
 
 static inline void
@@ -141,10 +142,10 @@ RsaSetExponentFromOld(
 		      privateExponent_t *pExp   // IN
                      )
 {
-    BnCopy(Z->Q, (bigNum)&pExp->Q);
-    BnCopy(Z->dP, (bigNum)&pExp->dP);
-    BnCopy(Z->dQ, (bigNum)&pExp->dQ);
-    BnCopy(Z->qInv, (bigNum)&pExp->qInv);
+    ExtMath_Copy(Z->Q, (Crypt_Int*)&pExp->Q);
+    ExtMath_Copy(Z->dP, (Crypt_Int*)&pExp->dP);
+    ExtMath_Copy(Z->dQ, (Crypt_Int*)&pExp->dQ);
+    ExtMath_Copy(Z->qInv, (Crypt_Int*)&pExp->qInv);
 }
 
 #endif  // _CRYPT_RSA_H

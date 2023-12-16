@@ -77,6 +77,10 @@
 // therefore we typedef here to a size 1 (smallest possible).
 typedef CRYPT_INT_BUF(one, 1) Crypt_Int;
 
+// produces bare typedef ci_<typename>_t
+#define CRYPT_INT_TYPE(typename, bits)					\
+    typedef CRYPT_INT_BUF(ci_##typename##_buf_t, bits) ci_##typename##_t
+
 // produces allocated `Crypt_Int* varname` backed by a
 // stack buffer named `<varname>_buf`.  Initialization at the discretion of the
 // ExtMath library.
@@ -98,6 +102,9 @@ typedef CRYPT_INT_BUF(one, 1) Crypt_Int;
 
 #define CRYPT_INT_MAX_INITIALIZED(name, initializer)			\
     CRYPT_INT_INITIALIZED(name, LARGEST_NUMBER_BITS, initializer)
+
+// A single RADIX_BITS value.
+#define CRYPT_INT_WORD(name) CRYPT_INT_VAR(name, RADIX_BITS)
 
 #endif  //MATH_LIBRARY_INTERFACE_TYPES_H
 
