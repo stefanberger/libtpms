@@ -150,6 +150,17 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 		 (bigNum)quotient, (bigNum)remainder, (bigConst)dividend, (bigConst)divisor);
 }
 
+#if ALG_RSA && !RSA_KEY_SIEVE
+//** ExtMath_GCD()
+// Get the greatest common divisor of two numbers. This function is only needed
+// when the TPM implements RSA.
+LIB_EXPORT BOOL ExtMath_GCD(
+			    Crypt_Int* gcd, const Crypt_Int* number1, const Crypt_Int* number2)
+{
+    return BnGcd((bigNum)gcd, (bigConst)number1, (bigConst)number2);
+}
+#endif  // ALG_RSA
+
 	//*** ExtMath_Add()
 	// This function adds two Crypt_Int* values. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_Add(

@@ -146,6 +146,12 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 			       const Crypt_Int* dividend,
 			       const Crypt_Int* divisor);
 
+//** ExtMath_GCD()
+// Get the greatest common divisor of two numbers. This function is only needed
+// when the TPM implements RSA.
+LIB_EXPORT BOOL ExtMath_GCD(
+			    Crypt_Int* gcd, const Crypt_Int* number1, const Crypt_Int* number2);
+
 //*** ExtMath_Add()
 // This function adds two Crypt_Int* values. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_Add(
