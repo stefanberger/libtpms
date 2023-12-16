@@ -104,8 +104,6 @@ int sm3_final(unsigned char* md, SM3_CTX* c);
 //** Links to the OpenSSL HASH code
 //***************************************************************
 
-#define HASH_ALIGNMENT  RADIX_BYTES  /* libtpms: keep; not sure whether needed */
-
 // Redefine the internal name used for each of the hash state structures to the
 // name used by the library.
 // These defines need to be known in all parts of the TPM so that the structure
