@@ -177,6 +177,9 @@ typedef union
 #if HASH_ALIGNMENT == 8
     uint64_t             align;
 #else
+#if defined(__x86_64__)
+# error Wrong HASH_ALIGNMENT
+#endif
     uint32_t             align;
 #endif
 } ANY_HASH_STATE;
