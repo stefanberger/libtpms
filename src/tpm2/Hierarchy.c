@@ -320,16 +320,24 @@ HierarchyGetPrimarySeedCompatLevel(
 }
 // libtpms added end
 
-//*** HierarchyIsEnabled()
-// This function checks to see if a hierarchy is enabled.
-// NOTE: The TPM_RH_NULL hierarchy is always enabled.
-//  Return Type: BOOL
-//      TRUE(1)         hierarchy is enabled
-//      FALSE(0)        hierarchy is disabled
-BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
-			)
+//*** ValidateHierarchy()
+// This function ensures a given hierarchy is valid and enabled.
+//  Return Type: TPM_RC
+//      TPM_RC_HIERARCHY        Hierarchy is disabled
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the given SVN
+//                              is greater than the TPM's current SVN.
+//      TPM_RC_VALUE            Hierarchy is not valid
+TPM_RC ValidateHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
+			 )
 {
-    BOOL            enabled = FALSE;
+    BOOL               enabled;
+    HIERARCHY_MODIFIER modifier;
+
+    hierarchy = DecomposeHandle(hierarchy, &modifier);
+
     switch(hierarchy)
 	{
 	  case TPM_RH_PLATFORM:
@@ -345,8 +353,21 @@ BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 	    enabled = TRUE;
 	    break;
 	  default:
-	    enabled = FALSE;
-	    break;
+	    return TPM_RC_VALUE;
 	}
-    return enabled;
+
+    return enabled ? TPM_RC_SUCCESS : TPM_RC_HIERARCHY;
 }
+
+//*** HierarchyIsEnabled()
+// This function checks to see if a hierarchy is enabled.
+// NOTE: The TPM_RH_NULL hierarchy is always enabled.
+//  Return Type: BOOL
+//      TRUE(1)         hierarchy is enabled
+//      FALSE(0)        hierarchy is disabled
+BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
+			)
+{
+    return ValidateHierarchy(hierarchy) == TPM_RC_SUCCESS;
+}
+
