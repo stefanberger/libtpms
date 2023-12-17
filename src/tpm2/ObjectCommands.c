@@ -661,6 +661,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
     // Internal data update
     // Create the object
     result = CryptCreateObject(newObject, &in->inSensitive.sensitive, rand);
+    DRBG_Uninstantiate((DRBG_STATE*)rand);
     if(result != TPM_RC_SUCCESS)
 	return result;
     // if this is not a Primary key and not a derived key, then return the sensitive

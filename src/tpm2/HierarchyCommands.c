@@ -123,6 +123,7 @@ TPM2_CreatePrimary(
 	    // Create the primary object.
 	    result = CryptCreateObject(
 				       newObject, &in->inSensitive.sensitive, (RAND_STATE*)&rand);
+	    DRBG_Uninstantiate(&rand);
 	}
     if(result != TPM_RC_SUCCESS)
 	return result;
