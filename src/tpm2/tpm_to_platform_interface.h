@@ -371,7 +371,7 @@ LIB_EXPORT NORETURN void _plat__Fail(void);
 
 //** From Unique.c
 
-#if VENDOR_PERMANENT_AUTH_ENABLED == YES || 1		// libtpms: changed
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
 //** _plat__GetUnique()
 // This function is used to access the platform-specific unique values.
 // This function places the unique value in the provided buffer ('b')

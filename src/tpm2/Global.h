@@ -735,8 +735,10 @@ EXTERN TPM_RC g_NvStatus;
 // These are loaded on every _TPM2_Startup() using the _plat__GetUnique function.
 // The "which" parameter to  _plat__GetUnique indicates the value to return.
 // If used, the TPM vendor is expected to use these values for authentication.
-EXTERN TPM2B_AUTH       g_platformUniqueAuthorities; // Reserved for RNG
-EXTERN TPM2B_AUTH       g_platformUniqueDetails;   // referenced by VENDOR_PERMANENT
+#  if VENDOR_PERMANENT_AUTH_ENABLED == YES
+// which = 1, the authorization value for VENDOR_PERMANENT_AUTH_HANDLE
+EXTERN TPM2B_AUTH g_platformUniqueAuth;
+#  endif
 
 //*********************************************************************************
 //*********************************************************************************
