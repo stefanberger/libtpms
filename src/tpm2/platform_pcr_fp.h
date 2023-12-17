@@ -85,7 +85,6 @@ PCR_Attributes _platPcr__GetPcrInitializationAttributes(UINT32 pcrNumber);
 // treat it as non-existant and provide a default.
 // If the buffer is not large enough for a pcr consistent with pcrAlg, then the
 // platform will return TPM_RC_FAILURE.
-#if 0					// libtpms: added
 TPM_RC _platPcr__GetInitialValueForPcr(
 				       UINT32     pcrNumber,        // IN: PCR to be initialized
 				       TPM_ALG_ID pcrAlg,           // IN: Algorithm of the PCR Bank being initialized
@@ -93,7 +92,6 @@ TPM_RC _platPcr__GetInitialValueForPcr(
 				       BYTE*      pcrBuffer,        // OUT: buffer to put PCR initialization value into
 				       uint16_t   bufferSize,       // IN: maximum size of value buffer can hold
 				       uint16_t*  pcrLength);  // OUT: size of initialization value returned in pcrBuffer
-#endif					// libtpms: added
 
 // should the given PCR algorithm default to active in a new TPM?
 BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg);
