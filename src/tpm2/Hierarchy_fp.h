@@ -139,5 +139,10 @@ HierarchyGetPrimarySeedCompatLevel(
 BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 			);
 
+//*** HierarchyNormalizeHandle
+// This function accepts a handle that may or may not be FW- or SVN-bound,
+// and returns the base hierarchy to which the handle refers.
+TPMI_RH_HIERARCHY HierarchyNormalizeHandle(TPMI_RH_HIERARCHY handle  // IN
+					   );
 
 #endif  // _HIERARCHY_FP_H_

@@ -117,7 +117,7 @@ TPM2_CreatePrimary(
     if(result == TPM_RC_SUCCESS)
 	{
 	    newObject->attributes.primary = SET;
-	    if(in->primaryHandle == TPM_RH_ENDORSEMENT)
+	    if(HierarchyNormalizeHandle(in->primaryHandle) == TPM_RH_ENDORSEMENT)
 		newObject->attributes.epsHierarchy = SET;
 
 	    // Create the primary object.

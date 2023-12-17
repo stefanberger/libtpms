@@ -1536,7 +1536,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
 		    if(i > (command->sessionNum - 1))
 			return TPM_RC_AUTH_MISSING;
 		    // Record the handle associated with the authorization session
-		    s_associatedHandles[i] = command->handles[i];
+		    s_associatedHandles[i] = HierarchyNormalizeHandle(command->handles[i]);
 		}
 	}
     // Consistency checks are done first to avoid authorization failure when the
@@ -2168,7 +2168,7 @@ void SessionRemoveAssociationToHandle(TPM_HANDLE handle)
     //
     for(i = 0; i < MAX_SESSION_NUM; i++)
 	{
-	    if(s_associatedHandles[i] == handle)
+	    if(s_associatedHandles[i] == HierarchyNormalizeHandle(handle))
 		{
 		    s_associatedHandles[i] = TPM_RH_NULL;
 		}
