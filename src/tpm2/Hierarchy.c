@@ -300,7 +300,9 @@ HierarchyGetPrimarySeedCompatLevel(
 				   TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
 			           )
 {
-    switch(hierarchy)
+    HIERARCHY_MODIFIER modifier;
+
+    switch(DecomposeHandle(hierarchy, &modifier))
 	{
 	  case TPM_RH_PLATFORM:
 	    return gp.PPSeedCompatLevel;
@@ -314,7 +316,7 @@ HierarchyGetPrimarySeedCompatLevel(
 	  case TPM_RH_NULL:
 	    return gr.nullSeedCompatLevel;
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
+	    return SEED_COMPAT_LEVEL_LAST;
 	    break;
 	}
 }
