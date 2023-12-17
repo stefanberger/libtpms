@@ -124,7 +124,7 @@ typedef struct OLD_privateExponent
     bn_old_prime_t          qInv;
 } OLD_privateExponent_t;
 
-static inline void CopyFromOldPrimeT(bn_prime_t *dst,
+static inline void CopyFromOldPrimeT(ci_prime_t *dst,
 				     const bn_old_prime_t *src)
 {
     dst->allocated = src->allocated;
