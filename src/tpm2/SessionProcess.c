@@ -315,10 +315,10 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
 		  case TPM_RH_OWNER:
 		  case TPM_RH_ENDORSEMENT:
 		  case TPM_RH_PLATFORM:
-#ifdef VENDOR_PERMANENT
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
 		    // This vendor defined handle associated with the
 		    // manufacturer's shared secret
-		  case VENDOR_PERMANENT:
+		  case VENDOR_PERMANENT_AUTH_HANDLE:
 #endif
 		    // The DA checking has been performed on LockoutAuth but we
 		    // bypass the DA logic if we are using lockout policy. The

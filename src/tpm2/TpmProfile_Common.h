@@ -277,7 +277,6 @@
 // libtpms added end
 
 
-#if 0							// libtpms: added
 //***********************************************
 // Enable VENDOR_PERMANENT_AUTH_HANDLE?
 //***********************************************
@@ -285,7 +284,6 @@
 // if YES, this must be valid per Part2 (TPM_RH_AUTH_00 - TPM_RH_AUTH_FF)
 // if NO, this must be #undef
 #undef  VENDOR_PERMANENT_AUTH_HANDLE
-#endif							// libtpms: added
 
 //***********************************************
 // Defines controlling optional implementation

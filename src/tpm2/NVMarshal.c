@@ -2829,6 +2829,9 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     UINT16 array_size;
     BLOCK_SKIP_INIT;
     PERSISTENT_DATA pd;
+    TPM2B_AUTH unused = {
+        .b.size = 0,
+    };
 
     written = NV_HEADER_Marshal(buffer, size,
                                 VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC,
@@ -2879,7 +2882,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if 0 /* does not exist */
     written += TPM2B_AUTH_Marshal(&g_platformUniqueAuthorities, buffer, size); /* line 535 */
 #endif
-    written += TPM2B_AUTH_Marshal(&g_platformUniqueDetails, buffer, size); /* line 536 */
+    written += TPM2B_AUTH_Marshal(&unused, buffer, size); /* was g_platformUniqueDetails; unused since v0.10 */
 
     /* gp (persistent_data): skip; we assume its latest states in the persistent data file */
 
@@ -3245,6 +3248,9 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     BOOL needs_block;
     UINT16 array_size = 0;
     UINT64 backthen;
+    TPM2B_AUTH unused = {
+        .b.size = 0,
+    };
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3306,7 +3312,7 @@ skip_da:
     }
 #endif
     if (rc == TPM_RC_SUCCESS) {
-        rc = TPM2B_AUTH_Unmarshal(&g_platformUniqueDetails, buffer, size); /* line 536 */
+        rc = TPM2B_AUTH_Unmarshal(&unused, buffer, size); /* was g_platformUniqueDetails; unused since v0.10 */
     }
 
     if (rc == TPM_RC_SUCCESS) {

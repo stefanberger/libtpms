@@ -101,8 +101,8 @@ NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
 		  case TPM_RH_ENDORSEMENT:
 		  case TPM_RH_PLATFORM:
 		  case TPM_RH_PLATFORM_NV:
-#ifdef  VENDOR_PERMANENT
-		  case VENDOR_PERMANENT:
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
+		  case VENDOR_PERMANENT_AUTH_HANDLE:
 #endif
 		    // Each of the implemented ACT
 #define ACT_IMPLEMENTED_CASE(N) case TPM_RH_ACT_##N:

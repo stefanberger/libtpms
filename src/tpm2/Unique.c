@@ -67,7 +67,8 @@
 
 //** Includes
 #include "Platform.h"
-#include "Memory_fp.h"	// libtpms: temporary
+
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
 
 const char notReallyUnique[] = "This is not really a unique value. A real "
 			       "unique value should"
@@ -90,7 +91,7 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t which,  // which vendor value to r
 				     unsigned char* b  // output buffer
 				     )
 {
-    //const char* from   = notReallyUnique;	// libtpms: deactivated
+    const char* from   = notReallyUnique;
     uint32_t    retVal = 0;
 
     if(which == 1)
@@ -103,3 +104,5 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t which,  // which vendor value to r
 
     return retVal;
 }
+
+#endif
