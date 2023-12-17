@@ -863,15 +863,11 @@ LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in
 	    if(label != NULL)
 		CryptDigestUpdate2B(&hashState, label);
 
-	    // Add a null. SP108 is not very clear about when the 0 is needed but to
-	    // make this like the previous version that did not add an 0x00 after
-	    // a null-terminated string, this version will only add a null byte
-	    // if the label parameter did not end in a null byte, or if no label
-	    // is present.
-	    if((label == NULL)
-	       || (label->size == 0)
-	       || (label->buffer[label->size - 1] != 0))
-		CryptDigestUpdateInt(&hashState, 1, 0);
+	    // NIST.SP.800-56Cr2.pdf section 4.1 states that no NULL
+	    // character is required here.
+	    // Note, this is different from KDFa which is specified in
+	    // NIST.SP.800-108r1.pdf section 4 (a NULL character is required
+	    // for that case).
 
 	    // Add PartyUInfo
 	    if(partyUInfo != NULL)
