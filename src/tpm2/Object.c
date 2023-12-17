@@ -319,7 +319,7 @@ void ObjectSetLoadedAttributes(OBJECT* object,  // IN: object attributes to fina
     if(parent == NULL)
 	{
 	    object->attributes.primary = SET;
-	    switch(parentHandle)
+	    switch(HierarchyNormalizeHandle(parentHandle))
 		{
 		  case TPM_RH_ENDORSEMENT:
 		    object->attributes.epsHierarchy = SET;
@@ -812,7 +812,7 @@ ObjectLoadEvict(TPM_HANDLE* handle,  // IN:OUT: evict object handle.  If success
     // that the hierarchy is disabled.
     // If the associated hierarchy is disabled, make it look like the
     // handle is not defined
-    if(ObjectGetHierarchy(object) == TPM_RH_ENDORSEMENT
+    if(HierarchyNormalizeHandle(ObjectGetHierarchy(object)) == TPM_RH_ENDORSEMENT
        && gc.ehEnable == CLEAR && GetCommandCode(commandIndex) != TPM_CC_EvictControl)
 	return TPM_RC_HANDLE;
 

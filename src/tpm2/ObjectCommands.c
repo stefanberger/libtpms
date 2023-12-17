@@ -625,7 +625,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 		    TPM2B_SEED primary_seed;
 
 		    newObject->attributes.primary = SET;
-		    if(in->parentHandle == TPM_RH_ENDORSEMENT)
+		    if(HierarchyNormalizeHandle(in->parentHandle) == TPM_RH_ENDORSEMENT)
 			newObject->attributes.epsHierarchy = SET;
 		    seedCompatLevel = HierarchyGetPrimarySeedCompatLevel(in->parentHandle); // libtpms added
 		    // If so, use the primary seed and the digest of the template
