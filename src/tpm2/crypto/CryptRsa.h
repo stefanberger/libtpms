@@ -72,11 +72,11 @@ CRYPT_INT_TYPE(rsa, MAX_RSA_KEY_BITS);
     CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
 
 #define CRYPT_PRIME_VAR(name) CRYPT_INT_VAR(name, (MAX_RSA_KEY_BITS / 2))
-
-#define BN_PRIME(name)     BN_VAR(name, (MAX_RSA_KEY_BITS / 2))
-BN_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
-#define BN_PRIME_INITIALIZED(name, initializer)				\
-    BN_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
+// define ci_prime_t as buffer containing a CRYPT_INT object with space for
+// (MAX_RSA_KEY_BITS/2) of actual data.
+CRYPT_INT_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
+#define CRYPT_PRIME_INITIALIZED(name, initializer)			\
+    CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
 
 #if !CRT_FORMAT_RSA
 #  error This verson only works with CRT formatted data
@@ -89,7 +89,7 @@ typedef struct privateExponent
     Crypt_Int* dP;
     Crypt_Int* dQ;
     Crypt_Int* qInv;
-    bn_prime_t entries[5];
+    ci_prime_t entries[5];
 } privateExponent;
 
 #define NEW_PRIVATE_EXPONENT(X)		\
@@ -103,10 +103,10 @@ typedef struct privateExponent
  */
 typedef struct privateExponentOld
 {
-    bn_prime_t          Q;
-    bn_prime_t          dP;
-    bn_prime_t          dQ;
-    bn_prime_t          qInv;
+    ci_prime_t          Q;
+    ci_prime_t          dP;
+    ci_prime_t          dQ;
+    ci_prime_t          qInv;
 } privateExponent_t;
 
 #include "BnMemory_fp.h"

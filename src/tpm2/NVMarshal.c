@@ -1473,7 +1473,7 @@ STATE_RESET_DATA_Marshal(STATE_RESET_DATA *data, BYTE **buffer, INT32 *size)
 #define BN_PRIME_T_MAGIC 0x2fe736ab
 #define BN_PRIME_T_VERSION 2
 static UINT16
-bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
+ci_prime_t_Marshal(ci_prime_t *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written, numbytes;
     size_t i, idx;
@@ -1509,7 +1509,7 @@ bn_prime_t_Marshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
 }
 
 static TPM_RC
-bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
+ci_prime_t_Unmarshal(ci_prime_t *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     size_t i, idx;
@@ -1532,7 +1532,7 @@ bn_prime_t_Unmarshal(bn_prime_t *data, BYTE **buffer, INT32 *size)
         /* coverity: num_bytes is sanitized here! */
         data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
         if (data->size > data->allocated) {
-            TPMLIB_LogTPM2Error("bn_prime_t: Require size larger %zu than "
+            TPMLIB_LogTPM2Error("ci_prime_t: Require size larger %zu than "
                                 "allocated %zu\n",
                                 (size_t)data->size, (size_t)data->allocated);
             rc = TPM_RC_SIZE;
@@ -1588,10 +1588,10 @@ privateExponent_t_Marshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 #if CRT_FORMAT_RSA == NO
 #error Missing code
 #else
-    written += bn_prime_t_Marshal(&data->Q, buffer, size);
-    written += bn_prime_t_Marshal(&data->dP, buffer, size);
-    written += bn_prime_t_Marshal(&data->dQ, buffer, size);
-    written += bn_prime_t_Marshal(&data->qInv, buffer, size);
+    written += ci_prime_t_Marshal(&data->Q, buffer, size);
+    written += ci_prime_t_Marshal(&data->dP, buffer, size);
+    written += ci_prime_t_Marshal(&data->dQ, buffer, size);
+    written += ci_prime_t_Marshal(&data->qInv, buffer, size);
 #endif
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
@@ -1620,16 +1620,16 @@ privateExponent_t_Unmarshal(privateExponent_t *data, BYTE **buffer, INT32 *size)
 #error Missing code
 #else
     if (rc == TPM_RC_SUCCESS) {
-        rc = bn_prime_t_Unmarshal(&data->Q, buffer, size);
+        rc = ci_prime_t_Unmarshal(&data->Q, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = bn_prime_t_Unmarshal(&data->dP, buffer, size);
+        rc = ci_prime_t_Unmarshal(&data->dP, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = bn_prime_t_Unmarshal(&data->dQ, buffer, size);
+        rc = ci_prime_t_Unmarshal(&data->dQ, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = bn_prime_t_Unmarshal(&data->qInv, buffer, size);
+        rc = ci_prime_t_Unmarshal(&data->qInv, buffer, size);
     }
 #endif
 
