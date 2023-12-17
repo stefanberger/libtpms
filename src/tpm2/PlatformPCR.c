@@ -181,7 +181,6 @@ BOOL _platPcr_IsPcrBankDefaultActive(TPM_ALG_ID pcrAlg)
     return FALSE;
 }
 
-#if 0					// libtpms: added
 // Fill a given buffer with the PCR initialization value for a particular PCR and hash
 // combination, and return its length.  If the platform doesn't have a value, then
 // the result size is expected to be zero, and the rfunction will return TPM_RC_PCR.
@@ -226,4 +225,3 @@ TPM_RC _platPcr__GetInitialValueForPcr(
     *pcrLength = pcrSize;
     return TPM_RC_SUCCESS;
 }
-#endif					// libtpms: added

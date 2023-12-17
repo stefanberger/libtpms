@@ -581,23 +581,43 @@ BOOL PCRStartup(STARTUP_TYPE type,     // IN: startup type
 				{
 				    // Restore saved PCR value
 				    BYTE* pcrSavedData;
-				    pcrSavedData = GetSavedPcrPointer(
-								      gp.pcrAllocated.pcrSelections[j].hash,
-								      saveIndex);
+				    pcrSavedData = GetSavedPcrPointer(hash, saveIndex);
 				    if(pcrSavedData == NULL)
 					return FALSE;
 				    MemoryCopy(pcrData, pcrSavedData, pcrSize);
 				}
 			    else  // PCR was not restored by state save
 				{
-				    // If the reset locality of the PCR is 4, then
-				    // the reset value is all one's, otherwise it is
-				    // all zero.
-				    if((currentPcrAttributes.resetLocality & 0x10) != 0)
-					MemorySet(pcrData, 0xFF, pcrSize);
+				    // give platform opportunity to provide the PCR initialization
+				    // value and it's length. this provides a platform specification
+				    // the ability to change the default values without affecting the
+				    // core library. if the platform doesn't have a value, then the
+				    // result is expected to be TPM_RC_PCR and the size to be 0 and we
+				    // provide the original defaults.
+				    uint16_t pcrLength        = 0;
+				    TPM_RC   pcrInitialResult = _platPcr__GetInitialValueForPcr(
+					pcr, hash, locality, pcrData, pcrSize, &pcrLength);
+
+				    // any other result is a fatal error
+				    pAssert_BOOL(pcrInitialResult == TPM_RC_SUCCESS
+						 || pcrInitialResult == TPM_RC_PCR);
+				    if(pcrInitialResult == TPM_RC_SUCCESS && pcrLength == pcrSize)
+					{
+					    // just use the PCR initialized by platform
+					}
 				    else
 					{
-					    MemorySet(pcrData, 0, pcrSize);
+					    // If the reset locality contains locality 4, then this
+					    // indicates a DRTM PCR where the reset value is all ones,
+					    // otherwise it is all zero.  Don't check with equal because
+					    // resetLocality is a bitfield of multiple values and does
+					    // not support extended localities.
+					    BYTE defaultValue = 0;
+					    if((currentPcrAttributes.resetLocality & 0x10) != 0)
+						{
+						    defaultValue = 0xFF;
+						}
+					    MemorySet(pcrData, defaultValue, pcrSize);
 					    if(pcr == HCRTM_PCR)
 						{
 						    pcrData[pcrSize - 1] = locality;

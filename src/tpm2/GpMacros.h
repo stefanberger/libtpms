@@ -182,6 +182,13 @@
 		FAIL(FATAL_ERROR_PARAMETER);			   \
 	} while(0)
 
+#  define pAssert_RC(a)				   \
+    do						   \
+	{						   \
+	    if(!(a))					   \
+		FAIL_RC(FATAL_ERROR_ASSERT);		   \
+	} while(0);
+
 #  define pAssert_BOOL(a)			     \
     do						     \
 	{						     \
