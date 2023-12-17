@@ -110,6 +110,19 @@ TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
 			       TPM2B_SEED*       seed        // OUT: seed buffer
 			       );
 
+//*** ValidateHierarchy()
+// This function ensures a given hierarchy is valid and enabled.
+//  Return Type: TPM_RC
+//      TPM_RC_HIERARCHY        Hierarchy is disabled
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the given SVN
+//                              is greater than the TPM's current SVN.
+//      TPM_RC_VALUE            Hierarchy is not valid
+TPM_RC ValidateHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
+			 );
+
 // libtpms added begin
 SEED_COMPAT_LEVEL
 HierarchyGetPrimarySeedCompatLevel(
