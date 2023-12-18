@@ -197,6 +197,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Attest_spt.c \
 	tpm2/AuditCommands.c \
 	tpm2/Bits.c \
+	tpm2/BnEccConstants.c \
 	tpm2/BnConvert.c \
 	tpm2/BnMath.c \
 	tpm2/BnMemory.c \
@@ -275,6 +276,8 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/TpmEcc_Signature_Schnorr.c \
 	tpm2/TpmEcc_Signature_SM2.c \
 	tpm2/TpmEcc_Signature_Util.c \
+	tpm2/TpmEcc_Util.c \
+	tpm2/TpmMath_Debug.c \
 	tpm2/TpmMath_Util.c \
 	tpm2/TpmSizeChecks.c \
 	tpm2/TPMCmdp.c \
@@ -329,6 +332,7 @@ noinst_HEADERS += \
 	tpm2/Attest_spt_fp.h \
 	tpm2/BaseTypes.h \
 	tpm2/Bits_fp.h \
+	tpm2/BnEccConstants.c \
 	tpm2/BnSupport_Interface.h \
 	tpm2/BnUtil_fp.h \
 	tpm2/Capabilities.h \
@@ -363,6 +367,7 @@ noinst_HEADERS += \
 	tpm2/DictionaryAttackLockReset_fp.h \
 	tpm2/DictionaryAttackParameters_fp.h \
 	tpm2/Duplicate_fp.h \
+	tpm2/EccConstantData.inl \
 	tpm2/EccTestData.h \
 	tpm2/ECC_Parameters_fp.h \
 	tpm2/ECDH_KeyGen_fp.h \
@@ -521,6 +526,7 @@ noinst_HEADERS += \
 	tpm2/TpmEcc_Signature_SM2_fp.h \
 	tpm2/TpmEcc_Signature_Util_fp.h \
 	tpm2/TpmFail_fp.h \
+	tpm2/TpmMath_Debug_fp.h \
 	tpm2/TpmMath_Util_fp.h \
 	tpm2/TpmProfile.h \
 	tpm2/TpmProfile_CommandList.h \
@@ -536,6 +542,7 @@ noinst_HEADERS += \
 	tpm2/_TPM_Hash_Start_fp.h \
 	tpm2/_TPM_Init_fp.h \
 	tpm2/TpmCalculatedAttributes.h \
+	tpm2/TpmEcc_Util_fp.h \
 	tpm2/TpmSizeChecks_fp.h \
 	tpm2/TpmTcpProtocol.h \
 	tpm2/TpmTypes.h \
@@ -582,6 +589,7 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/TpmToOsslSupport.c
 
 noinst_HEADERS += \
+	tpm2/crypto/openssl/BnToOsslMath_fp.h \
 	tpm2/crypto/openssl/BnToOsslMath.h \
 	tpm2/crypto/openssl/ConsttimeUtils.h \
 	tpm2/crypto/openssl/BnConvert_fp.h \
@@ -594,7 +602,6 @@ noinst_HEADERS += \
 	tpm2/crypto/openssl/TpmToTpmBigNumMath.h \
 	tpm2/crypto/openssl/TpmToOsslDesSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslHash.h \
-	tpm2/crypto/openssl/TpmToOsslMath_fp.h \
 	tpm2/crypto/openssl/TpmToOsslSupport_fp.h \
 	tpm2/crypto/openssl/TpmToOsslSym.h \
 	tpm2/crypto/openssl/tpm_radix.h

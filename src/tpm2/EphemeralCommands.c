@@ -60,6 +60,7 @@
 
 #include "Tpm.h"
 #include "Commit_fp.h"
+#include "TpmMath_Util_fp.h"
 
 #if CC_Commit  // Conditional expansion of this file
 
@@ -115,7 +116,7 @@ TPM2_Commit(Commit_In*  in,  // IN: input parameter list
 
     // Get prime modulus for the curve. This is needed later but getting this now
     // allows confirmation that the curve exists.
-    if(!CryptEccGetParameter(&p, 'p', parms->curveID))
+    if(!TpmMath_IntTo2B(ExtEcc_CurveGetPrime(parms->curveID), &p.b, 0))
 	return TPM_RCS_KEY + RC_Commit_signHandle;
 
     // Get the random value that will be used in the point multiplications

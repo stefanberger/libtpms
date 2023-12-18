@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*			ECC curve data 						*/
+/*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,101 +54,41 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2018 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
 /*(Auto-generated)
- *  Created by TpmStructures; Version 4.4 Mar 26, 2019
- *  Date: Aug 30, 2019  Time: 02:11:52PM
+ *  Created by TpmPrototypes; Version 3.0 July 18, 2017
+ *  Date: Oct 24, 2019  Time: 11:37:07AM
  */
 
-#include "Tpm.h"
-#include "OIDs.h"
+#ifndef _BN_TO_OSSL_MATH_FP_H_
+#define _BN_TO_OSSL_MATH_FP_H_
 
-#if ALG_ECC
+#ifdef MATH_LIB_OSSL
 
-// This file contains the TPM Specific ECC curve metadata and pointers to the ecc-lib specific
-// constant structure.
-// The CURVE_NAME macro is used to remove the name string from normal builds, but leaves the
-// string available in the initialization lists for potenial use during debugging by changing this
-// macro (and the structure declaration)
-#  define CURVE_NAME(N)
+//*** OsslToTpmBn()
+// This function converts an OpenSSL BIGNUM to a TPM bigNum. In this implementation
+// it is assumed that OpenSSL uses a different control structure but the same data
+// layout -- an array of native-endian words in little-endian order.
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure because value will not fit or OpenSSL variable doesn't
+//                      exist
+BOOL OsslToTpmBn(bigNum bn, const BIGNUM* osslBn);
 
-#  define comma
-const TPM_ECC_CURVE_METADATA eccCurves[] = {
-#  if ECC_NIST_P192
-    comma{TPM_ECC_NIST_P192,
-	  192,
-	  {TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
-	  {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	  OID_ECC_NIST_P192 CURVE_NAME("NIST_P192")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_NIST_P192
-#  if ECC_NIST_P224
-    comma{TPM_ECC_NIST_P224,
-	    224,
-		{TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_NIST_P224 CURVE_NAME("NIST_P224")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_NIST_P224
-#  if ECC_NIST_P256
-    comma{TPM_ECC_NIST_P256,
-	    256,
-		{TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA256}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_NIST_P256 CURVE_NAME("NIST_P256")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_NIST_P256
-#  if ECC_NIST_P384
-    comma{TPM_ECC_NIST_P384,
-	    384,
-		{TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA384}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_NIST_P384 CURVE_NAME("NIST_P384")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_NIST_P384
-#  if ECC_NIST_P521
-    comma{TPM_ECC_NIST_P521,
-	    521,
-		{TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SHA512}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_NIST_P521 CURVE_NAME("NIST_P521")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_NIST_P521
-#  if ECC_BN_P256
-    comma{TPM_ECC_BN_P256,
-	    256,
-		{TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_BN_P256 CURVE_NAME("BN_P256")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_BN_P256
-#  if ECC_BN_P638
-    comma{TPM_ECC_BN_P638,
-	    638,
-		{TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_BN_P638 CURVE_NAME("BN_P638")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_BN_P638
-#  if ECC_SM2_P256
-    comma{TPM_ECC_SM2_P256,
-	    256,
-		{TPM_ALG_KDF1_SP800_56A, {{TPM_ALG_SM3_256}}},
-		    {TPM_ALG_NULL, {{TPM_ALG_NULL}}},
-	    OID_ECC_SM2_P256 CURVE_NAME("SM2_P256")}
-#    undef comma
-#    define comma ,
-#  endif  // ECC_SM2_P256
-};
+//*** BigInitialized()
+// This function initializes an OSSL BIGNUM from a TPM bigConst. Do not use this for
+// values that are passed to OpenSLL when they are not declared as const in the
+// function prototype. Instead, use BnNewVariable().
+BIGNUM* BigInitialized(BIGNUM* toInit, bigConst initializer);
+#endif  // MATHLIB OSSL
 
-#endif  // TPM_ALG_ECC
+// libtpms added begin
+EC_POINT *EcPointInitialized(pointConst          initializer,
+			     const bigCurveData* E
+			     );
+// libtpms added end
+
+#endif // _TPM_TO_OSSL_MATH_FP_H_

@@ -60,6 +60,8 @@
 
 //** Includes and Defines
 #include "Tpm.h"
+#include "TpmMath_Util_fp.h"
+#include "TpmEcc_Util_fp.h"
 
 #if CC_ECC_Encrypt || CC_ECC_Encrypt
 
@@ -108,11 +110,11 @@ LIB_EXPORT TPM_RC CryptEccEncrypt(
 				  //      and plainText
 				  )
 {
-    CURVE_INITIALIZED(E, key->publicArea.parameters.eccDetail.curveID);
-    POINT_INITIALIZED(PB, &key->publicArea.unique.ecc);
-    POINT_VAR(Px, MAX_ECC_KEY_BITS);
-    TPMS_ECC_POINT          p2;
-    ECC_NUM(D);
+    CRYPT_CURVE_INITIALIZED(E, key->publicArea.parameters.eccDetail.curveID);
+    CRYPT_POINT_INITIALIZED(PB, &key->publicArea.unique.ecc);
+    CRYPT_POINT_VAR(Px);
+    TPMS_ECC_POINT p2;
+    CRYPT_ECC_NUM(D);
     TPM2B_TYPE(2ECC, MAX_ECC_KEY_BYTES * 2);
     TPM2B_2ECC z;
     int        i;
@@ -137,12 +139,12 @@ LIB_EXPORT TPM_RC CryptEccEncrypt(
     if(TPM_ALG_KDF2 != scheme->scheme)
 	ERROR_EXIT(TPM_RC_SCHEME);
     // generate an ephemeral key from a random k
-    if (!BnEccGenerateKeyPair(D, Px, E, RANDOM)
-	// C1 is the public part of the ephemeral key
-	|| !BnPointTo2B(c1, Px, E)
-	// Compute P2
-	|| (BnPointMult(Px, PB, D, NULL, NULL, E) != TPM_RC_SUCCESS)
-	|| !BnPointTo2B(&p2, Px, E))
+    if(!TpmEcc_GenerateKeyPair(D, Px, E, RANDOM)
+       // C1 is the public part of the ephemeral key
+       || !TpmEcc_PointTo2B(c1, Px, E)
+       // Compute P2
+       || (TpmEcc_PointMult(Px, PB, D, NULL, NULL, E) != TPM_RC_SUCCESS)
+       || !TpmEcc_PointTo2B(&p2, Px, E))
 	ERROR_EXIT(TPM_RC_NO_RESULT);
 
     //Compute the C3 value hash(x2 || M || y2)
@@ -166,7 +168,7 @@ LIB_EXPORT TPM_RC CryptEccEncrypt(
     for(i = 0; i < plainText->t.size; i++)
 	c2->t.buffer[i] ^= plainText->t.buffer[i];
  Exit:
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
 
@@ -188,10 +190,10 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
 				  //      and plainText
 				  )
 {
-    CURVE_INITIALIZED(E, key->publicArea.parameters.eccDetail.curveID);
-    ECC_INITIALIZED(D, &key->sensitive.sensitive.ecc.b);
-    POINT_INITIALIZED(C1, c1);
-    TPMS_ECC_POINT          p2;
+    CRYPT_CURVE_INITIALIZED(E, key->publicArea.parameters.eccDetail.curveID);
+    CRYPT_ECC_INITIALIZED(D, &key->sensitive.sensitive.ecc.b);
+    CRYPT_POINT_INITIALIZED(C1, c1);
+    TPMS_ECC_POINT p2;
     TPM2B_TYPE(2ECC, MAX_ECC_KEY_BYTES * 2);
     TPM2B_DIGEST check;
     TPM2B_2ECC   z;
@@ -204,8 +206,8 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
     if(TPM_ALG_KDF2 != scheme->scheme)
 	ERROR_EXIT(TPM_RC_SCHEME);
     // Generate the Z value
-    BnPointMult(C1, C1, D, NULL, NULL, E);
-    BnPointTo2B(&p2, C1, E);
+    TpmEcc_PointMult(C1, C1, D, NULL, NULL, E);
+    TpmEcc_PointTo2B(&p2, C1, E);
 
     // Start the hash to check the algorithm
     if(0 == CryptHashStart(&hashState, scheme->details.mgf1.hashAlg))
@@ -233,7 +235,7 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
     if(!MemoryEqual2B(&check.b, &c3->b))
 	ERROR_EXIT(TPM_RC_VALUE);
  Exit:
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
 

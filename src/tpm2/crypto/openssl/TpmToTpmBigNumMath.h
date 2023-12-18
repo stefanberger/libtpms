@@ -92,6 +92,14 @@
 #include "BnMemory_fp.h"
 #include "BnSupport_Interface.h"
 
+// Create a data object backing a Crypt_Point big enough for the given number of
+// data bits, per coordinate
+#define CRYPT_POINT_BUF(buftypename, bits) BN_POINT_BUF(buftypename, bits)
+
+// Create an instance of a data object underlying Crypt_EccCurve on the stack
+// sufficient for given bit size.  In our case, all are the same size.
+#define CRYPT_CURVE_BUF(buftypename, max_size_in_bits) bigCurveData
+
 // now include the math library functional interface and instantiate the
 // Crypt_Int & related types
 // TODO_RENAME_INC_FOLDER: This should have a Tpm_Cryptolib_Common component prefix.

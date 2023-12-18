@@ -67,6 +67,7 @@
 
 #define MATH_LIB_OSSL
 
+#include "BnValues.h"
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 #include <openssl/bn.h>
@@ -125,27 +126,26 @@ struct bignum_st
 
 typedef struct
 {
-    const ECC_CURVE_DATA*            C;     // the TPM curve values
+    const TPMBN_ECC_CURVE_CONSTANTS* C;  // the TPM curve values
     EC_GROUP*                        G;  // group parameters
     BN_CTX* CTX;  // the context for the math (this might not be
     // the context in which the curve was created>;
 } OSSL_CURVE_DATA;
 
 // Define the curve data type expected by the TpmBigNum library:
-typedef OSSL_CURVE_DATA      *bigCurve;
-#define AccessCurveData(E)  ((E)->C)
+typedef OSSL_CURVE_DATA                     bigCurveData;
+
+TPM_INLINE const TPMBN_ECC_CURVE_CONSTANTS* AccessCurveConstants(
+								 const bigCurveData* E)
+{
+    return E->C;
+}
 
 #include "TpmToOsslSupport_fp.h"
 
 // Start and end a context within which the OpenSSL memory management works
 #define OSSL_ENTER() BN_CTX* CTX = OsslContextEnter()
 #define OSSL_LEAVE() OsslContextLeave(CTX)
-
-#define CURVE_INITIALIZED(name, initializer)				\
-    OSSL_CURVE_DATA     _##name;					\
-    bigCurve            name =  BnCurveInitialize(&_##name, initializer)
-
-#define CURVE_FREE(name)               BnCurveFree(name)
 
 #if 0	/* kgold not used */
 // Start and end a local stack frame within the context of the curve frame

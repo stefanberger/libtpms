@@ -60,8 +60,10 @@
 
 //** Includes and Defines
 #include "Tpm.h"
+#include "TpmMath_Util_fp.h"
+#include "TpmEcc_Util_fp.h"
+#include "TpmEcc_Signature_ECDSA_fp.h"  // required for pairwise test in key generation
 #include "Helpers_fp.h"                // libtpms added
-#include "TpmToOsslMath_fp.h"          // libtpms added
 #if ALG_ECC
 //** Functions
 
@@ -108,10 +110,9 @@ void ClearPoint2B(TPMS_ECC_POINT* p  // IN: the point
 //  Return Type: const TPM_ECC_CURVE_METADATA
 //      NULL            curve with the indicated TPM_ECC_CURVE is not implemented
 //      != NULL         pointer to the curve data
-LIB_EXPORT const ECC_CURVE *
-CryptEccGetParametersByCurveId(
-			       TPM_ECC_CURVE       curveId     // IN: the curveID
-			       )
+LIB_EXPORT const TPM_ECC_CURVE_METADATA* CryptEccGetParametersByCurveId(
+									TPM_ECC_CURVE curveId  // IN: the curveID
+									)
 {
     int i;
     for(i = 0; i < ECC_CURVE_COUNT; i++)
@@ -127,27 +128,17 @@ CryptEccGetParametersByCurveId(
 LIB_EXPORT UINT16 CryptEccGetKeySizeForCurve(TPM_ECC_CURVE curveId  // IN: the curve
 					     )
 {
-    const ECC_CURVE* curve = CryptEccGetParametersByCurveId(curveId);
-    UINT16           keySizeInBits;
+    const TPM_ECC_CURVE_METADATA* curve = CryptEccGetParametersByCurveId(curveId);
+    UINT16                        keySizeInBits;
     //
     keySizeInBits = (curve != NULL) ? curve->keySizeBits : 0;
     return keySizeInBits;
-}
-/* 10.2.11.2.6 GetCurveData() */
-/* This function returns the a pointer for the parameter data associated with a curve. */
-const ECC_CURVE_DATA *
-GetCurveData(
-	     TPM_ECC_CURVE        curveId     // IN: the curveID
-	     )
-{
-    const ECC_CURVE      *curve = CryptEccGetParametersByCurveId(curveId);
-    return (curve != NULL) ? curve->curveData : NULL;
 }
 
 //***CryptEccGetOID()
 const BYTE* CryptEccGetOID(TPM_ECC_CURVE curveId)
 {
-    const ECC_CURVE*curve = CryptEccGetParametersByCurveId(curveId);
+    const TPM_ECC_CURVE_METADATA* curve = CryptEccGetParametersByCurveId(curveId);
     return (curve != NULL) ? curve->OID : NULL;
 }
 
@@ -160,55 +151,6 @@ LIB_EXPORT TPM_ECC_CURVE CryptEccGetCurveByIndex(UINT16 i)
     if(i >= ECC_CURVE_COUNT)
 	return TPM_ECC_NONE;
     return eccCurves[i].curveId;
-}
-/* 10.2.11.2.8 CryptEccGetParameter() */
-/* This function returns an ECC curve parameter. The parameter is selected by a single character
-   designator from the set of {PNABXYH}. */
-/* Return Values Meaning */
-/* TRUE curve exists and parameter returned */
-/* FALSE curve does not exist or parameter selector */
-LIB_EXPORT BOOL
-CryptEccGetParameter(
-		     TPM2B_ECC_PARAMETER     *out,       // OUT: place to put parameter
-		     char                     p,         // IN: the parameter selector
-		     TPM_ECC_CURVE            curveId    // IN: the curve id
-		     )
-{
-    const ECC_CURVE_DATA    *curve = GetCurveData(curveId);
-    bigConst                 parameter = NULL;
-    if(curve != NULL)
-	{
-	    switch(p)
-		{
-		  case 'p':
-		    parameter = CurveGetPrime(curve);
-		    break;
-		  case 'n':
-		    parameter = CurveGetOrder(curve);
-		    break;
-		  case 'a':
-		    parameter = CurveGet_a(curve);
-		    break;
-		  case 'b':
-		    parameter = CurveGet_b(curve);
-		    break;
-		  case 'x':
-		    parameter = CurveGetGx(curve);
-		    break;
-		  case 'y':
-		    parameter = CurveGetGy(curve);
-		    break;
-		  case 'h':
-		    parameter = CurveGetCofactor(curve);
-		    break;
-		  default:
-		    FAIL(FATAL_ERROR_INTERNAL);
-		    break;
-		}
-	}
-    // If not debugging and we get here with parameter still NULL, had better
-    // not try to convert so just return FALSE instead.
-    return (parameter != NULL) ? BnTo2B(parameter, &out->b, 0) : 0;
 }
 
 //*** CryptCapGetECCCurve()
@@ -267,7 +209,8 @@ const TPMT_ECC_SCHEME* CryptGetCurveSignScheme(
 					       TPM_ECC_CURVE curveId  // IN: The curve selector
 					       )
 {
-    const ECC_CURVE* curve = CryptEccGetParametersByCurveId(curveId);
+    const TPM_ECC_CURVE_METADATA* curve = CryptEccGetParametersByCurveId(curveId);
+
     if(curve != NULL)
 	return &(curve->sign);
     else
@@ -300,7 +243,7 @@ BOOL CryptGenerateR(TPM2B_ECC_PARAMETER* r,        // OUT: the generated random 
     UINT64              currentCount = gr.commitCounter;
     UINT16              t1;
     //
-    if(!CryptEccGetParameter(&n, 'n', curveID))
+    if(!TpmMath_IntTo2B(ExtEcc_CurveGetOrder(curveID), (TPM2B*)&n, 0))
 	return FALSE;
 
     // If this is the commit phase, use the current value of the commit counter
@@ -401,101 +344,72 @@ BOOL CryptEccGetParameters(
 			   TPMS_ALGORITHM_DETAIL_ECC* parameters  // OUT: ECC parameters
 			   )
 {
-    const ECC_CURVE             *curve = CryptEccGetParametersByCurveId(curveId);
-    const ECC_CURVE_DATA        *data;
+    const TPM_ECC_CURVE_METADATA* curve = CryptEccGetParametersByCurveId(curveId);
     BOOL                          found = curve != NULL;
+
     if(found)
 	{
-	    data = curve->curveData;
 	    parameters->curveID = curve->curveId;
 	    parameters->keySize = curve->keySizeBits;
-	    parameters->kdf = curve->kdf;
-	    parameters->sign = curve->sign;
-	    /* BnTo2B(data->prime, &parameters->p.b, 0); */
-	    BnTo2B(data->prime, &parameters->p.b, parameters->p.t.size);
-	    BnTo2B(data->a, &parameters->a.b, parameters->p.t.size /* libtpms changed for HLK */);
-	    BnTo2B(data->b, &parameters->b.b, parameters->p.t.size /* libtpms changed for HLK */);
-	    BnTo2B(data->base.x, &parameters->gX.b, parameters->p.t.size);
-	    BnTo2B(data->base.y, &parameters->gY.b, parameters->p.t.size);
-	    BnTo2B(data->order, &parameters->n.b, 0);
-	    BnTo2B(data->h, &parameters->h.b, 0);
+	    parameters->kdf     = curve->kdf;
+	    parameters->sign    = curve->sign;
+	    //        BnTo2B(data->prime, &parameters->p.b, 0);
+	    found = found
+		    && TpmMath_IntTo2B(ExtEcc_CurveGetPrime(curveId),
+				       &parameters->p.b,
+				       parameters->p.t.size);
+	    found = found
+		    && TpmMath_IntTo2B(ExtEcc_CurveGet_a(curveId), &parameters->a.b,
+				       parameters->p.t.size /* libtpms changed for HLK */);
+	    found = found
+		    && TpmMath_IntTo2B(ExtEcc_CurveGet_b(curveId), &parameters->b.b,
+				       parameters->p.t.size /* libtpms changed for HLK */);
+	    found = found
+		    && TpmMath_IntTo2B(ExtEcc_CurveGetGx(curveId),
+				       &parameters->gX.b,
+				       parameters->p.t.size);
+	    found = found
+		    && TpmMath_IntTo2B(ExtEcc_CurveGetGy(curveId),
+				       &parameters->gY.b,
+				       parameters->p.t.size);
+	    //        BnTo2B(data->base.x, &parameters->gX.b, 0);
+	    //        BnTo2B(data->base.y, &parameters->gY.b, 0);
+	    found =
+		found
+		&& TpmMath_IntTo2B(ExtEcc_CurveGetOrder(curveId), &parameters->n.b, 0);
+	    found =
+		found
+		&& TpmMath_IntTo2B(ExtEcc_CurveGetCofactor(curveId), &parameters->h.b, 0);
+	    // if we got into this IF but failed to get a parameter from the external
+	    // library, our crypto systems are broken; enter failure mode.
+	    if(!found)
+		{
+		    FAIL(FATAL_ERROR_MATHLIBRARY);
+		}
 	}
     return found;
 }
-/* 10.2.11.2.15 BnGetCurvePrime() */
-/* This function is used to get just the prime modulus associated with a curve */
-const bignum_t *
-BnGetCurvePrime(
-		TPM_ECC_CURVE            curveId
-		)
-{
-    const ECC_CURVE_DATA    *C = GetCurveData(curveId);
-    return (C != NULL) ? CurveGetPrime(C) : NULL;
-}
 
-/* 10.2.11.2.16 BnGetCurveOrder() */
-/* This function is used to get just the curve order */
-const bignum_t *
-BnGetCurveOrder(
-		TPM_ECC_CURVE            curveId
-		)
+//*** TpmEcc_IsValidPrivateEcc()
+// Checks that 0 < 'x' < 'q'
+BOOL TpmEcc_IsValidPrivateEcc(const Crypt_Int*      x,  // IN: private key to check
+			      const Crypt_EccCurve* E   // IN: the curve to check
+			      )
 {
-    const ECC_CURVE_DATA    *C = GetCurveData(curveId);
-    return (C != NULL) ? CurveGetOrder(C) : NULL;
-}
-
-/* 10.2.11.2.17 BnIsOnCurve() */
-/* This function checks if a point is on the curve. */
-BOOL
-BnIsOnCurve(
-	    pointConst                   Q,
-	    const ECC_CURVE_DATA        *C
-	    )
-{
-    BN_VAR(right, (MAX_ECC_KEY_BITS * 3));
-    BN_VAR(left, (MAX_ECC_KEY_BITS * 2));
-    bigConst                   prime = CurveGetPrime(C);
-    //
-    // Show that point is on the curve y^2 = x^3 + ax + b;
-    // Or y^2 = x(x^2 + a) + b
-    // y^2
-    BnMult(left, Q->y, Q->y);
-    BnMod(left, prime);
-    // x^2
-    BnMult(right, Q->x, Q->x);
-    // x^2 + a
-    BnAdd(right, right, CurveGet_a(C));
-    //    BnMod(right, CurveGetPrime(C));
-    // x(x^2 + a)
-    BnMult(right, right, Q->x);
-    // x(x^2 + a) + b
-    BnAdd(right, right, CurveGet_b(C));
-    BnMod(right, prime);
-    if(BnUnsignedCmp(left, right) == 0)
-	return TRUE;
-    else
-	return FALSE;
-}
-
-/* 10.2.11.2.18 BnIsValidPrivateEcc() */
-/* Checks that 0 < x < q */
-BOOL
-BnIsValidPrivateEcc(
-		    bigConst                 x,         // IN: private key to check
-		    bigCurve                 E          // IN: the curve to check
-		    )
-{
-    BOOL        retVal;
-    retVal = (!BnEqualZero(x)
-	      && (BnUnsignedCmp(x, CurveGetOrder(AccessCurveData(E))) < 0));
+    BOOL retVal;
+    retVal =
+	(!ExtMath_IsZero(x)
+	 && (ExtMath_UnsignedCmp(x, ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E)))
+	     < 0));
     return retVal;
 }
 
 LIB_EXPORT BOOL CryptEccIsValidPrivateKey(TPM2B_ECC_PARAMETER* d,
 					  TPM_ECC_CURVE        curveId)
 {
-    BN_INITIALIZED(bnD, MAX_ECC_PARAMETER_BYTES * 8, d);
-    return !BnEqualZero(bnD) && (BnUnsignedCmp(bnD, BnGetCurveOrder(curveId)) < 0);
+    CRYPT_INT_INITIALIZED(bnD, MAX_ECC_PARAMETER_BYTES * 8, d);
+    return !ExtMath_IsZero(bnD)
+	&& (ExtMath_UnsignedCmp(bnD, ExtEcc_CurveGetOrder(curveId)) < 0);
 }
 
 //*** TpmEcc_PointMult()
@@ -511,14 +425,13 @@ LIB_EXPORT BOOL CryptEccIsValidPrivateKey(TPM2B_ECC_PARAMETER* d,
 //      TPM_RC_ECC_POINT        'S' or 'Q' is not on the curve
 //      TPM_RC_VALUE            'd' or 'u' is not < n
 TPM_RC
-BnPointMult(
-	    bigPoint             R,         // OUT: computed point
-	    pointConst           S,         // IN: optional point to multiply by 'd'
-	    bigConst             d,         // IN: scalar for [d]S or [d]G
-	    pointConst           Q,         // IN: optional second point
-	    bigConst             u,         // IN: optional second scalar
-	    bigCurve             E          // IN: curve parameters
-	    )
+TpmEcc_PointMult(Crypt_Point*          R,  // OUT: computed point
+		 const Crypt_Point*    S,  // IN: optional point to multiply by 'd'
+		 const Crypt_Int*      d,  // IN: scalar for [d]S or [d]G
+		 const Crypt_Point*    Q,  // IN: optional second point
+		 const Crypt_Int*      u,  // IN: optional second scalar
+		 const Crypt_EccCurve* E   // IN: curve parameters
+		 )
 {
     BOOL OK;
     //
@@ -538,24 +451,25 @@ BnPointMult(
     OK = OK && (E != NULL);
     if(!OK)
 	return TPM_RC_VALUE;
-    OK = (S == NULL) || BnIsOnCurve(S, AccessCurveData(E));
-    OK = OK && ((Q == NULL) || BnIsOnCurve(Q, AccessCurveData(E)));
+
+    OK = (S == NULL) || ExtEcc_IsPointOnCurve(S, E);
+    OK = OK && ((Q == NULL) || ExtEcc_IsPointOnCurve(Q, E));
     if(!OK)
 	return TPM_RC_ECC_POINT;
 
     if((d != NULL) && (S == NULL))
-	S = CurveGetG(AccessCurveData(E));
+	S = ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E));
     // If only one scalar, don't need Shamir's trick
     if((d == NULL) || (u == NULL))
 	{
 	    if(d == NULL)
-		OK = BnEccModMult(R, Q, u, E);
+		OK = ExtEcc_PointMultiply(R, Q, u, E);
 	    else
-		OK = BnEccModMult(R, S, d, E);
+		OK = ExtEcc_PointMultiply(R, S, d, E);
 	}
     else
 	{
-	    OK = BnEccModMult2(R, S, d, Q, u, E);
+	    OK = ExtEcc_PointMultiplyAndAdd(R, S, d, Q, u, E);
 	}
     return (OK ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT);
 }
@@ -569,59 +483,59 @@ BnPointMult(
 //      TRUE(1)         success
 //      FALSE(0)        failure generating private key
 #if !USE_OPENSSL_FUNCTIONS_EC          // libtpms added
-BOOL
-BnEccGetPrivate(
-		bigNum                   dOut,      // OUT: the qualified random value
-		const ECC_CURVE_DATA    *C,         // IN: curve for which the private key
-		//     needs to be appropriate
-		RAND_STATE              *rand       // IN: state for DRBG
-		)
+BOOL TpmEcc_GenPrivateScalar(
+			     Crypt_Int*            dOut,  // OUT: the qualified random value
+			     const Crypt_EccCurve* E,     // IN: curve for which the private key
+			     //     needs to be appropriate
+			     RAND_STATE* rand             // IN: state for DRBG
+			     )
 {
-    bigConst         order = CurveGetOrder(C);
+    TPM_ECC_CURVE    curveId = ExtEcc_CurveGetCurveId(E);
+    const Crypt_Int* order   = ExtEcc_CurveGetOrder(curveId);
     BOOL             OK;
-    UINT32           orderBits = BnSizeInBits(order);
+    UINT32           orderBits  = ExtMath_SizeInBits(order);
     UINT32           orderBytes = BITS_TO_BYTES(orderBits);
-    BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
-    BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
+    CRYPT_INT_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
+    CRYPT_INT_VAR(nMinus1, MAX_ECC_KEY_BITS);
     //
-    OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);
-    OK = OK && BnSubWord(nMinus1, order, 1);
-    OK = OK && BnMod(bnExtraBits, nMinus1);
-    OK = OK && BnAddWord(dOut, bnExtraBits, 1);
+    OK = BnGetRandomBits((bigNum)bnExtraBits, (orderBytes * 8) + 64, rand); // libtpms: keep for now
+    OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
+    OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
+    OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
     return OK && !g_inFailureMode;
 }
 #else                                  // libtpms added begin
-BOOL
-BnEccGetPrivate(
-		bigNum                   dOut,      // OUT: the qualified random value
-		const ECC_CURVE_DATA    *C,         // IN: curve for which the private key
-		const EC_GROUP          *G,         // IN: the EC_GROUP to use; must be != NULL for rand == NULL
-		BOOL                     noLeadingZeros, // IN: require that all bytes in the private key be set
-		                                         //     result may not have leading zero bytes
-		//     needs to be appropriate
-		RAND_STATE              *rand       // IN: state for DRBG
-		)
+BOOL TpmEcc_GenPrivateScalar(
+			     Crypt_Int*             dOut,      // OUT: the qualified random value
+			     const Crypt_EccCurve*  E,         // IN: curve for which the private key
+			     //     needs to be appropriate
+			     const EC_GROUP*        G,         // IN: the EC_GROUP to use; must be != NULL for rand == NULL
+			     BOOL                   noLeadingZeros, // IN: require that all bytes in the private key be set
+								    //     result may not have leading zero bytes
+			     RAND_STATE*            rand       // IN: state for DRBG
+			     )
 {
-    bigConst                 order = CurveGetOrder(C);
-    BOOL                     OK;
-    UINT32                   orderBits = BnSizeInBits(order);
-    UINT32                   orderBytes = BITS_TO_BYTES(orderBits);
-    UINT32                   requestedBits = 0;
-    BN_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
-    BN_VAR(nMinus1, MAX_ECC_KEY_BITS);
+    TPM_ECC_CURVE    curveId = ExtEcc_CurveGetCurveId(E);
+    const Crypt_Int* order   = ExtEcc_CurveGetOrder(curveId);
+    BOOL             OK;
+    UINT32           orderBits = ExtMath_SizeInBits(order);
+    UINT32           orderBytes = BITS_TO_BYTES(orderBits);
+    UINT32           requestedBits = 0;
+    CRYPT_INT_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
+    CRYPT_INT_VAR(nMinus1, MAX_ECC_KEY_BITS);
 
     if (rand == NULL) {
         if (noLeadingZeros)
             requestedBits = orderBits;
 
-        return OpenSSLEccGetPrivate(dOut, G, requestedBits);
+        return OpenSSLEccGetPrivate((bigNum)dOut, G, requestedBits);
     }
 
     //
-    OK = BnGetRandomBits(bnExtraBits, (orderBytes * 8) + 64, rand);
-    OK = OK && BnSubWord(nMinus1, order, 1);
-    OK = OK && BnMod(bnExtraBits, nMinus1);
-    OK = OK && BnAddWord(dOut, bnExtraBits, 1);
+    OK = BnGetRandomBits((bigNum)bnExtraBits, (orderBytes * 8) + 64, rand); // libtpms: keep for now
+    OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
+    OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
+    OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
     return OK && !g_inFailureMode;
 }
 #endif // USE_OPENSSL_FUNCTIONS_EC        libtpms added end
@@ -630,23 +544,18 @@ BnEccGetPrivate(
 //*** TpmEcc_GenerateKeyPair()
 // This function gets a private scalar from the source of random bits and does
 // the point multiply to get the public key.
-BOOL
-BnEccGenerateKeyPair(
-		     bigNum               bnD,            // OUT: private scalar
-		     bn_point_t          *ecQ,            // OUT: public point
-		     bigCurve             E,              // IN: curve for the point
-		     RAND_STATE          *rand            // IN: DRBG state to use
-		     )
+BOOL TpmEcc_GenerateKeyPair(Crypt_Int*            bnD,  // OUT: private scalar
+			    Crypt_Point*          ecQ,  // OUT: public point
+			    const Crypt_EccCurve* E,    // IN: curve for the point
+			    RAND_STATE*           rand  // IN: DRBG state to use
+			    )
 {
     BOOL OK = FALSE;
     // Get a private scalar
-    OK = BnEccGetPrivate(bnD, AccessCurveData(E), rand);
+    OK = TpmEcc_GenPrivateScalar(bnD, E, rand);
+
     // Do a point multiply
-    OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
-    if(!OK)
-	BnSetWord(ecQ->z, 0);
-    else
-	BnSetWord(ecQ->z, 1);
+    OK = OK && ExtEcc_PointMultiply(ecQ, NULL, bnD, E);
     return OK;
 }
 
@@ -660,38 +569,32 @@ BnEccGenerateKeyPair(
    curves whose order is not at the byte boundary, e.g. NIST P521, we simply
    always add the order of the curve to bnD and call BnEccModMult() with the
    result bnD1, which leads to the same result. */
-BOOL
-BnEccGenerateKeyPair(
-		     bigNum               bnD,            // OUT: private scalar
-		     bn_point_t          *ecQ,            // OUT: public point
-		     bigCurve             E,              // IN: curve for the point
-		     RAND_STATE          *rand            // IN: DRBG state to use
+BOOL TpmEcc_GenerateKeyPair(Crypt_Int*            bnD,  // OUT: private scalar
+			    Crypt_Point*          ecQ,  // OUT: public point
+			    const Crypt_EccCurve* E,    // IN: curve for the point
+			    RAND_STATE*           rand  // IN: DRBG state to use
 		     )
 {
-    BOOL                 OK = FALSE;
-    bigConst             order = CurveGetOrder(AccessCurveData(E));
-    UINT32               orderBits = BnSizeInBits(order);
-    BOOL                 atByteBoundary = (orderBits & 7) == 0;
-    BOOL                 noLeadingZeros = atByteBoundary;
-    ECC_NUM(bnD1);
+    BOOL             OK = FALSE;
+    TPM_ECC_CURVE    curveId = ExtEcc_CurveGetCurveId(E);
+    const Crypt_Int* order = ExtEcc_CurveGetOrder(curveId);
+    UINT32           orderBits = ExtMath_SizeInBits(order);
+    BOOL             atByteBoundary = (orderBits & 7) == 0;
+    BOOL             noLeadingZeros = atByteBoundary;
+    CRYPT_ECC_NUM(bnD1);
 
     // We request that bnD not have leading zeros if it is at byte-boundary,
     // like for example it is the case for NIST P256.
-    OK = BnEccGetPrivate(bnD, AccessCurveData(E), E->G, noLeadingZeros, rand);
+    OK = TpmEcc_GenPrivateScalar(bnD, E, E->G, noLeadingZeros, rand);
     if (!atByteBoundary) {
         // for NIST P521 we can add the order to bnD to ensure we have
         // a constant amount of bytes; the result is the same as if we
         // were doing the BnEccModMult() calculation with bnD.
-        OK = OK && BnAdd(bnD1, bnD, order);
-        OK = OK && BnEccModMult(ecQ, NULL, bnD1, E);
+        OK = OK && ExtMath_Add(bnD1, bnD, order);
+        OK = OK && ExtEcc_PointMultiply(ecQ, NULL, bnD1, E);
     } else {
-        OK = OK && BnEccModMult(ecQ, NULL, bnD, E);
+        OK = OK && ExtEcc_PointMultiply(ecQ, NULL, bnD, E);
     }
-
-    if(!OK)
-	BnSetWord(ecQ->z, 0);
-    else
-	BnSetWord(ecQ->z, 1);
     return OK;
 }
 
@@ -706,26 +609,26 @@ LIB_EXPORT TPM_RC CryptEccNewKeyPair(
 				     TPM_ECC_CURVE        curveId  // IN: the curve for the key
 				     )
 {
-    CURVE_INITIALIZED(E, curveId);
-    POINT(ecQ);
-    ECC_NUM(bnD);
+    CRYPT_CURVE_INITIALIZED(E, curveId);
+    CRYPT_POINT_VAR(ecQ);
+    CRYPT_ECC_NUM(bnD);
     BOOL OK;
 
     if(E == NULL)
 	return TPM_RC_CURVE;
 
     TEST(TPM_ALG_ECDH);
-    OK = BnEccGenerateKeyPair(bnD, ecQ, E, NULL);
+    OK = TpmEcc_GenerateKeyPair(bnD, ecQ, E, NULL);
     if(OK)
 	{
-	    BnPointTo2B(Qout, ecQ, E);
-	    BnTo2B(bnD, &dOut->b, Qout->x.t.size);
+	    TpmEcc_PointTo2B(Qout, ecQ, E);
+	    TpmMath_IntTo2B(bnD, &dOut->b, Qout->x.t.size);
 	}
     else
 	{
 	    Qout->x.t.size = Qout->y.t.size = dOut->t.size = 0;
 	}
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return OK ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
 }
 
@@ -766,20 +669,21 @@ LIB_EXPORT TPM_RC CryptEccPointMultiply(
 					//     of Q
 					)
 {
-    CURVE_INITIALIZED(E, curveId);
-    POINT_INITIALIZED(ecP, Pin);
-    ECC_INITIALIZED(bnD, dIn);      // If dIn is null, then bnD is null
-    ECC_INITIALIZED(bnU, uIn);
-    POINT_INITIALIZED(ecQ, Qin);
-    POINT(ecR);
-    TPM_RC             retVal;
+    CRYPT_CURVE_INITIALIZED(E, curveId);
+    CRYPT_POINT_INITIALIZED(ecP, Pin);
+    CRYPT_ECC_INITIALIZED(bnD, dIn);  // If dIn is null, then bnD is null
+    CRYPT_ECC_INITIALIZED(bnU, uIn);
+    CRYPT_POINT_INITIALIZED(ecQ, Qin);
+    CRYPT_POINT_VAR(ecR);
+    TPM_RC retVal;
     //
-    retVal = BnPointMult(ecR, ecP, bnD, ecQ, bnU, E);
+    retVal = TpmEcc_PointMult(ecR, ecP, bnD, ecQ, bnU, E);
+
     if(retVal == TPM_RC_SUCCESS)
-	BnPointTo2B(Rout, ecR, E);
+	TpmEcc_PointTo2B(Rout, ecR, E);
     else
 	ClearPoint2B(Rout);
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
 
@@ -796,12 +700,12 @@ LIB_EXPORT BOOL CryptEccIsPointOnCurve(
 				       TPMS_ECC_POINT* Qin       // IN: the point.
 				       )
 {
-    const ECC_CURVE_DATA    *C = GetCurveData(curveId);
-    POINT_INITIALIZED(ecQ, Qin);
+    CRYPT_CURVE_INITIALIZED(E, curveId);
+    CRYPT_POINT_INITIALIZED(ecQ, Qin);
     BOOL OK;
     //
     pAssert(Qin != NULL);
-    OK = (C != NULL && (BnIsOnCurve(ecQ, C)));
+    OK = (E != NULL && (ExtEcc_IsPointOnCurve(ecQ, E)));
     return OK;
 }
 
@@ -832,9 +736,9 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 				      //     RNG state
 				      )
 {
-    CURVE_INITIALIZED(E, publicArea->parameters.eccDetail.curveID);
-    ECC_NUM(bnD);
-    POINT(ecQ);
+    CRYPT_CURVE_INITIALIZED(E, publicArea->parameters.eccDetail.curveID);
+    CRYPT_ECC_NUM(bnD);
+    CRYPT_POINT_VAR(ecQ);
     BOOL   OK;
     TPM_RC retVal;
     //
@@ -847,18 +751,20 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
     publicArea->unique.ecc.x.t.size = 0;
     publicArea->unique.ecc.y.t.size = 0;
     sensitive->sensitive.ecc.t.size = 0;
-    OK = BnEccGenerateKeyPair(bnD, ecQ, E, rand);
+
+    OK                              = TpmEcc_GenerateKeyPair(bnD, ecQ, E, rand);
     if(OK)
 	{
-	    BnPointTo2B(&publicArea->unique.ecc, ecQ, E);
-	    BnTo2B(bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
+	    TpmEcc_PointTo2B(&publicArea->unique.ecc, ecQ, E);
+	    TpmMath_IntTo2B(
+			    bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
 	}
 #  if FIPS_COMPLIANT
     // See if PWCT is required
-    if(OK && (IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign)))
+    if(OK && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
 	{
-	    ECC_NUM(bnT);
-	    ECC_NUM(bnS);
+	    CRYPT_ECC_NUM(bnT);
+	    CRYPT_ECC_NUM(bnS);
 	    TPM2B_DIGEST digest;
 	    //
 	    TEST(TPM_ALG_ECDSA);
@@ -867,14 +773,15 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 	    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
 	    if(g_inFailureMode)
 		return TPM_RC_FAILURE;
-	    BnSignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
+	    TpmEcc_SignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
 	    // and make sure that we can validate the signature
-	    OK = BnValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest) == TPM_RC_SUCCESS;
+	    OK = TpmEcc_ValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest)
+		 == TPM_RC_SUCCESS;
 	}
 #  endif
     retVal = (OK) ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
  Exit:
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
 
@@ -886,10 +793,10 @@ CryptEccIsCurveRuntimeUsable(
 			     TPMI_ECC_CURVE curveId
 			    )
 {
-    CURVE_INITIALIZED(E, curveId);
+    CRYPT_CURVE_INITIALIZED(E, curveId);
     if (E == NULL)
 	return FALSE;
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return TRUE;
 }
 //		libtpms added end

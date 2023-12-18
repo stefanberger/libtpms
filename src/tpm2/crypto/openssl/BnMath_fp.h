@@ -159,4 +159,13 @@ LIB_EXPORT BOOL BnMaskBits(bigNum        bn,      // IN/OUT: number to mask
 // This function always returns TRUE.
 LIB_EXPORT BOOL BnShiftRight(bigNum result, bigConst toShift, uint32_t shiftAmount);
 
-#endif
+//*** BnGetCurveData()
+// This function returns the pointer for the parameter data
+// associated with a curve.
+const TPMBN_ECC_CURVE_CONSTANTS* BnGetCurveData(TPM_ECC_CURVE curveId);
+
+//*** BnIsPointOnCurve()
+// This function checks if a point is on the curve.
+BOOL BnIsPointOnCurve(pointConst Q, const TPMBN_ECC_CURVE_CONSTANTS* C);
+
+#endif  // _BN_MATH_FP_H_
