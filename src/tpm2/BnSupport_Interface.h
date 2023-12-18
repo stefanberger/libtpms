@@ -133,18 +133,19 @@ LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus);
 // structure is a set of pointers to bigNum values. The curve-dependent values are
 // set by a different function. This function is only needed
 // if the TPM supports ECC.
-LIB_EXPORT bigCurve BnCurveInitialize(bigCurve E, TPM_ECC_CURVE curveId);
+LIB_EXPORT bigCurveData* BnCurveInitialize(bigCurveData* E, TPM_ECC_CURVE curveId);
 
 //*** BnCurveFree()
 // This function will free the allocated components of the curve and end the
 // frame in which the curve data exists
-LIB_EXPORT void BnCurveFree(bigCurve E);
+LIB_EXPORT void BnCurveFree(bigCurveData* E);
 
 //** BnEccModMult()
 // This function does a point multiply of the form R = [d]S. A return of FALSE
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
-LIB_EXPORT BOOL BnEccModMult(bigPoint R, pointConst S, bigConst d, bigCurve E);
+LIB_EXPORT BOOL BnEccModMult(
+			     bigPoint R, pointConst S, bigConst d, const bigCurveData* E);
 
 //** BnEccModMult2()
 // This function does a point multiply of the form R = [d]S + [u]Q. A return of
@@ -155,15 +156,23 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,
 			      bigConst            d,
 			      pointConst          Q,
 			      bigConst            u,
-			      const bigCurve      E);
+			      const bigCurveData* E);
 
 //** BnEccAdd()
 // This function does a point add R = S + Q. A return of FALSE
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT BOOL BnEccAdd(
-			 bigPoint R, pointConst S, pointConst Q, const bigCurve E);
+			 bigPoint R, pointConst S, pointConst Q, const bigCurveData* E);
 
 #endif  // ALG_ECC
+
+//			libtpms: added begin
+bigCurveData*
+BnCurveInitialize(
+                  bigCurveData*     E,           // IN: curve structure to initialize
+                  TPM_ECC_CURVE     curveId      // IN: curve identifier
+                  );
+//			libtpms: added end
 
 #endif  //BN_SUPPORT_INTERFACE_H

@@ -129,51 +129,6 @@ LIB_EXPORT bigNum BnFrom2B(bigNum       bn,  // OUT:
     BnSetTop(bn, 0);  // Function accepts NULL
     return NULL;
 }
-/* 10.2.2.3.3 BnFromHex() */
-/* Convert a hex string into a bigNum. This is primarily used in debugging. */
-#ifdef _SM2_SIGN_DEBUG                 // libtpms added
-LIB_EXPORT bigNum
-BnFromHex(
-	  bigNum          bn,         // OUT:
-	  const char      *hex        // IN:
-	  )
-{
-#define FromHex(a)  ((a) - (((a) > 'a') ? ('a' + 10)			\
-			    : ((a) > 'A') ? ('A' - 10) : '0'))
-    unsigned             i;
-    unsigned             wordCount;
-    const char          *p;
-    BYTE                *d = (BYTE *)&(bn->d[0]);
-    //
-    pAssert(bn && hex);
-    i = (unsigned)strlen(hex);
-    wordCount = BYTES_TO_CRYPT_WORDS((i + 1) / 2);
-    if((i == 0) || (wordCount >= BnGetAllocated(bn)))
-	BnSetWord(bn, 0);
-    else
-	{
-	    bn->d[wordCount - 1] = 0;
-	    p = hex + i - 1;
-	    for(;i > 1; i -= 2)
-		{
-		    BYTE a;
-		    a = FromHex(*p);
-		    p--;
-		    *d++ = a + (FromHex(*p) << 4);
-		    p--;
-		}
-	    if(i == 1)
-		*d = FromHex(*p);
-	}
-#if !BIG_ENDIAN_TPM
-    for(i = 0; i < wordCount; i++)
-	bn->d[i] = SWAP_CRYPT_WORD(bn->d[i]);
-#endif // BIG_ENDIAN_TPM
-    BnSetTop(bn, wordCount);
-    return bn;
-}
-#endif                                 // libtpms added
-
 
 //*** BnToBytes()
 // This function converts a BIG_NUM to a byte array. It converts the bigNum to a
@@ -263,49 +218,48 @@ LIB_EXPORT BOOL BnTo2B(bigConst bn,   // IN:
 
 #if ALG_ECC
 
-/* 10.2.2.3.6 BnPointFrom2B() */
-/* Function to create a BIG_POINT structure from a 2B point. A point is going to be two ECC values
-   in the same buffer. The values are going to be the size of the modulus.  They are in modular
-   form. */
-LIB_EXPORT bn_point_t   *
-BnPointFrom2B(
-	      bigPoint             ecP,         // OUT: the preallocated point structure
-	      TPMS_ECC_POINT      *p            // IN: the number to convert
-	      )
+//*** BnPointFromBytes()
+// Function to create a BIG_POINT structure from a byte buffer in big-endian order.
+// A point is going to be two ECC values in the same buffer. The values are going
+// to be the size of the modulus.  They are in modular form.
+LIB_EXPORT bn_point_t* BnPointFromBytes(
+					bigPoint    ecP,  // OUT: the preallocated point structure
+					const BYTE* x,
+					NUMBYTES    nBytesX,
+					const BYTE* y,
+					NUMBYTES    nBytesY)
 {
-    if(p == NULL)
+    if(x == NULL || y == NULL)
 	return NULL;
 
     if(NULL != ecP)
 	{
-	    BnFrom2B(ecP->x, &p->x.b);
-	    BnFrom2B(ecP->y, &p->y.b);
+	    BnFromBytes(ecP->x, x, nBytesX);
+	    BnFromBytes(ecP->y, y, nBytesY);
 	    BnSetWord(ecP->z, 1);
 	}
     return ecP;
 }
 
-/* 10.2.2.3.7 BnPointTo2B() */
-/* This function converts a BIG_POINT into a TPMS_ECC_POINT. A TPMS_ECC_POINT contains two
-   TPM2B_ECC_PARAMETER values. The maximum size of the parameters is dependent on the maximum EC key
-   size used in an implementation. The presumption is that the TPMS_ECC_POINT is large enough to
-   hold 2 TPM2B values, each as large as a MAX_ECC_PARAMETER_BYTES */
-LIB_EXPORT BOOL
-BnPointTo2B(
-	    TPMS_ECC_POINT  *p,             // OUT: the converted 2B structure
-	    bigPoint         ecP,           // IN: the values to be converted
-	    bigCurve         E              // IN: curve descriptor for the point
-	    )
+//*** BnPointToBytes()
+// This function extracts coordinates from a BIG_POINT into
+// most-significant-byte-first memory buffers (the native format of
+// a TPMS_ECC_POINT.)
+// on input the NUMBYTES* parameters indicate the maximum buffer size.
+// on output, they represent the amount of significant data in that buffer.
+LIB_EXPORT BOOL BnPointToBytes(
+			       pointConst ecP,  // OUT: the preallocated point structure
+			       BYTE*      x,
+			       NUMBYTES*  pBytesX,
+			       BYTE*      y,
+			       NUMBYTES*  pBytesY)
 {
-    UINT16           size;
-    //
-    pAssert(p && ecP && E);
+    pAssert(ecP && x && y && pBytesX && pBytesY);
     pAssert(BnEqualWord(ecP->z, 1));
-    // BnMsb is the bit number of the MSB. This is one less than the number of bits
-    size = (UINT16)BITS_TO_BYTES(BnSizeInBits(CurveGetOrder(AccessCurveData(E))));
-    BnTo2B(ecP->x, &p->x.b, size);
-    BnTo2B(ecP->y, &p->y.b, size);
-    return TRUE;
+    BOOL result = BnToBytes(ecP->x, x, pBytesX);
+    result      = result && BnToBytes(ecP->y, y, pBytesY);
+    // TODO: zeroize on error?
+    return result;
 }
 
 #endif  // ALG_ECC

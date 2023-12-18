@@ -507,6 +507,41 @@ LIB_EXPORT BOOL BnShiftRight(bigNum result, bigConst toShift, uint32_t shiftAmou
     BnSetTop(result, finalSize);
     return TRUE;
 }
+
+//*** BnIsPointOnCurve()
+// This function checks if a point is on the curve.
+BOOL BnIsPointOnCurve(pointConst Q, const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    BN_VAR(right, (MAX_ECC_KEY_BITS * 3));
+    BN_VAR(left, (MAX_ECC_KEY_BITS * 2));
+    bigConst prime = BnCurveGetPrime(C);
+    //
+    // Show that point is on the curve y^2 = x^3 + ax + b;
+    // Or y^2 = x(x^2 + a) + b
+    // y^2
+    BnMult(left, Q->y, Q->y);
+
+    BnMod(left, prime);
+    // x^2
+    BnMult(right, Q->x, Q->x);
+
+    // x^2 + a
+    BnAdd(right, right, BnCurveGet_a(C));
+
+    //    ExtMath_Mod(right, CurveGetPrime(C));
+    // x(x^2 + a)
+    BnMult(right, right, Q->x);
+
+    // x(x^2 + a) + b
+    BnAdd(right, right, BnCurveGet_b(C));
+
+    BnMod(right, prime);
+    if(BnUnsignedCmp(left, right) == 0)
+	return TRUE;
+    else
+	return FALSE;
+}
+
 /* 10.2.3.3.20	BnGetRandomBits() */
 /* Return Value	Meaning */
 /* TRUE(1)	success */

@@ -150,7 +150,7 @@ LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
 		 (bigNum)quotient, (bigNum)remainder, (bigConst)dividend, (bigConst)divisor);
 }
 
-#if ALG_RSA && !RSA_KEY_SIEVE
+#if ALG_RSA && !RSA_KEY_SIEVE	// libtpms: changed
 //** ExtMath_GCD()
 // Get the greatest common divisor of two numbers. This function is only needed
 // when the TPM implements RSA.
@@ -200,6 +200,10 @@ LIB_EXPORT BOOL ExtMath_SubtractWord(
 // Modular Arithmetic, writ large
 // ###############################
 // define Mod in terms of Divide
+LIB_EXPORT BOOL ExtMath_Mod(Crypt_Int* valueAndResult, const Crypt_Int* modulus)
+{
+    return ExtMath_Divide(NULL, valueAndResult, valueAndResult, modulus);
+}
 
 //** ExtMath_ModMult()
 // Does 'op1' * 'op2' and divide by 'modulus' returning the remainder of the divide.
@@ -313,6 +317,11 @@ LIB_EXPORT unsigned ExtMath_SizeInBits(const Crypt_Int* n)
 // Bitwise Operations
 // ###############################
 
+LIB_EXPORT BOOL ExtMath_SetBit(Crypt_Int* bn, unsigned int bitNum)
+{
+    return BnSetBit((bigNum)bn, bitNum);
+}
+
 // This function is used to check to see if a bit is SET in a bigNum_t. The 0th bit
 //*** ExtMath_TestBit()
 // is the LSb of d[0].
@@ -326,6 +335,22 @@ LIB_EXPORT BOOL ExtMath_TestBit(Crypt_Int*   bn,     // IN: number to check
     return BnTestBit((bigNum)bn, bitNum);
 }
 
+//***ExtMath_MaskBits()
+// This function is used to mask off high order bits of a big number.
+// The returned value will have no more than 'maskBit' bits
+// set.
+// Note: There is a requirement that unused words of a bigNum_t are set to zero.
+//  Return Type: BOOL
+//      TRUE(1)         result masked
+//      FALSE(0)        the input was not as large as the mask
+LIB_EXPORT BOOL ExtMath_MaskBits(
+				 Crypt_Int*    bn,      // IN/OUT: number to mask
+				 crypt_uword_t maskBit  // IN: the bit number for the mask.
+				 )
+{
+    return BnMaskBits((bigNum)bn, maskBit);
+}
+
 //*** ExtMath_ShiftRight()
 // This function will shift a Crypt_Int* to the right by the shiftAmount.
 // This function always returns TRUE.
@@ -335,3 +360,172 @@ LIB_EXPORT BOOL ExtMath_ShiftRight(
     return BnShiftRight((bigNum)result, (bigConst)toShift, shiftAmount);
 }
 
+// ***************************************************************************
+// ECC Functions
+// ***************************************************************************
+// ##################
+// Point initializers
+// ##################
+LIB_EXPORT Crypt_Point* ExtEcc_Initialize_Point(Crypt_Point* point, NUMBYTES bitCount)
+{
+    // Since we define the structure, we know that BN_POINT_BUFs are a bn_point_t followed by bignums.
+    // and that the size is always the MAX_ECC_KEY_SIZE
+    // tell the individual bignums how large they are:
+    bn_fullpoint_t* pBuf = (bn_fullpoint_t*)point;
+    BnInit((bigNum) & (pBuf->x), BN_STRUCT_ALLOCATION(bitCount));
+    BnInit((bigNum) & (pBuf->y), BN_STRUCT_ALLOCATION(bitCount));
+    BnInit((bigNum) & (pBuf->z), BN_STRUCT_ALLOCATION(bitCount));
+    
+    // now feed the addresses of those coordinates to the bn_point_t structure
+    bn_point_t* bnPoint = (bn_point_t*)point;
+    BnInitializePoint(
+		      bnPoint, (bigNum) & (pBuf->x), (bigNum) & (pBuf->y), (bigNum) & (pBuf->z));
+    return point;
+}
+
+// ##################
+// Curve initializers
+// ##################
+LIB_EXPORT const Crypt_EccCurve* ExtEcc_CurveInitialize(Crypt_EccCurve* E,
+							TPM_ECC_CURVE   curveId)
+{
+    return BnCurveInitialize((bigCurveData*)E, curveId);
+}
+
+// #################
+// Curve DESTRUCTOR
+// #################
+// WARNING: Not guaranteed to be called in presence of LONGJMP.
+LIB_EXPORT void ExtEcc_CurveFree(const Crypt_EccCurve* E)
+{
+    BnCurveFree((bigCurveData*)E);
+}
+
+// #################
+// Buffer Converters
+// #################
+//*** BnPointFromBytes()
+// Function to create a BIG_POINT structure from a 2B point.
+// A point is going to be two ECC values in the same buffer. The values are going
+// to be the size of the modulus.  They are in modular form.
+LIB_EXPORT Crypt_Point* ExtEcc_PointFromBytes(Crypt_Point* point,
+					      const BYTE*  x,
+					      NUMBYTES     nBytesX,
+					      const BYTE*  y,
+					      NUMBYTES     nBytesY)
+{
+    return (Crypt_Point*)BnPointFromBytes((bigPoint)point, x, nBytesX, y, nBytesY);
+}
+
+LIB_EXPORT BOOL ExtEcc_PointToBytes(const Crypt_Point* point,
+				    BYTE* x, NUMBYTES* pBytesX,
+				    BYTE* y, NUMBYTES* pBytesY)
+{
+    return BnPointToBytes((pointConst)point, x, pBytesX, y, pBytesY);
+}
+
+// ####################
+// ECC Point Operations
+// ####################
+//** ExtEcc_PointMultiply()
+// This function does a point multiply of the form R = [d]S. A return of FALSE
+// indicates that the result was the point at infinity. This function is only needed
+// if the TPM supports ECC.
+LIB_EXPORT BOOL ExtEcc_PointMultiply(
+				     Crypt_Point* R, const Crypt_Point* S, const Crypt_Int* d, const Crypt_EccCurve* E)
+{
+    return BnEccModMult((bigPoint)R, (pointConst)S, (bigConst)d, (bigCurveData*)E);
+}
+
+//** ExtEcc_PointMultiplyAndAdd()
+// This function does a point multiply of the form R = [d]S + [u]Q. A return of
+// FALSE indicates that the result was the point at infinity. This function is only
+// needed if the TPM supports ECC.
+LIB_EXPORT BOOL ExtEcc_PointMultiplyAndAdd(Crypt_Point*          R,
+					   const Crypt_Point*    S,
+					   const Crypt_Int*      d,
+					   const Crypt_Point*    Q,
+					   const Crypt_Int*      u,
+					   const Crypt_EccCurve* E)
+{
+    return BnEccModMult2((bigPoint)R,
+			 (pointConst)S,
+			 (bigConst)d,
+			 (pointConst)Q,
+			 (bigConst)u,
+			 (bigCurveData*)E);
+}
+
+LIB_EXPORT BOOL ExtEcc_PointAdd(Crypt_Point*          R,
+				const Crypt_Point*    S,
+				const Crypt_Point*    Q,
+				const Crypt_EccCurve* E)
+{
+    return BnEccAdd((bigPoint)R, (pointConst)S, (pointConst)Q, (bigCurveData*)E);
+}
+
+// #####################
+// ECC Point Information
+// #####################
+LIB_EXPORT BOOL ExtEcc_IsPointOnCurve(const Crypt_Point* Q, const Crypt_EccCurve* E)
+{
+    return BnIsPointOnCurve((pointConst)Q, AccessCurveConstants(E));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_PointX(const Crypt_Point* point)
+{
+    return (const Crypt_Int*)(((pointConst)point)->x);
+}
+
+LIB_EXPORT BOOL ExtEcc_IsInfinityPoint(const Crypt_Point* point)
+{
+    return BnEqualZero(((pointConst)point)->z);
+}
+
+// #####################
+// ECC Curve Information
+// #####################
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGetPrime(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGetPrime(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGetOrder(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGetOrder(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGetCofactor(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGetCofactor(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGet_a(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGet_a(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGet_b(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGet_b(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Point* ExtEcc_CurveGetG(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Point*)BnCurveGetG(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGetGx(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGetGx(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT const Crypt_Int* ExtEcc_CurveGetGy(TPM_ECC_CURVE curveId)
+{
+    return (const Crypt_Int*)BnCurveGetGy(BnGetCurveData(curveId));
+}
+
+LIB_EXPORT TPM_ECC_CURVE ExtEcc_CurveGetCurveId(const Crypt_EccCurve* E)
+{
+    return BnCurveGetCurveId(AccessCurveConstants(E));
+}

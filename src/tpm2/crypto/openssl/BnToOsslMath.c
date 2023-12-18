@@ -84,7 +84,7 @@
 //#include "BnOssl.h"
 
 #ifdef MATH_LIB_OSSL
-#  include "TpmToOsslMath_fp.h"
+#  include "BnToOsslMath_fp.h"
 
 //** Functions
 
@@ -444,7 +444,7 @@ LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus)
 //      FALSE(0)        failure in operation
 static BOOL PointFromOssl(bigPoint            pOut,  // OUT: resulting point
 			  EC_POINT*           pIn,   // IN: the point to return
-			  const bigCurve      E      // IN: the curve
+			  const bigCurveData* E      // IN: the curve
 			  )
 {
     BIGNUM* x = NULL;
@@ -478,7 +478,7 @@ static BOOL PointFromOssl(bigPoint            pOut,  // OUT: resulting point
 
 //*** EcPointInitialized()
 // Allocate and initialize a point.
-LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, bigCurve E)   // libtpms: exported function
+LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, const bigCurveData* E)   // libtpms: exported function
 {
     EC_POINT* P = NULL;
 
@@ -510,13 +510,12 @@ LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, bigCurve E)   //
 //      NULL        the TPM_ECC_CURVE is not valid or there was a problem in
 //                  in initializing the curve data
 //      non-NULL    points to 'E'
-LIB_EXPORT bigCurve
-BnCurveInitialize(
-		  bigCurve          E,           // IN: curve structure to initialize
-		  TPM_ECC_CURVE     curveId      // IN: curve identifier
-		  )
+LIB_EXPORT bigCurveData* BnCurveInitialize(
+					   bigCurveData* E,       // IN: curve structure to initialize
+					   TPM_ECC_CURVE curveId  // IN: curve identifier
+					   )
 {
-    const ECC_CURVE_DATA    *C = GetCurveData(curveId);
+    const TPMBN_ECC_CURVE_CONSTANTS* C = BnGetCurveData(curveId);
     if(C == NULL)
 	E = NULL;
     if(E != NULL)
@@ -580,7 +579,7 @@ BnCurveInitialize(
 //*** BnCurveFree()
 // This function will free the allocated components of the curve and end the
 // frame in which the curve data exists
-LIB_EXPORT void BnCurveFree(bigCurve E)
+LIB_EXPORT void BnCurveFree(bigCurveData* E)
 {
     if(E)
 	{
@@ -597,7 +596,7 @@ LIB_EXPORT void BnCurveFree(bigCurve E)
 LIB_EXPORT BOOL BnEccModMult(bigPoint   R,  // OUT: computed point
 			     pointConst S,  // IN: point to multiply by 'd' (optional)
 			     bigConst   d,  // IN: scalar for [d]S
-			     const bigCurve E)
+			     const bigCurveData* E)
 {
     EC_POINT* pR = EC_POINT_new(E->G);
     EC_POINT* pS = EcPointInitialized(S, E);
@@ -624,7 +623,7 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
 			      bigConst            d,  // IN: scalar for [d]S or [d]G
 			      pointConst          Q,  // IN: second point
 			      bigConst            u,  // IN: second scalar
-			      const bigCurve      E   // IN: curve
+			      const bigCurveData* E   // IN: curve
 			      )
 {
     EC_POINT* pR = EC_POINT_new(E->G);
@@ -633,7 +632,7 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
     EC_POINT* pQ = EcPointInitialized(Q, E);
     BIG_INITIALIZED(bnU, u);
 
-    if(S == NULL || S == (pointConst) & (AccessCurveData(E)->base))
+    if(S == NULL || S == (pointConst) & (AccessCurveConstants(E)->base))
 	EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
 	{
@@ -678,7 +677,7 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
 LIB_EXPORT BOOL BnEccAdd(bigPoint            R,  // OUT: computed point
 			 pointConst          S,  // IN: first point to add
 			 pointConst          Q,  // IN: second point
-			 const bigCurve      E   // IN: curve
+			 const bigCurveData* E   // IN: curve
 			 )
 {
     EC_POINT* pR = EC_POINT_new(E->G);

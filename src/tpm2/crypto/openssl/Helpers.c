@@ -61,7 +61,8 @@
 #include "Tpm.h"
 #include "ExpDCache_fp.h"
 #include "Helpers_fp.h"
-#include "TpmToOsslMath_fp.h"
+#include "BnToOsslMath_fp.h"
+#include "TpmMath_Util_fp.h"
 
 #include "config.h"
 

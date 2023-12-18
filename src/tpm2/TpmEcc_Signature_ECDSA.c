@@ -60,62 +60,63 @@
 
 #include "Tpm.h"
 #include "TpmEcc_Signature_ECDSA_fp.h"
-#include "TpmToOsslMath_fp.h"  // libtpms added
+#include "TpmMath_Debug_fp.h"
+#include "TpmMath_Util_fp.h"
+#include "BnToOsslMath_fp.h"
 
 #if ALG_ECC && ALG_ECDSA
-/* 10.2.12.2 Utility Functions */
-/* 10.2.12.2.1 EcdsaDigest() */
-/* Function to adjust the digest so that it is no larger than the order of the curve. This is used
-   for ECDSA sign and verification. */
+//*** TpmEcc_AdjustEcdsaDigest()
+// Function to adjust the digest so that it is no larger than the order of the
+// curve. This is used for ECDSA sign and verification.
 #if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
-static bigNum
-EcdsaDigest(
-	    bigNum               bnD,           // OUT: the adjusted digest
-	    const TPM2B_DIGEST  *digest,        // IN: digest to adjust
-	    bigConst             max            // IN: value that indicates the maximum
-	    //     number of bits in the results
-	    )
+static Crypt_Int* TpmEcc_AdjustEcdsaDigest(
+					   Crypt_Int*          bnD,     // OUT: the adjusted digest
+					   const TPM2B_DIGEST* digest,  // IN: digest to adjust
+					   const Crypt_Int*    max      // IN: value that indicates the maximum
+					   //     number of bits in the results
+					   )
 {
-    int              bitsInMax = BnSizeInBits(max);
-    int              shift;
+    int bitsInMax = ExtMath_SizeInBits(max);
+    int shift;
     //
     if(digest == NULL)
-	BnSetWord(bnD, 0);
+	ExtMath_SetWord(bnD, 0);
     else
 	{
-	    BnFromBytes(bnD, digest->t.buffer,
-			(NUMBYTES)MIN(digest->t.size, BITS_TO_BYTES(bitsInMax)));
-	    shift = BnSizeInBits(bnD) - bitsInMax;
+	    ExtMath_IntFromBytes(bnD,
+				 digest->t.buffer,
+				 (NUMBYTES)MIN(digest->t.size, BITS_TO_BYTES(bitsInMax)));
+	    shift = ExtMath_SizeInBits(bnD) - bitsInMax;
 	    if(shift > 0)
-		BnShiftRight(bnD, bnD, shift);
+		ExtMath_ShiftRight(bnD, bnD, shift);
 	}
     return bnD;
 }
 #endif                                 // libtpms added
 
-/* 10.2.12.3.1 BnSignEcdsa() */
-/* This function implements the ECDSA signing algorithm. The method is described in the comments
-   below. This version works with internal numbers. */
+//*** TpmEcc_SignEcdsa()
+// This function implements the ECDSA signing algorithm. The method is described
+// in the comments below.
 #if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
 TPM_RC
-BnSignEcdsa(
-	    bigNum                   bnR,           // OUT: r component of the signature
-	    bigNum                   bnS,           // OUT: s component of the signature
-	    bigCurve                 E,             // IN: the curve used in the signature
-	    //     process
-	    bigNum                   bnD,           // IN: private signing key
-	    const TPM2B_DIGEST      *digest,        // IN: the digest to sign
-	    RAND_STATE              *rand           // IN: used in debug of signing
-	    )
+TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signature
+		 Crypt_Int*            bnS,   // OUT: 's' component of the signature
+		 const Crypt_EccCurve* E,     // IN: the curve used in the signature
+		 //     process
+		 Crypt_Int*          bnD,     // IN: private signing key
+		 const TPM2B_DIGEST* digest,  // IN: the digest to sign
+		 RAND_STATE*         rand     // IN: used in debug of signing
+		 )
 {
-    ECC_NUM(bnK);
-    ECC_NUM(bnIk);
-    BN_VAR(bnE, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE) * 8);
-    POINT(ecR);
-    bigConst                order = CurveGetOrder(AccessCurveData(E));
-    TPM_RC                  retVal = TPM_RC_SUCCESS;
-    INT32                   tries = 10;
-    BOOL                    OK = FALSE;
+    CRYPT_ECC_NUM(bnK);
+    CRYPT_ECC_NUM(bnIk);
+    CRYPT_INT_VAR(bnE, MAX_ECC_KEY_BITS);
+    CRYPT_POINT_VAR(ecR);
+    CRYPT_ECC_NUM(bnX);
+    const Crypt_Int* order  = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
+    TPM_RC           retVal = TPM_RC_SUCCESS;
+    INT32            tries  = 10;
+    BOOL             OK     = FALSE;
     //
     pAssert(digest != NULL);
     // The algorithm as described in "Suite B Implementer's Guide to FIPS
@@ -132,63 +133,68 @@ BnSignEcdsa(
     // 6. Compute s = (k^-1 *  (e + d *  r)) mod q. If s = 0, return to Step 1.2.
     // 7. Return (r, s).
     // In the code below, q is n (that it, the order of the curve is p)
-    do // This implements the loop at step 6. If s is zero, start over.
+
+    do  // This implements the loop at step 6. If s is zero, start over.
 	{
 	    for(; tries > 0; tries--)
 		{
 		    // Step 1 and 2 -- generate an ephemeral key and the modular inverse
 		    // of the private key.
-		    if(!BnEccGenerateKeyPair(bnK, ecR, E, rand))
+		    if(!TpmEcc_GenerateKeyPair(bnK, ecR, E, rand))
 			continue;
+		    // get mutable copy of X coordinate
+		    ExtMath_Copy(bnX, ExtEcc_PointX(ecR));
 		    // x coordinate is mod p.  Make it mod q
-		    BnMod(ecR->x, order);
+		    ExtMath_Mod(bnX, order);
 		    // Make sure that it is not zero;
-		    if(BnEqualZero(ecR->x))
+		    if(ExtMath_IsZero(bnX))
 			continue;
 		    // write the modular reduced version of r as part of the signature
-		    BnCopy(bnR, ecR->x);
+		    ExtMath_Copy(bnR, bnX);
 		    // Make sure that a modular inverse exists and try again if not
-		    OK = (BnModInverse(bnIk, bnK, order));
+		    OK = (ExtMath_ModInverse(bnIk, bnK, order));
 		    if(OK)
 			break;
 		}
 	    if(!OK)
 		goto Exit;
-	    EcdsaDigest(bnE, digest, order);
+
+	    TpmEcc_AdjustEcdsaDigest(bnE, digest, order);
+
 	    // now have inverse of K (bnIk), e (bnE), r (bnR),  d (bnD) and
-	    // CurveGetOrder(E)
+	    // ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E))
 	    // Compute s = k^-1 (e + r*d)(mod q)
 	    //  first do s = r*d mod q
-	    BnModMult(bnS, bnR, bnD, order);
+	    ExtMath_ModMult(bnS, bnR, bnD, order);
 	    // s = e + s = e + r * d
-	    BnAdd(bnS, bnE, bnS);
+	    ExtMath_Add(bnS, bnE, bnS);
 	    // s = k^(-1)s (mod n) = k^(-1)(e + r * d)(mod n)
-	    BnModMult(bnS, bnIk, bnS, order);
+	    ExtMath_ModMult(bnS, bnIk, bnS, order);
+
 	    // If S is zero, try again
-	} while(BnEqualZero(bnS));
+	} while(ExtMath_IsZero(bnS));
  Exit:
     return retVal;
 }
 #else // !USE_OPENSSL_FUNCTIONS_ECDSA  libtpms added begin
 TPM_RC
-BnSignEcdsa(
-	    bigNum                   bnR,           // OUT: r component of the signature
-	    bigNum                   bnS,           // OUT: s component of the signature
-	    bigCurve                 E,             // IN: the curve used in the signature
-	    //     process
-	    bigNum                   bnD,           // IN: private signing key
-	    const TPM2B_DIGEST      *digest,        // IN: the digest to sign
-	    RAND_STATE              *rand           // IN: used in debug of signing
-	    )
+TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signature
+		 Crypt_Int*            bnS,   // OUT: 's' component of the signature
+		 const Crypt_EccCurve* E,     // IN: the curve used in the signature
+		 //     process
+		 Crypt_Int*          bnD,     // IN: private signing key
+		 const TPM2B_DIGEST* digest,  // IN: the digest to sign
+		 RAND_STATE*         rand     // IN: used in debug of signing
+		 )
 {
-    ECDSA_SIG        *sig = NULL;
-    EC_KEY           *eckey;
-    int               retVal;
-    const BIGNUM     *r;
-    const BIGNUM     *s;
-    BIGNUM           *d = BN_new();
+    ECDSA_SIG*    sig = NULL;
+    EC_KEY*       eckey;
+    int           retVal;
+    const BIGNUM* r;
+    const BIGNUM* s;
+    BIGNUM*       d = BN_new();
 
-    d = BigInitialized(d, bnD);
+    d = BigInitialized(d, (bigConst)bnD);
 
     eckey = EC_KEY_new();
 
@@ -206,8 +212,8 @@ BnSignEcdsa(
         ERROR_EXIT(TPM_RC_FAILURE);
 
     ECDSA_SIG_get0(sig, &r, &s);
-    OsslToTpmBn(bnR, r);
-    OsslToTpmBn(bnS, s);
+    OsslToTpmBn((bigNum)bnR, r);
+    OsslToTpmBn((bigNum)bnS, s);
 
     retVal = TPM_RC_SUCCESS;
 
@@ -220,33 +226,35 @@ BnSignEcdsa(
 }
 #endif  // USE_OPENSSL_FUNCTIONS_ECDSA libtpms added end
 
-/* 10.2.12.3.7 BnValidateSignatureEcdsa() */
-/* This function validates an ECDSA signature. rIn and sIn should have been checked to make sure
-   that they are in the range 0 < v < n */
-/* Error Returns Meaning */
-/* TPM_RC_SIGNATURE signature not valid */
+//*** TpmEcc_ValidateSignatureEcdsa()
+// This function validates an ECDSA signature. rIn and sIn should have been checked
+// to make sure that they are in the range 0 < 'v' < 'n'
+//  Return Type: TPM_RC
+//      TPM_RC_SIGNATURE           signature not valid
 #if !USE_OPENSSL_FUNCTIONS_ECDSA  // libtpms added
 TPM_RC
-BnValidateSignatureEcdsa(
-			 bigNum                   bnR,           // IN: r component of the signature
-			 bigNum                   bnS,           // IN: s component of the signature
-			 bigCurve                 E,             // IN: the curve used in the signature
-			 //     process
-			 bn_point_t              *ecQ,           // IN: the public point of the key
-			 const TPM2B_DIGEST      *digest         // IN: the digest that was signed
-			 )
+TpmEcc_ValidateSignatureEcdsa(
+			      Crypt_Int*            bnR,  // IN: 'r' component of the signature
+			      Crypt_Int*            bnS,  // IN: 's' component of the signature
+			      const Crypt_EccCurve* E,    // IN: the curve used in the signature
+			      //     process
+			      const Crypt_Point*  ecQ,    // IN: the public point of the key
+			      const TPM2B_DIGEST* digest  // IN: the digest that was signed
+			      )
 {
     // Make sure that the allocation for the digest is big enough for a maximum
     // digest
-    BN_VAR(bnE, MAX(MAX_ECC_KEY_BYTES, MAX_DIGEST_SIZE) * 8);
-    POINT(ecR);
-    ECC_NUM(bnU1);
-    ECC_NUM(bnU2);
-    ECC_NUM(bnW);
-    bigConst                 order = CurveGetOrder(AccessCurveData(E));
-    TPM_RC                   retVal = TPM_RC_SIGNATURE;
+    CRYPT_INT_VAR(bnE, MAX_ECC_KEY_BITS);
+    CRYPT_POINT_VAR(ecR);
+    CRYPT_ECC_NUM(bnU1);
+    CRYPT_ECC_NUM(bnU2);
+    CRYPT_ECC_NUM(bnW);
+    CRYPT_ECC_NUM(bnV);
+    const Crypt_Int* order  = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
+    TPM_RC           retVal = TPM_RC_SIGNATURE;
+    //
     // Get adjusted digest
-    EcdsaDigest(bnE, digest, order);
+    TpmEcc_AdjustEcdsaDigest(bnE, digest, order);
     // 1. If r and s are not both integers in the interval [1, n - 1], output
     //    INVALID.
     //  bnR  and bnS were validated by the caller
@@ -255,47 +263,50 @@ BnValidateSignatureEcdsa(
     // 3. Convert the bit string H0 to an integer e as described in Appendix B.2.
     // Done at entry
     // 4. Compute w = (s')^-1 mod n, using the routine in Appendix B.1.
-    if(!BnModInverse(bnW, bnS, order))
+    if(!ExtMath_ModInverse(bnW, bnS, order))
 	goto Exit;
     // 5. Compute u1 = (e' *   w) mod n, and compute u2 = (r' *  w) mod n.
-    BnModMult(bnU1, bnE, bnW, order);
-    BnModMult(bnU2, bnR, bnW, order);
+    ExtMath_ModMult(bnU1, bnE, bnW, order);
+    ExtMath_ModMult(bnU2, bnR, bnW, order);
     // 6. Compute the elliptic curve point R = (xR, yR) = u1G+u2Q, using EC
     //    scalar multiplication and EC addition (see [Routines]). If R is equal to
     //    the point at infinity O, output INVALID.
-    if(BnPointMult(ecR, CurveGetG(AccessCurveData(E)), bnU1, ecQ, bnU2, E)
+    if(TpmEcc_PointMult(
+			ecR, ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E)), bnU1, ecQ, bnU2, E)
        != TPM_RC_SUCCESS)
 	goto Exit;
     // 7. Compute v = Rx mod n.
-    BnMod(ecR->x, order);
+    ExtMath_Copy(bnV, ExtEcc_PointX(ecR));
+    ExtMath_Mod(bnV, order);
     // 8. Compare v and r0. If v = r0, output VALID; otherwise, output INVALID
-    if(BnUnsignedCmp(ecR->x, bnR) != 0)
+    if(ExtMath_UnsignedCmp(bnV, bnR) != 0)
 	goto Exit;
+
     retVal = TPM_RC_SUCCESS;
  Exit:
     return retVal;
 }
 #else // USE_OPENSSL_FUNCTIONS_ECDSA     libtpms added begin
 TPM_RC
-BnValidateSignatureEcdsa(
-			 bigNum                   bnR,           // IN: r component of the signature
-			 bigNum                   bnS,           // IN: s component of the signature
-			 bigCurve                 E,             // IN: the curve used in the signature
-			 //     process
-			 bn_point_t              *ecQ,           // IN: the public point of the key
-			 const TPM2B_DIGEST      *digest         // IN: the digest that was signed
-			 )
+TpmEcc_ValidateSignatureEcdsa(
+			      Crypt_Int*            bnR,  // IN: 'r' component of the signature
+			      Crypt_Int*            bnS,  // IN: 's' component of the signature
+			      const Crypt_EccCurve* E,    // IN: the curve used in the signature
+			      //     process
+			      const Crypt_Point*  ecQ,    // IN: the public point of the key
+			      const TPM2B_DIGEST* digest  // IN: the digest that was signed
+			      )
 {
-    int               retVal;
-    int               rc;
-    ECDSA_SIG        *sig = NULL;
-    EC_KEY           *eckey = NULL;
-    BIGNUM           *r = BN_new();
-    BIGNUM           *s = BN_new();
-    EC_POINT         *q = EcPointInitialized(ecQ, E);
+    int        retVal;
+    int        rc;
+    ECDSA_SIG* sig = NULL;
+    EC_KEY*    eckey = NULL;
+    BIGNUM*    r = BN_new();
+    BIGNUM*    s = BN_new();
+    EC_POINT*  q = EcPointInitialized((bn_point_t*)ecQ, E);
 
-    r = BigInitialized(r, bnR);
-    s = BigInitialized(s, bnS);
+    r = BigInitialized(r, (bigConst)bnR);
+    s = BigInitialized(s, (bigConst)bnS);
 
     sig = ECDSA_SIG_new();
     eckey = EC_KEY_new();

@@ -80,12 +80,6 @@ LIB_EXPORT bigNum BnFrom2B(bigNum       bn,  // OUT:
 			   const TPM2B* a2B  // IN: number to convert
 			   );
 
-LIB_EXPORT bigNum
-BnFromHex(
-	  bigNum          bn,         // OUT:
-	  const char      *hex        // IN:
-	  );
-
 //*** BnToBytes()
 // This function converts a BIG_NUM to a byte array. It converts the bigNum to a
 // big-endian byte string and sets 'size' to the normalized value. If  'size' is an
@@ -114,19 +108,31 @@ LIB_EXPORT BOOL BnTo2B(bigConst bn,   // IN:
 		       TPM2B*   a2B,  // OUT:
 		       NUMBYTES size  // IN: the desired size
 		       );
+#if ALG_ECC
 
+//*** BnPointFromBytes()
+// Function to create a BIG_POINT structure from a byte buffer in big-endian order.
+// A point is going to be two ECC values in the same buffer. The values are going
+// to be the size of the modulus.  They are in modular form.
+LIB_EXPORT bn_point_t* BnPointFromBytes(
+					bigPoint    ecP,  // OUT: the preallocated point structure
+					const BYTE* x,
+					NUMBYTES    nBytesX,
+					const BYTE* y,
+					NUMBYTES    nBytesY);
 
-LIB_EXPORT bn_point_t   *
-BnPointFrom2B(
-	      bigPoint             ecP,         // OUT: the preallocated point structure
-	      TPMS_ECC_POINT      *p            // IN: the number to convert
-	      );
-
-LIB_EXPORT BOOL
-BnPointTo2B(
-	    TPMS_ECC_POINT  *p,             // OUT: the converted 2B structure
-	    bigPoint         ecP,           // IN: the values to be converted
-	    bigCurve         E              // IN: curve descriptor for the point
-	    );
+//*** BnPointToBytes()
+// This function converts a BIG_POINT into a TPMS_ECC_POINT. A TPMS_ECC_POINT
+// contains two TPM2B_ECC_PARAMETER values. The maximum size of the parameters
+// is dependent on the maximum EC key size used in an implementation.
+// The presumption is that the TPMS_ECC_POINT is large enough to hold 2 TPM2B
+// values, each as large as a MAX_ECC_PARAMETER_BYTES
+LIB_EXPORT BOOL BnPointToBytes(
+			       pointConst ecP,  // OUT: the preallocated point structure
+			       BYTE*      x,
+			       NUMBYTES*  pBytesX,
+			       BYTE*      y,
+			       NUMBYTES*  pBytesY);
+#endif  // ALG_ECC
 
 #endif  // _BN_CONVERT_FP_H_

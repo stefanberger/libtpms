@@ -60,92 +60,102 @@
 
 //** Includes and Defines
 #include "Tpm.h"
-#include "CryptEccSignature_fp.h"
-#include "TpmEcc_Signature_ECDAA_fp.h"
 #include "TpmEcc_Signature_ECDSA_fp.h"
+#include "TpmEcc_Signature_ECDAA_fp.h"
 #include "TpmEcc_Signature_Schnorr_fp.h"
 #include "TpmEcc_Signature_SM2_fp.h"
-#include "TpmToOsslMath_fp.h"  // libtpms added
-#if ALG_ECC
-/* 10.2.12.2 Utility Functions */
+#include "TpmEcc_Util_fp.h"
+#include "TpmMath_Util_fp.h"
+#include "CryptEccSignature_fp.h"
 
-/* 10.2.12.3.6 CryptEccSign() */
-/* This function is the dispatch function for the various ECC-based signing schemes. There is a bit
-   of ugliness to the parameter passing. In order to test this, we sometime would like to use a
-   deterministic RNG so that we can get the same signatures during testing. The easiest way to do
-   this for most schemes is to pass in a deterministic RNG and let it return canned values during
-   testing. There is a competing need for a canned parameter to use in ECDAA. To accommodate both
-   needs with minimal fuss, a special type of RAND_STATE is defined to carry the address of the
-   commit value. The setup and handling of this is not very different for the caller than what was
-   in previous versions of the code. */
-/* Error Returns Meaning */
-/* TPM_RC_SCHEME scheme is not supported */
-LIB_EXPORT TPM_RC
-CryptEccSign(
-	     TPMT_SIGNATURE          *signature,     // OUT: signature
-	     OBJECT                  *signKey,       // IN: ECC key to sign the hash
-	     const TPM2B_DIGEST      *digest,        // IN: digest to sign
-	     TPMT_ECC_SCHEME         *scheme,        // IN: signing scheme
-	     RAND_STATE              *rand
-	     )
+#if ALG_ECC
+
+//** Utility Functions
+
+//** Signing Functions
+
+//*** CryptEccSign()
+// This function is the dispatch function for the various ECC-based
+// signing schemes.
+// There is a bit of ugliness to the parameter passing. In order to test this,
+// we sometime would like to use a deterministic RNG so that we can get the same
+// signatures during testing. The easiest way to do this for most schemes is to
+// pass in a deterministic RNG and let it return canned values during testing.
+// There is a competing need for a canned parameter to use in ECDAA. To accommodate
+// both needs with minimal fuss, a special type of RAND_STATE is defined to carry
+// the address of the commit value. The setup and handling of this is not very
+// different for the caller than what was in previous versions of the code.
+//  Return Type: TPM_RC
+//      TPM_RC_SCHEME            'scheme' is not supported
+LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
+			       OBJECT* signKey,  // IN: ECC key to sign the hash
+			       const TPM2B_DIGEST* digest,  // IN: digest to sign
+			       TPMT_ECC_SCHEME*    scheme,  // IN: signing scheme
+			       RAND_STATE*         rand)
 {
-    CURVE_INITIALIZED(E, signKey->publicArea.parameters.eccDetail.curveID);
-    ECC_INITIALIZED(bnD, &signKey->sensitive.sensitive.ecc.b);
-    ECC_NUM(bnR);
-    ECC_NUM(bnS);
-    const ECC_CURVE_DATA   *C;
-    TPM_RC                  retVal = TPM_RC_SCHEME;
+    CRYPT_CURVE_INITIALIZED(E, signKey->publicArea.parameters.eccDetail.curveID);
+    CRYPT_ECC_INITIALIZED(bnD, &signKey->sensitive.sensitive.ecc.b);
+    CRYPT_ECC_NUM(bnR);
+    CRYPT_ECC_NUM(bnS);
+    TPM_RC retVal = TPM_RC_SCHEME;
     //
     NOT_REFERENCED(scheme);
     if(E == NULL)
 	ERROR_EXIT(TPM_RC_VALUE);
-    C = AccessCurveData(E);
-    signature->signature.ecdaa.signatureR.t.size
-	= sizeof(signature->signature.ecdaa.signatureR.t.buffer);
-    signature->signature.ecdaa.signatureS.t.size
-	= sizeof(signature->signature.ecdaa.signatureS.t.buffer);
+    signature->signature.ecdaa.signatureR.t.size =
+	sizeof(signature->signature.ecdaa.signatureR.t.buffer);
+    signature->signature.ecdaa.signatureS.t.size =
+	sizeof(signature->signature.ecdaa.signatureS.t.buffer);
     TEST(signature->sigAlg);
     switch(signature->sigAlg)
 	{
 	  case TPM_ALG_ECDSA:
-	    retVal = BnSignEcdsa(bnR, bnS, E, bnD, digest, rand);
+	    retVal = TpmEcc_SignEcdsa(bnR, bnS, E, bnD, digest, rand);
 	    break;
-#if ALG_ECDAA
+#  if ALG_ECDAA
 	  case TPM_ALG_ECDAA:
-	    retVal = BnSignEcdaa(&signature->signature.ecdaa.signatureR, bnS, E,
-				 bnD, digest, scheme, signKey, rand);
-	    bnR = NULL;
+	    retVal = TpmEcc_SignEcdaa(&signature->signature.ecdaa.signatureR,
+				      bnS,
+				      E,
+				      bnD,
+				      digest,
+				      scheme,
+				      signKey,
+				      rand);
+	    bnR    = NULL;
 	    break;
-#endif
-#if ALG_ECSCHNORR
+#  endif
+#  if ALG_ECSCHNORR
 	  case TPM_ALG_ECSCHNORR:
-	    retVal = BnSignEcSchnorr(bnR, bnS, E, bnD, digest,
-				     signature->signature.ecschnorr.hash,
-				     rand);
+	    retVal = TpmEcc_SignEcSchnorr(
+					  bnR, bnS, E, bnD, digest, signature->signature.ecschnorr.hash, rand);
 	    break;
-#endif
-#if ALG_SM2
+#  endif
+#  if ALG_SM2
 	  case TPM_ALG_SM2:
-	    retVal = BnSignEcSm2(bnR, bnS, E, bnD, digest, rand);
+	    retVal = TpmEcc_SignEcSm2(bnR, bnS, E, bnD, digest, rand);
 	    break;
-#endif
+#  endif
 	  default:
 	    break;
 	}
     // If signature generation worked, convert the results.
     if(retVal == TPM_RC_SUCCESS)
 	{
-	    NUMBYTES     orderBytes =
-		(NUMBYTES)BITS_TO_BYTES(BnSizeInBits(CurveGetOrder(C)));
+	    NUMBYTES orderBytes = (NUMBYTES)BITS_TO_BYTES(
+							  ExtMath_SizeInBits(ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E))));
 	    if(bnR != NULL)
-		BnTo2B(bnR, &signature->signature.ecdaa.signatureR.b, orderBytes);
+		TpmMath_IntTo2B(
+				bnR, &signature->signature.ecdaa.signatureR.b, orderBytes);
 	    if(bnS != NULL)
-		BnTo2B(bnS, &signature->signature.ecdaa.signatureS.b, orderBytes);
+		TpmMath_IntTo2B(
+				bnS, &signature->signature.ecdaa.signatureS.b, orderBytes);
 	}
  Exit:
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
+
 //********************* Signature Validation   ********************
 
 //*** CryptEccValidateSignature()
@@ -159,16 +169,18 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
 					    const TPM2B_DIGEST* digest      // IN: digest that was signed
 					    )
 {
-    CURVE_INITIALIZED(E, signKey->publicArea.parameters.eccDetail.curveID);
-    ECC_NUM(bnR);
-    ECC_NUM(bnS);
-    POINT_INITIALIZED(ecQ, &signKey->publicArea.unique.ecc);
-    bigConst                 order;
+    CRYPT_CURVE_INITIALIZED(E, signKey->publicArea.parameters.eccDetail.curveID);
+    CRYPT_ECC_NUM(bnR);
+    CRYPT_ECC_NUM(bnS);
+    CRYPT_POINT_INITIALIZED(ecQ, &signKey->publicArea.unique.ecc);
+    const Crypt_Int* order;
     TPM_RC           retVal;
 
     if(E == NULL)
 	ERROR_EXIT(TPM_RC_VALUE);
-    order = CurveGetOrder(AccessCurveData(E));
+
+    order = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
+
     //    // Make sure that the scheme is valid
     switch(signature->sigAlg)
 	{
@@ -187,37 +199,38 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
     // Can convert r and s after determining that the scheme is an ECC scheme. If
     // this conversion doesn't work, it means that the unmarshaling code for
     // an ECC signature is broken.
-    BnFrom2B(bnR, &signature->signature.ecdsa.signatureR.b);
-    BnFrom2B(bnS, &signature->signature.ecdsa.signatureS.b);
+    TpmMath_IntFrom2B(bnR, &signature->signature.ecdsa.signatureR.b);
+    TpmMath_IntFrom2B(bnS, &signature->signature.ecdsa.signatureS.b);
+
     // r and s have to be greater than 0 but less than the curve order
-    if(BnEqualZero(bnR) || BnEqualZero(bnS))
+    if(ExtMath_IsZero(bnR) || ExtMath_IsZero(bnS))
 	ERROR_EXIT(TPM_RC_SIGNATURE);
-    if((BnUnsignedCmp(bnS, order) >= 0)
-       || (BnUnsignedCmp(bnR, order) >= 0))
+    if((ExtMath_UnsignedCmp(bnS, order) >= 0)
+       || (ExtMath_UnsignedCmp(bnR, order) >= 0))
 	ERROR_EXIT(TPM_RC_SIGNATURE);
 
     switch(signature->sigAlg)
 	{
 	  case TPM_ALG_ECDSA:
-	    retVal = BnValidateSignatureEcdsa(bnR, bnS, E, ecQ, digest);
+	    retVal = TpmEcc_ValidateSignatureEcdsa(bnR, bnS, E, ecQ, digest);
 	    break;
-#if ALG_ECSCHNORR
+
+#  if ALG_ECSCHNORR
 	  case TPM_ALG_ECSCHNORR:
-	    retVal = BnValidateSignatureEcSchnorr(bnR, bnS,
-						  signature->signature.any.hashAlg,
-						  E, ecQ, digest);
+	    retVal = TpmEcc_ValidateSignatureEcSchnorr(
+						       bnR, bnS, signature->signature.any.hashAlg, E, ecQ, digest);
 	    break;
-#endif
-#if ALG_SM2
+#  endif
+#  if ALG_SM2
 	  case TPM_ALG_SM2:
-	    retVal = BnValidateSignatureEcSm2(bnR, bnS, E, ecQ, digest);
+	    retVal = TpmEcc_ValidateSignatureEcSm2(bnR, bnS, E, ecQ, digest);
 	    break;
-#endif
+#  endif
 	  default:
 	    FAIL(FATAL_ERROR_INTERNAL);
 	}
  Exit:
-    CURVE_FREE(E);
+    CRYPT_CURVE_FREE(E);
     return retVal;
 }
 
@@ -248,10 +261,11 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 					TPM2B_ECC_PARAMETER* r         // IN: the computed r value (required)
 					)
 {
-    CURVE_INITIALIZED(curve, curveId);  	// Normally initialize E as the curve, but E means
-						// something else in this function
-    ECC_INITIALIZED(bnR, r);
-    TPM_RC               retVal = TPM_RC_SUCCESS;
+    // Normally initialize E as the curve, but
+    // E means something else in this function
+    CRYPT_CURVE_INITIALIZED(curve, curveId);
+    CRYPT_ECC_INITIALIZED(bnR, r);
+    TPM_RC retVal = TPM_RC_SUCCESS;
     //
     // Validate that the required parameters are provided.
     // Note: E has to be provided if computing E := [r]Q or E := [r]M. Will do
@@ -269,34 +283,37 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
     // If B is provided, compute K=[d]B and L=[r]B
     if(B != NULL)
 	{
-	    ECC_INITIALIZED(bnD, d);
-	    POINT_INITIALIZED(pB, B);
-	    POINT(pK);
-	    POINT(pL);
+	    CRYPT_ECC_INITIALIZED(bnD, d);
+	    CRYPT_POINT_INITIALIZED(pB, B);
+	    CRYPT_POINT_VAR(pK);
+	    CRYPT_POINT_VAR(pL);
 	    //
 	    pAssert(d != NULL && K != NULL && L != NULL);
-	    if(!BnIsOnCurve(pB, AccessCurveData(curve)))
+
+	    if(!ExtEcc_IsPointOnCurve(pB, curve))
 		ERROR_EXIT(TPM_RC_VALUE);
 	    // do the math for K = [d]B
-	    if((retVal = BnPointMult(pK, pB, bnD, NULL, NULL, curve)) != TPM_RC_SUCCESS)
+	    if((retVal = TpmEcc_PointMult(pK, pB, bnD, NULL, NULL, curve))
+	       != TPM_RC_SUCCESS)
 		goto Exit;
 	    // Convert BN K to TPM2B K
-	    BnPointTo2B(K, pK, curve);
+	    TpmEcc_PointTo2B(K, pK, curve);
 	    //  compute L= [r]B after checking for cancel
 	    if(_plat__IsCanceled())
 		ERROR_EXIT(TPM_RC_CANCELED);
 	    // compute L = [r]B
-	    if(!BnIsValidPrivateEcc(bnR, curve))
+	    if(!TpmEcc_IsValidPrivateEcc(bnR, curve))
 		ERROR_EXIT(TPM_RC_VALUE);
-	    if((retVal = BnPointMult(pL, pB, bnR, NULL, NULL, curve)) != TPM_RC_SUCCESS)
+	    if((retVal = TpmEcc_PointMult(pL, pB, bnR, NULL, NULL, curve))
+	       != TPM_RC_SUCCESS)
 		goto Exit;
 	    // Convert BN L to TPM2B L
-	    BnPointTo2B(L, pL, curve);
+	    TpmEcc_PointTo2B(L, pL, curve);
 	}
     if((M != NULL) || (B == NULL))
 	{
-	    POINT_INITIALIZED(pM, M);
-	    POINT(pE);
+	    CRYPT_POINT_INITIALIZED(pM, M);
+	    CRYPT_POINT_VAR(pE);
 	    //
 	    // Make sure that a place was provided for the result
 	    pAssert(E != NULL);
@@ -308,13 +325,14 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 	    // If M provided, then pM will not be NULL and will compute E = [r]M.
 	    // However, if M was not provided, then pM will be NULL and E = [r]G
 	    // will be computed
-	    if((retVal = BnPointMult(pE, pM, bnR, NULL, NULL, curve)) != TPM_RC_SUCCESS)
+	    if((retVal = TpmEcc_PointMult(pE, pM, bnR, NULL, NULL, curve))
+	       != TPM_RC_SUCCESS)
 		goto Exit;
 	    // Convert E to 2B format
-	    BnPointTo2B(E, pE, curve);
+	    TpmEcc_PointTo2B(E, pE, curve);
 	}
  Exit:
-    CURVE_FREE(curve);
+    CRYPT_CURVE_FREE(curve);
     return retVal;
 }
 

@@ -104,12 +104,6 @@
 #   define  DEBUG       YES       // Default: Either YES or NO
 #endif
 
-// This definition is required for the re-factored code
-#if (!defined USE_BN_ECC_DATA) || ((USE_BN_ECC_DATA != NO) && (USE_BN_ECC_DATA != YES))
-#   undef   USE_BN_ECC_DATA
-#   define  USE_BN_ECC_DATA     YES     // Default: Either YES or NO
-#endif
-
 ////////////////////////////////////////////////////////////////
 // DEBUG OPTIONS
 ////////////////////////////////////////////////////////////////

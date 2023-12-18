@@ -217,32 +217,22 @@ typedef struct constant_point_t
     bigConst y;
     bigConst z;
 } constant_point_t;
-#define ECC_BITS    (MAX_ECC_KEY_BYTES * 8)
-BN_TYPE(ecc, ECC_BITS);
-#define ECC_NUM(name)       BN_VAR(name, ECC_BITS)
-#define ECC_INITIALIZED(name, initializer)		\
-    BN_INITIALIZED(name, ECC_BITS, initializer)
-#define POINT_INSTANCE(name, bits)					\
-    BN_STRUCT (name##_x, bits)    name##_x =					\
-    {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
-    BN_STRUCT (name##_y, bits )    name##_y =					\
-    {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
-    BN_STRUCT (name##_z, bits )    name##_z =					\
-    {BITS_TO_CRYPT_WORDS ( bits ), 0,{0}};				\
-    bn_point_t name##_
-#define POINT_INITIALIZER(name)						\
-    BnInitializePoint(&name##_, (bigNum)&name##_x,			\
-		      (bigNum)&name##_y, (bigNum)&name##_z)
-#define POINT_INITIALIZED(name, initValue)				\
-    POINT_INSTANCE(name, MAX_ECC_KEY_BITS);				\
-    bigPoint             name = BnPointFrom2B(				\
-					      POINT_INITIALIZER(name),	\
-					      initValue)
-#define POINT_VAR(name, bits)						\
-    POINT_INSTANCE (name, bits);					\
-    bigPoint            name = POINT_INITIALIZER(name)
-#define POINT(name)      POINT_VAR(name, MAX_ECC_KEY_BITS)
-/* Structure for the curve parameters. This is an analog to the TPMS_ALGORITHM_DETAIL_ECC */
+
+// coords points into x,y,z
+// a bigPoint is a pointer to one of these structures, and
+// therefore a pointer to bn_point_t (a coords).
+// so bigPoint->coords->x->size is the size of x, and
+// all 3 components are the same size.
+#define BN_POINT_BUF(typename, bits)			 \
+    struct bnpt_st_##typename##_t			 \
+    {							 \
+	bn_point_t coords;				 \
+	BN_STRUCT(typename##_x, MAX_ECC_KEY_BITS) x;	 \
+	BN_STRUCT(typename##_y, MAX_ECC_KEY_BITS) y;	 \
+	BN_STRUCT(typename##_z, MAX_ECC_KEY_BITS) z;	 \
+    }
+
+typedef BN_POINT_BUF(fullpoint, MAX_ECC_KEY_BITS) bn_fullpoint_t;
 
 // TPMBN_ECC_CURVE_CONSTANTS
 // =========================
@@ -278,13 +268,14 @@ BN_TYPE(ecc, ECC_BITS);
 // TPMS_ALGORITHM_DETAIL_ECC
 typedef struct
 {
+    TPM_ECC_CURVE    curveId;  // TPM Algorithm ID for this data
     bigConst         prime;    // a prime number
     bigConst         order;    // the order of the curve
     bigConst         h;        // cofactor
     bigConst         a;        // linear coefficient
     bigConst         b;        // constant term
     constant_point_t base;     // base point
-} ECC_CURVE_DATA;
+} TPMBN_ECC_CURVE_CONSTANTS;
 
 // Access macros for the TPMBN_ECC_CURVE_CONSTANTS structure. The parameter 'C' is a pointer
 // to an TPMBN_ECC_CURVE_CONSTANTS structure. In some libraries, the curve structure E contains
@@ -293,14 +284,42 @@ typedef struct
 // to the TPMBN_ECC_CURVE_CONSTANTS for access. In some cases, the function does nothing.
 // AccessCurveConstants and these functions are all defined as inline so they can be optimized
 // away in cases where they are no-ops.
-#define CurveGetPrime(C)    ((C)->prime)
-#define CurveGetOrder(C)    ((C)->order)
-#define CurveGetCofactor(C) ((C)->h)
-#define CurveGet_a(C)       ((C)->a)
-#define CurveGet_b(C)       ((C)->b)
-#define CurveGetG(C)        ((pointConst)&((C)->base))
-#define CurveGetGx(C)       ((C)->base.x)
-#define CurveGetGy(C)       ((C)->base.y)
+TPM_INLINE bigConst BnCurveGetPrime(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->prime;
+}
+TPM_INLINE bigConst BnCurveGetOrder(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->order;
+}
+TPM_INLINE bigConst BnCurveGetCofactor(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->h;
+}
+TPM_INLINE bigConst BnCurveGet_a(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->a;
+}
+TPM_INLINE bigConst BnCurveGet_b(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->b;
+}
+TPM_INLINE pointConst BnCurveGetG(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return (pointConst) & (C->base);
+}
+TPM_INLINE bigConst BnCurveGetGx(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->base.x;
+}
+TPM_INLINE bigConst BnCurveGetGy(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->base.y;
+}
+TPM_INLINE TPM_ECC_CURVE BnCurveGetCurveId(const TPMBN_ECC_CURVE_CONSTANTS* C)
+{
+    return C->curveId;
+}
 
 // Convert bytes in initializers
 // This is used for CryptEccData.c.

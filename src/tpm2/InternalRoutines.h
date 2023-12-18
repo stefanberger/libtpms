@@ -116,7 +116,6 @@
 #include "CryptHash_fp.h"
 #include "CryptSym_fp.h"
 #include "CryptDes_fp.h"
-#include "TpmToTpmBigNumMath.h" // libtpms: temp
 #include "CryptPrime_fp.h"
 #include "CryptRand_fp.h"
 #include "CryptSelfTest_fp.h"
@@ -146,7 +145,5 @@
 // Linkage to platform functions
 // TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
 #include "tpm_to_platform_interface.h"
-
-#include "TpmMath_Util_fp.h" // libtpms: temporary
 
 #endif

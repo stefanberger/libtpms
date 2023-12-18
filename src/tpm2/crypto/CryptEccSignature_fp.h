@@ -86,6 +86,7 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
 			       const TPM2B_DIGEST* digest,  // IN: digest to sign
 			       TPMT_ECC_SCHEME*    scheme,  // IN: signing scheme
 			       RAND_STATE*         rand);
+
 //*** CryptEccValidateSignature()
 // This function validates an EcDsa or EcSchnorr signature.
 // The point 'Qin' needs to have been validated to be on the curve of 'curveId'.

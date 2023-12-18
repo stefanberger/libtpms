@@ -179,6 +179,13 @@ LIB_EXPORT BOOL ExtMath_SubtractWord(
 // Modular Arithmetic, writ large
 // ###############################
 
+//** ExtMath_Mod()
+// compute valueAndResult = valueAndResult mod modulus
+// This function divides two Crypt_Int* values and returns only the remainder,
+// replacing the original dividend. The function returns FALSE if there is an
+// error in the operation.
+LIB_EXPORT BOOL ExtMath_Mod(Crypt_Int* valueAndResult, const Crypt_Int* modulus);
+
 //** ExtMath_ModMult()
 // Compute result = (op1 * op2) mod modulus
 LIB_EXPORT BOOL ExtMath_ModMult(Crypt_Int*       result,
@@ -201,6 +208,17 @@ LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
 // This function is only needed when the TPM implements RSA.
 LIB_EXPORT BOOL ExtMath_ModInverse(
 				   Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* modulus);
+
+//** ExtMath_ModInversePrime()
+// Compute the modular multiplicative inverse. This is an optimized function for
+// the case where the modulus is known to be prime.
+//
+// CAUTION: Depending on the library implementation this may be much faster than
+// the normal ModInverse, and therefore is subject to exposing the fact the
+// modulus is prime via a timing side-channel. In many cases (e.g. ECC primes),
+// the prime is not sensitive and this optimized route can be used.
+LIB_EXPORT BOOL ExtMath_ModInversePrime(
+					Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* primeModulus);
 
 //*** ExtMath_ModWord()
 // compute numerator
@@ -270,6 +288,17 @@ LIB_EXPORT unsigned ExtMath_SizeInBits(const Crypt_Int* n);
 // Bitwise Operations
 // ###############################
 
+//*** ExtMath_SetBit()
+//
+// This function will SET a bit in a Crypt_Int*. Bit 0 is the least-significant
+// bit in the 0th digit_t. The function returns TRUE if the bitNum is within the
+// range valid for the given number.  If bitNum is too large, the function
+// should return FALSE, and the TPM will enter failure mode.
+// Return Type: BOOL
+LIB_EXPORT BOOL ExtMath_SetBit(Crypt_Int*   bn,     // IN/OUT: big number to modify
+			       unsigned int bitNum  // IN: Bit number to SET
+			       );
+
 //*** ExtMath_TestBit()
 // This function is used to check to see if a bit is SET in a bignum_t. The 0th bit
 // is the LSb of d[0].
@@ -280,10 +309,125 @@ LIB_EXPORT BOOL ExtMath_TestBit(Crypt_Int*   bn,     // IN: number to check
 				unsigned int bitNum  // IN: bit to test
 				);
 
+//***ExtMath_MaskBits()
+// This function is used to mask off high order bits of a big number.
+// The returned value will have no more than 'maskBit' bits
+// set.
+// Note: There is a requirement that unused words of a bignum_t are set to zero.
+//  Return Type: BOOL
+//      TRUE(1)         result masked
+//      FALSE(0)        the input was not as large as the mask
+LIB_EXPORT BOOL ExtMath_MaskBits(
+				 Crypt_Int*    bn,      // IN/OUT: number to mask
+				 crypt_uword_t maskBit  // IN: the bit number for the mask.
+				 );
+
 //*** ExtMath_ShiftRight()
 // This function will shift a Crypt_Int* to the right by the shiftAmount.
 // This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_ShiftRight(
 				   Crypt_Int* result, const Crypt_Int* toShift, uint32_t shiftAmount);
+
+// ***************************************************************************
+// ECC Functions
+// ***************************************************************************
+// #################
+// type initializers
+// #################
+
+//** initialize point structure given memory size of each coordinate
+LIB_EXPORT Crypt_Point* ExtEcc_Initialize_Point(Crypt_Point* buffer,
+						NUMBYTES     bitsPerCoord);
+
+//** ExtEcc_CurveInitialize()
+// This function is used to initialize a Crypt_EccCurve structure. The
+// structure is a set of pointers to Crypt_Int* values. The curve-dependent values are
+// set by a different function. This function is only needed
+// if the TPM supports ECC.
+LIB_EXPORT const Crypt_EccCurve* ExtEcc_CurveInitialize(Crypt_EccCurve* E,
+							TPM_ECC_CURVE   curveId);
+
+// #################
+// DESTRUCTOR - See Warning
+// #################
+
+//*** ExtEcc_CurveFree()
+// This function will free the allocated components of the curve and end the
+// frame in which the curve data exists.
+// WARNING: Not guaranteed to be called in presence of LONGJMP.
+LIB_EXPORT void ExtEcc_CurveFree(const Crypt_EccCurve* E);
+
+// #################
+// Buffer Converters
+// #################
+//** point structure to/from raw coordinate buffers.
+LIB_EXPORT Crypt_Point* ExtEcc_PointFromBytes(Crypt_Point* buffer,
+					      const BYTE*  x,
+					      NUMBYTES     nBytesX,
+					      const BYTE*  y,
+					      NUMBYTES     nBytesY);
+
+LIB_EXPORT BOOL         ExtEcc_PointToBytes(
+					    const Crypt_Point* point, BYTE* x, NUMBYTES* nBytesX, BYTE* y, NUMBYTES* nBytesY);
+
+// ####################
+// ECC Point Operations
+// ####################
+
+//** ExtEcc_PointMultiply()
+// This function does a point multiply of the form R = [d]S. A return of FALSE
+// indicates that the result was the point at infinity. This function is only needed
+// if the TPM supports ECC.
+LIB_EXPORT BOOL ExtEcc_PointMultiply(Crypt_Point*          R,
+				     const Crypt_Point*    S,
+				     const Crypt_Int*      d,
+				     const Crypt_EccCurve* E);
+
+//** ExtEcc_PointMultiplyAndAdd()
+// This function does a point multiply of the form R = [d]S + [u]Q. A return of
+// FALSE indicates that the result was the point at infinity. This function is only
+// needed if the TPM supports ECC.
+LIB_EXPORT BOOL ExtEcc_PointMultiplyAndAdd(Crypt_Point*          R,
+					   const Crypt_Point*    S,
+					   const Crypt_Int*      d,
+					   const Crypt_Point*    Q,
+					   const Crypt_Int*      u,
+					   const Crypt_EccCurve* E);
+
+//** ExtEcc_PointAdd()
+// This function does a point add R = S + Q. A return of FALSE
+// indicates that the result was the point at infinity. This function is only needed
+// if the TPM supports ECC.
+LIB_EXPORT BOOL ExtEcc_PointAdd(Crypt_Point*          R,
+				const Crypt_Point*    S,
+				const Crypt_Point*    Q,
+				const Crypt_EccCurve* E);
+
+// #####################
+// ECC Point Information
+// #####################
+LIB_EXPORT BOOL ExtEcc_IsPointOnCurve(const Crypt_Point* Q, const Crypt_EccCurve* E);
+LIB_EXPORT BOOL ExtEcc_IsInfinityPoint(const Crypt_Point* pt);
+// extract the X-Coordinate of a point
+LIB_EXPORT const Crypt_Int* ExtEcc_PointX(const Crypt_Point* pt);
+
+// extract the Y-Coordinate of a point
+// (no current use case for the Y coordinate alone, signatures use X)
+// LIB_EXPORT const Crypt_Int* ExtEcc_PointY(const Crypt_Point* pt);
+
+// #####################
+// ECC Curve Information
+// #####################
+// These functions are expected to be fast, returning pre-built constants without
+// allocation or copying.
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGetPrime(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGetOrder(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGetCofactor(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGet_a(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGet_b(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Point* ExtEcc_CurveGetG(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGetGx(TPM_ECC_CURVE curveId);
+LIB_EXPORT const Crypt_Int*   ExtEcc_CurveGetGy(TPM_ECC_CURVE curveId);
+LIB_EXPORT TPM_ECC_CURVE      ExtEcc_CurveGetCurveId(const Crypt_EccCurve* E);
 
 #endif
