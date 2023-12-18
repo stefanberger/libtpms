@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*	 		TPM to OpenSSL BigNum Shim Layer			*/
+/*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,42 +54,41 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
-/* B.2.2.1. TpmToOsslMath.h */
-/* B.2.2.1.1. Introduction */
-/* This file contains the structure definitions used for ECC in the OpenSSL version of the
-   code. These definitions would change, based on the library. The ECC-related structures that cross
-   the TPM interface are defined in TpmTypes.h */
+//** Introduction
+// This file contains OpenSSL specific functions called by TpmBigNum library to provide
+// the TpmBigNum + OpenSSL math support.
 
-#ifndef MATH_LIB_DEFINED
-#define MATH_LIB_DEFINED
+#ifndef _BN_TO_OSSL_MATH_H_
+#define _BN_TO_OSSL_MATH_H_
+
 #define MATH_LIB_OSSL
+
 #include <openssl/evp.h>
 #include <openssl/ec.h>
+#include <openssl/bn.h>
 
 #define SYMMETRIC_ALIGNMENT RADIX_BYTES
 
 #if 0 // libtpms added
-/*
- * As of release 3.0.0, OPENSSL_VERSION_NUMBER is a combination of the
- * major (M), minor (NN) and patch (PP) version into a single integer 0xMNN00PP0L
- */
-#if OPENSSL_VERSION_NUMBER > 0x30100ff0L
-// Check the bignum_st definition in crypto/bn/bn_lcl.h or crypto/bn/bn_local.h and either update
-// the version check or provide the new definition for this version.
-// Currently safe for all 3.1.x
-#   error Untested OpenSSL version
-#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
-// from crypto/bn/bn_lcl.h
-struct bignum_st {
-    BN_ULONG *d;
-    int top;
 
-    int dmax;
-    int neg;
+#if OPENSSL_VERSION_NUMBER >= 0x30100ff0L
+// Check the bignum_st definition against the one below and either update the
+// version check or provide the new definition for this version.
+#  error Untested OpenSSL version
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
+// from crypto/bn/bn_lcl.h (OpenSSL 1.x) or crypto/bn/bn_local.h (OpenSSL 3.0)
+struct bignum_st
+{
+    BN_ULONG* d;   /* Pointer to an array of 'BN_BITS2' bit
+		    * chunks. */
+    int       top; /* Index of last used d +1. */
+    /* The next are internal book keeping for bn_expand. */
+    int dmax;      /* Size of the d array. */
+    int neg;       /* one if the number is negative */
     int flags;
 };
 #if 0   // libtpms added
@@ -99,53 +98,48 @@ struct bignum_st {
 #endif // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
 
-#include <openssl/bn.h>
-#if USE_OPENSSL_FUNCTIONS_ECDSA        // libtpms added begin
-#include <openssl/ecdsa.h>
-#endif                                 // libtpms added end
+                    // libtpms added end
 
-/* B.2.2.2.2. Macros and Defines */
-/* Make sure that the library is using the correct size for a crypt word */
+	//** Macros and Defines
 
-#if    defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
+	// Make sure that the library is using the correct size for a crypt word
+#if defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
     || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT)		\
 	&& (RADIX_BITS != 64))
-#   error Ossl library is using different radix
+#  error Ossl library is using different radix
 #endif
 
-/* Allocate a local BIGNUM value. For the allocation, a bigNum structure is created as is a local
-   BIGNUM. The bigNum is initialized and then the BIGNUM is set to reference the local value. */
-
+// Allocate a local BIGNUM value. For the allocation, a bigNum structure is created
+// as is a local BIGNUM. The bigNum is initialized and then the BIGNUM is
+// set to reference the local value.
 #define BIG_VAR(name, bits)						\
     BN_VAR(name##Bn, (bits));						\
-    BIGNUM          *_##name = BN_new();		/* libtpms */	\
-    BIGNUM          *name = BigInitialized(_##name,	/* libtpms */	\
-					   BnInit(name##Bn,		\
-						  BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
+    BIGNUM* _##name = BN_new();			/* libtpms */	\
+    BIGNUM* name = BigInitialized(_##name	/* libtpms */	\
+									, BnInit(name##Bn, BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
 
-/* Allocate a BIGNUM and initialize with the values in a bigNum initializer */
-
+// Allocate a BIGNUM and initialize with the values in a bigNum initializer
 #define BIG_INITIALIZED(name, initializer)				\
-    BIGNUM          *_##name = BN_new();		/* libtpms */	\
-    BIGNUM          *name = BigInitialized(_##name, initializer) /* libtpms */
+    BIGNUM* _##name = BN_new();				/* libtpms */	\
+    BIGNUM* name = BigInitialized(_##name, initializer) /* libtpms */
 
 typedef struct
 {
-    const ECC_CURVE_DATA    *C;     // the TPM curve values
-    EC_GROUP                *G;     // group parameters
-    BN_CTX                  *CTX;   // the context for the math (this might not be
+    const ECC_CURVE_DATA*            C;     // the TPM curve values
+    EC_GROUP*                        G;  // group parameters
+    BN_CTX* CTX;  // the context for the math (this might not be
     // the context in which the curve was created>;
 } OSSL_CURVE_DATA;
+
+// Define the curve data type expected by the TpmBigNum library:
 typedef OSSL_CURVE_DATA      *bigCurve;
 #define AccessCurveData(E)  ((E)->C)
 
 #include "TpmToOsslSupport_fp.h"
 
-#define OSSL_ENTER()     BN_CTX      *CTX = OsslContextEnter()
-#define OSSL_LEAVE()     OsslContextLeave(CTX)
-
-/* Start and end a context that spans multiple ECC functions. This is used so that the group for the
-   curve can persist across multiple frames. */
+// Start and end a context within which the OpenSSL memory management works
+#define OSSL_ENTER() BN_CTX* CTX = OsslContextEnter()
+#define OSSL_LEAVE() OsslContextLeave(CTX)
 
 #define CURVE_INITIALIZED(name, initializer)				\
     OSSL_CURVE_DATA     _##name;					\
@@ -153,16 +147,15 @@ typedef OSSL_CURVE_DATA      *bigCurve;
 
 #define CURVE_FREE(name)               BnCurveFree(name)
 
-/* Start and end a local stack frame within the context of the curve frame */
 #if 0	/* kgold not used */
-#define ECC_ENTER()     BN_CTX         *CTX = OsslPushContext(E->CTX)
-#define ECC_LEAVE()     OsslPopContext(CTX)
+// Start and end a local stack frame within the context of the curve frame
+#define ECC_ENTER() BN_CTX* CTX = OsslPushContext(E->CTX)
+#define ECC_LEAVE() OsslPopContext(CTX)
 #endif
-#define BN_NEW()        BnNewVariable(CTX)
 
+#define BN_NEW() BnNewVariable(CTX)
 
-/* This definition would change if there were something to report */
+// This definition would change if there were something to report
 #define MathLibSimulationEnd()
-#endif // MATH_LIB_DEFINED
 
-
+#endif  // _BN_TO_OSSL_MATH_H_
