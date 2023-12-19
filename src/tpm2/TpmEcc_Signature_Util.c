@@ -1,0 +1,105 @@
+/********************************************************************************/
+/*										*/
+/*			     							*/
+/*			     Written by Ken Goldman				*/
+/*		       IBM Thomas J. Watson Research Center			*/
+/*										*/
+/*  Licenses and Notices							*/
+/*										*/
+/*  1. Copyright Licenses:							*/
+/*										*/
+/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
+/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
+/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
+/*    derivative works, distribute, display and perform the Source Code and	*/
+/*    derivative works thereof, and to grant others the rights granted herein.	*/
+/*										*/
+/*  - The TCG grants to the user of the other parts of the specification 	*/
+/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
+/*    display, and perform the specification solely for the purpose of 		*/
+/*    developing products based on such documents.				*/
+/*										*/
+/*  2. Source Code Distribution Conditions:					*/
+/*										*/
+/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
+/*    this list of conditions and the following disclaimers.			*/
+/*										*/
+/*  - Redistributions in binary form must reproduce the above copyright 	*/
+/*    licenses, this list of conditions	and the following disclaimers in the 	*/
+/*    documentation and/or other materials provided with the distribution.	*/
+/*										*/
+/*  3. Disclaimers:								*/
+/*										*/
+/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
+/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
+/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
+/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
+/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
+/*  information on specification licensing rights available through TCG 	*/
+/*  membership agreements.							*/
+/*										*/
+/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
+/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
+/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
+/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
+/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
+/*										*/
+/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
+/*    liability, including liability for infringement of any proprietary 	*/
+/*    rights, relating to use of information in this specification and to the	*/
+/*    implementation of this specification, and TCG disclaims all liability for	*/
+/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
+/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
+/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
+/*    arising in any way out of use or reliance upon this specification or any 	*/
+/*    information herein.							*/
+/*										*/
+/*  (c) Copyright IBM Corp. and others, 2023					*/
+/*										*/
+/********************************************************************************/
+
+// functions shared by multiple signature algorithms
+#include "Tpm.h"
+#include "TpmEcc_Signature_Util_fp.h"
+#include "TpmMath_Util_fp.h"
+
+#if(ALG_ECC && (ALG_ECSCHNORR || ALG_ECDAA))
+
+/* 10.2.12.2.2 BnSchnorrSign() */
+/* This contains the Schnorr signature computation. It is used by both ECDSA and Schnorr
+   signing. The result is computed as: [s = k + r * d (mod n)] where */
+/* a) s is the signature */
+/* b) k is a random value */
+/* c) r is the value to sign */
+/* d) d is the private EC key */
+/* e) n is the order of the curve */
+/* Error Returns Meaning */
+/* TPM_RC_NO_RESULT the result of the operation was zero or r (mod n) is zero */
+TPM_RC
+BnSchnorrSign(
+	      bigNum                   bnS,           // OUT: s component of the signature
+	      bigConst                 bnK,           // IN: a random value
+	      bigNum                   bnR,           // IN: the signature 'r' value
+	      bigConst                 bnD,           // IN: the private key
+	      bigConst                 bnN            // IN: the order of the curve
+	      )
+{
+    // Need a local temp value to store the intermediate computation because product
+    // size can be larger than will fit in bnS.
+    BN_VAR(bnT1, MAX_ECC_PARAMETER_BYTES * 2 * 8);
+    //
+    // Reduce bnR without changing the input value
+    BnDiv(NULL, bnT1, bnR, bnN);
+    if(BnEqualZero(bnT1))
+	return TPM_RC_NO_RESULT;
+    // compute s = (k + r * d)(mod n)
+    // r * d
+    BnMult(bnT1, bnT1, bnD);
+    // k * r * d
+    BnAdd(bnT1, bnT1, bnK);
+    // k + r * d (mod n)
+    BnDiv(NULL, bnS, bnT1, bnN);
+    return (BnEqualZero(bnS)) ? TPM_RC_NO_RESULT : TPM_RC_SUCCESS;
+}
+
+#endif  // (ALG_ECC && (ALG_ECSCHNORR || ALG_ECDAA))
