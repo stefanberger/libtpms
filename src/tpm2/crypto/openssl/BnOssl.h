@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*		Initialization of the Interface to the OpenSSL Library.	   	*/
+/*						*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,67 +54,23 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				  	*/
 /*										*/
 /********************************************************************************/
 
 //** Introduction
-//
-// The functions in this file are used for initialization of the interface to the
-// OpenSSL library.
-
-//** Defines and Includes
-
-#include "BnOssl.h"
-
-#if defined(HASH_LIB_OSSL) || defined(MATH_LIB_OSSL) || defined(SYM_LIB_OSSL)
-// Used to pass the pointers to the correct sub-keys
-typedef const BYTE* desKeyPointers[3];
-
-//*** BnSupportLibInit()
-// This does any initialization required by the support library.
-LIB_EXPORT int BnSupportLibInit(void)
-{
-    return TRUE;
-}
-
-//*** OsslContextEnter()
-// This function is used to initialize an OpenSSL context at the start of a function
-// that will call to an OpenSSL math function.
-BN_CTX* OsslContextEnter(void)
-{
-    BN_CTX* CTX = BN_CTX_new();
-    //
-    return OsslPushContext(CTX);
-}
-
-//*** OsslContextLeave()
-// This is the companion function to OsslContextEnter().
-void OsslContextLeave(BN_CTX* CTX)
-{
-    OsslPopContext(CTX);
-    BN_CTX_free(CTX);
-}
-
-//*** OsslPushContext()
-// This function is used to create a frame in a context. All values allocated within
-// this context after the frame is started will be automatically freed when the
-// context (OsslPopContext()
-BN_CTX* OsslPushContext(BN_CTX* CTX)
-{
-    if(CTX == NULL)
-	FAIL(FATAL_ERROR_ALLOCATION);
-    BN_CTX_start(CTX);
-    return CTX;
-}
-
-//*** OsslPopContext()
-// This is the companion function to OsslPushContext().
-void OsslPopContext(BN_CTX* CTX)
-{
-    // BN_CTX_end can't be called with NULL. It will blow up.
-    if(CTX != NULL)
-	BN_CTX_end(CTX);
-}
-
-#endif  // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL
+// This file contains the headers necessary to build the Open SSL support for
+// the TpmBigNum library.
+#ifndef _BNOSSL_H_
+#define _BNOSSL_H_
+// TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
+#include "tpm_public.h"
+#include "TpmFail_fp.h"
+#include "BnToOsslMath.h"
+// TODO_RENAME_INC_FOLDER: these refer to TpmBigNum protected headers
+#include "BnSupport_Interface.h"
+#include "BnUtil_fp.h"
+#include "BnMemory_fp.h"
+#include "BnMath_fp.h"
+#include "BnConvert_fp.h"
+#endif
