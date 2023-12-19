@@ -80,8 +80,8 @@
 // should be no chance of a memory leak.
 
 //** Includes and Defines
-#include "Tpm.h"
-//#include "BnOssl.h"
+//#include "Tpm.h"
+#include "BnOssl.h"
 
 #ifdef MATH_LIB_OSSL
 #  include "BnToOsslMath_fp.h"

@@ -589,6 +589,7 @@ libtpms_tpm2_la_SOURCES += \
 	tpm2/crypto/openssl/TpmToOsslSupport.c
 
 noinst_HEADERS += \
+	tpm2/crypto/openssl/BnOssl.h \
 	tpm2/crypto/openssl/BnToOsslMath_fp.h \
 	tpm2/crypto/openssl/BnToOsslMath.h \
 	tpm2/crypto/openssl/ConsttimeUtils.h \
