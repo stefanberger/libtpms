@@ -588,7 +588,7 @@ LIB_EXPORT BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,
     unsigned numBytes;
 
     if (rand)
-	return BnGenerateRandomInRange(dest, limit, rand);
+	return TpmMath_GetRandomInRange((Crypt_Int*)dest, (const Crypt_Int*)limit, rand);
 
     // a 'limit' like 'BN_P638_n' has leading zeros and we only need 73 bytes not 80
     requestedBits = BnSizeInBitsSkipLeadingZeros(limit);
@@ -598,7 +598,7 @@ LIB_EXPORT BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,
 	maxRepeats += (9 - (requestedBits & 7));
 
     while (true) {
-	OK = BnGenerateRandomInRange(dest, limit, rand);
+	OK = TpmMath_GetRandomInRange((Crypt_Int*)dest, (const Crypt_Int*)limit, rand);
 	if (!OK)
 	    break;
 	if (repeats < maxRepeats) {

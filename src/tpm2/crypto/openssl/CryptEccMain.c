@@ -498,7 +498,7 @@ BOOL TpmEcc_GenPrivateScalar(
     CRYPT_INT_VAR(bnExtraBits, MAX_ECC_KEY_BITS + 64);
     CRYPT_INT_VAR(nMinus1, MAX_ECC_KEY_BITS);
     //
-    OK = BnGetRandomBits((bigNum)bnExtraBits, (orderBytes * 8) + 64, rand); // libtpms: keep for now
+    OK = TpmMath_GetRandomInteger(bnExtraBits, (orderBytes * 8) + 64, rand);
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
@@ -532,7 +532,7 @@ BOOL TpmEcc_GenPrivateScalar(
     }
 
     //
-    OK = BnGetRandomBits((bigNum)bnExtraBits, (orderBytes * 8) + 64, rand); // libtpms: keep for now
+    OK = TpmMath_GetRandomInteger(bnExtraBits, (orderBytes * 8) + 64, rand);
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
