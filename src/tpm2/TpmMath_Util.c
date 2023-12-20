@@ -99,3 +99,61 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
     return FALSE;
 }
 
+/* 10.2.3.3.20	BnGetRandomBits() */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure */
+LIB_EXPORT BOOL
+BnGetRandomBits(
+		bigNum           n,
+		size_t           bits,
+		RAND_STATE      *rand
+		)
+{
+    // Since this could be used for ECC key generation using the extra bits method,
+    // make sure that the value is large enough
+    TPM2B_TYPE(LARGEST, LARGEST_NUMBER + 8);
+    TPM2B_LARGEST    large;
+    //
+    large.b.size = (UINT16)BITS_TO_BYTES(bits);
+    if(DRBG_Generate(rand, large.t.buffer, large.t.size) == large.t.size)
+	{
+	    if(BnFrom2B(n, &large.b) != NULL)
+		{
+		    if(BnMaskBits(n, (crypt_uword_t)bits))
+			return TRUE;
+		}
+	}
+    return FALSE;
+}
+/* 10.2.3.3.21 BnGenerateRandomInRange() */
+/* Function to generate a random number r in the range 1 <= r < limit. The function gets a random
+   number of bits that is the size of limit. There is some some probability that the returned number
+   is going to be greater than or equal to the limit. If it is, try again. There is no more than 50%
+   chance that the next number is also greater, so try again. We keep trying until we get a value
+   that meets the criteria. Since limit is very often a number with a LOT of high order ones, this
+   rarely would need a second try. */
+/* Return Value	Meaning */
+/* TRUE(1)	success */
+/* FALSE(0)	failure */
+LIB_EXPORT BOOL
+BnGenerateRandomInRange(
+			bigNum           dest,
+			bigConst         limit,
+			RAND_STATE      *rand
+			)
+{
+    size_t   bits = BnSizeInBits(limit);
+    //
+    if(bits < 2)
+	{
+	    BnSetWord(dest, 0);
+	    return FALSE;
+	}
+    else
+	{
+	    while(BnGetRandomBits(dest, bits, rand)
+		  && (BnEqualZero(dest) || (BnUnsignedCmp(dest, limit) >= 0)));
+	}
+    return !g_inFailureMode;
+}
