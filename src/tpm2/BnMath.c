@@ -542,74 +542,12 @@ BOOL BnIsPointOnCurve(pointConst Q, const TPMBN_ECC_CURVE_CONSTANTS* C)
 	return FALSE;
 }
 
-/* 10.2.3.3.20	BnGetRandomBits() */
-/* Return Value	Meaning */
-/* TRUE(1)	success */
-/* FALSE(0)	failure */
-LIB_EXPORT BOOL
-BnGetRandomBits(
-		bigNum           n,
-		size_t           bits,
-		RAND_STATE      *rand
-		)
-{
-    // Since this could be used for ECC key generation using the extra bits method,
-    // make sure that the value is large enough
-    TPM2B_TYPE(LARGEST, LARGEST_NUMBER + 8);
-    TPM2B_LARGEST    large;
-    //
-    large.b.size = (UINT16)BITS_TO_BYTES(bits);
-    if(DRBG_Generate(rand, large.t.buffer, large.t.size) == large.t.size)
-	{
-	    if(BnFrom2B(n, &large.b) != NULL)
-		{
-		    if(BnMaskBits(n, (crypt_uword_t)bits))
-			return TRUE;
-		}
-	}
-    return FALSE;
-}
-/* 10.2.3.3.21 BnGenerateRandomInRange() */
-/* Function to generate a random number r in the range 1 <= r < limit. The function gets a random
-   number of bits that is the size of limit. There is some some probability that the returned number
-   is going to be greater than or equal to the limit. If it is, try again. There is no more than 50%
-   chance that the next number is also greater, so try again. We keep trying until we get a value
-   that meets the criteria. Since limit is very often a number with a LOT of high order ones, this
-   rarely would need a second try. */
-/* Return Value	Meaning */
-/* TRUE(1)	success */
-/* FALSE(0)	failure */
-LIB_EXPORT BOOL
-BnGenerateRandomInRange(
-			bigNum           dest,
-			bigConst         limit,
-			RAND_STATE      *rand
-			)
-{
-    size_t   bits = BnSizeInBits(limit);
-    //
-    if(bits < 2)
-	{
-	    BnSetWord(dest, 0);
-	    return FALSE;
-	}
-    else
-	{
-	    while(BnGetRandomBits(dest, bits, rand)
-		  && (BnEqualZero(dest) || (BnUnsignedCmp(dest, limit) >= 0)));
-	}
-    return !g_inFailureMode;
-}
-
 // libtpms added begin
 
 // This version of BnSizeInBits skips any leading zero bytes in bigConst
 // and thus calculates the bits that OpenSSL will work with after truncating
 // the leading zeros
-static LIB_EXPORT unsigned
-BnSizeInBitsSkipLeadingZeros(
-	     bigConst                 n
-	     )
+static unsigned BnSizeInBitsSkipLeadingZeros(bigConst n)
 {
     int                firstByte;
     unsigned           bitSize = BnSizeInBits(n);
@@ -637,12 +575,10 @@ BnSizeInBitsSkipLeadingZeros(
    byte is non-zero, so that the number will not be shortened and subsequent operations
    will not have a timing-sidechannel
  */
-LIB_EXPORT BOOL
-BnGenerateRandomInRangeAllBytes(
-			bigNum           dest,
-			bigConst         limit,
-			RAND_STATE      *rand
-			)
+LIB_EXPORT BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,
+						bigConst    limit,
+						RAND_STATE* rand
+						)
 {
     BOOL     OK;
     int      repeats = 0;
