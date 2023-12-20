@@ -2853,6 +2853,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if USE_DA_USED
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -2860,6 +2861,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if USE_DA_USED
     /* g_daUsed: must write */
     written += BOOL_Marshal(&g_daUsed, buffer, size); /* line 484 */
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
@@ -2893,6 +2896,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -2920,6 +2924,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if CC_GetCommandAuditDigest
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -2927,6 +2932,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if CC_GetCommandAuditDigest
     /* s_cpHashForCommandAudit: seems not used; better to write it */
     written += TPM2B_DIGEST_Marshal(&s_cpHashForCommandAudit, buffer, size);
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
@@ -2937,13 +2944,14 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
     has_block = TRUE;
+#error Unsupport #define value(s)
 #else
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
-
+#error Unsupport #define value(s)
 #if !ACCUMULATE_SELF_HEAL_TIMER
     has_block = TRUE;
 #else
@@ -2962,6 +2970,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if defined NV_C || defined GLOBAL_C
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -2985,12 +2994,15 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
      * - s_cachedNvRef
      * - s_cachedNvRamRef
      */
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
 #if defined OBJECT_C || defined GLOBAL_C
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -3005,12 +3017,15 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     for (i = 0; i < array_size; i++) {
         written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size);
     }
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
 #if defined PCR_C || defined GLOBAL_C
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -3023,12 +3038,15 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     for (i = 0; i < array_size; i++) {
         written += PCR_Marshal(&s_pcrs[i], buffer, size);
     }
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
 #if defined SESSION_C || defined GLOBAL_C
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -3045,10 +3063,13 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += UINT32_Marshal(&s_oldestSavedSession, buffer, size);
     /* s_freeSessionSlots: */
     written += UINT32_Marshal((UINT32 *)&s_freeSessionSlots, buffer, size);
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
 #if defined IO_BUFFER_C || defined GLOBAL_C
+# error Unsupport #define value(s)
     /* s_actionInputBuffer: skip; only used during a single command */
     /* s_actionOutputBuffer: skip; only used during a single command */
 #endif
@@ -3061,6 +3082,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #if defined TPM_FAIL_C || defined GLOBAL_C || 1
     has_block = TRUE;
 #else
+# error Unsupport #define value(s)
     has_block = FALSE;
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
@@ -3069,6 +3091,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += UINT32_Marshal(&s_failFunction, buffer, size);
     written += UINT32_Marshal(&s_failLine, buffer, size);
     written += UINT32_Marshal(&s_failCode, buffer, size);
+#else
+# error Unsupport #define value(s)
 #endif // TPM_FAIL_C
     BLOCK_SKIP_WRITE_POP(size);
 
@@ -3076,6 +3100,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     has_block = TRUE;
 #else
     has_block = FALSE;
+# error Unsupport #define value(s)
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
@@ -3084,6 +3109,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
     tmp_uint64 = s_tpmTime;
     written += UINT64_Marshal(&tmp_uint64, buffer, size);
+#else
+# error Unsupport #define value(s)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
@@ -3248,6 +3275,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
 #if USE_DA_USED
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3258,6 +3286,8 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_daUsed, buffer, size); /* line 484 */
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_da:
 
@@ -3299,6 +3329,7 @@ skip_da:
 #if defined SESSION_PROCESS_C || defined GLOBAL_C || defined MANUFACTURE_C
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3347,6 +3378,7 @@ skip_da:
 #if CC_GetCommandAuditDigest
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3363,10 +3395,13 @@ skip_cc_getcommandauditdigest:
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&s_DAPendingOnNV, buffer, size);
     }
+#else
+# error Unsupport #define value(s)
 #endif /* SESSION_PROCESS_C */
 skip_session_process:
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+# error Unsupport #define value(s)
     needs_block = TRUE;
 #else
     needs_block = FALSE;
@@ -3377,6 +3412,7 @@ skip_session_process:
     }
 
 #if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+# error Unsupport #define value(s)
 #if !ACCUMULATE_SELF_HEAL_TIMER
     needs_block = TRUE;
 #else
@@ -3401,6 +3437,7 @@ skip_accumulate_self_heal_timer_1:
 #if defined NV_C || defined GLOBAL_C
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3434,12 +3471,15 @@ skip_accumulate_self_heal_timer_1:
      * - s_cachedNvRef
      * - s_cachedNvRamRef
      */
+#else
+# error Unsupport #define value(s)
 #endif
 skip_nv:
 
 #if defined OBJECT_C || defined GLOBAL_C
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3460,12 +3500,15 @@ skip_nv:
     for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size, true);
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_object:
 
 #if defined PCR_C || defined GLOBAL_C
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3486,12 +3529,15 @@ skip_object:
     for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = PCR_Unmarshal(&s_pcrs[i], buffer, size, &shadow.pcrAllocated);
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_pcr:
 
 #if defined SESSION_C || defined GLOBAL_C
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3521,6 +3567,8 @@ skip_pcr:
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal((UINT32 *)&s_freeSessionSlots, buffer, size);
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_session:
 
@@ -3543,6 +3591,7 @@ skip_session:
 #if defined TPM_FAIL_C || defined GLOBAL_C || 1
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3561,12 +3610,15 @@ skip_session:
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&s_failCode, buffer, size);
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_fail:
 
 #ifndef HARDWARE_CLOCK
     needs_block = TRUE;
 #else
+# error Unsupport #define value(s)
     needs_block = FALSE;
 #endif
     if (rc == TPM_RC_SUCCESS) {
@@ -3583,6 +3635,8 @@ skip_fail:
         rc = UINT64_Unmarshal(&tmp_uint64, buffer, size);
         s_tpmTime = tmp_uint64;
     }
+#else
+# error Unsupport #define value(s)
 #endif
 skip_hardware_clock:
 
