@@ -141,6 +141,20 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
 				       UINT32      e,          // IN: the exponent
 				       RAND_STATE* rand        // IN: the random number generator state
 				       );
+#  if RSA_INSTRUMENT
+
+//*** PrintTuple()
+char* PrintTuple(UINT32* i);
+
+//*** RsaSimulationEnd()
+void RsaSimulationEnd(void);
+
+//*** GetSieveStats()
+LIB_EXPORT void GetSieveStats(
+			      uint32_t* trials, uint32_t* emptyFields, uint32_t* averageBits);
+#  endif
+#endif  // RSA_KEY_SIEVE
+#if !RSA_INSTRUMENT
 
 //*** RsaSimulationEnd()
 // Stub for call when not doing instrumentation.
