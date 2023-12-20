@@ -1468,7 +1468,7 @@ EXTERN UINT32 s_actionIoAllocation;   // number of UIN64 allocated for the
 // in which the failure occurred. This address value is not useful for anything
 // other than helping the vendor to know in which file the failure  occurred.
 EXTERN BOOL g_inFailureMode;  // Indicates that the TPM is in failure mode
-#  if SIMULATION
+#  if ALLOW_FORCE_FAILURE_MODE
 EXTERN BOOL g_forceFailureMode;  // flag to force failure mode during test
 #  endif
 

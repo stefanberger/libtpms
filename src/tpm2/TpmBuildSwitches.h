@@ -122,6 +122,16 @@
 // Define this to run the function that checks the compatibility between the chosen big number math
 // library and the TPM code. Not all ports use this.
 
+////////////////////////////////////////////////////////////////
+// TEST OPTIONS
+////////////////////////////////////////////////////////////////
+// The SIMULATION flag can enable test crypto behaviors and caching that
+// significantly change the behavior of the code.  This flag controls only the
+// g_forceFailureMode flag in the TPM library while leaving the rest of the TPM
+// behavior alone.  Useful for testing when the full set of options controlled by
+// SIMULATION may not be desired.
+#define ALLOW_FORCE_FAILURE_MODE    NO		// libtpms: NO
+
 #if !(defined LIBRARY_COMPATIBILITY_CHECK)				\
     || (( LIBRARY_COMPATIBILITY_CHECK != NO)				\
 	&& (LIBRARY_COMPATIBILITY_CHECK != YES))
