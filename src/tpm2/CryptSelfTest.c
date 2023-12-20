@@ -116,7 +116,7 @@ TPM_RC
 CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
 	      )
 {
-#if SIMULATION
+#if ALLOW_FORCE_FAILURE_MODE
     if(g_forceFailureMode)
 	FAIL(FATAL_ERROR_FORCED);
 #endif

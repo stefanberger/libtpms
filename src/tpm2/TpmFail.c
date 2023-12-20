@@ -178,19 +178,16 @@ static BOOL Unmarshal16(UINT16* target, BYTE** buffer, INT32* size)
 }
 
 //** Public Functions
-#if 0 /* libtpms added */
 
 //*** SetForceFailureMode()
 // This function is called by the simulator to enable failure mode testing.
+#if ALLOW_FORCE_FAILURE_MODE
 LIB_EXPORT void SetForceFailureMode(void)
 {
-#if SIMULATION
     g_forceFailureMode = TRUE;
-#endif
     return;
 }
-#endif /* libtpms added */
-
+#endif  // ALLOW_FORCE_FAILURE_MODE
 
 /* libtpms added begin */
 static void

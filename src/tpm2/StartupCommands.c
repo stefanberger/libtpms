@@ -82,7 +82,8 @@ LIB_EXPORT void _TPM_Init(void)
 	    memset(&go, 0xbb, sizeof(go));
 	}
 #endif
-#if SIMULATION
+
+#if ALLOW_FORCE_FAILURE_MODE
     // Clear the flag that forces failure on self-test
     g_forceFailureMode = FALSE;
 #endif
