@@ -469,6 +469,18 @@ LIB_EXPORT int _plat__NvCommit(void)
 #endif
 }
 
+//***_plat__TearDown
+// notify platform that TPM_TearDown was called so platform can cleanup or
+// zeroize anything in the Platform.  This should zeroize NV as well.
+#if 0			// libtpms: added
+LIB_EXPORT void _plat__TearDown(void)
+{
+#if FILE_BACKED_NV
+    // remove(s_NvFilePath);
+#endif
+}
+#endif			// libtpms: added
+
 //***_plat__SetNvAvail()
 // Set the current NV state to available.  This function is for testing purpose
 // only.  It is not part of the platform NV logic
