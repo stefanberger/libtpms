@@ -379,18 +379,7 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
 	       || !Unmarshal32(&pt, &buffer, &size)
 	       || !Unmarshal32(&count, &buffer, &size))
 		goto FailureModeReturn;
-	    // If in failure mode because of an unrecoverable read error, and the
-	    // property is 0 and the count is 0, then this is an indication to
-	    // re-manufacture the TPM. Do the re-manufacture but stay in failure
-	    // mode until the TPM is reset.
-	    // Note: this behavior is not required by the specification and it is
-	    // OK to leave the TPM permanently bricked due to an unrecoverable NV
-	    // error.
-	    if(count == 0 && pt == 0 && s_failCode == FATAL_ERROR_NV_UNRECOVERABLE)
-		{
-		    g_manufactured = FALSE;
-		    TPM_Manufacture(0);
-		}
+
 	    if(count > 0)
 		count = 1;
 	    else if(pt > TPM_PT_FIRMWARE_VERSION_2)
