@@ -120,7 +120,7 @@ TPM_RC TpmEcc_SignEcSm2(Crypt_Int* bnR,  // OUT: 'r' component of the signature
 	// byte boundary we require that the random number bnK comes back with
 	// a requested number of bytes.
 	if (!atByteBoundary) {
-	    BnGenerateRandomInRange((bigNum)bnK, (bigConst)order, rand);
+	    TpmMath_GetRandomInRange(bnK, order, rand);
 	    ExtMath_Add(bnK1, bnK, order);
 #  ifdef _SM2_SIGN_DEBUG
 	TpmEccDebug_FromHex(bnK,

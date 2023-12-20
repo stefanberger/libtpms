@@ -234,7 +234,7 @@ BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand)
 	    // 4.1 Obtain a string b of wlen bits from an RBG.
 	    // Ensure that 1 < b < w1.
 	    // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
-	    while(BnGetRandomBits((bigNum)bnB, wLen, rand)
+	    while(TpmMath_GetRandomInteger(bnB, wLen, rand)
 		  && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
 		      || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
 		;
@@ -445,7 +445,7 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 		break;
 	    case SEED_COMPAT_LEVEL_LAST:
             /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
-		if(!BnGetRandomBits((bigNum)prime, bits, rand))                              // new
+		if(!TpmMath_GetRandomInteger(prime, bits, rand))                              // new
 		    return TPM_RC_FAILURE;
                 break;
             default:

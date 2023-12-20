@@ -1496,7 +1496,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 		{
 		    CRYPT_RSA_VAR(temp1);
 		    CRYPT_RSA_VAR(temp2);
-		    BnGenerateRandomInRange((bigNum)temp1, (bigConst)bnN, rand);
+		    TpmMath_GetRandomInRange(temp1, bnN, rand);
 
 		    // Encrypt with public exponent...
 		    ExtMath_ModExp(temp2, temp1, bnPubExp, bnN);

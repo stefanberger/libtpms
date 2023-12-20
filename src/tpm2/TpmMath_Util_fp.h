@@ -83,25 +83,39 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
 				NUMBYTES         size    // IN: Size of output buffer - see comments.
 				);
 
-LIB_EXPORT BOOL
-BnGetRandomBits(
-		bigNum           n,
-		size_t           bits,
-		RAND_STATE      *rand
-		);
 
-LIB_EXPORT BOOL
-BnGenerateRandomInRange(
-			bigNum           dest,
-			bigConst         limit,
-			RAND_STATE      *rand
-			);
-							// libtpms added begin
-LIB_EXPORT BOOL
-BnGenerateRandomInRangeAllBytes(
-			bigNum           dest,
-			bigConst         limit,
-			RAND_STATE      *rand
-			);
+//*** TpmMath_GetRandomInteger
+// This function generates a random integer with the requested number of bits.
+// Except for size, no range checking is performed.
+// The maximum size that can be created is LARGEST_NUMBER + 64 bits.
+// if either more bits, or the Crypt_Int* is too small to contain the requested bits
+// the TPM enters failure mode and this function returns FALSE.
+LIB_EXPORT BOOL TpmMath_GetRandomInteger(Crypt_Int* bn,  // OUT: integer buffer to set
+					 size_t     bits,  // IN: size of output,
+					 RAND_STATE* rand  // IN: random engine
+					 );
+
+//*** TpmMath_GetRandomInRange()
+// This function is used to generate a random number r in the range 1 <= r < limit.
+// The function gets a random number of bits that is the size of limit. There is some
+// some probability that the returned number is going to be greater than or equal
+// to the limit. If it is, try again. There is no more than 50% chance that the
+// next number is also greater, so try again. We keep trying until we get a
+// value that meets the criteria. Since limit is very often a number with a LOT of
+// high order ones, this rarely would need a second try.
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure ('limit' is too small)
+LIB_EXPORT BOOL TpmMath_GetRandomInRange(
+					 Crypt_Int*       dest,   // OUT: integer buffer to set
+					 const Crypt_Int* limit,  // IN: limit (see remarks)
+					 RAND_STATE*      rand    // IN: random engine
+					 );
+
+// BnMath.c
+BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,
+				     bigConst    limit,
+				     RAND_STATE* rand
+				     );
 
 #endif  //_TPM_MATH_FP_H_
