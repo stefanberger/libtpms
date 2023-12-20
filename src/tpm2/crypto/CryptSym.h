@@ -115,6 +115,9 @@ typedef union tpmCryptKeySchedule_t {
     uint64_t alignment;
 #else
     uint32_t alignment;
+# if defined(__x86_64__)
+# error Bad SYMMETRIC_ALIGNMENT
+# endif
 #endif
 } tpmCryptKeySchedule_t;
 

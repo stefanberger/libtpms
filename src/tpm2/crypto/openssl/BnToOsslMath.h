@@ -72,10 +72,7 @@
 #include <openssl/ec.h>
 #include <openssl/bn.h>
 
-#define SYMMETRIC_ALIGNMENT RADIX_BYTES
-
 #if 0 // libtpms added
-
 #if OPENSSL_VERSION_NUMBER >= 0x30100ff0L
 // Check the bignum_st definition against the one below and either update the
 // version check or provide the new definition for this version.
@@ -93,8 +90,8 @@ struct bignum_st
     int flags;
 };
 #if 0   // libtpms added
-#   define EC_POINT_get_affine_coordinates EC_POINT_get_affine_coordinates_GFp
-#   define EC_POINT_set_affine_coordinates EC_POINT_set_affine_coordinates_GFp
+#  define EC_POINT_get_affine_coordinates EC_POINT_get_affine_coordinates_GFp
+#  define EC_POINT_set_affine_coordinates EC_POINT_set_affine_coordinates_GFp
 #endif  // libtpms added
 #endif // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
