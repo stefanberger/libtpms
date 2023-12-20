@@ -85,6 +85,18 @@ LIB_EXPORT int TPM_Manufacture(
 			       //     main()
 			       );
 
+//*** TPM_TearDown()
+// This function prepares the TPM for re-manufacture. It should not be implemented
+// in anything other than a simulated TPM.
+//
+// In this implementation, all that is needs is to stop the cryptographic units
+// and set a flag to indicate that the TPM can be re-manufactured. This should
+// be all that is necessary to start the manufacturing process again.
+//  Return Type: int
+//      0        success
+//      1        TPM not previously manufactured
+#define TEARDOWN_OK          0
+#define TEARDOWN_NOTHINGDONE 1
 LIB_EXPORT int TPM_TearDown(void);
 
 //*** TpmEndSimulation()
