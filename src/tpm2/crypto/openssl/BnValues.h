@@ -147,12 +147,12 @@ extern const bignum_t BnConstZero;
 
 #define CRYPT_WORDS(bytes) BYTES_TO_CRYPT_WORDS(bytes)
 #define MIN_ALLOC(bytes)   (CRYPT_WORDS(bytes) < 1 ? 1 : CRYPT_WORDS(bytes))
-#define BN_CONST(name, words, initializer)	   \
+#define BN_CONST(name, bytes, initializer)	   \
     typedef const struct name##_type		   \
     {						   \
 	crypt_uword_t allocated;		   \
 	crypt_uword_t size;			   \
-	crypt_uword_t d[words < 1 ? 1 : words];	   \
+	crypt_uword_t d[MIN_ALLOC(bytes)];	   \
     } name##_type;							\
     name##_type name = {MIN_ALLOC(bytes), CRYPT_WORDS(bytes), {initializer}};
 
@@ -169,7 +169,7 @@ extern const bignum_t BnConstZero;
 // initializes it from a TPM2B input parameter.
 #define BN_INITIALIZED(name, bits, initializer)		\
     BN_STRUCT(name, bits) name##_;					\
-    bigNum name = BnFrom2B(BN_INIT(name##_), (const TPM2B*)initializer)
+    bigNum name = TpmMath_IntFrom2B(BN_INIT(name##_), (const TPM2B*)initializer)
 
 // Create a local variable that can hold a number with 'bits'
 #define BN_VAR(name, bits)					 \
@@ -188,7 +188,7 @@ extern const bignum_t BnConstZero;
 // This is used to create a word-size bigNum and initialize it with
 // an input parameter to a function.
 #define BN_WORD_INITIALIZED(name, initial)				\
-    BN_STRUCT(name##_, RADIX_BITS) name##_;				\
+    BN_STRUCT(RADIX_BITS) name##_;					\
     bigNum name =							\
 									BnInitializeWord((bigNum)&name##_, BN_STRUCT_ALLOCATION(RADIX_BITS), initial)
 

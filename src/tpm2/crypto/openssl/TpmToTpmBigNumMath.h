@@ -65,6 +65,14 @@
 #ifndef _TPM_TO_TPMBIGNUM_MATH_H_
 #define _TPM_TO_TPMBIGNUM_MATH_H_
 
+#ifdef MATH_LIB_DEFINED
+#  error only one primary math library allowed
+#endif
+#define MATH_LIB_DEFINED
+
+// indicate the TPMBIGNUM library is active
+#define MATH_LIB_TPMBIGNUM
+
 // TODO_RENAME_INC_FOLDER: private refers to the TPM_CoreLib private headers
 #include "GpMacros.h"  // required for TpmFail_fp.h
 #include "Capabilities.h"
@@ -78,10 +86,9 @@
 #  error BN_MATH_LIB not defined, required to provide BN library functions.
 #endif
 
-// Define macros and types necessary for the math library abstraction layer
-// Create a data object backing a Crypt_Int big enough for the given number of
-// data bits
-#define CRYPT_INT_BUF(buftypename, bits) BN_STRUCT(buftypename, bits)
+#if defined(CRYPT_CURVE_INITIALIZED) || defined(CRYPT_CURVE_FREE)
+#error include ordering error, expected CRYPT_CURVE_INITIALIZED & CRYPT_CURVE_FREE to be undefined.
+#endif
 
 // Add support library dependent definitions.
 // For TpmBigNum, we expect bigCurveData to be a defined type.
@@ -91,6 +98,11 @@
 #include "BnMath_fp.h"
 #include "BnMemory_fp.h"
 #include "BnSupport_Interface.h"
+
+// Define macros and types necessary for the math library abstraction layer
+// Create a data object backing a Crypt_Int big enough for the given number of
+// data bits
+#define CRYPT_INT_BUF(buftypename, bits) BN_STRUCT(buftypename, bits)
 
 // Create a data object backing a Crypt_Point big enough for the given number of
 // data bits, per coordinate

@@ -67,6 +67,11 @@
 
 #define MATH_LIB_OSSL
 
+// Require TPM Big Num types
+#if !defined(MATH_LIB_TPMBIGNUM) && !defined(_BNOSSL_H_)
+#  error this OpenSSL Interface expects to be used from TpmBigNum
+#endif
+
 #include "BnValues.h"
 #include <openssl/evp.h>
 #include <openssl/ec.h>
