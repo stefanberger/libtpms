@@ -61,9 +61,6 @@
 // PCR platform interface functions
 #include "Platform.h"
 #include "TpmAlgorithmDefines.h"
-#include "GpMacros.h"			// libtpms: temporary
-#include "Capabilities.h"		//  - " -
-#include "platform_pcr_fp.h"		// libtpms: temporary
 
 // use this as a convenient lookup for hash size for PCRs.
 UINT16 CryptHashGetDigestSize(TPM_ALG_ID hashAlg  // IN: hash algorithm to look up

@@ -73,5 +73,9 @@
 #include "platform_public_interface.h"
 #include "tpm_to_platform_interface.h"
 #include "platform_to_tpm_interface.h"
+#define GLOBAL_C
+#define NV_C
+#include "pcrstruct.h"
+#include "platform_pcr_fp.h"
 
 #endif  // _PLATFORM_H_
