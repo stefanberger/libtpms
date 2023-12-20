@@ -167,20 +167,14 @@ static BOOL PCRBelongsTCBGroup(TPMI_DH_PCR handle  // IN: handle of PCR
 			       )
 {
 #if ENABLE_PCR_NO_INCREMENT == YES
-#if 0
     // Platform specification decides if a PCR belongs to a TCB group.
     UINT32         pcr = handle - PCR_FIRST;
     PCR_Attributes currentPcrAttributes =
 	_platPcr__GetPcrInitializationAttributes(pcr);
     return currentPcrAttributes.doNotIncrementPcrCounter;
-#endif
-    /* kgold - changed for PC Client, 16, 21-23 no increment */
-    if ((handle == 16) ||
-	((handle >= 21) && (handle <= 23))) {
-	return  TRUE;
-    }
-#endif
+#else
     return FALSE;
+#endif
 }
 
 //*** PCRPolicyIsAvailable()
