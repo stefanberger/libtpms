@@ -75,7 +75,6 @@
 //** Includes, Defines, and Data Definitions
 #define PCR_C
 #include "Tpm.h"
-#include "platform_pcr_fp.h"		// libtpms: temporary
 
 // verify values from pcrstruct.h. not <= because group #0 is reserved
 // indicating no auth/policy support

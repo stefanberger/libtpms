@@ -2945,7 +2945,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #endif // SESSION_PROCESS_C
     BLOCK_SKIP_WRITE_POP(size);
 
-#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+#if defined DA_C || defined GLOBAL_C_UNSUPPORTED || defined MANUFACTURE_C
     has_block = TRUE;
 #error Unsupport #define value(s)
 #else
@@ -2953,7 +2953,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #endif
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
-#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+#if defined DA_C || defined GLOBAL_C_UNSUPPORTED || defined MANUFACTURE_C
 #error Unsupport #define value(s)
 #if !ACCUMULATE_SELF_HEAL_TIMER
     has_block = TRUE;
@@ -3071,7 +3071,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
 #endif
     BLOCK_SKIP_WRITE_POP(size);
 
-#if defined IO_BUFFER_C || defined GLOBAL_C
+#if defined IO_BUFFER_C || defined GLOBAL_C_UNSUPPORTED
 # error Unsupport #define value(s)
     /* s_actionInputBuffer: skip; only used during a single command */
     /* s_actionOutputBuffer: skip; only used during a single command */
@@ -3406,7 +3406,7 @@ skip_cc_getcommandauditdigest:
 #endif /* SESSION_PROCESS_C */
 skip_session_process:
 
-#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+#if defined DA_C || defined GLOBAL_C_UNSUPPORTED || defined MANUFACTURE_C
 # error Unsupport #define value(s)
     needs_block = TRUE;
 #else
@@ -3417,7 +3417,7 @@ skip_session_process:
                         "Volatile state", "s_selfHealTimer.1");
     }
 
-#if defined DA_C || defined GLOBAL_C || defined MANUFACTURE_C
+#if defined DA_C || defined GLOBAL_C_UNSUPPORTED || defined MANUFACTURE_C
 # error Unsupport #define value(s)
 #if !ACCUMULATE_SELF_HEAL_TIMER
     needs_block = TRUE;

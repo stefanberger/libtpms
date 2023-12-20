@@ -460,8 +460,6 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 LIB_EXPORT uint32_t _plat__GetTpmType(void);
 
 // platform PCR initialization functions
-#if 0						// libtpms: added
 #include "platform_pcr_fp.h"
-#endif						// libtpms: added
 
 #endif  // _TPM_TO_PLATFORM_INTERFACE_H_
