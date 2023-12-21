@@ -285,6 +285,15 @@
 
 #define STD_RESPONSE_HEADER (sizeof(TPM_ST) + sizeof(UINT32) + sizeof(TPM_RC))
 
+// This bit is used to indicate that an authorization ticket expires on TPM Reset
+// and TPM Restart. It is added to the timeout value returned by TPM2_PoliySigned()
+// and TPM2_PolicySecret() and used by TPM2_PolicyTicket(). The timeout value is
+// relative to Time (g_time). Time is reset whenever the TPM loses power and cannot
+// be moved forward by the user (as can Clock). 'g_time' is a 64-bit value expressing
+// time in ms. Stealing the MSb for a flag means that the TPM needs to be reset
+// at least once every 292,471,208 years rather than once every 584,942,417 years.
+#define EXPIRATION_BIT ((UINT64)1 << 63)
+
 // Check for consistency of the bit ordering of bit fields
 #if BIG_ENDIAN_TPM && MOST_SIGNIFICANT_BIT_0 && USE_BIT_FIELD_STRUCTURES
 #  error "Settings not consistent"
@@ -330,5 +339,12 @@
 // 0x06 indicating an OID fallowed by an octet indicating the number of octets in the
 // rest of the OID. This allows a user of this OID to know how much/little to copy.
 #define MAKE_OID(NAME) EXTERN const BYTE OID##NAME[] INITIALIZER({OID##NAME##_VALUE})
+
+// This definition is moved from TpmProfile.h because it is not actually vendor-
+// specific. It has to be the same size as the 'sequence' parameter of a TPMS_CONTEXT
+// and that is a UINT64. So, this is an invariant value
+#define CONTEXT_COUNTER UINT64
+
+#include "TpmCalculatedAttributes.h"
 
 #endif  // GP_MACROS_H
