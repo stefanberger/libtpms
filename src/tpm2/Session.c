@@ -959,11 +959,9 @@ SessionCapGetSaved(TPMI_SH_HMAC handle,     // IN: start handle
 {
     TPMI_YES_NO more = NO;
     UINT32      i;
-#ifdef  TPM_HT_SAVED_SESSION
+
     pAssert(HandleGetType(handle) == TPM_HT_SAVED_SESSION);
-#else
-    pAssert(HandleGetType(handle) == TPM_HT_ACTIVE_SESSION);
-#endif
+
     // Initialize output handle list
     handleList->count = 0;
 
