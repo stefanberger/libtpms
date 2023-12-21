@@ -111,24 +111,17 @@ typedef struct privateExponentOld
 
 #include "BnMemory_fp.h"
 
-static inline void
-RsaInitializeExponentOld(
-			 privateExponent_t      *pExp
-			)
+static inline void RsaInitializeExponentOld(privateExponent_t* pExp)
 {
     BN_INIT(pExp->Q);
     BN_INIT(pExp->dP);
     BN_INIT(pExp->dQ);
     BN_INIT(pExp->qInv);
-}					// libtpms added end
+}
 
-#include "BnMemory_fp.h"
-
-static inline void
-RsaSetExponentOld(
-		  privateExponent_t *pExp,  // OUT
-		  privateExponent   *Z      // IN
-		 )
+static inline void RsaSetExponentOld(privateExponent_t* pExp,  // OUT
+				     privateExponent*   Z      // IN
+				     )
 {
     // pExp->Q must be set elsewhere
     ExtMath_Copy((Crypt_Int*)&pExp->dP, Z->dP);
@@ -136,16 +129,14 @@ RsaSetExponentOld(
     ExtMath_Copy((Crypt_Int*)&pExp->qInv, Z->qInv);
 }
 
-static inline void
-RsaSetExponentFromOld(
-		      privateExponent   *Z,     // OUT
-		      privateExponent_t *pExp   // IN
-                     )
+static inline void RsaSetExponentFromOld(privateExponent*   Z,     // OUT
+					 privateExponent_t* pExp   // IN
+					 )
 {
     ExtMath_Copy(Z->Q, (Crypt_Int*)&pExp->Q);
     ExtMath_Copy(Z->dP, (Crypt_Int*)&pExp->dP);
     ExtMath_Copy(Z->dQ, (Crypt_Int*)&pExp->dQ);
     ExtMath_Copy(Z->qInv, (Crypt_Int*)&pExp->qInv);
 }
-
+					// libtpms added end
 #endif  // _CRYPT_RSA_H
