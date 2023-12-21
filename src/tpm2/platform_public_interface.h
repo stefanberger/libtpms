@@ -133,6 +133,19 @@ LIB_EXPORT void _plat__ClearNvAvail(void);
 // needs to be manufactured.
 LIB_EXPORT int _plat__NVNeedsManufacture(void);
 
+//** From PlatformACT.c
+
+//*** _plat__ACT_GetPending()
+LIB_EXPORT int _plat__ACT_GetPending(uint32_t act  //IN: number of ACT to check
+				     );
+
+//*** _plat__ACT_Tick()
+// This processes the once-per-second clock tick from the hardware. This is set up
+// for the simulator to use the control interface to send ticks to the TPM. These
+// ticks do not have to be on a per second basis. They can be as slow or as fast as
+// desired so that the simulation can be tested.
+LIB_EXPORT void _plat__ACT_Tick(void);
+
 //** From PowerPlat.c
 
 //***_plat__Signal_PowerOn()
