@@ -172,7 +172,7 @@ BOOL NvPowerOn(void)
     if(g_powerWasLost)
 	{
 	    if((nvError = _plat__NVEnable(NULL, 0)) < 0)
-		LOG_FAILURE(FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
+		TpmLogFailure(FUNCTION_NAME, __LINE__, FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
 	    NvInitStatic();
 	}
     return nvError == 0;

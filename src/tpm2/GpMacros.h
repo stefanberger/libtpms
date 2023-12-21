@@ -142,27 +142,19 @@
 // hence it is better to use one of the early-exit macros to immediately return.
 // However, the necessary return-code plumbing may be large and FAIL/FAIL_NORET
 // are provided to support gradual improvement over time.
-#if !FAIL_TRACE
-#   define FAIL(errorCode) (TpmFail(errorCode))
-#   define LOG_FAILURE(errorCode) (TpmLogFailure(errorCode))
-#else
-#   define FAIL(errorCode)        TpmFail(FUNCTION_NAME, __LINE__, errorCode)
-#   define LOG_FAILURE(errorCode) TpmLogFailure(FUNCTION_NAME, __LINE__, errorCode)
-#endif
-#  define FAIL_RC(failCode)                SETFAILED(failCode)
-/* If implementation is using longjmp, then the call to TpmFail() does not return and the compiler
-   will complain about unreachable code that comes after. To allow for not having longjmp, TpmFail()
-   will return and the subsequent code will be executed. This macro accounts for the difference. */
 
 #ifndef NO_LONGJMP
 // has longjmp
 // necesary to reference Exit, even though the code is no-return
-#  define FAIL_RETURN(returnCode)
 #  define TPM_FAIL_RETURN NORETURN void
 
+// see discussion above about FAIL/FAIL_NORET
+#  define FAIL(failCode)                   SETFAILED(failCode)
+#  define FAIL_NORET(failCode)             SETFAILED(failCode)
 #  define FAIL_IMMEDIATE(failCode, retval) SETFAILED(failCode)
 #  define FAIL_BOOL(failCode)              SETFAILED(failCode)
 #  define FAIL_RC(failCode)                SETFAILED(failCode)
+#  define FAIL_VOID(failCode)              SETFAILED(failCode)
 #  define FAIL_NULL(failCode)              SETFAILED(failCode)
 #  define FAIL_EXIT(failCode, returnVar, returnCode)	     \
     do								     \
@@ -173,8 +165,22 @@
 
 #else  // NO_LONGJMP
 // no longjmp service is available
-#  define FAIL_RETURN(returnCode) return(returnCode)
 #  define TPM_FAIL_RETURN      void
+
+// This macro is provided for existing code and should not be used in new code.
+// see discussion above.
+#  define FAIL(failCode)       FAIL_NORET(failCode)
+
+// Be cautious with this macro, see discussion above.
+#  define FAIL_NORET(failCode) SETFAILED(failCode)
+
+// fail and immediately return void
+#  define FAIL_VOID(failCode)		       \
+    do						       \
+	{					       \
+	    SETFAILED(failCode);		       \
+	    return;				       \
+	} while(0)
 
 // fail and immediately return a value
 #  define FAIL_IMMEDIATE(failCode, retval)			   \
@@ -204,6 +210,117 @@
 
 #endif
 
+// This macro tests that a condition is TRUE and puts the TPM into failure mode
+// if it is not. If longjmp is being used, then the macro makes a call from
+// which there is no return. Otherwise, the function will return the given
+// return code.
+#define VERIFY(condition, failCode, returnCode)				\
+    do									\
+	{								\
+	    if(!(condition))						\
+		{							\
+		    FAIL_IMMEDIATE(failCode, returnCode);		\
+		}							\
+	} while(0)
+
+// this function also verifies a condition and enters failure mode, but sets a
+// return value and jumps to Exit on failure - allowing for cleanup.
+#define VERIFY_OR_EXIT(condition, failCode, returnVar, returnCode)	\
+    do									\
+	{								\
+	    if(!(condition))						\
+		{							\
+		    FAIL_EXIT(failCode, returnVar, returnCode);		\
+		}							\
+	} while(0)
+
+// verify the given TPM_RC is success and we are not in
+// failure mode.  Otherwise, return immediately with TPM_RC_FAILURE.
+// note that failure mode is checked first so that an existing FATAL_* error code
+// is not overwritten with the default from this macro.
+#define VERIFY_RC(rc)							\
+    do									\
+	{								\
+	    if(g_inFailureMode)						\
+		{							\
+		    return TPM_RC_FAILURE;				\
+		}							\
+	    if(rc != TPM_RC_SUCCESS)					\
+		{							\
+		    FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, TPM_RC_FAILURE); \
+		}							\
+	} while(0)
+
+// verify the TPM is not in failure mode or return failure
+#define VERIFY_NOT_FAILED()						\
+    do									\
+	{								\
+	    if(g_inFailureMode)						\
+		{							\
+		    return TPM_RC_FAILURE;				\
+		}							\
+	} while(0)
+
+// Enter failure mode if the given TPM_RC is not success, return void.
+#define VERIFY_RC_VOID(rc)						\
+    do									\
+	{								\
+	    if(g_inFailureMode)						\
+		{							\
+		    return;						\
+		}							\
+	    if(rc != TPM_RC_SUCCESS)					\
+		{							\
+		    FAIL_VOID(FATAL_ERROR_ASSERT);			\
+		}							\
+	} while(0)
+
+// These VERIFY_CRYPTO macros all set failure mode to FATAL_ERROR_CRYPTO
+// and immediately return.  The general way to parse the names is:
+// VERIFY_CRYPTO_[conditionType]_[OR_EXIT]_[retValType]
+// if conditionType is omitted, it is taken as BOOL.
+// Without OR_EXIT, implies an immediate return. Thus VERIFY_CRYPTO_BOOL:
+// 1. check fn against TRUE
+// 2. if false,  set failure mode to FATAL_ERROR_CRYPTO
+// 3. immediately return FALSE.
+// and, VERIFY_CRYPTO_OR_EXIT_RC translates to:
+// 1. Check a BOOL
+// 2. If false, set failure mode with FATAL_ERROR_CRYPTO,
+// 3. assume retVal is type TPM_RC, set it to TPM_RC_FAILURE
+// 4. Goto Exit
+// while VERIFY_CRYPTO_RC_OR_EXIT translates to:
+// 1. Check fn result against TPM_RC_SUCCESS
+// 2. if not equal, set failure mode to FATAL_ERROR_CRYPTO
+// 3. assume retVal is type TPM_RC, set it to TPM_RC_FAILURE
+// 4. Goto Exit.
+#define VERIFY_CRYPTO(fn) VERIFY((fn), FATAL_ERROR_CRYPTO, TPM_RC_FAILURE)
+
+#define VERIFY_CRYPTO_BOOL(fn) VERIFY((fn), FATAL_ERROR_CRYPTO, FALSE)
+
+#define VERIFY_CRYPTO_OR_NULL(fn) VERIFY((fn), FATAL_ERROR_CRYPTO, NULL)
+
+// these VERIFY_CRYPTO macros all set a result value and goto Exit
+#define VERIFY_CRYPTO_OR_EXIT(fn, returnVar, returnCode)		\
+    VERIFY_OR_EXIT(fn, FATAL_ERROR_CRYPTO, returnVar, returnCode);
+
+// these VERIFY_CRYPTO_OR_EXIT functions assume the return value variable is
+// named retVal
+#define VERIFY_CRYPTO_OR_EXIT_RC(fn)					\
+    VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, retVal, TPM_RC_FAILURE)
+
+#define VERIFY_CRYPTO_OR_EXIT_FALSE(fn)				\
+    VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, retVal, FALSE)
+
+#define VERIFY_CRYPTO_RC_OR_EXIT(fn)			       \
+    do							       \
+	{							       \
+	    TPM_RC rc = fn;					       \
+	    if(rc != TPM_RC_SUCCESS)				       \
+		{							\
+		    FAIL_EXIT(FATAL_ERROR_CRYPTO, retVal, rc);		\
+		}							\
+	} while(0)
+
 #if(defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
 #  define pAssert(a) ((void)0)
 #else
@@ -213,6 +330,13 @@
 	    if(!(a))						   \
 		FAIL(FATAL_ERROR_PARAMETER);			   \
 	} while(0)
+
+#  define pAssert_ZERO(a)						\
+    do									\
+	{								\
+	    if(!(a))							\
+		FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, 0);			\
+	} while(0);
 
 #  define pAssert_RC(a)				   \
     do						   \
@@ -227,6 +351,32 @@
 	    if(!(a))					     \
 		FAIL_BOOL(FATAL_ERROR_ASSERT);		     \
 	} while(0);
+
+#  define pAssert_NULL(a)			     \
+    do						     \
+	{						     \
+	    if(!(a))					     \
+		FAIL_NULL(FATAL_ERROR_ASSERT);		     \
+	} while(0);
+
+// using FAIL_NORET isn't optimium but is available in limited cases that
+// result in wrong calculated values, and can be checked later
+// but should have no vulnerability implications.
+#  define pAssert_NORET(a)			      \
+    {						      \
+	if(!(a))					      \
+	    FAIL_NORET(FATAL_ERROR_ASSERT);		      \
+    }
+
+// this macro is used where a calling code has been verified to function correctly
+// when the failing assert immediately returns without an error code.
+// this can be because either the caller checks the fatal error flag, or
+// the state is safe and a higher-level check will catch it.
+#  define pAssert_VOID_OK(a)			     \
+    {						     \
+	if(!(a))					     \
+	    FAIL_VOID(FATAL_ERROR_ASSERT);		     \
+    }
 
 #endif
 
