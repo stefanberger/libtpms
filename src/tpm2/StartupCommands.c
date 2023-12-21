@@ -89,7 +89,9 @@ LIB_EXPORT void _TPM_Init(void)
 #endif
 
     // Disable the tick processing
+#if ACT_SUPPORT || 1	// libtpms: changed
     _plat__ACT_EnableTicks(FALSE);
+#endif
 
     // Set initialization state
     TPMInit();
