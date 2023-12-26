@@ -304,5 +304,30 @@ ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starti
     return NO;
 }
 
+#ifndef __ACT_DISABLED		// libtpms: added
+//*** ActGetOneCapability()
+// This function returns an ACT's capability, if present.
+BOOL ActGetOneCapability(TPM_HANDLE     actHandle,  // IN: the handle for the ACT
+			 TPMS_ACT_DATA* actData     // OUT: ACT data
+			 )
+{
+    UINT32 act = actHandle - TPM_RH_ACT_0;
+    
+    if(ActIsImplemented(actHandle - TPM_RH_ACT_0))
+	{
+	    memset(&actData->attributes, 0, sizeof(actData->attributes));
+	    actData->handle  = actHandle;
+	    actData->timeout = _plat__ACT_GetRemaining(act);
+	    if(_plat__ACT_GetSignaled(act))
+		SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+	    else
+		CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+	    if(go.preservedSignaled & (1 << act))
+		SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
+	    return TRUE;
+	}
+    return FALSE;
+}
+#endif				// libtpms: added
 
 #endif  // ACT_SUPPORT

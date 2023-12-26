@@ -2938,6 +2938,49 @@ PolicyAuthorizeNV_COMMAND_DESCRIPTOR_t _PolicyAuthorizeNVData = {
 #else
 #define _PolicyAuthorizeNVDataAddress 0
 #endif
+
+#if       CC_PolicyCapability
+#include    "PolicyCapability_fp.h"
+
+typedef TPM_RC (PolicyCapability_Entry)(
+					PolicyCapability_In*        in
+					);
+
+typedef const struct
+{
+    PolicyCapability_Entry      *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[5];
+    BYTE                        types[8];
+} PolicyCapability_COMMAND_DESCRIPTOR_t;
+
+PolicyCapability_COMMAND_DESCRIPTOR_t _PolicyCapabilityData = {
+    /* entry         */         &TPM2_PolicyCapability,
+    /* inSize        */         (UINT16)(sizeof(PolicyCapability_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyCapability_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyCapability_In, operandB)),
+				 (UINT16)(offsetof(PolicyCapability_In, offset)),
+				 (UINT16)(offsetof(PolicyCapability_In, operation)),
+				 (UINT16)(offsetof(PolicyCapability_In, capability)),
+				 (UINT16)(offsetof(PolicyCapability_In, property))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+				 TPM2B_OPERAND_P_UNMARSHAL,
+				 UINT16_P_UNMARSHAL,
+				 TPM_EO_P_UNMARSHAL,
+				 TPM_CAP_P_UNMARSHAL,
+				 UINT32_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _PolicyCapabilityDataAddress (&_PolicyCapabilityData)
+#else
+#define _PolicyCapabilityDataAddress 0
+#endif // CC_PolicyCapability
+
 #if CC_CreatePrimary
 #include "CreatePrimary_fp.h"
 typedef TPM_RC  (CreatePrimary_Entry)(
@@ -4613,6 +4656,9 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ECC_Decrypt)
     (COMMAND_DESCRIPTOR_t *)_ECC_DecryptDataAddress,
 #endif // CC_ECC_Decrypt
+#if (PAD_LIST || CC_PolicyCapability)
+    (COMMAND_DESCRIPTOR_t*)_PolicyCapabilityDataAddress,
+#endif // CC_PolicyCapability
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif

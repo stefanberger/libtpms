@@ -54,37 +54,34 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 -2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				        */
 /*										*/
 /********************************************************************************/
 
-#ifndef HANDLE_FP_H
-#define HANDLE_FP_H
+#if CC_PolicyCapability  // Command must be enabled
 
-TPM_HT
-HandleGetType(
-	      TPM_HANDLE       handle         // IN: a handle to be checked
-	      );
-TPM_HANDLE
-NextPermanentHandle(
-		    TPM_HANDLE       inHandle       // IN: the handle to check
-		    );
-TPMI_YES_NO
-PermanentCapGetHandles(
-		       TPM_HANDLE       handle,        // IN: start handle
-		       UINT32           count,         // IN: count of returned handles
-		       TPML_HANDLE     *handleList     // OUT: list of handle
-		       );
-BOOL PermanentCapGetOneHandle(TPM_HANDLE handle  // IN: handle
-			      );
-TPMI_YES_NO
-PermanentHandleGetPolicy(
-			 TPM_HANDLE           handle,        // IN: start handle
-			 UINT32               count,         // IN: count of returned handles
-			 TPML_TAGGED_POLICY  *policyList     // OUT: list of handle
-			 );
-BOOL PermanentHandleGetOnePolicy(TPM_HANDLE          handle,  // IN: handle
-				 TPMS_TAGGED_POLICY* policy   // OUT: tagged policy
-				 );
+#ifndef POLICYCAPABILITY_FP_H
+#define POLICYCAPABILITY_FP_H
 
-#endif
+typedef struct
+{
+    TPMI_SH_POLICY policySession;
+    TPM2B_OPERAND  operandB;
+    UINT16         offset;
+    TPM_EO         operation;
+    TPM_CAP        capability;
+    UINT32         property;
+} PolicyCapability_In;
+
+#define RC_PolicyCapability_policySession (TPM_RC_H + TPM_RC_1)
+#define RC_PolicyCapability_operandB      (TPM_RC_P + TPM_RC_1)
+#define RC_PolicyCapability_offset        (TPM_RC_P + TPM_RC_2)
+#define RC_PolicyCapability_operation     (TPM_RC_P + TPM_RC_3)
+#define RC_PolicyCapability_capability    (TPM_RC_P + TPM_RC_4)
+#define RC_PolicyCapability_property      (TPM_RC_P + TPM_RC_5)
+
+TPM_RC
+TPM2_PolicyCapability(PolicyCapability_In* in);
+
+#endif  // POLICYCAPABILITY_FP_H
+#endif  // CC_PolicyCapability

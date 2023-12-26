@@ -193,12 +193,20 @@ NvCapGetPersistent(
 		   UINT32           count,         // IN: maximum number of returned handles
 		   TPML_HANDLE     *handleList     // OUT: list of handle
 		   );
+//*** NvCapGetOnePersistent()
+// This function returns whether a given persistent handle exists.
+//
+// 'Handle' must be in valid persistent object handle range.
+BOOL NvCapGetOnePersistent(TPMI_DH_OBJECT handle  // IN: handle
+			   );
+
 TPMI_YES_NO
 NvCapGetIndex(
 	      TPMI_DH_OBJECT   handle,        // IN: start handle
 	      UINT32           count,         // IN: max number of returned handles
 	      TPML_HANDLE     *handleList     // OUT: list of handle
 	      );
+BOOL NvCapGetOneIndex(TPMI_DH_OBJECT handle);  // IN: start handle
 UINT32
 NvCapGetIndexNumber(
 		    void

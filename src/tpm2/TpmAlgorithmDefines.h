@@ -344,6 +344,7 @@
 					  + (ADD_FILL || CC_ACT_SetTimeout)                       /* 0x00000198 */ \
 					  + (ADD_FILL || CC_ECC_Encrypt)                          /* 0x00000199 */ \
 					  + (ADD_FILL || CC_ECC_Decrypt)                          /* 0x0000019A */ \
+					  + (ADD_FILL || CC_PolicyCapability)                     /* 0x0000019B */ \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   (0 + CC_Vendor_TCG_Test)

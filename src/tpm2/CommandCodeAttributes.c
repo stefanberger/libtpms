@@ -540,6 +540,21 @@ CommandCapGetCCList(
 	}
     return more;
 }
+//*** CommandCapGetOneCC()
+// This function checks whether a command is implemented, and returns its
+// attributes if so.
+BOOL CommandCapGetOneCC(TPM_CC   commandCode,       // IN: command code
+			TPMA_CC* commandAttributes  // OUT: command attributes
+			)
+{
+    COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
+    if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
+	{
+	    *commandAttributes = s_ccAttr[commandIndex];
+	    return TRUE;
+	}
+    return FALSE;
+}
 #if 0 /* libtpms added */
 /* 9.3.3.14 IsVendorCommand() */
 /* Function indicates if a command index references a vendor command. */
