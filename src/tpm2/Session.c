@@ -941,6 +941,21 @@ SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
     return more;
 }
 
+//*** SessionCapGetOneLoaded()
+// This function returns whether a session handle exists and is loaded.
+BOOL SessionCapGetOneLoaded(TPMI_SH_POLICY handle)  // IN: handle
+{
+    pAssert(HandleGetType(handle) == TPM_HT_LOADED_SESSION);
+
+    if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
+       && gr.contextArray[(handle & HR_HANDLE_MASK)])
+	{
+	    return TRUE;
+	}
+
+    return FALSE;
+}
+
 //*** SessionCapGetSaved()
 // This function returns a list of handles for saved session, starting at
 // 'handle'.
@@ -997,6 +1012,21 @@ SessionCapGetSaved(TPMI_SH_HMAC handle,     // IN: start handle
 	}
 
     return more;
+}
+
+//*** SessionCapGetOneSaved()
+// This function returns whether a session handle exists and is saved.
+BOOL SessionCapGetOneSaved(TPMI_SH_HMAC handle)  // IN: handle
+{
+    pAssert(HandleGetType(handle) == TPM_HT_SAVED_SESSION);
+
+    if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
+       && gr.contextArray[(handle & HR_HANDLE_MASK)])
+	{
+	    return TRUE;
+	}
+
+    return FALSE;
 }
 
 //*** SessionCapGetLoadedNumber()

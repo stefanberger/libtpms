@@ -976,6 +976,30 @@ ObjectCapGetLoaded(TPMI_DH_OBJECT handle,     // IN: start handle
 
     return more;
 }
+
+//*** ObjectCapGetOneLoaded()
+// This function returns whether a handle is loaded.
+BOOL ObjectCapGetOneLoaded(TPMI_DH_OBJECT handle)  // IN: handle
+{
+    UINT32 i;
+
+    pAssert(HandleGetType(handle) == TPM_HT_TRANSIENT);
+
+    // Iterate object slots to get loaded object handles
+    for(i = handle - TRANSIENT_FIRST; i < MAX_LOADED_OBJECTS; i++)
+	{
+	    if(s_objects[i].attributes.occupied == TRUE)
+		{
+		    // A valid transient object can not be the copy of a persistent object
+		    pAssert(s_objects[i].attributes.evict == CLEAR);
+
+		    return TRUE;
+		}
+	}
+
+    return FALSE;
+}
+
 //*** ObjectCapGetTransientAvail()
 // This function returns an estimate of the number of additional transient
 // objects that could be loaded into the TPM.
