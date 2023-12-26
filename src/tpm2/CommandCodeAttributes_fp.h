@@ -113,6 +113,9 @@ CommandCapGetCCList(
 		    //     'commandList'
 		    TPML_CCA        *commandList    // OUT: list of TPMA_CC
 		    );
+BOOL CommandCapGetOneCC(TPM_CC   commandCode,       // IN: command code
+			TPMA_CC* commandAttributes  // OUT: Command attributes
+			);
 #if 0  /* libtpms added */
 BOOL
 IsVendorCommand(

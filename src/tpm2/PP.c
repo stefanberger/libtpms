@@ -179,3 +179,15 @@ PhysicalPresenceCapGetCCList(
 	}
     return more;
 }
+
+//*** PhysicalPresenceCapGetOneCC()
+// This function returns true if the command requires Physical Presence.
+BOOL PhysicalPresenceCapGetOneCC(TPM_CC commandCode)  // IN: command code
+{
+    COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
+    if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
+	{
+	    return PhysicalPresenceIsRequired(commandIndex);
+	}
+    return FALSE;
+}

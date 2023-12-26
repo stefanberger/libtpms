@@ -1574,6 +1574,29 @@ NvCapGetPersistent(TPMI_DH_OBJECT handle,  // IN: start handle
 	}
     return more;
 }
+
+//*** NvCapGetOnePersistent()
+// This function returns whether a given persistent handle exists.
+//
+// 'Handle' must be in valid persistent object handle range.
+BOOL NvCapGetOnePersistent(TPMI_DH_OBJECT handle)  // IN: handle
+{
+    NV_REF     iter = NV_REF_INIT;
+    NV_REF     currentAddr;
+    TPM_HANDLE entityHandle;
+
+    pAssert(HandleGetType(handle) == TPM_HT_PERSISTENT);
+
+    while((currentAddr = NvNextEvict(&entityHandle, &iter)) != 0)
+	{
+	    if(entityHandle == handle)
+		{
+		    return TRUE;
+		}
+	}
+    return FALSE;
+}
+
 //*** NvCapGetIndex()
 // This function returns a list of handles of NV indexes, starting from 'handle'.
 // 'Handle' must be in the range of NV indexes, but does not have to reference
@@ -1619,6 +1642,26 @@ NvCapGetIndex(TPMI_DH_OBJECT handle,     // IN: start handle
 	    InsertSort(handleList, count, nvHandle);
 	}
     return more;
+}
+
+//*** NvCapGetOneIndex()
+// This function whether an NV index exists.
+BOOL NvCapGetOneIndex(TPMI_DH_OBJECT handle)  // IN: handle
+{
+    NV_REF     iter = NV_REF_INIT;
+    NV_REF     currentAddr;
+    TPM_HANDLE nvHandle;
+
+    pAssert(HandleGetType(handle) == TPM_HT_NV_INDEX);
+
+    while((currentAddr = NvNextIndex(&nvHandle, &iter)) != 0)
+	{
+	    if(nvHandle == handle)
+		{
+		    return TRUE;
+		}
+	}
+    return FALSE;
 }
 
 //*** NvCapGetIndexNumber()

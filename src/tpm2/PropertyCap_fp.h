@@ -68,6 +68,9 @@ TPMCapGetProperties(
 		    //     properties
 		    TPML_TAGGED_TPM_PROPERTY    *propertyList   // OUT: property list
 		    );
+BOOL TPMCapGetOneProperty(TPM_PT                pt,       // IN: the TPM property
+			  TPMS_TAGGED_PROPERTY* property  // OUT: tagged property
+			  );
 
 
 #endif

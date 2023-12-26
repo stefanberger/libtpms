@@ -67,6 +67,14 @@ AlgorithmCapGetImplemented(
 			   UINT32                       count,     // IN: count of returned algorithms
 			   TPML_ALG_PROPERTY           *algList    // OUT: algorithm list
 			   );
+//** AlgorithmCapGetOneImplemented()
+// This function returns whether a single algorithm was implemented, along
+// with its properties (if implemented).
+BOOL AlgorithmCapGetOneImplemented(
+				   TPM_ALG_ID         algID,       // IN: the algorithm ID
+				   TPMS_ALG_PROPERTY* algProperty  // OUT: algorithm properties
+				   );
+
 LIB_EXPORT
 void
 AlgorithmGetImplementedVector(

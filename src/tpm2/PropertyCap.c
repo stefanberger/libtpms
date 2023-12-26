@@ -593,3 +593,21 @@ TPMCapGetProperties(
 	}
     return more;
 }
+
+//*** TPMCapGetOneProperty()
+// This function returns a single TPM property, if present.
+BOOL TPMCapGetOneProperty(TPM_PT                pt,       // IN: the TPM property
+			  TPMS_TAGGED_PROPERTY* property  // OUT: tagged property
+			  )
+{
+    UINT32 value;
+
+    if(TPMPropertyIsDefined((TPM_PT)pt, &value))
+	{
+	    property->property = (TPM_PT)pt;
+	    property->value    = value;
+	    return TRUE;
+	}
+
+    return FALSE;
+}

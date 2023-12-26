@@ -103,5 +103,10 @@ ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starti
 		     TPML_ACT_DATA* actList     // OUT: ACT data list
 		     );
 
+//*** ActGetOneCapability()
+// This function returns an ACT's capability, if present.
+BOOL ActGetOneCapability(TPM_HANDLE     actHandle,  // IN: the handle for the ACT
+			 TPMS_ACT_DATA* actData     // OUT: ACT data
+			 );
 
 #endif  // _ACT_SPT_FP_H_

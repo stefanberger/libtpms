@@ -1338,3 +1338,16 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
 	}
     return more;
 }
+
+//*** PCRCapGetOneHandle()
+// This function is used to check whether a PCR handle exists.
+BOOL PCRCapGetOneHandle(TPMI_DH_PCR handle)  // IN: handle
+{
+    pAssert(HandleGetType(handle) == TPM_HT_PCR);
+
+    if((handle & HR_HANDLE_MASK) <= PCR_LAST)
+	{
+	    return TRUE;
+	}
+    return FALSE;
+}
