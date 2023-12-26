@@ -203,6 +203,24 @@ CryptCapGetECCCurve(TPM_ECC_CURVE   curveID,   // IN: the starting ECC curve
     return more;
 }
 
+//*** CryptCapGetOneECCCurve()
+// This function returns whether the ECC curve is implemented.
+BOOL CryptCapGetOneECCCurve(TPM_ECC_CURVE curveID  // IN: the  ECC curve
+			    )
+{
+    UINT16 i;
+
+    // Scan the eccCurveValues array
+    for(i = 0; i < ECC_CURVE_COUNT; i++)
+	{
+	    if(CryptEccGetCurveByIndex(i) == curveID)
+		{
+		    return TRUE;
+		}
+	}
+    return FALSE;
+}
+
 //*** CryptGetCurveSignScheme()
 // This function will return a pointer to the scheme of the curve.
 const TPMT_ECC_SCHEME* CryptGetCurveSignScheme(

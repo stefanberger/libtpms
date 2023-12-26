@@ -297,5 +297,9 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
 		 TPML_HANDLE* handleList  // OUT: list of handle
 		 );
 
+//*** PCRCapGetOneHandle()
+// This function is used to check whether a PCR handle exists.
+BOOL PCRCapGetOneHandle(TPMI_DH_PCR handle  // IN: handle
+			);
 
 #endif  // _PCR_FP_H_

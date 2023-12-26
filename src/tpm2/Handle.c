@@ -164,6 +164,26 @@ PermanentCapGetHandles(TPM_HANDLE   handle,     // IN: start handle
 	}
     return more;
 }
+
+//*** PermanentCapGetOneHandle()
+// This function returns whether a permanent handle exists.
+BOOL PermanentCapGetOneHandle(TPM_HANDLE handle)  // IN: handle
+{
+    UINT32 i;
+    
+    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    
+    // Iterate permanent handle range
+    for(i = NextPermanentHandle(handle); i != 0; i = NextPermanentHandle(i + 1))
+	{
+	    if(i == handle)
+		{
+		    return TRUE;
+		}
+	}
+    return FALSE;
+}
+
 //*** PermanentHandleGetPolicy()
 // This function returns a list of the permanent handles of PCR, started from
 // 'handle'. If 'handle' is larger than the largest permanent handle, an empty list
@@ -218,4 +238,31 @@ PermanentHandleGetPolicy(TPM_HANDLE handle,  // IN: start handle
 		}
 	}
     return more;
+}
+
+//*** PermanentHandleGetOnePolicy()
+// This function returns a permanent handle's policy, if present.
+BOOL PermanentHandleGetOnePolicy(TPM_HANDLE          handle,  // IN: handle
+				 TPMS_TAGGED_POLICY* policy   // OUT: tagged policy
+				 )
+{
+    pAssert(HandleGetType(handle) == TPM_HT_PERMANENT);
+    
+    if(NextPermanentHandle(handle) == handle)
+	{
+	    TPM2B_DIGEST policyDigest;
+	    TPM_ALG_ID   policyAlg;
+	    // Check to see if this permanent handle has a policy
+	    policyAlg = EntityGetAuthPolicy(handle, &policyDigest);
+	    if(policyAlg == TPM_ALG_ERROR)
+		{
+		    return FALSE;
+		}
+	    policy->handle             = handle;
+	    policy->policyHash.hashAlg = policyAlg;
+	    MemoryCopy(
+		       &policy->policyHash.digest, policyDigest.t.buffer, policyDigest.t.size);
+	    return TRUE;
+	}
+    return FALSE;
 }

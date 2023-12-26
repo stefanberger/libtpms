@@ -462,6 +462,7 @@ noinst_HEADERS += \
 	tpm2/PolicyAuthorize_fp.h \
 	tpm2/PolicyAuthorizeNV_fp.h \
 	tpm2/PolicyAuthValue_fp.h \
+	tpm2/PolicyCapability_fp.h \
 	tpm2/PolicyCommandCode_fp.h \
 	tpm2/PolicyCounterTimer_fp.h \
 	tpm2/PolicyCpHash_fp.h \
