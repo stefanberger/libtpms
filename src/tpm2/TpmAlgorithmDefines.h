@@ -348,6 +348,7 @@
 					  + (ADD_FILL || CC_PolicyParameters)                     /* 0x0000019C */ \
 					  + (ADD_FILL || CC_NV_DefineSpace2)                      /* 0x0000019D */ \
 					  + (ADD_FILL || CC_NV_ReadPublic2)                       /* 0x0000019E */ \
+					  + (ADD_FILL || CC_SetCapability)                        /* 0x0000019F */ \
 					  )
 
 #define VENDOR_COMMAND_ARRAY_SIZE   (0 + CC_Vendor_TCG_Test)

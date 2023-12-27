@@ -306,7 +306,8 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_PolicyParameters             (TPM_CC)(0x0000019C)
 #define TPM_CC_NV_DefineSpace2              (TPM_CC)(0x0000019D)
 #define TPM_CC_NV_ReadPublic2               (TPM_CC)(0x0000019E)
-#define TPM_CC_LAST			    (TPM_CC)(0x0000019E)
+#define TPM_CC_SetCapability                (TPM_CC)(0x0000019F)
+#define TPM_CC_LAST                         (TPM_CC)(0x0000019F)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 
@@ -1609,11 +1610,25 @@ typedef union {
     TPML_TAGGED_POLICY          authPolicies;
     TPML_ACT_DATA 		actData;
 } TPMU_CAPABILITIES;
+/* NOTE The TPMU_SET_CAPABILITIES structure may be defined by a TCG Registry. */
+typedef struct {
+    UINT32	platformSpecific;
+} TPMU_SET_CAPABILITIES;
 /* Table 2:111 - Definition of TPMS_CAPABILITY_DATA Structure  */
 typedef struct {
     TPM_CAP                 capability;
     TPMU_CAPABILITIES       data;
 } TPMS_CAPABILITY_DATA;
+/* Table 129 - Definition of TPMS_SET_CAPABILITY_DATA Structure <IN> */
+typedef struct {
+    TPM_CAP			setCapability;
+    TPMU_SET_CAPABILITIES	data;
+} TPMS_SET_CAPABILITY_DATA;
+/* Table 130 - Definition of TPM2B_SET_CAPABILITY_DATA Structure <IN> */
+typedef struct {
+    UINT16			size;
+    TPMS_SET_CAPABILITY_DATA	setCapabilityData;
+} TPM2B_SET_CAPABILITY_DATA;
 /* Table 2:112 - Definition of TPMS_CLOCK_INFO Structure  */
 typedef struct {
     UINT64                  clock;
