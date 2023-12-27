@@ -454,6 +454,9 @@ const TPMA_CC    s_ccAttr [] = {
 #if (PAD_LIST || CC_NV_DefineSpace2)
     TPMA_CC_INITIALIZER(0x019D, 0, 1, 0, 0, 1, 0, 0, 0),
 #endif
+#if (PAD_LIST || CC_NV_ReadPublic2)
+    TPMA_CC_INITIALIZER(0x019E, 0, 0, 0, 0, 1, 0, 0, 0),
+#endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
     TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
 #endif
@@ -966,6 +969,10 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #if (PAD_LIST || CC_NV_DefineSpace2)
     (COMMAND_ATTRIBUTES)(CC_NV_DefineSpace2 * 		// 0x019D
 			 (IS_IMPLEMENTED+DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+#endif
+#if (PAD_LIST || CC_NV_ReadPublic2)
+    (COMMAND_ATTRIBUTES)(CC_NV_ReadPublic2 * 		// 0x019E
+			 (IS_IMPLEMENTED+ENCRYPT_2)),
 #endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
     (COMMAND_ATTRIBUTES)(CC_Vendor_TCG_Test          *  // 0x0000

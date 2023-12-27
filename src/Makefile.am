@@ -435,6 +435,7 @@ noinst_HEADERS += \
 	tpm2/NV_Read_fp.h \
 	tpm2/NV_ReadLock_fp.h \
 	tpm2/NV_ReadPublic_fp.h \
+	tpm2/NV_ReadPublic2_fp.h \
 	tpm2/NVReserved_fp.h \
 	tpm2/NV_SetBits_fp.h \
 	tpm2/NV_spt_fp.h \

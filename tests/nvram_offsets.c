@@ -23,7 +23,7 @@ int main(void)
 
     /* Check size of auditCommands that expands with new commands */
     /* was 14 when COMPRESSED_LISTS was enabled */
-#define PD_AUDIT_COMMANDS_EXP_SIZE 16
+#define PD_AUDIT_COMMANDS_EXP_SIZE 17
     if (sizeof(pd.auditCommands) != PD_AUDIT_COMMANDS_EXP_SIZE) {
         fprintf(stderr,
                 "sizeof(PERSISTENT_DATA.auditCommands) does not have expected size "
