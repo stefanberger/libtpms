@@ -54,46 +54,26 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				        */
 /*										*/
 /********************************************************************************/
 
-#ifndef SESSIONPROCESS_FP_H
-#define SESSIONPROCESS_FP_H
+#if CC_PolicyParameters  // Command must be enabled
 
-BOOL
-IsDAExempted(
-	     TPM_HANDLE       handle         // IN: entity handle
-	     );
-void
-ClearCpRpHashes(
-		COMMAND         *command
-		);
-BOOL
-CompareNameHash(
-		COMMAND         *command,       // IN: main parsing structure
-		SESSION         *session        // IN: session structure with nameHash
-		);
-BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
-			   SESSION* session   // IN: session structure with pHash
-			   );
-TPM_RC
-ParseSessionBuffer(
-		   COMMAND         *command        // IN: the structure that contains
-		   );
-TPM_RC
-CheckAuthNoSession(
-		   COMMAND         *command        // IN: command parsing structure
-		   );
-TPM_RC
-BuildResponseSession(
-		     COMMAND         *command        // IN: structure that has relevant command
-		     //     information
-		     );
-void
-SessionRemoveAssociationToHandle(
-				 TPM_HANDLE       handle
-				 );
+#ifndef POLICYPARAMETERS_FP_H_
+#define POLICYPARAMETERS_FP_H_
 
+typedef struct
+{
+    TPMI_SH_POLICY policySession;
+    TPM2B_DIGEST   pHash;
+} PolicyParameters_In;
+
+#define RC_PolicyParameters_policySession (TPM_RC_H + TPM_RC_1)
+#define RC_PolicyParameters_pHash         (TPM_RC_P + TPM_RC_1)
+
+TPM_RC
+TPM2_PolicyParameters(PolicyParameters_In* in);
 
 #endif
+#endif    // CC_PolicyParameters
