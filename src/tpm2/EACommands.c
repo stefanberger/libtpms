@@ -1496,14 +1496,12 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
-    // If the template is set, make sure that it is the same as the input value
-    if(session->attributes.isTemplateHashDefined)
-	{
-	    if(!MemoryEqual2B(&in->templateHash.b, &session->u1.cpHash.b))
-		return TPM_RCS_VALUE + RC_PolicyTemplate_templateHash;
-	}
-    // error if cpHash contains something that is not a template
-    else if(session->u1.templateHash.t.size != 0)
+
+    // error if the templateHash in session context is not empty and is not the
+    // same as the input or is not a template
+    if((IsCpHashUnionOccupied(session->attributes))
+       && (!session->attributes.isTemplateHashDefined
+	   || !MemoryEqual2B(&in->templateHash.b, &session->u1.templateHash.b)))
 	return TPM_RC_CPHASH;
 
     // A valid templateHash must have the same size as session hash digest
