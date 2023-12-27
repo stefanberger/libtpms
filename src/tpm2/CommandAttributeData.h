@@ -448,6 +448,9 @@ const TPMA_CC    s_ccAttr [] = {
 #if (PAD_LIST || CC_PolicyCapability)
     TPMA_CC_INITIALIZER(0x019B, 0, 0, 0, 0, 1, 0, 0, 0),
 #endif
+#if (PAD_LIST || CC_PolicyParameters)
+    TPMA_CC_INITIALIZER(0x019C, 0, 0, 0, 0, 1, 0, 0, 0),
+#endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
     TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
 #endif
@@ -951,6 +954,10 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_PolicyCapability)
     (COMMAND_ATTRIBUTES)(CC_PolicyCapability *   	 // 0x019B
+			 (IS_IMPLEMENTED+DECRYPT_2+ALLOW_TRIAL)),
+#endif
+#if (PAD_LIST || CC_PolicyParameters)
+    (COMMAND_ATTRIBUTES)(CC_PolicyParameters *  	// 0x019C
 			 (IS_IMPLEMENTED+DECRYPT_2+ALLOW_TRIAL)),
 #endif
 #if (PAD_LIST  || CC_Vendor_TCG_Test)
