@@ -396,6 +396,16 @@ TPMI_RH_NV_INDEX_Marshal(TPMI_RH_NV_INDEX *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+/* Table 69 - Definition of (TPM_HANDLE) TPMI_RH_NV_ EXP_INDEX Type <IN/OUT> */
+
+UINT16
+TPMI_RH_NV_EXP_INDEX_Marshal(TPMI_RH_NV_INDEX *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += TPM_HANDLE_Marshal(source, buffer, size);
+    return written;
+}
+
 /* Table 2:60 - Definition of TPMI_ALG_HASH Type (InterfaceTable()) */
 
 UINT16
@@ -2181,6 +2191,15 @@ TPMA_NV_Marshal(TPMA_NV *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+/* Table 226 - Definition of (UINT64) TPMA_NV_EXP Bits */
+UINT16
+TPMA_NV_EXP_Marshal(TPMA_NV_EXP *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    written += UINT64_Marshal(source, buffer, size);
+    return written;
+}
+
 /* Table 2:206 - Definition of TPMS_NV_PUBLIC Structure (StructuresTable()) */
 
 UINT16
@@ -2209,6 +2228,78 @@ TPM2B_NV_PUBLIC_Marshal(TPM2B_NV_PUBLIC *source, BYTE **buffer, INT32 *size)
     	*buffer += sizeof(UINT16);
     }
     written += TPMS_NV_PUBLIC_Marshal(&source->nvPublic, buffer, size);
+    if (buffer != NULL) {
+	written += UINT16_Marshal(&written, &sizePtr, size);
+    }
+    else {
+	written += sizeof(UINT16);
+    }
+    return written;
+}
+
+/* Table 229 - Definition of TPMS_NV_PUBLIC_EXP_ATTR Structure */
+UINT16
+TPMS_NV_PUBLIC_EXP_ATTR_Marshal(TPMS_NV_PUBLIC_EXP_ATTR *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += TPMI_RH_NV_EXP_INDEX_Marshal(&source->nvIndex, buffer, size);
+    written += TPMI_ALG_HASH_Marshal(&source->nameAlg, buffer, size);
+    written += TPMA_NV_EXP_Marshal(&source->attributes, buffer, size);
+    written += TPM2B_DIGEST_Marshal(&source->authPolicy, buffer, size);
+    written += UINT16_Marshal(&source->dataSize, buffer, size);
+    return written;
+}
+
+/* Table 230 - Definition of TPMU_NV_PUBLIC_2 Union */
+
+UINT16
+TPMU_NV_PUBLIC_2_Marshal(TPMU_NV_PUBLIC_2 *source, BYTE **buffer, INT32 *size, UINT8 selector)
+{
+    UINT16 written = 0;
+
+    switch (selector) {
+
+      case TPM_HT_NV_INDEX:
+	written += TPMS_NV_PUBLIC_Marshal(&source->nvIndex, buffer, size);
+	break;
+      case TPM_HT_EXTERNAL_NV:
+	written += TPMS_NV_PUBLIC_EXP_ATTR_Marshal(&source->externalNV, buffer, size);
+	break;
+      case TPM_HT_PERMANENT_NV:
+	written +=  TPMS_NV_PUBLIC_Marshal(&source->permanentNV, buffer, size);
+	break;
+      default:
+	pAssert(FALSE);
+    }
+    return written;
+}
+
+/* Table 231 - Definition of TPMT_NV_PUBLIC_2 Structure */
+
+UINT16
+TPMT_NV_PUBLIC_2_Marshal(TPMT_NV_PUBLIC_2 *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += UINT8_Marshal(&source->handleType, buffer, size);
+    written += TPMU_NV_PUBLIC_2_Marshal(&source->nvPublic2, buffer, size, source->handleType);
+    return written;
+}
+
+/* Table 232 - Definition of TPM2B_NV_PUBLIC_2 Structure */
+
+UINT16
+TPM2B_NV_PUBLIC_2_Marshal(TPM2B_NV_PUBLIC_2 *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    BYTE *sizePtr;
+
+    if (buffer != NULL) {
+	sizePtr = *buffer;
+	*buffer += sizeof(UINT16);
+    }
+    written += TPMT_NV_PUBLIC_2_Marshal(&source->nvPublic2, buffer, size);
     if (buffer != NULL) {
 	written += UINT16_Marshal(&written, &sizePtr, size);
     }

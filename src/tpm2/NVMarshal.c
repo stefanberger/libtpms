@@ -4741,6 +4741,9 @@ USER_NVRAM_Display(const char *msg)
             NvReadObject(entryRef + offset, &obj);
             fprintf(stderr, " sizeof(obj): %zu  entrysize: %u\n", sizeof(obj), entrysize);
             break;
+#if CC_NV_DefineSpace2
+# error Missing support for TPM_HT_PERMANENT_NV
+#endif
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
@@ -4814,6 +4817,9 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             NvReadObject(entryRef + offset, &obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
             break;
+#if CC_NV_DefineSpace2
+# error Missing support for TPM_HT_PERMANENT_NV
+#endif
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
