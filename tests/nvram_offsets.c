@@ -12,7 +12,7 @@ int main(void)
 
     /* Check size of ppList that expands with new commands */
     /* was 14 when COMPRESSED_LISTS was enabled */
-#define PD_PP_LIST_EXP_SIZE 16
+#define PD_PP_LIST_EXP_SIZE 17
     if (sizeof(pd.ppList) != PD_PP_LIST_EXP_SIZE) {
         fprintf(stderr,
                 "sizeof(PERSISTENT_DATA.ppList) does not have expected size "

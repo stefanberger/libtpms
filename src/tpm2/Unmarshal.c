@@ -2437,6 +2437,9 @@ TPML_TAGGED_POLICY_Unmarshal(TPML_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
     return rc;
 }
 
+#endif					// libtpms added
+
+
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union (StructuresTable()) */
 
 #if 0
@@ -2500,6 +2503,69 @@ TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT3
     return rc;
 }
 #endif
+
+/* NOTE The TPMU_SET_CAPABILITIES structure may be defined by a TCG Registry. */
+TPM_RC
+TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    switch (selector) {
+      default:
+	rc = TPM_RC_SELECTOR;
+    }
+    return rc;
+}
+
+/* Table 129 - Definition of TPMS_SET_CAPABILITY_DATA Structure <IN> */
+TPM_RC
+TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_CAP_Unmarshal(&target->setCapability, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMU_SET_CAPABILITIES_Unmarshal(&target->data, buffer, size, target->setCapability);
+    }
+    return rc;
+}
+
+/* Table 130 - Definition of TPM2B_SET_CAPABILITY_DATA Structure <IN> */
+TPM_RC
+TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    INT32 startSize;
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size == 0) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	startSize = *size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMS_SET_CAPABILITY_DATA_Unmarshal(&target->setCapabilityData, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size != startSize - *size) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
+
+#if 0					// libtpms added
+typedef struct {
+    UINT16				size;
+    TPMS_SET_CAPABILITY_DATA	setCapabilityData;
+} TPM2B_SET_CAPABILITY_DATA;
 
 /* Table 109 - Definition of TPMS_CLOCK_INFO Structure */
 
@@ -4906,3 +4972,60 @@ TPM_AT_Unmarshal(TPM_AT *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+
+#if 0		// libtpms added
+TPM_RC
+TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    switch (selector) {
+      default:
+	rc = TPM_RC_SELECTOR;
+    }
+    return rc;
+}
+
+TPM_RC
+TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_CAP_Unmarshal(&target->setCapability, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMU_SET_CAPABILITIES_Unmarshal(&target->data, buffer, size, target->setCapability);
+    }
+    return rc;
+}
+
+TPM_RC
+TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    INT32 startSize;
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size == 0) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	startSize = *size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMS_SET_CAPABILITY_DATA_Unmarshal(&target->setCapabilityData, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size != startSize - *size) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
+#endif		// libtpms added
+

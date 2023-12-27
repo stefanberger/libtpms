@@ -407,7 +407,16 @@ extern "C" {
     TPMS_AC_OUTPUT_Marshal(TPMS_AC_OUTPUT *source, BYTE **buffer, INT32 *size);
     UINT16
     TPML_AC_CAPABILITIES_Marshal(TPML_AC_CAPABILITIES *source, BYTE **buffer, INT32 *size);
-
+    UINT16
+    TPMU_CAPABILITIES_Marshal(TPMU_CAPABILITIES* source, BYTE** buffer, INT32* size, UINT32 selector);
+    UINT16
+    TPMS_CAPABILITY_DATA_Marshal(TPMS_CAPABILITY_DATA* source, BYTE** buffer, INT32* size);
+    TPM_RC
+    TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES* target, BYTE** buffer, INT32* size, UINT32 selector);
+    TPM_RC
+    TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA* target, BYTE** buffer, INT32* size);
+    TPM_RC
+    TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA* target, BYTE** buffer, INT32* size);
 #ifdef __cplusplus
 }
 #endif
