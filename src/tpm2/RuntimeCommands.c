@@ -187,10 +187,11 @@ static const struct {
     COMMAND(ECC_Encrypt, true, 3),
     COMMAND(ECC_Decrypt, true, 3),
     COMMAND(PolicyCapability, true, 0), // not supported
+    COMMAND(PolicyParameters, true, 0), // not supported
     /* all new commands added here MUST have CAN_BE_DISABLE = true */
 #undef COMMAND
 };
-MUST_BE(TPM_CC_LAST == TPM_CC_PolicyCapability); /* force update of above list when new commands added */
+MUST_BE(TPM_CC_LAST == TPM_CC_PolicyParameters); /* force update of above list when new commands added */
 
 static void
 RuntimeCommandsEnableAllCommands(struct RuntimeCommands *RuntimeCommands,

@@ -477,6 +477,7 @@ noinst_HEADERS += \
 	tpm2/PolicyNV_fp.h \
 	tpm2/PolicyNvWritten_fp.h \
 	tpm2/PolicyOR_fp.h \
+	tpm2/PolicyParameters_fp.h \
 	tpm2/PolicyPassword_fp.h \
 	tpm2/PolicyPCR_fp.h \
 	tpm2/PolicyPhysicalPresence_fp.h \
