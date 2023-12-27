@@ -506,6 +506,7 @@ noinst_HEADERS += \
 	tpm2/Session_fp.h \
 	tpm2/SessionProcess_fp.h \
 	tpm2/SetAlgorithmSet_fp.h \
+	tpm2/SetCapability_fp.h \
 	tpm2/SetCommandCodeAuditStatus_fp.h \
 	tpm2/SetPrimaryPolicy_fp.h \
 	tpm2/Shutdown_fp.h \
