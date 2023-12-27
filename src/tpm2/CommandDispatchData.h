@@ -167,8 +167,10 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
 #define TPM2B_SENSITIVE_DATA_P_UNMARSHAL				\
 					(TPM2B_SENSITIVE_CREATE_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_SENSITIVE_DATA),
+#define TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL   (TPM2B_SENSITIVE_DATA_P_UNMARSHAL + 1)
+					UNMARSHAL_DISPATCH(TPM2B_SET_CAPABILITY_DATA),
 #define TPM2B_TEMPLATE_P_UNMARSHAL					\
-					(TPM2B_SENSITIVE_DATA_P_UNMARSHAL + 1)
+					(TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_TEMPLATE),
 #define TPM2B_TIMEOUT_P_UNMARSHAL               (TPM2B_TEMPLATE_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_TIMEOUT),
@@ -4216,6 +4218,40 @@ NV_ReadPublic2_COMMAND_DESCRIPTOR_t _NV_ReadPublic2Data = {
 #define _NV_ReadPublic2DataAddress 0
 #endif // CC_NV_ReadPublic2
 
+#if       CC_SetCapability
+#include    "SetCapability_fp.h"
+
+typedef TPM_RC (SetCapability_Entry)(
+				     SetCapability_In*        in
+				     );
+
+typedef const struct
+{
+    SetCapability_Entry         *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[4];
+} SetCapability_COMMAND_DESCRIPTOR_t;
+
+SetCapability_COMMAND_DESCRIPTOR_t _SetCapabilityData = {
+    /* entry         */         &TPM2_SetCapability,
+    /* inSize        */         (UINT16)(sizeof(SetCapability_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(SetCapability_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(SetCapability_In, setCapabilityData))},
+    /* types         */         {TPMI_RH_HIERARCHY_H_UNMARSHAL,
+				 TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _SetCapabilityDataAddress (&_SetCapabilityData)
+#else
+#define _SetCapabilityDataAddress 0
+#endif // CC_SetCapability
+
 #if CC_AC_GetCapability
 #include "AC_GetCapability_fp.h"
 typedef TPM_RC  (AC_GetCapability_Entry)(
@@ -4780,6 +4816,9 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_NV_ReadPublic2)
     (COMMAND_DESCRIPTOR_t*)_NV_ReadPublic2DataAddress,
 #endif // CC_NV_ReadPublic2
+#if (PAD_LIST || CC_SetCapability)
+    (COMMAND_DESCRIPTOR_t*)_SetCapabilityDataAddress,
+#endif // CC_SetCapability
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif
