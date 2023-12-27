@@ -54,52 +54,28 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023   					*/
 /*										*/
 /********************************************************************************/
 
-#ifndef NV_SPT_FP_H
-#define NV_SPT_FP_H
+#if CC_NV_DefineSpace2  // Command must be enabled
+
+#ifndef NV_DEFINESPACE2_FP_H
+#define NV_DEFINESPACE2_FP_H
+
+typedef struct
+{
+    TPMI_RH_PROVISION authHandle;
+    TPM2B_AUTH        auth;
+    TPM2B_NV_PUBLIC_2 publicInfo;
+} NV_DefineSpace2_In;
+
+#define RC_NV_DefineSpace2_authHandle (TPM_RC_H + TPM_RC_1)
+#define RC_NV_DefineSpace2_auth       (TPM_RC_P + TPM_RC_1)
+#define RC_NV_DefineSpace2_publicInfo (TPM_RC_P + TPM_RC_2)
 
 TPM_RC
-NvReadAccessChecks(
-		   TPM_HANDLE       authHandle,    // IN: the handle that provided the
-		   //     authorization
-		   TPM_HANDLE       nvHandle,      // IN: the handle of the NV index to be read
-		   TPMA_NV          attributes     // IN: the attributes of 'nvHandle'
-		   );
-TPM_RC
-NvWriteAccessChecks(
-		    TPM_HANDLE       authHandle,    // IN: the handle that provided the
-		    //     authorization
-		    TPM_HANDLE       nvHandle,      // IN: the handle of the NV index to be written
-		    TPMA_NV          attributes     // IN: the attributes of 'nvHandle'
-		    );
-TPM_RC
-NvClearOrderly(
-	       void
-	       );
-BOOL
-NvIsPinPassIndex(
-		 TPM_HANDLE          index       // IN: Handle to check
-		 );
-TPM2B_NAME* NvGetIndexName(
-			   NV_INDEX* nvIndex,  // IN: the index over which the name is to be
-			   //     computed
-			   TPM2B_NAME* name    // OUT: name of the index
-			   );
-TPM_RC NvPublic2FromNvPublic(
-			     TPMS_NV_PUBLIC*   nvPublic,  // IN: the source S-form NV public area
-			     TPMT_NV_PUBLIC_2* nvPublic2  // OUT: the T-form NV public area to populate
-			     );
-TPM_RC NvPublicFromNvPublic2(
-			     TPMT_NV_PUBLIC_2* nvPublic2,  // IN: the source T-form NV public area
-			     TPMS_NV_PUBLIC*   nvPublic    // OUT: the S-form NV public area to populate
-			     );
-TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
-		     TPM2B_AUTH*       auth,
-		     TPMS_NV_PUBLIC*   publicInfo,
-		     TPM_RC            blameAuthHandle,
-		     TPM_RC            blameAuth,
-		     TPM_RC            blamePublic);
-#endif
+TPM2_NV_DefineSpace2(NV_DefineSpace2_In* in);
+
+#endif    // NV_DEFINESPACE2_FP_H
+#endif    // CC_NV_DefineSpace2

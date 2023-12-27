@@ -325,8 +325,6 @@
 // "external NV" that is stored in the same place as "internal NV."
 // NOTE: enabling this doesn't necessarily mean that the expanded
 // (external-NV-specific) attributes are supported.
-#if 0							// libtpms: added
-#define EXTERNAL_NV                           YES
-#endif							// libtpms: added
+#define EXTERNAL_NV                           NO
 
 #endif // _TPM_PROFILE_COMMON_H_

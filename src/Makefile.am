@@ -426,6 +426,7 @@ noinst_HEADERS += \
 	tpm2/NV_Certify_fp.h \
 	tpm2/NV_ChangeAuth_fp.h \
 	tpm2/NV_DefineSpace_fp.h \
+	tpm2/NV_DefineSpace2_fp.h \
 	tpm2/NVDynamic_fp.h \
 	tpm2/NV_Extend_fp.h \
 	tpm2/NV_GlobalWriteLock_fp.h \
