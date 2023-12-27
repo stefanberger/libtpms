@@ -186,6 +186,11 @@ EntityGetLoadStatus(COMMAND* command  // IN/OUT: command parsing structure
 		    result = AcIsAccessible(handle);
 		    break;
 #endif
+		  case TPM_HT_EXTERNAL_NV:
+		  case TPM_HT_PERMANENT_NV:
+		    // Not yet supported.
+		    result = TPM_RC_VALUE;
+		    break;
 		  default:
 		    // Any other handle type is a defect in the unmarshaling code.
 		    FAIL(FATAL_ERROR_INTERNAL);
