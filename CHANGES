@@ -6,6 +6,12 @@ version 0.10.0:
           PCR policies used by TPM2_PolicyCounterTimer and TPM2_PolicyNV
           when upgrading from v0.9 to v0.10.
           https://github.com/stefanberger/libtpms/pull/367#issuecomment-1498353831
+  - tpm2: Upraded to rev180
+     - Due to changes related to the SESSION_ATTRIBUTES flag
+       isTemplateHashDefined and related code in TPM2_PolicyTemplate,
+       TPM2_PolicyCpHash, and TPM2_PolicyNameHash there may be
+       compatibility issues if a session from a previous version of libtpms
+       was reused such as after a VM-suspend/libtpms upgrade/VM-resume cycle.
 
 version 0.9.0:
   - NOTE: Downgrade to previous versions is not possible. See below.
