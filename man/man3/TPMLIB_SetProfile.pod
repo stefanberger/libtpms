@@ -139,7 +139,18 @@ ECC_Decrypt (0x19a).
 
 =item 4: (since v0.10)
 
-This I<StateFormatLevel> enabled Camellia-192 and AES-192.
+This I<StateFormatLevel>:
+
+=over 2
+
+=item * enabled Camellia-192 and AES-192.
+
+=item * enabled setting of TPM 2-internal session attribute flag
+isNameHashDefined that was added; it I<may> slightly change behavior
+of sessions when for example used by default-v1 profile compared to
+the null profile (libtpms v0.9).
+
+=back
 
 =back
 

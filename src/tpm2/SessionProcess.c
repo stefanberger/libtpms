@@ -1066,10 +1066,13 @@ static TPM_RC CheckPolicyAuthSession(
 		// Compare cpHash.
 		OK = MemoryEqual2B(&session->u1.cpHash.b,
 				   &ComputeCpHash(command, session->authHashAlg)->b);
+	    else if(g_RuntimeProfile.stateFormatLevel >= 4		// libtpms added
+		    && session->attributes.isNameHashDefined)
+		OK = CompareNameHash(command, session);
 	    else if(session->attributes.isTemplateHashDefined)
 		OK = CompareTemplateHash(command, session);
-	    else
-		OK = CompareNameHash(command, session);
+	    else if (g_RuntimeProfile.stateFormatLevel < 4)		// libtpms added: backwards compatibility
+                OK = CompareNameHash(command, session);			// libtpms added: backwards compatibility
 	    if(!OK)
 		return TPM_RCS_POLICY_FAIL;
 	}
