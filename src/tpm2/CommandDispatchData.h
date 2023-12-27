@@ -2981,6 +2981,41 @@ PolicyCapability_COMMAND_DESCRIPTOR_t _PolicyCapabilityData = {
 #define _PolicyCapabilityDataAddress 0
 #endif // CC_PolicyCapability
 
+#if       CC_PolicyParameters
+#include    "PolicyParameters_fp.h"
+
+typedef TPM_RC (PolicyParameters_Entry)(
+					PolicyParameters_In*        in
+					);
+
+
+typedef const struct
+{
+    PolicyParameters_Entry      *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[4];
+} PolicyParameters_COMMAND_DESCRIPTOR_t;
+
+PolicyParameters_COMMAND_DESCRIPTOR_t _PolicyParametersData = {
+    /* entry         */         &TPM2_PolicyParameters,
+    /* inSize        */         (UINT16)(sizeof(PolicyParameters_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyParameters_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyParameters_In, pHash))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+				 TPM2B_DIGEST_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _PolicyParametersDataAddress (&_PolicyParametersData)
+#else
+#define _PolicyParametersDataAddress 0
+#endif // CC_PolicyParameters
+
 #if CC_CreatePrimary
 #include "CreatePrimary_fp.h"
 typedef TPM_RC  (CreatePrimary_Entry)(
@@ -4659,6 +4694,9 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_PolicyCapability)
     (COMMAND_DESCRIPTOR_t*)_PolicyCapabilityDataAddress,
 #endif // CC_PolicyCapability
+#if (PAD_LIST || CC_PolicyParameters)
+    (COMMAND_DESCRIPTOR_t*)_PolicyParametersDataAddress,
+#endif // CC_PolicyParameters
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif

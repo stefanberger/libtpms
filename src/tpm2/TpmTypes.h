@@ -303,7 +303,8 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_ECC_Encrypt		    (TPM_CC)(0x00000199)
 #define TPM_CC_ECC_Decrypt		    (TPM_CC)(0x0000019A)
 #define TPM_CC_PolicyCapability             (TPM_CC)(0x0000019B)
-#define TPM_CC_LAST			    (TPM_CC)(0x0000019B)
+#define TPM_CC_PolicyParameters             (TPM_CC)(0x0000019C)
+#define TPM_CC_LAST			    (TPM_CC)(0x0000019C)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 
