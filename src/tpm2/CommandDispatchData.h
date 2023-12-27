@@ -4179,6 +4179,42 @@ NV_DefineSpace2_COMMAND_DESCRIPTOR_t _NV_DefineSpace2Data = {
 #define _NV_DefineSpace2DataAddress 0
 #endif // CC_NV_DefineSpace2
 
+#if       CC_NV_ReadPublic2
+#include    "NV_ReadPublic2_fp.h"
+
+typedef TPM_RC (NV_ReadPublic2_Entry)(
+				      NV_ReadPublic2_In*          in,
+				      NV_ReadPublic2_Out*         out
+				      );
+
+
+typedef const struct
+{
+    NV_ReadPublic2_Entry        *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[5];
+} NV_ReadPublic2_COMMAND_DESCRIPTOR_t;
+
+NV_ReadPublic2_COMMAND_DESCRIPTOR_t _NV_ReadPublic2Data = {
+    /* entry         */         &TPM2_NV_ReadPublic2,
+    /* inSize        */         (UINT16)(sizeof(NV_ReadPublic2_In)),
+    /* outSize       */         (UINT16)(sizeof(NV_ReadPublic2_Out)),
+    /* offsetOfTypes */         offsetof(NV_ReadPublic2_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(NV_ReadPublic2_Out, nvName))},
+    /* types         */         {TPMI_RH_NV_INDEX_H_UNMARSHAL,
+				 END_OF_LIST,
+				 TPM2B_NV_PUBLIC_2_P_MARSHAL,
+				 TPM2B_NAME_P_MARSHAL,
+				 END_OF_LIST}
+};
+
+#define _NV_ReadPublic2DataAddress (&_NV_ReadPublic2Data)
+#else
+#define _NV_ReadPublic2DataAddress 0
+#endif // CC_NV_ReadPublic2
 
 #if CC_AC_GetCapability
 #include "AC_GetCapability_fp.h"
@@ -4741,6 +4777,9 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_NV_DefineSpace2)
     (COMMAND_DESCRIPTOR_t*)_NV_DefineSpace2DataAddress,
 #endif // CC_NV_DefineSpace2
+#if (PAD_LIST || CC_NV_ReadPublic2)
+    (COMMAND_DESCRIPTOR_t*)_NV_ReadPublic2DataAddress,
+#endif // CC_NV_ReadPublic2
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif
