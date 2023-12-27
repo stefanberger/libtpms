@@ -84,6 +84,8 @@ static const struct RuntimeProfileDesc {
  *      PERSISTENT_DATA.ppList and PERSISTENT_DATA.auditCommands became bigger and need to
  *      be written differently.
  *  4 : Camellia-192 & AES-192 enabled
+ *      Session attribute isNameHashDefined was added and existing functions TPM2_PolicyNameHash
+ *      and CheckPolicyAuthSession are using it.
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
