@@ -1117,7 +1117,8 @@ TPM2_PolicyNameHash(PolicyNameHash_In* in  // IN: input parameter list
     CryptHashEnd2B(&hashState, &session->u2.policyDigest.b);
 
     // update nameHash in session context
-    session->u1.cpHash = in->nameHash;
+    session->u1.nameHash                  = in->nameHash;
+    session->attributes.isNameHashDefined = SET;
 
     return TPM_RC_SUCCESS;
 }
@@ -1149,8 +1150,9 @@ TPM2_PolicyDuplicationSelect(
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
-    // cpHash in session context must be empty
-    if(session->u1.cpHash.t.size != 0)
+
+    // nameHash in session context must be empty
+    if(session->u1.nameHash.t.size != 0)
 	return TPM_RC_CPHASH;
 
     // commandCode in session context must be empty
@@ -1160,7 +1162,8 @@ TPM2_PolicyDuplicationSelect(
     // Internal Data Update
 
     // Update name hash
-    session->u1.cpHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
+    session->u1.nameHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
+
     //  add objectName
     CryptDigestUpdate2B(&hashState, &in->objectName.b);
 
@@ -1168,7 +1171,9 @@ TPM2_PolicyDuplicationSelect(
     CryptDigestUpdate2B(&hashState, &in->newParentName.b);
 
     //  complete hash
-    CryptHashEnd2B(&hashState, &session->u1.cpHash.b);
+    CryptHashEnd2B(&hashState, &session->u1.nameHash.b);
+    session->attributes.isNameHashDefined = SET;
+
     // update policy hash
     // Old policyDigest size should be the same as the new policyDigest size since
     // they are using the same hash algorithm

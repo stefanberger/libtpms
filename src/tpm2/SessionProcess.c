@@ -1066,10 +1066,10 @@ static TPM_RC CheckPolicyAuthSession(
 		// Compare cpHash.
 		OK = MemoryEqual2B(&session->u1.cpHash.b,
 				   &ComputeCpHash(command, session->authHashAlg)->b);
+	    else if(session->attributes.isNameHashDefined)
+		OK = CompareNameHash(command, session);
 	    else if(session->attributes.isTemplateHashDefined)
 		OK = CompareTemplateHash(command, session);
-	    else
-		OK = CompareNameHash(command, session);
 	    if(!OK)
 		return TPM_RCS_POLICY_FAIL;
 	}

@@ -1094,6 +1094,6 @@ SessionCapGetActiveAvail(void)
 // the members of the union containing `cpHash` are set.
 BOOL IsCpHashUnionOccupied(SESSION_ATTRIBUTES attrs)
 {
-    return attrs.isBound || attrs.isCpHashDefined
+    return attrs.isBound || attrs.isCpHashDefined || attrs.isNameHashDefined
 	|| attrs.isTemplateHashDefined;
 }
