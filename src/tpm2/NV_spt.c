@@ -231,6 +231,33 @@ TPM2B_NAME* NvGetIndexName(
     return name;
 }
 
+#if 0				// libtpms: added
+// NOTE: This is a lossy conversion: any expanded attributes are lost here.
+// Calling code should return an error to the user, instead of dropping their
+// data, if any of the expanded attributes are SET.
+static TPMA_NV LegacyAttributesFromExpanded(TPMA_NV_EXP attributes)
+{
+    UINT64 attributes64;
+    UINT32 attributes32;
+
+    attributes64 = TPMA_NV_EXP_TO_UINT64(attributes);
+    attributes32 = (UINT32)attributes64;
+
+    return UINT32_TO_TPMA_NV(attributes32);
+}
+
+static TPMA_NV_EXP ExpandedAttributesFromLegacy(TPMA_NV attributes)
+{
+    UINT32 attributes32;
+    UINT64 attributes64;
+
+    attributes32 = TPMA_NV_TO_UINT32(attributes);
+    attributes64 = (UINT64)attributes32;
+
+    return UINT64_TO_TPMA_NV_EXP(attributes64);
+}
+#endif				// libtpms: added
+
 //*** NvPublic2FromNvPublic()
 // This function converts a legacy-form NV public (TPMS_NV_PUBLIC) into the
 // generalized TPMT_NV_PUBLIC_2 tagged-union representation.
