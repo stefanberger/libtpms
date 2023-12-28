@@ -93,9 +93,9 @@ EXTERN uint64_t         s_suspendedElapsedTime;
 #endif // HARDWARE_CLOCK
 
 /* This value indicates that the timer was reset */
-EXTERN BOOL              s_timerReset;
+EXTERN int              s_timerReset;
 /* This value indicates that the timer was stopped. It causes a clock discontinuity. */
-EXTERN BOOL              s_timerStopped;
+EXTERN int              s_timerStopped;
 /* This variable records the time when _plat__TimerReset() is called.  This mechanism allow us to
    subtract the time when TPM is power off from the total time reported by clock() function */
 EXTERN uint64_t         s_initClock;
@@ -125,13 +125,13 @@ EXTERN unsigned char s_locality;
 #endif // SIMULATION
 
 EXTERN unsigned char    s_NV[NV_MEMORY_SIZE];
-EXTERN BOOL              s_NvIsAvailable;
-EXTERN BOOL              s_NV_unrecoverable;
-EXTERN BOOL              s_NV_recoverable;
+EXTERN int              s_NvIsAvailable;
+EXTERN int              s_NV_unrecoverable;
+EXTERN int              s_NV_recoverable;
 /* From PPPlat.c Physical presence.  It is initialized to FALSE */
-EXTERN BOOL     s_physicalPresence;
+EXTERN int        s_physicalPresence;
 /* From Power */
-EXTERN BOOL        s_powerLost;
+EXTERN int        s_powerLost;
 /* From Entropy.c */
 EXTERN uint32_t        lastEntropy;
 
