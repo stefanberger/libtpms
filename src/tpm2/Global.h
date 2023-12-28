@@ -1137,6 +1137,9 @@ typedef struct state_reset_data
     BYTE commitArray[16];  // The default reset value is {0}.
     
 #  endif  // ALG_ECC
+#  if STATE_RESET_DATA_PADDING != 0
+    BYTE reserved[STATE_RESET_DATA_PADDING];
+#  endif
 } STATE_RESET_DATA;
 
 EXTERN STATE_RESET_DATA gr;
