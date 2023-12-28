@@ -86,12 +86,6 @@
 #  define FALSE 0
 #endif
 
-#ifdef PROFILE
-#   define PROFILE_QUOTE(a) #a
-#   define PROFILE_INCLUDE(a) PROFILE_QUOTE(a)
-#   include PROFILE_INCLUDE(PROFILE)
-#endif
-
 // Need an unambiguous definition for DEBUG. Do not change this
 #ifndef DEBUG
 #  ifdef NDEBUG
@@ -100,8 +94,7 @@
 #    define DEBUG YES
 #  endif
 #elif(DEBUG != NO) && (DEBUG != YES)
-#   undef   DEBUG
-#   define  DEBUG       YES       // Default: Either YES or NO
+#  error DEBUG should be 0 or 1
 #endif
 
 ////////////////////////////////////////////////////////////////
