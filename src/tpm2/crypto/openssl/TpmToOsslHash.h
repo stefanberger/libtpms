@@ -71,15 +71,11 @@
 #include <openssl/sha.h>
 
 #if ALG_SM3_256
-#   if defined(OPENSSL_NO_SM3) || OPENSSL_VERSION_NUMBER < 0x10101010L
-#    if ALG_SM3_256  // libtpms added begin
-#     error This version of OpenSSL does not support SM3
-#    endif           // libtpms added end
-#       undef ALG_SM3_256
-#       define ALG_SM3_256  ALG_NO
-#   elif OPENSSL_VERSION_NUMBER >= 0x10200000L
-#       include <openssl/sm3.h>
-#   else
+#  if defined(OPENSSL_NO_SM3) || OPENSSL_VERSION_NUMBER < 0x10101010L
+#    error "Current version of OpenSSL doesn't support SM3"
+#  elif OPENSSL_VERSION_NUMBER >= 0x10200000L
+#    include <openssl/sm3.h>
+#  else
 // OpenSSL 1.1.1 keeps smX.h headers in the include/crypto directory,
 // and they do not get installed as part of the libssl package
 #    define SM3_LBLOCK (64 / 4)
