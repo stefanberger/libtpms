@@ -107,20 +107,43 @@
 ////////////////////////////////////////////////////////////////
 // DEBUG OPTIONS
 ////////////////////////////////////////////////////////////////
-/* The SIMULATION switch allows certain other macros to be enabled. The things that can be enabled
-   in a simulation include key caching, reproducible random sequences, instrumentation of the RSA
-   key generation process, and certain other debug code. SIMULATION Needs to be defined as either
-   YES or NO. This grouping of macros will make sure that it is set correctly. A simulated TPM would
-   include a Virtual TPM. The interfaces for a Virtual TPM should be modified from the standard ones
-   in the Simulator project. If SIMULATION is in the compile parameters without modifiers, make
-   SIMULATION == YES */
-#if !(defined SIMULATION) || ((SIMULATION != NO) && (SIMULATION != YES))
-#   undef   SIMULATION
-#   define  SIMULATION      NO     // Default: Either YES or NO    libtpms: NO
-#endif
 
-// Define this to run the function that checks the compatibility between the chosen big number math
-// library and the TPM code. Not all ports use this.
+// The SIMULATION switch allows certain other macros to be enabled. The things that
+// can be enabled in a simulation include key caching, reproducible "random"
+// sequences, instrumentation of the RSA key generation process, and certain other
+// debug code. SIMULATION Needs to be defined as either YES or NO. This grouping of
+// macros will make sure that it is set correctly. A simulated TPM would include a
+// Virtual TPM. The interfaces for a Virtual TPM should be modified from the standard
+// ones in the Simulator project.
+#define SIMULATION                 NO			// libtpms: changed to NO
+
+// If doing debug, can set the DRBG to print out the intermediate test values.
+// Before enabling this, make sure that the dbgDumpMemBlock() function
+// has been added someplace (preferably, somewhere in CryptRand.c)
+#define DRBG_DEBUG_PRINT            (NO  * DEBUG)
+
+// This define is used to control the debug for the CertifyX509 command.
+#define CERTIFYX509_DEBUG           (NO * DEBUG)	// libtpms: NO
+
+// This provides fixed seeding of the RNG when doing debug on a simulator. This
+// should allow consistent results on test runs as long as the input parameters
+// to the functions remains the same.
+#define USE_DEBUG_RNG               (NO  * DEBUG)
+
+////////////////////////////////////////////////////////////////
+// RSA DEBUG OPTIONS
+////////////////////////////////////////////////////////////////
+
+// Enable the instrumentation of the sieve process. This is used to tune the sieve
+// variables.
+#define RSA_INSTRUMENT              (NO  * DEBUG)
+
+// Enables use of the key cache. Default is YES
+#define USE_RSA_KEY_CACHE           (NO  * DEBUG)
+
+// Enables use of a file to store the key cache values so that the TPM will start
+// faster during debug. Default for this is YES
+#define USE_KEY_CACHE_FILE          (NO  * DEBUG)
 
 ////////////////////////////////////////////////////////////////
 // TEST OPTIONS
@@ -175,14 +198,6 @@
 #   define  RSA_KEY_SIEVE           YES         // Default: Either YES or NO
 #endif
 
-/* Enable the instrumentation of the sieve process. This is used to tune the sieve variables.*/
-#if RSA_KEY_SIEVE && SIMULATION
-#   if !(defined RSA_INSTRUMENT) || ((RSA_INSTRUMENT != NO) && (RSA_INSTRUMENT != YES))
-#       undef   RSA_INSTRUMENT
-#       define  RSA_INSTRUMENT      NO         // Default: Either YES or NO
-#   endif
-#endif
-
 /* This switch enables the RNG state save and restore */
 #if !(defined _DRBG_STATE_SAVE)						\
     || ((_DRBG_STATE_SAVE != NO) && (_DRBG_STATE_SAVE != YES))
@@ -220,51 +235,6 @@
 #   define USE_MARSHALING_DEFINES   YES     // Default: Either YES or NO
 #endif
 
-// The switches in this group can only be enabled when doing debug during simulation
-#if SIMULATION && DEBUG
-
-/* This forces the use of a smaller context slot size. This reduction reduces the range of the epoch
-   allowing the tester to force the epoch to occur faster than the normal defined in TpmProfile.h */
-#   if !(defined CONTEXT_SLOT)
-#       define CONTEXT_SLOT             UINT8
-#   endif
-
-// Enables use of the key cache. Default is YES
-#   if !(defined USE_RSA_KEY_CACHE)					\
-    || ((USE_RSA_KEY_CACHE != NO) && (USE_RSA_KEY_CACHE != YES))
-#       undef   USE_RSA_KEY_CACHE
-#       define  USE_RSA_KEY_CACHE   YES   // Default: Either YES or NO
-#   endif
-
-// Enables use of a file to store the key cache values so that the TPM will start faster during
-// debug. Default for this is YES
-#   if USE_RSA_KEY_CACHE
-#       if !(defined USE_KEY_CACHE_FILE)				\
-    || ((USE_KEY_CACHE_FILE != NO) && (USE_KEY_CACHE_FILE != YES))
-#           undef   USE_KEY_CACHE_FILE
-#           define  USE_KEY_CACHE_FILE  YES     // Default: Either YES or NO
-#       endif
-#   else
-#       undef   USE_KEY_CACHE_FILE
-#       define  USE_KEY_CACHE_FILE      NO
-#   endif   // USE_RSA_KEY_CACHE
-
-// This provides fixed seeding of the RNG when doing debug on a simulator. This should allow
-// consistent results on test runs as long as the input parameters to the functions remains the
-// same. There is no default value.
-#   if !(defined USE_DEBUG_RNG) || ((USE_DEBUG_RNG != NO) && (USE_DEBUG_RNG != YES))
-#       undef   USE_DEBUG_RNG
-#       define  USE_DEBUG_RNG           YES      // Default: Either YES or NO
-#   endif
-
-// Don't change these. They are the settings needed when not doing a simulation and not doing
-// debug. Can't use the key cache except during debug. Otherwise, all of the key values end up being
-// the same
-#else
-#   define USE_RSA_KEY_CACHE        NO
-#   define USE_RSA_KEY_CACHE_FILE   NO
-#   define USE_DEBUG_RNG            NO
-#endif  // DEBUG && SIMULATION
 
 #if DEBUG
 
@@ -290,15 +260,6 @@
     || ((RUNTIME_SIZE_CHECKS != NO) && (RUNTIME_SIZE_CHECKS != YES))
 #       undef RUNTIME_SIZE_CHECKS
 #       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO  libtpms: NO
-#   endif
-
-// If doing debug, can set the DRBG to print out the intermediate test values. Before enabling this,
-// make sure that the dbgDumpMemBlock() function has been added someplace (preferably, somewhere in
-// CryptRand.c)
-#   if !(defined DRBG_DEBUG_PRINT)					\
-    || ((DRBG_DEBUG_PRINT != NO) && (DRBG_DEBUG_PRINT != YES))
-#       undef   DRBG_DEBUG_PRINT
-#       define  DRBG_DEBUG_PRINT    NO      // Default: Either YES or NO
 #   endif
 
 // If an assertion event it not going to produce any trace information (function and line number)
@@ -346,13 +307,6 @@
     || ((USE_BIT_FIELD_STRUCTURES != NO) && (USE_BIT_FIELD_STRUCTURES != YES))
 #   undef   USE_BIT_FIELD_STRUCTURES
 #   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO   libtpms: NO
-#endif
-
-// This define is used to control the debug for the CertifyX509() command.
-#if !(defined CERTIFYX509_DEBUG)					\
-    || ((CERTIFYX509_DEBUG != NO) && (CERTIFYX509_DEBUG != YES))
-#   undef   CERTIFYX509_DEBUG
-#   define  CERTIFYX509_DEBUG NO               // libtpms: NO
 #endif
 
 #if !(defined TABLE_DRIVEN_MARSHAL)					\
