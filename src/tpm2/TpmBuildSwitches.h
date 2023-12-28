@@ -243,55 +243,29 @@
 // Implementation alternatives - changes external behavior
 ////////////////////////////////////////////////////////////////
 
-#if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
-#   undef   USE_DA_USED
-#   define  USE_DA_USED     YES         // Default: Either YES or NO
-#endif
+// This switch enables the RNG state save and restore
+#define _DRBG_STATE_SAVE            YES
 
+// Definition to allow alternate behavior for non-orderly startup. If there is a
+// chance that the TPM could not update 'failedTries'
+#define USE_DA_USED                 YES		// libtpms: YES
 
-/* This switch is used to enable the self-test capability in AlgorithmTests.c */
-#if !(defined SELF_TEST) || ((SELF_TEST != NO) && (SELF_TEST != YES))
-#   undef   SELF_TEST
-#   define  SELF_TEST       YES         // Default: Either YES or NO
-#endif
+// This switch is used to enable the self-test capability in AlgorithmTests.c
+#define SELF_TEST                   YES
 
-/* This switch enables the RNG state save and restore */
-#if !(defined _DRBG_STATE_SAVE)						\
-    || ((_DRBG_STATE_SAVE != NO) && (_DRBG_STATE_SAVE != YES))
-#   undef   _DRBG_STATE_SAVE
-#   define  _DRBG_STATE_SAVE        YES     // Default: Either YES or NO
-#endif
+// This switch indicates where clock epoch value should be stored. If this value
+// defined, then it is assumed that the timer will change at any time so the
+// nonce should be a random number kept in RAM. When it is not defined, then the
+// timer only stops during power outages.
+#define CLOCK_STOPS                 NO
 
+// Indicate if the implementation is going to give lockout time credit for time up to
+// the last orderly shutdown.
+#define ACCUMULATE_SELF_HEAL_TIMER  YES
 
-
-/* This switch indicates where clock epoch value should be stored. If this value defined, then it is
-   assumed that the timer will change at any time so the nonce should be a random number kept in
-   RAM. When it is not defined, then the timer only stops during power outages. */
-#if !(defined CLOCK_STOPS) || ((CLOCK_STOPS != NO) && (CLOCK_STOPS != YES))
-#   undef   CLOCK_STOPS
-#   define  CLOCK_STOPS             NO     // Default: Either YES or NO
-#endif
-
-
-#if DEBUG
-
-// If an assertion event it not going to produce any trace information (function and line number)
-// then make FAIL_TRACE == NO
-#   if !(defined FAIL_TRACE) || ((FAIL_TRACE != NO) && (FAIL_TRACE != YES))
-#       undef   FAIL_TRACE
-#       define  FAIL_TRACE          YES      // Default: Either YES or NO
-#   endif
-
-#endif // DEBUG
-
-/* Indicate if the implementation is going to give lockout time credit for time up to the last
-   orderly shutdown. */
-#if !(defined ACCUMULATE_SELF_HEAL_TIMER)				\
-    || ((ACCUMULATE_SELF_HEAL_TIMER != NO) && (ACCUMULATE_SELF_HEAL_TIMER != YES))
-#   undef   ACCUMULATE_SELF_HEAL_TIMER
-#   define  ACCUMULATE_SELF_HEAL_TIMER      YES       // Default: Either YES or NO
-#endif
-
+// If an assertion event is not going to produce any trace information (function and
+// line number) then make FAIL_TRACE == NO
+#define FAIL_TRACE                  YES
 
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
 #include "CompilerDependencies.h"
