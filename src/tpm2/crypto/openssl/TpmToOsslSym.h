@@ -78,9 +78,8 @@
 #endif
 
 #if ALG_SM4
-#   if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
-#       undef ALG_SM4
-#       define ALG_SM4  ALG_NO
+#  if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
+#    error "Current version of OpenSSL doesn't support SM4"
 #   //elif OPENSSL_VERSION_NUMBER >= 0x10200000L		// libtpms deactivated
 #   //    include <openssl/sm4.h>				// libtpms deactivated
 #   else
