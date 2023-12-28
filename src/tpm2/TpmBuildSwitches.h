@@ -206,29 +206,53 @@
 // Implementation alternatives - don't  change external behavior
 ////////////////////////////////////////////////////////////////
 
+// Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements
+// for command dispatch and handle unmarshaling
+#define TABLE_DRIVEN_DISPATCH       YES
+
+// This define is used to enable the new table-driven marshaling code.
+#define TABLE_DRIVEN_MARSHAL        NO
+
+// This switch allows use of #defines in place of pass-through marshaling or
+// unmarshaling code. A pass-through function just calls another function to do
+// the required function and does no parameter checking of its own. The
+// table-driven dispatcher calls directly to the lowest level
+// marshaling/unmarshaling code and by-passes any pass-through functions.
+#define USE_MARSHALING_DEFINES      YES
+
+// Switch added to support packed lists that leave out space associated with
+// unimplemented commands. Comment this out to use linear lists.
+// Note: if vendor specific commands are present, the associated list is always
+// in compressed form.
+#define COMPRESSED_LISTS            YES
+
+// This define is used to eliminate the use of bit-fields. It can be enabled for big-
+// or little-endian machines. For big-endian architectures that numbers bits in
+// registers from left to right (MSb0) this must be enabled. Little-endian machines
+// number from right to left with the least significant bit having assigned a bit
+// number of 0. These are LSb0 machines (they are also little-endian so they are also
+// least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
+// either direction (MSb0 or LSb0). For an MSB0+MSb0 machine this value is required to
+// be 'NO'
+#define USE_BIT_FIELD_STRUCTURES    NO
+
+// Enable the generation of RSA primes using a sieve.
+#define RSA_KEY_SIEVE               YES
+
+////////////////////////////////////////////////////////////////
+// Implementation alternatives - changes external behavior
+////////////////////////////////////////////////////////////////
+
 #if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
 #   undef   USE_DA_USED
 #   define  USE_DA_USED     YES         // Default: Either YES or NO
 #endif
 
-// Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements for command dispatch and
-// handle unmarshaling
-#if !(defined TABLE_DRIVEN_DISPATCH)					\
-    || ((TABLE_DRIVEN_DISPATCH != NO) && (TABLE_DRIVEN_DISPATCH != YES))
-#   undef   TABLE_DRIVEN_DISPATCH
-#   define  TABLE_DRIVEN_DISPATCH   YES     // Default: Either YES or NO
-#endif
 
 /* This switch is used to enable the self-test capability in AlgorithmTests.c */
 #if !(defined SELF_TEST) || ((SELF_TEST != NO) && (SELF_TEST != YES))
 #   undef   SELF_TEST
 #   define  SELF_TEST       YES         // Default: Either YES or NO
-#endif
-
-/* Enable the generation of RSA primes using a sieve. */
-#if !(defined RSA_KEY_SIEVE) || ((RSA_KEY_SIEVE != NO) && (RSA_KEY_SIEVE != YES))
-#   undef   RSA_KEY_SIEVE
-#   define  RSA_KEY_SIEVE           YES         // Default: Either YES or NO
 #endif
 
 /* This switch enables the RNG state save and restore */
@@ -238,15 +262,6 @@
 #   define  _DRBG_STATE_SAVE        YES     // Default: Either YES or NO
 #endif
 
-/* Switch added to support packed lists that leave out space associated with unimplemented
-   commands. Comment this out to use linear lists. */
-/* NOTE: if vendor specific commands are present, the associated list is always in compressed
-   form. */
-#if !(defined COMPRESSED_LISTS)						\
-    || ((COMPRESSED_LISTS != NO) && (COMPRESSED_LISTS != YES))
-#   undef   COMPRESSED_LISTS
-#   define  COMPRESSED_LISTS        YES     // Default: Either YES or NO
-#endif
 
 
 /* This switch indicates where clock epoch value should be stored. If this value defined, then it is
@@ -255,17 +270,6 @@
 #if !(defined CLOCK_STOPS) || ((CLOCK_STOPS != NO) && (CLOCK_STOPS != YES))
 #   undef   CLOCK_STOPS
 #   define  CLOCK_STOPS             NO     // Default: Either YES or NO
-#endif
-
-// This switch allows use of #defines in place of pass-through marshaling or unmarshaling code. A
-// pass-through function just calls another function to do the required function and does no
-// parameter checking of its own. The table-driven dispatcher calls directly to the lowest level
-// marshaling/unmarshaling code and by-passes any pass-through functions.
-#if (defined USE_MARSHALING_DEFINES) && (USE_MARSHALING_DEFINES != NO)
-#   undef   USE_MARSHALING_DEFINES
-#   define  USE_MARSHALING_DEFINES  YES
-#else
-#   define USE_MARSHALING_DEFINES   YES     // Default: Either YES or NO
 #endif
 
 
@@ -288,25 +292,6 @@
 #   define  ACCUMULATE_SELF_HEAL_TIMER      YES       // Default: Either YES or NO
 #endif
 
-// This define is used to eliminate the use of bit-fields. It can be enabled for big- or
-// little-endian machines. For big-endian architectures that number bits in registers from left to
-// right (MSb0()) this must be enabled.  Little-endian machines number from right to left with the
-// least significant bit having assigned a bit number of 0. These are LSb0() machines (they are also
-// little-endian so they are also least-significant byte 0 (LSB0) machines. Big-endian (MSB0)
-// machines may number in either direction (MSb0() or LSb0()). For an MSB0+MSb0() machine this
-// value is required to be NO
-
-#if !(defined USE_BIT_FIELD_STRUCTURES)					\
-    || ((USE_BIT_FIELD_STRUCTURES != NO) && (USE_BIT_FIELD_STRUCTURES != YES))
-#   undef   USE_BIT_FIELD_STRUCTURES
-#   define  USE_BIT_FIELD_STRUCTURES    NO        // Default: Either YES or NO   libtpms: NO
-#endif
-
-#if !(defined TABLE_DRIVEN_MARSHAL)					\
-    || ((TABLE_DRIVEN_MARSHAL != NO) && (TABLE_DRIVEN_MARSHAL != YES))
-#   undef   TABLE_DRIVEN_MARSHAL
-#   define  TABLE_DRIVEN_MARSHAL NO    // Default: Either YES or NO  libtpms: NO
-#endif
 
 // TODO_RENAME_INC_FOLDER: public refers to the TPM_CoreLib public headers
 #include "CompilerDependencies.h"
