@@ -155,12 +155,37 @@
 // SIMULATION may not be desired.
 #define ALLOW_FORCE_FAILURE_MODE    NO		// libtpms: NO
 
-#if !(defined LIBRARY_COMPATIBILITY_CHECK)				\
-    || (( LIBRARY_COMPATIBILITY_CHECK != NO)				\
-	&& (LIBRARY_COMPATIBILITY_CHECK != YES))
-#   undef   LIBRARY_COMPATIBILITY_CHECK
-#   define  LIBRARY_COMPATIBILITY_CHECK YES     // Default: Either YES or NO  libtpms: YES
-#endif
+////////////////////////////////////////////////////////////////
+// Internal checks
+////////////////////////////////////////////////////////////////
+
+// Define this to run the function that checks the compatibility between the
+// chosen big number math library and the TPM code. Not all ports use this.
+#define LIBRARY_COMPATIBILITY_CHECK YES		// libtpms: YES
+
+// In some cases, the relationship between two values may be dependent on things that
+// change based on various selections like the chosen cryptographic libraries. It is
+// possible that these selections will result in incompatible settings. These are often
+// detectable by the compiler but it is not always possible to do the check in the
+// preprocessor code. For example, when the check requires use of 'sizeof'() then the
+// preprocessor can't do the comparison. For these cases, we include a special macro
+// that, depending on the compiler will generate a warning to indicate if the check
+// always passes or always fails because it involves fixed constants.
+//
+// In modern compilers this is now commonly known as a static_assert, but the precise
+// implementation varies by compiler. CompilerDependencies.h defines MUST_BE as a macro
+// that abstracts out the differences, and COMPILER_CHECKS can remove the checks where
+// the current compiler doesn't support it.  COMPILER_CHECKS should be enabled if the
+// compiler supports some form of static_assert.
+// See the CompilerDependencies_*.h files for specific implementations per compiler.
+#define COMPILER_CHECKS             NO		// libtpms: NO
+
+// Some of the values (such as sizes) are the result of different options set in
+// TpmProfile.h. The combination might not be consistent. A function is defined
+// (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the
+// function, define this parameter.
+#define RUNTIME_SIZE_CHECKS        NO		// libtpms: NO
+
 #if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
 #   undef   FIPS_COMPLIANT
 #   define  FIPS_COMPLIANT      NO     // Default: Either YES or NO    libtpms: NO
@@ -237,30 +262,6 @@
 
 
 #if DEBUG
-
-// In some cases, the relationship between two values may be dependent on things that change based
-// on various selections like the chosen cryptographic libraries. It is possible that these
-// selections will result in incompatible settings. These are often detectable by the compiler but
-// it isn't always possible to do the check in the preprocessor code. For example, when the check
-// requires use of 'sizeof()' then the preprocessor can't do the comparison. For these cases, we
-// include a special macro that, depending on the compiler will generate a warning to indicate if
-// the check always passes or always fails because it involves fixed constants. To run these checks,
-// define COMPILER_CHECKS.
-#   if !(defined COMPILER_CHECKS)					\
-    || ((COMPILER_CHECKS != NO) && (COMPILER_CHECKS != YES))
-#       undef   COMPILER_CHECKS
-#       define  COMPILER_CHECKS     NO      // Default: Either YES or NO
-#   endif
-
-// Some of the values (such as sizes) are the result of different options set in
-// TpmProfile.h. The combination might not be consistent. A function is defined
-// (TpmSizeChecks()) that is used to verify the sizes at run time. To enable the function, define
-// this parameter.
-#   if !(defined RUNTIME_SIZE_CHECKS)					\
-    || ((RUNTIME_SIZE_CHECKS != NO) && (RUNTIME_SIZE_CHECKS != YES))
-#       undef RUNTIME_SIZE_CHECKS
-#       define RUNTIME_SIZE_CHECKS      NO      // Default: Either YES or NO  libtpms: NO
-#   endif
 
 // If an assertion event it not going to produce any trace information (function and line number)
 // then make FAIL_TRACE == NO
