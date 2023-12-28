@@ -388,7 +388,6 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 				     );
 #endif
 
-#if 0							// libtpms: added
 //** _plat__GetPlatformManufactureData
 // This function allows the platform to provide a small amount of data to be
 // stored as part of the TPM's PERSISTENT_DATA structure during manufacture.  Of
@@ -399,7 +398,6 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 // to the Core library.
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
 						  uint32_t bufferSize);
-#endif							// libtpms: added
 
 // return the 4 character Manufacturer Capability code.  This
 // should come from the platform library since that is provided by the manufacturer

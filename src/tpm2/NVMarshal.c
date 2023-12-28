@@ -4022,6 +4022,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_DATA_VERSION,
                                 PERSISTENT_DATA_MAGIC, 4);
+    // platformReserved (added in v0.10) is not persisted
     written += BOOL_Marshal(&data->disableClear, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->ownerAlg, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->endorsementAlg, buffer, size);

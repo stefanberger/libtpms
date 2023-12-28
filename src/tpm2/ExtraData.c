@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*						*/
+/*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -54,81 +54,37 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2023				  	*/
+/*  (c) Copyright IBM Corp. and others, 2023					*/
 /*										*/
 /********************************************************************************/
 
-// Misc profile settings that don't currently have a better home.
-// These are rarely changed, but available for vendor customization.
+//** Description
+//
+// This file contains routines that are called by the core library to allow the
+// platform to use the Core storage structures for small amounts of related data.
+//
+// In this implementation, the buffers are all just set to 0xFF
 
-#ifndef _TPM_PROFILE_MISC_H_
-#define _TPM_PROFILE_MISC_H_
+//** Includes and Data Definitions
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+#include "Platform.h"
 
-// YES & NO defined by TpmBuildSwitches.h
-#if(YES != 1 || NO != 0)
-#  error YES or NO incorrectly set
-#endif
+//** _plat__GetPlatformManufactureData
 
-// clang-format off
-// clang-format off to preserve horizontal spacing
-#define IMPLEMENTATION_PCR         24
-#define PLATFORM_PCR               24
-#define DRTM_PCR                   17
-#define HCRTM_PCR                  0
-#define NUM_LOCALITIES             5
-#define MAX_HANDLE_NUM             3
-#define MAX_ACTIVE_SESSIONS        64
-#define MAX_LOADED_SESSIONS        3
-#define MAX_SESSION_NUM            3
-#define MAX_LOADED_OBJECTS         3
-#define MIN_EVICT_OBJECTS          7	/* libtpms: for PC client */
-#define NUM_POLICY_PCR_GROUP       1
-#define NUM_AUTHVALUE_PCR_GROUP    1
-//#define MAX_CONTEXT_SIZE           2168
-#define MAX_CONTEXT_SIZE           2680	/* libtpms: changed for RSA-3072 */
-#define MAX_DIGEST_BUFFER          1024
-#define MAX_NV_INDEX_SIZE          2048
-#define MAX_NV_BUFFER_SIZE         1024
-#define MAX_CAP_BUFFER             1024
-/* libtmps: 65 OBJECTs in USER NVRAM expanded by 704 bytes due to size
- * increase of OBJECT from 2048 bit RSA keys to 3072 bit by 704 bytes*/
-#define NV_MEMORY_SIZE                  (128 * 1024 + 65 * 704)  /* libtpms changed */
-#define MIN_COUNTER_INDICES        8
-#define NUM_STATIC_PCR             16
-#define MAX_ALG_LIST_SIZE          64
-#define PRIMARY_SEED_SIZE          64 /* libtpms: 64 per define USE_SPEC_COMPLIANT_PROOFS */
-#define CONTEXT_ENCRYPT_ALGORITHM  AES
-#define NV_CLOCK_UPDATE_INTERVAL   12 /* libtpms: keep old value */
-#define NUM_POLICY_PCR             1
-
-#define ORDERLY_BITS               8
-#define MAX_SYM_DATA               128
-#define MAX_RNG_ENTROPY_SIZE       64
-#define RAM_INDEX_SPACE            512
-#define ENABLE_PCR_NO_INCREMENT    YES
-
-#define SIZE_OF_X509_SERIAL_NUMBER 20
-
-// amount of space the platform can provide in PERSISTENT_DATA during
-// manufacture
-#define PERSISTENT_DATA_PLATFORM_SPACE  0	/* libtpms: changed from '16' */
-
-// structure padding space for these structures.  Used if a
-// particular configuration needs them to be aligned to a
-// specific size
-#define ORDERLY_DATA_PADDING            0
-#define STATE_CLEAR_DATA_PADDING        0
-#define STATE_RESET_DATA_PADDING        0
-
-// configuration values that may vary by SIMULATION/DEBUG
-#if SIMULATION && DEBUG
-// This forces the use of a smaller context slot size. This reduction reduces the
-// range of the epoch allowing the tester to force the epoch to occur faster than
-// the normal production size
-#  define CONTEXT_SLOT UINT8
-#  error SIMULATION & DEBUG is not supported /* libtpms: added */
-#else
-#  define CONTEXT_SLOT UINT16		/* libtpms: changed from UINT8 in v0.9.0 */
-#endif
-
-#endif  // _TPM_PROFILE_MISC_H_
+// This function allows the platform to provide a small amount of data to be
+// stored as part of the TPM's PERSISTENT_DATA structure during manufacture.  Of
+// course the platform can store data separately as well, but this allows a
+// simple platform implementation to store a few bytes of data without
+// implementing a multi-layer storage system.  This function is called on
+// manufacture and CLEAR.  The buffer will contain the last value provided
+// to the Core library.
+LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
+						  uint32_t bufferSize)
+{
+    if(bufferSize != 0)
+	{
+	    memset((void*)pPlatformPersistentData, 0xFF, bufferSize);
+	}
+}
