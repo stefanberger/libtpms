@@ -186,17 +186,25 @@
 // function, define this parameter.
 #define RUNTIME_SIZE_CHECKS        NO		// libtpms: NO
 
-#if !(defined FIPS_COMPLIANT) || ((FIPS_COMPLIANT != NO) && (FIPS_COMPLIANT != YES))
-#   undef   FIPS_COMPLIANT
-#   define  FIPS_COMPLIANT      NO     // Default: Either YES or NO    libtpms: NO
-#endif
+////////////////////////////////////////////////////////////////
+// Compliance options
+////////////////////////////////////////////////////////////////
 
-// Definition to allow alternate behavior for non-orderly startup. If there is a chance that the TPM
-// could not update failedTries
+// Enable extra behaviors to meet FIPS compliance requirements
+#define FIPS_COMPLIANT              NO		// libtpms: NO
 
-/* Removes the behavior of automatically incrementing the failed tries counter after any non-orderly
-   shutdown.  When YES, the failed counter is incremented on non-orderly shutdown only if an attempt
-   to access a DA protected object was made on the previous cycle. */
+// Indicates if the implementation is to compute the sizes of the proof and primary
+// seed size values based on the implemented algorithms.
+#define USE_SPEC_COMPLIANT_PROOFS   YES
+
+// Set this to allow compile to continue even though the chosen proof values
+// do not match the compliant values. This is written so that someone would
+// have to proactively ignore errors.
+#define SKIP_PROOF_ERRORS           NO
+
+////////////////////////////////////////////////////////////////
+// Implementation alternatives - don't  change external behavior
+////////////////////////////////////////////////////////////////
 
 #if !(defined USE_DA_USED) || ((USE_DA_USED != NO) && (USE_DA_USED != YES))
 #   undef   USE_DA_USED
@@ -278,22 +286,6 @@
     || ((ACCUMULATE_SELF_HEAL_TIMER != NO) && (ACCUMULATE_SELF_HEAL_TIMER != YES))
 #   undef   ACCUMULATE_SELF_HEAL_TIMER
 #   define  ACCUMULATE_SELF_HEAL_TIMER      YES       // Default: Either YES or NO
-#endif
-
-/* If the implementation is to compute the sizes of the proof and primary seed size values based on
-   the implemented algorithms, then use this define. */
-#if !(defined USE_SPEC_COMPLIANT_PROOFS)				\
-    || ((USE_SPEC_COMPLIANT_PROOFS != NO) && (USE_SPEC_COMPLIANT_PROOFS != YES))
-#   undef   USE_SPEC_COMPLIANT_PROOFS
-#   define  USE_SPEC_COMPLIANT_PROOFS       YES       // Default: Either YES or NO
-#endif
-
-// Comment this out to allow compile to continue even though the chosen proof values do not match
-// the compliant values. This is written so that someone would have to proactively ignore errors.
-#if !(defined SKIP_PROOF_ERRORS)					\
-    || ((SKIP_PROOF_ERRORS != NO) && (SKIP_PROOF_ERRORS != YES))
-#   undef   SKIP_PROOF_ERRORS
-#   define  SKIP_PROOF_ERRORS           NO       // Default: Either YES or NO
 #endif
 
 // This define is used to eliminate the use of bit-fields. It can be enabled for big- or
