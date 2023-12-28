@@ -758,6 +758,10 @@ EXTERN TPM2B_AUTH g_platformUniqueAuth;
 // (TPM2_Startup() or TPM2_Shutdown().
 typedef struct
 {
+    // data provided by the platform library during manufacturing.
+    // Opaque to the TPM Core library, but may be used by the platform library.
+    BYTE platformReserved[PERSISTENT_DATA_PLATFORM_SPACE];
+    
     //*********************************************************************************
     //          Hierarchy
     //*********************************************************************************

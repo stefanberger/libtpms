@@ -223,6 +223,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Entropy.c \
 	tpm2/EphemeralCommands.c \
 	tpm2/ExecCommand.c \
+	tpm2/ExtraData.c \
 	tpm2/Global.c \
 	tpm2/Handle.c \
 	tpm2/HashCommands.c \

@@ -155,6 +155,11 @@ TPM_Manufacture(
     gp.firmwareV1 = _plat__GetTpmFirmwareVersionHigh();
     gp.firmwareV2 = _plat__GetTpmFirmwareVersionLow();
 
+    _plat__GetPlatformManufactureData(gp.platformReserved,
+				      sizeof(gp.platformReserved));
+
+    NV_SYNC_PERSISTENT(platformReserved);
+
     NV_SYNC_PERSISTENT(firmwareV1);
     NV_SYNC_PERSISTENT(firmwareV2);
 
