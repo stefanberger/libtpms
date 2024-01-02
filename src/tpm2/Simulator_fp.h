@@ -229,6 +229,14 @@ void _rpc__RsaKeyCacheControl(int state);
 // This function is used to count the ACT second tick.
 bool _rpc__ACT_GetSignaled(uint32_t actHandle);
 
+//*** _rpc__SetTpmFirmwareHash()
+// This function is used to modify the firmware's hash during simulation.
+void _rpc__SetTpmFirmwareHash(uint32_t hash);
+
+//*** _rpc__SetTpmFirmwareSvn()
+// This function is used to modify the firmware's SVN during simulation.
+void _rpc__SetTpmFirmwareSvn(uint16_t svn);
+
 //** From TPMCmds.c
 
 //*** main()

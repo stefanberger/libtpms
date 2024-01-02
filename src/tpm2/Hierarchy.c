@@ -198,10 +198,141 @@ static TPMI_RH_HIERARCHY DecomposeHandle(TPMI_RH_HIERARCHY   handle,   // IN
 					 HIERARCHY_MODIFIER* modifier  // OUT
 					 )
 {
+    TPMI_RH_HIERARCHY base_hierarchy = handle;
+
     modifier->type                   = HM_NONE;
+
+    // See if the handle is firmware-bound.
+    switch(handle)
+	{
+	  case TPM_RH_FW_OWNER:
+	      {
+		  modifier->type = HM_FW_LIMITED;
+		  base_hierarchy = TPM_RH_OWNER;
+		  break;
+	      }
+	  case TPM_RH_FW_ENDORSEMENT:
+	      {
+		  modifier->type = HM_FW_LIMITED;
+		  base_hierarchy = TPM_RH_ENDORSEMENT;
+		  break;
+	      }
+	  case TPM_RH_FW_PLATFORM:
+	      {
+		  modifier->type = HM_FW_LIMITED;
+		  base_hierarchy = TPM_RH_PLATFORM;
+		  break;
+	      }
+	  case TPM_RH_FW_NULL:
+	      {
+		  modifier->type = HM_FW_LIMITED;
+		  base_hierarchy = TPM_RH_NULL;
+		  break;
+	      }
+	}
+
+    if(modifier->type == HM_FW_LIMITED)
+	{
+	    return base_hierarchy;
+	}
+
+    // See if the handle is SVN-bound.
+    switch(handle & 0xFFFF0000)
+	{
+	  case TPM_RH_SVN_OWNER_BASE:
+	    modifier->type = HM_SVN_LIMITED;
+	    base_hierarchy = TPM_RH_OWNER;
+	    break;
+	  case TPM_RH_SVN_ENDORSEMENT_BASE:
+	    modifier->type = HM_SVN_LIMITED;
+	    base_hierarchy = TPM_RH_ENDORSEMENT;
+	    break;
+	  case TPM_RH_SVN_PLATFORM_BASE:
+	    modifier->type = HM_SVN_LIMITED;
+	    base_hierarchy = TPM_RH_PLATFORM;
+	    break;
+	  case TPM_RH_SVN_NULL_BASE:
+	    modifier->type = HM_SVN_LIMITED;
+	    base_hierarchy = TPM_RH_NULL;
+	    break;
+	}
+
+    if(modifier->type == HM_SVN_LIMITED)
+	{
+	    modifier->min_svn = handle & 0x0000FFFF;
+	    return base_hierarchy;
+	}
 
     // Handle is neither FW- nor SVN-bound; return it unmodified.
     return handle;
+}
+
+//*** GetAdditionalSecret()
+// Retrieve the additional secret for the given hierarchy modifier, along with the
+// label that should be used when mixing the secret into a KDF. If the hierarchy
+// needs no additional secret, secret_buffer's size is set to zero and secret_label
+// is set to NULL.
+//
+//  Return Type: TPM_RC
+//      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
+//                              does not support FW-limited objects or the TPM failed
+//                              to derive the Firmware Secret.
+//      TPM_RC_SVN_LIMITED      The requested hierarchy is SVN-limited, but the TPM
+//                              does not support SVN-limited objects or the TPM failed
+//                              to derive the Firmware SVN Secret for the requested
+//                              SVN.
+static TPM_RC GetAdditionalSecret(const HIERARCHY_MODIFIER* modifier,       // IN
+				  TPM2B_SEED*               secret_buffer,  // OUT
+				  const TPM2B**             secret_label    // OUT
+				  )
+{
+    switch(modifier->type)
+	{
+	  case HM_FW_LIMITED:
+	      {
+#if FW_LIMITED_SUPPORT
+		  if(_plat__GetTpmFirmwareSecret(sizeof(secret_buffer->t.buffer),
+						 secret_buffer->t.buffer,
+						 &secret_buffer->t.size)
+		     != 0)
+		      {
+			  return TPM_RC_FW_LIMITED;
+		      }
+
+		  *secret_label = HIERARCHY_FW_SECRET_LABEL;
+		  break;
+#else
+		  return TPM_RC_FW_LIMITED;
+#endif  // FW_LIMITED_SUPPORT
+	      }
+	  case HM_SVN_LIMITED:
+	      {
+#if SVN_LIMITED_SUPPORT
+		  if(_plat__GetTpmFirmwareSvnSecret(modifier->min_svn,
+						    sizeof(secret_buffer->t.buffer),
+						    secret_buffer->t.buffer,
+						    &secret_buffer->t.size)
+		     != 0)
+		      {
+			  return TPM_RC_SVN_LIMITED;
+		      }
+
+		  *secret_label = HIERARCHY_SVN_SECRET_LABEL;
+		  break;
+#else
+		  return TPM_RC_SVN_LIMITED;
+#endif  // SVN_LIMITED_SUPPORT
+	      }
+	  case HM_NONE:
+	  default:
+	      {
+		  secret_buffer->t.size = 0;
+		  *secret_label         = NULL;
+		  break;
+	      }
+	}
+
+    return TPM_RC_SUCCESS;
 }
 
 //***MixAdditionalSecret()
@@ -219,17 +350,42 @@ static TPMI_RH_HIERARCHY DecomposeHandle(TPMI_RH_HIERARCHY   handle,   // IN
 //                              does not support SVN-limited objects or the TPM failed
 //                              to derive the Firmware SVN Secret for the requested
 //                              SVN.
-static
-TPM_RC MixAdditionalSecret(const TPM2B*              base_secret,        // IN
-			   TPM2B*                    output_secret       // OUT
-			   )
+static TPM_RC MixAdditionalSecret(const HIERARCHY_MODIFIER* modifier,           // IN
+				  const TPM2B*              base_secret_label,  // IN
+				  const TPM2B*              base_secret,        // IN
+				  TPM2B*                    output_secret       // OUT
+				  )
 {
+    TPM_RC       result = TPM_RC_SUCCESS;
+    TPM2B_SEED   additional_secret;
+    const TPM2B* additional_secret_label = NULL;
+
+    result =
+	GetAdditionalSecret(modifier, &additional_secret, &additional_secret_label);
+    if(result != TPM_RC_SUCCESS)
+	return result;
+
     output_secret->size = base_secret->size;
 
-    if(1)
+    if(additional_secret.b.size == 0)
 	{
 	    memcpy(output_secret->buffer, base_secret->buffer, base_secret->size);
 	}
+    else
+	{
+	    CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG,
+		      base_secret,
+		      base_secret_label,
+		      &additional_secret.b,
+		      additional_secret_label,
+		      base_secret->size * 8,
+		      output_secret->buffer,
+		      NULL,
+		      FALSE);
+	}
+
+    MemorySet(additional_secret.b.buffer, 0, additional_secret.b.size);
+
     return TPM_RC_SUCCESS;
 }
 
@@ -263,7 +419,8 @@ TPM_RC HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant
 	    break;
 	}
 
-    return MixAdditionalSecret(&base_proof->b, &proof->b);
+    return MixAdditionalSecret(
+			       &modifier, HIERARCHY_PROOF_SECRET_LABEL, &base_proof->b, &proof->b);
 }
 
 //*** HierarchyGetPrimarySeed()
@@ -291,7 +448,8 @@ TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
 	    break;
 	}
 
-    return MixAdditionalSecret(&base_seed->b, &seed->b);
+    return MixAdditionalSecret(
+			       &modifier, HIERARCHY_SEED_SECRET_LABEL, &base_seed->b, &seed->b);
 }
 
 // libtpms added begin
@@ -340,6 +498,35 @@ TPM_RC ValidateHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 
     hierarchy = DecomposeHandle(hierarchy, &modifier);
 
+    // Modifier-specific checks.
+    switch(modifier.type)
+	{
+	  case HM_NONE:
+	    break;
+	  case HM_FW_LIMITED:
+	      {
+#if FW_LIMITED_SUPPORT
+		  break;
+#else
+		  return TPM_RC_FW_LIMITED;
+#endif  // FW_LIMITED_SUPPORT
+	      }
+	  case HM_SVN_LIMITED:
+	      {
+#if SVN_LIMITED_SUPPORT
+		  // SVN-limited hierarchies are only enabled for SVNs less than or
+		  // equal to the current firmware's SVN.
+		  if(modifier.min_svn > _plat__GetTpmFirmwareSvn())
+		      {
+			  return TPM_RC_SVN_LIMITED;
+		      }
+		  break;
+#else
+		  return TPM_RC_SVN_LIMITED;
+#endif  // SVN_LIMITED_SUPPORT
+	      }
+	}
+
     switch(hierarchy)
 	{
 	  case TPM_RH_PLATFORM:
@@ -384,3 +571,27 @@ TPMI_RH_HIERARCHY HierarchyNormalizeHandle(TPMI_RH_HIERARCHY handle  // IN: hand
     return DecomposeHandle(handle, &unused_modifier);
 }
 
+//*** HierarchyIsFirmwareLimited
+// This function accepts a hierarchy handle and returns whether it is firmware-
+// limited.
+BOOL HierarchyIsFirmwareLimited(TPMI_RH_HIERARCHY handle  // IN
+				)
+{
+    HIERARCHY_MODIFIER modifier;
+
+    DecomposeHandle(handle, &modifier);
+
+    return modifier.type == HM_FW_LIMITED;
+}
+//*** HierarchyIsSvnLimited
+// This function accepts a hierarchy handle and returns whether it is SVN-
+// limited.
+BOOL HierarchyIsSvnLimited(TPMI_RH_HIERARCHY handle  // IN
+			   )
+{
+    HIERARCHY_MODIFIER modifier;
+
+    DecomposeHandle(handle, &modifier);
+
+    return modifier.type == HM_SVN_LIMITED;
+}

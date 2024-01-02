@@ -92,6 +92,18 @@ NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
     // or go out of range
     for(; inHandle <= TPM_RH_LAST; inHandle++)
 	{
+	    // Skip over gaps in the reserved handle space.
+	    if(inHandle > TPM_RH_FW_NULL && inHandle < SVN_OWNER_FIRST)
+		inHandle = SVN_OWNER_FIRST;
+	    if(inHandle > SVN_OWNER_FIRST && inHandle <= SVN_OWNER_LAST)
+		inHandle = SVN_ENDORSEMENT_FIRST;
+	    if(inHandle > SVN_ENDORSEMENT_FIRST && inHandle <= SVN_ENDORSEMENT_LAST)
+		inHandle = SVN_PLATFORM_FIRST;
+	    if(inHandle > SVN_PLATFORM_FIRST && inHandle <= SVN_PLATFORM_LAST)
+		inHandle = SVN_NULL_FIRST;
+	    if(inHandle > SVN_NULL_FIRST)
+		inHandle = TPM_RH_LAST;
+	    
 	    switch(inHandle)
 		{
 		  case TPM_RH_OWNER:
@@ -101,6 +113,18 @@ NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
 		  case TPM_RH_ENDORSEMENT:
 		  case TPM_RH_PLATFORM:
 		  case TPM_RH_PLATFORM_NV:
+#if FW_LIMITED_SUPPORT
+		  case TPM_RH_FW_OWNER:
+		  case TPM_RH_FW_ENDORSEMENT:
+		  case TPM_RH_FW_PLATFORM:
+		  case TPM_RH_FW_NULL:
+#endif
+#if SVN_LIMITED_SUPPORT
+		  case TPM_RH_SVN_OWNER_BASE:
+		  case TPM_RH_SVN_ENDORSEMENT_BASE:
+		  case TPM_RH_SVN_PLATFORM_BASE:
+		  case TPM_RH_SVN_NULL_BASE:
+#endif
 #if VENDOR_PERMANENT_AUTH_ENABLED == YES
 		  case VENDOR_PERMANENT_AUTH_HANDLE:
 #endif

@@ -178,7 +178,8 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
 		      out->context.savedHandle =
 			  (object->attributes.stClear == SET) ? 0x80000002 : 0x80000000;
 		  // Get object hierarchy
-		  out->context.hierarchy = ObjectGetHierarchy(object);
+		  out->context.hierarchy = object->hierarchy;
+
 		  break;
 	      }
 	  case TPM_HT_HMAC_SESSION:
@@ -514,6 +515,13 @@ TPM2_EvictControl(EvictControl_In* in  // IN: input parameter list
 
     // Get internal object pointer
     evictObject = HandleToObject(in->objectHandle);
+
+    // Objects in a firmware-limited or SVN-limited hierarchy cannot be made
+    // persistent.
+    if(HierarchyIsFirmwareLimited(evictObject->hierarchy)
+       || HierarchyIsSvnLimited(evictObject->hierarchy))
+	return TPM_RCS_HIERARCHY + RC_EvictControl_objectHandle;
+
     // Temporary, stClear or public only objects can not be made persistent
     if(evictObject->attributes.temporary == SET
        || evictObject->attributes.stClear == SET

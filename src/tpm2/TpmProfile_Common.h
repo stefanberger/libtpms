@@ -312,10 +312,8 @@
 //***********************************************
 // Defines controlling Firmware- and SVN-limited objects
 //***********************************************
-#if 0							// libtpms: added
-#define FW_LIMITED_SUPPORT                    YES
-#define SVN_LIMITED_SUPPORT                   YES
-#endif							// libtpms: added
+#define FW_LIMITED_SUPPORT                    NO	// libtpms: NO
+#define SVN_LIMITED_SUPPORT                   NO	// libtpms: NO
 
 //***********************************************
 // Defines controlling External NV
