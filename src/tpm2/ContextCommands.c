@@ -118,8 +118,8 @@ TPM2_ContextSave(
 		  unsigned char        buffer[sizeof(OBJECT) * 2];		// libtpms changed begin
 		  BYTE                *bufptr = &buffer[0];
 		  INT32                size = sizeof(buffer);
-		  UINT16               written = ANY_OBJECT_Marshal(object, &bufptr, &size);
-		  UINT16               objectSize = written;			// libtpms changed end
+		  UINT16               objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size);
+										// libtpms changed end
 		  outObject = (ANY_OBJECT_BUFFER *)(out->context.contextBlob.t.buffer
 						    + integritySize + fingerprintSize);
 		  // Set size of the context data.  The contents of context blob is vendor
@@ -131,7 +131,7 @@ TPM2_ContextSave(
 		  pAssert(out->context.contextBlob.t.size
 			  <= sizeof(out->context.contextBlob.t.buffer));
 		  // Copy the whole internal OBJECT structure to context blob
-		  MemoryCopy(outObject, buffer, written);			// libtpms changed
+		  MemoryCopy(outObject, buffer, objectSize);			// libtpms changed
 		  // Increment object context ID
 		  gr.objectContextID++;
 		  // If object context ID overflows, TPM should be put in failure mode
