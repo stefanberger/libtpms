@@ -118,15 +118,28 @@ TPM2_ContextSave(
 		  unsigned char        buffer[sizeof(OBJECT) * 2];		// libtpms changed begin
 		  BYTE                *bufptr = &buffer[0];
 		  INT32                size = sizeof(buffer);
-		  UINT16               objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size);
-										// libtpms changed end
+		  UINT16               objectSize;				// libtpms changed end
 		  outObject = (ANY_OBJECT_BUFFER *)(out->context.contextBlob.t.buffer
 						    + integritySize + fingerprintSize);
 		  // Set size of the context data.  The contents of context blob is vendor
 		  // defined.  In this implementation, the size is size of integrity
 		  // plus fingerprint plus the whole internal OBJECT structure
+#  if 0											// libtpms: added
 		  out->context.contextBlob.t.size = integritySize +
 						    fingerprintSize + objectSize;
+#  endif										// libtpms: added
+#  if ALG_RSA
+		  // For an RSA key, make sure that the key has had the private exponent
+		  // computed before saving.
+		  if(object->publicArea.type == TPM_ALG_RSA
+		     && !(object->attributes.publicOnly))
+		      CryptRsaLoadPrivateExponent(&object->publicArea, &object->sensitive, object); // libtpms: added object param
+#  endif
+		  objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size);		// libtpms: added begin
+
+		  out->context.contextBlob.t.size = integritySize +
+						    fingerprintSize + objectSize;	// libtpms: added end
+
 		  // Make sure things fit
 		  pAssert(out->context.contextBlob.t.size
 			  <= sizeof(out->context.contextBlob.t.buffer));
