@@ -449,6 +449,13 @@ EntityGetHierarchy(TPMI_DH_ENTITY handle  // IN :handle of entity
 	{
 	  case TPM_HT_PERMANENT:
             // hierarchy for a permanent handle
+
+            if(HierarchyIsFirmwareLimited(handle) || HierarchyIsSvnLimited(handle))
+		{
+		    hierarchy = handle;
+		    break;
+		}
+
             switch(handle)
 		{
 		  case TPM_RH_PLATFORM:
