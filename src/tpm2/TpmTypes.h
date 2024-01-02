@@ -440,6 +440,8 @@ typedef UINT32             TPM_RC;
 #define TPM_RCS_CURVE               (TPM_RC)(RC_FMT1+0x026)
 #define TPM_RC_ECC_POINT            (TPM_RC)(RC_FMT1+0x027)
 #define TPM_RCS_ECC_POINT           (TPM_RC)(RC_FMT1+0x027)
+#define TPM_RC_FW_LIMITED           (TPM_RC)(RC_FMT1 + 0x028)
+#define TPM_RC_SVN_LIMITED          (TPM_RC)(RC_FMT1 + 0x029)
 #define RC_WARN                     (TPM_RC)(0x900)
 #define TPM_RC_CONTEXT_GAP          (TPM_RC)(RC_WARN+0x001)
 #define TPM_RC_OBJECT_MEMORY        (TPM_RC)(RC_WARN+0x002)
@@ -708,6 +710,7 @@ typedef UINT8              TPM_HT;
 
 /* Table 2:28 - Definition of TPM_RH Constants  */
 typedef  TPM_HANDLE         TPM_RH;
+#define  TYPE_OF_TPM_RH              TPM_HANDLE
 #define  TPM_RH_FIRST          (TPM_RH)(0x40000000)
 #define  TPM_RH_SRK            (TPM_RH)(0x40000000)
 #define  TPM_RH_OWNER          (TPM_RH)(0x40000001)
@@ -727,7 +730,16 @@ typedef  TPM_HANDLE         TPM_RH;
 #define  TPM_RH_AUTH_FF        (TPM_RH)(0x4000010F)
 #define  TPM_RH_ACT_0          (TPM_RH)(0x40000110)
 #define  TPM_RH_ACT_F          (TPM_RH)(0x4000011F)
-#define  TPM_RH_LAST           (TPM_RH)(0x4000011F)
+#define TPM_RH_FW_OWNER             (TPM_RH)(0x40000140)
+#define TPM_RH_FW_ENDORSEMENT       (TPM_RH)(0x40000141)
+#define TPM_RH_FW_PLATFORM          (TPM_RH)(0x40000142)
+#define TPM_RH_FW_NULL              (TPM_RH)(0x40000143)
+#define TPM_RH_SVN_OWNER_BASE       (TPM_RH)(0x40010000)
+#define TPM_RH_SVN_ENDORSEMENT_BASE (TPM_RH)(0x40020000)
+#define TPM_RH_SVN_PLATFORM_BASE    (TPM_RH)(0x40030000)
+#define TPM_RH_SVN_NULL_BASE        (TPM_RH)(0x40040000)
+#define TPM_RH_LAST                 (TPM_RH)(0x4004FFFF)
+
 /* Table 2:29 - Definition of TPM_HC Constants  */
 typedef  TPM_HANDLE         TPM_HC;
 #define  HR_HANDLE_MASK          (TPM_HC)(0x00FFFFFF)
@@ -756,6 +768,14 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  TRANSIENT_LAST          (TPM_HC)((TRANSIENT_FIRST+MAX_LOADED_OBJECTS-1))
 #define  PERSISTENT_FIRST        (TPM_HC)((HR_PERSISTENT+0))
 #define  PERSISTENT_LAST         (TPM_HC)((PERSISTENT_FIRST+0x00FFFFFF))
+#define  SVN_OWNER_FIRST         (TPM_HC)((TPM_RH_SVN_OWNER_BASE + 0x0000))
+#define  SVN_OWNER_LAST          (TPM_HC)((TPM_RH_SVN_OWNER_BASE + 0xFFFF))
+#define  SVN_ENDORSEMENT_FIRST   (TPM_HC)((TPM_RH_SVN_ENDORSEMENT_BASE + 0x0000))
+#define  SVN_ENDORSEMENT_LAST    (TPM_HC)((TPM_RH_SVN_ENDORSEMENT_BASE + 0xFFFF))
+#define  SVN_PLATFORM_FIRST      (TPM_HC)((TPM_RH_SVN_PLATFORM_BASE + 0x0000))
+#define  SVN_PLATFORM_LAST       (TPM_HC)((TPM_RH_SVN_PLATFORM_BASE + 0xFFFF))
+#define  SVN_NULL_FIRST          (TPM_HC)((TPM_RH_SVN_NULL_BASE + 0x0000))
+#define  SVN_NULL_LAST           (TPM_HC)((TPM_RH_SVN_NULL_BASE + 0xFFFF))
 #define  PLATFORM_PERSISTENT     (TPM_HC)((PERSISTENT_FIRST+0x00800000))
 #define  NV_INDEX_FIRST          (TPM_HC)((HR_NV_INDEX+0))
 #define  NV_INDEX_LAST           (TPM_HC)((NV_INDEX_FIRST+0x00FFFFFF))
@@ -845,7 +865,8 @@ typedef struct TPMA_OBJECT {                        // Table 2:31
     unsigned    sensitiveDataOrigin      : 1;
     unsigned    userWithAuth             : 1;
     unsigned    adminWithPolicy          : 1;
-    unsigned    Reserved_bits_at_8       : 2;
+    unsigned    firmwareLimited          : 1;
+    unsigned    svnLimited               : 1;
     unsigned    noDA                     : 1;
     unsigned    encryptedDuplication     : 1;
     unsigned    Reserved_bits_at_12      : 4;
@@ -859,7 +880,8 @@ typedef struct TPMA_OBJECT {                        // Table 2:31
 #define TPMA_OBJECT_INITIALIZER(					\
 				bit_at_0,             fixedtpm,             stclear, \
 				bit_at_3,             fixedparent,          sensitivedataorigin, \
-				userwithauth,         adminwithpolicy,      bits_at_8, \
+				userwithauth,         adminwithpolicy,      firmwareLimited, \
+				svnLimited,		\
 				noda,                 encryptedduplication, bits_at_12, \
 				restricted,           decrypt,              sign, \
 				x509sign,             bits_at_20)	\
@@ -880,13 +902,15 @@ typedef UINT32                              TPMA_OBJECT;
 #define TPMA_OBJECT_sensitiveDataOrigin     ((TPMA_OBJECT)(1 << 5))
 #define TPMA_OBJECT_userWithAuth            ((TPMA_OBJECT)(1 << 6))
 #define TPMA_OBJECT_adminWithPolicy         ((TPMA_OBJECT)(1 << 7))
+#define TPMA_OBJECT_firmwareLimited         ((TPMA_OBJECT)(1 << 8))
+#define TPMA_OBJECT_svnLimited              ((TPMA_OBJECT)(1 << 9))
 #define TPMA_OBJECT_noDA                    ((TPMA_OBJECT)(1 << 10))
 #define TPMA_OBJECT_encryptedDuplication    ((TPMA_OBJECT)(1 << 11))
 #define TPMA_OBJECT_restricted              ((TPMA_OBJECT)(1 << 16))
 #define TPMA_OBJECT_decrypt                 ((TPMA_OBJECT)(1 << 17))
 #define TPMA_OBJECT_sign                    ((TPMA_OBJECT)(1 << 18))
 #define TPMA_OBJECT_x509sign                ((TPMA_OBJECT)(1 << 19))
-#define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f309)
+#define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f009)
 //  This is the initializer for a TPMA_OBJECT bit array.
 #define TPMA_OBJECT_INITIALIZER(                                                   \
              bit_at_0,             fixedtpm,             stclear,                  \

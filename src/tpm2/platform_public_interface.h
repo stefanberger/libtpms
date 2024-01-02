@@ -172,6 +172,20 @@ LIB_EXPORT void _plat__Signal_PhysicalPresenceOn(void);
 LIB_EXPORT void _plat__Signal_PhysicalPresenceOff(void);
 #endif /* libtpms added */
 
+//*** _plat__SetTpmFirmwareHash()
+// Called by the simulator to set the TPM Firmware hash used for
+// firmware-bound hierarchies. Not a cryptographically-strong hash.
+#if SIMULATION
+LIB_EXPORT void _plat__SetTpmFirmwareHash(uint32_t hash);
+#endif
+
+//*** _plat__SetTpmFirmwareSvn()
+// Called by the simulator to set the TPM Firmware SVN reported by
+// getCapability.
+#if SIMULATION
+LIB_EXPORT void _plat__SetTpmFirmwareSvn(uint16_t svn);
+#endif
+
 //** From RunCommand.c
 
 //***_plat__RunCommand()

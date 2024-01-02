@@ -417,7 +417,6 @@ LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);
 // getCapability.
 LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);
 
-#if 0							// libtpms: added
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
 
@@ -452,7 +451,6 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 					   uint16_t* secret_size       // OUT: secret buffer
 					   );
 #endif  // FW_LIMITED_SUPPORT
-#endif						// libtpms: added
 
 	// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
 LIB_EXPORT uint32_t _plat__GetTpmType(void);

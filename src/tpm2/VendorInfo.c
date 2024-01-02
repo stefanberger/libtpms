@@ -77,10 +77,10 @@
 #define FIRMWARE_V2     (0x00163636)
 #define MAX_SVN         255
 
-#if 0				// libtpms: added
+#if SIMULATION	// libtpms added
 static uint32_t currentHash = FIRMWARE_V2;
+#endif
 static uint16_t currentSvn  = 10;
-#endif				// libtpms: added
 
 // Similar to the Core Library's ByteArrayToUint32, but usable in Platform code.
 static uint32_t StringToUint32(char s[4])
@@ -130,7 +130,6 @@ LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow()
     return FIRMWARE_V2;
 }
 
-#if 0						// libtpms: added
 // return the TPM Firmware SVN reported by getCapability.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void)
 {
@@ -145,6 +144,7 @@ LIB_EXPORT uint16_t _plat__GetTpmFirmwareMaxSvn(void)
 
 // Called by the simulator to set the TPM Firmware SVN reported by
 // getCapability.
+#if SIMULATION		// libtpms added
 LIB_EXPORT void _plat__SetTpmFirmwareHash(uint32_t hash)
 {
     currentHash = hash;
@@ -156,7 +156,7 @@ LIB_EXPORT void _plat__SetTpmFirmwareSvn(uint16_t svn)
 {
     currentSvn = MIN(svn, MAX_SVN);
 }
-#endif						// libtpms: added
+#endif			// libtpms added
 
 #if SVN_LIMITED_SUPPORT
 // Dummy implmenentation for obtaining a Firmware SVN Secret bound
