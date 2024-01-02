@@ -241,17 +241,16 @@ ObjectGetHierarchy(
 	    return TPM_RH_NULL;
 	}
 }
-/* 8.6.3.11 GetHierarchy() */
-/* This function returns the handle of the hierarchy to which a handle belongs. This function is
-   similar to ObjectGetHierarchy() but this routine takes a handle while ObjectGetHierarchy() takes
-   a pointer to an object. */
-/* This function requires that handle references a loaded object. */
+
+//*** GetHierarchy()
+// This function returns the handle of the hierarchy to which a handle belongs.
+//
+// This function requires that 'handle' references a loaded object.
 TPMI_RH_HIERARCHY
 GetHierarchy(TPMI_DH_OBJECT handle  // IN :object handle
 	     )
 {
-    OBJECT          *object = HandleToObject(handle);
-    return ObjectGetHierarchy(object);
+    return HandleToObject(handle)->hierarchy;
 }
 
 //*** FindEmptyObjectSlot()
@@ -277,6 +276,7 @@ OBJECT* FindEmptyObjectSlot(TPMI_DH_OBJECT* handle  // OUT: (optional)
 		    // Initialize the object attributes
 		    // MemorySet(&object->attributes, 0, sizeof(OBJECT_ATTRIBUTES));
 		    MemorySet(object, 0, sizeof(*object)); // libtpms added: Initialize the whole object
+		    object->hierarchy = TPM_RH_NULL;
 		    return object;
 		}
 	}
@@ -318,8 +318,9 @@ void ObjectSetLoadedAttributes(OBJECT* object,  // IN: object attributes to fina
     // If parent handle is a permanent handle, it is a primary (unless it is NULL
     if(parent == NULL)
 	{
+	    object->hierarchy          = parentHandle;
 	    object->attributes.primary = SET;
-	    switch(HierarchyNormalizeHandle(parentHandle))
+	    switch(HierarchyNormalizeHandle(object->hierarchy))
 		{
 		  case TPM_RH_ENDORSEMENT:
 		    object->attributes.epsHierarchy = SET;
@@ -350,6 +351,7 @@ void ObjectSetLoadedAttributes(OBJECT* object,  // IN: object attributes to fina
 	    // is external
 	    object->attributes.temporary = parent->attributes.temporary
 					   || object->attributes.external;
+	    object->hierarchy = parent->hierarchy;
 	}
     // If this is an external object, set the QN == name but don't SET other
     // key properties ('parent' or 'derived')
@@ -812,7 +814,7 @@ ObjectLoadEvict(TPM_HANDLE* handle,  // IN:OUT: evict object handle.  If success
     // that the hierarchy is disabled.
     // If the associated hierarchy is disabled, make it look like the
     // handle is not defined
-    if(HierarchyNormalizeHandle(ObjectGetHierarchy(object)) == TPM_RH_ENDORSEMENT
+    if(HierarchyNormalizeHandle(object->hierarchy) == TPM_RH_ENDORSEMENT
        && gc.ehEnable == CLEAR && GetCommandCode(commandIndex) != TPM_CC_EvictControl)
 	return TPM_RC_HANDLE;
 

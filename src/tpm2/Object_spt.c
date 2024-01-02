@@ -724,6 +724,62 @@ PublicAttributesValidation(
 	       != IS_ATTRIBUTE(parentAttributes, TPMA_OBJECT, encryptedDuplication))
 		return TPM_RCS_ATTRIBUTES;
 	}
+#define TPMA_OBJECT_firmwareLimited         ((TPMA_OBJECT)(1 << 8))
+#define TPMA_OBJECT_svnLimited              ((TPMA_OBJECT)(1 << 9))
+
+    // firmwareLimited/svnLimited can only be set if fixedTPM is also set.
+    if((IS_ATTRIBUTE(attributes, TPMA_OBJECT, firmwareLimited)
+	|| IS_ATTRIBUTE(attributes, TPMA_OBJECT, svnLimited))
+       && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, fixedTPM))
+	{
+	    return TPM_RCS_ATTRIBUTES;
+	}
+
+    // firmwareLimited/svnLimited also impose requirements on the parent key or
+    // primary handle.
+    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, firmwareLimited))
+	{
+	    if(parentObject != NULL)
+		{
+		    // For an ordinary object, firmwareLimited can only be set if its
+		    // parent is also firmwareLimited.
+		    if(!IS_ATTRIBUTE(parentAttributes, TPMA_OBJECT, firmwareLimited))
+			return TPM_RCS_ATTRIBUTES;
+		}
+	    else if(primaryHierarchy != 0)
+		{
+		    // For a primary object, firmwareLimited can only be set if its
+		    // hierarchy is a firmware-limited hierarchy.
+		    if(!HierarchyIsFirmwareLimited(primaryHierarchy))
+			return TPM_RCS_ATTRIBUTES;
+		}
+	    else
+		{
+		    return TPM_RCS_ATTRIBUTES;
+		}
+	}
+    if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, svnLimited))
+	{
+	    if(parentObject != NULL)
+		{
+		    // For an ordinary object, svnLimited can only be set if its
+		    // parent is also svnLimited.
+		    if(!IS_ATTRIBUTE(parentAttributes, TPMA_OBJECT, svnLimited))
+			return TPM_RCS_ATTRIBUTES;
+		}
+	    else if(primaryHierarchy != 0)
+		{
+		    // For a primary object, svnLimited can only be set if its
+		    // hierarchy is an svn-limited hierarchy.
+		    if(!HierarchyIsSvnLimited(primaryHierarchy))
+			return TPM_RCS_ATTRIBUTES;
+		}
+	    else
+		{
+		    return TPM_RCS_ATTRIBUTES;
+		}
+	}
+
     // Special checks for derived objects
     if((parentObject != NULL) && (parentObject->attributes.derivation == SET))
 	{

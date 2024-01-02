@@ -180,6 +180,9 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
 		       parentObject,
 		       publicArea->nameAlg,
 		       &out->outPrivate);
+
+    newObject->hierarchy = parentObject->hierarchy;
+
     // Finish by copying the remaining return values
     out->outPublic.publicArea = newObject->publicArea;
     return TPM_RC_SUCCESS;

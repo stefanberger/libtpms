@@ -288,6 +288,24 @@ bool _rpc__ACT_GetSignaled(uint32_t actHandle)
 #endif  // ACT_SUPPORT
     return false;
 }
+
+//*** _rpc__SetTpmFirmwareHash()
+// This function is used to modify the firmware's hash during simulation.
+void _rpc__SetTpmFirmwareHash(uint32_t hash)
+{
+#if SIMULATION
+    _plat__SetTpmFirmwareHash(hash);
+#endif
+}
+
+//*** _rpc__SetTpmFirmwareSvn()
+// This function is used to modify the firmware's SVN during simulation.
+void _rpc__SetTpmFirmwareSvn(uint16_t svn)
+{
+#if SIMULATION
+    _plat__SetTpmFirmwareSvn(svn);
+#endif
+}
 #endif /* libtpms added */
 
 /* libtpms added begin */

@@ -145,4 +145,16 @@ BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 TPMI_RH_HIERARCHY HierarchyNormalizeHandle(TPMI_RH_HIERARCHY handle  // IN
 					   );
 
+//*** HierarchyIsFirmwareLimited
+// This function accepts a hierarchy handle and returns whether it is firmware-
+// limited.
+BOOL HierarchyIsFirmwareLimited(TPMI_RH_HIERARCHY handle  // IN
+				);
+
+//*** HierarchyIsSvnLimited
+// This function accepts a hierarchy handle and returns whether it is SVN-
+// limited.
+BOOL HierarchyIsSvnLimited(TPMI_RH_HIERARCHY handle  // IN
+			   );
+
 #endif  // _HIERARCHY_FP_H_
