@@ -110,7 +110,6 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
 //  Return Type: BOOL
 //      TRUE(1)         success
 //      FALSE(0)        failure
-#if 0
 LIB_EXPORT BOOL TpmMath_GetRandomBits(BYTE* pBuffer, size_t bits, RAND_STATE* rand)
 {
     // buffer is assumed to be large enough for the number of bits rounded up to
@@ -170,7 +169,6 @@ LIB_EXPORT BOOL TpmMath_GetRandomBits(BYTE* pBuffer, size_t bits, RAND_STATE* ra
 	}
     return FALSE;
 }
-#endif
 
 //*** TpmMath_GetRandomInteger()
 // This function gets random bits for use in various places. To make sure that the
