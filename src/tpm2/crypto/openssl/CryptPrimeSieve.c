@@ -104,7 +104,7 @@ LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes,
 	primeLimit = s_PrimeMarkers[requestedPrimes];
     else {					// libtpms changed begin
 	primeLimit = s_LastPrimeInTable;
-	if (DRBG_GetSeedCompatLevel(rand) <= SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX)
+	if (DRBG_GetSeedCompatLevel(rand) <= SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169)
 	    primeLimit = s_LastPrimeInTable - 2;  // Previous 'fix' for 3072 bit keys to avoid mark=5
     }						// libtpms changed end
     primeLimit >>= 1;

@@ -475,7 +475,7 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
     pAssert((bits % 32) == 0);
     
     prime->size = BITS_TO_CRYPT_WORDS(bits);
-    
+
     while(!found)
 	{
 	    // The change below is to make sure that all keys that are generated from the same
@@ -490,9 +490,8 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 		    return TPM_RC_FAILURE;
 		RsaAdjustPrimeCandidate_PreRev155(prime);
 		break;
-	    case SEED_COMPAT_LEVEL_LAST:
-	    /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
-		if(!TpmMath_GetRandomInteger(prime, bits, rand))                              // new
+	    case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169:
+		if(!TpmMath_GetRandomInteger(prime, bits, rand))
 		    return TPM_RC_FAILURE;
 		RsaAdjustPrimeCandidate_PreRev169(prime);
 		break;
