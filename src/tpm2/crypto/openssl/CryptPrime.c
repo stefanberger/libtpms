@@ -338,6 +338,29 @@ RsaAdjustPrimeCandidate_PreRev155(
     prime->d[0] |= 1;
 }
 
+static void
+RsaAdjustPrimeCandidate_New(
+			    Crypt_Int* prime
+			   )
+{
+    // If the radix is 32, the compiler should turn this into a simple assignment
+    uint32_t msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
+    // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
+    uint32_t adjusted = (msw >> 16) * 0x4AFB;
+    adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
+    adjusted += 0xB5050000UL;
+#if RADIX_BITS == 64
+    // Save the low-order 32 bits
+    prime->d[prime->size - 1] &= 0xFFFFFFFFUL;
+    // replace the upper 32-bits
+    prime->d[prime->size -1] |= ((crypt_uword_t)adjusted << 32);
+#else
+    prime->d[prime->size - 1] = (crypt_uword_t)adjusted;
+#endif
+    // make sure the number is odd
+    prime->d[0] |= 1;
+}
+
 /* 10.2.14.1.7 RsaAdjustPrimeCandidate() */
 
 //*** RsaAdjustPrimeCandiate()
@@ -368,28 +391,7 @@ RsaAdjustPrimeCandidate_PreRev155(
 // significant bits of each prime candidate without introducing any computational
 // issues.
 //
-static void
-RsaAdjustPrimeCandidate_New(
-			    Crypt_Int* prime
-			   )
-{
-    // If the radix is 32, the compiler should turn this into a simple assignment
-    uint32_t msw = prime->d[prime->size - 1] >> ((RADIX_BITS == 64) ? 32 : 0);
-    // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
-    uint32_t adjusted = (msw >> 16) * 0x4AFB;
-    adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
-    adjusted += 0xB5050000UL;
-#if RADIX_BITS == 64
-    // Save the low-order 32 bits
-    prime->d[prime->size - 1] &= 0xFFFFFFFFUL;
-    // replace the upper 32-bits
-    prime->d[prime->size -1] |= ((crypt_uword_t)adjusted << 32);
-#else
-    prime->d[prime->size - 1] = (crypt_uword_t)adjusted;
-#endif
-    // make sure the number is odd
-    prime->d[0] |= 1;
-}
+
 
 
 LIB_EXPORT void RsaAdjustPrimeCandidate(Crypt_Int*        prime,
