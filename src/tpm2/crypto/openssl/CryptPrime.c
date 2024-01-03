@@ -427,9 +427,8 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 		    return TPM_RC_FAILURE;
 		RsaAdjustPrimeCandidate_PreRev155(prime);
 		break;
-	    case SEED_COMPAT_LEVEL_LAST:
-	    /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
-		if(!TpmMath_GetRandomInteger(prime, bits, rand))                              // new
+	    case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PRE165:
+		if(!TpmMath_GetRandomInteger(prime, bits, rand))
 		    return TPM_RC_FAILURE;
 		RsaAdjustPrimeCandidate_PreRev165(prime);
 		break;
