@@ -290,6 +290,10 @@ ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starti
 				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
 			    else
 				CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+#ifndef __ACT_DISABLED	// libtpms added
+			    if(go.preservedSignaled & (1 << act))
+				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
+#endif			// libtpms added
 			    actList->count++;
 			}
 		}
