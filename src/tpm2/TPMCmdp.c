@@ -66,33 +66,7 @@
 // of the testing.
 
 //** Includes and Data Definitions
-#include <stdlib.h>
-#include <stdio.h>
-#include <setjmp.h>
-#include <stdbool.h>
-#include "TpmBuildSwitches.h"
-#ifdef TPM_WINDOWS
-#include <windows.h>
-#include <winsock.h>
-#endif
-#include "Platform_fp.h"
-#include "PlatformACT_fp.h"
-#include "ExecCommand_fp.h"
-#include "Manufacture_fp.h"
-#include "_TPM_Init_fp.h"
-#include "_TPM_Hash_Start_fp.h"
-#include "_TPM_Hash_Data_fp.h"
-#include "_TPM_Hash_End_fp.h"
-#include "TpmFail_fp.h"
-#include "TpmTcpProtocol.h"
-#include "Simulator_fp.h"
-#ifdef TPM_WINDOWS
-#include "TcpServer_fp.h"	/* kgold */
-#endif
-#ifdef TPM_POSIX
-#include "TcpServerPosix_fp.h"	/* kgold */
-#endif
-#include "TpmProfile.h"		/* kgold */
+#include "simulatorPrivate.h"
 
 static bool s_isPowerOn = false;
 
