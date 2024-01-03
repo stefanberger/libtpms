@@ -339,7 +339,7 @@ RsaAdjustPrimeCandidate_PreRev155(
 }
 
 static void
-RsaAdjustPrimeCandidate_New(
+RsaAdjustPrimeCandidate_PreRev169(
 			    Crypt_Int* prime
 			   )
 {
@@ -404,7 +404,7 @@ LIB_EXPORT void RsaAdjustPrimeCandidate(Crypt_Int*        prime,
         break;
     case SEED_COMPAT_LEVEL_LAST:
     /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
-        RsaAdjustPrimeCandidate_New(prime);
+        RsaAdjustPrimeCandidate_PreRev169(prime);
         break;
     default:
         FAIL(FATAL_ERROR_INTERNAL);
