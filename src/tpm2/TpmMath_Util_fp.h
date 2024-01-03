@@ -83,6 +83,22 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
 				NUMBYTES         size    // IN: Size of output buffer - see comments.
 				);
 
+//*** TpmMath_GetRandomBits()
+// This function gets random bits for use in various places.
+//
+// One consequence of the generation scheme is that, if the number of bits requested
+// is not a multiple of 8, then the high-order bits are set to zero. This would come
+// into play when generating a 521-bit ECC key. A 66-byte (528-bit) value is
+// generated and the high order 7 bits are masked off (CLEAR).
+// In this situation, the highest order byte is the first byte (big-endian/TPM2B format)
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure
+LIB_EXPORT BOOL TpmMath_GetRandomBits(
+				      BYTE*       pBuffer,  // OUT: buffer to set
+				      size_t      bits,     // IN: number of bits to generate (see remarks)
+				      RAND_STATE* rand      // IN: random engine
+				      );
 
 //*** TpmMath_GetRandomInteger
 // This function generates a random integer with the requested number of bits.
