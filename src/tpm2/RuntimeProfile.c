@@ -763,7 +763,7 @@ RuntimeProfileGetByIndex(size_t  idx,
  * SEED_COMPAT_LEVEL must be available on the earliest version of libtpms
  * where the profile can run. If a profile for example can run on libtpms v0.9
  * then this function must return only this SEED_COMPAT_LEVEL that was
- * available in v0.9, which was SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX.
+ * available in v0.9, which was SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169.
  * The SEED_COMPAT_LEVEL depends on the stateFormatLevel that in turn depends
  * on the libtpms version.
  */
@@ -774,7 +774,7 @@ RuntimeProfileGetSeedCompatLevel(void)
 
     switch (g_RuntimeProfile.stateFormatLevel) {
     case 1: /* profile runs on v0.9 */
-	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
+	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169;
 
     case 2 ... 6: /* profile runs on v0.10 */ {
 	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 6); // force update when this changes
