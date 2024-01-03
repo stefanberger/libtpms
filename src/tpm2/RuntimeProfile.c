@@ -73,7 +73,7 @@ static const struct RuntimeProfileDesc {
      * This basically locks the name of the profile to the stateFormatLevel.
      */
     unsigned int stateFormatLevel;
-#define STATE_FORMAT_LEVEL_CURRENT 6
+#define STATE_FORMAT_LEVEL_CURRENT 7
 #define STATE_FORMAT_LEVEL_UNKNOWN 0 /* JSON didn't provide StateFormatLevel; this is only
 					allowed for the 'default' profile or when user
 					passed JSON via SetProfile() */
@@ -89,6 +89,7 @@ static const struct RuntimeProfileDesc {
  *  5 : Enabled TPM2_PolicyCapability (0x19b) & TPM2_PolicyParameters (0x19c)
  *  6 : Only OBJECTs for RSA keys marshal the private exponent; hierachy field is also
  *      marshalled now
+ *  7 : New RSA prime number generation algorithm for keys derived from seeds
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
@@ -770,15 +771,18 @@ RuntimeProfileGetByIndex(size_t  idx,
 LIB_EXPORT SEED_COMPAT_LEVEL
 RuntimeProfileGetSeedCompatLevel(void)
 {
-    MUST_BE(SEED_COMPAT_LEVEL_LAST == 1); // force update when this changes
+    MUST_BE(SEED_COMPAT_LEVEL_LAST == 2); // force update when this changes
 
     switch (g_RuntimeProfile.stateFormatLevel) {
     case 1: /* profile runs on v0.9 */
 	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169;
 
-    case 2 ... 6: /* profile runs on v0.10 */ {
-	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 6); // force update when this changes
+    case 2 ... 6: /* profile runs on v0.10 */
 	return SEED_COMPAT_LEVEL_LAST;
+
+    case 7: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 7); // force update when this changes
+	return SEED_COMPAT_LEVEL_RSA_PRIME_GENERATION_REV169;
     }
 
     default:

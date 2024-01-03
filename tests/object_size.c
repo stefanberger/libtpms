@@ -68,8 +68,8 @@ int main(void)
         },
         .seedCompatLevel = 1,
     };
-    static const size_t exp_sizes[7] = {
-        0, 2580, 2580, 2580, 2580, 2580, 2584,
+    static const size_t exp_sizes[8] = {
+        0, 2580, 2580, 2580, 2580, 2580, 2584, 2584,
     };
     BYTE buffer[2 * MAX_MARSHALLED_OBJECT_SIZE];
     UINT32 stateFormatLevel;
