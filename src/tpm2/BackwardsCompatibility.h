@@ -43,7 +43,7 @@ typedef UINT8 SEED_COMPAT_LEVEL;
 enum {
     SEED_COMPAT_LEVEL_ORIGINAL = 0,   /* original TPM 2 code up to rev155 */
     SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PRE165 = 1, /* RsaAdjustPrimeCandidate was fixed; up to rev164 */
-    SEED_COMPAT_LEVEL_LAST = SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PRE165
+    SEED_COMPAT_LEVEL_LAST = 2 /* new algo was introduce some time before rev181 */
 };
 
 #endif /* BACKWARDS_COMPATIBILITY_H */
