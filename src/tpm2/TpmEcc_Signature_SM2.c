@@ -92,6 +92,8 @@ TPM_RC TpmEcc_SignEcSm2(Crypt_Int* bnR,  // OUT: 'r' component of the signature
     UINT32                    orderBits = ExtMath_SizeInBits(order);
     BOOL                      atByteBoundary = (orderBits & 7) == 0;
     CRYPT_ECC_NUM(bnK1);
+    if (!E)
+	return TPM_RC_VALUE;
 // libtpms added end
 
     //

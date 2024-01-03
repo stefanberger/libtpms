@@ -290,6 +290,9 @@ LIB_EXPORT TPM_RC CryptEccCommitCompute(
 	    //
 	    pAssert(d != NULL && K != NULL && L != NULL);
 
+	    if (!curve)
+		ERROR_EXIT(TPM_RC_NO_RESULT);
+
 	    if(!ExtEcc_IsPointOnCurve(pB, curve))
 		ERROR_EXIT(TPM_RC_VALUE);
 	    // do the math for K = [d]B
