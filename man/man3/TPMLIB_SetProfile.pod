@@ -199,6 +199,11 @@ This I<StateFormatLevel> enabled the following profile attributes:
 
 This I<StateFormatLevel> enabled 4096-bit RSA.
 
+=item 9: (since v0.11)
+
+This I<StateFormatLevel> enabled a new RSA prime number generation
+algorithm for keys derived from seeds.
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.

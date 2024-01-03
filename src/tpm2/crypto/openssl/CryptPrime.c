@@ -391,7 +391,6 @@ RsaAdjustPrimeCandidate_PreRev169(
 // significant bits of each prime candidate without introducing any computational
 // issues.
 //
-#if 0											// libtpms added
 static void RsaAdjustPrimeCandidate_Rev169(BYTE* bigNumberBuffer, size_t bufSize)	// libtpms: renamed
 {
     // first, ensure the last byte is odd, making the entire value odd
@@ -454,7 +453,6 @@ static TPM_RC TpmRsa_GeneratePrimeForRSA_Rev169(			// libtpms: renamed
 
     return (OK && found) ? TPM_RC_SUCCESS : TPM_RC_FAILURE;
 }
-#endif									// libtpms added
 
 //									// libtpms added begin
 // This function uses different methods for generating RSA prime numbers
@@ -467,7 +465,8 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 				  RAND_STATE* rand       // IN: the random state
 				  )
 {
-    BOOL            found = FALSE;
+    BOOL              found = FALSE;
+    SEED_COMPAT_LEVEL seedCompatLevel = DRBG_GetSeedCompatLevel(rand);
     //
     // Make sure that the prime is large enough
     pAssert(prime->allocated >= BITS_TO_CRYPT_WORDS(bits));
@@ -476,14 +475,18 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
     
     prime->size = BITS_TO_CRYPT_WORDS(bits);
 
+    switch (seedCompatLevel) {
+    case SEED_COMPAT_LEVEL_ORIGINAL:
+    case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PREREV169:
+	break;
+    case SEED_COMPAT_LEVEL_RSA_PRIME_GENERATION_REV169: /* introduced around rev169 */
+	return TpmRsa_GeneratePrimeForRSA_Rev169(prime, bits, exponent, rand);
+    }
+    MUST_BE(SEED_COMPAT_LEVEL_LAST == 2); /* add case above if this changes */
+
     while(!found)
 	{
-	    // The change below is to make sure that all keys that are generated from the same
-	    // seed value will be the same regardless of the endianness or word size of the CPU.
-	    //       DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));// old
-	    //       if(g_inFailureMode)                                                // old
-	// libtpms changed begin
-	    switch (DRBG_GetSeedCompatLevel(rand)) {
+	    switch (seedCompatLevel) {
 	    case SEED_COMPAT_LEVEL_ORIGINAL:
 		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
 		if (g_inFailureMode)
@@ -498,7 +501,6 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 	    default:
 		FAIL(FATAL_ERROR_INTERNAL);
 	    }
-	// libtpms changed end
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
     return TPM_RC_SUCCESS;
