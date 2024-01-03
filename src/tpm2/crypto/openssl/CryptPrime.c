@@ -339,7 +339,7 @@ RsaAdjustPrimeCandidate_PreRev155(
 }
 
 static void
-RsaAdjustPrimeCandidate_New(
+RsaAdjustPrimeCandidate_PreRev169(
 			    Crypt_Int* prime
 			   )
 {
@@ -494,7 +494,7 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 	    /* case SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX: */
 		if(!TpmMath_GetRandomInteger(prime, bits, rand))                              // new
 		    return TPM_RC_FAILURE;
-		RsaAdjustPrimeCandidate_New(prime);
+		RsaAdjustPrimeCandidate_PreRev169(prime);
 		break;
 	    default:
 		FAIL(FATAL_ERROR_INTERNAL);
