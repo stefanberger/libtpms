@@ -65,14 +65,14 @@
 #define TPM_SPEC_FAMILY      (0x322E3000)
 #define TPM_SPEC_LEVEL_NUM   0		// libtpms added: TPM_SPEC_LEVEL without leading zeros and '()'
 #define TPM_SPEC_LEVEL       (00)
-#define TPM_SPEC_VERSION     164	// libtpms changed: removed '()'
-#define TPM_SPEC_YEAR        (2021)
-#define TPM_SPEC_DAY_OF_YEAR (75)
+#define TPM_SPEC_VERSION     183	// libtpms changed: removed '()'
+#define TPM_SPEC_YEAR        (2024)
+#define TPM_SPEC_DAY_OF_YEAR (25)
 #define MAX_VENDOR_PROPERTY  (1)
 
 // Define the platform specification-specific capability values.
 #define PLATFORM_FAMILY      (1)		/* kgold changed for PC Client */
-#define PLATFORM_LEVEL       TPM_SPEC_LEVEL_NUM
+#define PLATFORM_LEVEL       TPM_SPEC_LEVEL_NUM		// libtpms: changed
 #define PLATFORM_VERSION     (0x00000106)
 #define PLATFORM_YEAR        TPM_SPEC_YEAR		// libtpms: changed
 #define PLATFORM_DAY_OF_YEAR TPM_SPEC_DAY_OF_YEAR	// libtpms: changed
