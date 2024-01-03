@@ -506,6 +506,8 @@ noinst_HEADERS += \
 	tpm2/SetPrimaryPolicy_fp.h \
 	tpm2/Shutdown_fp.h \
 	tpm2/Sign_fp.h \
+	tpm2/simulatorPrivate.h \
+	tpm2/simulator_sysheaders.h \
 	tpm2/Simulator_fp.h \
 	tpm2/StartAuthSession_fp.h \
 	tpm2/Startup_fp.h \
