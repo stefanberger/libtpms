@@ -99,6 +99,79 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
     return FALSE;
 }
 
+//*** TpmMath_GetRandomBits()
+// This function gets random bits for use in various places.
+//
+// One consequence of the generation scheme is that, if the number of bits requested
+// is not a multiple of 8, then the high-order bits are set to zero. This would come
+// into play when generating a 521-bit ECC key. A 66-byte (528-bit) value is
+// generated and the high order 7 bits are masked off (CLEAR).
+// In this situation, the highest order byte is the first byte (big-endian/TPM2B format)
+//  Return Type: BOOL
+//      TRUE(1)         success
+//      FALSE(0)        failure
+#if 0
+LIB_EXPORT BOOL TpmMath_GetRandomBits(BYTE* pBuffer, size_t bits, RAND_STATE* rand)
+{
+    // buffer is assumed to be large enough for the number of bits rounded up to
+    // bytes.
+    NUMBYTES byteCount = (NUMBYTES)BITS_TO_BYTES(bits);
+    if(DRBG_Generate(rand, pBuffer, byteCount) == byteCount)
+	{
+	    // now flip the buffer order - this exists only to maintain
+	    // compatibility with existing Known-value tests that expect the
+	    // GetRandomInteger behavior of generating the value in little-endian
+	    // order.
+	    BYTE* pFrom = pBuffer + byteCount - 1;
+	    BYTE* pTo   = pBuffer;
+	    while(pTo < pFrom)
+		{
+		    BYTE t = *pTo;
+		    *pTo   = *pFrom;
+		    *pFrom = t;
+		    pTo++;
+		    pFrom--;
+		}
+	    // For a little-endian machine, the conversion is a straight byte
+	    // reversal, done above. For a big-endian machine, we have to put the
+	    // words in big-endian byte order.  COMPATIBILITY NOTE: This code does
+	    // not exactly reproduce the original code, because the original big-num
+	    // code always generated data in units of crypt_word_t sizes.  I.e. you
+	    // couldn't generate just 9 bits for example.  This revised version of
+	    // the function could; and would generate 2 bytes with the first byte
+	    // masked to 1 bit.  In order to avoid running over the buffer when
+	    // swapping crypt_uword_t blocks, this loop intentionally doesn't swap
+	    // the last word if it is smaller than crypt_word_t size (which is the
+	    // same as saying the buffer isn't an integral number of crypt_word_t
+	    // units.) This is okay in this particular case _because_ this whole
+	    // block of swapping code is to maintain compatibilty with existing
+	    // KNOWN ANSWER TESTS, and said existing tests use sizes that this
+	    // assumption is true for.  Any new code with a different size where
+	    // this last partial value isn't swapped will be creating a new KAT, and
+	    // thus any (cryptographically valid) value is still random; swapping
+	    // doesn't make a cryptographic random buffer more or less random, so
+	    // the failure to swap is fine.
+#if BIG_ENDIAN_TPM
+	    crypt_uword_t* pTemp = pBuffer;
+	    for(size_t t = 0; t < (byteCount / sizeof(crypt_uword_t)); t++)
+		*pTemp = SWAP_CRYPT_WORD(*pTemp);
+#endif
+	    // if the number of bits % 8 != 0, mask the high order (first) byte to the relevant number of bits
+	    // bits % 8     desired mask   right-shift of 0xFF
+	    //     0           0xFF             0 = (8 - 0) % 8
+	    //     1           0x01             7 = (8 - 1) % 8
+	    //     2           0x03             6 = (8 - 2) % 8
+	    //     ... etc ...
+	    //     7           0x7F             1 = (8 - 7) % 8
+	    int  excessBits = bits % 8;
+	    static const BYTE mask[8] = {0xff, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f};	// libtpms changed: fix
+	    pBuffer[0] &= mask[excessBits];							// libtpms changed: fix
+	    return TRUE;
+	}
+    return FALSE;
+}
+#endif
+
 //*** TpmMath_GetRandomInteger()
 // This function gets random bits for use in various places. To make sure that the
 // number is generated in a portable format, it is created as a TPM2B and then
