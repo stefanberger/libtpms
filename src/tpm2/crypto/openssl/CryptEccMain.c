@@ -706,6 +706,10 @@ LIB_EXPORT BOOL CryptEccIsPointOnCurve(
     //
     pAssert(Qin != NULL);
     OK = (E != NULL && (ExtEcc_IsPointOnCurve(ecQ, E)));
+    if (E) {
+	OsslContextLeave(E->CTX); // libtpms added: avoid memory leak
+	EC_GROUP_free(E->G);
+    }
     return OK;
 }
 
