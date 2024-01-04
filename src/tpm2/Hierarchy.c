@@ -109,9 +109,9 @@ void HierarchyPreInstall_Init(void)
     CryptRandomGenerate(gp.SPSeed.t.size, gp.SPSeed.t.buffer);
     CryptRandomGenerate(gp.PPSeed.t.size, gp.PPSeed.t.buffer);
 
-    gp.EPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added begin
-    gp.SPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;
-    gp.PPSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;   // libtpms added end
+    gp.EPSeedCompatLevel = RuntimeProfileGetSeedCompatLevel();   // libtpms added begin
+    gp.SPSeedCompatLevel = RuntimeProfileGetSeedCompatLevel();
+    gp.PPSeedCompatLevel = RuntimeProfileGetSeedCompatLevel();   // libtpms added end
     // Initialize owner, endorsement and lockout authorization
     gp.ownerAuth.t.size       = 0;
     gp.endorsementAuth.t.size = 0;
@@ -185,7 +185,7 @@ BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
 	    CryptRandomGenerate(gr.nullProof.t.size, gr.nullProof.t.buffer);
 	    gr.nullSeed.t.size = sizeof(gr.nullSeed.t.buffer);
 	    CryptRandomGenerate(gr.nullSeed.t.size, gr.nullSeed.t.buffer);
-	    gr.nullSeedCompatLevel = SEED_COMPAT_LEVEL_LAST;  // libtpms added
+	    gr.nullSeedCompatLevel = RuntimeProfileGetSeedCompatLevel();  // libtpms added
 	}
 
     return TRUE;
@@ -316,7 +316,7 @@ HierarchyGetPrimarySeedCompatLevel(
 	  case TPM_RH_NULL:
 	    return gr.nullSeedCompatLevel;
 	  default:
-	    return SEED_COMPAT_LEVEL_LAST;
+	    return RuntimeProfileGetSeedCompatLevel();
 	    break;
 	}
 }
