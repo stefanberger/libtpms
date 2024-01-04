@@ -748,3 +748,31 @@ RuntimeProfileGetByIndex(size_t  idx,
 				RuntimeProfileDescs[idx].commandsProfile,
 				RuntimeProfileDescs[idx].description);
 }
+
+/*
+ * Determine the SEED_COMPAT_LEVEL that a profile can support. The
+ * SEED_COMPAT_LEVEL must be available on the earliest version of libtpms
+ * where the profile can run. If a profile for example can run on libtpms v0.9
+ * then this function must return only this SEED_COMPAT_LEVEL that was
+ * available in v0.9, which was SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX.
+ * The SEED_COMPAT_LEVEL depends on the stateFormatLevel that in turn depends
+ * on the libtpms version.
+ */
+LIB_EXPORT SEED_COMPAT_LEVEL
+RuntimeProfileGetSeedCompatLevel(void)
+{
+    MUST_BE(SEED_COMPAT_LEVEL_LAST == 1); // force update when this changes
+
+    switch (g_RuntimeProfile.stateFormatLevel) {
+    case 1: /* profile runs on v0.9 */
+	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
+
+    case 2 ... 2: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 2); // force update when this changes
+	return SEED_COMPAT_LEVEL_LAST;
+    }
+
+    default:
+	FAIL(FATAL_ERROR_INTERNAL);
+    }
+}
