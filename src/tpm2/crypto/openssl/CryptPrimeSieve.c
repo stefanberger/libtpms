@@ -94,15 +94,19 @@ uint32_t       primeLimit;
 // limit (primeLimit) set up by this function. This causes the sieve
 // process to stop when an appropriate number of primes have been
 // sieved.
-LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes)
+LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes,
+				    RAND_STATE* rand)
 {
     if(requestedPrimes == 0 || requestedPrimes > s_PrimesInTable)
 	requestedPrimes = s_PrimesInTable;
     requestedPrimes = (requestedPrimes - 1) / 1024;
     if(requestedPrimes < s_PrimeMarkersCount)
 	primeLimit = s_PrimeMarkers[requestedPrimes];
-    else
-	primeLimit = s_LastPrimeInTable - 2;  // libtpms: Fix for 3072 bit keys to avoid mark=5
+    else {					// libtpms changed begin
+	primeLimit = s_LastPrimeInTable;
+	if (DRBG_GetSeedCompatLevel(rand) <= SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX)
+	    primeLimit = s_LastPrimeInTable - 2;  // Previous 'fix' for 3072 bit keys to avoid mark=5
+    }						// libtpms changed end
     primeLimit >>= 1;
 }
 
@@ -241,11 +245,13 @@ typedef struct
     UINT32 prime;
     UINT16 count;
 } SIEVE_MARKS;
-const SIEVE_MARKS sieveMarks[5] = {{31, 7},
+
+const SIEVE_MARKS sieveMarks[6] = {{31, 7},
 				   {73, 5},
 				   {241, 4},
 				   {1621, 3},
-				   {UINT16_MAX, 2}};
+				   {UINT16_MAX, 2},
+				   {UINT32_MAX, 1}};
 
 const size_t MAX_SIEVE_MARKS = (sizeof(sieveMarks) / sizeof(sieveMarks[0]));
 
@@ -449,15 +455,15 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
 
     if(primeSize <= 512)
 	{
-	    RsaAdjustPrimeLimit(1024);  // Use just the first 1024 primes
+	    RsaAdjustPrimeLimit(1024, rand);  // Use just the first 1024 primes	// libtpms added rand
 	}
     else if(primeSize <= 1024)
 	{
-	    RsaAdjustPrimeLimit(4096);  // Use just the first 4K primes
+	    RsaAdjustPrimeLimit(4096, rand);  // Use just the first 4K primes	// libtpms added rand
 	}
     else
 	{
-	    RsaAdjustPrimeLimit(0);  // Use all available
+	    RsaAdjustPrimeLimit(0, rand);  // Use all available			// libtpms added rand
 	}
 
     // Save the low-order word to use as a search generator and make sure that

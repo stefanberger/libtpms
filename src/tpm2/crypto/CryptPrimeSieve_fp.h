@@ -75,7 +75,9 @@
 // limit (primeLimit) set up by this function. This causes the sieve
 // process to stop when an appropriate number of primes have been
 // sieved.
-LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes);
+LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes,
+				    RAND_STATE* rand		// libtpms added
+				    );
 
 //*** RsaNextPrime()
 // This the iterator used during the sieve process. The input is the
