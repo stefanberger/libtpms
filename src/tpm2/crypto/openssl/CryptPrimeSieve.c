@@ -94,15 +94,19 @@ uint32_t       primeLimit;
 // limit (primeLimit) set up by this function. This causes the sieve
 // process to stop when an appropriate number of primes have been
 // sieved.
-LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes)
+LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes,
+				    SEED_COMPAT_LEVEL seedCompatLevel)
 {
     if(requestedPrimes == 0 || requestedPrimes > s_PrimesInTable)
 	requestedPrimes = s_PrimesInTable;
     requestedPrimes = (requestedPrimes - 1) / 1024;
     if(requestedPrimes < s_PrimeMarkersCount)
 	primeLimit = s_PrimeMarkers[requestedPrimes];
-    else
-	primeLimit = s_LastPrimeInTable - 2;  // libtpms: Fix for 3072 bit keys to avoid mark=5
+    else {					// libtpms changed begin
+	primeLimit = s_LastPrimeInTable;
+	if (seedCompatLevel <= SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_PRE165)
+		primeLimit -= 2;  		// Previous fix for 3072 bit keys to avoid mark=5
+    }						// libtpms changed end
     primeLimit >>= 1;
 }
 
@@ -436,6 +440,7 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
     UINT32 fieldSize = MAX_FIELD_SIZE;
 #  endif
     UINT32 primeSize;
+    SEED_COMPAT_LEVEL seedCompatLevel = DRBG_GetSeedCompatLevel(rand);
     //
     // Adjust the field size and prime table list to fit the size of the prime
     // being tested. This is done to try to optimize the trade-off between the
@@ -447,15 +452,15 @@ LIB_EXPORT TPM_RC PrimeSelectWithSieve(
 
     if(primeSize <= 512)
 	{
-	    RsaAdjustPrimeLimit(1024);  // Use just the first 1024 primes
+	    RsaAdjustPrimeLimit(1024, seedCompatLevel);  // Use just the first 1024 primes	// libtpms added seedCompatLevel
 	}
     else if(primeSize <= 1024)
 	{
-	    RsaAdjustPrimeLimit(4096);  // Use just the first 4K primes
+	    RsaAdjustPrimeLimit(4096, seedCompatLevel);  // Use just the first 4K primes	// libtpms added seedCompatLevel
 	}
     else
 	{
-	    RsaAdjustPrimeLimit(0);  // Use all available
+	    RsaAdjustPrimeLimit(0, seedCompatLevel);  // Use all available			// libtpms added seedCompatLevel
 	}
 
     // Save the low-order word to use as a search generator and make sure that
