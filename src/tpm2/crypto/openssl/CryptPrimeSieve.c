@@ -238,11 +238,12 @@ typedef struct
     UINT32 prime;
     UINT16 count;
 } SIEVE_MARKS;
-const SIEVE_MARKS sieveMarks[5] = {{31, 7},
+const SIEVE_MARKS sieveMarks[6] = {{31, 7},
 				   {73, 5},
 				   {241, 4},
 				   {1621, 3},
-				   {UINT16_MAX, 2}};
+				   {UINT16_MAX, 2},
+				   {UINT32_MAX, 1}};
 
 const size_t MAX_SIEVE_MARKS = (sizeof(sieveMarks) / sizeof(sieveMarks[0]));
 
