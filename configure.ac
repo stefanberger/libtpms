@@ -247,6 +247,9 @@ CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_ECDSA=$use_openssl_functions_ecdsa"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_RSA=$use_openssl_functions_rsa"
 
+AC_CHECK_LIB([crypto], [EC_POINT_get_affine_coordinates], found=1, found=0)
+CFLAGS="$CFLAGS -DUSE_EC_POINT_GET_AFFINE_COORDINATES_API=$found"
+
 AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),
     [SANITIZERS="-fsanitize=address,undefined"], [])
 AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
