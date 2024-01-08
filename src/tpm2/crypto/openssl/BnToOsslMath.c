@@ -458,12 +458,7 @@ static BOOL PointFromOssl(bigPoint            pOut,  // OUT: resulting point
     if(y == NULL)
 	FAIL(FATAL_ERROR_ALLOCATION);
     // If this returns false, then the point is at infinity
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)					// libtpms added begin
-    OK = EC_POINT_get_affine_coordinates(E->G, pIn, x, y, E->CTX);
-#else									// libtpms added begin
     OK = EC_POINT_get_affine_coordinates_GFp(E->G, pIn, x, y, E->CTX);
-#endif									// libtpms added end
     if(OK)
 	{
 	    OsslToTpmBn(pOut->x, x);
@@ -489,12 +484,7 @@ LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, const bigCurveDa
 	    if(E == NULL)
 		FAIL(FATAL_ERROR_ALLOCATION);
 	    P = EC_POINT_new(E->G);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)					// libtpms added begin
-	    if(!EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, E->CTX))
-#else									// libtpms added end
 	    if(!EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
-#endif									// libtpms added
 		P = NULL;
 	    BN_clear_free(bnX); // libtpms added
 	    BN_clear_free(bnY); // libtpms added
@@ -547,12 +537,8 @@ LIB_EXPORT bigCurveData* BnCurveInitialize(
 	    GOTO_ERROR_UNLESS(P != NULL);
 
 	    // Need to use this in case Montgomery method is being used
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-    !defined(LIBRESSL_VERSION_NUMBER)						// libtpms added begin
-	    GOTO_ERROR_UNLESS(EC_POINT_set_affine_coordinates(E->G, P, bnX, bnY, CTX));
-#else										// libtpms added end
-	    GOTO_ERROR_UNLESS(EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
-#endif										// libtpms added
+	    GOTO_ERROR_UNLESS(
+			      EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
 	    // Now set the generator
 	    GOTO_ERROR_UNLESS(EC_GROUP_set_generator(E->G, P, bnN, bnH));
 

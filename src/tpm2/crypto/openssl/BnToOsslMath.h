@@ -94,14 +94,16 @@ struct bignum_st
     int neg;       /* one if the number is negative */
     int flags;
 };
-#if 0   // libtpms added
+#else
 #  define EC_POINT_get_affine_coordinates EC_POINT_get_affine_coordinates_GFp
 #  define EC_POINT_set_affine_coordinates EC_POINT_set_affine_coordinates_GFp
-#endif  // libtpms added
 #endif // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
 
-                    // libtpms added end
+#if USE_EC_POINT_GET_AFFINE_COORDINATES_API
+#  define EC_POINT_get_affine_coordinates_GFp EC_POINT_get_affine_coordinates
+#  define EC_POINT_set_affine_coordinates_GFp EC_POINT_set_affine_coordinates
+#endif							// libtpms added end
 
 	//** Macros and Defines
 
