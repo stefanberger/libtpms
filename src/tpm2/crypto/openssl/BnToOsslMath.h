@@ -100,6 +100,10 @@ struct bignum_st
 #endif // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
 
+#if USE_OPENSSL_FUNCTIONS_ECDSA				// libtpms added begin
+# include <openssl/ecdsa.h>				// LibreSSL needs it
+#endif
+
 #if USE_EC_POINT_GET_AFFINE_COORDINATES_API
 #  define EC_POINT_get_affine_coordinates_GFp EC_POINT_get_affine_coordinates
 #  define EC_POINT_set_affine_coordinates_GFp EC_POINT_set_affine_coordinates
