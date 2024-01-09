@@ -171,7 +171,7 @@
 // the current compiler doesn't support it.  COMPILER_CHECKS should be enabled if the
 // compiler supports some form of static_assert.
 // See the CompilerDependencies_*.h files for specific implementations per compiler.
-#define COMPILER_CHECKS             NO		// libtpms: NO
+#define COMPILER_CHECKS             YES
 
 // Some of the values (such as sizes) are the result of different options set in
 // TpmProfile.h. The combination might not be consistent. A function is defined
