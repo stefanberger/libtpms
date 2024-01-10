@@ -51,15 +51,15 @@ typedef union {
 	BYTE                    buffer[2048/8];
     }            t;
     TPM2B        b;
-} OLD_TPM2B_PUBLIC_KEY_RSA;
+} RSA2048_TPM2B_PUBLIC_KEY_RSA;
 
 typedef union {
-    TPM2B_DIGEST             keyedHash;
-    TPM2B_DIGEST             sym;
-    OLD_TPM2B_PUBLIC_KEY_RSA rsa;
-    TPMS_ECC_POINT           ecc;
-//    TPMS_DERIVE             derive;
-} OLD_TPMU_PUBLIC_ID;
+    TPM2B_DIGEST                 keyedHash;
+    TPM2B_DIGEST                 sym;
+    RSA2048_TPM2B_PUBLIC_KEY_RSA rsa;
+    TPMS_ECC_POINT               ecc;
+//    TPMS_DERIVE                derive;
+} RSA2048_TPMU_PUBLIC_ID;
 
 typedef struct {
     TPMI_ALG_PUBLIC         type;
@@ -67,20 +67,10 @@ typedef struct {
     TPMA_OBJECT             objectAttributes;
     TPM2B_DIGEST            authPolicy;
     TPMU_PUBLIC_PARMS       parameters;
-    OLD_TPMU_PUBLIC_ID      unique;
-} OLD_TPMT_PUBLIC;
+    RSA2048_TPMU_PUBLIC_ID  unique;
+} RSA2048_TPMT_PUBLIC;
 
-MUST_BE(sizeof(OLD_TPMT_PUBLIC) == 356);
-
-typedef union {
-    struct {
-	UINT16                  size;
-	BYTE                    buffer[((2048/8)/2)*5];
-    }            t;
-    TPM2B        b;
-} OLD_TPM2B_PRIVATE_KEY_RSA;
-
-MUST_BE(sizeof(OLD_TPM2B_PRIVATE_KEY_RSA) == 642);
+MUST_BE(sizeof(RSA2048_TPMT_PUBLIC) == 356);
 
 typedef union {
     struct {
@@ -88,34 +78,44 @@ typedef union {
 	BYTE                    buffer[((2048/8)/2)*5];
     }            t;
     TPM2B        b;
-} OLD_TPM2B_PRIVATE_VENDOR_SPECIFIC;
+} RSA2048_TPM2B_PRIVATE_KEY_RSA;
+
+MUST_BE(sizeof(RSA2048_TPM2B_PRIVATE_KEY_RSA) == 642);
 
 typedef union {
-    OLD_TPM2B_PRIVATE_KEY_RSA         rsa;
-    TPM2B_ECC_PARAMETER               ecc;
-    TPM2B_SENSITIVE_DATA              bits;
-    TPM2B_SYM_KEY                     sym;
-    OLD_TPM2B_PRIVATE_VENDOR_SPECIFIC any;
-} OLD_TPMU_SENSITIVE_COMPOSITE;
+    struct {
+	UINT16                  size;
+	BYTE                    buffer[((2048/8)/2)*5];
+    }            t;
+    TPM2B        b;
+} RSA2048_TPM2B_PRIVATE_VENDOR_SPECIFIC;
+
+typedef union {
+    RSA2048_TPM2B_PRIVATE_KEY_RSA         rsa;
+    TPM2B_ECC_PARAMETER                   ecc;
+    TPM2B_SENSITIVE_DATA                  bits;
+    TPM2B_SYM_KEY                         sym;
+    RSA2048_TPM2B_PRIVATE_VENDOR_SPECIFIC any;
+} RSA2048_TPMU_SENSITIVE_COMPOSITE;
 
 typedef struct {
-    TPMI_ALG_PUBLIC              sensitiveType;
-    TPM2B_AUTH                   authValue;
-    TPM2B_DIGEST                 seedValue;
-    OLD_TPMU_SENSITIVE_COMPOSITE sensitive;
-} OLD_TPMT_SENSITIVE;
+    TPMI_ALG_PUBLIC                  sensitiveType;
+    TPM2B_AUTH                       authValue;
+    TPM2B_DIGEST                     seedValue;
+    RSA2048_TPMU_SENSITIVE_COMPOSITE sensitive;
+} RSA2048_TPMT_SENSITIVE;
 
-MUST_BE(sizeof(OLD_TPMT_SENSITIVE) == 776);
+MUST_BE(sizeof(RSA2048_TPMT_SENSITIVE) == 776);
 
 BN_TYPE(old_prime, (2048 / 2));
 
-typedef struct OLD_privateExponent
+typedef struct RSA2048_privateExponent
 {
     bn_old_prime_t          Q;
     bn_old_prime_t          dP;
     bn_old_prime_t          dQ;
     bn_old_prime_t          qInv;
-} OLD_privateExponent_t;
+} RSA2048_privateExponent_t;
 
 static inline void CopyFromOldPrimeT(ci_prime_t *dst,
 				     const bn_old_prime_t *src)
@@ -125,16 +125,16 @@ static inline void CopyFromOldPrimeT(ci_prime_t *dst,
     memcpy(dst->d, src->d, sizeof(src->d));
 }
 
-MUST_BE(sizeof(OLD_privateExponent_t) == 608);
+MUST_BE(sizeof(RSA2048_privateExponent_t) == 608);
 
-typedef struct OLD_OBJECT
+typedef struct RSA2048_OBJECT
 {
     // The attributes field is required to be first followed by the publicArea.
     // This allows the overlay of the object structure and a sequence structure
     OBJECT_ATTRIBUTES   attributes;         // object attributes
-    OLD_TPMT_PUBLIC     publicArea;         // public area of an object
-    OLD_TPMT_SENSITIVE  sensitive;          // sensitive area of an object
-    OLD_privateExponent_t privateExponent;  // Additional field for the private
+    RSA2048_TPMT_PUBLIC     publicArea;         // public area of an object
+    RSA2048_TPMT_SENSITIVE  sensitive;          // sensitive area of an object
+    RSA2048_privateExponent_t privateExponent;  // Additional field for the private
     TPM2B_NAME          qualifiedName;      // object qualified name
     TPMI_DH_OBJECT      evictHandle;        // if the object is an evict object,
     // the original handle is kept here.
@@ -147,11 +147,11 @@ typedef struct OLD_OBJECT
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
     // same size; simple padding at the end works here
     UINT32             _pad;
-} OLD_OBJECT;
+} RSA2048_OBJECT;
 
-MUST_BE(sizeof(OLD_OBJECT) == 1896);
+MUST_BE(sizeof(RSA2048_OBJECT) == 1896);
 
-static void OLD_OBJECT_To_OBJECT(OBJECT* dest, const OLD_OBJECT* src)
+static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
 {
     dest->attributes = src->attributes;
 
@@ -190,7 +190,7 @@ static void OLD_OBJECT_To_OBJECT(OBJECT* dest, const OLD_OBJECT* src)
     dest->sensitive.sensitiveType = src->sensitive.sensitiveType;
     dest->sensitive.authValue = src->sensitive.authValue;
     dest->sensitive.seedValue = src->sensitive.seedValue;
-    /* The OLD_TPMU_SENSITIVE_COMPOSITE is always a TPM2B */
+    /* The RSA2048_TPMU_SENSITIVE_COMPOSITE is always a TPM2B */
     MemoryCopy2B(&dest->sensitive.sensitive.any.b,
 		 &src->sensitive.sensitive.any.b,
 		 sizeof(src->sensitive.sensitive.any.t.buffer));
@@ -205,11 +205,11 @@ static void OLD_OBJECT_To_OBJECT(OBJECT* dest, const OLD_OBJECT* src)
     dest->name = src->name;
 }
 
-// Convert an OLD_OBJECT that was copied into buffer using MemoryCopy
+// Convert an RSA2048_OBJECT that was copied into buffer using MemoryCopy
 TPM_RC
-OLD_OBJECTToOBJECT(OBJECT *newObject, BYTE *buffer, INT32 size)
+RSA2048_OBJECT_Buffer_To_OBJECT(OBJECT* newObject, BYTE* buffer, INT32 size)
 {
-    OLD_OBJECT    oldObject;
+    RSA2048_OBJECT    oldObject;
     TPM_RC        rc = 0;
 
     // get the attributes
@@ -221,12 +221,12 @@ OLD_OBJECTToOBJECT(OBJECT *newObject, BYTE *buffer, INT32 size)
 	}
     else
         {
-	    if (size != sizeof(OLD_OBJECT))
+	    if (size != sizeof(RSA2048_OBJECT))
 		return TPM_RC_SIZE;
-	    MemoryCopy(&oldObject, buffer, sizeof(OLD_OBJECT));
+	    MemoryCopy(&oldObject, buffer, sizeof(RSA2048_OBJECT));
 
 	    /* fill the newObject with the contents of the oldObject */
-	    OLD_OBJECT_To_OBJECT(newObject, &oldObject);
+	    RSA2048_OBJECT_To_OBJECT(newObject, &oldObject);
     }
 
     return rc;
