@@ -40,10 +40,6 @@
 
 #include "BackwardsCompatibilityObject.h"
 
-#ifndef static_assert
-#define static_assert(test, msg)
-#endif
-
 /* The following are data structure from libtpms 0.7.x with RSA 2048 support
  * that help to resume key and hash contexts (TPM2_ContextSave/Load) from this
  * earlier version. All structures that have different sizes in 0.8 are found
@@ -74,8 +70,7 @@ typedef struct {
     OLD_TPMU_PUBLIC_ID      unique;
 } OLD_TPMT_PUBLIC;
 
-static_assert(sizeof(OLD_TPMT_PUBLIC) == 356,
-	      "OLD_TPMT_PUBLIC has wrong size");
+MUST_BE(sizeof(OLD_TPMT_PUBLIC) == 356);
 
 typedef union {
     struct {
@@ -85,8 +80,7 @@ typedef union {
     TPM2B        b;
 } OLD_TPM2B_PRIVATE_KEY_RSA;
 
-static_assert(sizeof(OLD_TPM2B_PRIVATE_KEY_RSA) == 642,
-	      "OLD_TPM2B_PRIVATE_KEY_RSA has wrong size");
+MUST_BE(sizeof(OLD_TPM2B_PRIVATE_KEY_RSA) == 642);
 
 typedef union {
     struct {
@@ -111,8 +105,7 @@ typedef struct {
     OLD_TPMU_SENSITIVE_COMPOSITE sensitive;
 } OLD_TPMT_SENSITIVE;
 
-static_assert(sizeof(OLD_TPMT_SENSITIVE) == 776,
-	      "OLD_TPMT_SENSITIVE has wrong size");
+MUST_BE(sizeof(OLD_TPMT_SENSITIVE) == 776);
 
 BN_TYPE(old_prime, (2048 / 2));
 
@@ -132,8 +125,7 @@ static inline void CopyFromOldPrimeT(ci_prime_t *dst,
     memcpy(dst->d, src->d, sizeof(src->d));
 }
 
-static_assert(sizeof(OLD_privateExponent_t) == 608,
-	      "OLD_privateExponent_t has wrong size");
+MUST_BE(sizeof(OLD_privateExponent_t) == 608);
 
 typedef struct OLD_OBJECT
 {
@@ -157,8 +149,7 @@ typedef struct OLD_OBJECT
     UINT32             _pad;
 } OLD_OBJECT;
 
-static_assert(sizeof(OLD_OBJECT) == 1896,
-	      "OLD_OBJECT has wrong size");
+MUST_BE(sizeof(OLD_OBJECT) == 1896);
 
 // Convert an OLD_OBJECT that was copied into buffer using MemoryCopy
 TPM_RC
