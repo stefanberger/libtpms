@@ -99,6 +99,8 @@
 #define NV_C
 #include "Tpm.h"
 #include "Marshal.h"
+#include "tpm_library_intern.h"				// libtpms added
+#include "BackwardsCompatibilityObject.h"		// libtpms added
 
 //** Local Functions
 
@@ -584,6 +586,61 @@ void NvReadNvIndexInfo(NV_REF    ref,     // IN: points to NV where index is loc
     return;
 }
 
+// Convert an OBJECT into a buffer to store in NVRAM	// libtpms added begin
+static UINT32 NvObjectToBuffer(OBJECT* object, BYTE* buffer, UINT32 size)
+{
+    BOOL marshalAnyObject = false;
+
+    pAssert(size >= MAX_MARSHALLED_OBJECT_SIZE);
+
+    // RSA 3072 objects and older are stored as RSA3072_OBJECT
+    switch(object->publicArea.type) {
+    case TPM_ALG_RSA:
+        if (object->publicArea.parameters.rsaDetail.keyBits > 3072)
+            marshalAnyObject = true;
+        break;
+    case TPM_ALG_ECC:
+        break;
+    case TPM_ALG_KEYEDHASH:
+        break;
+    case TPM_ALG_SYMCIPHER:
+        break;
+    default:
+        // must never happen
+        TPMLIB_LogTPM2Error("%s : Unhandled object type: %d\n",
+                            __func__, object->publicArea.type);
+        FAIL(FATAL_ERROR_INTERNAL);
+    }
+
+    if (marshalAnyObject) {
+        return ANY_OBJECT_Marshal(object, &buffer, (INT32*)&size);
+    }
+    return OBJECT_To_Buffer_As_RSA3072_OBJECT(object, buffer, size);
+}
+
+// Convert a buffer to an OBJECT; the size of the buffer must have
+// exactly the size consumed by ANY_OBJECT_Unmarshal, if the OBJECT
+// can be unmarshaled from the buffer.
+static void NvObjectFromBuffer(OBJECT* object, BYTE* buf, UINT32 buf_size)
+{
+    TPM_RC rc;
+    BYTE*  buffer = buf;
+    INT32  size = buf_size;
+
+    /* Try to unmarshal it as an ANY_OBJECT; if this works, an OBJECT will
+     * be passed back, otherwise fall back to copying from memory directly
+     * as an RSA3072_OBJECT and have it converted to current OBJECT.
+     */
+    rc = ANY_OBJECT_Unmarshal(object, &buffer, &size, false);
+    if (!rc) {
+        pAssert(size == 0);
+    } else {
+        /* It could not be unmarshalled, it must be a plain RSA3072_OBJECT */
+        rc = RSA3072_OBJECT_Buffer_To_OBJECT(object, buf, buf_size);
+        pAssert(rc == TPM_RC_SUCCESS);
+    }
+}							// libtpms added end
+
 //*** NvReadObject()
 // This function is used to read a persistent object. This is used so that the
 // object information can be compressed and only this function would be needed
@@ -592,8 +649,23 @@ void NvReadObject(NV_REF  ref,    // IN: points to NV where index is located
 		  OBJECT* object  // OUT: place to receive the object data
 		  )
 {
+#if 0							// libtpms changed begin
     NvRead(object, (ref + sizeof(TPM_HANDLE)), sizeof(OBJECT));
-    return;
+#endif
+    UINT32 entrysize;
+    BYTE   buffer[MAX_MARSHALLED_OBJECT_SIZE];
+
+    /* read size of object in NVRAM; this includes the NV_ENTRY_HEADER */
+    NvRead(&entrysize, ref - sizeof(UINT32), sizeof(entrysize));
+    entrysize -= sizeof(NV_ENTRY_HEADER);
+
+    /* read the flat object into a buffer */
+    pAssert(entrysize <= sizeof(buffer));
+    NvRead(buffer, ref + sizeof(TPM_HANDLE), entrysize);
+
+    NvObjectFromBuffer(object, buffer, entrysize);
+
+    return;						// libtpms changed end
 }
 
 //*** NvFindEvict()
@@ -1199,6 +1271,21 @@ NvDefineIndex(TPMS_NV_PUBLIC* publicArea,  // IN: A template for an area to crea
     return result;
 }
 
+static TPM_RC						// libtpms added begin
+NvWriteObject(OBJECT* object)
+{
+    UINT32 sizeOfObject;
+    BYTE   buffer[MAX_MARSHALLED_OBJECT_SIZE];
+
+    sizeOfObject = NvObjectToBuffer(object, buffer, sizeof(buffer));
+
+    if(!NvTestSpace(sizeOfObject + sizeof(TPM_HANDLE), FALSE, FALSE))
+	return TPM_RC_NV_SPACE;
+
+    // Now put this in NV
+    return NvAdd(sizeOfObject, sizeOfObject, object->evictHandle, buffer);
+}							// libtpms added end
+
 //*** NvAddEvictObject()
 // This function is used to assign NV memory to a persistent object.
 //  Return Type: TPM_RC
@@ -1211,6 +1298,7 @@ NvAddEvictObject(TPMI_DH_OBJECT evictHandle,  // IN: new evict handle
 {
     TPM_HANDLE temp = object->evictHandle;
     TPM_RC     result;
+#if 0							// libtpms added
     //
     // Check if we have enough space to add the evict object
     // An evict object needs 8 bytes in index table + sizeof OBJECT
@@ -1219,13 +1307,14 @@ NvAddEvictObject(TPMI_DH_OBJECT evictHandle,  // IN: new evict handle
     // handle space
     if(!NvTestSpace(sizeof(OBJECT) + sizeof(TPM_HANDLE), FALSE, FALSE))
 	return TPM_RC_NV_SPACE;
+#endif							// libtpms added
 
     // Set evict attribute and handle
     object->attributes.evict = SET;
     object->evictHandle      = evictHandle;
 
     // Now put this in NV
-    result = NvAdd(sizeof(OBJECT), sizeof(OBJECT), evictHandle, (BYTE*)object);
+    result = NvWriteObject(object);			// libtpms changed
 
     // Put things back the way they were
     object->attributes.evict = CLEAR;
