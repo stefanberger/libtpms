@@ -151,6 +151,60 @@ typedef struct OLD_OBJECT
 
 MUST_BE(sizeof(OLD_OBJECT) == 1896);
 
+static void OLD_OBJECT_To_OBJECT(OBJECT* dest, const OLD_OBJECT* src)
+{
+    dest->attributes = src->attributes;
+
+    dest->publicArea.type = src->publicArea.type;
+    dest->publicArea.nameAlg = src->publicArea.nameAlg;
+    dest->publicArea.objectAttributes = src->publicArea.objectAttributes;
+    dest->publicArea.authPolicy = src->publicArea.authPolicy;
+    dest->publicArea.parameters = src->publicArea.parameters;
+    /* the unique part can be one or two TPM2B's */
+    switch (dest->publicArea.type) {
+    case TPM_ALG_KEYEDHASH:
+	MemoryCopy2B(&dest->publicArea.unique.keyedHash.b,
+		     &src->publicArea.unique.keyedHash.b,
+		     sizeof(src->publicArea.unique.keyedHash.t.buffer));
+	break;
+    case TPM_ALG_SYMCIPHER:
+	MemoryCopy2B(&dest->publicArea.unique.sym.b,
+		     &src->publicArea.unique.sym.b,
+		     sizeof(src->publicArea.unique.sym.t.buffer));
+	break;
+    case TPM_ALG_RSA:
+	MemoryCopy2B(&dest->publicArea.unique.rsa.b,
+		     &src->publicArea.unique.rsa.b,
+		     sizeof(src->publicArea.unique.rsa.t.buffer));
+	break;
+    case TPM_ALG_ECC:
+	MemoryCopy2B(&dest->publicArea.unique.ecc.x.b,
+		     &src->publicArea.unique.ecc.x.b,
+		     sizeof(src->publicArea.unique.ecc.x.t.buffer));
+	MemoryCopy2B(&dest->publicArea.unique.ecc.y.b,
+		     &src->publicArea.unique.ecc.y.b,
+		     sizeof(src->publicArea.unique.ecc.y.t.buffer));
+	break;
+    }
+
+    dest->sensitive.sensitiveType = src->sensitive.sensitiveType;
+    dest->sensitive.authValue = src->sensitive.authValue;
+    dest->sensitive.seedValue = src->sensitive.seedValue;
+    /* The OLD_TPMU_SENSITIVE_COMPOSITE is always a TPM2B */
+    MemoryCopy2B(&dest->sensitive.sensitive.any.b,
+		 &src->sensitive.sensitive.any.b,
+		 sizeof(src->sensitive.sensitive.any.t.buffer));
+
+    CopyFromOldPrimeT(&dest->privateExponent.Q, &src->privateExponent.Q);
+    CopyFromOldPrimeT(&dest->privateExponent.dP, &src->privateExponent.dP);
+    CopyFromOldPrimeT(&dest->privateExponent.dQ, &src->privateExponent.dQ);
+    CopyFromOldPrimeT(&dest->privateExponent.qInv, &src->privateExponent.qInv);
+
+    dest->qualifiedName = src->qualifiedName;
+    dest->evictHandle = src->evictHandle;
+    dest->name = src->name;
+}
+
 // Convert an OLD_OBJECT that was copied into buffer using MemoryCopy
 TPM_RC
 OLD_OBJECTToOBJECT(OBJECT *newObject, BYTE *buffer, INT32 size)
@@ -172,58 +226,8 @@ OLD_OBJECTToOBJECT(OBJECT *newObject, BYTE *buffer, INT32 size)
 	    MemoryCopy(&oldObject, buffer, sizeof(OLD_OBJECT));
 
 	    /* fill the newObject with the contents of the oldObject */
-	    newObject->attributes = oldObject.attributes;
-
-	    newObject->publicArea.type = oldObject.publicArea.type;
-	    newObject->publicArea.nameAlg = oldObject.publicArea.nameAlg;
-	    newObject->publicArea.objectAttributes = oldObject.publicArea.objectAttributes;
-	    newObject->publicArea.authPolicy = oldObject.publicArea.authPolicy;
-	    newObject->publicArea.parameters = oldObject.publicArea.parameters;
-	    /* the unique part can be one or two TPM2B's */
-	    switch (newObject->publicArea.type) {
-	    case TPM_ALG_KEYEDHASH:
-		MemoryCopy2B(&newObject->publicArea.unique.keyedHash.b,
-			     &oldObject.publicArea.unique.keyedHash.b,
-			     sizeof(oldObject.publicArea.unique.keyedHash.t.buffer));
-		break;
-	    case TPM_ALG_SYMCIPHER:
-		MemoryCopy2B(&newObject->publicArea.unique.sym.b,
-			     &oldObject.publicArea.unique.sym.b,
-			     sizeof(oldObject.publicArea.unique.sym.t.buffer));
-		break;
-	    case TPM_ALG_RSA:
-		MemoryCopy2B(&newObject->publicArea.unique.rsa.b,
-			     &oldObject.publicArea.unique.rsa.b,
-			     sizeof(oldObject.publicArea.unique.rsa.t.buffer));
-		break;
-	    case TPM_ALG_ECC:
-		MemoryCopy2B(&newObject->publicArea.unique.ecc.x.b,
-			     &oldObject.publicArea.unique.ecc.x.b,
-			     sizeof(oldObject.publicArea.unique.ecc.x.t.buffer));
-		MemoryCopy2B(&newObject->publicArea.unique.ecc.y.b,
-			     &oldObject.publicArea.unique.ecc.y.b,
-			     sizeof(oldObject.publicArea.unique.ecc.y.t.buffer));
-		break;
-	    }
-
-	    newObject->sensitive.sensitiveType = oldObject.sensitive.sensitiveType;
-	    newObject->sensitive.authValue = oldObject.sensitive.authValue;
-	    newObject->sensitive.seedValue = oldObject.sensitive.seedValue;
-	    /* The OLD_TPMU_SENSITIVE_COMPOSITE is always a TPM2B */
-	    MemoryCopy2B(&newObject->sensitive.sensitive.any.b,
-			 &oldObject.sensitive.sensitive.any.b,
-			 sizeof(oldObject.sensitive.sensitive.any.t.buffer));
-
-	    CopyFromOldPrimeT(&newObject->privateExponent.Q, &oldObject.privateExponent.Q);
-	    CopyFromOldPrimeT(&newObject->privateExponent.dP, &oldObject.privateExponent.dP);
-	    CopyFromOldPrimeT(&newObject->privateExponent.dQ, &oldObject.privateExponent.dQ);
-	    CopyFromOldPrimeT(&newObject->privateExponent.qInv, &oldObject.privateExponent.qInv);
-
-	    newObject->qualifiedName = oldObject.qualifiedName;
-	    newObject->evictHandle = oldObject.evictHandle;
-	    newObject->name = oldObject.name;
+	    OLD_OBJECT_To_OBJECT(newObject, &oldObject);
     }
 
     return rc;
 }
-
