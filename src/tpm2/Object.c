@@ -703,7 +703,7 @@ ObjectContextLoadLibtpms(BYTE           *buffer,
 	         /* Attempt to load an old OBJECT that was copied out directly from
 	          * an older version of OBJECT.
 	          */
-		rc = OLD_OBJECTToOBJECT(newObject, buffer, size);
+		rc = RSA2048_OBJECT_Buffer_To_OBJECT(newObject, buffer, size);
 		if (rc) {
 		    FlushObject(*handle);
 		    newObject = NULL;

@@ -41,7 +41,7 @@
 
 #include "Tpm.h"
 
-TPM_RC OLD_OBJECTToOBJECT(OBJECT *object, BYTE *buffer, INT32 size);
+TPM_RC RSA2048_OBJECT_Buffer_To_OBJECT(OBJECT* object, BYTE* buffer, INT32 size);
 
 #endif /* BACKWARDS_COMPATIBILITY_OBJECT_H */
 
