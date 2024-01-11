@@ -2654,7 +2654,9 @@ SESSION_Marshal(SESSION *data, BYTE **buffer, INT32 *size)
     written += TPM2B_AUTH_Marshal(&data->sessionKey, buffer, size);
     written += TPM2B_NONCE_Marshal(&data->nonceTPM, buffer, size);
     // TPM2B_NAME or TPM2B_DIGEST could be used for marshalling
+    MUST_BE(sizeof(data->u1.boundEntity) == sizeof(data->u1));
     written += TPM2B_NAME_Marshal(&data->u1.boundEntity, buffer, size);
+    MUST_BE(sizeof(data->u2.auditDigest) == sizeof(data->u2));
     written += TPM2B_DIGEST_Marshal(&data->u2.auditDigest, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
