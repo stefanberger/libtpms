@@ -2426,6 +2426,7 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     BOOL has_block;
     BLOCK_SKIP_INIT;
 
+    // FIXME: for v4: privateExponent_t needs to only be written for RSA keys
     written = NV_HEADER_Marshal(buffer, size,
                                 OBJECT_VERSION, OBJECT_MAGIC, 3);
 
