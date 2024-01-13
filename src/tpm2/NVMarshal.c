@@ -4767,15 +4767,22 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 }
 
                 if (rc == TPM_RC_SUCCESS) {
+                    BYTE objBuffer[MAX_MARSHALLED_OBJECT_SIZE];
+                    UINT32 marshalledObjectSize;
+
                     NvWrite(entryRef + o + offset, sizeof(handle), &handle);
                     offset += sizeof(TPM_HANDLE);
 
                     memset(&obj, 0, sizeof(obj));
                     rc = ANY_OBJECT_Unmarshal(&obj, buffer, size, true);
-                    NvWrite(entryRef + o + offset, sizeof(obj), &obj);
-                    offset += sizeof(obj);
+                    pAssert(rc == TPM_RC_SUCCESS);
+                    // convert the OBJECT into a buffer to copy into NVRAM
+                    marshalledObjectSize = NvObjectToBuffer(&obj, objBuffer, sizeof(objBuffer));
+                    NvWrite(entryRef + o + offset, marshalledObjectSize, objBuffer);
+                    offset += marshalledObjectSize;
+
+                    entrysize = sizeof(UINT32) + sizeof(TPM_HANDLE) + marshalledObjectSize;
                 }
-                entrysize = sizeof(UINT32) + sizeof(TPM_HANDLE) + sizeof(obj);
                 break;
             default:
                 TPMLIB_LogTPM2Error("USER_NVRAM: "

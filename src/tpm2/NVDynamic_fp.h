@@ -74,6 +74,8 @@ NvReadNvIndexInfo(
 		  NV_REF           ref,           // IN: points to NV where index is located
 		  NV_INDEX        *nvIndex        // OUT: place to receive index data
 		  );
+UINT32								// libtpms added begin
+NvObjectToBuffer(OBJECT *object, BYTE *buffer, UINT32 size);	// libtpms added end
 void
 NvReadObject(
 	     NV_REF           ref,           // IN: points to NV where index is located
