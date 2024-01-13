@@ -267,8 +267,21 @@ AC_ARG_ENABLE([test-coverage],
   [if test "$enableval" = "yes"; then
     COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage"
     COVERAGE_LDFLAGS="-fprofile-arcs"
+    enable_static_tests=no  # some tests will not link
   fi], [
     enable_test_coverage=no
+  ]
+)
+
+AC_ARG_ENABLE([static-tests],
+  AS_HELP_STRING([--disable-static-tests], [Disable statically linked tests]),
+  [if test "$enableval" = "yes"; then
+    AM_CONDITIONAL(ENABLE_STATIC_TESTS, true)
+  else
+    AM_CONDITIONAL(ENABLE_STATIC_TESTS, false)
+  fi], [
+    AM_CONDITIONAL(ENABLE_STATIC_TESTS, true)
+    enable_static_tests=yes
   ]
 )
 
@@ -372,5 +385,6 @@ echo "With TPM2 support       : $with_tpm2"
 echo "HAVE_VERSION_SCRIPT     : $have_version_script"
 echo "Use openssl crypto for  : $use_openssl_functions_for"
 echo "Test coverage           : $enable_test_coverage"
+echo "Statically linked tests : $enable_static_tests"
 echo
 echo

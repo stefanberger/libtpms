@@ -46,6 +46,11 @@
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 
+// Maximum size of buffer ANY_OBJECT_Marshal() will require to marshal an OBJECT
+// This is not an exact number but gives a 'safe' buffer size
+#define MAX_MARSHALLED_OBJECT_SIZE \
+    (sizeof(OBJECT) + 32 /* marshalling headers */)
+
 UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
 TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
 

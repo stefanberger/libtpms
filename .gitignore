@@ -53,6 +53,7 @@ Makefile
 /tests/fuzz
 /tests/freebl_sha1flattensize
 /tests/nvram_offsets
+/tests/object_size
 /tests/tpm2_createprimary
 /tests/tpm2_cve-2023-1017
 /tests/tpm2_cve-2023-1018
