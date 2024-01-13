@@ -853,31 +853,31 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
             case TPM_ALG_SHA1:
                 needed_size = sizeof(data->Sha1);
                 t = (BYTE *)&data->Sha1;
-            break;
+                break;
 #endif
 #if ALG_SHA256
             case TPM_ALG_SHA256:
                 needed_size = sizeof(data->Sha256);
                 t = (BYTE *)&data->Sha256;
-            break;
+                break;
 #endif
 #if ALG_SHA384
             case TPM_ALG_SHA384:
                 needed_size = sizeof(data->Sha384);
                 t = (BYTE *)&data->Sha384;
-            break;
+                break;
 #endif
 #if ALG_SHA512
             case TPM_ALG_SHA512:
                 needed_size = sizeof(data->Sha512);
                 t = (BYTE *)&data->Sha512;
-            break;
+                break;
 #endif
 #if ALG_SM3_256
             case TPM_ALG_SM3_256:
                 needed_size = sizeof(data->Sm3_256);
                 t = (BYTE *)&data->Sm3_256;
-            break;
+                break;
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
 #error SHA3 and SM3 are not supported
@@ -886,7 +886,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
                 /* end marker */
                 end = TRUE;
                 t = NULL;
-            break;
+                break;
             default:
                 TPMLIB_LogTPM2Error("PCR_SAVE: Unsupported algid %d.",
                                     algid);
@@ -1035,31 +1035,31 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
             case TPM_ALG_SHA1:
                 needed_size = sizeof(data->Sha1Pcr);
                 t = (BYTE *)&data->Sha1Pcr;
-            break;
+                break;
 #endif
 #if ALG_SHA256
             case TPM_ALG_SHA256:
                 needed_size = sizeof(data->Sha256Pcr);
                 t = (BYTE *)&data->Sha256Pcr;
-            break;
+                break;
 #endif
 #if ALG_SHA384
             case TPM_ALG_SHA384:
                 needed_size = sizeof(data->Sha384Pcr);
                 t = (BYTE *)&data->Sha384Pcr;
-            break;
+                break;
 #endif
 #if ALG_SHA512
             case TPM_ALG_SHA512:
                 needed_size = sizeof(data->Sha512Pcr);
                 t = (BYTE *)&data->Sha512Pcr;
-            break;
+                break;
 #endif
 #if ALG_SM3_256
             case TPM_ALG_SM3_256:
                 needed_size = sizeof(data->Sm3_256Pcr);
                 t = (BYTE *)&data->Sm3_256Pcr;
-            break;
+                break;
 #endif
 #if ALG_SHA3_256 || ALG_SHA3_384 || ALG_SHA3_512 || ALG_SM3_256
 #error SHA3 and SM3 are not supported
@@ -1068,7 +1068,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
                 /* end marker */
                 end = TRUE;
                 t = NULL;
-            break;
+                break;
             default:
                 TPMLIB_LogTPM2Error("PCR: Unsupported algid %d.",
                                     algid);
@@ -4559,7 +4559,6 @@ USER_NVRAM_Display(const char *msg)
             datasize = entrysize - sizeof(UINT32) - sizeof(nvi);
             fprintf(stderr, " datasize: %u\n",datasize);
             break;
-        break;
         case TPM_HT_PERSISTENT:
             fprintf(stderr, " (PERSISTENT)");
             offset += sizeof(handle);
@@ -4567,7 +4566,7 @@ USER_NVRAM_Display(const char *msg)
             NvRead(&obj, entryRef + offset, sizeof(obj));
             offset += sizeof(obj);
             fprintf(stderr, " sizeof(obj): %zu\n", sizeof(obj));
-        break;
+            break;
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
@@ -4636,14 +4635,14 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
                 NvRead(buf, entryRef + offset, datasize);
                 written += Array_Marshal(buf, datasize, buffer, size);
             }
-        break;
+            break;
         case TPM_HT_PERSISTENT:
             offset += sizeof(handle);
 
             NvRead(&obj, entryRef + offset, sizeof(obj));
             offset += sizeof(obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
-        break;
+            break;
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
@@ -4763,7 +4762,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     /* update the entry size; account for expanding nvi */
                     entrysize = sizeof(UINT32) + sizeof(nvi) + datasize;
                 }
-            break;
+                break;
             case TPM_HT_PERSISTENT:
                 if (rc == TPM_RC_SUCCESS &&
                     o + offset + sizeof(TPM_HANDLE) + sizeof(obj) >
@@ -4782,7 +4781,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     offset += sizeof(obj);
                 }
                 entrysize = sizeof(UINT32) + sizeof(TPM_HANDLE) + sizeof(obj);
-            break;
+                break;
             default:
                 TPMLIB_LogTPM2Error("USER_NVRAM: "
                                     "Read handle 0x%08x of unknown type\n",
