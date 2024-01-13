@@ -4561,11 +4561,9 @@ USER_NVRAM_Display(const char *msg)
             break;
         case TPM_HT_PERSISTENT:
             fprintf(stderr, " (PERSISTENT)");
-            offset += sizeof(handle);
 
-            NvRead(&obj, entryRef + offset, sizeof(obj));
-            offset += sizeof(obj);
-            fprintf(stderr, " sizeof(obj): %zu\n", sizeof(obj));
+            NvReadObject(entryRef + offset, &obj);
+            fprintf(stderr, " sizeof(obj): %zu  entrysize: %u\n", sizeof(obj), entrysize);
             break;
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
@@ -4637,10 +4635,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             }
             break;
         case TPM_HT_PERSISTENT:
-            offset += sizeof(handle);
-
-            NvRead(&obj, entryRef + offset, sizeof(obj));
-            offset += sizeof(obj);
+            NvReadObject(entryRef + offset, &obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
             break;
         default:
