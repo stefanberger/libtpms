@@ -587,7 +587,7 @@ void NvReadNvIndexInfo(NV_REF    ref,     // IN: points to NV where index is loc
 }
 
 // Convert an OBJECT into a buffer to store in NVRAM	// libtpms added begin
-static UINT32 NvObjectToBuffer(OBJECT* object, BYTE* buffer, UINT32 size)
+UINT32 NvObjectToBuffer(OBJECT* object, BYTE* buffer, UINT32 size)
 {
     BOOL marshalAnyObject = false;
 
