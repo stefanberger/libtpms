@@ -48,6 +48,29 @@ nvram_offsets_CFLAGS = $(AM_CFLAGS) \
 	-DTPM_POSIX
 nvram_offsets_LDFLAGS = $(AM_LDFLAGS)
 
+
+if WITH_TPM2
+if ENABLE_STATIC_TESTS
+
+# object_size needs ANY_OBJECT_Marshal which only is accessible with '-static'
+check_PROGRAMS += \
+	object_size
+TESTS += \
+	object_size
+
+object_size_SOURCES = object_size.c
+object_size_CFLAGS = $(AM_CFLAGS) \
+	-static \
+	-I$(top_srcdir)/include/libtpms \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/tpm2 \
+	-I$(top_srcdir)/src/tpm2/crypto \
+	-I$(top_srcdir)/src/tpm2/crypto/openssl \
+	-DTPM_POSIX
+object_size_LDFLAGS = $(AM_LDFLAGS)
+endif # ENABLE_STATIC_TESTS
+endif # WITH_TPM2
+
 if WITH_TPM2
 check_PROGRAMS += fuzz
 endif
