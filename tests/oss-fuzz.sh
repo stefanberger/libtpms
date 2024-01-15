@@ -6,6 +6,7 @@ export CC=${CC:-clang}
 export CXX=${CXX:-clang++}
 export WORK=${WORK:-$(pwd)}
 export OUT=${OUT:-$(pwd)/out}
+CFLAGS="${CFLAGS} -fno-sanitize=bounds"  # due to casts to Crypt_Int*
 
 mkdir -p $OUT
 
