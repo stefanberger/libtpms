@@ -3,7 +3,6 @@
 /*		Accessing properties for handles of various types		*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Entity.c 1594 2020-03-26 22:15:48Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,36 +54,38 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
-/* 9.4 Entity.c */
-/* 9.4.1 Description */
-/* The functions in this file are used for accessing properties for handles of various
-   types. Functions in other files require handles of a specific type but the functions in this file
-   allow use of any handle type. */
-/* 9.4.2 Includes */
+//** Description
+// The functions in this file are used for accessing properties for handles of
+// various types. Functions in other files require handles of a specific
+// type but the functions in this file allow use of any handle type.
+
+//** Includes
+
 #include "Tpm.h"
-/* 9.4.3 Functions */
-/* 9.4.3.1 EntityGetLoadStatus() */
-/* This function will check that all the handles access loaded entities. */
-/* Error Returns Meaning */
-/* TPM_RC_HANDLE handle type does not match */
-/* TPM_RC_REFERENCE_Hx() entity is not present */
-/* TPM_RC_HIERARCHY entity belongs to a disabled hierarchy */
-/* TPM_RC_OBJECT_MEMORY handle is an evict object but there is no space to load it to RAM */
+
+//** Functions
+//*** EntityGetLoadStatus()
+// This function will check that all the handles access loaded entities.
+//  Return Type: TPM_RC
+//      TPM_RC_HANDLE           handle type does not match
+//      TPM_RC_REFERENCE_Hx     entity is not present
+//      TPM_RC_HIERARCHY        entity belongs to a disabled hierarchy
+//      TPM_RC_OBJECT_MEMORY    handle is an evict object but there is no
+//                               space to load it to RAM
 TPM_RC
-EntityGetLoadStatus(
-		    COMMAND         *command        // IN/OUT: command parsing structure
+EntityGetLoadStatus(COMMAND* command  // IN/OUT: command parsing structure
 		    )
 {
-    UINT32               i;
-    TPM_RC               result = TPM_RC_SUCCESS;
+    UINT32 i;
+    TPM_RC result = TPM_RC_SUCCESS;
     //
     for(i = 0; i < command->handleNum; i++)
 	{
-	    TPM_HANDLE      handle = command->handles[i];
+	    TPM_HANDLE handle = command->handles[i];
 	    switch(HandleGetType(handle))
 		{
 		    // For handles associated with hierarchies, the entity is present
@@ -96,8 +97,11 @@ EntityGetLoadStatus(
 			    if(!gc.shEnable)
 				result = TPM_RC_HIERARCHY;
 			    break;
-#ifdef  VENDOR_PERMANENT
-			  case VENDOR_PERMANENT:
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
+			  case VENDOR_PERMANENT_AUTH_HANDLE:
+			    if(!gc.ehEnable)
+				result = TPM_RC_HIERARCHY;
+			    break;
 #endif
 			  case TPM_RH_ENDORSEMENT:
 			    if(!gc.ehEnable)
@@ -115,13 +119,12 @@ EntityGetLoadStatus(
 			    // for policy checks but not always available when authValue
 			    // is being checked.
 			  case TPM_RH_LOCKOUT:
-	                    // Rather than have #ifdefs all over the code,
-	                    // CASE_ACT_HANDLE is defined in ACT.h. It is 'case TPM_RH_ACT_x:'
-	                    // FOR_EACH_ACT(CASE_ACT_HANDLE) creates a simple
-	                    // case TPM_RH_ACT_x: // for each of the implemented ACT.
-	                    FOR_EACH_ACT(CASE_ACT_HANDLE)
+			    // Rather than have #ifdefs all over the code,
+			    // CASE_ACT_HANDLE is defined in ACT.h. It is 'case TPM_RH_ACT_x:'
+			    // FOR_EACH_ACT(CASE_ACT_HANDLE) creates a simple
+			    // case TPM_RH_ACT_x: // for each of the implemented ACT.
+			    FOR_EACH_ACT(CASE_ACT_HANDLE)
 				break;
-
 			  default:
 			    // If the implementation has a manufacturer-specific value
 			    // then test for it here. Since this implementation does
@@ -158,7 +161,7 @@ EntityGetLoadStatus(
 		    // an HMAC session.
 		    if(SessionIsLoaded(handle))
 			{
-			    SESSION             *session;
+			    SESSION* session;
 			    session = SessionGet(handle);
 			    // Check if the session is a HMAC session
 			    if(session->attributes.isPolicy == SET)
@@ -173,7 +176,7 @@ EntityGetLoadStatus(
 		    // a policy session.
 		    if(SessionIsLoaded(handle))
 			{
-			    SESSION             *session;
+			    SESSION* session;
 			    session = SessionGet(handle);
 			    // Check if the session is a policy session
 			    if(session->attributes.isPolicy == CLEAR)
@@ -213,22 +216,26 @@ EntityGetLoadStatus(
 	}
     return result;
 }
-/* 9.4.3.2 EntityGetAuthValue() */
-/* This function is used to access the authValue associated with a handle. This function assumes
-   that the handle references an entity that is accessible and the handle is not for a persistent
-   objects. That is EntityGetLoadStatus() should have been called. Also, the accessibility of the
-   authValue should have been verified by IsAuthValueAvailable(). */
-/* This function copies the authorization value of the entity to auth. */
-/* Return Values Meaning */
-/* count number of bytes in the authValue with zeros stripped */
+
+//*** EntityGetAuthValue()
+// This function is used to access the 'authValue' associated with a handle.
+// This function assumes that the handle references an entity that is accessible
+// and the handle is not for a persistent objects. That is EntityGetLoadStatus()
+// should have been called. Also, the accessibility of the authValue should have
+// been verified by IsAuthValueAvailable().
+//
+// This function copies the authorization value of the entity to 'auth'.
+// Return Type: UINT16
+//      count           number of bytes in the authValue with 0's stripped
 UINT16
-EntityGetAuthValue(
-		   TPMI_DH_ENTITY   handle,        // IN: handle of entity
-		   TPM2B_AUTH      *auth           // OUT: authValue of the entity
+EntityGetAuthValue(TPMI_DH_ENTITY handle,  // IN: handle of entity
+                   TPM2B_AUTH*    auth     // OUT: authValue of the entity
 		   )
 {
-    TPM2B_AUTH      *pAuth = NULL;
-    auth->t.size = 0;
+    TPM2B_AUTH* pAuth = NULL;
+
+    auth->t.size      = 0;
+
     switch(HandleGetType(handle))
 	{
 	  case TPM_HT_PERMANENT:
@@ -243,8 +250,10 @@ EntityGetAuthValue(
 			  // endorsementAuth for TPM_RH_ENDORSEMENT
 			  pAuth = &gp.endorsementAuth;
 			  break;
+
 			  // The ACT use platformAuth for auth
 			  FOR_EACH_ACT(CASE_ACT_HANDLE)
+
 			case TPM_RH_PLATFORM:
 			  // platformAuth for TPM_RH_PLATFORM
 			  pAuth = &gc.platformAuth;
@@ -257,10 +266,10 @@ EntityGetAuthValue(
 			  // nullAuth for TPM_RH_NULL. Return 0 directly here
 			  return 0;
 			  break;
-#ifdef  VENDOR_PERMANENT
-			case VENDOR_PERMANENT:
+#if VENDOR_PERMANENT_AUTH_ENABLED == YES
+			case VENDOR_PERMANENT_AUTH_HANDLE:
 			  // vendor authorization value
-			  pAuth = &g_platformUniqueDetails;
+			  pAuth = &g_platformUniqueAuth;
 #endif
 			default:
 			  // If any other permanent handle is present it is
@@ -271,16 +280,17 @@ EntityGetAuthValue(
 		  break;
 	      }
 	  case TPM_HT_TRANSIENT:
-	    // authValue for an object
-	    // A persistent object would have been copied into RAM
-	    // and would have an transient object handle here.
+            // authValue for an object
+            // A persistent object would have been copied into RAM
+            // and would have an transient object handle here.
 	      {
-		  OBJECT          *object;
+		  OBJECT* object;
+
 		  object = HandleToObject(handle);
 		  // special handling if this is a sequence object
 		  if(ObjectIsSequence(object))
 		      {
-			  pAuth = &((HASH_OBJECT *)object)->auth;
+			  pAuth = &((HASH_OBJECT*)object)->auth;
 		      }
 		  else
 		      {
@@ -293,123 +303,125 @@ EntityGetAuthValue(
 	      }
 	      break;
 	  case TPM_HT_NV_INDEX:
-	    // authValue for an NV index
+            // authValue for an NV index
 	      {
-		  NV_INDEX        *nvIndex = NvGetIndexInfo(handle, NULL);
+		  NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
 		  pAssert(nvIndex != NULL);
 		  pAuth = &nvIndex->authValue;
 	      }
 	      break;
 	  case TPM_HT_PCR:
-	    // authValue for PCR
-	    pAuth = PCRGetAuthValue(handle);
-	    break;
+            // authValue for PCR
+            pAuth = PCRGetAuthValue(handle);
+            break;
 	  default:
-	    // If any other handle type is present here, then there is a defect
-	    // in the unmarshaling code.
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    break;
+            // If any other handle type is present here, then there is a defect
+            // in the unmarshaling code.
+            FAIL(FATAL_ERROR_INTERNAL);
+            break;
 	}
     // Copy the authValue
-    MemoryCopy2B((TPM2B *)auth, (TPM2B *)pAuth, sizeof(auth->t.buffer));
+    MemoryCopy2B((TPM2B*)auth, (TPM2B*)pAuth, sizeof(auth->t.buffer));
     MemoryRemoveTrailingZeros(auth);
     return auth->t.size;
 }
-/* 9.4.3.3 EntityGetAuthPolicy() */
-/* This function is used to access the authPolicy associated with a handle. This function assumes
-   that the handle references an entity that is accessible and the handle is not for a persistent
-   objects. That is EntityGetLoadStatus() should have been called. Also, the accessibility of the
-   authPolicy should have been verified by IsAuthPolicyAvailable(). */
-/* This function copies the authorization policy of the entity to authPolicy. */
-/* The return value is the hash algorithm for the policy. */
+
+//*** EntityGetAuthPolicy()
+// This function is used to access the 'authPolicy' associated with a handle.
+// This function assumes that the handle references an entity that is accessible
+// and the handle is not for a persistent objects. That is EntityGetLoadStatus()
+// should have been called. Also, the accessibility of the authPolicy should have
+// been verified by IsAuthPolicyAvailable().
+//
+// This function copies the authorization policy of the entity to 'authPolicy'.
+//
+//  The return value is the hash algorithm for the policy.
 TPMI_ALG_HASH
-EntityGetAuthPolicy(
-		    TPMI_DH_ENTITY   handle,        // IN: handle of entity
-		    TPM2B_DIGEST    *authPolicy     // OUT: authPolicy of the entity
+EntityGetAuthPolicy(TPMI_DH_ENTITY handle,     // IN: handle of entity
+                    TPM2B_DIGEST*  authPolicy  // OUT: authPolicy of the entity
 		    )
 {
-    TPMI_ALG_HASH       hashAlg = TPM_ALG_NULL;
-    authPolicy->t.size = 0;
+    TPMI_ALG_HASH hashAlg = TPM_ALG_NULL;
+    authPolicy->t.size    = 0;
+
     switch(HandleGetType(handle))
 	{
 	  case TPM_HT_PERMANENT:
 	    switch(handle)
 		{
 		  case TPM_RH_OWNER:
-		    // ownerPolicy for TPM_RH_OWNER
-		    *authPolicy = gp.ownerPolicy;
-		    hashAlg = gp.ownerAlg;
-		    break;
+                    // ownerPolicy for TPM_RH_OWNER
+                    *authPolicy = gp.ownerPolicy;
+                    hashAlg     = gp.ownerAlg;
+                    break;
 		  case TPM_RH_ENDORSEMENT:
-		    // endorsementPolicy for TPM_RH_ENDORSEMENT
-		    *authPolicy = gp.endorsementPolicy;
-		    hashAlg = gp.endorsementAlg;
-		    break;
+                    // endorsementPolicy for TPM_RH_ENDORSEMENT
+                    *authPolicy = gp.endorsementPolicy;
+                    hashAlg     = gp.endorsementAlg;
+                    break;
 		  case TPM_RH_PLATFORM:
-		    // platformPolicy for TPM_RH_PLATFORM
-		    *authPolicy = gc.platformPolicy;
-		    hashAlg = gc.platformAlg;
-		    break;
+                    // platformPolicy for TPM_RH_PLATFORM
+                    *authPolicy = gc.platformPolicy;
+                    hashAlg     = gc.platformAlg;
+                    break;
 		  case TPM_RH_LOCKOUT:
-		    // lockoutPolicy for TPM_RH_LOCKOUT
-		    *authPolicy = gp.lockoutPolicy;
-		    hashAlg = gp.lockoutAlg;
-		    break;
-
-#define ACT_GET_POLICY(N)						\
-		    case TPM_RH_ACT_##N:				\
-		      *authPolicy = go.ACT_##N.authPolicy;		\
-		      hashAlg = go.ACT_##N.hashAlg;			\
+                    // lockoutPolicy for TPM_RH_LOCKOUT
+                    *authPolicy = gp.lockoutPolicy;
+                    hashAlg     = gp.lockoutAlg;
+                    break;
+#define ACT_GET_POLICY(N)					\
+		    case TPM_RH_ACT_##N:			\
+		      *authPolicy = go.ACT_##N.authPolicy;	\
+		      hashAlg     = go.ACT_##N.hashAlg;		\
 		      break;
-		    // Get the policy for each implemented ACT
-		    FOR_EACH_ACT(ACT_GET_POLICY)
+                    // Get the policy for each implemented ACT
+                    FOR_EACH_ACT(ACT_GET_POLICY)
 		  default:
-		    hashAlg = TPM_ALG_ERROR;
-		    break;
+                    hashAlg = TPM_ALG_ERROR;
+                    break;
 		}
-	    break;
+            break;
 	  case TPM_HT_TRANSIENT:
-	    // authPolicy for an object
+            // authPolicy for an object
 	      {
-		  OBJECT *object = HandleToObject(handle);
-		  *authPolicy = object->publicArea.authPolicy;
-		  hashAlg = object->publicArea.nameAlg;
+		  OBJECT* object = HandleToObject(handle);
+		  *authPolicy    = object->publicArea.authPolicy;
+		  hashAlg        = object->publicArea.nameAlg;
 	      }
 	      break;
 	  case TPM_HT_NV_INDEX:
-	    // authPolicy for a NV index
+            // authPolicy for a NV index
 	      {
-		  NV_INDEX        *nvIndex = NvGetIndexInfo(handle, NULL);
+		  NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
 		  pAssert(nvIndex != 0);
 		  *authPolicy = nvIndex->publicArea.authPolicy;
-		  hashAlg = nvIndex->publicArea.nameAlg;
+		  hashAlg     = nvIndex->publicArea.nameAlg;
 	      }
 	      break;
 	  case TPM_HT_PCR:
-	    // authPolicy for a PCR
-	    hashAlg = PCRGetAuthPolicy(handle, authPolicy);
-	    break;
+            // authPolicy for a PCR
+            hashAlg = PCRGetAuthPolicy(handle, authPolicy);
+            break;
 	  default:
-	    // If any other handle type is present it is a code defect.
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    break;
+            // If any other handle type is present it is a code defect.
+            FAIL(FATAL_ERROR_INTERNAL);
+            break;
 	}
     return hashAlg;
 }
-/* 9.4.3.4 EntityGetName() */
-/* This function returns the Name associated with a handle. */
-TPM2B_NAME *
-EntityGetName(
-	      TPMI_DH_ENTITY   handle,        // IN: handle of entity
-	      TPM2B_NAME      *name           // OUT: name of entity
-	      )
+
+//*** EntityGetName()
+// This function returns the Name associated with a handle.
+TPM2B_NAME* EntityGetName(TPMI_DH_ENTITY handle,  // IN: handle of entity
+                          TPM2B_NAME*    name     // OUT: name of entity
+			  )
 {
     switch(HandleGetType(handle))
 	{
 	  case TPM_HT_TRANSIENT:
 	      {
 		  // Name for an object
-		  OBJECT      *object = HandleToObject(handle);
+		  OBJECT* object = HandleToObject(handle);
 		  // an object with no nameAlg has no name
 		  if(object->publicArea.nameAlg == TPM_ALG_NULL)
 		      name->b.size = 0;
@@ -418,67 +430,68 @@ EntityGetName(
 		  break;
 	      }
 	  case TPM_HT_NV_INDEX:
-	    // Name for a NV index
-	    NvGetNameByIndexHandle(handle, name);
-	    break;
+            // Name for a NV index
+            NvGetNameByIndexHandle(handle, name);
+            break;
 	  default:
-	    // For all other types, the handle is the Name
-	    name->t.size = sizeof(TPM_HANDLE);
-	    UINT32_TO_BYTE_ARRAY(handle, name->t.name);
-	    break;
+            // For all other types, the handle is the Name
+            name->t.size = sizeof(TPM_HANDLE);
+            UINT32_TO_BYTE_ARRAY(handle, name->t.name);
+            break;
 	}
     return name;
 }
-/* 9.4.3.5 EntityGetHierarchy() */
-/* This function returns the hierarchy handle associated with an entity. */
-/* a) A handle that is a hierarchy handle is associated with itself. */
-/* b) An NV index belongs to TPM_RH_PLATFORM if TPMA_NV_PLATFORMCREATE, is SET, otherwise it belongs
-   to TPM_RH_OWNER */
-/* c) An object handle belongs to its hierarchy. All other handles belong to the platform
-   hierarchy. or an NV Index. */
+
+//*** EntityGetHierarchy()
+// This function returns the hierarchy handle associated with an entity.
+// a) A handle that is a hierarchy handle is associated with itself.
+// b) An NV index belongs to TPM_RH_PLATFORM if TPMA_NV_PLATFORMCREATE,
+//    is SET, otherwise it belongs to TPM_RH_OWNER
+// c) An object handle belongs to its hierarchy.
 TPMI_RH_HIERARCHY
-EntityGetHierarchy(
-		   TPMI_DH_ENTITY   handle         // IN :handle of entity
+EntityGetHierarchy(TPMI_DH_ENTITY handle  // IN :handle of entity
 		   )
 {
-    TPMI_RH_HIERARCHY       hierarchy = TPM_RH_NULL;
+    TPMI_RH_HIERARCHY hierarchy = TPM_RH_NULL;
+
     switch(HandleGetType(handle))
 	{
 	  case TPM_HT_PERMANENT:
-	    // hierarchy for a permanent handle
-	    switch(handle)
+            // hierarchy for a permanent handle
+            switch(handle)
 		{
 		  case TPM_RH_PLATFORM:
 		  case TPM_RH_ENDORSEMENT:
 		  case TPM_RH_NULL:
-		    hierarchy = handle;
-		    break;
+                    hierarchy = handle;
+                    break;
 		    // all other permanent handles are associated with the owner
 		    // hierarchy. (should only be TPM_RH_OWNER and TPM_RH_LOCKOUT)
 		  default:
-		    hierarchy = TPM_RH_OWNER;
-		    break;
+                    hierarchy = TPM_RH_OWNER;
+                    break;
 		}
-	    break;
+            break;
 	  case TPM_HT_NV_INDEX:
-	    // hierarchy for NV index
+            // hierarchy for NV index
 	      {
-		  NV_INDEX        *nvIndex = NvGetIndexInfo(handle, NULL);
+		  NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
 		  pAssert(nvIndex != NULL);
+
 		  // If only the platform can delete the index, then it is
 		  // considered to be in the platform hierarchy, otherwise it
 		  // is in the owner hierarchy.
-		  if(IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV,
-				  PLATFORMCREATE))
+		  if(IS_ATTRIBUTE(
+				  nvIndex->publicArea.attributes, TPMA_NV, PLATFORMCREATE))
 		      hierarchy = TPM_RH_PLATFORM;
 		  else
 		      hierarchy = TPM_RH_OWNER;
 	      }
 	      break;
 	  case TPM_HT_TRANSIENT:
-	    // hierarchy for an object
+            // hierarchy for an object
 	      {
-		  OBJECT          *object;
+		  OBJECT* object;
 		  object = HandleToObject(handle);
 		  if(object->attributes.ppsHierarchy)
 		      {
@@ -495,11 +508,11 @@ EntityGetHierarchy(
 	      }
 	      break;
 	  case TPM_HT_PCR:
-	    hierarchy = TPM_RH_OWNER;
-	    break;
+            hierarchy = TPM_RH_OWNER;
+            break;
 	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    break;
+            FAIL(FATAL_ERROR_INTERNAL);
+            break;
 	}
     // this is unreachable but it provides a return value for the default
     // case which makes the complier happy

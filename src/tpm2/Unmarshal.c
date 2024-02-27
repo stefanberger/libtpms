@@ -4,7 +4,7 @@
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
-/* (c) Copyright IBM Corporation 2015 - 2023					*/
+/* (c) Copyright IBM Corporation 2015 - 2024					*/
 /*										*/
 /* All rights reserved.								*/
 /* 										*/
@@ -207,14 +207,45 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	switch (*target) {
 	  case TPM_ECC_NONE:
+#  if ECC_NIST_P192
 	  case TPM_ECC_NIST_P192:
-	  case TPM_ECC_NIST_P224:
-	  case TPM_ECC_NIST_P256:
-	  case TPM_ECC_NIST_P384:
+#  endif  // ECC_NIST_P192
+#  if ECC_NIST_P224
+ 	  case TPM_ECC_NIST_P224:
+#  endif  // ECC_NIST_P224
+#  if ECC_NIST_P256
+ 	  case TPM_ECC_NIST_P256:
+#  endif  // ECC_NIST_P256
+#  if ECC_NIST_P384
+ 	  case TPM_ECC_NIST_P384:
+#  endif  // ECC_NIST_P384
+#  if ECC_NIST_P521
 	  case TPM_ECC_NIST_P521:
+#  endif  // ECC_NIST_P521
+#  if ECC_BN_P256
 	  case TPM_ECC_BN_P256:
-	  case TPM_ECC_BN_P638:
+#  endif  // ECC_BN_P256
+#  if ECC_BN_P638
+ 	  case TPM_ECC_BN_P638:
+#  endif  // ECC_BN_P638
+#  if ECC_SM2_P256
 	  case TPM_ECC_SM2_P256:
+#  endif  // ECC_SM2_P256
+#  if ECC_BP_P256_R1
+	  case TPM_ECC_BP_P256_R1:
+#  endif  // ECC_BP_P256_R1
+#  if ECC_BP_P384_R1
+	  case TPM_ECC_BP_P384_R1:
+#  endif  // ECC_BP_P384_R1
+#  if ECC_BP_P512_R1
+	  case TPM_ECC_BP_P512_R1:
+#  endif  // ECC_BP_P512_R1
+#  if ECC_CURVE_25519
+	  case TPM_ECC_CURVE_25519:
+#  endif  // ECC_CURVE_25519
+#  if ECC_CURVE_448
+	  case TPM_ECC_CURVE_448:
+#  endif  // ECC_CURVE_448
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
@@ -585,7 +616,7 @@ TPMI_DH_OBJECT_Unmarshal(TPMI_DH_OBJECT *target, BYTE **buffer, INT32 *size, BOO
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     TPMI_DH_OBJECT orig_target = *target; // libtpms added
-    
+
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
@@ -610,7 +641,7 @@ TPMI_DH_PARENT_Unmarshal(TPMI_DH_PARENT *target, BYTE **buffer, INT32 *size, BOO
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     TPMI_DH_PARENT orig_target = *target; // libtpms added
-    
+
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
@@ -749,7 +780,7 @@ TPMI_SH_HMAC_Unmarshal(TPMI_SH_HMAC *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     TPMI_SH_HMAC orig_target = *target; // libtpms added
-    
+
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
@@ -770,7 +801,7 @@ TPMI_SH_POLICY_Unmarshal(TPMI_SH_POLICY *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     TPMI_SH_POLICY orig_target = *target; // libtpms added
-    
+
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
@@ -2216,6 +2247,7 @@ TPML_TAGGED_PCR_PROPERTY_Unmarshal(TPML_TAGGED_PCR_PROPERTY *target, BYTE **buff
 
 /* Table 106 - Definition of {ECC} TPML_ECC_CURVE Structure <OUT> */
 
+#if 0
 TPM_RC
 TPML_ECC_CURVE_Unmarshal(TPML_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 {
@@ -2236,6 +2268,7 @@ TPML_ECC_CURVE_Unmarshal(TPML_ECC_CURVE *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+#endif
 
 /* Table 2:109 - Definition of TPML_TAGGED_POLICY Structure (StructuresTable()) */
 
@@ -2262,6 +2295,7 @@ TPML_TAGGED_POLICY_Unmarshal(TPML_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
 
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union (StructuresTable()) */
 
+#if 0
 TPM_RC
 TPMU_CAPABILITIES_Unmarshal(TPMU_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
@@ -2303,9 +2337,11 @@ TPMU_CAPABILITIES_Unmarshal(TPMU_CAPABILITIES *target, BYTE **buffer, INT32 *siz
     }
     return rc;
 }
+#endif
 
 /* Table 128 - Definition of TPMS_CAPABILITY_DATA Structure (StructuresTable()) */
 
+#if 0
 TPM_RC
 TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
 {
@@ -2319,6 +2355,7 @@ TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT3
     }
     return rc;
 }
+#endif
 
 /* Table 109 - Definition of TPMS_CLOCK_INFO Structure */
 

@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -534,6 +534,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
     RAND_STATE*  rand = &randState;
     TPMS_DERIVE  labelContext;
     SEED_COMPAT_LEVEL            seedCompatLevel = SEED_COMPAT_LEVEL_LAST; // libtpms added
+
     // Input Validation
 
     // How the public area is unmarshaled is determined by the parent, so
