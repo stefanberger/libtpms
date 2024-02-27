@@ -240,7 +240,7 @@ EntityGetAuthValue(TPMI_DH_ENTITY handle,  // IN: handle of entity
 	{
 	  case TPM_HT_PERMANENT:
 	      {
-		  switch(handle)
+		  switch(HierarchyNormalizeHandle(handle))
 		      {
 			case TPM_RH_OWNER:
 			  // ownerAuth for TPM_RH_OWNER
@@ -347,7 +347,7 @@ EntityGetAuthPolicy(TPMI_DH_ENTITY handle,     // IN: handle of entity
     switch(HandleGetType(handle))
 	{
 	  case TPM_HT_PERMANENT:
-	    switch(handle)
+            switch(HierarchyNormalizeHandle(handle))
 		{
 		  case TPM_RH_OWNER:
                     // ownerPolicy for TPM_RH_OWNER
