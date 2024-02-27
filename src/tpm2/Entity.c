@@ -93,27 +93,14 @@ EntityGetLoadStatus(COMMAND* command  // IN/OUT: command parsing structure
 		  case TPM_HT_PERMANENT:
 		    switch(handle)
 			{
-			  case TPM_RH_OWNER:
-			    if(!gc.shEnable)
-				result = TPM_RC_HIERARCHY;
-			    break;
+			    // First handle non-hierarchy cases
 #if VENDOR_PERMANENT_AUTH_ENABLED == YES
 			  case VENDOR_PERMANENT_AUTH_HANDLE:
 			    if(!gc.ehEnable)
 				result = TPM_RC_HIERARCHY;
 			    break;
 #endif
-			  case TPM_RH_ENDORSEMENT:
-			    if(!gc.ehEnable)
-				result = TPM_RC_HIERARCHY;
-			    break;
-			  case TPM_RH_PLATFORM:
-			    if(!g_phEnable)
-				result = TPM_RC_HIERARCHY;
-			    break;
-			    // null handle, PW session handle and lockout
-			    // handle are always available
-			  case TPM_RH_NULL:
+			    // PW session handle and lockout handle are always available
 			  case TPM_RS_PW:
 			    // Need to be careful for lockout. Lockout is always available
 			    // for policy checks but not always available when authValue
@@ -135,9 +122,8 @@ EntityGetLoadStatus(COMMAND* command  // IN/OUT: command parsing structure
 				// if the implementation has a manufacturer-specific value
 				result = TPM_RC_VALUE;
 			    else
-				// The handle is in the range of reserved handles but is
-				// not implemented in this TPM.
-				result = TPM_RC_VALUE;
+				// The handle either refers to a hierarchy or is invalid.
+				result = ValidateHierarchy(handle);
 			    break;
 			}
 		    break;
