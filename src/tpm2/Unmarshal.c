@@ -246,6 +246,10 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 #  if ECC_CURVE_448
 	  case TPM_ECC_CURVE_448:
 #  endif  // ECC_CURVE_448
+	    if (*target != TPM_ECC_NONE &&		// libtpms added begin
+	        !CryptEccIsCurveRuntimeUsable(*target)) {
+              rc = TPM_RC_CURVE;
+            }						// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
@@ -3786,47 +3790,16 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 /* Table 165 - Definition of {ECC} (TPM_ECC_CURVE) TPMI_ECC_CURVE Type */
 
 TPM_RC
-TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size)
+TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size, BOOL allowNull)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    TPMI_ECC_CURVE orig_target = *target; // libtpms added
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_ECC_CURVE_Unmarshal(target, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-	switch (*target) {
-#if ECC_BN_P256
-	  case TPM_ECC_BN_P256:
-#endif
-#if ECC_BN_P638		// libtpms added begin
-	  case TPM_ECC_BN_P638:
-#endif
-#if ECC_NIST_P192
-	  case TPM_ECC_NIST_P192:
-#endif
-#if ECC_NIST_P224
-	  case TPM_ECC_NIST_P224:
-#endif			// libtpms added end
-#if ECC_NIST_P256
-	  case TPM_ECC_NIST_P256:
-#endif
-#if ECC_NIST_P384
-	  case TPM_ECC_NIST_P384:
-#endif
-#if ECC_NIST_P521	// libtpms added begin
-	  case TPM_ECC_NIST_P521:
-#endif
-#if ECC_SM2_P256
-	  case TPM_ECC_SM2_P256:
-#endif
-          if (!CryptEccIsCurveRuntimeUsable(*target))
-              rc = TPM_RC_CURVE;
-                      // libtpms added end
-	    break;
-	  default:
+	if ((*target == TPM_ECC_NONE) && !allowNull) {
 	    rc = TPM_RC_CURVE;
-	    *target = orig_target; // libtpms added
 	}
     }
     return rc;
@@ -4152,7 +4125,7 @@ TPMS_ECC_PARMS_Unmarshal(TPMS_ECC_PARMS *target, BYTE **buffer, INT32 *size)
 	rc = TPMT_ECC_SCHEME_Unmarshal(&target->scheme, buffer, size, YES);
     }
     if (rc == TPM_RC_SUCCESS) {
-	rc = TPMI_ECC_CURVE_Unmarshal(&target->curveID, buffer, size);
+	rc = TPMI_ECC_CURVE_Unmarshal(&target->curveID, buffer, size, NO);
     }
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMT_KDF_SCHEME_Unmarshal(&target->kdf, buffer, size, YES);

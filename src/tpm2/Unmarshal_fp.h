@@ -403,7 +403,7 @@ extern "C" {
     LIB_EXPORT TPM_RC
     TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
-    TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size);
+    TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
     TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull);
     LIB_EXPORT TPM_RC
