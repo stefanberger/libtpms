@@ -166,16 +166,23 @@ static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
 	MemoryCopy2B(&dest->publicArea.unique.keyedHash.b,
 		     &src->publicArea.unique.keyedHash.b,
 		     sizeof(src->publicArea.unique.keyedHash.t.buffer));
+	memset(&dest->privateExponent, 0, sizeof(dest->privateExponent));
 	break;
     case TPM_ALG_SYMCIPHER:
 	MemoryCopy2B(&dest->publicArea.unique.sym.b,
 		     &src->publicArea.unique.sym.b,
 		     sizeof(src->publicArea.unique.sym.t.buffer));
+	memset(&dest->privateExponent, 0, sizeof(dest->privateExponent));
 	break;
     case TPM_ALG_RSA:
 	MemoryCopy2B(&dest->publicArea.unique.rsa.b,
 		     &src->publicArea.unique.rsa.b,
 		     sizeof(src->publicArea.unique.rsa.t.buffer));
+
+	CopyFromOldPrimeT(&dest->privateExponent.Q, &src->privateExponent.Q);
+	CopyFromOldPrimeT(&dest->privateExponent.dP, &src->privateExponent.dP);
+	CopyFromOldPrimeT(&dest->privateExponent.dQ, &src->privateExponent.dQ);
+	CopyFromOldPrimeT(&dest->privateExponent.qInv, &src->privateExponent.qInv);
 	break;
     case TPM_ALG_ECC:
 	MemoryCopy2B(&dest->publicArea.unique.ecc.x.b,
@@ -184,6 +191,7 @@ static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
 	MemoryCopy2B(&dest->publicArea.unique.ecc.y.b,
 		     &src->publicArea.unique.ecc.y.b,
 		     sizeof(src->publicArea.unique.ecc.y.t.buffer));
+	memset(&dest->privateExponent, 0, sizeof(dest->privateExponent));
 	break;
     }
 
@@ -194,11 +202,6 @@ static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
     MemoryCopy2B(&dest->sensitive.sensitive.any.b,
 		 &src->sensitive.sensitive.any.b,
 		 sizeof(src->sensitive.sensitive.any.t.buffer));
-
-    CopyFromOldPrimeT(&dest->privateExponent.Q, &src->privateExponent.Q);
-    CopyFromOldPrimeT(&dest->privateExponent.dP, &src->privateExponent.dP);
-    CopyFromOldPrimeT(&dest->privateExponent.dQ, &src->privateExponent.dQ);
-    CopyFromOldPrimeT(&dest->privateExponent.qInv, &src->privateExponent.qInv);
 
     dest->qualifiedName = src->qualifiedName;
     dest->evictHandle = src->evictHandle;
