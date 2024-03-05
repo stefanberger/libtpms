@@ -264,7 +264,13 @@ AC_SUBST([LIB_FUZZING_ENGINE])
 
 AC_ARG_ENABLE([test-coverage],
   AS_HELP_STRING([--enable-test-coverage], [Enable test coverage flags]),
-  [COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage" COVERAGE_LDFLAGS="-fprofile-arcs"])
+  [if test "$enableval" = "yes"; then
+    COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage"
+    COVERAGE_LDFLAGS="-fprofile-arcs"
+  fi], [
+    enable_test_coverage=no
+  ]
+)
 
 LT_INIT
 AC_PROG_CC
@@ -365,5 +371,6 @@ echo "With TPM1.2 support     : $with_tpm1"
 echo "With TPM2 support       : $with_tpm2"
 echo "HAVE_VERSION_SCRIPT     : $have_version_script"
 echo "Use openssl crypto for  : $use_openssl_functions_for"
+echo "Test coverage           : $enable_test_coverage"
 echo
 echo
