@@ -48,6 +48,8 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 #include <openssl/engine.h>
+#include <openssl/evp.h>
+#include <openssl/rsa.h>
 
 #include "tpm_cryptoh.h"
 #include "tpm_debug.h"
