@@ -124,12 +124,6 @@ TpmRsa_GeneratePrimeForRSA(
 			   RAND_STATE* rand       // IN: the random state
 			   );
 
-				// libtpms: added begin
-void RsaAdjustPrimeCandidate(Crypt_Int*        prime,
-			     SEED_COMPAT_LEVEL seedCompatLevel  // IN: compatibility level
-			     );
-				// libtpms: added end
-
 #endif  // ALG_RSA
 
 #endif  // _CRYPT_PRIME_FP_H_
