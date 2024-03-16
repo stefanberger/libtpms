@@ -88,4 +88,18 @@ TPM2B_NAME* NvGetIndexName(
 			   //     computed
 			   TPM2B_NAME* name    // OUT: name of the index
 			   );
+TPM_RC NvPublic2FromNvPublic(
+			     TPMS_NV_PUBLIC*   nvPublic,  // IN: the source S-form NV public area
+			     TPMT_NV_PUBLIC_2* nvPublic2  // OUT: the T-form NV public area to populate
+			     );
+TPM_RC NvPublicFromNvPublic2(
+			     TPMT_NV_PUBLIC_2* nvPublic2,  // IN: the source T-form NV public area
+			     TPMS_NV_PUBLIC*   nvPublic    // OUT: the S-form NV public area to populate
+			     );
+TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
+		     TPM2B_AUTH*       auth,
+		     TPMS_NV_PUBLIC*   publicInfo,
+		     TPM_RC            blameAuthHandle,
+		     TPM_RC            blameAuth,
+		     TPM_RC            blamePublic);
 #endif

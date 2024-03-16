@@ -130,12 +130,17 @@ SessionCapGetLoaded(
 		    UINT32           count,         // IN: count of returned handles
 		    TPML_HANDLE     *handleList     // OUT: list of handle
 		    );
+BOOL SessionCapGetOneLoaded(TPMI_SH_POLICY handle  // IN: handle
+			    );
 TPMI_YES_NO
 SessionCapGetSaved(
 		   TPMI_SH_HMAC     handle,        // IN: start handle
 		   UINT32           count,         // IN: count of returned handles
 		   TPML_HANDLE     *handleList     // OUT: list of handle
 		   );
+BOOL SessionCapGetOneSaved(TPMI_SH_HMAC handle  // IN: handle
+			   );
+
 UINT32
 SessionCapGetLoadedNumber(
 			  void

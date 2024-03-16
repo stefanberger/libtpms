@@ -316,6 +316,14 @@ ObjectCapGetLoaded(TPMI_DH_OBJECT handle,     // IN: start handle
 		   TPML_HANDLE*   handleList  // OUT: list of handle
 		   );
 
+//*** ObjectCapGetOneLoaded()
+// This function returns whether a handle is loaded.
+BOOL ObjectCapGetOneLoaded(TPMI_DH_OBJECT handle  // IN: handle
+			   );
+
+//*** ObjectCapGetTransientAvail()
+// This function returns an estimate of the number of additional transient
+// objects that could be loaded into the TPM.
 UINT32
 ObjectCapGetTransientAvail(void);
 

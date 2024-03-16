@@ -302,7 +302,12 @@ typedef UINT32                              TPM_CC;
 #define TPM_CC_ACT_SetTimeout               (TPM_CC)(0x00000198)
 #define TPM_CC_ECC_Encrypt		    (TPM_CC)(0x00000199)
 #define TPM_CC_ECC_Decrypt		    (TPM_CC)(0x0000019A)
-#define TPM_CC_LAST			    (TPM_CC)(0x0000019A)
+#define TPM_CC_PolicyCapability             (TPM_CC)(0x0000019B)
+#define TPM_CC_PolicyParameters             (TPM_CC)(0x0000019C)
+#define TPM_CC_NV_DefineSpace2              (TPM_CC)(0x0000019D)
+#define TPM_CC_NV_ReadPublic2               (TPM_CC)(0x0000019E)
+#define TPM_CC_SetCapability                (TPM_CC)(0x0000019F)
+#define TPM_CC_LAST                         (TPM_CC)(0x0000019F)
 #define CC_VEND                             0x20000000
 #define TPM_CC_Vendor_TCG_Test              (TPM_CC)(0x20000000)
 
@@ -694,6 +699,8 @@ typedef UINT8              TPM_HT;
 #define TPM_HT_LOADED_SESSION    (TPM_HT)(0x02)
 #define TPM_HT_POLICY_SESSION    (TPM_HT)(0x03)
 #define TPM_HT_SAVED_SESSION     (TPM_HT)(0x03)
+#define TPM_HT_EXTERNAL_NV       (TPM_HT)(0x11)
+#define TPM_HT_PERMANENT_NV      (TPM_HT)(0x12)
 #define TPM_HT_PERMANENT         (TPM_HT)(0x40)
 #define TPM_HT_TRANSIENT         (TPM_HT)(0x80)
 #define TPM_HT_PERSISTENT        (TPM_HT)(0x81)
@@ -732,6 +739,8 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  HR_TRANSIENT		 (TPM_HC)((((UINT32)TPM_HT_TRANSIENT) << HR_SHIFT))
 #define  HR_PERSISTENT           (TPM_HC)((((UINT32)TPM_HT_PERSISTENT) << HR_SHIFT))
 #define  HR_NV_INDEX             (TPM_HC)((TPM_HT_NV_INDEX << HR_SHIFT))
+#define  HR_EXTERNAL_NV          (TPM_HC)((TPM_HT_EXTERNAL_NV << HR_SHIFT))
+#define  HR_PERMANENT_NV         (TPM_HC)((TPM_HT_PERMANENT_NV << HR_SHIFT))
 #define  HR_PERMANENT            (TPM_HC)((TPM_HT_PERMANENT << HR_SHIFT))
 #define  PCR_FIRST               (TPM_HC)((HR_PCR+0))
 #define  PCR_LAST                (TPM_HC)((PCR_FIRST+IMPLEMENTATION_PCR-1))
@@ -750,6 +759,10 @@ typedef  TPM_HANDLE         TPM_HC;
 #define  PLATFORM_PERSISTENT     (TPM_HC)((PERSISTENT_FIRST+0x00800000))
 #define  NV_INDEX_FIRST          (TPM_HC)((HR_NV_INDEX+0))
 #define  NV_INDEX_LAST           (TPM_HC)((NV_INDEX_FIRST+0x00FFFFFF))
+#define  EXTERNAL_NV_FIRST       (TPM_HC)((HR_EXTERNAL_NV + 0))
+#define  EXTERNAL_NV_LAST        (TPM_HC)((EXTERNAL_NV_FIRST + 0x00FFFFFF))
+#define  PERMANENT_NV_FIRST      (TPM_HC)((HR_PERMANENT_NV + 0))
+#define  PERMANENT_NV_LAST       (TPM_HC)((PERMANENT_NV_FIRST + 0x00FFFFFF))
 #define  PERMANENT_FIRST         (TPM_HC)(TPM_RH_FIRST)
 #define  PERMANENT_LAST          (TPM_HC)(TPM_RH_LAST)
 #define  HR_NV_AC                (TPM_HC)(((TPM_HT_NV_INDEX<<HR_SHIFT)+0xD00000))
@@ -1308,6 +1321,11 @@ typedef  TPM_HANDLE         TPMI_RH_NV_AUTH;
 typedef  TPM_HANDLE         TPMI_RH_LOCKOUT;
 /* Table 2:59 - Definition of TPMI_RH_NV_INDEX Type  */
 typedef  TPM_HANDLE         TPMI_RH_NV_INDEX;
+
+typedef TPM_HANDLE 	    TPMI_RH_NV_DEFINED_INDEX;
+typedef TPM_HANDLE 	    TPMI_RH_NV_LEGACY_INDEX;
+typedef TPM_HANDLE 	    TPMI_RH_NV_EXP_INDEX;
+
 /* Table 2:60 - Definition of TPMI_RH_AC Type  */
 typedef  TPM_HANDLE         TPMI_RH_AC;
 /* Table 2:65 - Definition of TPMI_RH_ACT Type  */
@@ -1591,11 +1609,25 @@ typedef union {
     TPML_TAGGED_POLICY          authPolicies;
     TPML_ACT_DATA 		actData;
 } TPMU_CAPABILITIES;
+/* NOTE The TPMU_SET_CAPABILITIES structure may be defined by a TCG Registry. */
+typedef struct {
+    UINT32	platformSpecific;
+} TPMU_SET_CAPABILITIES;
 /* Table 2:111 - Definition of TPMS_CAPABILITY_DATA Structure  */
 typedef struct {
     TPM_CAP                 capability;
     TPMU_CAPABILITIES       data;
 } TPMS_CAPABILITY_DATA;
+/* Table 129 - Definition of TPMS_SET_CAPABILITY_DATA Structure <IN> */
+typedef struct {
+    TPM_CAP			setCapability;
+    TPMU_SET_CAPABILITIES	data;
+} TPMS_SET_CAPABILITY_DATA;
+/* Table 130 - Definition of TPM2B_SET_CAPABILITY_DATA Structure <IN> */
+typedef struct {
+    UINT16			size;
+    TPMS_SET_CAPABILITY_DATA	setCapabilityData;
+} TPM2B_SET_CAPABILITY_DATA;
 /* Table 2:112 - Definition of TPMS_CLOCK_INFO Structure  */
 typedef struct {
     UINT64                  clock;
@@ -2382,6 +2414,168 @@ typedef UINT32                  TPMA_NV;
      (platformcreate << 30) + (read_stclear << 31))
 #endif // USE_BIT_FIELD_STRUCTURES
 
+// Table "Definition of TPMA_NV_EXP Bits" (Part 2: Structures)
+#define TYPE_OF_TPMA_NV_EXP      UINT64
+#define TPMA_NV_EXP_TO_UINT64(a) (*((UINT64*)&(a)))
+#define UINT64_TO_TPMA_NV_EXP(a) (*((TPMA_NV_EXP*)&(a)))
+#define TPMA_NV_EXP_TO_BYTE_ARRAY(i, a)					\
+    UINT64_TO_BYTE_ARRAY((TPMA_NV_EXP_TO_UINT64(i)), (a))
+#define BYTE_ARRAY_TO_TPMA_NV_EXP(i, a)		     \
+    {							     \
+	UINT64 x = BYTE_ARRAY_TO_UINT64(a);		     \
+	i        = UINT64_TO_TPMA_NV_EXP(x);		     \
+    }
+#if USE_BIT_FIELD_STRUCTURES
+typedef struct
+{
+    unsigned TPMA_NV_PPWRITE               : 1;
+    unsigned TPMA_NV_OWNERWRITE            : 1;
+    unsigned TPMA_NV_AUTHWRITE             : 1;
+    unsigned TPMA_NV_POLICYWRITE           : 1;
+    unsigned TPM_NT                        : 4;
+    unsigned Reserved_bits_at_8            : 2;
+    unsigned TPMA_NV_POLICY_DELETE         : 1;
+    unsigned TPMA_NV_WRITELOCKED           : 1;
+    unsigned TPMA_NV_WRITEALL              : 1;
+    unsigned TPMA_NV_WRITEDEFINE           : 1;
+    unsigned TPMA_NV_WRITE_STCLEAR         : 1;
+    unsigned TPMA_NV_GLOBALLOCK            : 1;
+    unsigned TPMA_NV_PPREAD                : 1;
+    unsigned TPMA_NV_OWNERREAD             : 1;
+    unsigned TPMA_NV_AUTHREAD              : 1;
+    unsigned TPMA_NV_POLICYREAD            : 1;
+    unsigned Reserved_bits_at_20           : 5;
+    unsigned TPMA_NV_NO_DA                 : 1;
+    unsigned TPMA_NV_ORDERLY               : 1;
+    unsigned TPMA_NV_CLEAR_STCLEAR         : 1;
+    unsigned TPMA_NV_READLOCKED            : 1;
+    unsigned TPMA_NV_WRITTEN               : 1;
+    unsigned TPMA_NV_PLATFORMCREATE        : 1;
+    unsigned TPMA_NV_READ_STCLEAR          : 1;
+    unsigned TPMA_EXTERNAL_NV_ENCRYPTION   : 1;
+    unsigned TPMA_EXTERNAL_NV_INTEGRITY    : 1;
+    unsigned TPMA_EXTERNAL_NV_ANTIROLLBACK : 1;
+    unsigned Reserved_bits_at_35           : 29;
+} TPMA_NV_EXP;
+
+// Initializer for the bit-field structure
+#  define TPMA_NV_EXP_INITIALIZER(tpma_nv_ppwrite,			\
+				  tpma_nv_ownerwrite,			\
+				  tpma_nv_authwrite,			\
+				  tpma_nv_policywrite,			\
+				  tpm_nt,				\
+				  bits_at_8,				\
+				  tpma_nv_policy_delete,		\
+				  tpma_nv_writelocked,			\
+				  tpma_nv_writeall,			\
+				  tpma_nv_writedefine,			\
+				  tpma_nv_write_stclear,		\
+				  tpma_nv_globallock,			\
+				  tpma_nv_ppread,			\
+				  tpma_nv_ownerread,			\
+				  tpma_nv_authread,			\
+				  tpma_nv_policyread,			\
+				  bits_at_20,				\
+				  tpma_nv_no_da,			\
+				  tpma_nv_orderly,			\
+				  tpma_nv_clear_stclear,		\
+				  tpma_nv_readlocked,			\
+				  tpma_nv_written,			\
+				  tpma_nv_platformcreate,		\
+				  tpma_nv_read_stclear,			\
+				  tpma_external_nv_encryption,		\
+				  tpma_external_nv_integrity,		\
+				  tpma_external_nv_antirollback,	\
+				  bits_at_35)				\
+    {									\
+	tpma_nv_ppwrite, tpma_nv_ownerwrite, tpma_nv_authwrite,		\
+	    tpma_nv_policywrite, tpm_nt, bits_at_8, tpma_nv_policy_delete, \
+	    tpma_nv_writelocked, tpma_nv_writeall, tpma_nv_writedefine, \
+	    tpma_nv_write_stclear, tpma_nv_globallock, tpma_nv_ppread,	\
+	    tpma_nv_ownerread, tpma_nv_authread, tpma_nv_policyread, bits_at_20, \
+	    tpma_nv_no_da, tpma_nv_orderly, tpma_nv_clear_stclear,	\
+	    tpma_nv_readlocked, tpma_nv_written, tpma_nv_platformcreate, \
+	    tpma_nv_read_stclear, tpma_external_nv_encryption,		\
+	    tpma_external_nv_integrity, tpma_external_nv_antirollback, bits_at_35 \
+	    }
+#else  // USE_BIT_FIELD_STRUCTURES
+
+// This implements Table "Definition of TPMA_NV_EXP Bits" (Part 2: Structures) using bit masking
+typedef UINT64 TPMA_NV_EXP;
+#  define TPMA_NV_EXP_TPMA_NV_PPWRITE               (TPMA_NV_EXP)(1 << 0)
+#  define TPMA_NV_EXP_TPMA_NV_OWNERWRITE            (TPMA_NV_EXP)(1 << 1)
+#  define TPMA_NV_EXP_TPMA_NV_AUTHWRITE             (TPMA_NV_EXP)(1 << 2)
+#  define TPMA_NV_EXP_TPMA_NV_POLICYWRITE           (TPMA_NV_EXP)(1 << 3)
+#  define TPMA_NV_EXP_TPM_NT                        (TPMA_NV_EXP)(0xF << 4)
+#  define TPMA_NV_EXP_TPM_NT_SHIFT                  4
+#  define TPMA_NV_EXP_TPMA_NV_POLICY_DELETE         (TPMA_NV_EXP)(1 << 10)
+#  define TPMA_NV_EXP_TPMA_NV_WRITELOCKED           (TPMA_NV_EXP)(1 << 11)
+#  define TPMA_NV_EXP_TPMA_NV_WRITEALL              (TPMA_NV_EXP)(1 << 12)
+#  define TPMA_NV_EXP_TPMA_NV_WRITEDEFINE           (TPMA_NV_EXP)(1 << 13)
+#  define TPMA_NV_EXP_TPMA_NV_WRITE_STCLEAR         (TPMA_NV_EXP)(1 << 14)
+#  define TPMA_NV_EXP_TPMA_NV_GLOBALLOCK            (TPMA_NV_EXP)(1 << 15)
+#  define TPMA_NV_EXP_TPMA_NV_PPREAD                (TPMA_NV_EXP)(1 << 16)
+#  define TPMA_NV_EXP_TPMA_NV_OWNERREAD             (TPMA_NV_EXP)(1 << 17)
+#  define TPMA_NV_EXP_TPMA_NV_AUTHREAD              (TPMA_NV_EXP)(1 << 18)
+#  define TPMA_NV_EXP_TPMA_NV_POLICYREAD            (TPMA_NV_EXP)(1 << 19)
+#  define TPMA_NV_EXP_TPMA_NV_NO_DA                 (TPMA_NV_EXP)(1 << 25)
+#  define TPMA_NV_EXP_TPMA_NV_ORDERLY               (TPMA_NV_EXP)(1 << 26)
+#  define TPMA_NV_EXP_TPMA_NV_CLEAR_STCLEAR         (TPMA_NV_EXP)(1 << 27)
+#  define TPMA_NV_EXP_TPMA_NV_READLOCKED            (TPMA_NV_EXP)(1 << 28)
+#  define TPMA_NV_EXP_TPMA_NV_WRITTEN               (TPMA_NV_EXP)(1 << 29)
+#  define TPMA_NV_EXP_TPMA_NV_PLATFORMCREATE        (TPMA_NV_EXP)(1 << 30)
+#  define TPMA_NV_EXP_TPMA_NV_READ_STCLEAR          (TPMA_NV_EXP)(1 << 31)
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ENCRYPTION   (TPMA_NV_EXP)(1 << 32)
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_INTEGRITY    (TPMA_NV_EXP)(1 << 33)
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ANTIROLLBACK (TPMA_NV_EXP)(1 << 34)
+#  define TPMA_NV_EXP_reserved		            0xfffffff800000000L
+
+//  This is the initializer for a TPMA_NV_EXP bit array.
+#  define TPMA_NV_EXP_INITIALIZER(tpma_nv_ppwrite,			\
+				  tpma_nv_ownerwrite,			\
+				  tpma_nv_authwrite,			\
+				  tpma_nv_policywrite,			\
+				  tpm_nt,				\
+				  bits_at_8,				\
+				  tpma_nv_policy_delete,		\
+				  tpma_nv_writelocked,			\
+				  tpma_nv_writeall,			\
+				  tpma_nv_writedefine,			\
+				  tpma_nv_write_stclear,		\
+				  tpma_nv_globallock,			\
+				  tpma_nv_ppread,			\
+				  tpma_nv_ownerread,			\
+				  tpma_nv_authread,			\
+				  tpma_nv_policyread,			\
+				  bits_at_20,				\
+				  tpma_nv_no_da,			\
+				  tpma_nv_orderly,			\
+				  tpma_nv_clear_stclear,		\
+				  tpma_nv_readlocked,			\
+				  tpma_nv_written,			\
+				  tpma_nv_platformcreate,		\
+				  tpma_nv_read_stclear,			\
+				  tpma_external_nv_encryption,		\
+				  tpma_external_nv_integrity,		\
+				  tpma_external_nv_antirollback,	\
+				  bits_at_35)				\
+    (TPMA_NV_EXP)((tpma_nv_ppwrite << 0) + (tpma_nv_ownerwrite << 1)	\
+		  + (tpma_nv_authwrite << 2) + (tpma_nv_policywrite << 3) \
+		  + (tpm_nt << 4) + (tpma_nv_policy_delete << 10)	\
+		  + (tpma_nv_writelocked << 11) + (tpma_nv_writeall << 12) \
+		  + (tpma_nv_writedefine << 13) + (tpma_nv_write_stclear << 14) \
+		  + (tpma_nv_globallock << 15) + (tpma_nv_ppread << 16) \
+		  + (tpma_nv_ownerread << 17) + (tpma_nv_authread << 18) \
+		  + (tpma_nv_policyread << 19) + (tpma_nv_no_da << 25)	\
+		  + (tpma_nv_orderly << 26) + (tpma_nv_clear_stclear << 27) \
+		  + (tpma_nv_readlocked << 28) + (tpma_nv_written << 29) \
+		  + (tpma_nv_platformcreate << 30) + (tpma_nv_read_stclear << 31) \
+		  + (tpma_external_nv_encryption << 32)			\
+		  + (tpma_external_nv_integrity << 33)			\
+		  + (tpma_external_nv_antirollback << 34))
+
+#endif  // USE_BIT_FIELD_STRUCTURES
+
 /* Table 2:209 - Definition of TPMS_NV_PUBLIC Structure  */
 typedef struct {
     TPMI_RH_NV_INDEX        nvIndex;
@@ -2395,6 +2589,30 @@ typedef struct {
     UINT16                  size;
     TPMS_NV_PUBLIC          nvPublic;
 } TPM2B_NV_PUBLIC;
+typedef struct
+{
+    TPMI_RH_NV_EXP_INDEX nvIndex;
+    TPMI_ALG_HASH        nameAlg;
+    TPMA_NV_EXP          attributes;
+    TPM2B_DIGEST         authPolicy;
+    UINT16               dataSize;
+} TPMS_NV_PUBLIC_EXP_ATTR;
+typedef union
+{
+    TPMS_NV_PUBLIC          nvIndex;
+    TPMS_NV_PUBLIC_EXP_ATTR externalNV;
+    TPMS_NV_PUBLIC          permanentNV;
+} TPMU_NV_PUBLIC_2;
+typedef struct
+{
+    TPM_HT           handleType;
+    TPMU_NV_PUBLIC_2 nvPublic2;
+} TPMT_NV_PUBLIC_2;
+typedef struct
+{
+    UINT16           size;
+    TPMT_NV_PUBLIC_2 nvPublic2;
+} TPM2B_NV_PUBLIC_2;
 /* Table 2:208 - Definition of TPM2B_CONTEXT_SENSITIVE Structure  */
 typedef union {
     struct {

@@ -721,6 +721,27 @@ BOOL CompareNameHash(COMMAND* command,  // IN: main parsing structure
 		       session->u1.nameHash.t.buffer, nameHash.t.buffer, nameHash.t.size);
 }
 
+//*** CompareParametersHash()
+// This function computes the parameters hash and compares it to the pHash in
+// the session data, returning true if they are equal.
+BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
+			   SESSION* session   // IN: session structure with pHash
+			   )
+{
+    HASH_STATE   hashState;
+    TPM2B_DIGEST pHash;
+    //
+    pHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
+    //  Add commandCode.
+    CryptDigestUpdateInt(&hashState, sizeof(TPM_CC), command->code);
+    //  Add the parameters.
+    CryptDigestUpdate(&hashState, command->parameterSize, command->parameterBuffer);
+    //  Complete hash.
+    CryptHashEnd2B(&hashState, &pHash.b);
+    // and compare
+    return MemoryEqual2B(&session->u1.pHash.b, &pHash.b);
+}
+
 //*** CheckPWAuthSession()
 // This function validates the authorization provided in a PWAP session. It
 // compares the input value to authValue of the authorized entity. Argument
@@ -1061,10 +1082,12 @@ static TPM_RC CheckPolicyAuthSession(
 		// Compare cpHash.
 		OK = MemoryEqual2B(&session->u1.cpHash.b,
 				   &ComputeCpHash(command, session->authHashAlg)->b);
-	    else if(session->attributes.isTemplateSet)
-		OK = CompareTemplateHash(command, session);
-	    else
+	    else if(session->attributes.isNameHashDefined)
 		OK = CompareNameHash(command, session);
+	    else if(session->attributes.isParametersHashDefined)
+		OK = CompareParametersHash(command, session);
+	    else if(session->attributes.isTemplateHashDefined)
+		OK = CompareTemplateHash(command, session);
 	    if(!OK)
 		return TPM_RCS_POLICY_FAIL;
 	}

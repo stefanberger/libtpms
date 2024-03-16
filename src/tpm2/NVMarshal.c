@@ -2739,6 +2739,21 @@ SESSION_Unmarshal(SESSION *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_NAME_Unmarshal(&data->u1.boundEntity, buffer, size);
+#if 0
+        /* When resuming from v2 and u1's TPM2B buffer has content but none of
+         * the associated flags are set then set the isNameHashDefined flag
+         * because this one was implicitly assumed to be set in this case prior
+         * to the existence of this flag.
+         * FIXME We should write v3 now but will need v2 for backwards
+         * compatibility with libtpms v0.9.
+         */
+        if (rc == TPM_RC_SUCCESS) {
+            if (!IsCpHashUnionOccupied(data->attributes) &&
+                data->u1.boundEntity.b.size) {
+                data->attributes.isNameHashDefined = SET;
+            }
+        }
+#endif
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM2B_DIGEST_Unmarshal(&data->u2.auditDigest, buffer, size);
@@ -4565,6 +4580,9 @@ USER_NVRAM_Display(const char *msg)
             NvReadObject(entryRef + offset, &obj);
             fprintf(stderr, " sizeof(obj): %zu  entrysize: %u\n", sizeof(obj), entrysize);
             break;
+#if CC_NV_DefineSpace2
+# error Missing support for TPM_HT_PERMANENT_NV
+#endif
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }
@@ -4638,6 +4656,9 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             NvReadObject(entryRef + offset, &obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
             break;
+#if CC_NV_DefineSpace2
+# error Missing support for TPM_HT_PERMANENT_NV
+#endif
         default:
             TPMLIB_LogTPM2Error("USER_NVRAM: Corrupted handle: %08x\n", handle);
         }

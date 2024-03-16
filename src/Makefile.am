@@ -422,6 +422,7 @@ noinst_HEADERS += \
 	tpm2/NV_Certify_fp.h \
 	tpm2/NV_ChangeAuth_fp.h \
 	tpm2/NV_DefineSpace_fp.h \
+	tpm2/NV_DefineSpace2_fp.h \
 	tpm2/NVDynamic_fp.h \
 	tpm2/NV_Extend_fp.h \
 	tpm2/NV_GlobalWriteLock_fp.h \
@@ -430,6 +431,7 @@ noinst_HEADERS += \
 	tpm2/NV_Read_fp.h \
 	tpm2/NV_ReadLock_fp.h \
 	tpm2/NV_ReadPublic_fp.h \
+	tpm2/NV_ReadPublic2_fp.h \
 	tpm2/NVReserved_fp.h \
 	tpm2/NV_SetBits_fp.h \
 	tpm2/NV_spt_fp.h \
@@ -462,6 +464,7 @@ noinst_HEADERS += \
 	tpm2/PolicyAuthorize_fp.h \
 	tpm2/PolicyAuthorizeNV_fp.h \
 	tpm2/PolicyAuthValue_fp.h \
+	tpm2/PolicyCapability_fp.h \
 	tpm2/PolicyCommandCode_fp.h \
 	tpm2/PolicyCounterTimer_fp.h \
 	tpm2/PolicyCpHash_fp.h \
@@ -472,6 +475,7 @@ noinst_HEADERS += \
 	tpm2/PolicyNV_fp.h \
 	tpm2/PolicyNvWritten_fp.h \
 	tpm2/PolicyOR_fp.h \
+	tpm2/PolicyParameters_fp.h \
 	tpm2/PolicyPassword_fp.h \
 	tpm2/PolicyPCR_fp.h \
 	tpm2/PolicyPhysicalPresence_fp.h \
@@ -502,6 +506,7 @@ noinst_HEADERS += \
 	tpm2/Session_fp.h \
 	tpm2/SessionProcess_fp.h \
 	tpm2/SetAlgorithmSet_fp.h \
+	tpm2/SetCapability_fp.h \
 	tpm2/SetCommandCodeAuditStatus_fp.h \
 	tpm2/SetPrimaryPolicy_fp.h \
 	tpm2/Shutdown_fp.h \

@@ -54,37 +54,26 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 -2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023				        */
 /*										*/
 /********************************************************************************/
 
-#ifndef HANDLE_FP_H
-#define HANDLE_FP_H
+#if CC_PolicyParameters  // Command must be enabled
 
-TPM_HT
-HandleGetType(
-	      TPM_HANDLE       handle         // IN: a handle to be checked
-	      );
-TPM_HANDLE
-NextPermanentHandle(
-		    TPM_HANDLE       inHandle       // IN: the handle to check
-		    );
-TPMI_YES_NO
-PermanentCapGetHandles(
-		       TPM_HANDLE       handle,        // IN: start handle
-		       UINT32           count,         // IN: count of returned handles
-		       TPML_HANDLE     *handleList     // OUT: list of handle
-		       );
-BOOL PermanentCapGetOneHandle(TPM_HANDLE handle  // IN: handle
-			      );
-TPMI_YES_NO
-PermanentHandleGetPolicy(
-			 TPM_HANDLE           handle,        // IN: start handle
-			 UINT32               count,         // IN: count of returned handles
-			 TPML_TAGGED_POLICY  *policyList     // OUT: list of handle
-			 );
-BOOL PermanentHandleGetOnePolicy(TPM_HANDLE          handle,  // IN: handle
-				 TPMS_TAGGED_POLICY* policy   // OUT: tagged policy
-				 );
+#ifndef POLICYPARAMETERS_FP_H_
+#define POLICYPARAMETERS_FP_H_
+
+typedef struct
+{
+    TPMI_SH_POLICY policySession;
+    TPM2B_DIGEST   pHash;
+} PolicyParameters_In;
+
+#define RC_PolicyParameters_policySession (TPM_RC_H + TPM_RC_1)
+#define RC_PolicyParameters_pHash         (TPM_RC_P + TPM_RC_1)
+
+TPM_RC
+TPM2_PolicyParameters(PolicyParameters_In* in);
 
 #endif
+#endif    // CC_PolicyParameters

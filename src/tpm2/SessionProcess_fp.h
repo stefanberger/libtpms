@@ -74,6 +74,9 @@ CompareNameHash(
 		COMMAND         *command,       // IN: main parsing structure
 		SESSION         *session        // IN: session structure with nameHash
 		);
+BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
+			   SESSION* session   // IN: session structure with pHash
+			   );
 TPM_RC
 ParseSessionBuffer(
 		   COMMAND         *command        // IN: the structure that contains
