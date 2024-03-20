@@ -293,6 +293,62 @@ TPM2B_PROOF_Unmarshal(TPM2B_PROOF *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+/* Marshal a string including its terminating NUL byte. A NULL pointer will be
+ * marshalled with 0 bytes and will be unmarshalled as a NULL pointer again.
+ */
+static UINT16
+String_Marshal(const char *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    UINT16 len = 0;
+
+    if (source)
+        len = (UINT16)strlen(source) + 1;
+    written += UINT16_Marshal(&len, buffer, size);
+
+    if (len > 0 && *size >= len) {
+        memcpy(*buffer, source, len);
+        *buffer += len;
+        *size -= len;
+
+        written += len;
+    }
+
+    return written;
+}
+
+static TPM_RC
+String_Unmarshal(char **target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT16 len;
+
+    *target = NULL;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&len, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (*size < len) {
+            rc = TPM_RC_INSUFFICIENT;
+        } else if (len > 0) {
+            *target = malloc(len);
+            if (!*target) {
+                rc = TPM_RC_MEMORY;
+            }
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (len > 0) {
+            memcpy(*target, *buffer, len);
+            *buffer += len;
+            *size -= len;
+        }
+    }
+
+    return rc;
+}
+
 static TPM_RC
 UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
                        const char *msg)
@@ -4014,8 +4070,10 @@ skip_future_versions:
 #define PERSISTENT_DATA_VERSION 4
 
 static UINT16
-PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                        struct RuntimeProfile *RuntimeProfile)
 {
+    UINT32 commandCount = RuntimeCommandsCountEnabled(&RuntimeProfile->RuntimeCommands);
     UINT16 written;
     UINT16 array_size;
     UINT8 clocksize;
@@ -4059,8 +4117,12 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 
     written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
 
-    /* ppList may grow */
-    array_size = sizeof(data->ppList);
+    /* ppList may grow; use the same math as in Global.h PERSISTENT_DATA to calculate
+     * ppList array size. If commands are disabled then commandCount will be smaller
+     * than COMMAND_COUNT used there.
+     */
+    array_size = (commandCount + 7) / 8;
+    assert(array_size == sizeof(data->ppList)); /* FIXME: remove; testing for NULL profile only */
     written += UINT16_Marshal(&array_size, buffer, size);
     written += Array_Marshal(&data->ppList[0], array_size, buffer, size);
 
@@ -4071,8 +4133,11 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
     written += BOOL_Marshal(&data->lockOutAuthEnabled, buffer, size);
     written += UINT16_Marshal(&data->orderlyState, buffer, size);
 
-    /* auditCommands may grow */
-    array_size = sizeof(data->auditCommands);
+    /* auditCommands may grow; use the same math as in Global.h PERSISTENT_DATA to
+     * calculate array size.
+     */
+    array_size = ((commandCount + 1) + 7) / 8;		/* same as in Global.h PERSISTENT_DATA */
+    assert(array_size == sizeof(data->auditCommands)); /* for NULL profile only */
     written += UINT16_Marshal(&array_size, buffer, size);
     written += Array_Marshal(&data->auditCommands[0], array_size,
                              buffer, size);
@@ -4118,7 +4183,8 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 }
 
 static TPM_RC
-PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
+PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
+                          struct RuntimeProfile *RuntimeProfile)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
@@ -4217,6 +4283,7 @@ skip_num_policy_pcr_group:
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
         rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memset(data->ppList, 0, sizeof(data->ppList));
         memcpy(data->ppList, buf, MIN(array_size, sizeof(data->ppList)));
     }
 
@@ -4247,6 +4314,7 @@ skip_num_policy_pcr_group:
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
         rc = Array_Unmarshal(buf, array_size, buffer, size);
+        memset(data->auditCommands, 0, sizeof(data->auditCommands));
         memcpy(data->auditCommands, buf,
                MIN(array_size, sizeof(data->auditCommands)));
     }
@@ -4844,11 +4912,13 @@ exit_size:
  * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
  * - NVRAM locations  (NV_USER_DYNAMIC)
  */
-#define PERSISTENT_ALL_VERSION 3
+#define PERSISTENT_ALL_VERSION 4
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 {
+    struct RuntimeProfile *RuntimeProfile = &g_RuntimeProfile;
+    const char *profileJSON;
     UINT32 magic;
     PERSISTENT_DATA pd;
     ORDERLY_DATA od;
@@ -4858,6 +4928,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
     BLOCK_SKIP_INIT;
     BOOL writeSuState;
+    UINT16 blob_version;
 
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
     NvRead(&od, NV_ORDERLY_DATA, sizeof(od));
@@ -4867,11 +4938,33 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     /* indexOrderlyRam was never endianess-converted; so it's native */
     NvRead(indexOrderlyRam, NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam));
 
+    /* If we previously read state that did not contain a profile then
+     * we don't want to upgrade the state unnecessarily but still write
+     * it as v3.
+     */
+    switch (RuntimeProfile->stateFormatLevel) {
+    case 1:
+        blob_version = 3;
+        break;
+    default:
+        blob_version = 4; /* since stateFormatLevel 2 */
+        break;
+    }
+
+    if (RuntimeProfileWasNullProfile(RuntimeProfile) && blob_version != 3)
+        assert(false);
+    else if (!RuntimeProfileWasNullProfile(&g_RuntimeProfile) && blob_version == 3)
+        assert(false);
+
     written = NV_HEADER_Marshal(buffer, size,
-                                PERSISTENT_ALL_VERSION,
-                                PERSISTENT_ALL_MAGIC, 3);
+                                blob_version,
+                                PERSISTENT_ALL_MAGIC, blob_version);
+    if (blob_version >= 4) {
+        profileJSON = RuntimeProfileGetJSON(RuntimeProfile);
+        written += String_Marshal(profileJSON, buffer, size); // since v4
+    }
     written += PACompileConstants_Marshal(buffer, size);
-    written += PERSISTENT_DATA_Marshal(&pd, buffer, size);
+    written += PERSISTENT_DATA_Marshal(&pd, buffer, size, &g_RuntimeProfile);
     written += ORDERLY_DATA_Marshal(&od, buffer, size);
     writeSuState = (pd.orderlyState & TPM_SU_STATE_MASK) == TPM_SU_STATE;
     /* starting with v3 we only write STATE_RESET and STATE_CLEAR if needed */
@@ -4906,7 +4999,9 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     STATE_RESET_DATA srd;
     STATE_CLEAR_DATA scd;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
+    unsigned int stateFormatLevel = 0; // ignored
     BOOL readSuState = false;
+    char *profileJSON = NULL;
 
     memset(&pd, 0, sizeof(pd));
     memset(&od, 0, sizeof(od));
@@ -4919,12 +5014,32 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
                                  PERSISTENT_ALL_VERSION,
                                  PERSISTENT_ALL_MAGIC);
     }
-
+    if (rc == TPM_RC_SUCCESS) {
+        if (hdr.version >= 4) {
+            rc = String_Unmarshal(&profileJSON, buffer, size);
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* set the profile read from the state */
+        rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON, false);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        /* allow all algorithms to be unmarshalled */
+        rc = RuntimeAlgorithmSetProfile(&g_RuntimeProfile.RuntimeAlgorithm, NULL, &stateFormatLevel, ~0);
+    }
+#if 1
+    if (rc == TPM_RC_SUCCESS) {
+        rc = RuntimeProfileFormatJSON(&g_RuntimeProfile);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        fprintf(stderr, "Temp profile while unmarshalling: %s\n", RuntimeProfileGetJSON(&g_RuntimeProfile));
+    }
+#endif
     if (rc == TPM_RC_SUCCESS) {
         rc = PACompileConstants_Unmarshal(buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
+        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size, &g_RuntimeProfile);
     }
     if (rc == TPM_RC_SUCCESS) {
         if (hdr.version < 3) {
@@ -4973,7 +5088,17 @@ skip_future_versions:
         NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd);
         NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
         NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
+        /* Activate a profile read from the state of the TPM 2 */
+        fprintf(stderr, "profile from state: %s\n", profileJSON);
+        rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON, false);
+#if 1
+        if (rc == TPM_RC_SUCCESS) {
+            fprintf(stderr, "Final profile after unmarshalling: %s\n", RuntimeProfileGetJSON(&g_RuntimeProfile));
+        }
+#endif
     }
+
+    free(profileJSON);
 
     return rc;
 }

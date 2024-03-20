@@ -80,14 +80,21 @@
 /* 1 manufacturing process previously performed */
 LIB_EXPORT int
 TPM_Manufacture(
-		int             firstTime       // IN: indicates if this is the first call from
+		int             firstTime,      // IN: indicates if this is the first call from
 						// main()
+		const char *    profile		// libtpms: optional profile to use
 		)
 {
     TPM_SU          orderlyShutdown;
 
     // Initialize the context slot mask for UINT16
-    s_ContextSlotMask = 0xffff;	// libtpms added
+    s_ContextSlotMask = 0xffff;						// libtpms added begin
+    if (firstTime) {
+	RuntimeProfileInit(&g_RuntimeProfile);
+	/* profile was tested before in SetProfile, so this should always work */
+	if (RuntimeProfileSet(&g_RuntimeProfile, profile, true) != TPM_RC_SUCCESS)
+	    return -1;
+    }									// libtpms added end
 #if RUNTIME_SIZE_CHECKS
     // Call the function to verify the sizes of values that result from different
     // compile options.
@@ -193,6 +200,7 @@ TPM_TearDown(
 	     void
 	     )
 {
+    RuntimeProfileFree(&g_RuntimeProfile);	// libtpms added
     g_manufactured = FALSE;
     return 0;
 }

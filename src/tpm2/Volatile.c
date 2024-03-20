@@ -50,6 +50,7 @@
 #include "assert.h"
 #include "NVMarshal.h"
 #include "Volatile.h"
+#include "RuntimeAlgorithm_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
@@ -57,13 +58,23 @@
 TPM_RC
 VolatileState_Load(BYTE **buffer, INT32 *size)
 {
-    TPM_RC rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS, irc;
     BYTE hash[SHA1_DIGEST_SIZE], acthash[SHA1_DIGEST_SIZE];
+    unsigned int stateFormatLevel = 0; // ignored
     UINT16 hashAlg = TPM_ALG_SHA1;
+    char *oldProfile = NULL;
 
     if (rc == TPM_RC_SUCCESS) {
         if ((UINT32)*size < sizeof(hash))
             return TPM_RC_INSUFFICIENT;
+
+        rc = RuntimeAlgorithmSwitchProfile(&g_RuntimeProfile.RuntimeAlgorithm,
+                                           NULL, ~0, &oldProfile);
+        if (rc != TPM_RC_SUCCESS)
+            return rc;
+    }
+
+    if (rc == TPM_RC_SUCCESS) {
 
         CryptHashBlock(hashAlg, *size - sizeof(hash), *buffer,
                        sizeof(acthash), acthash);
@@ -93,6 +104,12 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
                                 rc);
         }
     }
+
+    irc = RuntimeAlgorithmSetProfile(&g_RuntimeProfile.RuntimeAlgorithm, oldProfile,
+                                     &stateFormatLevel, ~0);
+    free(oldProfile);
+    if (irc != TPM_RC_SUCCESS && rc == TPM_RC_SUCCESS)
+        rc = irc;
 
     if (rc != TPM_RC_SUCCESS)
         g_inFailureMode = TRUE;

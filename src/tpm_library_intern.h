@@ -83,6 +83,7 @@ struct tpm_interface {
                            const unsigned char *buffer, uint32_t buflen);
     TPM_RESULT (*GetState)(enum TPMLIB_StateType st,
                            unsigned char **buffer, uint32_t *buflen);
+    TPM_RESULT (*SetProfile)(const char *profile);
 };
 
 extern const struct tpm_interface DisabledInterface;

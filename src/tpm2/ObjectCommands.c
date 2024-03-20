@@ -533,7 +533,7 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
     RAND_STATE   randState;
     RAND_STATE*  rand = &randState;
     TPMS_DERIVE  labelContext;
-    SEED_COMPAT_LEVEL            seedCompatLevel = SEED_COMPAT_LEVEL_LAST; // libtpms added
+    SEED_COMPAT_LEVEL seedCompatLevel = RuntimeProfileGetSeedCompatLevel(); // libtpms added
 
     // Input Validation
 

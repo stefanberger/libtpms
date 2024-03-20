@@ -589,7 +589,8 @@ void NvReadNvIndexInfo(NV_REF    ref,     // IN: points to NV where index is loc
 // Convert an OBJECT into a buffer to store in NVRAM	// libtpms added begin
 UINT32 NvObjectToBuffer(OBJECT* object, BYTE* buffer, UINT32 size)
 {
-    BOOL marshalAnyObject = false;
+    // always use ANY_OBJECT_Marshal if StateFormatLevel >=2 (v0.10)
+    BOOL marshalAnyObject = g_RuntimeProfile.stateFormatLevel >= 2;
 
     pAssert(size >= MAX_MARSHALLED_OBJECT_SIZE);
 

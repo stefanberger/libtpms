@@ -267,6 +267,11 @@ TPM_RESULT TPMLIB_ValidateState(enum TPMLIB_StateType st,
     return tpm_iface[tpmvers_choice]->ValidateState(st, flags);
 }
 
+TPM_RESULT TPMLIB_SetProfile(const char *profile)
+{
+    return tpm_iface[tpmvers_choice]->SetProfile(profile);
+}
+
 static struct libtpms_callbacks libtpms_cbs;
 
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void)

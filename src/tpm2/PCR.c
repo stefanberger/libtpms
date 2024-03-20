@@ -1130,6 +1130,7 @@ PCRCapGetAllocation(UINT32              count,        // IN: count of return
     else
 	{
 	    *pcrSelection = gp.pcrAllocated;
+	    RuntimeAlgorithmsFilterPCRSelection(pcrSelection);	// libtpms added
 	    return NO;
 	}
 }

@@ -69,6 +69,7 @@
 
 extern BOOL      g_inFailureMode;
 static BOOL      reportedFailureCommand;
+static char     *g_profile;
 
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
@@ -136,7 +137,7 @@ static TPM_RESULT TPM2_MainInit(void)
                 TPMLIB_LogTPM2Error(
                     "%s: _plat__NVEnable(NULL) failed: %d\n",
                     __func__, ret);
-            if (TPM_Manufacture(TRUE) < 0 || g_inFailureMode) {
+            if (TPM_Manufacture(TRUE, g_profile) < 0 || g_inFailureMode) {
                 TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
                                     "failure mode\n", __func__);
                 reportedFailureCommand = TRUE;
@@ -171,6 +172,9 @@ static void TPM2_Terminate(void)
 
     _rpc__Signal_PowerOff();
     ExpDCacheFree();
+
+    free(g_profile);
+    g_profile = NULL;
 }
 
 static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
@@ -375,12 +379,41 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         ", \"SM4KeySizes\":[128]"
 #endif
     "}";
+    const char *runtimeAlgorithms_temp =
+    "\"RuntimeAlgorithms\":{"
+        "\"Implemented\":%s,"
+        "\"CanBeDisabled\":%s,"
+        "\"Enabled\":%s,"
+        "\"Disabled\":%s"
+    "}";
+    const char *runtimeCommands_temp =
+    "\"RuntimeCommands\":{"
+        "\"Implemented\":%s,"
+        "\"CanBeDisabled\":%s,"
+        "\"Enabled\":%s,"
+        "\"Disabled\":%s"
+    "}";
+    const char *tpmProfile_temp = "\"ActiveProfile\":%s";
+    const char *availableProfiles_temp =
+    "\"AvailableProfiles\":["
+        "%s%s%s"
+    "]";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
     char *tpmfeatures = NULL;
     char rsakeys[32];
     char camelliakeys[16];
+    char *runtimeAlgos[RUNTIME_ALGO_NUM] = { NULL, };
+    char *runtimeCmds[RUNTIME_CMD_NUM] = { NULL, };
+    enum RuntimeAlgorithmType rat;
+    enum RuntimeCommandType rct;
+    char *runtimeAlgorithms = NULL;
+    char *runtimeCommands = NULL;
+    char *profile = NULL;
+    const char *profileJSON;
+    char *availableProfiles = NULL;
+    char *tmp = NULL;
     size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
@@ -434,25 +467,122 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_RUNTIME_ALGORITHMS)) {
+        fmt = buffer;
+        buffer = NULL;
+        for (rat = RUNTIME_ALGO_IMPLEMENTED; rat < RUNTIME_ALGO_NUM; rat++) {
+            runtimeAlgos[rat] = RuntimeAlgorithmGet(&g_RuntimeProfile.RuntimeAlgorithm, rat);
+            if (!runtimeAlgos[rat])
+                goto error;
+        }
+        if (asprintf(&runtimeAlgorithms, runtimeAlgorithms_temp,
+                     runtimeAlgos[RUNTIME_ALGO_IMPLEMENTED],
+                     runtimeAlgos[RUNTIME_ALGO_CAN_BE_DISABLED],
+                     runtimeAlgos[RUNTIME_ALGO_ENABLED],
+                     runtimeAlgos[RUNTIME_ALGO_DISABLED]) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     runtimeAlgorithms, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
+    if ((flags & TPMLIB_INFO_RUNTIME_COMMANDS)) {
+        fmt = buffer;
+        buffer = NULL;
+        for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++) {
+            runtimeCmds[rct] = RuntimeCommandsGet(&g_RuntimeProfile.RuntimeCommands, rct);
+            if (!runtimeCmds[rct])
+                goto error;
+        }
+        if (asprintf(&runtimeCommands, runtimeCommands_temp,
+                     runtimeCmds[RUNTIME_CMD_IMPLEMENTED],
+                     runtimeCmds[RUNTIME_CMD_CAN_BE_DISABLED],
+                     runtimeCmds[RUNTIME_CMD_ENABLED],
+                     runtimeCmds[RUNTIME_CMD_DISABLED]) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     runtimeCommands, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
+    if ((flags & TPMLIB_INFO_ACTIVE_PROFILE) &&
+        (profileJSON = RuntimeProfileGetJSON(&g_RuntimeProfile))) {
+        fmt = buffer;
+        buffer = NULL;
+        if (asprintf(&profile, tpmProfile_temp, profileJSON) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt, printed ? "," : "",
+                     profile, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
+    if ((flags & TPMLIB_INFO_AVAILABLE_PROFILES)) {
+        size_t idx = 0;
+        char *json = NULL;
+
+        fmt = buffer; // keep here in case of 'goto error'
+        buffer = NULL;
+
+        tmp = NULL;
+
+        while (RuntimeProfileGetByIndex(idx, &json) == TPM_RC_SUCCESS) {
+            if (asprintf(&availableProfiles,
+                         idx > 0 ? tmp : availableProfiles_temp,
+                         idx > 0 ? "," : "",
+                         json,
+                         "%s%s%s") < 0) {
+                free(json);
+                goto error;
+            }
+
+            free(json);
+            free(tmp);
+            tmp = availableProfiles;
+            idx++;
+        }
+        availableProfiles = NULL;
+        if (asprintf(&availableProfiles, tmp, "", "", "") < 0)
+            goto error;
+
+        if (asprintf(&buffer, fmt, printed ? "," : "",
+                     availableProfiles, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
     if (asprintf(&buffer, fmt, "", "", "") < 0)
         goto error;
 
+exit:
     free(fmt);
     free(tpmattrs);
     free(tpmfeatures);
+    free(profile);
+    for (rat = RUNTIME_ALGO_IMPLEMENTED; rat < RUNTIME_ALGO_NUM; rat++)
+        free(runtimeAlgos[rat]);
+    for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++)
+        free(runtimeCmds[rct]);
+    free(runtimeAlgorithms);
+    free(runtimeCommands);
+    free(availableProfiles);
+    free(tmp);
 
     return buffer;
 
 error:
-    free(fmt);
     free(buffer);
-    free(tpmattrs);
-    free(tpmfeatures);
-
-    return NULL;
+    buffer = NULL;
+    goto exit;
 }
 
 static uint32_t tpm2_buffersize = TPM_BUFFER_MAX;
@@ -676,6 +806,33 @@ static TPM_RESULT TPM2_SetState(enum TPMLIB_StateType st,
     return ret;
 }
 
+static TPM_RESULT TPM2_SetProfile(const char *profile)
+{
+    char *copyProfile = NULL;
+    TPM_RC rc;
+
+    if (_rpc__Signal_IsPowerOn())
+        return TPM_INVALID_POSTINIT;
+
+    if (profile) {
+        /* test the profile */
+        rc = RuntimeProfileTest(&g_RuntimeProfile, profile, true);
+        if (rc != TPM_RC_SUCCESS)
+            return TPM_FAIL;
+
+        copyProfile = strdup(profile);
+        if (!copyProfile)
+            return TPM_SIZE;
+    }
+
+    free(g_profile);
+    g_profile = copyProfile;
+
+    TPMLIB_LogPrintf(" profile for new TPM: %s\n", profile);
+
+    return TPM_SUCCESS;
+}
+
 const struct tpm_interface TPM2Interface = {
     .MainInit = TPM2_MainInit,
     .Terminate = TPM2_Terminate,
@@ -693,4 +850,5 @@ const struct tpm_interface TPM2Interface = {
     .ValidateState = TPM2_ValidateState,
     .SetState = TPM2_SetState,
     .GetState = TPM2_GetState,
+    .SetProfile = TPM2_SetProfile,
 };

@@ -95,7 +95,10 @@ NextImplementedIndex(
 {
     for(;commandIndex < COMMAND_COUNT; commandIndex++)
 	{
-	    if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED)
+	    if((s_commandAttributes[commandIndex] & IS_IMPLEMENTED) &&		 // libtpms changed
+	       RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	 // libtpms added begin
+					   GET_ATTRIBUTE(s_ccAttr[commandIndex],
+							 TPMA_CC, commandIndex)))// libtpms added end
 		return commandIndex;
 	}
     return UNIMPLEMENTED_COMMAND_INDEX;
@@ -285,7 +288,9 @@ CommandCodeToCommandIndex(
 	    // it look like a large unsigned number, this will cause it to fail
 	    // the unsigned check below.
 	    if(commandIndex >= LIBRARY_COMMAND_ARRAY_SIZE
-	       || (s_commandAttributes[commandIndex] & IS_IMPLEMENTED) == 0)
+	       || (s_commandAttributes[commandIndex] & IS_IMPLEMENTED) == 0
+	       || !RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,// libtpms added
+					       commandCode))			 // libtpms added
 		return UNIMPLEMENTED_COMMAND_INDEX;
 	    return commandIndex;
 	}
@@ -294,11 +299,14 @@ CommandCodeToCommandIndex(
     commandIndex = GetClosestCommandIndex(commandCode);
     // Look at the returned value from get closest. If it isn't the one that was
     // requested, then the command is not implemented.
+    // libtpms: Or it may be runtime-disabled
     if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
 	{
 	    if((GET_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, commandIndex)
 		!= searchIndex)
-	       || (IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V)) != vendor)
+	       || (IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V)) != vendor
+	       || !RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,// libtpms added
+					       commandCode))			 // libtpms added
 		commandIndex = UNIMPLEMENTED_COMMAND_INDEX;
 	}
     return commandIndex;
@@ -315,6 +323,10 @@ GetNextCommandIndex(
 {
     while(++commandIndex < COMMAND_COUNT)
 	{
+	    if(!RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	  // libtpms added begin
+					    GET_ATTRIBUTE(s_ccAttr[commandIndex],
+							  TPMA_CC, commandIndex)))
+		continue;							  // libtpms added end
 #if !COMPRESSED_LISTS
 	    if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED)
 #endif
@@ -523,6 +535,10 @@ CommandCapGetCCList(
 	    if(!(s_commandAttributes[commandIndex] & IS_IMPLEMENTED))
 		continue;
 #endif
+	    if (!RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	// libtpms added begin
+					     GET_ATTRIBUTE(s_ccAttr[commandIndex],
+							   TPMA_CC, commandIndex)))
+		continue;							// libtpms added end
 	    if(commandList->count < count)
 		{
 		    // If the list is not full, add the attributes for this command.

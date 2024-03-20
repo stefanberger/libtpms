@@ -42,6 +42,7 @@
 
 #include "Unmarshal_fp.h"
 #include "CryptEccMain_fp.h"	// libtpms added
+#include "RuntimeAlgorithm_fp.h"// libtpms added
 
 TPM_RC
 UINT8_Unmarshal(UINT8 *target, BYTE **buffer, INT32 *size)
@@ -249,13 +250,22 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 	    if (*target != TPM_ECC_NONE &&		// libtpms added begin
 	        !CryptEccIsCurveRuntimeUsable(*target)) {
               rc = TPM_RC_CURVE;
-            }						// libtpms added end
+            }
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     TPM_ALG_ECC,
+						     CryptEccGetKeySizeForCurve(*target),
+						     *target,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_CURVE;
+	    }						// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
@@ -1231,6 +1241,10 @@ TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH *target, BYTE **buffer, INT32 *size, BOOL 
 #if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_HASH;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1238,9 +1252,11 @@ TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH *target, BYTE **buffer, INT32 *size, BOOL 
 	    }
 	  default:
 	    rc = TPM_RC_HASH;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1272,6 +1288,10 @@ TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM *target, BYTE **buffer, INT32 *size, BOOL al
 #if ALG_XOR
 	  case TPM_ALG_XOR:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_SYMMETRIC;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1279,9 +1299,11 @@ TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM *target, BYTE **buffer, INT32 *size, BOOL al
 	    }
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1310,6 +1332,10 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(TPMI_ALG_SYM_OBJECT *target, BYTE **buffer, INT32 
 #if ALG_TDES		// libtpms added begin
           case TPM_ALG_TDES:
 #endif			// iibtpms added end
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+					      *target)) {
+		rc = TPM_RC_SYMMETRIC;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1317,9 +1343,11 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(TPMI_ALG_SYM_OBJECT *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1354,6 +1382,10 @@ TPMI_ALG_SYM_MODE_Unmarshal(TPMI_ALG_SYM_MODE *target, BYTE **buffer, INT32 *siz
 #if ALG_CMAC
 	  case TPM_ALG_CMAC:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_MODE;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1361,9 +1393,11 @@ TPMI_ALG_SYM_MODE_Unmarshal(TPMI_ALG_SYM_MODE *target, BYTE **buffer, INT32 *siz
 	    }
 	  default:
 	    rc = TPM_RC_MODE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1439,6 +1473,10 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(TPMI_ALG_SIG_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECSCHNORR
 	  case TPM_ALG_ECSCHNORR:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+                                              *target)) {
+		rc = TPM_RC_SCHEME;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1446,9 +1484,11 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(TPMI_ALG_SIG_SCHEME *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_SCHEME;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1474,6 +1514,10 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 #if ALG_SM2
 	  case TPM_ALG_SM2:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_SCHEME;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1481,9 +1525,11 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 	    }
 	  default:
 	    rc = TPM_RC_SCHEME;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1543,6 +1589,10 @@ TPMI_ALG_MAC_SCHEME_Unmarshal(TPMI_ALG_MAC_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_CMAC
 	  case TPM_ALG_CMAC:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+                                              *target)) {
+		rc = TPM_RC_SYMMETRIC;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1550,9 +1600,11 @@ TPMI_ALG_MAC_SCHEME_Unmarshal(TPMI_ALG_MAC_SCHEME *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1584,6 +1636,10 @@ TPMI_ALG_CIPHER_MODE_Unmarshal(TPMI_ALG_CIPHER_MODE*target, BYTE **buffer, INT32
 #if ALG_ECB
 	  case TPM_ALG_ECB:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+                                              *target)) {
+		rc = TPM_RC_MODE;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1591,9 +1647,11 @@ TPMI_ALG_CIPHER_MODE_Unmarshal(TPMI_ALG_CIPHER_MODE*target, BYTE **buffer, INT32
 	    }
 	  default:
 	    rc = TPM_RC_MODE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -1615,6 +1673,12 @@ TPM_RC
 TPMU_HA_Unmarshal(TPMU_HA *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_SHA1
@@ -2654,12 +2718,21 @@ TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *siz
 #if AES_256	// libtpms added end
 	  case 256:
 #endif		// libtpms added
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+						     TPM_ALG_AES,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
@@ -2685,12 +2758,21 @@ TPMI_CAMELLIA_KEY_BITS_Unmarshal(TPMI_CAMELLIA_KEY_BITS *target, BYTE **buffer, 
 #if CAMELLIA_256
 	  case 256:
 #endif			// libtpms added end
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                             TPM_ALG_CAMELLIA,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
@@ -2708,12 +2790,19 @@ TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *siz
     if (rc == TPM_RC_SUCCESS) {
 	switch (*target) {
 	  case 128:
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                             TPM_ALG_SM4,
+						     *target)) {
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
@@ -2732,12 +2821,21 @@ TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *si
 	switch (*target) {
 	  case 128:
 	  case 192:
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpms added begin
+						     TPM_ALG_TDES,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }										// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif			// libtpms added end
@@ -2748,6 +2846,12 @@ TPM_RC
 TPMU_SYM_KEY_BITS_Unmarshal(TPMU_SYM_KEY_BITS *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_AES
@@ -2789,6 +2893,12 @@ TPM_RC
 TPMU_SYM_MODE_Unmarshal(TPMU_SYM_MODE *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_AES
@@ -3190,6 +3300,10 @@ TPMU_SIG_SCHEME_Unmarshal(TPMU_SIG_SCHEME *target, BYTE **buffer, INT32 *size, U
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
+    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {	// libtpms added begin
+	return TPM_RC_SELECTOR;
+    }											// libtpms added end
+
     switch (selector) {
 #if ALG_RSASSA
       case TPM_ALG_RSASSA:
@@ -3450,6 +3564,9 @@ TPMI_ALG_ASYM_SCHEME_Unmarshal(TPMI_ALG_ASYM_SCHEME *target, BYTE **buffer, INT3
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, *target)) {	// libtpms added begin
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3457,9 +3574,11 @@ TPMI_ALG_ASYM_SCHEME_Unmarshal(TPMI_ALG_ASYM_SCHEME *target, BYTE **buffer, INT3
 	    }
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 #endif
@@ -3470,6 +3589,12 @@ TPM_RC
 TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {					// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }								// libtpms added end
 
     switch (selector) {
 #if ALG_ECDH
@@ -3555,6 +3680,10 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_VALUE;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3562,9 +3691,11 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -3603,6 +3734,7 @@ TPMI_ALG_RSA_DECRYPT_Unmarshal(TPMI_ALG_RSA_DECRYPT *target, BYTE **buffer, INT3
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    // libtpms: allow decryption with these algorithms
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3661,15 +3793,24 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	  case 1024:
 	  case 2048:
 	  case 3072:
-#if RSA_4096					// libtpms added begin
+#if RSA_4096										// libtpms added begin
           case 4096:
-#endif						// libtpms added end
+#endif
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						     TPM_ALG_RSA,
+						     *target,
+						     TPM_ECC_NONE,
+						     g_RuntimeProfile.stateFormatLevel)) {
+		rc = TPM_RC_VALUE;
+	    }										// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
-	    *target = orig_target; // libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -3777,6 +3918,9 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECMQV
 	  case TPM_ALG_ECMQV:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, *target)) {	// libtpms added begin
+		rc = TPM_RC_SCHEME;
+	    }											// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3784,9 +3928,11 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 	    }
 	  default:
 	    rc = TPM_RC_SCHEME;
-	    *target = orig_target; //  libtpms added
 	}
     }
+    if (rc != TPM_RC_SUCCESS) {	// libtpms added begin
+	*target = orig_target;
+    }				// libtpms added end
     return rc;
 }
 
@@ -3937,6 +4083,12 @@ TPM_RC
 TPMU_SIGNATURE_Unmarshal(TPMU_SIGNATURE *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_RSASSA
