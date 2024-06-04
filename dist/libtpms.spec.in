@@ -113,7 +113,6 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 
 %changelog
 * Mon Aug 14 2023 Stefan Berger - 0.9.7-1
-- Object: clear out sensitive area if on load if not provided (Bugfix)
 - tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
 - tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
 - tpm2: Sync CryptParameterDecrypt implementation  with upstream
