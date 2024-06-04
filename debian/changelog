@@ -1,6 +1,5 @@
 libtpms (0.9.7) RELEASED; urgency=medium
 
-  - Object: clear out sensitive area if on load if not provided (Bugfix)
   - tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
   - tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
   - tpm2: Sync CryptParameterDecrypt implementation  with upstream
