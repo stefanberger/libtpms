@@ -68,7 +68,7 @@
 #include "Platform.h"
 
 // In this sample platform, these are compile time constants, but are not required to be.
-#define MANUFACTURER    "IBM "
+#define MANUFACTURER    "IBM"
 #define VENDOR_STRING_1 "SW  "
 #define VENDOR_STRING_2 " TPM"
 #define VENDOR_STRING_3 "\0\0\0\0"
