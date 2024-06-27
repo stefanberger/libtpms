@@ -3,7 +3,6 @@
 /*			     				*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: AlgorithmTests_fp.h 809 2016-11-16 18:31:54Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,12 +54,14 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016					*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
 #ifndef ALGORITHMTESTS_FP_H
 #define ALGORITHMTESTS_FP_H
+
+#if ENABLE_SELF_TESTS
 
 LIB_EXPORT
 TPM_RC
@@ -69,5 +70,5 @@ TestAlgorithm(
 	      ALGORITHM_VECTOR        *toTest
 	      );
 
-
-#endif
+#endif  // ENABLE_SELF_TESTS
+#endif  // ALGORITHMTESTS_FP_H

@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -435,7 +435,7 @@ TpmEcc_PointMult(Crypt_Point*          R,  // OUT: computed point
 {
     BOOL OK;
     //
-    TEST(TPM_ALG_ECDH);
+    TPM_DO_SELF_TEST(TPM_ALG_ECDH);
 
     // Need one scalar
     OK = (d != NULL || u != NULL);
@@ -617,7 +617,7 @@ LIB_EXPORT TPM_RC CryptEccNewKeyPair(
     if(E == NULL)
 	return TPM_RC_CURVE;
 
-    TEST(TPM_ALG_ECDH);
+    TPM_DO_SELF_TEST(TPM_ALG_ECDH);
     OK = TpmEcc_GenerateKeyPair(bnD, ecQ, E, NULL);
     if(OK)
 	{
@@ -743,7 +743,7 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
     BOOL   OK;
     TPM_RC retVal;
     //
-    TEST(TPM_ALG_ECDSA);  // ECDSA is used to verify each key
+    TPM_DO_SELF_TEST(TPM_ALG_ECDSA);  // ECDSA is used to verify each key
 
     // Validate parameters
     if(E == NULL)
@@ -768,7 +768,7 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 	    CRYPT_ECC_NUM(bnS);
 	    TPM2B_DIGEST digest;
 	    //
-	    TEST(TPM_ALG_ECDSA);
+	    TPM_DO_SELF_TEST(TPM_ALG_ECDSA);
 	    digest.t.size = MIN(sensitive->sensitive.ecc.t.size, sizeof(digest.t.buffer));
 	    // Get a random value to sign using the built in DRBG state
 	    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);

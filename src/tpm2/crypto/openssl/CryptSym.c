@@ -3,7 +3,6 @@
 /*			     Symmetric block cipher modes			*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptSym.c 1661 2021-03-18 19:00:58Z kgoldman $		*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -184,7 +183,7 @@ CryptSymmetricEncrypt(
     memset(tmp, 0, sizeof(tmp));
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
-    TEST(algorithm);
+    TPM_DO_SELF_TEST(algorithm);
     blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
     if(blockSize == 0)
 	return TPM_RC_FAILURE;
@@ -346,7 +345,7 @@ CryptSymmetricDecrypt(
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
-    TEST(algorithm);
+    TPM_DO_SELF_TEST(algorithm);
     blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
     if(blockSize == 0)
 	return TPM_RC_FAILURE;
@@ -557,7 +556,7 @@ CryptSymmetricEncrypt(
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
-    TEST(algorithm);
+    TPM_DO_SELF_TEST(algorithm);
     blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
     if(blockSize == 0)
 	return TPM_RC_FAILURE;
@@ -676,7 +675,7 @@ CryptSymmetricDecrypt(
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
-    TEST(algorithm);
+    TPM_DO_SELF_TEST(algorithm);
     blockSize = CryptGetSymmetricBlockSize(algorithm, keySizeInBits);
     if(blockSize == 0)
 	return TPM_RC_FAILURE;

@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -73,18 +73,18 @@
 
 //** For Self-test
 // These macros are used in CryptUtil to invoke the incremental self test.
-#if SELF_TEST
-#  define TEST(alg)				     \
-    do						     \
-	{						     \
-	    if(TEST_BIT(alg, g_toTest))			     \
-		CryptTestAlgorithm(alg, NULL);		     \
-	} while(0)
+#if ENABLE_SELF_TESTS
+#  define TPM_DO_SELF_TEST(alg)              \
+      do                                     \
+      {                                      \
+          if(TEST_BIT(alg, g_toTest))        \
+              CryptTestAlgorithm(alg, NULL); \
+      } while(0)
 #else
-#  define TEST(alg)
-#endif  // SELF_TEST
+#  define TPM_DO_SELF_TEST(alg)
+#endif  // ENABLE_SELF_TESTS
 
-	//** For Failures
+//** For Failures
 #if defined _POSIX_
 #  define FUNCTION_NAME __func__     /* libtpms changed */
 #else

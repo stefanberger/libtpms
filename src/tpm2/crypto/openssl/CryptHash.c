@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -372,7 +372,7 @@ LIB_EXPORT UINT16 CryptHashStart(
 {
     UINT16 retVal;
 
-    TEST(hashAlg);
+    TPM_DO_SELF_TEST(hashAlg);
 
     hashState->hashAlg = hashAlg;
     if(hashAlg == TPM_ALG_NULL)
@@ -735,7 +735,7 @@ LIB_EXPORT UINT16 CryptKDFa(
 
     pAssert(key != NULL && keyStream != NULL);
 
-    TEST(TPM_ALG_KDF1_SP800_108);
+    TPM_DO_SELF_TEST(TPM_ALG_KDF1_SP800_108);
 
     if(digestSize == 0)
 	return 0;

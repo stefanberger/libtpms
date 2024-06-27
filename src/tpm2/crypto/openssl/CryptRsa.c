@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -1013,7 +1013,7 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive,
 		    CRYPT_RSA_VAR(bnQr);
 		    CRYPT_INT_VAR(bnE, RADIX_BITS);
 
-		    TEST(TPM_ALG_NULL);
+		    TPM_DO_SELF_TEST(TPM_ALG_NULL);
 
 		    GOTO_ERROR_UNLESS((sensitive->sensitive.rsa.t.size * 2)
 				      == publicArea->unique.rsa.t.size);
@@ -1097,7 +1097,7 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
 	}
     // All encryption schemes return the same size of data
     cOut->t.size = key->publicArea.unique.rsa.t.size;
-    TEST(scheme->scheme);
+    TPM_DO_SELF_TEST(scheme->scheme);
 
     switch(scheme->scheme)
 	{
@@ -1171,7 +1171,7 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
     if(cIn->size != key->publicArea.unique.rsa.t.size)
 	ERROR_EXIT(TPM_RC_SIZE);
 
-    TEST(scheme->scheme);
+    TPM_DO_SELF_TEST(scheme->scheme);
 
     // For others that do padding, do the decryption in place and then
     // go handle the decoding.
@@ -1227,7 +1227,7 @@ LIB_EXPORT TPM_RC CryptRsaSign(TPMT_SIGNATURE* sigOut,
     // for all non-null signatures, the size is the size of the key modulus
     sigOut->signature.rsapss.sig.t.size = modSize;
 
-    TEST(sigOut->sigAlg);
+    TPM_DO_SELF_TEST(sigOut->sigAlg);
 
     switch(sigOut->sigAlg)
 	{
@@ -1288,7 +1288,7 @@ LIB_EXPORT TPM_RC CryptRsaValidateSignature(
     if(sig->signature.rsassa.sig.t.size != key->publicArea.unique.rsa.t.size)
 	ERROR_EXIT(TPM_RC_SIGNATURE);
 
-    TEST(sig->sigAlg);
+    TPM_DO_SELF_TEST(sig->sigAlg);
 
     // Decrypt the block
     retVal = RSAEP(&sig->signature.rsassa.sig.b, key);
@@ -1409,7 +1409,7 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 #  endif
 
     // Make sure that key generation has been tested
-    TEST(TPM_ALG_NULL);
+    TPM_DO_SELF_TEST(TPM_ALG_NULL);
     // Need to initialize the privateExponent structure			// libtpms added begin
     RsaInitializeExponentOld(&rsaKey->privateExponent);
 #if USE_OPENSSL_FUNCTIONS_RSA
@@ -1551,7 +1551,7 @@ CryptRsaEncrypt(
     // All encryption schemes return the same size of data
     pAssert(sizeof(cOut->t.buffer) >= key->publicArea.unique.rsa.t.size);
     cOut->t.size = key->publicArea.unique.rsa.t.size;
-    TEST(scheme->scheme);
+    TPM_DO_SELF_TEST(scheme->scheme);
 
     retVal = InitOpenSSLRSAPublicKey(key, &pkey);
     if (retVal != TPM_RC_SUCCESS)
@@ -1656,7 +1656,7 @@ CryptRsaDecrypt(
     // Size is checked to make sure that the encrypted value is the right size
     if(cIn->size != key->publicArea.unique.rsa.t.size)
         ERROR_EXIT(TPM_RC_SIZE);
-    TEST(scheme->scheme);
+    TPM_DO_SELF_TEST(scheme->scheme);
 
     retVal = InitOpenSSLRSAPrivateKey(key, &pkey);
     if (retVal != TPM_RC_SUCCESS)
@@ -1750,7 +1750,7 @@ CryptRsaSign(
     modSize = key->publicArea.unique.rsa.t.size;
     // for all non-null signatures, the size is the size of the key modulus
     sigOut->signature.rsapss.sig.t.size = modSize;
-    TEST(sigOut->sigAlg);
+    TPM_DO_SELF_TEST(sigOut->sigAlg);
 
     switch(sigOut->sigAlg)
          {
@@ -1846,7 +1846,7 @@ CryptRsaValidateSignature(
     // Errors that might be caused by calling parameters
     if(sig->signature.rsassa.sig.t.size != key->publicArea.unique.rsa.t.size)
 	ERROR_EXIT(TPM_RC_SIGNATURE);
-    TEST(sig->sigAlg);
+    TPM_DO_SELF_TEST(sig->sigAlg);
 
     retVal = InitOpenSSLRSAPublicKey(key, &pkey);
     if (retVal != TPM_RC_SUCCESS)
