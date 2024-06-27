@@ -1184,6 +1184,7 @@ typedef UINT32                  TPMA_MODES;
     {UINT32 x = BYTE_ARRAY_TO_UINT32(a);				\
 	i = UINT32_TO_TPMA_X509_KEY_USAGE(x);				\
     }
+#define TPMA_X509_KEY_USAGE_ALLOWED_BITS (0xff800000)
 #if USE_BIT_FIELD_STRUCTURES
 typedef struct TPMA_X509_KEY_USAGE {                // Table 2:39
     unsigned    Reserved_bits_at_0   : 23;

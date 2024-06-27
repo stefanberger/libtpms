@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2019 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2019 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -209,7 +209,9 @@ X509ProcessExtensions(
 
 	    //
 	    keyUsage.integer = value;
-	    // For KeyUsage:
+	    // see if any reserved bits are set
+	    if(keyUsage.integer & ~(TPMA_X509_KEY_USAGE_ALLOWED_BITS))
+		return TPM_RCS_RESERVED_BITS;	    // For KeyUsage:
 	    // 1) 'sign' is SET if Key Usage includes signing
 	    badSign = ((KEY_USAGE_SIGN.integer & keyUsage.integer) != 0)
 		      && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, sign);
