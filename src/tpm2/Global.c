@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -123,9 +123,9 @@ TPM2B_STRING(COMMIT_STRING, "ECDAA Commit");
 TPM2B_STRING(DUPLICATE_STRING, "DUPLICATE");
 TPM2B_STRING(IDENTITY_STRING, "IDENTITY");
 TPM2B_STRING(OBFUSCATE_STRING, "OBFUSCATE");
-#if SELF_TEST
+#if ENABLE_SELF_TESTS
 TPM2B_STRING(OAEP_TEST_STRING, "OAEP Test Value");
-#endif  // SELF_TEST
+#endif  // ENABLE_SELF_TESTS
 
 //*** g_rcIndex[]
 const UINT16 g_rcIndex[15]  = {TPM_RC_1,

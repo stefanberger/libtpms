@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -1278,9 +1278,9 @@ extern const TPM2B* COMMIT_STRING;
 extern const TPM2B* DUPLICATE_STRING;
 extern const TPM2B* IDENTITY_STRING;
 extern const TPM2B* OBFUSCATE_STRING;
-#  if SELF_TEST
+#  if ENABLE_SELF_TESTS
 extern const TPM2B* OAEP_TEST_STRING;
-#  endif  // SELF_TEST
+#  endif  // ENABLE_SELF_TESTS
 
 //*****************************************************************************
 //** From CryptTest.c

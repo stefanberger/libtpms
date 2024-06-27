@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -69,7 +69,7 @@
 
 #define SELF_TEST_DATA
 
-#if SELF_TEST
+#if ENABLE_SELF_TESTS
 
 // These includes pull in the data structures. They contain data definitions for the
 // various tests.
@@ -990,4 +990,4 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
     return result;
 }
 
-#endif  // SELF_TESTS
+#endif  // ENABLE_SELF_TESTS

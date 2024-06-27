@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -217,7 +217,7 @@ TPM_RC
 CryptTestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
 {
     TPM_RC result;
-#if SELF_TEST
+#if ENABLE_SELF_TESTS
     result = TestAlgorithm(alg, toTest);
 #else
     // If this is an attempt to determine the algorithms for which there is a

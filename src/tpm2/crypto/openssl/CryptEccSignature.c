@@ -54,7 +54,7 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
+/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
 /*										*/
 /********************************************************************************/
 
@@ -106,7 +106,7 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
 	sizeof(signature->signature.ecdaa.signatureR.t.buffer);
     signature->signature.ecdaa.signatureS.t.size =
 	sizeof(signature->signature.ecdaa.signatureS.t.buffer);
-    TEST(signature->sigAlg);
+    TPM_DO_SELF_TEST(signature->sigAlg);
     switch(signature->sigAlg)
 	{
 	  case TPM_ALG_ECDSA:
