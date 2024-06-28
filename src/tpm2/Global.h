@@ -337,6 +337,11 @@ typedef struct SESSION_ATTRIBUTES
     // SET if the cpHash has been defined. This attribute is not SET unless
     // 'isPolicy' is SET.
     unsigned isCpHashDefined : 1;
+#if 0						// libtpms: added; see further below
+    // SET if the templateHash needs to be checked for Create, CreatePrimary, or
+    // CreateLoaded.
+    unsigned isTemplateHashDefined : 1;    // SET if the authValue is required for computing the session HMAC. This
+#endif						// libtpms: added
     // SET if the authValue is required for computing the session HMAC. This
     // attribute is not SET unless 'isPolicy' is SET.
     unsigned isAuthValueNeeded : 1;
@@ -369,12 +374,12 @@ typedef struct SESSION_ATTRIBUTES
     unsigned nvWrittenState : 1;
     // SET if the templateHash needs to be checked for Create, CreatePrimary, or
     // CreateLoaded.
-    unsigned    isTemplateSet : 1;
+    unsigned    isTemplateHashDefined : 1;	// libtpms: keep here
     unsigned    _reserved : 18;         //15-32  /* libtpms added */
 #endif                                           /* libtpms added */
 #if BIG_ENDIAN_TPM == YES                        /* libtpms added begin */
     unsigned    _reserved : 18;         //15-32
-    unsigned    isTemplateSet : 1;      //14) SET if the templateHash needs to be
+    unsigned    isTemplateHashDefined : 1; //14) SET if the templateHash needs to be
     unsigned    nvWrittenState : 1;     //13) SET if TPMA_NV_WRITTEN is required to
     unsigned    checkNvWritten : 1;     //12) SET if the TPMA_NV_WRITTEN attribute
     unsigned    includeAuth : 1;        //11) This attribute is SET when the
