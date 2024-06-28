@@ -1096,7 +1096,7 @@ TPM2_PolicyNameHash(PolicyNameHash_In* in  // IN: input parameter list
     if(session->u1.cpHash.b.size != 0
        || session->attributes.isBound
        || session->attributes.isCpHashDefined
-       || session->attributes.isTemplateSet)
+       || session->attributes.isTemplateHashDefined)
 	return TPM_RC_CPHASH;
 
     // Internal Data Update
@@ -1499,7 +1499,7 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
     // If the template is set, make sure that it is the same as the input value
-    if(session->attributes.isTemplateSet)
+    if(session->attributes.isTemplateHashDefined)
 	{
 	    if(!MemoryEqual2B(&in->templateHash.b, &session->u1.cpHash.b))
 		return TPM_RCS_VALUE + RC_PolicyTemplate_templateHash;
@@ -1530,9 +1530,11 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
 
     //  complete the digest and get the results
     CryptHashEnd2B(&hashState, &session->u2.policyDigest.b);
-    // update cpHash in session context
-    session->u1.templateHash = in->templateHash;
-    session->attributes.isTemplateSet = SET;
+
+    // update templateHash in session context
+    session->u1.templateHash                  = in->templateHash;
+    session->attributes.isTemplateHashDefined = SET;
+
     return TPM_RC_SUCCESS;
 }
 

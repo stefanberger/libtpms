@@ -1061,7 +1061,7 @@ static TPM_RC CheckPolicyAuthSession(
 		// Compare cpHash.
 		OK = MemoryEqual2B(&session->u1.cpHash.b,
 				   &ComputeCpHash(command, session->authHashAlg)->b);
-	    else if(session->attributes.isTemplateSet)
+	    else if(session->attributes.isTemplateHashDefined)
 		OK = CompareTemplateHash(command, session);
 	    else
 		OK = CompareNameHash(command, session);
