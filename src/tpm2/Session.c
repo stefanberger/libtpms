@@ -1059,3 +1059,11 @@ SessionCapGetActiveAvail(void)
     return num;
 }
 
+//*** IsCpHashUnionOccupied()
+// This function indicates whether the session attributes indicate that one of
+// the members of the union containing `cpHash` are set.
+BOOL IsCpHashUnionOccupied(SESSION_ATTRIBUTES attrs)
+{
+    return attrs.isBound || attrs.isCpHashDefined
+	|| attrs.isTemplateHashDefined;
+}

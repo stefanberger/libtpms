@@ -1029,7 +1029,7 @@ TPM2_PolicyCpHash(PolicyCpHash_In* in  // IN: input parameter list
 
     // error if the cpHash in session context is not empty and is not the same
     // as the input or is not a cpHash
-    if((session->u1.cpHash.t.size != 0)
+    if((IsCpHashUnionOccupied(session->attributes))
        && (!session->attributes.isCpHashDefined
 	   || !MemoryEqual2B(&in->cpHashA.b, &session->u1.cpHash.b)))
 	return TPM_RC_CPHASH;
@@ -1092,11 +1092,9 @@ TPM2_PolicyNameHash(PolicyNameHash_In* in  // IN: input parameter list
     // is always non-zero.
     if(in->nameHash.t.size != CryptHashGetDigestSize(session->authHashAlg))
 	return TPM_RCS_SIZE + RC_PolicyNameHash_nameHash;
-    // u1 in the policy session context cannot otherwise be occupied
-    if(session->u1.cpHash.b.size != 0
-       || session->attributes.isBound
-       || session->attributes.isCpHashDefined
-       || session->attributes.isTemplateHashDefined)
+
+    // error if the nameHash in session context is not empty
+    if(IsCpHashUnionOccupied(session->attributes))
 	return TPM_RC_CPHASH;
 
     // Internal Data Update
