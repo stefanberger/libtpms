@@ -396,6 +396,11 @@ typedef struct SESSION_ATTRIBUTES
 #endif                                           /* libtpms added end */
 } SESSION_ATTRIBUTES;
 
+//*** IsCpHashUnionOccupied()
+// This function indicates whether the session attributes indicate that one of
+// the members of the union containing `cpHash` are set.
+BOOL IsCpHashUnionOccupied(SESSION_ATTRIBUTES attrs);
+
 //*** SESSION Structure
 // The SESSION structure contains all the context of a session except for the
 // associated contextID.
