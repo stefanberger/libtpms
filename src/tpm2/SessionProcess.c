@@ -329,14 +329,16 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
 		  case TPM_RH_NULL:
 		    result = TRUE;
 		    break;
-#ifndef __ACT_DISABLED	// libtpms added begin
+
+#ifndef __ACT_DISABLED	// libtpms changed
 		    FOR_EACH_ACT(CASE_ACT_HANDLE)
 			{
 			    // The ACT auth value is not available if the platform is disabled
 			    result = g_phEnable == SET;
 			    break;
 			}
-#endif			// libtpms added end
+#endif  // ACT_SUPPORT
+
 		  default:
 		    // Otherwise authValue is not available.
 		    break;
@@ -459,6 +461,8 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
 		    if(gc.platformPolicy.t.size != 0)
 			result = TRUE;
 		    break;
+#if ACT_SUPPORT || 1	// libtpms changed
+
 #  define ACT_GET_POLICY(N)						\
 		    case TPM_RH_ACT_##N:				\
 		      if(go.ACT_##N.authPolicy.t.size != 0)		\
@@ -466,7 +470,8 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
 		      break;
 
 		    FOR_EACH_ACT(ACT_GET_POLICY)
-			
+#endif  // ACT_SUPPORT
+
 		  case TPM_RH_LOCKOUT:
 		    if(gp.lockoutPolicy.t.size != 0)
 			result = TRUE;

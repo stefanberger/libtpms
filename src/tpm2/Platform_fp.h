@@ -58,4 +58,4 @@
 /*										*/
 /********************************************************************************/
 
-#include "platform_public_interface.h"
+#include "platform_public_interface.h"		// libtpms added
