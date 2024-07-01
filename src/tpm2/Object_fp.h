@@ -129,10 +129,10 @@ void GetQualifiedName(TPMI_DH_OBJECT handle,     // IN: handle of the object
 		      TPM2B_NAME* qualifiedName  // OUT: qualified name of the object
 		      );
 
-TPMI_RH_HIERARCHY
+TPMI_RH_HIERARCHY					// libtpms added begin
 ObjectGetHierarchy(
 		   OBJECT          *object         // IN :object
-		   );
+		   );					// libtpms added end
 //*** GetHierarchy()
 // This function returns the handle of the hierarchy to which a handle belongs.
 //

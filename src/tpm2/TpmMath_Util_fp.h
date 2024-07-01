@@ -112,10 +112,10 @@ LIB_EXPORT BOOL TpmMath_GetRandomInRange(
 					 RAND_STATE*      rand    // IN: random engine
 					 );
 
-// BnMath.c
+// BnMath.c					// libtpms added begin
 BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,
 				     bigConst    limit,
 				     RAND_STATE* rand
 				     );
-
+						// libtpms added end
 #endif  //_TPM_MATH_FP_H_
