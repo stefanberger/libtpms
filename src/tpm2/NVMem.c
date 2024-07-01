@@ -286,8 +286,10 @@ LIB_EXPORT void _plat__NVDisable(
 				 )
 {
     NOT_REFERENCED(paramSize);  // to keep compiler quiet
-    int delete =
-	(intptr_t)platParameter;  // IN: If TRUE (!=0), delete the NV contents.
+    int delete = ((intptr_t)platParameter != 0)
+		 ? TRUE
+		 : FALSE;  // IN: If TRUE (!=0), delete the NV contents.
+
 #ifdef TPM_LIBTPMS_CALLBACKS
     int ret = libtpms_plat__NVDisable();
     if (ret != LIBTPMS_CALLBACK_FALLTHROUGH)
