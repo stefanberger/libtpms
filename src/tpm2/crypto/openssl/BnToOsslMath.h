@@ -121,8 +121,8 @@ struct bignum_st
 // Allocate a local BIGNUM value. For the allocation, a bigNum structure is created
 // as is a local BIGNUM. The bigNum is initialized and then the BIGNUM is
 // set to reference the local value.
-#define BIG_VAR(name, bits)						\
-    BN_VAR(name##Bn, (bits));						\
+#define BIG_VAR(name, bits)		 \
+    BN_VAR(name##Bn, (bits));		 \
     BIGNUM* _##name = BN_new();			/* libtpms */	\
     BIGNUM* name = BigInitialized(_##name	/* libtpms */	\
 									, BnInit(name##Bn, BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))

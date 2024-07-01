@@ -385,7 +385,7 @@ TPM2_MakeCredential(
     TPM_RC               result = TPM_RC_SUCCESS;
     OBJECT              *object;
     TPM2B_DATA           data;
-    // Input Validation
+   // Input Validation
     // Get object pointer
     object = HandleToObject(in->handle);
     // input key must be an asymmetric, restricted decryption key
