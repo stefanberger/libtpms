@@ -143,7 +143,6 @@ BIGNUM* BigInitialized(BIGNUM* toInit, bigConst initializer)
 	FAIL(FATAL_ERROR_PARAMETER);
     if(toInit == NULL || initializer == NULL)
 	return NULL;
-
 #if 1		// libtpms: added begin
     BnToBytes(initializer, buffer, &buffer_len);	/* TPM to bin */
     _toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */

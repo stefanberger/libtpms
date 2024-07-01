@@ -123,7 +123,6 @@ TpmRsa_GeneratePrimeForRSA(
 			   UINT32      exponent,  // IN: the exponent
 			   RAND_STATE* rand       // IN: the random state
 			   );
-
 #endif  // ALG_RSA
 
 #endif  // _CRYPT_PRIME_FP_H_
