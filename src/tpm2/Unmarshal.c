@@ -2499,6 +2499,7 @@ typedef struct {
     TPMS_SET_CAPABILITY_DATA	setCapabilityData;
 } TPM2B_SET_CAPABILITY_DATA;
 
+
 /* Table 109 - Definition of TPMS_CLOCK_INFO Structure */
 
 TPM_RC
@@ -4783,7 +4784,6 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
-
 /* Table 225 - Definition of (UINT32) TPM_AT Constants */
 
 TPM_RC
@@ -4852,4 +4852,3 @@ TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA *target, BYTE **bu
     return rc;
 }
 #endif		// libtpms added
-

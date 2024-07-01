@@ -151,7 +151,7 @@ LIB_EXPORT BOOL TpmMath_GetRandomBits(BYTE* pBuffer, size_t bits, RAND_STATE* ra
 	    // doesn't make a cryptographic random buffer more or less random, so
 	    // the failure to swap is fine.
 #if BIG_ENDIAN_TPM
-	    crypt_uword_t* pTemp = pBuffer;
+	    crypt_uword_t* pTemp = (crypt_uword_t*)pBuffer;
 	    for(size_t t = 0; t < (byteCount / sizeof(crypt_uword_t)); t++)
 		*pTemp = SWAP_CRYPT_WORD(*pTemp);
 #endif

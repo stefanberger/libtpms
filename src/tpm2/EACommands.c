@@ -1705,7 +1705,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 					   (&propertyUnion.alg, &buffer, &bufferSize);
 			}
 		    break;
-		  case TPM_CAP_HANDLES:
+		  case TPM_CAP_HANDLES: ;
 		    BOOL foundHandle = FALSE;
 		    switch(HandleGetType((TPM_HANDLE)in->property))
 			{
@@ -1783,7 +1783,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 			}
 		    break;
 #  if ALG_ECC
-		  case TPM_CAP_ECC_CURVES:
+		  case TPM_CAP_ECC_CURVES: ;
 		    TPM_ECC_CURVE curve = (TPM_ECC_CURVE)in->property;
 		    if(CryptCapGetOneECCCurve(curve))
 			{
