@@ -338,6 +338,12 @@ typedef struct SESSION_ATTRIBUTES
     // 'isPolicy' is SET.
     unsigned isCpHashDefined : 1;
 #if 0						// libtpms: added; see further below
+    // SET if the nameHash has been defined. This attribute is not SET unless
+    // 'isPolicy' is SET.
+    unsigned isNameHashDefined : 1;
+    // SET if the pHash has been defined. This attribute is not SET unless
+    // 'isPolicy' is SET.
+    unsigned isParametersHashDefined : 1;
     // SET if the templateHash needs to be checked for Create, CreatePrimary, or
     // CreateLoaded.
     unsigned isTemplateHashDefined : 1;    // SET if the authValue is required for computing the session HMAC. This
@@ -375,10 +381,18 @@ typedef struct SESSION_ATTRIBUTES
     // SET if the templateHash needs to be checked for Create, CreatePrimary, or
     // CreateLoaded.
     unsigned    isTemplateHashDefined : 1;	// libtpms: keep here
-    unsigned    _reserved : 18;         //15-32  /* libtpms added */
+    // SET if the nameHash has been defined. This attribute is not SET unless
+    // 'isPolicy' is SET.
+    unsigned    isNameHashDefined : 1;
+    // SET if the pHash has been defined. This attribute is not SET unless
+    // 'isPolicy' is SET.
+    unsigned    isParametersHashDefined : 1;
+    unsigned    _reserved : 16;         //17-32  /* libtpms added */
 #endif                                           /* libtpms added */
 #if BIG_ENDIAN_TPM == YES                        /* libtpms added begin */
-    unsigned    _reserved : 18;         //15-32
+    unsigned    _reserved : 16;         //17-32
+    unsigned    isParametersHashDefined : 1 // 16
+    unsigned    isNameHashDefined : 1   // 15
     unsigned    isTemplateHashDefined : 1; //14) SET if the templateHash needs to be
     unsigned    nvWrittenState : 1;     //13) SET if TPMA_NV_WRITTEN is required to
     unsigned    checkNvWritten : 1;     //12) SET if the TPMA_NV_WRITTEN attribute
@@ -442,6 +456,8 @@ typedef struct SESSION
 	// command being authorized
 	TPM2B_DIGEST nameHash;      // the required nameHash
 	TPM2B_DIGEST templateHash;  // the required template for creation
+	TPM2B_DIGEST pHash;         // the required parameter hash value for the
+	// command being authorized
     } u1;
     
     union

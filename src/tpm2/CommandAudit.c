@@ -249,6 +249,18 @@ CommandAuditCapGetCCList(TPM_CC   commandCode,  // IN: start command code
     return more;
 }
 
+//*** CommandAuditCapGetOneCC()
+// This function returns true if a command has its audit bit set.
+BOOL CommandAuditCapGetOneCC(TPM_CC commandCode)  // IN: command code
+{
+    COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
+    if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
+	{
+	    return CommandAuditIsRequired(commandIndex);
+	}
+    return FALSE;
+}
+
 //*** CommandAuditGetDigest
 // This command is used to create a digest of the commands being audited. The
 // commands are processed in ascending numeric order with a list of TPM_CC being

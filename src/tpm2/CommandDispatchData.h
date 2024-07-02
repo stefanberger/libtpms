@@ -153,7 +153,9 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
 					UNMARSHAL_DISPATCH(TPM2B_NAME),
 #define TPM2B_NV_PUBLIC_P_UNMARSHAL             (TPM2B_NAME_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_NV_PUBLIC),
-#define TPM2B_PRIVATE_P_UNMARSHAL               (TPM2B_NV_PUBLIC_P_UNMARSHAL + 1)
+#define TPM2B_NV_PUBLIC_2_P_UNMARSHAL           (TPM2B_NV_PUBLIC_P_UNMARSHAL + 1)
+					UNMARSHAL_DISPATCH(TPM2B_NV_PUBLIC_2),
+#define TPM2B_PRIVATE_P_UNMARSHAL               (TPM2B_NV_PUBLIC_2_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_PRIVATE),
 #define TPM2B_PUBLIC_KEY_RSA_P_UNMARSHAL        (TPM2B_PRIVATE_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_PUBLIC_KEY_RSA),
@@ -165,8 +167,10 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
 #define TPM2B_SENSITIVE_DATA_P_UNMARSHAL				\
 					(TPM2B_SENSITIVE_CREATE_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_SENSITIVE_DATA),
+#define TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL   (TPM2B_SENSITIVE_DATA_P_UNMARSHAL + 1)
+					UNMARSHAL_DISPATCH(TPM2B_SET_CAPABILITY_DATA),
 #define TPM2B_TEMPLATE_P_UNMARSHAL					\
-					(TPM2B_SENSITIVE_DATA_P_UNMARSHAL + 1)
+					(TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_TEMPLATE),
 #define TPM2B_TIMEOUT_P_UNMARSHAL               (TPM2B_TEMPLATE_P_UNMARSHAL + 1)
 					UNMARSHAL_DISPATCH(TPM2B_TIMEOUT),
@@ -292,7 +296,9 @@ const _MARSHAL_T_ marshalArray[] = {
 				    MARSHAL_DISPATCH(TPM2B_NAME),
 #define TPM2B_NV_PUBLIC_P_MARSHAL               (TPM2B_NAME_P_MARSHAL + 1)
 				    MARSHAL_DISPATCH(TPM2B_NV_PUBLIC),
-#define TPM2B_PRIVATE_P_MARSHAL                 (TPM2B_NV_PUBLIC_P_MARSHAL + 1)
+#define TPM2B_NV_PUBLIC_2_P_MARSHAL             (TPM2B_NV_PUBLIC_P_MARSHAL + 1)
+				    MARSHAL_DISPATCH(TPM2B_NV_PUBLIC_2),
+#define TPM2B_PRIVATE_P_MARSHAL                 (TPM2B_NV_PUBLIC_2_P_MARSHAL + 1)
 				    MARSHAL_DISPATCH(TPM2B_PRIVATE),
 #define TPM2B_PUBLIC_P_MARSHAL                  (TPM2B_PRIVATE_P_MARSHAL + 1)
 				    MARSHAL_DISPATCH(TPM2B_PUBLIC),
@@ -2938,6 +2944,84 @@ PolicyAuthorizeNV_COMMAND_DESCRIPTOR_t _PolicyAuthorizeNVData = {
 #else
 #define _PolicyAuthorizeNVDataAddress 0
 #endif
+
+#if       CC_PolicyCapability
+#include    "PolicyCapability_fp.h"
+
+typedef TPM_RC (PolicyCapability_Entry)(
+					PolicyCapability_In*        in
+					);
+
+typedef const struct
+{
+    PolicyCapability_Entry      *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[5];
+    BYTE                        types[8];
+} PolicyCapability_COMMAND_DESCRIPTOR_t;
+
+PolicyCapability_COMMAND_DESCRIPTOR_t _PolicyCapabilityData = {
+    /* entry         */         &TPM2_PolicyCapability,
+    /* inSize        */         (UINT16)(sizeof(PolicyCapability_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyCapability_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyCapability_In, operandB)),
+				 (UINT16)(offsetof(PolicyCapability_In, offset)),
+				 (UINT16)(offsetof(PolicyCapability_In, operation)),
+				 (UINT16)(offsetof(PolicyCapability_In, capability)),
+				 (UINT16)(offsetof(PolicyCapability_In, property))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+				 TPM2B_OPERAND_P_UNMARSHAL,
+				 UINT16_P_UNMARSHAL,
+				 TPM_EO_P_UNMARSHAL,
+				 TPM_CAP_P_UNMARSHAL,
+				 UINT32_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _PolicyCapabilityDataAddress (&_PolicyCapabilityData)
+#else
+#define _PolicyCapabilityDataAddress 0
+#endif // CC_PolicyCapability
+
+#if       CC_PolicyParameters
+#include    "PolicyParameters_fp.h"
+
+typedef TPM_RC (PolicyParameters_Entry)(
+					PolicyParameters_In*        in
+					);
+
+
+typedef const struct
+{
+    PolicyParameters_Entry      *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[4];
+} PolicyParameters_COMMAND_DESCRIPTOR_t;
+
+PolicyParameters_COMMAND_DESCRIPTOR_t _PolicyParametersData = {
+    /* entry         */         &TPM2_PolicyParameters,
+    /* inSize        */         (UINT16)(sizeof(PolicyParameters_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyParameters_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyParameters_In, pHash))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+				 TPM2B_DIGEST_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _PolicyParametersDataAddress (&_PolicyParametersData)
+#else
+#define _PolicyParametersDataAddress 0
+#endif // CC_PolicyParameters
+
 #if CC_CreatePrimary
 #include "CreatePrimary_fp.h"
 typedef TPM_RC  (CreatePrimary_Entry)(
@@ -4061,6 +4145,113 @@ NV_Certify_COMMAND_DESCRIPTOR_t _NV_CertifyData = {
 #define _NV_CertifyDataAddress 0
 #endif
 
+#if       CC_NV_DefineSpace2
+#include    "NV_DefineSpace2_fp.h"
+
+typedef TPM_RC (NV_DefineSpace2_Entry)(
+				       NV_DefineSpace2_In*         in
+				       );
+
+typedef const struct
+{
+    NV_DefineSpace2_Entry       *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[2];
+    BYTE                        types[5];
+} NV_DefineSpace2_COMMAND_DESCRIPTOR_t;
+
+NV_DefineSpace2_COMMAND_DESCRIPTOR_t _NV_DefineSpace2Data = {
+    /* entry         */         &TPM2_NV_DefineSpace2,
+    /* inSize        */         (UINT16)(sizeof(NV_DefineSpace2_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(NV_DefineSpace2_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(NV_DefineSpace2_In, auth)),
+				 (UINT16)(offsetof(NV_DefineSpace2_In, publicInfo))},
+    /* types         */         {TPMI_RH_PROVISION_H_UNMARSHAL,
+				 TPM2B_AUTH_P_UNMARSHAL,
+				 TPM2B_NV_PUBLIC_2_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _NV_DefineSpace2DataAddress (&_NV_DefineSpace2Data)
+#else
+#define _NV_DefineSpace2DataAddress 0
+#endif // CC_NV_DefineSpace2
+
+#if       CC_NV_ReadPublic2
+#include    "NV_ReadPublic2_fp.h"
+
+typedef TPM_RC (NV_ReadPublic2_Entry)(
+				      NV_ReadPublic2_In*          in,
+				      NV_ReadPublic2_Out*         out
+				      );
+
+
+typedef const struct
+{
+    NV_ReadPublic2_Entry        *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[5];
+} NV_ReadPublic2_COMMAND_DESCRIPTOR_t;
+
+NV_ReadPublic2_COMMAND_DESCRIPTOR_t _NV_ReadPublic2Data = {
+    /* entry         */         &TPM2_NV_ReadPublic2,
+    /* inSize        */         (UINT16)(sizeof(NV_ReadPublic2_In)),
+    /* outSize       */         (UINT16)(sizeof(NV_ReadPublic2_Out)),
+    /* offsetOfTypes */         offsetof(NV_ReadPublic2_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(NV_ReadPublic2_Out, nvName))},
+    /* types         */         {TPMI_RH_NV_INDEX_H_UNMARSHAL,
+				 END_OF_LIST,
+				 TPM2B_NV_PUBLIC_2_P_MARSHAL,
+				 TPM2B_NAME_P_MARSHAL,
+				 END_OF_LIST}
+};
+
+#define _NV_ReadPublic2DataAddress (&_NV_ReadPublic2Data)
+#else
+#define _NV_ReadPublic2DataAddress 0
+#endif // CC_NV_ReadPublic2
+
+#if       CC_SetCapability
+#include    "SetCapability_fp.h"
+
+typedef TPM_RC (SetCapability_Entry)(
+				     SetCapability_In*        in
+				     );
+
+typedef const struct
+{
+    SetCapability_Entry         *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[1];
+    BYTE                        types[4];
+} SetCapability_COMMAND_DESCRIPTOR_t;
+
+SetCapability_COMMAND_DESCRIPTOR_t _SetCapabilityData = {
+    /* entry         */         &TPM2_SetCapability,
+    /* inSize        */         (UINT16)(sizeof(SetCapability_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(SetCapability_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(SetCapability_In, setCapabilityData))},
+    /* types         */         {TPMI_RH_HIERARCHY_H_UNMARSHAL,
+				 TPM2B_SET_CAPABILITY_DATA_P_UNMARSHAL,
+				 END_OF_LIST,
+				 END_OF_LIST}
+};
+
+#define _SetCapabilityDataAddress (&_SetCapabilityData)
+#else
+#define _SetCapabilityDataAddress 0
+#endif // CC_SetCapability
+
 #if CC_AC_GetCapability
 #include "AC_GetCapability_fp.h"
 typedef TPM_RC  (AC_GetCapability_Entry)(
@@ -4613,6 +4804,21 @@ COMMAND_DESCRIPTOR_t *s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ECC_Decrypt)
     (COMMAND_DESCRIPTOR_t *)_ECC_DecryptDataAddress,
 #endif // CC_ECC_Decrypt
+#if (PAD_LIST || CC_PolicyCapability)
+    (COMMAND_DESCRIPTOR_t*)_PolicyCapabilityDataAddress,
+#endif // CC_PolicyCapability
+#if (PAD_LIST || CC_PolicyParameters)
+    (COMMAND_DESCRIPTOR_t*)_PolicyParametersDataAddress,
+#endif // CC_PolicyParameters
+#if (PAD_LIST || CC_NV_DefineSpace2)
+    (COMMAND_DESCRIPTOR_t*)_NV_DefineSpace2DataAddress,
+#endif // CC_NV_DefineSpace2
+#if (PAD_LIST || CC_NV_ReadPublic2)
+    (COMMAND_DESCRIPTOR_t*)_NV_ReadPublic2DataAddress,
+#endif // CC_NV_ReadPublic2
+#if (PAD_LIST || CC_SetCapability)
+    (COMMAND_DESCRIPTOR_t*)_SetCapabilityDataAddress,
+#endif // CC_SetCapability
 #if (PAD_LIST || CC_Vendor_TCG_Test)
     (COMMAND_DESCRIPTOR_t *)_Vendor_TCG_TestDataAddress,
 #endif

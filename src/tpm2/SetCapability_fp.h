@@ -54,37 +54,29 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 -2023				*/
+/*  (c) Copyright IBM Corp. and others, 2023					*/
 /*										*/
 /********************************************************************************/
 
-#ifndef HANDLE_FP_H
-#define HANDLE_FP_H
+#if CC_SetCapability  // Command must be enabled
 
-TPM_HT
-HandleGetType(
-	      TPM_HANDLE       handle         // IN: a handle to be checked
-	      );
-TPM_HANDLE
-NextPermanentHandle(
-		    TPM_HANDLE       inHandle       // IN: the handle to check
-		    );
-TPMI_YES_NO
-PermanentCapGetHandles(
-		       TPM_HANDLE       handle,        // IN: start handle
-		       UINT32           count,         // IN: count of returned handles
-		       TPML_HANDLE     *handleList     // OUT: list of handle
-		       );
-BOOL PermanentCapGetOneHandle(TPM_HANDLE handle  // IN: handle
-			      );
-TPMI_YES_NO
-PermanentHandleGetPolicy(
-			 TPM_HANDLE           handle,        // IN: start handle
-			 UINT32               count,         // IN: count of returned handles
-			 TPML_TAGGED_POLICY  *policyList     // OUT: list of handle
-			 );
-BOOL PermanentHandleGetOnePolicy(TPM_HANDLE          handle,  // IN: handle
-				 TPMS_TAGGED_POLICY* policy   // OUT: tagged policy
-				 );
+#  ifndef SETCAPABILITY_FP_H
+#    define SETCAPABILITY_FP_H
 
-#endif
+// Input structure definition
+typedef struct
+{
+    TPMI_RH_HIERARCHY authHandle;
+    TPM2B_SET_CAPABILITY_DATA setCapabilityData;
+} SetCapability_In;
+
+// Response code modifiers
+#    define SetCapability_authHandle (TPM_RC_H + TPM_RC_1)
+#    define SetCapability_setCapabilityData (TPM_RC_P + TPM_RC_1)
+
+// Function prototype
+TPM_RC TPM2_SetCapability(SetCapability_In* in);
+
+#  endif  // SETCAPABILITY_FP_H
+#endif    // CC_SetCapability
+

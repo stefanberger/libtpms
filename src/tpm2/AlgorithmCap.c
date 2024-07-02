@@ -221,6 +221,36 @@ AlgorithmCapGetImplemented(
 	}
     return more;
 }
+
+//** AlgorithmCapGetOneImplemented()
+// This function returns whether a single algorithm was implemented, along
+// with its properties (if implemented).
+BOOL AlgorithmCapGetOneImplemented(
+				   TPM_ALG_ID         algID,       // IN: the algorithm ID
+				   TPMS_ALG_PROPERTY* algProperty  // OUT: algorithm properties
+				   )
+{
+    UINT32 i;
+    UINT32 algNum;
+
+    // Compute how many algorithms are defined in s_algorithms array.
+    algNum = sizeof(s_algorithms) / sizeof(s_algorithms[0]);
+
+    // Scan the implemented algorithm list to see if there is a match to 'algID'.
+    for(i = 0; i < algNum; i++)
+	{
+	    // If algID is less than the starting algorithm ID, skip it
+	    if(s_algorithms[i].algID == algID)
+		{
+		    algProperty->alg           = algID;
+		    algProperty->algProperties = s_algorithms[i].attributes;
+		    return TRUE;
+		}
+	}
+    return FALSE;
+}
+
+
 /* 9.1.4 AlgorithmGetImplementedVector()
 
    This function returns the bit vector of the implemented algorithms.

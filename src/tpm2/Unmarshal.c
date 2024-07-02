@@ -1153,7 +1153,79 @@ TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
 	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
+	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+	BOOL isNotPermamentNV = (*target < PERMANENT_NV_FIRST) || (*target > PERMANENT_NV_LAST);
+
+	if (isNotNv &&
+	    isNotExternalNV &&
+	    isNotPermamentNV) {
+	    rc = TPM_RC_VALUE;
+	    *target = orig_target; // libtpms added
+	}
+    }
+    return rc;
+}
+
+/* Table 67 - Definition of (TPM_HANDLE) TPMI_RH_NV_DEFINED_INDEX Type <IN> */
+
+TPM_RC
+TPMI_RH_NV_DEFINED_INDEX_Unmarshal(TPMI_RH_NV_DEFINED_INDEX *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    TPMI_RH_NV_DEFINED_INDEX orig_target = *target; // libtpms added
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
+	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+
+	if (isNotNv &&
+	    isNotExternalNV) {
+	    rc = TPM_RC_VALUE;
+	    *target = orig_target; // libtpms added
+	}
+    }
+    return rc;
+}
+
+/* Table 68 - Definition of (TPM_HANDLE) TPMI_RH_NV_LEGACY_INDEX Type <IN/OUT> */
+TPM_RC
+TPMI_RH_NV_LEGACY_INDEX_Unmarshal(TPMI_RH_NV_LEGACY_INDEX *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    TPMI_RH_NV_LEGACY_INDEX orig_target = *target; // libtpms added
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
+
 	if (isNotNv) {
+	    rc = TPM_RC_VALUE;
+	    *target = orig_target; // libtpms added
+	}
+    }
+    return rc;
+}
+
+/* Table 69 - Definition of (TPM_HANDLE) TPMI_RH_NV_EXP_INDEX Type <IN/OUT> */
+
+TPM_RC
+TPMI_RH_NV_EXP_INDEX_Unmarshal(TPMI_RH_NV_EXP_INDEX *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    TPMI_RH_NV_EXP_INDEX orig_target = *target; // libtpms added
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+
+	if (isNotExternalNV) {
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
 	}
@@ -2297,6 +2369,9 @@ TPML_TAGGED_POLICY_Unmarshal(TPML_TAGGED_POLICY *target, BYTE **buffer, INT32 *s
     return rc;
 }
 
+#endif					// libtpms added
+
+
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union (StructuresTable()) */
 
 #if 0
@@ -2360,6 +2435,69 @@ TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT3
     return rc;
 }
 #endif
+
+/* NOTE The TPMU_SET_CAPABILITIES structure may be defined by a TCG Registry. */
+TPM_RC
+TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    switch (selector) {
+      default:
+	rc = TPM_RC_SELECTOR;
+    }
+    return rc;
+}
+
+/* Table 129 - Definition of TPMS_SET_CAPABILITY_DATA Structure <IN> */
+TPM_RC
+TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_CAP_Unmarshal(&target->setCapability, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMU_SET_CAPABILITIES_Unmarshal(&target->data, buffer, size, target->setCapability);
+    }
+    return rc;
+}
+
+/* Table 130 - Definition of TPM2B_SET_CAPABILITY_DATA Structure <IN> */
+TPM_RC
+TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    INT32 startSize;
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size == 0) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	startSize = *size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMS_SET_CAPABILITY_DATA_Unmarshal(&target->setCapabilityData, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size != startSize - *size) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
+
+#if 0					// libtpms added
+typedef struct {
+    UINT16				size;
+    TPMS_SET_CAPABILITY_DATA	setCapabilityData;
+} TPM2B_SET_CAPABILITY_DATA;
 
 /* Table 109 - Definition of TPMS_CLOCK_INFO Structure */
 
@@ -4450,6 +4588,121 @@ TPM2B_NV_PUBLIC_Unmarshal(TPM2B_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+/* Table 226 - Definition of (UINT64) TPMA_NV_EXP Bits */
+
+TPM_RC
+TPMA_NV_EXP_Unmarshal(TPMA_NV_EXP *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT64_Unmarshal(target, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (*target & TPMA_NV_EXP_reserved) {
+	    rc = TPM_RC_RESERVED_BITS;
+	}
+    }
+    return rc;
+}
+
+/* Table 229 - Definition of TPMS_NV_PUBLIC_EXP_ATTR Structure */
+
+TPM_RC
+TPMS_NV_PUBLIC_EXP_ATTR_Unmarshal(TPMS_NV_PUBLIC_EXP_ATTR *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMI_RH_NV_EXP_INDEX_Unmarshal(&target->nvIndex, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMI_ALG_HASH_Unmarshal(&target->nameAlg, buffer, size, NO);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMA_NV_EXP_Unmarshal(&target->attributes, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM2B_DIGEST_Unmarshal(&target->authPolicy, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->dataSize, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->dataSize > MAX_NV_INDEX_SIZE) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
+
+/* Table 230 - Definition of TPMU_NV_PUBLIC_2 Union */
+
+TPM_RC
+TPMU_NV_PUBLIC_2_Unmarshal( TPMU_NV_PUBLIC_2 *target, BYTE **buffer, INT32 *size, UINT8 selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    switch (selector) {
+      case TPM_HT_NV_INDEX:
+	rc = TPMS_NV_PUBLIC_Unmarshal(&target->nvIndex, buffer, size);
+	break;
+      case TPM_HT_EXTERNAL_NV:
+	rc = TPMS_NV_PUBLIC_EXP_ATTR_Unmarshal(&target->externalNV, buffer, size);
+	break;
+      case TPM_HT_PERMANENT_NV:
+	rc = TPMS_NV_PUBLIC_Unmarshal(&target->permanentNV, buffer, size);
+	break;
+      default:
+	rc = TPM_RC_SELECTOR;
+    }
+    return rc;
+}
+
+/* Table 231 - Definition of TPMT_NV_PUBLIC_2 Structure */
+
+TPM_RC
+TPMT_NV_PUBLIC_2_Unmarshal(TPMT_NV_PUBLIC_2 *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT8_Unmarshal(&target->handleType, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMU_NV_PUBLIC_2_Unmarshal(&target->nvPublic2, buffer, size, target->handleType);
+    }
+    return rc;
+}
+
+/* Table 232 - Definition of TPM2B_NV_PUBLIC_2 Structure */
+TPM_RC
+TPM2B_NV_PUBLIC_2_Unmarshal(TPM2B_NV_PUBLIC_2 *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    INT32 startSize;
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size == 0) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	startSize = *size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMT_NV_PUBLIC_2_Unmarshal(&target->nvPublic2, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size != startSize - *size) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
 /* Table 199 - Definition of TPM2B_CONTEXT_SENSITIVE Structure <IN/OUT> */
 
 #if 0		// libtpms added
@@ -4543,3 +4796,60 @@ TPM_AT_Unmarshal(TPM_AT *target, BYTE **buffer, INT32 *size)
     }
     return rc;
 }
+
+#if 0		// libtpms added
+TPM_RC
+TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    switch (selector) {
+      default:
+	rc = TPM_RC_SELECTOR;
+    }
+    return rc;
+}
+
+TPM_RC
+TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPM_CAP_Unmarshal(&target->setCapability, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMU_SET_CAPABILITIES_Unmarshal(&target->data, buffer, size, target->setCapability);
+    }
+    return rc;
+}
+
+TPM_RC
+TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA *target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    INT32 startSize;
+    if (rc == TPM_RC_SUCCESS) {
+	rc = UINT16_Unmarshal(&target->size, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size == 0) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	startSize = *size;
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	rc = TPMS_SET_CAPABILITY_DATA_Unmarshal(&target->setCapabilityData, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+	if (target->size != startSize - *size) {
+	    rc = TPM_RC_SIZE;
+	}
+    }
+    return rc;
+}
+#endif		// libtpms added
+
