@@ -77,7 +77,7 @@ CryptGetHashDef(
 BOOL
 CryptHashIsValidAlg(
 		    TPM_ALG_ID       hashAlg,
-		    BOOL             flag
+		    BOOL             isAlgNullValid
 		    );
 LIB_EXPORT TPM_ALG_ID
 CryptHashGetAlgByIndex(
