@@ -470,6 +470,7 @@ static void OBJECT_To_RSA3072_OBJECT(RSA3072_OBJECT* dest, const OBJECT* src)
     dest->evictHandle = src->evictHandle;
     dest->name = src->name;
     dest->seedCompatLevel = src->seedCompatLevel;
+    MemorySet(dest->_pad, 0, sizeof(dest->_pad));
 }
 
 TPM_RC
