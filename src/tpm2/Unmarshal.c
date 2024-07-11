@@ -247,9 +247,9 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 	  case TPM_ECC_CURVE_448:
 #  endif  // ECC_CURVE_448
 	    if (*target != TPM_ECC_NONE &&		// libtpms added begin
-	        !CryptEccIsCurveRuntimeUsable(*target)) {
-              rc = TPM_RC_CURVE;
-            }						// libtpms added end
+		!CryptEccIsCurveRuntimeUsable(*target)) {
+	      rc = TPM_RC_CURVE;
+	    }						// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
@@ -1308,7 +1308,7 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(TPMI_ALG_SYM_OBJECT *target, BYTE **buffer, INT32 
 	  case TPM_ALG_CAMELLIA:
 #endif
 #if ALG_TDES		// libtpms added begin
-          case TPM_ALG_TDES:
+	  case TPM_ALG_TDES:
 #endif			// iibtpms added end
 	    break;
 	  case TPM_ALG_NULL:
@@ -3674,7 +3674,7 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	  case 2048:
 	  case 3072:
 #if RSA_4096					// libtpms added begin
-          case 4096:
+	  case 4096:
 #endif						// libtpms added end
 	    break;
 	  default:
@@ -4524,31 +4524,31 @@ TPMS_CONTEXT_Unmarshal(TPMS_CONTEXT *target, BYTE **buffer, INT32 *size)
     }
     // libtpms added begin
     if (rc == TPM_RC_SUCCESS) {
-        if (*size > 0) {
-            /* Windows 2019 server pads the command TPM_ContextLoad up to the value of
-             * TPM_PT_MAX_OBJECT_CONTENT for the TPMS_CONTEXT part and we end up with
-             * left-over padding bytes here that will make the TPM2_ContextLoad command
-             * fail. This is because we don't just write an OBJECT as the context but use
-             * ANY_OBJECT_Marshal to write it, which consumes less bytes. We had to do
-             * this due to a Linux TPM resource manager bug that couldn't deal with the
-             * larger context sizes once RSA 3072 was enabled and it ran out of memory
-             * when receiving contexts.
-             * Luckily only one command needs TPMS_CONTEXT unmarshalled, so we can adjust
-             * for the left-over padding here but also ONLY do this if
-             * 'orig_size' == value(TPM_PT_MAX_OBJECT_CONTENT).
-             */
-            static UINT32 tpm_pt_max_object_context;
+	if (*size > 0) {
+	    /* Windows 2019 server pads the command TPM_ContextLoad up to the value of
+	     * TPM_PT_MAX_OBJECT_CONTENT for the TPMS_CONTEXT part and we end up with
+	     * left-over padding bytes here that will make the TPM2_ContextLoad command
+	     * fail. This is because we don't just write an OBJECT as the context but use
+	     * ANY_OBJECT_Marshal to write it, which consumes less bytes. We had to do
+	     * this due to a Linux TPM resource manager bug that couldn't deal with the
+	     * larger context sizes once RSA 3072 was enabled and it ran out of memory
+	     * when receiving contexts.
+	     * Luckily only one command needs TPMS_CONTEXT unmarshalled, so we can adjust
+	     * for the left-over padding here but also ONLY do this if
+	     * 'orig_size' == value(TPM_PT_MAX_OBJECT_CONTENT).
+	     */
+	    static UINT32 tpm_pt_max_object_context;
 
-            if (tpm_pt_max_object_context == 0) {
-                TPML_TAGGED_TPM_PROPERTY tttp;
+	    if (tpm_pt_max_object_context == 0) {
+		TPML_TAGGED_TPM_PROPERTY tttp;
 
-                TPMCapGetProperties(TPM_PT_MAX_OBJECT_CONTEXT, 1, &tttp);
-                if (tttp.count == 1)
-                    tpm_pt_max_object_context = tttp.tpmProperty[0].value;
-            }
-            if ((UINT32)orig_size == tpm_pt_max_object_context)
-                *size = 0; /* consume the padding bytes */
-        }
+		TPMCapGetProperties(TPM_PT_MAX_OBJECT_CONTEXT, 1, &tttp);
+		if (tttp.count == 1)
+		    tpm_pt_max_object_context = tttp.tpmProperty[0].value;
+	    }
+	    if ((UINT32)orig_size == tpm_pt_max_object_context)
+		*size = 0; /* consume the padding bytes */
+	}
     }
     // libtpms added end
     return rc;
