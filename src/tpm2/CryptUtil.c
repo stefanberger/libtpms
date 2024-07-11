@@ -781,6 +781,8 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
 		  BYTE*          buffer = secret->t.secret;
 		  INT32          size   = secret->t.size;
 
+		  MemorySet(&eccPublic, 0, sizeof(eccPublic));		// libtpms added: Coverity
+
 		  // Retrieve ECC point from secret buffer
 		  result = TPMS_ECC_POINT_Unmarshal(&eccPublic, &buffer, &size);
 		  if(result == TPM_RC_SUCCESS)
