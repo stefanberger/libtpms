@@ -1621,6 +1621,7 @@ TPMU_HA_Unmarshal(TPMU_HA *target, BYTE **buffer, INT32 *size, UINT32 selector)
 TPM_RC
 TPMT_HA_Unmarshal(TPMT_HA *target, BYTE **buffer, INT32 *size, BOOL allowNull)
 {
+    TPMT_HA orig_target = *target;			// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -1629,6 +1630,9 @@ TPMT_HA_Unmarshal(TPMT_HA *target, BYTE **buffer, INT32 *size, BOOL allowNull)
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMU_HA_Unmarshal(&target->digest, buffer, size, target->hashAlg);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added begin
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
@@ -2891,6 +2895,7 @@ TPM2B_SENSITIVE_DATA_Unmarshal(TPM2B_SENSITIVE_DATA *target, BYTE **buffer, INT3
 TPM_RC
 TPMS_SENSITIVE_CREATE_Unmarshal(TPMS_SENSITIVE_CREATE *target, BYTE **buffer, INT32 *size)
 {
+    TPMS_SENSITIVE_CREATE orig_target = *target;	// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
     
     if (rc == TPM_RC_SUCCESS) {
@@ -2899,6 +2904,9 @@ TPMS_SENSITIVE_CREATE_Unmarshal(TPMS_SENSITIVE_CREATE *target, BYTE **buffer, IN
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM2B_SENSITIVE_DATA_Unmarshal(&target->data, buffer, size);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added begin
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
@@ -3199,6 +3207,7 @@ TPMU_SIG_SCHEME_Unmarshal(TPMU_SIG_SCHEME *target, BYTE **buffer, INT32 *size, U
 TPM_RC
 TPMT_SIG_SCHEME_Unmarshal(TPMT_SIG_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull)
 {
+    TPMT_SIG_SCHEME orig_target = *target;		// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -3207,6 +3216,9 @@ TPMT_SIG_SCHEME_Unmarshal(TPMT_SIG_SCHEME *target, BYTE **buffer, INT32 *size, B
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMU_SIG_SCHEME_Unmarshal(&target->details, buffer, size, target->scheme);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added begin
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
@@ -3661,6 +3673,7 @@ TPM2B_ECC_PARAMETER_Unmarshal(TPM2B_ECC_PARAMETER *target, BYTE **buffer, INT32 
 TPM_RC
 TPMS_ECC_POINT_Unmarshal(TPMS_ECC_POINT *target, BYTE **buffer, INT32 *size)
 {
+    TPMS_ECC_POINT orig_target = *target;		// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -3669,6 +3682,9 @@ TPMS_ECC_POINT_Unmarshal(TPMS_ECC_POINT *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM2B_ECC_PARAMETER_Unmarshal(&target->y, buffer, size);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added being
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
@@ -3801,6 +3817,7 @@ TPMI_ECC_CURVE_Unmarshal(TPMI_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 TPM_RC
 TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, BOOL allowNull)
 {
+    TPMT_ECC_SCHEME orig_target = *target;		// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -3809,6 +3826,9 @@ TPMT_ECC_SCHEME_Unmarshal(TPMT_ECC_SCHEME *target, BYTE **buffer, INT32 *size, B
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMU_ASYM_SCHEME_Unmarshal(&target->details, buffer, size, target->scheme);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added begin
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
@@ -4107,6 +4127,7 @@ TPMS_RSA_PARMS_Unmarshal(TPMS_RSA_PARMS *target, BYTE **buffer, INT32 *size)
 TPM_RC
 TPMS_ECC_PARMS_Unmarshal(TPMS_ECC_PARMS *target, BYTE **buffer, INT32 *size)
 {
+    TPMS_ECC_PARMS orig_target = *target;		// libtpms added
     TPM_RC rc = TPM_RC_SUCCESS;
     
     if (rc == TPM_RC_SUCCESS) {
@@ -4121,6 +4142,9 @@ TPMS_ECC_PARMS_Unmarshal(TPMS_ECC_PARMS *target, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPMT_KDF_SCHEME_Unmarshal(&target->kdf, buffer, size, YES);
     }
+    if (rc != TPM_RC_SUCCESS) {				// libtpms added begin
+	*target = orig_target;
+    }							// libtpms added end
     return rc;
 }
 
