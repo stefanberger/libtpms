@@ -217,6 +217,9 @@ LIB_EXPORT int FindNthSetBit(
     UINT32 sum = 0;
     BYTE   sel;
 
+    if (n < 1 || aSize < 1)			// libtpms added begin: Coverity 1550494
+        return -1;				// libtpms end
+
     //find the bit
     for(i = 0; (i < (int)aSize) && (sum < n); i++)
 	sum += BitsInByte(a[i]);
