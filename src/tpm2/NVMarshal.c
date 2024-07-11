@@ -4555,9 +4555,8 @@ USER_NVRAM_Display(const char *msg)
             fprintf(stderr, " (NV_INDEX)  ");
             /* NV_INDEX has the index again at offset 0! */
             NvReadNvIndexInfo(entryRef + offset, &nvi);
-            offset += sizeof(nvi);
             datasize = entrysize - sizeof(UINT32) - sizeof(nvi);
-            fprintf(stderr, " datasize: %u\n",datasize);
+            fprintf(stderr, " datasize: %u\n", datasize);
             break;
         case TPM_HT_PERSISTENT:
             fprintf(stderr, " (PERSISTENT)");
