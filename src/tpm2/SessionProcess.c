@@ -1422,6 +1422,8 @@ ParseSessionBuffer(
 		    // Note: for all the TPM 2.0 commands, handles requiring
 		    // authorization come first in a command input and there are only ever
 		    // two values requiring authorization
+		    if(command->sessionNum == 0)		// libtpms added begin (Coverity 1550499)
+		        return TPM_RC_AUTH_MISSING;		// libtpms added end
 		    if(i > (command->sessionNum - 1))
 			return TPM_RC_AUTH_MISSING;
 		    // Record the handle associated with the authorization session
