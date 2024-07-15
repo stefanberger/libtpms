@@ -70,6 +70,12 @@
 #include "CryptHash.h"
 #include "OIDs.h"
 
+#if USE_OPENSSL_FUNCTIONS_SSKDF
+# include "Helpers_fp.h"
+# include <openssl/kdf.h>
+# include <openssl/core_names.h>
+#endif
+
 // Instance each of the hash descriptors based on the implemented algorithms
 FOR_EACH_HASH(HASH_DEF_TEMPLATE)
 // Instance a 'null' def.
@@ -809,6 +815,7 @@ LIB_EXPORT UINT16 CryptKDFa(
 //     0            hash algorithm is not supported or is TPM_ALG_NULL
 //    > 0           the number of bytes in the 'keyStream' buffer
 //
+#if ! USE_OPENSSL_FUNCTIONS_SSKDF
 LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
 			    TPM2B*       Z,        // IN: Z
 			    const TPM2B* label,    // IN: a label value for the KDF
@@ -888,3 +895,17 @@ LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in
 
     return (UINT16)((sizeInBits + 7) / 8);
 }
+#else
+LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
+			    TPM2B*       Z,        // IN: Z
+			    const TPM2B* label,    // IN: a label value for the KDF
+			    TPM2B*       partyUInfo,  // IN: PartyUInfo
+			    TPM2B*       partyVInfo,  // IN: PartyVInfo
+			    UINT32       sizeInBits,  // IN: size of generated key in bits
+			    BYTE*        keyStream    // OUT: key buffer
+			    )
+{
+    return OSSLCryptKDFe(hashAlg, Z, label, partyUInfo, partyVInfo,
+			 sizeInBits, keyStream);
+}
+#endif //  USE_OPENSSL_FUNCTIONS_SSKDF
