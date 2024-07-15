@@ -52,6 +52,7 @@ Makefile
 /tests/base64decode
 /tests/fuzz
 /tests/freebl_sha1flattensize
+/tests/kdfa_openssl
 /tests/kdfe_openssl
 /tests/nvram_offsets
 /tests/object_size

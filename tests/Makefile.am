@@ -57,10 +57,12 @@ if ENABLE_STATIC_TESTS
 # object_size needs ANY_OBJECT_Marshal which only is accessible with '-static'
 check_PROGRAMS += \
 	object_size \
-	kdfe_openssl
+	kdfe_openssl \
+	kdfa_openssl
 TESTS += \
 	object_size \
-	kdfe_openssl
+	kdfe_openssl \
+	kdfa_openssl
 
 object_size_SOURCES = object_size.c
 object_size_CFLAGS = $(AM_CFLAGS) \
@@ -84,6 +86,18 @@ kdfe_openssl_CFLAGS = $(AM_CFLAGS) \
 	-I$(top_srcdir)/src/tpm2/crypto/openssl \
 	-DTPM_POSIX
 kdfe_openssl_LDFLAGS = $(AM_LDFLAGS)
+
+kdfa_openssl_SOURCES = kdfa_openssl.c
+kdfa_openssl_CFLAGS = $(AM_CFLAGS) \
+	-static \
+	-g -ggdb \
+	-I$(top_srcdir)/include/libtpms \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/tpm2 \
+	-I$(top_srcdir)/src/tpm2/crypto \
+	-I$(top_srcdir)/src/tpm2/crypto/openssl \
+	-DTPM_POSIX
+kdfa_openssl_LDFLAGS = $(AM_LDFLAGS)
 
 endif # ENABLE_STATIC_TESTS
 endif # WITH_TPM2
