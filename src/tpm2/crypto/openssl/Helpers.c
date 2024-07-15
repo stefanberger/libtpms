@@ -73,6 +73,11 @@
 # include <openssl/param_build.h>
 #endif
 
+#if USE_OPENSSL_FUNCTIONS_SSKDF
+# include <openssl/kdf.h>
+# include <openssl/core_names.h>
+#endif
+
 typedef const EVP_CIPHER *(*evpfunc)(void);
 
 /* to enable RSA_check_key() on private keys set to != 0 */
@@ -1109,3 +1114,93 @@ void SM4_final(const SM4_KEY *ks)
 }
 #endif
 
+#if USE_OPENSSL_FUNCTIONS_SSKDF
+
+UINT16 OSSLCryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
+		     TPM2B*       Z,        // IN: Z
+		     const TPM2B* label,    // IN: a label value for the KDF
+		     TPM2B*       partyUInfo,  // IN: PartyUInfo
+		     TPM2B*       partyVInfo,  // IN: PartyVInfo
+		     UINT32       sizeInBits,  // IN: size of generated key in bits
+		     BYTE*        keyStream    // OUT: key buffer
+		    )
+{
+    char        digestname[16];
+    OSSL_PARAM  params[4];
+    OSSL_PARAM  *p = params;
+    size_t      buffer_size = 0;
+    UINT16      generated = 0;
+    size_t      offset = 0;
+    EVP_KDF_CTX *ctx;
+    EVP_KDF     *kdf;
+    char        *buffer;
+    INT16       bytes;  // number of bytes to generate
+    const char  *name;
+
+    pAssert(keyStream != NULL && Z != NULL && ((sizeInBits + 7) / 8) < INT16_MAX);
+    //
+    bytes = (INT16)((sizeInBits + 7) / 8);
+    if(hashAlg == TPM_ALG_NULL || bytes == 0)
+	return 0;
+
+    name = GetDigestNameByHashAlg(hashAlg);
+    if (!name)
+	return 0;
+    if (strlen(name) >= sizeof(digestname))
+	FAIL(FATAL_ERROR_INTERNAL);
+    strcpy(digestname, name);
+
+    if (label)
+	buffer_size += label->size;
+    if (partyUInfo)
+	buffer_size += partyUInfo->size;
+    if (partyVInfo)
+	buffer_size += partyVInfo->size;
+
+    buffer = malloc(buffer_size);
+    if (!buffer)
+	return 0;
+
+    kdf = EVP_KDF_fetch(NULL, OSSL_KDF_NAME_SSKDF, NULL);
+    if (!kdf)
+	goto out;
+
+    ctx = EVP_KDF_CTX_new(kdf);
+    if (!ctx)
+	goto out;
+
+    if (label) {
+	memcpy(&buffer[offset], label->buffer, label->size);
+	offset += label->size;
+    }
+    if (partyUInfo) {
+	memcpy(&buffer[offset], partyUInfo->buffer, partyUInfo->size);
+	offset += partyUInfo->size;
+    }
+    if (partyVInfo)
+	memcpy(&buffer[offset], partyVInfo->buffer, partyVInfo->size);
+
+    *p++ = OSSL_PARAM_construct_utf8_string(OSSL_KDF_PARAM_DIGEST,
+					    digestname, 0);
+    *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SECRET,
+					     Z->buffer, Z->size);
+    *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_INFO,
+					     buffer, buffer_size);
+    *p = OSSL_PARAM_construct_end();
+    if (EVP_KDF_derive(ctx, keyStream, bytes, params) <= 0)
+	goto out;
+
+    // Mask off bits if the required bits is not a multiple of byte size
+    if((sizeInBits % 8) != 0)
+	keyStream[0] &= ((1 << (sizeInBits % 8)) - 1);
+
+    generated = bytes;
+
+out:
+    EVP_KDF_free(kdf);
+    free(buffer);
+
+    return generated;
+}
+
+#endif // USE_OPENSSL_FUNCTIONS_SSKDF
