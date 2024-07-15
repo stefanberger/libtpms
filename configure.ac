@@ -247,6 +247,13 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 		use_openssl_function_kdf_concat=1
 		use_openssl_functions_for="${use_openssl_functions_for}KDF-CONCAT "
 	fi
+
+	not_found=0
+	AX_CHECK_DEFINE([<openssl/core_names.h>], [OSSL_KDF_NAME_KBKDF],, not_found=1)
+	if test "x$not_found" = "x0"; then
+		use_openssl_function_kdf_kb=1
+		use_openssl_functions_for="${use_openssl_functions_for}KDF-KB "
+	fi
 	LIBS=$LIBS_save
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
