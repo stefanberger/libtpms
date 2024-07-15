@@ -240,12 +240,20 @@ AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
 		use_openssl_functions_rsa=1
 		use_openssl_functions_for="${use_openssl_functions_for}RSA "
 	fi
+
+	not_found=0
+	AX_CHECK_DEFINE([<openssl/core_names.h>], [OSSL_KDF_NAME_X942KDF_CONCAT],, not_found=1)
+	if test "x$not_found" = "x0"; then
+		use_openssl_function_kdf_concat=1
+		use_openssl_functions_for="${use_openssl_functions_for}KDF-CONCAT "
+	fi
 	LIBS=$LIBS_save
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_ECDSA=$use_openssl_functions_ecdsa"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_RSA=$use_openssl_functions_rsa"
+CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_KDF_CONCAT=$use_openssl_functions_kdf_concat"
 
 AC_CHECK_LIB([crypto], [EC_POINT_get_affine_coordinates], found=1, found=0)
 CFLAGS="$CFLAGS -DUSE_EC_POINT_GET_AFFINE_COORDINATES_API=$found"
