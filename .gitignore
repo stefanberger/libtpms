@@ -52,6 +52,7 @@ Makefile
 /tests/base64decode
 /tests/fuzz
 /tests/freebl_sha1flattensize
+/tests/kdfe_openssl
 /tests/nvram_offsets
 /tests/object_size
 /tests/tpm2_createprimary
