@@ -862,7 +862,12 @@ pcrbanks_algs_active(const TPML_PCR_SELECTION *pcrAllocated)
     for(i = 0; i < pcrAllocated->count; i++) {
         for (j = 0; j < pcrAllocated->pcrSelections[i].sizeofSelect; j++) {
             if (pcrAllocated->pcrSelections[i].pcrSelect[j]) {
-                algs_active |= ((UINT64)1 << pcrAllocated->pcrSelections[i].hash);
+                if (pcrAllocated->pcrSelections[i].hash >= 64) {
+                    TPMLIB_LogTPM2Error("pcrbanks_algs_active: invalid hash alg id: %d\n",
+                                        pcrAllocated->pcrSelections[i].hash);
+                } else {
+                    algs_active |= ((UINT64)1 << pcrAllocated->pcrSelections[i].hash);
+                }
                 break;
             }
         }
