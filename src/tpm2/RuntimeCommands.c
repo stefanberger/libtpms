@@ -397,12 +397,15 @@ RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
 			    TPM_CC	            commandCode      // IN: the commandCode to check
 			    )
 {
+    if (CcToIdx(commandCode) >= ARRAY_SIZE(s_CommandProperties)) {
+        TPMLIB_LogPrintf("IsEnabled(0x%x): out-of-range command code\n");
+        return FALSE;
+    }
     TPMLIB_LogPrintf("IsEnEnabled(0x%x = '%s'): %d\n",
 		     commandCode,
 		     s_CommandProperties[CcToIdx(commandCode)].name,
 		     TEST_BIT(commandCode, RuntimeCommands->enabledCommands));
-    if (CcToIdx(commandCode) >= ARRAY_SIZE(s_CommandProperties) ||
-        !TEST_BIT(commandCode, RuntimeCommands->enabledCommands))
+    if (!TEST_BIT(commandCode, RuntimeCommands->enabledCommands))
 	return FALSE;
     return TRUE;
 }
