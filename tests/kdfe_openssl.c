@@ -38,8 +38,8 @@ int main(void)
 
     for (o = 0; o < 8; o++) {
 	for (i = 0; i < ARRAY_SIZE(hashAlgs); i++) {
-	    gen1 = CryptKDFe(hashAlgs[i], &Z.b, &label.b,
-			     &partyUInfo.b, &partyVInfo.b, sizeInBits - o, keyStream1);
+	    gen1 = ReferenceCryptKDFe(hashAlgs[i], &Z.b, &label.b,
+				      &partyUInfo.b, &partyVInfo.b, sizeInBits - o, keyStream1);
 
 	    gen2 = OSSLCryptKDFe(hashAlgs[i], &Z.b, &label.b,
 				 &partyUInfo.b, &partyVInfo.b, sizeInBits - o, keyStream2);
