@@ -186,8 +186,8 @@ static const struct {
     COMMAND(ACT_SetTimeout, true, 0), // not supported
     COMMAND(ECC_Encrypt, true, 3),
     COMMAND(ECC_Decrypt, true, 3),
-    COMMAND(PolicyCapability, true, 0), // not supported
-    COMMAND(PolicyParameters, true, 0), // not supported
+    COMMAND(PolicyCapability, true, 5),
+    COMMAND(PolicyParameters, true, 5),
     COMMAND(NV_DefineSpace2, true, 0), // not supported
     COMMAND(NV_ReadPublic2, true, 0), // not supported
     COMMAND(SetCapability, true, 0), // not supported
