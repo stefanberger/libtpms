@@ -152,6 +152,11 @@ the null profile (libtpms v0.9).
 
 =back
 
+=item 5: (since v0.10)
+
+This I<StateFormatLevel> enabled the TPM 2 commands PolicyCapability (0x19b)
+and PolicyParameters (0x19c).
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.

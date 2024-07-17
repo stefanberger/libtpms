@@ -174,7 +174,7 @@
 #define CC_PolicyAuthValue            CC_YES
 #define CC_PolicyAuthorize            CC_YES
 #define CC_PolicyAuthorizeNV          CC_YES
-#define CC_PolicyCapability           CC_NO	/* libtpms: NO */
+#define CC_PolicyCapability           CC_YES	/* libtpms: YES; since v0.10, StateFormatLevel 5 */
 #define CC_PolicyCommandCode          CC_YES
 #define CC_PolicyCounterTimer         CC_YES
 #define CC_PolicyCpHash               CC_YES
@@ -187,7 +187,7 @@
 #define CC_PolicyOR                   CC_YES
 #define CC_PolicyPCR                  CC_YES
 #define CC_PolicyPassword             CC_YES
-#define CC_PolicyParameters           CC_NO 	/* libtpms: NO */
+#define CC_PolicyParameters           CC_YES 	/* libtpms: YES; since v0.10, StateFormatLevel 5 */
 #define CC_PolicyPhysicalPresence     CC_YES
 #define CC_PolicyRestart              CC_YES
 #define CC_PolicySecret               CC_YES
