@@ -1702,7 +1702,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 					   (&propertyUnion.alg, &buffer, &bufferSize);
 			}
 		    break;
-		  case TPM_CAP_HANDLES:
+		  case TPM_CAP_HANDLES: {			// libtpms changed: older gcc
 		    BOOL foundHandle = FALSE;
 		    switch(HandleGetType((TPM_HANDLE)in->property))
 			{
@@ -1733,13 +1733,14 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 			    // Unsupported input handle type
 			    return TPM_RCS_HANDLE + RC_PolicyCapability_property;
 			    break;
-			}
+			}					// libtpms added
 		    if(foundHandle)
 			{
 			    TPM_HANDLE handle = (TPM_HANDLE)in->property;
 			    propertySize = TPM_HANDLE_Marshal(&handle, &buffer, &bufferSize);
 			}
 		    break;
+		  }
 		  case TPM_CAP_COMMANDS:
 		    if(CommandCapGetOneCC((TPM_CC)in->property,
 					  &propertyUnion.commandAttributes))
@@ -1780,7 +1781,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 			}
 		    break;
 #  if ALG_ECC
-		  case TPM_CAP_ECC_CURVES:
+		  case TPM_CAP_ECC_CURVES: {			// libtpms changed: older gcc
 		    TPM_ECC_CURVE curve = (TPM_ECC_CURVE)in->property;
 		    if(CryptCapGetOneECCCurve(curve))
 			{
@@ -1788,6 +1789,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 				TPM_ECC_CURVE_Marshal(&curve, &buffer, &bufferSize);
 			}
 		    break;
+		  }						// libtpms added: older gcc
 #  endif  // ALG_ECC
 		  case TPM_CAP_AUTH_POLICIES:
 		    if(HandleGetType((TPM_HANDLE)in->property) != TPM_HT_PERMANENT)
