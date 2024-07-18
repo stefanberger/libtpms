@@ -435,8 +435,7 @@ RuntimeCommandPrint(char           *buffer,
 		    COMMAND_INDEX   commandCodeLo,
 		    COMMAND_INDEX   commandCodeHi)
 {
-    MUST_BE(sizeof(COMMAND_INDEX) == 2);
-    char bufferlo[10], bufferhi[10];
+    char bufferlo[12], bufferhi[12];
     char *nbuffer = NULL;
     int n;
 
