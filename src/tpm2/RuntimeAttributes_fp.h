@@ -1,6 +1,6 @@
 /********************************************************************************/
 /*										*/
-/*			        Runtime Profile 				*/
+/*			        Runtime Attributes 				*/
 /*			     Written by Stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
@@ -39,62 +39,68 @@
 /*										*/
 /********************************************************************************/
 
-#ifndef RUNTIME_PROFILE_H
-#define RUNTIME_PROFILE_H
+#ifndef RUNTIME_ATTRIBUTES_H
+#define RUNTIME_ATTRIBUTES_H
 
-#include "RuntimeAlgorithm_fp.h"
-#include "RuntimeCommands_fp.h"
-#include "RuntimeAttributes_fp.h"
+#define NUM_ENTRIES_ATTRIBUTE_PROPERTIES          1
 
-struct RuntimeProfile {
-    struct RuntimeAlgorithm RuntimeAlgorithm;
-    struct RuntimeCommands  RuntimeCommands;
-    struct RuntimeAttributes RuntimeAttributes;
-    char *profileName;		    /* name of profile */
-    char *runtimeProfileJSON;	    /* JSON description */
-    unsigned int stateFormatLevel;  /* how the state is to be written */
-    BOOL wasNullProfile;            /* whether this profile was originally due to a NULL profile */
-    char *profileDescription;       /* description */
+#define RUNTIME_ATTRIBUTE_DISALLOW_NO_PADDING     (1 << 0)
+#define RUNTIME_ATTRIBUTE_DISALLOW_SHA1_SIGNING   (1 << 1)
+#define RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_SIGNING (1 << 2)
+#define RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_KEYGEN  (1 << 3)
+
+struct RuntimeAttributes {
+    /* */
+    unsigned int attributeFlags;
+    unsigned char enabledAttributesPrint[(NUM_ENTRIES_ATTRIBUTE_PROPERTIES + 7) / 8];
+    char *attributesProfile;
 };
 
-extern struct RuntimeProfile g_RuntimeProfile;
-
-TPM_RC
-RuntimeProfileInit(struct RuntimeProfile *RuntimeProfile);
+void
+RuntimeAttributesInit(
+		      struct RuntimeAttributes *RuntimeAttributes
+		      );
 
 void
-RuntimeProfileFree(struct RuntimeProfile *RuntimeProfile);
+RuntimeAttributesFree(
+		      struct RuntimeAttributes *RuntimeAttributes
+		      );
+
+LIB_EXPORT TPM_RC
+RuntimeAttributesSetProfile(
+			    struct RuntimeAttributes *RuntimeAttributes,
+			    const char		     *newProfile,		// IN: colon-separated list of algorithm names
+			    unsigned int             *stateFormatLevel,		// IN/OUT: stateFormatLevel
+			    unsigned int	      maxStateFormatLevel	// IN: maximum allowed stateFormatLevel
+			    );
 
 TPM_RC
-RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
-		  const char            *jsonProfile,
-		  bool                   jsonProfileFromUser);
+RuntimeAttributesSwitchProfile(
+			       struct RuntimeAttributes *RuntimeAttributes,
+			       const char               *newProfile,
+			       unsigned int              maxStateFormatLevel,
+			       char                    **oldProfile
+			       );
 
-TPM_RC
-RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
-		   const char            *jsonProfile,
-		   bool                   jsonProfileFromUser);
+enum RuntimeAttributeType {
+    RUNTIME_ATTR_IMPLEMENTED,
+    RUNTIME_ATTR_ENABLED,
+    RUNTIME_ATTR_DISABLED,
+    RUNTIME_ATTR_CAN_BE_DISABLED,
+
+    RUNTIME_ATTR_NUM, /* keep last */
+};
+
+char *
+RuntimeAttributesGet(
+		     struct RuntimeAttributes   *RuntimeAttribute,
+		     enum RuntimeAttributeType   rat
+		     );
 
 BOOL
-RuntimeProfileWasNullProfile(struct RuntimeProfile *RuntimeProfile);
+RuntimeAttributeCheckRequired(
+			      struct RuntimeAttributes *RuntimeAttributes,
+			      unsigned int              attributeFlags
+			      );
 
-TPM_RC
-RuntimeProfileFormatJSON(struct RuntimeProfile *RuntimeProfile);
-
-const char *
-RuntimeProfileGetJSON(struct RuntimeProfile *RuntimeProfile);
-
-TPM_RC
-RuntimeProfileGetByIndex(size_t  idx,
-			 char    **runtimeProfileJSON);
-
-
-SEED_COMPAT_LEVEL RuntimeProfileGetSeedCompatLevel(void);
-
-BOOL
-RuntimeProfileRequiresAttribute(
-				struct RuntimeProfile *RuntimeProfile,
-				unsigned int           attributeFlag
-				);
-
-#endif /* RUNTIME_PROFILE_H */
+#endif

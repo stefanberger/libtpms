@@ -1527,6 +1527,11 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
     // Initialize signature hash
     // Note: need to do the check for TPM_ALG_NULL first because the null scheme
     // doesn't have a hashAlg member.
+    if (signScheme->details.any.hashAlg == TPM_ALG_SHA1 &&
+        RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+                                        RUNTIME_ATTRIBUTE_DISALLOW_SHA1_SIGNING))
+        return TPM_RC_HASH;
+
     signature->signature.any.hashAlg = signScheme->details.any.hashAlg;
 
     // perform sign operation based on different key type
@@ -1534,6 +1539,11 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
 	{
 #if ALG_RSA
 	  case TPM_ALG_RSA:
+	    if (signKey->publicArea.unique.rsa.t.size < BITS_TO_BYTES(2048) &&		// libtpms added begin
+		RuntimeProfileRequiresAttribute(&g_RuntimeProfile,
+						RUNTIME_ATTRIBUTE_DISALLOW_RSA_LT2048_SIGNING))
+		return TPM_RC_KEY_SIZE;					// libtpms added end
+
 	    result = CryptRsaSign(signature, signKey, digest, NULL);
 	    break;
 #endif  // ALG_RSA
