@@ -1185,7 +1185,7 @@ TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size)
 }
 
 /* Table 67 - Definition of (TPM_HANDLE) TPMI_RH_NV_DEFINED_INDEX Type <IN> */
-
+#if 0							// libtpms added
 TPM_RC
 TPMI_RH_NV_DEFINED_INDEX_Unmarshal(TPMI_RH_NV_DEFINED_INDEX *target, BYTE **buffer, INT32 *size)
 {
@@ -1232,6 +1232,7 @@ TPMI_RH_NV_LEGACY_INDEX_Unmarshal(TPMI_RH_NV_LEGACY_INDEX *target, BYTE **buffer
     }
     return rc;
 }
+#endif						// libtpms added
 
 /* Table 69 - Definition of (TPM_HANDLE) TPMI_RH_NV_EXP_INDEX Type <IN/OUT> */
 
