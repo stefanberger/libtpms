@@ -394,7 +394,7 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 						s_EccAlgorithmProperties[curveId].name,
 						s_EccAlgorithmProperties[curveId].stateFormatLevel,
 						maxStateFormatLevel);
-			    retVal = TPM_RC_FAILURE;
+			    retVal = TPM_RC_VALUE;
 			    goto exit;
 			}
 			continue;
@@ -414,7 +414,7 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	if (!found) {
 	    TPMLIB_LogTPM2Error("Requested algorithm specifier %.*s is not supported.\n",
 				(int)toklen, token);
-	    retVal = TPM_RC_FAILURE;
+	    retVal = TPM_RC_VALUE;
 	    goto exit;
 	}
 
@@ -432,7 +432,7 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	    !TEST_BIT(algId, RuntimeAlgorithm->enabledAlgorithms)) {
 	    TPMLIB_LogTPM2Error("Algorithm %s must be enabled.\n",
 				s_AlgorithmProperties[algId].name);
-	    retVal = TPM_RC_FAILURE;
+	    retVal = TPM_RC_VALUE;
 	    goto exit;
 	}
     }
@@ -443,7 +443,7 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	    !TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves)) {
 	    TPMLIB_LogTPM2Error("Elliptic curve %s must be enabled.\n",
 				s_EccAlgorithmProperties[curveId].name);
-	    retVal = TPM_RC_FAILURE;
+	    retVal = TPM_RC_VALUE;
 	    goto exit;
 	}
     }
