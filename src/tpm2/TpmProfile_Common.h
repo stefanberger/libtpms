@@ -326,5 +326,6 @@
 // NOTE: enabling this doesn't necessarily mean that the expanded
 // (external-NV-specific) attributes are supported.
 #define EXTERNAL_NV                           NO
+#define PERMANENT_NV                          NO	// libtpms: added
 
 #endif // _TPM_PROFILE_COMMON_H_
