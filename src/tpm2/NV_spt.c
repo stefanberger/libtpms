@@ -297,6 +297,7 @@ TPM_RC NvPublic2FromNvPublic(
     return TPM_RC_SUCCESS;
 }
 
+#if 0					// libtpms added
 //*** NvPublicFromNvPublic2()
 // This function converts a tagged-union NV public (TPMT_NV_PUBLIC_2) into the
 // legacy TPMS_NV_PUBLIC representation. This is a lossy conversion: any
@@ -506,3 +507,4 @@ TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
     // define the space.  A TPM_RC_NV_SPACE error may be returned at this point
     return NvDefineIndex(publicInfo, auth);
 }
+#endif						// libtpms added
