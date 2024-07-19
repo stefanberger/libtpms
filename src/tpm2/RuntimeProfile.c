@@ -568,7 +568,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 				  algorithmsProfile,
 				  profileDescription);
     if (!rp) {
-	retVal = TPM_RC_FAILURE;
+	retVal = TPM_RC_VALUE;
 	goto error;
     }
 
@@ -698,7 +698,7 @@ RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
 				  algorithmsProfile,
 				  profileDescription);
     if (!rp) {
-	retVal = TPM_RC_FAILURE;
+	retVal = TPM_RC_VALUE;
 	goto error;
     }
 
