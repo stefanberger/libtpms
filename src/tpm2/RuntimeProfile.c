@@ -293,7 +293,7 @@ GetStateFormatLevelFromJSON(const char   *json,
     if (v > UINT_MAX || errno) {
 	TPMLIB_LogTPM2Error("StateFormatLevel value '%s' is not a valid positive number.\n",
 			    str);
-	retVal = TPM_RC_FAILURE;
+	retVal = TPM_RC_VALUE;
     } else {
 	*stateFormatLevel = v;
     }
@@ -368,18 +368,18 @@ GetParametersFromJSON(const char    *jsonProfile,
 	/* StateFormatLevel may be missing */
 	retVal = GetStateFormatLevelFromJSON(jsonProfile, stateFormatLevel);
 	switch (retVal) {
-	case TPM_RC_FAILURE:
-	    goto err_free_profilename;
 	case TPM_RC_NO_RESULT:
 	    *stateFormatLevel = STATE_FORMAT_LEVEL_UNKNOWN;
 	    break;
+        case TPM_RC_SUCCESS:
+            break;
+	default:
+	    goto err_free_profilename;
 	}
     } else {
 	retVal = GetStateFormatLevelFromJSON(jsonProfile, stateFormatLevel);
-	if (retVal != TPM_RC_SUCCESS) {
-	    retVal = TPM_RC_FAILURE;
+	if (retVal != TPM_RC_SUCCESS)
 	    goto err_free_profilename;
-	}
     }
     if (*stateFormatLevel > STATE_FORMAT_LEVEL_CURRENT) {
 	TPMLIB_LogTPM2Error("The stateFormatLevel '%u' from the JSON exceeds the maximum supported '%u'\n",
