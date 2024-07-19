@@ -1163,8 +1163,16 @@ TPMI_RH_NV_INDEX_Unmarshal(TPMI_RH_NV_INDEX *target, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
 	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
+#if EXTERNAL_NV						// libtpms added
 	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+#else							// libtpms added begin
+	BOOL isNotExternalNV = TRUE;
+#endif
+#if PERMANENT_NV					// libtpms added end
 	BOOL isNotPermamentNV = (*target < PERMANENT_NV_FIRST) || (*target > PERMANENT_NV_LAST);
+#else							// libtpms added begin
+	BOOL isNotPermamentNV = TRUE;
+#endif							// libtpms added end
 
 	if (isNotNv &&
 	    isNotExternalNV &&
@@ -1182,14 +1190,18 @@ TPM_RC
 TPMI_RH_NV_DEFINED_INDEX_Unmarshal(TPMI_RH_NV_DEFINED_INDEX *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    TPMI_RH_NV_DEFINED_INDEX orig_target = *target; // libtpms added
+    TPMI_RH_NV_DEFINED_INDEX orig_target = *target;	// libtpms added
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
 	BOOL isNotNv = (*target < NV_INDEX_FIRST) || (*target > NV_INDEX_LAST);
+#if EXTERNAL_NV						// libtpms added
 	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+#else							// libtpms added begin
+	BOOL isNotExternalNV = TRUE;
+#endif							// libtpms added end
 
 	if (isNotNv &&
 	    isNotExternalNV) {
@@ -1233,7 +1245,11 @@ TPMI_RH_NV_EXP_INDEX_Unmarshal(TPMI_RH_NV_EXP_INDEX *target, BYTE **buffer, INT3
 	rc = TPM_HANDLE_Unmarshal(target, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+#if EXTERNAL_NV					// libtpms added
 	BOOL isNotExternalNV = (*target < EXTERNAL_NV_FIRST) || (*target > EXTERNAL_NV_LAST);
+#else						// libtpms added begin
+	BOOL isNotExternalNV = TRUE;
+#endif						// libtpms added end
 
 	if (isNotExternalNV) {
 	    rc = TPM_RC_VALUE;
