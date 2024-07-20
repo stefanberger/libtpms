@@ -536,7 +536,9 @@ RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
 	return FALSE;
 
     if (algId == TPM_ALG_ECC) {
-	if (!TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves)) {
+	if ((curveId >> 3) >= sizeof(RuntimeAlgorithm->enabledEccCurves) ||
+	    !TestBit(curveId, RuntimeAlgorithm->enabledEccCurves,
+	             sizeof(RuntimeAlgorithm->enabledEccCurves))) {
 	    return FALSE;
 	}
     }

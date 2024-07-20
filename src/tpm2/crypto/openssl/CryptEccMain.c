@@ -216,6 +216,14 @@ BOOL CryptCapGetOneECCCurve(TPM_ECC_CURVE curveID  // IN: the  ECC curve
 {
     UINT16 i;
 
+    if (!CryptEccIsCurveRuntimeUsable(curveID) ||	// libtpms added begin
+	!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+					     TPM_ALG_ECC,
+					     CryptEccGetKeySizeForCurve(curveID),
+					     curveID,
+					     g_RuntimeProfile.stateFormatLevel))
+	return FALSE;					// libtpms added end
+
     // Scan the eccCurveValues array
     for(i = 0; i < ECC_CURVE_COUNT; i++)
 	{
