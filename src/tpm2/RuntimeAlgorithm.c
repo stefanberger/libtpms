@@ -499,7 +499,9 @@ RuntimeAlgorithmCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
 			     TPM_ALG_ID	              algId      // IN: the algorithm to check
 			     )
 {
-    if (!TEST_BIT(algId, RuntimeAlgorithm->enabledAlgorithms))
+    if ((algId >> 3) >= sizeof(RuntimeAlgorithm->enabledAlgorithms) ||
+        !TestBit(algId, RuntimeAlgorithm->enabledAlgorithms,
+                 sizeof(RuntimeAlgorithm->enabledAlgorithms)))
 	return FALSE;
     return TRUE;
 }

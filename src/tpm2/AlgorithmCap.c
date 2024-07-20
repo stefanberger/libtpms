@@ -236,6 +236,9 @@ BOOL AlgorithmCapGetOneImplemented(
     UINT32 i;
     UINT32 algNum;
 
+    if(!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, algID))// libtpms added
+	return FALSE;								// libtpms added
+
     // Compute how many algorithms are defined in s_algorithms array.
     algNum = sizeof(s_algorithms) / sizeof(s_algorithms[0]);
 
