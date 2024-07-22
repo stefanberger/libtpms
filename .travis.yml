@@ -46,7 +46,7 @@ matrix:
         ./autogen.sh ${CONFIG} &&
         sudo make -j$(nproc) ${TARGET} &&
         sudo make -j$(nproc) check &&
-        git clone https://github.com/stefanberger/swtpm.git &&
+        git clone -b stable-0.9 https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
          sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python3-twisted expect
@@ -67,7 +67,7 @@ matrix:
         ./autogen.sh ${CONFIG} &&
         sudo make -j$(nproc) ${TARGET} &&
         sudo make -j$(nproc) check &&
-        git clone https://github.com/stefanberger/swtpm.git &&
+        git clone -b stable-0.9 https://github.com/stefanberger/swtpm.git &&
         pushd swtpm &&
          sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python3-twisted expect
