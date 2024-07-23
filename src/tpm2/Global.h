@@ -391,9 +391,9 @@ typedef struct SESSION_ATTRIBUTES
 #endif                                           /* libtpms added */
 #if BIG_ENDIAN_TPM == YES                        /* libtpms added begin */
     unsigned    _reserved : 16;         //17-32
-    unsigned    isParametersHashDefined : 1 // 16
-    unsigned    isNameHashDefined : 1   // 15
-    unsigned    isTemplateHashDefined : 1; //14) SET if the templateHash needs to be
+    unsigned    isParametersHashDefined : 1; //16
+    unsigned    isNameHashDefined : 1;       //15
+    unsigned    isTemplateHashDefined : 1;   //14) SET if the templateHash needs to be
     unsigned    nvWrittenState : 1;     //13) SET if TPMA_NV_WRITTEN is required to
     unsigned    checkNvWritten : 1;     //12) SET if the TPMA_NV_WRITTEN attribute
     unsigned    includeAuth : 1;        //11) This attribute is SET when the
