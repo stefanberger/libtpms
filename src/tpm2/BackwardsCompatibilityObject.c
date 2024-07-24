@@ -151,6 +151,20 @@ typedef struct RSA2048_OBJECT
 
 MUST_BE(sizeof(RSA2048_OBJECT) == 1896);
 
+TPMI_RH_HIERARCHY ObjectGetHierarchyFromAttributes(OBJECT* object)
+{
+    if(object->attributes.spsHierarchy)
+	return TPM_RH_OWNER;
+
+    if(object->attributes.epsHierarchy)
+	return TPM_RH_ENDORSEMENT;
+
+    if(object->attributes.ppsHierarchy)
+	return TPM_RH_PLATFORM;
+
+    return TPM_RH_NULL;
+}
+
 static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
 {
     dest->attributes = src->attributes;
