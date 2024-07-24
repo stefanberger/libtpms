@@ -224,22 +224,7 @@ ObjectGetHierarchy(
 		   OBJECT          *object         // IN :object
 		   )
 {
-    if(object->attributes.spsHierarchy)
-	{
-	    return TPM_RH_OWNER;
-	}
-    else if(object->attributes.epsHierarchy)
-	{
-	    return TPM_RH_ENDORSEMENT;
-	}
-    else if(object->attributes.ppsHierarchy)
-	{
-	    return TPM_RH_PLATFORM;
-	}
-    else
-	{
-	    return TPM_RH_NULL;
-	}
+    return ObjectGetHierarchyFromAttributes(object);
 }
 /* 8.6.3.11 GetHierarchy() */
 /* This function returns the handle of the hierarchy to which a handle belongs. This function is
