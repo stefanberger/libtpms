@@ -146,7 +146,7 @@ TPM2_ContextSave(ContextSave_In*  in,  // IN: input parameter list
 		     && !(object->attributes.publicOnly))
 		      CryptRsaLoadPrivateExponent(&object->publicArea, &object->sensitive, object); // libtpms: added object param
 #  endif
-		  objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size);		// libtpms: added begin
+		  objectSize = ANY_OBJECT_Marshal(object, &bufptr, &size, &g_RuntimeProfile);	// libtpms: added begin
 
 		  out->context.contextBlob.t.size =
 		      integritySize + fingerprintSize + objectSize;

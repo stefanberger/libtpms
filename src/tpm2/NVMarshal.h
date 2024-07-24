@@ -43,6 +43,7 @@
 
 #include "Tpm.h"
 #include "TpmTypes.h"
+#include "RuntimeProfile_fp.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 
@@ -51,7 +52,8 @@
 #define MAX_MARSHALLED_OBJECT_SIZE \
     (sizeof(OBJECT) + 32 /* marshalling headers */)
 
-UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size);
+UINT16 VolatileState_Marshal(BYTE **buffer, INT32 *size,
+                             struct RuntimeProfile *RuntimeProfile);
 TPM_RC VolatileState_Unmarshal(BYTE **buffer, INT32 *size);
 
 UINT32 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size);
@@ -59,7 +61,8 @@ TPM_RC PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size);
 
 void NVShadowRestore(void);
 
-UINT16 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size);
+UINT16 ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size,
+                          struct RuntimeProfile *RuntimeProfile);
 TPM_RC ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size, BOOL verbose);
 
 #endif /* NVMARSHAL_H */

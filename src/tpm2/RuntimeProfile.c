@@ -73,7 +73,7 @@ static const struct RuntimeProfileDesc {
      * This basically locks the name of the profile to the stateFormatLevel.
      */
     unsigned int stateFormatLevel;
-#define STATE_FORMAT_LEVEL_CURRENT 5
+#define STATE_FORMAT_LEVEL_CURRENT 6
 #define STATE_FORMAT_LEVEL_UNKNOWN 0 /* JSON didn't provide StateFormatLevel; this is only
 					allowed for the 'default' profile or when user
 					passed JSON via SetProfile() */
@@ -87,6 +87,8 @@ static const struct RuntimeProfileDesc {
  *      Session attribute isNameHashDefined was added and existing functions TPM2_PolicyNameHash
  *      and CheckPolicyAuthSession are using it.
  *  5 : Enabled TPM2_PolicyCapability (0x19b) & TPM2_PolicyParameters (0x19c)
+ *  6 : Only OBJECTs for RSA keys marshal the private exponent; hierachy field is also
+ *      marshalled now
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
@@ -774,8 +776,8 @@ RuntimeProfileGetSeedCompatLevel(void)
     case 1: /* profile runs on v0.9 */
 	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
 
-    case 2 ... 5: /* profile runs on v0.10 */ {
-	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 5); // force update when this changes
+    case 2 ... 6: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 6); // force update when this changes
 	return SEED_COMPAT_LEVEL_LAST;
     }
 

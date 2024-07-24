@@ -68,20 +68,31 @@ int main(void)
         },
         .seedCompatLevel = 1,
     };
-    /* this buffer must only be filled to <= MAX_MARSHALLED_OBJECT_SIZE bytes */
+    static const size_t exp_sizes[7] = {
+        0, 2580, 2580, 2580, 2580, 2580, 2584,
+    };
     BYTE buffer[2 * MAX_MARSHALLED_OBJECT_SIZE];
-    BYTE *buf = buffer;
-    INT32 size = sizeof(buffer);
+    UINT32 stateFormatLevel;
     UINT32 written;
+    INT32 size;
+    BYTE *buf;
 
-    written = ANY_OBJECT_Marshal(&object, &buf, &size);
-    if (written > MAX_MARSHALLED_OBJECT_SIZE) {
-        fprintf(stderr,
-                "Expected flattened OBJECT to have %zu bytes, but it has %u.\n",
-                MAX_MARSHALLED_OBJECT_SIZE, written);
-        return EXIT_FAILURE;
+    for (stateFormatLevel = 1; stateFormatLevel <= 6; stateFormatLevel++) {
+        /* this buffer must only be filled to <= MAX_MARSHALLED_OBJECT_SIZE bytes */
+        buf = buffer;
+        size = sizeof(buffer);
+
+        g_RuntimeProfile.stateFormatLevel = stateFormatLevel;
+
+        written = ANY_OBJECT_Marshal(&object, &buf, &size, &g_RuntimeProfile);
+        if (written != exp_sizes[stateFormatLevel]) {
+            fprintf(stderr,
+                    "Expected flattened OBJECT to have %d bytes, but it has %u.\n",
+                    exp_sizes[stateFormatLevel], written);
+            return EXIT_FAILURE;
+        }
+        fprintf(stdout, "  stateFormatLevel: %d   written = %d  < MAX_MARSHALLED_OBJECT_SIZE = %zu\n",
+                stateFormatLevel, written, MAX_MARSHALLED_OBJECT_SIZE);
     }
-    fprintf(stdout, "  written = %d  < MAX_MARSHALLED_OBJECT_SIZE = %zu\n",
-            written, MAX_MARSHALLED_OBJECT_SIZE);
     return EXIT_SUCCESS;
 }
