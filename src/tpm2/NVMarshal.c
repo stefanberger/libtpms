@@ -176,6 +176,9 @@ block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
             *buffer += blocksize;
             *size -= blocksize;
             *skip_code = TRUE;
+        } else if (!has_block && !needs_block) {
+            /* no block but also none needed */
+            *skip_code = TRUE;
         }
     }
     return rc;
