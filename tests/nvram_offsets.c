@@ -64,7 +64,7 @@ int main(void)
 #if RSA_4096
 # error Unsupported RSA key size
 #elif RSA_3072
-# define OBJECT_EXP_SIZE 2600
+# define OBJECT_EXP_SIZE 2608
 #elif RSA_2048
 # define OBJECT_EXP_SIZE 1896
 #endif

@@ -168,6 +168,7 @@ TPMI_RH_HIERARCHY ObjectGetHierarchyFromAttributes(OBJECT* object)
 static void RSA2048_OBJECT_To_OBJECT(OBJECT* dest, const RSA2048_OBJECT* src)
 {
     dest->attributes = src->attributes;
+    dest->hierarchy = ObjectGetHierarchyFromAttributes(dest);
 
     dest->publicArea.type = src->publicArea.type;
     dest->publicArea.nameAlg = src->publicArea.nameAlg;
@@ -375,6 +376,7 @@ static inline void CopyToRSA3072PrimeT(bn_rsa3072_prime_t* dst,
 static void RSA3072_OBJECT_To_OBJECT(OBJECT* dest, const RSA3072_OBJECT* src)
 {
     dest->attributes = src->attributes;
+    dest->hierarchy = ObjectGetHierarchyFromAttributes(dest);
 
     dest->publicArea.type = src->publicArea.type;
     dest->publicArea.nameAlg = src->publicArea.nameAlg;

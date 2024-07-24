@@ -55,6 +55,7 @@
 #include "TpmTcpProtocol.h"
 #include "Simulator_fp.h"
 #include "BackwardsCompatibilityBitArray.h"
+#include "BackwardsCompatibilityObject.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
@@ -2583,6 +2584,7 @@ skip_alg_rsa:
 
     /* default values before conditional block */
     data->seedCompatLevel = SEED_COMPAT_LEVEL_ORIGINAL;
+    data->hierarchy = ObjectGetHierarchyFromAttributes(data);
 
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
