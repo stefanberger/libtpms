@@ -258,6 +258,13 @@ typedef struct OBJECT
     // handle of an object slot.
     TPM2B_NAME name;                  // Name of the object name. Kept here
     // to avoid repeatedly computing it.
+    TPMI_RH_HIERARCHY hierarchy;      // Hierarchy for the object. While the
+    // base hierarchy can be deduced from
+    // 'attributes', if the hierarchy is
+    // firmware-bound or SVN-bound then
+    // this field carries additional metadata
+    // needed to derive the proof value for
+    // the object.
 
     // libtpms added: SEED_COMPAT_LEVEL to use for deriving child keys
     SEED_COMPAT_LEVEL   seedCompatLevel;
