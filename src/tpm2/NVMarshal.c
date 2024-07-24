@@ -2483,18 +2483,31 @@ NV_TPMT_SENSITIVE_Unmarshal(TPMT_SENSITIVE *target, BYTE **buffer, INT32 *size)
 }
 
 #define OBJECT_MAGIC 0x75be73af
-#define OBJECT_VERSION 3
+#define OBJECT_VERSION 4
 
 static UINT16
-OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
+OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size,
+               struct RuntimeProfile *RuntimeProfile)
 {
     UINT16 written;
     BOOL has_block;
     BLOCK_SKIP_INIT;
+    UINT16 blob_version;
 
-    // FIXME: for v4: privateExponent_t needs to only be written for RSA keys
+    switch (RuntimeProfile->stateFormatLevel) {
+    case 0:
+        pAssert(FALSE);
+        break;
+    case 1 ... 5:
+        blob_version = 3;
+        break;
+    default:  // since StateFormatLevel 6
+        blob_version = 4;
+        break;
+    }
+
     written = NV_HEADER_Marshal(buffer, size,
-                                OBJECT_VERSION, OBJECT_MAGIC, 3);
+                                blob_version, OBJECT_MAGIC, blob_version);
 
     /*
      * attributes are written in ANY_OBJECT_Marshal
@@ -2502,16 +2515,18 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
     written += TPMT_PUBLIC_Marshal(&data->publicArea, buffer, size);
     written += NV_TPMT_SENSITIVE_Marshal(&data->sensitive, buffer, size);
 
-#if ALG_RSA
+    /* before v4: private exponent was always written
+     *  since v4: private exponent only written for RSA keys
+     */
     has_block = TRUE;
-#else
-    has_block = FALSE;
-#endif
+    if (blob_version >= 4 &&
+        data->sensitive.sensitiveType != TPM_ALG_RSA)
+        has_block = FALSE;
+
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
-#if ALG_RSA
-    written += privateExponent_t_Marshal(&data->privateExponent,
-                                         buffer, size);
-#endif
+    if (has_block)
+        written += privateExponent_t_Marshal(&data->privateExponent,
+                                             buffer, size);
     BLOCK_SKIP_WRITE_POP(size);
 
     written += TPM2B_NAME_Marshal(&data->qualifiedName, buffer, size);
@@ -2524,6 +2539,10 @@ OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
+
+    /* since v4: hierarchy is written */
+    if (blob_version >= 4)
+        written += TPMI_RH_HIERARCHY_Marshal(&data->hierarchy, buffer, size);
 
     BLOCK_SKIP_WRITE_POP(size);
     BLOCK_SKIP_WRITE_POP(size);
@@ -2555,21 +2574,22 @@ OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size)
         rc = NV_TPMT_SENSITIVE_Unmarshal(&data->sensitive, buffer, size);
     }
 
-#if ALG_RSA
+    /* before v4: private exponent was always written
+     *  since v4: private exponent only written for RSA keys
+     */
     needs_block = TRUE;
-#else
-    needs_block = FALSE;
-#endif
+    if (hdr.version >= 4 &&
+        data->sensitive.sensitiveType != TPM_ALG_RSA)
+        needs_block = FALSE;
+
     if (rc == TPM_RC_SUCCESS) {
         BLOCK_SKIP_READ(skip_alg_rsa, needs_block, buffer, size,
                         "OBJECT", "privateExponent");
     }
-#if ALG_RSA
     if (rc == TPM_RC_SUCCESS) {
         rc = privateExponent_t_Unmarshal(&data->privateExponent,
                                          buffer, size);
     }
-#endif
 skip_alg_rsa:
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2598,10 +2618,13 @@ skip_alg_rsa:
         }
 
         if (rc == TPM_RC_SUCCESS) {
-            BLOCK_SKIP_READ(skip_future_versions, FALSE, buffer, size,
+            BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 4, buffer, size,
                             "OBJECT", "version 4 or later");
         }
-        /* future versions nest-append here */
+
+        if (rc == TPM_RC_SUCCESS) {
+            rc = TPMI_RH_HIERARCHY_Unmarshal(&data->hierarchy, buffer, size, TRUE);
+        }
     }
 
 skip_future_versions:
@@ -2612,7 +2635,8 @@ skip_future_versions:
 #define ANY_OBJECT_VERSION 2
 
 UINT16
-ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
+ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size,
+                   struct RuntimeProfile *RuntimeProfile)
 {
     UINT16 written;
     UINT32 *ptr = (UINT32 *)&data->attributes;
@@ -2627,7 +2651,7 @@ ANY_OBJECT_Marshal(OBJECT *data, BYTE **buffer, INT32 *size)
         if (ObjectIsSequence(data))
             written += HASH_OBJECT_Marshal((HASH_OBJECT *)data, buffer, size);
         else
-            written += OBJECT_Marshal(data, buffer, size);
+            written += OBJECT_Marshal(data, buffer, size, RuntimeProfile);
     }
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
@@ -2888,7 +2912,7 @@ skip_future_versions:
 #define VOLATILE_STATE_MAGIC 0x45637889
 
 UINT16
-VolatileState_Marshal(BYTE **buffer, INT32 *size)
+VolatileState_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *RuntimeProfile)
 {
     UINT16 written;
     size_t i;
@@ -3088,7 +3112,7 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(&array_size, buffer, size);
 
     for (i = 0; i < array_size; i++) {
-        written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size);
+        written += ANY_OBJECT_Marshal(&s_objects[i], buffer, size, RuntimeProfile);
     }
 #else
 # error Unsupport #define value(s)
@@ -4218,6 +4242,9 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
     UINT16 blob_version;
 
     switch (RuntimeProfile->stateFormatLevel) {
+    case 0:
+        pAssert(FALSE);
+        break;
     case 1 ... 2:
         blob_version = 4;
         break;
@@ -4765,7 +4792,7 @@ USER_NVRAM_Display(const char *msg)
 #define USER_NVRAM_VERSION 2
 #define USER_NVRAM_MAGIC   0x094f22c3
 static UINT32
-USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
+USER_NVRAM_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *RuntimeProfile)
 {
     UINT32 written;
     UINT32 entrysize;
@@ -4820,7 +4847,7 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             break;
         case TPM_HT_PERSISTENT:
             NvReadObject(entryRef + offset, &obj);
-            written += ANY_OBJECT_Marshal(&obj, buffer, size);
+            written += ANY_OBJECT_Marshal(&obj, buffer, size, RuntimeProfile);
             break;
 #if CC_NV_DefineSpace2
 # error Missing support for TPM_HT_PERMANENT_NV
@@ -5072,7 +5099,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 
     if (RuntimeProfileWasNullProfile(RuntimeProfile) && blob_version != 3)
         assert(false);
-    else if (!RuntimeProfileWasNullProfile(&g_RuntimeProfile) && blob_version == 3)
+    else if (!RuntimeProfileWasNullProfile(RuntimeProfile) && blob_version == 3)
         assert(false);
 
     written = NV_HEADER_Marshal(buffer, size,
@@ -5083,7 +5110,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
         written += String_Marshal(profileJSON, buffer, size); // since v4
     }
     written += PACompileConstants_Marshal(buffer, size);
-    written += PERSISTENT_DATA_Marshal(&pd, buffer, size, &g_RuntimeProfile);
+    written += PERSISTENT_DATA_Marshal(&pd, buffer, size, RuntimeProfile);
     written += ORDERLY_DATA_Marshal(&od, buffer, size);
     writeSuState = (pd.orderlyState & TPM_SU_STATE_MASK) == TPM_SU_STATE;
     /* starting with v3 we only write STATE_RESET and STATE_CLEAR if needed */
@@ -5093,7 +5120,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     }
     written += INDEX_ORDERLY_RAM_Marshal(indexOrderlyRam, sizeof(indexOrderlyRam),
                                          buffer, size);
-    written += USER_NVRAM_Marshal(buffer, size);
+    written += USER_NVRAM_Marshal(buffer, size, RuntimeProfile);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */

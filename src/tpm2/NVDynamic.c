@@ -614,7 +614,7 @@ UINT32 NvObjectToBuffer(OBJECT* object, BYTE* buffer, UINT32 size)
     }
 
     if (marshalAnyObject) {
-        return ANY_OBJECT_Marshal(object, &buffer, (INT32*)&size);
+        return ANY_OBJECT_Marshal(object, &buffer, (INT32*)&size, &g_RuntimeProfile);
     }
     return OBJECT_To_Buffer_As_RSA3072_OBJECT(object, buffer, size);
 }

@@ -126,7 +126,7 @@ VolatileState_Save(BYTE **buffer, INT32 *size)
     TPM_ALG_ID hashAlg = TPM_ALG_SHA1;
 
     start = *buffer;
-    written = VolatileState_Marshal(buffer, size);
+    written = VolatileState_Marshal(buffer, size, &g_RuntimeProfile);
 
     /* append the checksum */
     CryptHashBlock(hashAlg, written, start, sizeof(hash), hash);

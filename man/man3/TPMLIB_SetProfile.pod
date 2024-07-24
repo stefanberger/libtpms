@@ -157,6 +157,13 @@ the null profile (libtpms v0.9).
 This I<StateFormatLevel> enabled the TPM 2 commands PolicyCapability (0x19b)
 and PolicyParameters (0x19c).
 
+=item 6: (since v0.10)
+
+This I<StateFormatLevel> made some internal changes to the marshalling and
+unmarshalling code of an OBJECT. Only RSA key OBJECTS have the private
+exponent field marshalled and the hierarchy field is also always marshalled
+now. RSA key OBJECTs may be 4 bytes bigger while others are smaller now.
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.
