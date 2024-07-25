@@ -392,15 +392,4 @@ LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in
 			    BYTE*  keyStream    // OUT: key buffer
 			    );
 
-#if USE_OPENSSL_FUNCTIONS_SSKDF			// libtpms added begin: for test case
-LIB_EXPORT UINT16 ReferenceCryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
-				     TPM2B*       Z,        // IN: Z
-				     const TPM2B* label,    // IN: a label value for the KDF
-				     TPM2B*       partyUInfo,  // IN: PartyUInfo
-				     TPM2B*       partyVInfo,  // IN: PartyVInfo
-				     UINT32 sizeInBits,  // IN: size of generated key in bits
-				     BYTE*  keyStream    // OUT: key buffer
-				     );
-#endif // USE_OPENSSL_FUNCTIONS_SSKDF		// libtpms added end
-
 #endif  // _CRYPT_HASH_FP_H_
