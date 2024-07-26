@@ -21,8 +21,8 @@ static const char * const null_profile =
                         "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                         "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                         "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                        "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                        "cmac,ctr,ofb,cbc,cfb,ecb\","
+                        "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                        "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
         "\"Description\":\"The profile enables the commands and algorithms that "
                           "were enabled in libtpms v0.9. This profile is "
                           "automatically used when the state does not have a "
@@ -68,8 +68,8 @@ static const struct {
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                              "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"This profile enables all libtpms v0.10-supported "
                               "commands and algorithms. This profile is compatible with "
                               "libtpms >= v0.10.\""
@@ -96,8 +96,8 @@ static const struct {
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                              "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
     }, {
@@ -244,8 +244,8 @@ static const struct {
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                              "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
     }, {
@@ -281,8 +281,8 @@ static const struct {
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                              "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
     }, {
@@ -309,8 +309,8 @@ static const struct {
                              "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
                              "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
-                             "ecc-nist,ecc-bn,symcipher,camellia,camellia-min-size=128,"
-                             "cmac,ctr,ofb,cbc,cfb,ecb\","
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
     }, {
