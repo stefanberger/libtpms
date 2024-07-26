@@ -225,7 +225,6 @@ RuntimeAlgorithmEnableAllAlgorithms(struct RuntimeAlgorithm *RuntimeAlgorithm)
     }
 
     MemorySet(RuntimeAlgorithm->enabledEccCurves, 0 , sizeof(RuntimeAlgorithm->enabledEccCurves));
-    MemorySet(RuntimeAlgorithm->enabledEccCurvesPrint, 0 , sizeof(RuntimeAlgorithm->enabledEccCurvesPrint));
 
     for (curveId = 0; curveId < ARRAY_SIZE(s_EccAlgorithmProperties); curveId++) {
         if (!s_EccAlgorithmProperties[curveId].name)
@@ -298,7 +297,6 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 
     MemorySet(RuntimeAlgorithm->enabledAlgorithms, 0, sizeof(RuntimeAlgorithm->enabledAlgorithms));
     MemorySet(RuntimeAlgorithm->enabledEccCurves, 0 , sizeof(RuntimeAlgorithm->enabledEccCurves));
-    MemorySet(RuntimeAlgorithm->enabledEccCurvesPrint, 0 , sizeof(RuntimeAlgorithm->enabledEccCurvesPrint));
     MemorySet(RuntimeAlgorithm->enabledEccShortcuts, 0, sizeof(RuntimeAlgorithm->enabledEccShortcuts));
 
     token = newProfile;
@@ -403,10 +401,6 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 					    s_EccAlgorithmProperties[curveId].stateFormatLevel);
 		    SET_BIT(curveId, RuntimeAlgorithm->enabledEccCurves);
 		    found = true;
-		    if (match_one) {
-			SET_BIT(curveId, RuntimeAlgorithm->enabledEccCurvesPrint);
-			break;
-		    }
 		}
 	    }
 	}
@@ -612,11 +606,11 @@ RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	       continue;
 	    break;
 	case RUNTIME_ALGO_ENABLED:
-	    if (!TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurvesPrint))
+	    if (!TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves))
 		continue;
 	    break;
 	case RUNTIME_ALGO_DISABLED:
-	    if (TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurvesPrint))
+	    if (TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves))
 		continue;
 	    break;
 	default:
@@ -632,6 +626,7 @@ RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	buffer = nbuffer;
 	*first = FALSE;
     }
+
     return buffer;
 }
 
@@ -675,7 +670,7 @@ RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	    continue;
 	}
 	n = asprintf(&nbuffer, "%s%s%s",
-		     buffer ? buffer : "",
+		     buffer,
 		     first ? "" : ALGO_SEPARATOR_STR,
 		     s_AlgorithmProperties[algId].name);
 	free(buffer);
