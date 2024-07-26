@@ -560,7 +560,8 @@ RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
 static char *
 RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 		       enum RuntimeAlgorithmType rat,
-		       char                      *buffer)
+		       char                      *buffer,
+		       BOOL                      *first)
 {
     TPM_ECC_CURVE curveId;
     char *nbuffer = NULL;
@@ -588,11 +589,14 @@ RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	    break;
 	}
 	n = asprintf(&nbuffer, "%s%s%s",
-		     buffer, ALGO_SEPARATOR_STR, s_EccShortcuts[idx].name);
+		     buffer,
+		     *first ? "" : ALGO_SEPARATOR_STR,
+		     s_EccShortcuts[idx].name);
 	free(buffer);
 	if (n < 0)
 	    return NULL;
 	buffer = nbuffer;
+	*first = false;
     }
 
     for (curveId = 0; curveId < ARRAY_SIZE(s_EccAlgorithmProperties); curveId++) {
@@ -619,11 +623,14 @@ RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	    break;
 	}
 	n = asprintf(&nbuffer, "%s%s%s",
-		     buffer, ALGO_SEPARATOR_STR, s_EccAlgorithmProperties[curveId].name);
+		     buffer,
+		     *first ? "" : ALGO_SEPARATOR_STR,
+		     s_EccAlgorithmProperties[curveId].name);
 	free(buffer);
 	if (n < 0)
 	    return NULL;
 	buffer = nbuffer;
+	*first = FALSE;
     }
     return buffer;
 }
@@ -709,7 +716,7 @@ RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 
 skip:
 	if (algId == TPM_ALG_ECC)
-	    buffer = RuntimeAlgorithmGetEcc(RuntimeAlgorithm, rat, buffer);
+	    buffer = RuntimeAlgorithmGetEcc(RuntimeAlgorithm, rat, buffer, &first);
     }
 
     n = asprintf(&nbuffer, "%s\"", buffer);
