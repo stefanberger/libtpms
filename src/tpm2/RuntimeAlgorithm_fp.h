@@ -53,7 +53,6 @@ struct RuntimeAlgorithm {
 #define RUNTIME_ALGORITHM_ECC_NIST_BIT      0
 #define RUNTIME_ALGORITHM_ECC_BN_BIT        1
     unsigned char enabledEccCurves[(NUM_ENTRIES_ECC_ALGO_PROPERTIES + 7) / 8];
-    unsigned char enabledEccCurvesPrint[(NUM_ENTRIES_ECC_ALGO_PROPERTIES + 7) / 8];
     char *algorithmProfile;
 };
 
