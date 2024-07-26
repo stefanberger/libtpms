@@ -440,6 +440,11 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	    retVal = TPM_RC_VALUE;
 	    goto exit;
 	}
+	/* disable curves that can be disabled and not meet min. keysize */
+        if (RuntimeAlgorithm->algosMinimumKeySizes[TPM_ALG_ECC] >
+               s_EccAlgorithmProperties[curveId].keySize &&
+            s_EccAlgorithmProperties[curveId].canBeDisabled)
+            CLEAR_BIT(curveId, RuntimeAlgorithm->enabledEccCurves);
     }
 
     /* some consistency checks */
