@@ -87,7 +87,7 @@ int main(void)
         written = ANY_OBJECT_Marshal(&object, &buf, &size, &g_RuntimeProfile);
         if (written != exp_sizes[stateFormatLevel]) {
             fprintf(stderr,
-                    "Expected flattened OBJECT to have %d bytes, but it has %u.\n",
+                    "Expected flattened OBJECT to have %zu bytes, but it has %u.\n",
                     exp_sizes[stateFormatLevel], written);
             return EXIT_FAILURE;
         }
