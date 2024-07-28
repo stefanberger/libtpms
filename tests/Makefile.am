@@ -70,6 +70,7 @@ object_size_CFLAGS = $(AM_CFLAGS) \
 	-I$(top_srcdir)/src/tpm2/crypto/openssl \
 	-DTPM_POSIX
 object_size_LDFLAGS = $(AM_LDFLAGS)
+
 endif # ENABLE_STATIC_TESTS
 endif # WITH_TPM2
 
