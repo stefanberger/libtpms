@@ -1377,7 +1377,7 @@ CryptRsaDecrypt(
     outlen = sizeof(buffer);
     if (EVP_PKEY_decrypt(ctx, buffer, &outlen,
                          cIn->buffer, cIn->size) <= 0)
-        ERROR_RETURN(TPM_RC_FAILURE);
+        ERROR_RETURN(TPM_RC_VALUE);
 
     if (outlen > dOut->size)
         ERROR_RETURN(TPM_RC_FAILURE);
