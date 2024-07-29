@@ -391,11 +391,74 @@ RsaAdjustPrimeCandidate_New(
 // significant bits of each prime candidate without introducing any computational
 // issues.
 //
+#if 0											// libtpms added
+static void RsaAdjustPrimeCandidate_Rev169(BYTE* bigNumberBuffer, size_t bufSize)	// libtpms: renamed
+{
+    // first, ensure the last byte is odd, making the entire value odd
+    bigNumberBuffer[bufSize - 1] |= 1;
+
+    // second, get the most significant 32 bits.
+    uint32_t msw = (bigNumberBuffer[0] << 24) | (bigNumberBuffer[1] << 16)
+		   | (bigNumberBuffer[2] << 8) | (bigNumberBuffer[3] << 0);
+
+    // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
+    uint32_t adjusted = (msw >> 16) * 0x4AFB;
+    adjusted += ((msw & 0xFFFF) * 0x4AFB) >> 16;
+    adjusted += 0xB5050000UL;
+
+    // put the value back
+    bigNumberBuffer[0] = (uint8_t)(adjusted >> 24);
+    bigNumberBuffer[1] = (uint8_t)(adjusted >> 16);
+    bigNumberBuffer[2] = (uint8_t)(adjusted >> 8);
+    bigNumberBuffer[3] = (uint8_t)(adjusted >> 0);
+}
 
 //***TpmRsa_GeneratePrimeForRSA()
 // Function to generate a prime of the desired size with the proper attributes
 // for an RSA prime.
 // succeeds, or enters failure mode.
+static TPM_RC TpmRsa_GeneratePrimeForRSA_Rev169(			// libtpms: renamed
+				  Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
+				  //  random value
+				  UINT32      bits,      // IN: number of bits to get
+				  UINT32      exponent,  // IN: the exponent
+				  RAND_STATE* rand       // IN: the random state
+				  )
+{
+    // Only try to handle specific sizes of keys.
+    // this is necessary so the RsaAdjustPrimeCandidate function works correctly.
+    pAssert((bits % 32) == 0);
+
+    // create buffer large enough for the largest key
+    TPM2B_TYPE(LARGEST, LARGEST_NUMBER);
+    TPM2B_LARGEST large;
+
+    NUMBYTES      bytes = (NUMBYTES)BITS_TO_BYTES(bits);
+    BOOL          OK    = (bytes <= sizeof(large.t.buffer));
+    BOOL          found = FALSE;
+    while(OK && !found)
+	{
+	    OK           = TpmMath_GetRandomBits(large.t.buffer, bits, rand);  // new
+	    large.t.size = bytes;
+	    RsaAdjustPrimeCandidate_Rev169(large.t.buffer, bytes);	// libtpms renamed
+	    // convert from 2B to Integer for prime checks
+	    OK = OK
+		 && (ExtMath_IntFromBytes(prime, large.t.buffer, large.t.size) != NULL);
+	    found = OK && (RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS);
+	}
+
+    if(!OK)
+	{
+	    FAIL(FATAL_ERROR_CRYPTO);
+	}
+
+    return (OK && found) ? TPM_RC_SUCCESS : TPM_RC_FAILURE;
+}
+#endif									// libtpms added
+
+//									// libtpms added begin
+// This function uses different methods for generating RSA prime numbers
+// depending on the SeedCompatLevel of the DRBG.
 TPM_RC TpmRsa_GeneratePrimeForRSA(
 				  Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
 				  //  random value
@@ -440,6 +503,6 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 	    found = RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS;
 	}
     return TPM_RC_SUCCESS;
-}
+}									// libtpms added end
 
 #endif  // ALG_RSA
