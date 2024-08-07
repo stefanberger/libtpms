@@ -119,4 +119,35 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
 
 #endif // USE_OPENSSL_FUNCTIONS_RSA
 
+#if USE_OPENSSL_FUNCTIONS_SSKDF
+LIB_EXPORT UINT16
+OSSLCryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
+	      TPM2B*       Z,        // IN: Z
+	      const TPM2B* label,    // IN: a label value for the KDF
+	      TPM2B*       partyUInfo,  // IN: PartyUInfo
+	      TPM2B*       partyVInfo,  // IN: PartyVInfo
+	      UINT32       sizeInBits,  // IN: size of generated key in bits
+	      BYTE*        keyStream    // OUT: key buffer
+	     );
+#endif // USE_OPENSSL_FUNCTIONS_SSKDF
+
+#if USE_OPENSSL_FUNCTIONS_KBKDF
+LIB_EXPORT UINT16
+OSSLCryptKDFa(
+	      TPM_ALG_ID   hashAlg,       // IN: hash algorithm used in HMAC
+	      const TPM2B* key,           // IN: HMAC key
+	      const TPM2B* label,         // IN: a label for the KDF
+	      const TPM2B* contextU,      // IN: context U
+	      const TPM2B* contextV,      // IN: context V
+	      UINT32       sizeInBits,    // IN: size of generated key in bits
+	      BYTE*        keyStream,     // OUT: key buffer
+	      UINT32*      counterInOut,  // IN/OUT: caller may provide the iteration
+					  //     counter for incremental operations to
+					  //     avoid large intermediate buffers.
+	      UINT16 blocks               // IN: If non-zero, this is the maximum number
+					  //     of blocks to be returned, regardless
+					  //     of sizeInBits
+	     );
+#endif // USE_OPENSSL_FUNCTIONS_KBKDF
+
 #endif  /* HELPERS_FP_H */
