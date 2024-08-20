@@ -44,6 +44,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <regex.h>
+#include <limits.h>
 
 #include "Tpm.h"
 #include "tpm_library_intern.h"
