@@ -95,6 +95,10 @@ TPM2_Commit(Commit_In*  in,  // IN: input parameter list
     TPMS_ECC_PARMS*     parms;
     // Input Validation
 
+    if(RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+					    RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION))
+	return TPM_RC_TYPE;					// libtpms added end
+
     eccKey = HandleToObject(in->signHandle);
     parms  = &eccKey->publicArea.parameters.eccDetail;
 
@@ -204,6 +208,11 @@ TPM2_EC_Ephemeral(
 {
     TPM2B_ECC_PARAMETER      r;
     TPM_RC                   result;
+
+    if(RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+					    RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION))
+	return TPM_RC_TYPE;					// libtpms added end
+
     //
     do
 	{
