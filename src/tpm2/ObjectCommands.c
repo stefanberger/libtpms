@@ -586,6 +586,10 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 	    // Don't derive RSA keys
 	    if(publicArea->type == TPM_ALG_RSA)
 		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
+	    if(publicArea->type == TPM_ALG_ECC &&			// libtpms added begin
+		RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+						     RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION))
+		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;		// libtpms added end
 	    // sensitiveDataOrigin has to be CLEAR in a derived object. Since this
 	    // is specific to a derived object, it is checked here.
 	    if(IS_ATTRIBUTE(

@@ -272,6 +272,14 @@ keys
 
 =back
 
+=item B<no-ecc-key-derivation>: (since v0.10)
+
+=over 2
+
+=item * Prevent ECC key derivation
+
+=back
+
 =back
 
 =head1 FIPS mode on the host
