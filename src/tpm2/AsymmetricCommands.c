@@ -248,6 +248,12 @@ TPM2_ZGen_2Phase(
     OBJECT                  *eccKey;
     TPM2B_ECC_PARAMETER      r;
     TPM_ALG_ID               scheme;
+								// libtpms added begin
+    /* 2phase key exchange uses ecc key derivation; check whether it is allowed */
+    if(RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					   RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION))
+	return TPM_RC_TYPE;                                     // libtpms added end
+
     // Input Validation
     eccKey = HandleToObject(in->keyA);
     // keyA must be an ECC key
