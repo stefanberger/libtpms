@@ -85,6 +85,13 @@ static TPM_RC CryptHmacSign(TPMT_SIGNATURE* signature,  // OUT: signature
     HMAC_STATE hmacState;
     UINT32     digestSize;
 
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpms added begin
+					     TPM_ALG_HMAC,
+					     signKey->sensitive.sensitive.bits.t.size * 8,
+					     TPM_ECC_NONE,
+					     g_RuntimeProfile.stateFormatLevel))
+	return TPM_RC_KEY_SIZE;							// libtpms added end
+
     digestSize = CryptHmacStart2B(&hmacState,
 				  signature->signature.any.hashAlg,
 				  &signKey->sensitive.sensitive.bits.b);
@@ -110,6 +117,14 @@ static TPM_RC CryptHMACVerifySignature(
     TPMT_SIGNATURE         test;
     TPMT_KEYEDHASH_SCHEME* keyScheme =
 	&signKey->publicArea.parameters.keyedHashDetail.scheme;
+
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpm added begin
+					     TPM_ALG_HMAC,
+					     signKey->sensitive.sensitive.bits.t.size * 8,
+					     TPM_ECC_NONE,
+					     g_RuntimeProfile.stateFormatLevel))
+	return TPM_RC_KEY_SIZE;							// libtpms added end
+
     //
     if((signature->sigAlg != TPM_ALG_HMAC)
        || (signature->signature.hmac.hashAlg == TPM_ALG_NULL))

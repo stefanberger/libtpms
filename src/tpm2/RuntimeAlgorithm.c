@@ -57,6 +57,10 @@ struct KeySizes {
     unsigned int stateFormatLevel; /* required stateFormatLevel to support this */
 };
 
+struct MinKeySize {
+    unsigned int stateFormatLevel; /* required stateFormatLevel to support this */
+};
+
 static const struct KeySizes s_KeySizesAES[] = {
     { .enabled = AES_128, .size = 128, .stateFormatLevel = 1 },
     { .enabled = AES_192, .size = 192, .stateFormatLevel = 4 },
@@ -95,11 +99,15 @@ static const struct KeySizes s_KeySizesECC[] = {
     { .enabled = ECC_BN_P638  , .size = 638, .stateFormatLevel = 1 },
     { .enabled = false        , .size = 0  , .stateFormatLevel = 0 },
 };
+static const struct MinKeySize s_MinKeySizeHMAC[] = {
+    { .stateFormatLevel = 7 },
+};
 
 static const struct {
     const char   *name;
-    union {
+    struct {
 	const struct KeySizes *keySizes;
+	const struct MinKeySize *minKeySize;
     } u;
     BOOL          canBeDisabled;
     unsigned int  stateFormatLevel; /* required stateFormatLevel to support this */
@@ -110,6 +118,8 @@ static const struct {
     { .name = ENABLED ? NAME : NULL, .u.keySizes = KEYSIZES, .canBeDisabled = CANDISABLE, .stateFormatLevel = SFL }
 #define HASH(ENABLED, NAME, CANDISABLE, SFL) \
     { .name = ENABLED ? NAME : NULL, .canBeDisabled = CANDISABLE, .stateFormatLevel = SFL }
+#define HMAC(ENABLED, NAME, MINKEYSIZE, CANDISABLE, SFL) \
+    { .name = ENABLED ? NAME : NULL, .u.minKeySize = MINKEYSIZE, .canBeDisabled = CANDISABLE, .stateFormatLevel = SFL }
 #define SIGNING(ENABLED, NAME, CANDISABLE, SFL) \
     { .name = ENABLED ? NAME : NULL, .canBeDisabled = CANDISABLE, .stateFormatLevel = SFL }
 #define ENCRYPTING(ENABLED, NAME, CANDISABLE, SFL) \
@@ -120,7 +130,7 @@ static const struct {
     [TPM_ALG_RSA] = ASYMMETRIC(ALG_RSA, "rsa", s_KeySizesRSA, false, 1),
     [TPM_ALG_TDES] = SYMMETRIC(ALG_TDES, "tdes", s_KeySizesTDES, true, 1),
     [TPM_ALG_SHA1] = HASH(ALG_SHA1, "sha1", true, 1),
-    [TPM_ALG_HMAC] = SIGNING(ALG_HMAC, "hmac", false, 1),
+    [TPM_ALG_HMAC] = HMAC(ALG_HMAC, "hmac", s_MinKeySizeHMAC, false, 1),
     [TPM_ALG_AES] = SYMMETRIC(ALG_AES, "aes", s_KeySizesAES, false, 1), // never disable: context encryption
     [TPM_ALG_MGF1] = HASH(ALG_MGF1, "mgf1", false, 1),
     [TPM_ALG_KEYEDHASH] = HASH(ALG_KEYEDHASH, "keyedhash", false, 1),
@@ -326,6 +336,24 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 		assert(s_AlgorithmProperties[algId].stateFormatLevel > 0);
 		*stateFormatLevel = MAX(*stateFormatLevel,
 					s_AlgorithmProperties[algId].stateFormatLevel);
+		found = true;
+		break;
+	    } else if (s_AlgorithmProperties[algId].u.minKeySize) {
+	        size_t namelen = strlen(s_AlgorithmProperties[algId].name);
+	        if (strncmp(token,
+	                    s_AlgorithmProperties[algId].name, /* i.e., 'hmac' */
+	                    namelen) ||
+	            strncmp(&token[namelen], "-min-key-size=", 14))
+	            continue;
+		minKeySize = strtoul(&token[namelen + 14], &endptr, 10);
+		if ((*endptr != ALGO_SEPARATOR_C && *endptr != '\0')
+		    || minKeySize > MAX_SYM_DATA * 8) {
+		    retVal = TPM_RC_KEY_SIZE;
+		    goto exit;
+		}
+		RuntimeAlgorithm->algosMinimumKeySizes[algId] = (UINT16)minKeySize;
+		*stateFormatLevel = MAX(*stateFormatLevel,
+					s_AlgorithmProperties[algId].u.minKeySize->stateFormatLevel);
 		found = true;
 		break;
 	    } else if (s_AlgorithmProperties[algId].u.keySizes) {
@@ -534,6 +562,9 @@ RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
     if (minKeySize > keySizeInBits)
 	return FALSE;
 
+    if (s_AlgorithmProperties[algId].u.minKeySize)
+        return TRUE;
+
     if (algId == TPM_ALG_ECC) {
 	if ((curveId >> 3) >= sizeof(RuntimeAlgorithm->enabledEccCurves) ||
 	    !TestBit(curveId, RuntimeAlgorithm->enabledEccCurves,
@@ -691,10 +722,14 @@ RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	case RUNTIME_ALGO_IMPLEMENTED:
 	    if (s_AlgorithmProperties[algId].u.keySizes) {
 		minKeySize = KeySizesGetMinimum(s_AlgorithmProperties[algId].u.keySizes);
+	    } else if (s_AlgorithmProperties[algId].u.minKeySize) {
+	        /* for it to appear as 'Implemented' */
+	        minKeySize = 1;
 	    }
 	    break;
 	case RUNTIME_ALGO_ENABLED:
-	    if (s_AlgorithmProperties[algId].u.keySizes) {
+	    if (s_AlgorithmProperties[algId].u.keySizes ||
+	        s_AlgorithmProperties[algId].u.minKeySize) {
 		minKeySize = RuntimeAlgorithm->algosMinimumKeySizes[algId];
 	    }
 	    break;
@@ -702,10 +737,15 @@ RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	    break;
 	}
 	if (minKeySize > 0) {
-	    n = asprintf(&nbuffer, "%s%s%s-min-size=%u",
+	    const char *key = "";
+	    if (s_AlgorithmProperties[algId].u.minKeySize)
+	        key = "key-";
+
+	    n = asprintf(&nbuffer, "%s%s%s-min-%ssize=%u",
 			 buffer,
 			 ALGO_SEPARATOR_STR,
 			 s_AlgorithmProperties[algId].name,
+			 key,
 			 minKeySize);
 	    free(buffer);
 	    if (n < 0)
