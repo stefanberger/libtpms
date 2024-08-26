@@ -255,6 +255,14 @@ above (reference is RHEL 9.4+, but varies by distro). Note that usage of this
 verb does not make a TPM 2 instance compliant with FIPS-140. Also see the
 section on 'FIPS mode on the host'.
 
+=item B<drbg-continous-test>: (since v0.10)
+
+=over 2
+
+=item * Turns on continous testing of the DRBG
+
+=back
+
 =back
 
 =head1 FIPS mode on the host

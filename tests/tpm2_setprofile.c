@@ -329,7 +329,7 @@ static const struct {
                                    "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
                                    "0x17a-0x193,0x197\","
                     "\"Attributes\":\"no-unpadded-encryption,no-sha1-signing,"
-                                    "no-sha1-verification\","
+                                    "no-sha1-verification,drbg-continous-test\","
                     "\"Description\":\"test\""
                    "}",
         .exp_fail = false,
@@ -348,7 +348,7 @@ static const struct {
                              "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
                              "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Attributes\":\"no-unpadded-encryption,no-sha1-signing,"
-                             "no-sha1-verification\","
+                             "no-sha1-verification,drbg-continous-test\","
             "\"Description\":\"test\""
           "}}",
     }, {
