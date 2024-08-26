@@ -99,6 +99,7 @@ static const struct RuntimeProfileDesc {
  *      - no-sha1-verification
  *      - fips-host
  *      - drbg-continous-test
+ *      - pct
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250

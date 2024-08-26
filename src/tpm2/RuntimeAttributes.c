@@ -76,6 +76,8 @@ static const struct {
 	      7),
     ATTRIBUTE("drbg-continous-test", RUNTIME_ATTRIBUTE_DRBG_CONTINOUS_TEST,
 	      7),
+    ATTRIBUTE("pct", RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST,
+	      7),
 };
 
 LIB_EXPORT void

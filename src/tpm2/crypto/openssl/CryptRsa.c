@@ -1052,8 +1052,7 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive,
     return TPM_RC_BINDING;
 }
 
-#if FIPS_COMPLIANT							// libtpms added begin
-static TPM_RC
+static TPM_RC								// libtpms added begin
 CryptRSAPairwiseConsistencyTest(OBJECT *key)
 {
     TPM2B_PUBLIC_KEY_RSA enc = {
@@ -1102,8 +1101,7 @@ CryptRSAPairwiseConsistencyTest(OBJECT *key)
     if (retVal)
 	return retVal;
     return CryptRsaValidateSignature(&sigOut, key, &digest);
-}
-#endif /* FIPS_COMPLIANT */						// libtpms added end
+}									// libtpms added end
 
 #if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 
@@ -1581,13 +1579,13 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
 #if USE_OPENSSL_FUNCTIONS_RSA			// libtpms added begin
  pct:
 #endif
-#if FIPS_COMLIANT
-    if(retVal == TPM_RC_SUCCESS) {
+    if(retVal == TPM_RC_SUCCESS &&
+       RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+                                            RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST)) {
 	retVal = CryptRSAPairwiseConsistencyTest(rsaKey);
 	if (retVal)
 	    retVal = TPM_RC_FAILURE;
     }						// libtpms added end
-#endif
     return retVal;
 }
 

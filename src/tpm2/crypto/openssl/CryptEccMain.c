@@ -792,9 +792,11 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 	    TpmMath_IntTo2B(
 			    bnD, &sensitive->sensitive.ecc.b, publicArea->unique.ecc.x.t.size);
 	}
-#  if FIPS_COMPLIANT
+//#  if FIPS_COMPLIANT									// libtpms changed
     // See if PWCT is required
-    if(OK && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
+    if(OK && IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign) &&		// libtpms changed begin
+       RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					    RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST))	// libtpms changed end
 	{
 	    CRYPT_ECC_NUM(bnT);
 	    CRYPT_ECC_NUM(bnS);
@@ -811,7 +813,7 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 	    OK = TpmEcc_ValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest)
 		 == TPM_RC_SUCCESS;
 	}
-#  endif
+//#  endif										// libtpms changed
     retVal = (OK) ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
  Exit:
     CRYPT_CURVE_FREE(E);
