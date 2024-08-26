@@ -359,7 +359,10 @@ static BOOL EncryptDRBG(BYTE*              dOut,
 			UINT32* lastValue  // Points to the last output value
 			)
 {
-#if FIPS_COMPLIANT
+//#if FIPS_COMPLIANT								// libtpms changed
+if(RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,			// libtpms added
+					RUNTIME_ATTRIBUTE_DRBG_CONTINOUS_TEST))	// libtpms added
+{
     // For FIPS compliance, the DRBG has to do a continuous self-test to make sure that
     // no two consecutive values are the same. This overhead is not incurred if the TPM
     // is not required to be FIPS compliant
@@ -392,7 +395,8 @@ static BOOL EncryptDRBG(BYTE*              dOut,
 	    for(p = (BYTE*)temp; i > 0; i--)
 		*dOut++ = *p++;
 	}
-#else  // version without continuous self-test
+//#else  // version without continuous self-test				// libtpms changed
+} else {									// libtpms added
     NOT_REFERENCED(lastValue);
     for(; dOutBytes >= DRBG_IV_SIZE_BYTES;
 	dOut = &dOut[DRBG_IV_SIZE_BYTES], dOutBytes -= DRBG_IV_SIZE_BYTES)
@@ -411,7 +415,8 @@ static BOOL EncryptDRBG(BYTE*              dOut,
 	    DRBG_ENCRYPT(keySchedule, iv, temp);
 	    memcpy(dOut, temp, dOutBytes);
 	}
-#endif
+}										// libtpms added
+//#endif									// libtpms changed
     return TRUE;
 }
 

@@ -74,6 +74,8 @@ static const struct {
 			   RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING |
 			   RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION,
 	      7),
+    ATTRIBUTE("drbg-continous-test", RUNTIME_ATTRIBUTE_DRBG_CONTINOUS_TEST,
+	      7),
 };
 
 LIB_EXPORT void
