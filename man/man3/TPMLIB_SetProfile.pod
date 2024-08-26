@@ -263,6 +263,15 @@ section on 'FIPS mode on the host'.
 
 =back
 
+=item B<pct>: (since v0.10)
+
+=over 2
+
+=item * Turns on pairwise consistency test (pct) for RSA keys and EC signing
+keys
+
+=back
+
 =back
 
 =head1 FIPS mode on the host
