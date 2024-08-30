@@ -60,6 +60,8 @@ static const struct {
 	      7),
     ATTRIBUTE("no-sha1-signing", RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING,
 	      7),
+    ATTRIBUTE("no-sha1-verification", RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION,
+	      7),
 };
 
 LIB_EXPORT void

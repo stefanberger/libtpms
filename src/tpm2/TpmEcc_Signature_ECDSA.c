@@ -252,6 +252,11 @@ TpmEcc_ValidateSignatureEcdsa(
     CRYPT_ECC_NUM(bnV);
     const Crypt_Int* order  = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
     TPM_RC           retVal = TPM_RC_SIGNATURE;
+
+    if (digest->b.size == CryptHashGetDigestSize(TPM_ALG_SHA1) &&	// libtpms added begin
+	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
+	return TPM_RC_HASH;						// libtpms added end
     //
     // Get adjusted digest
     TpmEcc_AdjustEcdsaDigest(bnE, digest, order);
@@ -304,6 +309,11 @@ TpmEcc_ValidateSignatureEcdsa(
     BIGNUM*    r = BN_new();
     BIGNUM*    s = BN_new();
     EC_POINT*  q = EcPointInitialized((bn_point_t*)ecQ, E);
+
+    if (digest->b.size == CryptHashGetDigestSize(TPM_ALG_SHA1) &&
+	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
+	ERROR_EXIT(TPM_RC_HASH);
 
     r = BigInitialized(r, (bigConst)bnR);
     s = BigInitialized(s, (bigConst)bnS);

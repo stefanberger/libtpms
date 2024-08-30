@@ -202,6 +202,15 @@ algorithms
 
 =back
 
+=item B<no-sha1-verification>: (since v0.10)
+
+=over 2
+
+=item * Prevents signature verification with a SHA1 digest with RSA and ECC
+algorithms
+
+=back
+
 =back
 
 =head1 ERRORS

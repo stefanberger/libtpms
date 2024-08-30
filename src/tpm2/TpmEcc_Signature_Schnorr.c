@@ -180,6 +180,11 @@ TPM_RC TpmEcc_ValidateSignatureEcSchnorr(
     TPM2B_TYPE(BUFFER, MAX(MAX_ECC_PARAMETER_BYTES, MAX_DIGEST_SIZE));
     TPM2B_BUFFER Ex2 = {{sizeof(Ex2.t.buffer), {0}}};
     BOOL         OK;
+
+    if (hashAlg == TPM_ALG_SHA1 &&				// libtpms added begin
+	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
+	return TPM_RC_HASH;					// libtpms added end
     //
     // E = [s]G - [r]Q
     ExtMath_Mod(bnR, order);

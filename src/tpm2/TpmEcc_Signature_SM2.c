@@ -219,6 +219,11 @@ TPM_RC TpmEcc_ValidateSignatureEcSm2(
     BOOL             OK;
     const Crypt_Int* order = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
 
+    if (digest->b.size == CryptHashGetDigestSize(TPM_ALG_SHA1) &&	// libtpms added begin
+	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
+	return TPM_RC_HASH;						// libtpms added end
+
 #  ifdef _SM2_SIGN_DEBUG
     // Make sure that the input signature is the test signature
     pAssert(TpmEccDebug_HexEqual(bnR,
