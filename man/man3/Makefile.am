@@ -23,6 +23,7 @@ man3_PODS = \
 	TPMLIB_SetState.pod \
 	TPMLIB_ValidateState.pod \
 	TPMLIB_VolatileAll_Store.pod \
+	TPMLIB_WasManufactured.pod \
 	TPM_Malloc.pod
 
 man3_MANS = \
@@ -54,6 +55,7 @@ man3_MANS_generated = \
 	TPMLIB_RegisterCallbacks.3 \
 	TPMLIB_ValidateState.3 \
 	TPMLIB_VolatileAll_Store.3 \
+	TPMLIB_WasManufactured.3 \
 	TPM_Malloc.3
 
 man3_MANS += $(man3_MANS_generated)

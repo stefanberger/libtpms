@@ -272,6 +272,11 @@ TPM_RESULT TPMLIB_SetProfile(const char *profile)
     return tpm_iface[tpmvers_choice]->SetProfile(profile);
 }
 
+TPM_BOOL TPMLIB_WasManufactured(void)
+{
+    return tpm_iface[tpmvers_choice]->WasManufactured();
+}
+
 static struct libtpms_callbacks libtpms_cbs;
 
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void)

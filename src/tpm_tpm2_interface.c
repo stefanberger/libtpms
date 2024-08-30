@@ -70,6 +70,7 @@
 extern BOOL      g_inFailureMode;
 static BOOL      reportedFailureCommand;
 static char     *g_profile;
+static TPM_BOOL  g_wasManufactured;
 
 /*
  * Check whether the main NVRAM file exists. Return TRUE if it doesn, FALSE otherwise
@@ -108,6 +109,7 @@ static TPM_RESULT TPM2_MainInit(void)
 
     g_inFailureMode = FALSE;
     reportedFailureCommand = FALSE;
+    g_wasManufactured = FALSE;
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
@@ -141,6 +143,8 @@ static TPM_RESULT TPM2_MainInit(void)
                 TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
                                     "failure mode\n", __func__);
                 reportedFailureCommand = TRUE;
+            } else {
+                g_wasManufactured = TRUE;
             }
         }
     } else if (!has_nvram_loaddata_callback) {
@@ -831,6 +835,11 @@ static TPM_RESULT TPM2_SetProfile(const char *profile)
     return TPM_SUCCESS;
 }
 
+static TPM_BOOL TPM2_WasManufactured(void)
+{
+    return g_wasManufactured;
+}
+
 const struct tpm_interface TPM2Interface = {
     .MainInit = TPM2_MainInit,
     .Terminate = TPM2_Terminate,
@@ -849,4 +858,5 @@ const struct tpm_interface TPM2Interface = {
     .SetState = TPM2_SetState,
     .GetState = TPM2_GetState,
     .SetProfile = TPM2_SetProfile,
+    .WasManufactured = TPM2_WasManufactured,
 };

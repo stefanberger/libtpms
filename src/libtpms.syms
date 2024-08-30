@@ -41,6 +41,7 @@ LIBTPMS_0.6.0 {
 LIBTPMS_0.10.0 {
     global:
 	TPMLIB_SetProfile;
+	TPMLIB_WasManufactured;
     local:
 	*;
 } LIBTPMS_0.6.0;
