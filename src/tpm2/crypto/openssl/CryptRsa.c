@@ -1865,6 +1865,11 @@ CryptRsaValidateSignature(
     if (retVal != TPM_RC_SUCCESS)
         return retVal;
 
+    if (sig->signature.any.hashAlg == TPM_ALG_SHA1 &&		// libtpms added begin
+	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
+	ERROR_EXIT(TPM_RC_HASH);				// libtpms added end
+
     digestname = GetDigestNameByHashAlg(sig->signature.any.hashAlg);
     if (digestname == NULL)
         ERROR_EXIT(TPM_RC_VALUE);
