@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -374,7 +375,7 @@ int main(void)
                     profile, testcases[i].exp_profile);
             goto exit;
         }
-        TPM_Free(profile);
+        free(profile);
         profile = NULL;
 
         for (j = 0;
@@ -412,7 +413,7 @@ int main(void)
     ret = 0;
 
 exit:
-    TPM_Free(profile);
+    free(profile);
     TPM_Free(rbuffer);
 
     return ret;
