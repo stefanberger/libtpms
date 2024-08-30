@@ -1,0 +1,33 @@
+=head1 NAME
+
+TPMLIB_WasManufactured  - Check whether a new instance was created
+
+=head1 LIBRARY
+
+TPM library (libtpms, -ltpms)
+
+=head1 SYNOPSIS
+
+B<#include <libtpms/tpm_types.h>>
+
+B<#include <libtpms/tpm_library.h>>
+
+B<#include <libtpms/tpm_error.h>>
+
+B<TPM_BOOL TPMLIB_WasManufactured(void);>
+
+=head1 DESCRIPTION
+
+B<TPMLIB_WasManufactured()> is used to check whether a new TPM instance was
+created using B<TPMLIB_MainInit()> rather than an already existing one was
+restarted. This function will only return a valid result if it is called after
+B<TPMLIB_MainInit()>.
+
+This function only applies to a TPM 2 and for a TPM 1.2 it will always
+return I<FALSE>.
+
+=head1 SEE ALSO
+
+B<TPMLIB_ChooseTPMVersion>, B<TPMLIB_MainInit>(3)
+
+=cut

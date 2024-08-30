@@ -172,6 +172,8 @@ TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
 
 TPM_RESULT TPMLIB_SetProfile(const char *profile);
 
+TPM_BOOL TPMLIB_WasManufactured(void);
+
 #ifdef __cplusplus
 }
 #endif
