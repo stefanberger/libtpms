@@ -211,6 +211,59 @@ algorithms
 
 =back
 
+=item B<fips-host>: (since v0.10)
+
+=over 2
+
+=item * Prevents unpadded (raw) RSA encryption and decryption
+
+=item * Prevents signature generation with a SHA1 with RSA and ECC
+algorithms
+
+=item * Prevents signature verification with a SHA1 digest with RSA and ECC
+algorithms
+
+=back
+
+By adding this verb to the I<Attributes> a TPM 2 can be run on a FIPS-enabled
+host where the OpenSSL crypto library may restrict crypto algorithms as shown
+above (reference is RHEL 9.4+, but varies by distro). Note that usage of this
+verb does not make a TPM 2 instance compliant with FIPS-140. Also see the
+section on 'FIPS mode on the host'.
+
+=back
+
+=head1 FIPS mode on the host
+
+If FIPS mode is enabled on a host (reference is RHEL 9.4+) then the OpenSSL
+crypto library will not be able to use certain algorithms. In this case the
+following list of verbs should be omitted from a profile to avoid either
+selftest failures or having to disable FIPS mode in the OpenSSL instance.
+
+=over 2
+
+=item * camellia, camellia-min-size
+
+=item * tdes, tdes-min-size
+
+=item * rsaes
+
+=item * ecc-nist-p192
+
+=item * ecc-bn, ecc-bn-p256, ecc-bn-p638
+
+=item * ecc-sm2-p256
+
+=back
+
+A profile should contain the following verbs for minimum key sizes:
+
+=over 2
+
+=item * rsa-min-size=2048
+
+=item * ecc-min-size=224
+
 =back
 
 =head1 ERRORS
