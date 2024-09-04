@@ -211,6 +211,14 @@ algorithms
 
 =back
 
+=item B<no-sha1-hmac-creation>: (since v0.10)
+
+=over 2
+
+=item * Prevents creation of an HMAC using SHA1
+
+=back
+
 =item B<fips-host>: (since v0.10)
 
 =over 2
