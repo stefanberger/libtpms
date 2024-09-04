@@ -1537,6 +1537,11 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
 	        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
 						     RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING))
 		return TPM_RC_HASH;
+	  case TPM_ALG_KEYEDHASH:
+	    if (signScheme->details.any.hashAlg == TPM_ALG_SHA1 &&
+	        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+						     RUNTIME_ATTRIBUTE_NO_SHA1_HMAC_CREATION))
+		return TPM_RC_HASH;
 	  break;
 	}							// libtpms added end
 
