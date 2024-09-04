@@ -219,6 +219,14 @@ algorithms
 
 =back
 
+=item B<no-sha1-hmac-verification>: (since v0.10)
+
+=over 2
+
+=item * Prevents verification of an HMAC using SHA1
+
+=back
+
 =item B<fips-host>: (since v0.10)
 
 =over 2

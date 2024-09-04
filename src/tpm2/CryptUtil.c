@@ -123,6 +123,12 @@ static TPM_RC CryptHMACVerifySignature(
        && ((keyScheme->scheme != signature->sigAlg)
 	   || (keyScheme->details.hmac.hashAlg != signature->signature.any.hashAlg)))
 	return TPM_RC_SIGNATURE;
+
+    if (signature->signature.any.hashAlg == TPM_ALG_SHA1 &&			// libtpms added begin
+        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+					     RUNTIME_ATTRIBUTE_NO_SHA1_HMAC_VERIFICATION))
+	return TPM_RC_HASH;							// libtpms added end
+
     test.sigAlg                 = signature->sigAlg;
     test.signature.hmac.hashAlg = signature->signature.hmac.hashAlg;
 
