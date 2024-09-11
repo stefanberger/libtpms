@@ -1540,15 +1540,16 @@ CryptSign(OBJECT*          signKey,     // IN: signing key
 	  case TPM_ALG_RSA:
 	  case TPM_ALG_ECC:
 	    if (signScheme->details.any.hashAlg == TPM_ALG_SHA1 &&
-	        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+		RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
 						     RUNTIME_ATTRIBUTE_NO_SHA1_SIGNING))
 		return TPM_RC_HASH;
+	    break;
 	  case TPM_ALG_KEYEDHASH:
 	    if (signScheme->details.any.hashAlg == TPM_ALG_SHA1 &&
-	        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+		RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
 						     RUNTIME_ATTRIBUTE_NO_SHA1_HMAC_CREATION))
 		return TPM_RC_HASH;
-	  break;
+	    break;
 	}							// libtpms added end
 
     // perform sign operation based on different key type
