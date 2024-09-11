@@ -227,10 +227,74 @@ exit:
     return retVal;
 }
 
+/*
+ * RuntimeProfileDedupStrItems does in-place deduplication of comma-separated
+ * items in a string. If an item contains '=' (rsa-min-size=) then the part
+ * before the '=' is deduplicated. When deduplicating always the later item is
+ * kept.
+ */
+static void
+RuntimeProfileDedupStrItems(char *input)
+{
+    size_t len = strlen(input), slen;
+    char *comma, *equals, *dup, *ncomma;
+    char *pos = input;
+    bool found;
+    char exp;
+
+    while (true) {
+        comma = index(pos, ',');
+        if (!comma)
+            return;
+
+        /* temporarily terminate string here */
+        *comma = '\0';
+        equals = index(pos, '=');
+        if (equals) {
+            *equals = '\0';
+            exp = '=';
+            slen = equals - pos;
+        } else {
+            exp = ',';
+            slen = comma - pos;
+        }
+
+        found = false;
+        ncomma = comma;
+        /* search for string after the comma */
+        while (true) {
+            dup = strstr(ncomma + 1, pos);
+            if (dup) {
+                /* ensure 'dup' is a prefix of 'pos' with either ',' or '\0' before it */
+                if ((dup[-1] == ',' || dup[-1] == 0) && dup[slen] == exp) {
+                    memmove(pos, comma + 1, len - slen);
+                    /* keep pos as-is */
+                    found = true;
+                    break;
+                }
+                /* only a prefix matched; continue search afer comma */
+                ncomma = index(dup, ',');
+                if (!ncomma)
+                    break;
+            } else {
+                break;
+            }
+        }
+        if (!found) {
+            *comma = ',';
+            if (equals)
+               *equals = '=';
+            pos = comma + 1;
+        }
+        len -= (slen + 1);
+    }
+}
+
 static TPM_RC
 RuntimeProfileGetFromJSON(const char  *json,
 			  const char  *regex,
-			  char       **value)
+			  char       **value,
+			  bool         removeDuplicates)
 {
     regmatch_t match[2];
     TPM_RC retVal;
@@ -250,6 +314,9 @@ RuntimeProfileGetFromJSON(const char  *json,
     }
 
     *value = strndup(&json[match[1].rm_so], match[1].rm_eo - match[1].rm_so);
+    if (removeDuplicates)
+        RuntimeProfileDedupStrItems(*value);
+
     if (*value == NULL) {
 	retVal= TPM_RC_MEMORY;
 	goto exit;
@@ -268,7 +335,7 @@ RuntimeProfileGetNameFromJSON(const char  *json,
 {
     const char *regex = "^\\{.*[[:space:]]*\"Name\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
 
-    return RuntimeProfileGetFromJSON(json, regex, name);
+    return RuntimeProfileGetFromJSON(json, regex, name, false);
 }
 
 static TPM_RC
@@ -279,7 +346,7 @@ RuntimeProfileGetDescriptionFromJSON(const char  *json,
     TPM_RC retVal;
     size_t len;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, description);
+    retVal = RuntimeProfileGetFromJSON(json, regex, description, false);
     if (retVal == TPM_RC_NO_RESULT) {
 	*description = NULL;
 	return TPM_RC_SUCCESS;
@@ -301,7 +368,7 @@ GetStateFormatLevelFromJSON(const char   *json,
     unsigned long v;
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, &str);
+    retVal = RuntimeProfileGetFromJSON(json, regex, &str, false);
     if (retVal)
 	return retVal;
 
@@ -327,7 +394,7 @@ GetAlgorithmsProfileFromJSON(const char  *json,
     const char *regex = "^\\{.*[[:space:]]*\"Algorithms\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, algorithmsProfile);
+    retVal = RuntimeProfileGetFromJSON(json, regex, algorithmsProfile, true);
     if (retVal == TPM_RC_NO_RESULT) {
 	*algorithmsProfile = NULL;
 	retVal = 0;
@@ -344,7 +411,7 @@ GetAttributesProfileFromJSON(
     const char *regex = "^\\{.*[[:space:]]*\"Attributes\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, attributesProfile);
+    retVal = RuntimeProfileGetFromJSON(json, regex, attributesProfile, true);
     if (retVal == TPM_RC_NO_RESULT) {
 	*attributesProfile = NULL;
 	retVal = 0;
@@ -359,7 +426,7 @@ GetCommandsProfileFromJSON(const char  *json,
     const char *regex = "^\\{.*[[:space:]]*\"Commands\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, commandsProfile);
+    retVal = RuntimeProfileGetFromJSON(json, regex, commandsProfile, true);
     if (retVal == TPM_RC_NO_RESULT) {
 	*commandsProfile = NULL;
 	retVal = 0;
