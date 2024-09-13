@@ -714,15 +714,23 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
     }
 
     if (jsonProfileIsFromUser || stateFormatLevelJSON == STATE_FORMAT_LEVEL_UNKNOWN) {
-	RuntimeProfile->stateFormatLevel = rp->stateFormatLevel;
 	if (!rp->allowModifications) {
+	    /* StateFormatLevels are controlled by internal profile */
 	    maxStateFormatLevel = rp->stateFormatLevel;
+	    RuntimeProfile->stateFormatLevel = rp->stateFormatLevel;
 	} else {
 	    if (stateFormatLevelJSON != STATE_FORMAT_LEVEL_UNKNOWN) {
+		if (stateFormatLevelJSON < 2) {
+		    TPMLIB_LogTPM2Error("The minimum required StateFormatLevel for '%s' profile is '2'\n",
+					profileName);
+		    goto error;
+		}
 		maxStateFormatLevel = stateFormatLevelJSON;
 	    } else {
 		maxStateFormatLevel = ~0;
 	    }
+	    /* User has some control over StateFormatLevel */
+	    RuntimeProfile->stateFormatLevel = stateFormatLevelJSON;
 	}
     } else {
 	/* JSON was from TPM 2 state */
