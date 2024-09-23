@@ -354,7 +354,7 @@ RuntimeProfileGetDescriptionFromJSON(const char  *json,
     if (retVal == TPM_RC_SUCCESS && *description != NULL) {
 	len = strlen(*description);
 	if (len > DESCRIPTION_MAX_SIZE)
-	    description[len] = 0;
+	    (*description)[DESCRIPTION_MAX_SIZE] = 0;
     }
     return retVal;
 }
