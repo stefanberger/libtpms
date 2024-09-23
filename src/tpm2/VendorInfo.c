@@ -83,7 +83,7 @@ static uint32_t currentHash = FIRMWARE_V2;
 static uint16_t currentSvn  = 10;
 
 // Similar to the Core Library's ByteArrayToUint32, but usable in Platform code.
-static uint32_t StringToUint32(char s[4])
+static uint32_t StringToUint32(const char s[4])		// libtpms changed: added const
 {
     uint8_t* b = (uint8_t*)s;  // Avoid promotion to a signed integer type
     return (((uint32_t)b[0] << 8 | b[1]) << 8 | b[2]) << 8 | b[3];
