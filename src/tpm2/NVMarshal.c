@@ -102,7 +102,7 @@ typedef struct {
         BYTE *buffer;
         INT32 size;
     } pos[5]; /* more only needed for nested compile-time #ifdef's */
-} block_skip;
+} block_skip_t;
 
 /*
  * This function is to be called when an optional block follows. It inserts
@@ -112,7 +112,7 @@ typedef struct {
  * bytes written when block_skip_write_pop() is called.
  */
 static UINT16
-block_skip_write_push(block_skip *bs, BOOL has_block,
+block_skip_write_push(block_skip_t *bs, BOOL has_block,
                       BYTE **buffer, INT32 *size) {
     UINT16 written , w;
     UINT16 zero = 0;
@@ -137,7 +137,7 @@ block_skip_write_push(block_skip *bs, BOOL has_block,
  * needed.
  */
 static void
-block_skip_write_pop(block_skip *bs, INT32 *size) {
+block_skip_write_pop(block_skip_t *bs, INT32 *size) {
     UINT16 skip;
     unsigned i = --bs->idx;
     pAssert((int)bs->idx >= 0);
@@ -186,7 +186,7 @@ block_skip_read(BOOL needs_block, BYTE **buffer, INT32 *size,
 }
 
 #define BLOCK_SKIP_INIT				\
-    block_skip block_skip = {			\
+    block_skip_t block_skip = {			\
         .idx = 0,				\
         .sz = ARRAY_SIZE(block_skip.pos),	\
     }
