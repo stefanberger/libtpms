@@ -367,7 +367,7 @@ UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
     }
     if (rc == TPM_RC_SUCCESS && exp != *data) {
         TPMLIB_LogTPM2Error("%s: Expected value: 0x%08x, found: 0x%08x\n",
-                            __func__, exp, *data);
+                            msg, exp, *data);
         rc = TPM_RC_BAD_TAG;
     }
     return rc;
