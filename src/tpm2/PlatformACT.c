@@ -158,7 +158,7 @@ ActSignal(
 /* C.16.2.2.	ActGetDataPointer() */
 static P_ACT_DATA
 ActGetDataPointer(
-		  uint32_t            act
+		  uint32_t            act __attribute__((unused))
 		  )
 {
     

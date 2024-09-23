@@ -242,7 +242,7 @@ RuntimeCommandsSetDefault(struct RuntimeCommands *RuntimeCommands,
  * the parse input must either ',' or NUL.
  */
 static int
-parseRange(const char *buffer, size_t buflen,
+parseRange(const char *buffer,
 	   TPM_CC *commandCodeLo, TPM_CC *commandCodeHi)
 {
     char *endptr;
@@ -310,7 +310,7 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
 	else
 	    toklen = strlen(token);
 
-	if (parseRange(token, toklen, &commandCodeLo, &commandCodeHi) < 0) {
+	if (parseRange(token, &commandCodeLo, &commandCodeHi) < 0) {
 	    TPMLIB_LogTPM2Error("Requested command range %.*s cannot be parsed.\n",
 				(int)toklen, token);
 	    goto exit;

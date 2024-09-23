@@ -159,7 +159,7 @@ static TPM_RC TestHash(TPM_ALG_ID hashAlg, ALGORITHM_VECTOR* toTest)
 #if SMAC_IMPLEMENTED && ALG_CMAC
 static TPM_RC
 TestSMAC(
-	 ALGORITHM_VECTOR    *toTest
+	 ALGORITHM_VECTOR    *toTest LIBTPMS_ATTR_UNUSED
 	 )
 {
     HMAC_STATE          state;

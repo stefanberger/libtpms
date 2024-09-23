@@ -511,7 +511,6 @@ ComputePrivateExponentD_Carmichael(
 			    const BIGNUM   *P,      // IN: first prime (size is 1/2 of bnN)
 			    const BIGNUM   *Q,      // IN: second prime (size is 1/2 of bnN)
 			    const BIGNUM   *E,      // IN: the public exponent
-			    const BIGNUM   *N,      // IN: the public modulus
 			    BIGNUM        **D       // OUT:
                            )
 {
@@ -565,7 +564,7 @@ ComputePrivateExponentD(
      * >= 2048 bits & e >= 0x10000: Carmichael function
      */
     if (nbits >= 2048 && BN_num_bits(E) > 16) {
-       if (ComputePrivateExponentD_Carmichael(P, Q, E, N, D) == FALSE)
+       if (ComputePrivateExponentD_Carmichael(P, Q, E, D) == FALSE)
            return FALSE;
        /* D too small? A key generated following SP800-56B rev 1
         * 6.3.1.1 step 3 should not exist -> fall back to Euler
@@ -781,8 +780,9 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 
-static void DoRSACheckKey(const BIGNUM *P, const BIGNUM *Q, const BIGNUM *N,
-                          const BIGNUM *E, const BIGNUM *D)
+static void DoRSACheckKey(const BIGNUM *P LIBTPMS_ATTR_UNUSED,
+                          const BIGNUM *Q LIBTPMS_ATTR_UNUSED,
+                          const BIGNUM *N, const BIGNUM *E, const BIGNUM *D)
 {
     EVP_PKEY_CTX *ctx;
     EVP_PKEY *pkey = NULL;

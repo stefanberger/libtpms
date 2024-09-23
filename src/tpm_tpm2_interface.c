@@ -660,7 +660,7 @@ uint32_t TPM2_GetBufferSize(void)
  * successfully used by a TPM_INIT.
 */
 static TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
-                                     unsigned int flags)
+                                     unsigned int flags LIBTPMS_ATTR_UNUSED)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     TPM_RC rc = TPM_RC_SUCCESS;

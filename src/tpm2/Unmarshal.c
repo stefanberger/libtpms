@@ -2523,7 +2523,10 @@ TPMS_CAPABILITY_DATA_Unmarshal(TPMS_CAPABILITY_DATA *target, BYTE **buffer, INT3
 
 /* NOTE The TPMU_SET_CAPABILITIES structure may be defined by a TCG Registry. */
 TPM_RC
-TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target, BYTE **buffer, INT32 *size, UINT32 selector)
+TPMU_SET_CAPABILITIES_Unmarshal(TPMU_SET_CAPABILITIES *target LIBTPMS_ATTR_UNUSED,
+                                BYTE **buffer LIBTPMS_ATTR_UNUSED,
+                                INT32 *size LIBTPMS_ATTR_UNUSED,
+                                UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 

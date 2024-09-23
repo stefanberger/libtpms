@@ -39,6 +39,8 @@
 #ifndef BACKWARDS_COMPATIBILITY_H
 #define BACKWARDS_COMPATIBILITY_H
 
+#include "compiler.h"
+
 typedef UINT8 SEED_COMPAT_LEVEL;
 enum {
     SEED_COMPAT_LEVEL_ORIGINAL = 0,   /* original TPM 2 code up to rev155 */

@@ -45,5 +45,8 @@
 # define ATTRIBUTE_FORMAT(STRING_IDX, FIRST_TO_CHECK) \
   __attribute__((__format__ (__printf__, STRING_IDX, FIRST_TO_CHECK)))
 #endif
+#ifdef __GNUC__ /* gcc and clang */
+# define LIBTPMS_ATTR_UNUSED __attribute__((unused))
+#endif
 
 #endif /* TPMLIB_COMPILER_H */
