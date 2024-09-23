@@ -353,7 +353,7 @@ if test "x$enable_hardening" != "xno"; then
 	AC_SUBST([HARDENING_LDFLAGS])
 fi
 
-AM_CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wreturn-type -Wsign-compare -Wno-self-assign -Wmissing-prototypes"
+AM_CFLAGS="$CFLAGS $COVERAGE_CFLAGS -Wall -Werror -Wshadow -Wreturn-type -Wsign-compare -Wno-self-assign -Wmissing-prototypes"
 AM_CFLAGS="$AM_CFLAGS"
 AM_LDFLAGS="$LDFLAGS $COVERAGE_LDFLAGS"
 
