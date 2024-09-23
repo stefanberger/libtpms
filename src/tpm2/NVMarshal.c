@@ -60,6 +60,8 @@
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
 
+MUST_BE(CONTEXT_INTEGRITY_HASH_ALG == TPM_ALG_SHA512);
+
 /*
  * The TPM2 maintains a pcrAllocated shadow variable; the current active one is
  * in gp.pcrAllocated and the one to be active after reboot is in NVRAM. So,
