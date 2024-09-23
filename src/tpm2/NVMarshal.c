@@ -4574,7 +4574,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
     written += UINT32_Marshal(&sourceside_size, buffer, size);
 
     while (TRUE) {
-        nrhp = array + offset;
+        nrhp = (NV_RAM_HEADER *)((BYTE *)array + offset);
         /* nrhp may point to misaligned address (ubsan), so use 'nrh'; first access only 'size' */
         memcpy(&nrh, nrhp, sizeof(nrh.size));
 
@@ -4606,7 +4606,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         written += UINT16_Marshal(&datasize, buffer, size);
         if (datasize > 0) {
             /* append the data */
-            written += Array_Marshal(array + offset + sizeof(NV_RAM_HEADER),
+            written += Array_Marshal((BYTE *)array + offset + sizeof(NV_RAM_HEADER),
                                      datasize, buffer, size);
         }
         offset += nrh.size;
@@ -4656,7 +4656,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
         /* nrhp may point to misaligned address (ubsan)
          * we read 'into' nrh and copy to nrhp at end
          */
-        nrhp = array + offset;
+        nrhp = (NV_RAM_HEADER *)((BYTE *)array + offset);
 
         if (offset + sizeof(NV_RAM_HEADER) > sourceside_size) {
             /* this case can occur with the previous entry filling up the
@@ -4702,7 +4702,7 @@ INDEX_ORDERLY_RAM_Unmarshal(void *array, size_t array_size,
         }
         if (rc == TPM_RC_SUCCESS && datasize > 0) {
             /* append the data */
-            rc = Array_Unmarshal(array + offset + sizeof(NV_RAM_HEADER),
+            rc = Array_Unmarshal((BYTE *)array + offset + sizeof(NV_RAM_HEADER),
                                  datasize, buffer, size);
         }
         if (rc == TPM_RC_SUCCESS) {
