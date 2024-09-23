@@ -3829,7 +3829,7 @@ skip_future_versions:
  */
 static const struct _entry {
     UINT32 constant;
-    char *name;
+    const char *name;
     enum CompareOp { EQ, LE, GE, DONTCARE } cmp;
 } pa_compile_constants[] = {
 #define COMPILE_CONSTANT(CONST, CMP) \
