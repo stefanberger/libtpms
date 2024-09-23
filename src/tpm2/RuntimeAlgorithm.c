@@ -721,6 +721,8 @@ skip:
 
     n = asprintf(&nbuffer, "%s\"", buffer);
     free(buffer);
+    if (n < 0)
+        return NULL;
 
     return nbuffer;
 }
