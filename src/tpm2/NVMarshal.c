@@ -4342,8 +4342,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
 }
 
 static TPM_RC
-PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
-                          struct RuntimeProfile *RuntimeProfile)
+PERSISTENT_DATA_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
@@ -5179,7 +5178,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
         rc = PACompileConstants_Unmarshal(buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size, &g_RuntimeProfile);
+        rc = PERSISTENT_DATA_Unmarshal(&pd, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
         if (hdr.version < 3) {

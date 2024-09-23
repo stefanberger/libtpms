@@ -180,7 +180,6 @@ RuntimeProfileFree(struct RuntimeProfile *RuntimeProfile)
 
 static TPM_RC
 RuntimeProfileSetRuntimeProfile(struct RuntimeProfile           *RuntimeProfile,
-				const struct RuntimeProfileDesc *rp,
 				const char                      *algorithmsProfile,
 				const char                      *commandsProfile,
 				const char                      *attributesProfile,
@@ -737,7 +736,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 	maxStateFormatLevel = stateFormatLevelJSON;
 	RuntimeProfile->stateFormatLevel = stateFormatLevelJSON;
     }
-    retVal = RuntimeProfileSetRuntimeProfile(RuntimeProfile, rp,
+    retVal = RuntimeProfileSetRuntimeProfile(RuntimeProfile,
 					     algorithmsProfile,
 					     commandsProfile,
 					     attributesProfile,

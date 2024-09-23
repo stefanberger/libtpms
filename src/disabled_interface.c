@@ -11,15 +11,19 @@ static void Disabled_Terminate(void)
 {
 }
 
-static TPM_RESULT Disabled_Process(unsigned char **respbuffer, uint32_t *resp_size,
-                               uint32_t *respbufsize,
-                               unsigned char *command, uint32_t command_size)
+static TPM_RESULT
+Disabled_Process(unsigned char **respbuffer LIBTPMS_ATTR_UNUSED,
+                 uint32_t *resp_size LIBTPMS_ATTR_UNUSED,
+                 uint32_t *respbufsize LIBTPMS_ATTR_UNUSED,
+                 unsigned char *command LIBTPMS_ATTR_UNUSED,
+                 uint32_t command_size LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_VolatileAllStore(unsigned char **buffer,
-                                        uint32_t *buflen)
+static TPM_RESULT
+Disabled_VolatileAllStore(unsigned char **buffer LIBTPMS_ATTR_UNUSED,
+                          uint32_t *buflen LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
@@ -29,38 +33,46 @@ static TPM_RESULT Disabled_CancelCommand(void)
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_GetTPMProperty(enum TPMLIB_TPMProperty prop,
-                                      int *result)
+static TPM_RESULT
+Disabled_GetTPMProperty(enum TPMLIB_TPMProperty prop LIBTPMS_ATTR_UNUSED,
+                        int *result LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
 
-static char *Disabled_GetInfo(enum TPMLIB_InfoFlags flags)
+static char *
+Disabled_GetInfo(enum TPMLIB_InfoFlags flags LIBTPMS_ATTR_UNUSED)
 {
     return NULL;
 }
 
-static uint32_t Disabled_SetBufferSize(uint32_t wanted_size,
-                                   uint32_t *min_size,
-                                   uint32_t *max_size)
+static uint32_t
+Disabled_SetBufferSize(uint32_t wanted_size LIBTPMS_ATTR_UNUSED,
+                       uint32_t *min_size LIBTPMS_ATTR_UNUSED,
+                       uint32_t *max_size LIBTPMS_ATTR_UNUSED)
 {
     return 0;
 }
 
-static TPM_RESULT Disabled_ValidateState(enum TPMLIB_StateType st,
-                                     unsigned int flags)
+static TPM_RESULT
+Disabled_ValidateState(enum TPMLIB_StateType st LIBTPMS_ATTR_UNUSED,
+                       unsigned int flags LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_GetState(enum TPMLIB_StateType st,
-                                unsigned char **buffer, uint32_t *buflen)
+static TPM_RESULT
+Disabled_GetState(enum TPMLIB_StateType st LIBTPMS_ATTR_UNUSED,
+                  unsigned char **buffer LIBTPMS_ATTR_UNUSED,
+                  uint32_t *buflen LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_SetState(enum TPMLIB_StateType st,
-                                const unsigned char *buffer, uint32_t buflen)
+static TPM_RESULT
+Disabled_SetState(enum TPMLIB_StateType st LIBTPMS_ATTR_UNUSED,
+                  const unsigned char *buffer LIBTPMS_ATTR_UNUSED,
+                  uint32_t buflen LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
@@ -70,8 +82,9 @@ static TPM_RESULT Disabled_IO_Hash_Start(void)
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_IO_Hash_Data(const unsigned char *data,
-                                        uint32_t data_length)
+static TPM_RESULT
+Disabled_IO_Hash_Data(const unsigned char *data LIBTPMS_ATTR_UNUSED,
+                      uint32_t data_length LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
@@ -81,7 +94,8 @@ static TPM_RESULT Disabled_IO_Hash_End(void)
     return TPM_FAIL;
 }
 
-static TPM_RESULT Disabled_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
+static TPM_RESULT
+Disabled_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished LIBTPMS_ATTR_UNUSED)
 {
     return TPM_FAIL;
 }
@@ -89,6 +103,11 @@ static TPM_RESULT Disabled_IO_TpmEstablished_Get(TPM_BOOL *tpmEstablished)
 static TPM_RESULT Disabled_IO_TpmEstablished_Reset(void)
 {
     return TPM_FAIL;
+}
+
+static TPM_BOOL Disabled_WasManufactured(void)
+{
+    return FALSE;
 }
 
 const struct tpm_interface DisabledInterface = {
@@ -108,4 +127,5 @@ const struct tpm_interface DisabledInterface = {
     .ValidateState = Disabled_ValidateState,
     .SetState = Disabled_SetState,
     .GetState = Disabled_GetState,
+    .WasManufactured = Disabled_WasManufactured,
 };

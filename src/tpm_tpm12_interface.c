@@ -268,7 +268,7 @@ uint32_t TPM12_GetBufferSize(void)
 }
 
 static TPM_RESULT TPM12_ValidateState(enum TPMLIB_StateType st,
-                                      unsigned int flags)
+                                      unsigned int flags LIBTPMS_ATTR_UNUSED)
 {
     TPM_RESULT ret = TPM_SUCCESS;
     tpm_state_t tpm_state;
