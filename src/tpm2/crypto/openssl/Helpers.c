@@ -133,7 +133,7 @@ static const EVP_CIPHER *evp_cipher_cache[__NUM_ALGS][__NUM_MODES][__NUM_KEYSIZE
 
 static const EVP_CIPHER *
 GetCachedEVPCipher(
-                   evpfunc       evpfunc,      // IN
+                   evpfunc       evpFunc,      // IN
                    size_t        algIdx,       // IN algorithm Index for the cache
                    TPM_ALG_ID    mode,         // IN mode
                    size_t        keySizeIdx    // IN
@@ -148,7 +148,7 @@ GetCachedEVPCipher(
 
     evp_cipher = evp_cipher_cache[algIdx][modeIdx][keySizeIdx];
     if (evp_cipher == NULL) {
-	evp_cipher = evpfunc();
+	evp_cipher = evpFunc();
 	evp_cipher_cache[algIdx][modeIdx][keySizeIdx] = evp_cipher;
     }
 
