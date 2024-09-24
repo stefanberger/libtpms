@@ -5109,6 +5109,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
                                 PERSISTENT_ALL_MAGIC, blob_version);
     if (blob_version >= 4) {
         profileJSON = RuntimeProfileGetJSON(RuntimeProfile);
+        assert(profileJSON);
         written += String_Marshal(profileJSON, buffer, size); // since v4
     }
     written += PACompileConstants_Marshal(buffer, size);
