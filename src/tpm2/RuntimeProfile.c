@@ -65,6 +65,8 @@ const char defaultAlgorithmsProfile[] =
 
 static const struct RuntimeProfileDesc {
     const char *name;
+    const char *prefix;
+    size_t prefix_len;
     const char *commandsProfile;
     const char *algorithmsProfile;
     const char *attributesProfile;
@@ -137,6 +139,8 @@ static const struct RuntimeProfileDesc {
 	.allowModifications = false,
     }, {
 	.name = "custom",
+	.prefix = "custom:",
+	.prefix_len = 7,
 	.commandsProfile   = defaultCommandsProfile,
 	.algorithmsProfile = defaultAlgorithmsProfile,
 	.stateFormatLevel = 2, /* minimum is '2', algos+cmds determine higher level */
@@ -610,6 +614,19 @@ RuntimeProfileFormatJSON(struct RuntimeProfile *RuntimeProfile)
     return TPM_RC_SUCCESS;
 }
 
+static int
+RuntimeProfileNameMatch(const struct RuntimeProfileDesc *rp,
+                        const char *profileName)
+{
+    if (!strcmp(rp->name, profileName))
+        return true;
+    if (rp->prefix &&
+        !strncmp(rp->prefix, profileName, rp->prefix_len)) {
+        return true;
+    }
+    return false;
+}
+
 static const struct RuntimeProfileDesc *
 RuntimeProfileFindByName(const char	*profileName,
 			 bool            jsonProfileIsFromUser,
@@ -623,7 +640,7 @@ RuntimeProfileFindByName(const char	*profileName,
     size_t i;
 
     for (i = 0; i < ARRAY_SIZE(RuntimeProfileDescs); i++) {
-	if (!strcmp(RuntimeProfileDescs[i].name, profileName)) {
+	if (RuntimeProfileNameMatch(&RuntimeProfileDescs[i], profileName)) {
 	    rp = &RuntimeProfileDescs[i];
 
 	    if (!rp->allowModifications) {
