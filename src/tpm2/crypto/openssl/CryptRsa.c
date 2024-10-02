@@ -1051,6 +1051,60 @@ CryptRsaLoadPrivateExponent(TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive,
  Error:
     return TPM_RC_BINDING;
 }
+
+#if FIPS_COMPLIANT							// libtpms added begin
+static TPM_RC
+CryptRSAPairwiseConsistencyTest(OBJECT *key)
+{
+    TPM2B_PUBLIC_KEY_RSA enc = {
+        .t.size = 0,
+    };
+    TPM2B_PUBLIC_KEY_RSA out = {
+        .t.size = sizeof(out.t.buffer),
+    };
+    TPM2B_TYPE(PLAIN, 20);
+    TPM2B_PLAIN          plain = {
+        .t.size = sizeof(plain.t.buffer),
+    };
+    TPM2B_LABEL          label = {{5, {"label"}}};
+    TPMT_RSA_DECRYPT     scheme = {
+	.scheme               = TPM_ALG_OAEP,
+	.details.oaep.hashAlg = TPM_ALG_SHA256,
+    };
+    TPMT_SIGNATURE       sigOut = {
+	.sigAlg                = TPM_ALG_RSAPSS,
+	.signature.rsapss.hash = TPM_ALG_SHA256,
+    };
+    TPM2B_DIGEST         digest = {
+        .t.size = SHA256_DIGEST_SIZE,
+    };
+    TPM_RC               retVal;
+
+    /* encrypt + decrypt */
+    DRBG_Generate(NULL, plain.t.buffer, plain.t.size);
+    retVal = CryptRsaEncrypt(&enc, &plain.b, key, &scheme, &label.b, NULL);
+    if (retVal)
+	return retVal;
+    if (enc.b.size == plain.b.size ||
+        enc.b.size != key->publicArea.unique.rsa.t.size)
+        return TPM_RC_FAILURE;
+
+    retVal = CryptRsaDecrypt(&out.b, &enc.b, key, &scheme, &label.b);
+    if (retVal)
+	return retVal;
+    if (out.b.size != plain.b.size ||
+	memcmp(out.b.buffer, plain.b.buffer, plain.b.size) != 0)
+	return TPM_RC_FAILURE;
+
+    /* sign + verify */
+    DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
+    retVal = CryptRsaSign(&sigOut, key, &digest, NULL);
+    if (retVal)
+	return retVal;
+    return CryptRsaValidateSignature(&sigOut, key, &digest);
+}
+#endif /* FIPS_COMPLIANT */						// libtpms added end
+
 #if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 
 //*** CryptRsaEncrypt()
@@ -1419,8 +1473,10 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     // Need to initialize the privateExponent structure			// libtpms added begin
     RsaInitializeExponentOld(&rsaKey->privateExponent);
 #if USE_OPENSSL_FUNCTIONS_RSA
-    if (rand == NULL)
-        return OpenSSLCryptRsaGenerateKey(rsaKey, e, keySizeInBits);
+    if (rand == NULL) {
+        retVal = OpenSSLCryptRsaGenerateKey(rsaKey, e, keySizeInBits);
+        goto pct;
+    }
 #endif									// libtpms added end
 
     // The prime is computed in P. When a new prime is found, Q is checked to
@@ -1521,6 +1577,17 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
  Exit:
     if(retVal == TPM_RC_SUCCESS)
 	rsaKey->attributes.privateExp = SET;
+
+#if USE_OPENSSL_FUNCTIONS_RSA			// libtpms added begin
+ pct:
+#endif
+#if FIPS_COMLIANT
+    if(retVal == TPM_RC_SUCCESS) {
+	retVal = CryptRSAPairwiseConsistencyTest(rsaKey);
+	if (retVal)
+	    retVal = TPM_RC_FAILURE;
+    }						// libtpms added end
+#endif
     return retVal;
 }
 
