@@ -39,6 +39,7 @@
 
 #include <config.h>
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <string.h>
 #if defined __FreeBSD__
@@ -590,6 +591,18 @@ void TPMLIB_LogArray(unsigned int indent, const unsigned char *data,
     if (o > 0) {
         TPMLIB_LogPrintfA(indent, "%s\n", line);
     }
+}
+
+int TPMLIB_asprintf(char **strp, const char *fmt, ...)
+{
+    int ret;
+    va_list ap;
+
+    va_start(ap, fmt);
+    ret = vasprintf(strp, fmt, ap);
+    va_end(ap);
+
+    return ret;
 }
 
 void ClearCachedState(enum TPMLIB_StateType st)
