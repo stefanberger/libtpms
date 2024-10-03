@@ -154,9 +154,9 @@ TPM2_NV_DefineSpace(
 	    // It is not allowed to create a PIN Index that can't be modified.
 	    if(!IS_ATTRIBUTE(attributes, TPMA_NV, NO_DA))
 		return TPM_RCS_ATTRIBUTES + RC_NV_DefineSpace_publicInfo;
-            /* fall through */
 #endif
 #ifdef TPM_NT_PIN_PASS
+            /* fallthrough */			// libtpms moved
 	  case TPM_NT_PIN_PASS:
 	    // AUTHWRITE must be CLEAR (see note above to TPM_NT_PIN_FAIL)
 	    if(IS_ATTRIBUTE(attributes, TPMA_NV, AUTHWRITE)

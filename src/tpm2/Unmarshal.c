@@ -905,6 +905,7 @@ TPMI_RH_HIERARCHY_Unmarshal(TPMI_RH_HIERARCHY *target, BYTE **buffer, INT32 *siz
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
@@ -935,6 +936,7 @@ TPMI_RH_ENABLES_Unmarshal(TPMI_RH_ENABLES *target, BYTE **buffer, INT32 *size, B
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
@@ -1042,6 +1044,7 @@ TPMI_RH_ENDORSEMENT_Unmarshal(TPMI_RH_ENDORSEMENT *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
@@ -1339,6 +1342,7 @@ TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH *target, BYTE **buffer, INT32 *size, BOOL 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_HASH;
 	}
@@ -1386,6 +1390,7 @@ TPMI_ALG_SYM_Unmarshal(TPMI_ALG_SYM *target, BYTE **buffer, INT32 *size, BOOL al
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
 	}
@@ -1430,6 +1435,7 @@ TPMI_ALG_SYM_OBJECT_Unmarshal(TPMI_ALG_SYM_OBJECT *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
 	}
@@ -1480,6 +1486,7 @@ TPMI_ALG_SYM_MODE_Unmarshal(TPMI_ALG_SYM_MODE *target, BYTE **buffer, INT32 *siz
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_MODE;
 	}
@@ -1520,6 +1527,7 @@ TPMI_ALG_KDF_Unmarshal(TPMI_ALG_KDF *target, BYTE **buffer, INT32 *size, BOOL al
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_KDF;
 	    *target = orig_target; // libtpms added
@@ -1571,6 +1579,7 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(TPMI_ALG_SIG_SCHEME *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SCHEME;
 	}
@@ -1612,6 +1621,7 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SCHEME;
 	}
@@ -1687,6 +1697,7 @@ TPMI_ALG_MAC_SCHEME_Unmarshal(TPMI_ALG_MAC_SCHEME *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SYMMETRIC;
 	}
@@ -1734,6 +1745,7 @@ TPMI_ALG_CIPHER_MODE_Unmarshal(TPMI_ALG_CIPHER_MODE*target, BYTE **buffer, INT32
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_MODE;
 	}
@@ -3303,6 +3315,7 @@ TPMI_ALG_KEYEDHASH_SCHEME_Unmarshal(TPMI_ALG_KEYEDHASH_SCHEME *target, BYTE **bu
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
@@ -3860,6 +3873,7 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	}
@@ -3911,6 +3925,7 @@ TPMI_ALG_RSA_DECRYPT_Unmarshal(TPMI_ALG_RSA_DECRYPT *target, BYTE **buffer, INT3
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_VALUE;
 	    *target = orig_target; // libtpms added
@@ -4101,6 +4116,7 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 	    if (allowNull) {
 		break;
 	    }
+	    /* fallthrough */
 	  default:
 	    rc = TPM_RC_SCHEME;
 	}

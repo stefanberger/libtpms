@@ -886,6 +886,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
 		  case TPM_ALG_SM4: /* libtpms changed */
 #  endif  // ALG_SM4
 #  if ALG_CAMELLIA
+                  /* fallthrough */
 		  case TPM_ALG_CAMELLIA:  // libtpms activated
 #  endif
 #  if ALG_TDES
