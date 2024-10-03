@@ -38,10 +38,7 @@
 
 #include <config.h>
 
-#define _GNU_SOURCE
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 
 #ifndef LIB_EXPORT
@@ -436,7 +433,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     if ((flags & TPMLIB_INFO_TPMSPECIFICATION)) {
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&buffer, fmt, "", tpmspec, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt, "", tpmspec, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -447,10 +444,10 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
 
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&tpmattrs, tpmattrs_temp, firmware_v1) < 0)
+        if (TPMLIB_asprintf(&tpmattrs, tpmattrs_temp, firmware_v1) < 0)
             goto error;
-        if (asprintf(&buffer, fmt,  printed ? "," : "",
-                     tpmattrs, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt,  printed ? "," : "",
+                             tpmattrs, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -471,11 +468,11 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
                      CAMELLIA_256 ? ",256" : "");
         if (n >= sizeof(camelliakeys))
             goto error;
-        if (asprintf(&tpmfeatures, tpmfeatures_temp,
-                     rsakeys, camelliakeys) < 0)
+        if (TPMLIB_asprintf(&tpmfeatures, tpmfeatures_temp,
+                            rsakeys, camelliakeys) < 0)
             goto error;
-        if (asprintf(&buffer, fmt,  printed ? "," : "",
-                     tpmfeatures, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt,  printed ? "," : "",
+                            tpmfeatures, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -489,14 +486,14 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
             if (!runtimeAlgos[rat])
                 goto error;
         }
-        if (asprintf(&runtimeAlgorithms, runtimeAlgorithms_temp,
-                     runtimeAlgos[RUNTIME_ALGO_IMPLEMENTED],
-                     runtimeAlgos[RUNTIME_ALGO_CAN_BE_DISABLED],
-                     runtimeAlgos[RUNTIME_ALGO_ENABLED],
-                     runtimeAlgos[RUNTIME_ALGO_DISABLED]) < 0)
+        if (TPMLIB_asprintf(&runtimeAlgorithms, runtimeAlgorithms_temp,
+                            runtimeAlgos[RUNTIME_ALGO_IMPLEMENTED],
+                            runtimeAlgos[RUNTIME_ALGO_CAN_BE_DISABLED],
+                            runtimeAlgos[RUNTIME_ALGO_ENABLED],
+                            runtimeAlgos[RUNTIME_ALGO_DISABLED]) < 0)
             goto error;
-        if (asprintf(&buffer, fmt,  printed ? "," : "",
-                     runtimeAlgorithms, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt,  printed ? "," : "",
+                            runtimeAlgorithms, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -510,14 +507,14 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
             if (!runtimeCmds[rct])
                 goto error;
         }
-        if (asprintf(&runtimeCommands, runtimeCommands_temp,
-                     runtimeCmds[RUNTIME_CMD_IMPLEMENTED],
-                     runtimeCmds[RUNTIME_CMD_CAN_BE_DISABLED],
-                     runtimeCmds[RUNTIME_CMD_ENABLED],
-                     runtimeCmds[RUNTIME_CMD_DISABLED]) < 0)
+        if (TPMLIB_asprintf(&runtimeCommands, runtimeCommands_temp,
+                            runtimeCmds[RUNTIME_CMD_IMPLEMENTED],
+                            runtimeCmds[RUNTIME_CMD_CAN_BE_DISABLED],
+                            runtimeCmds[RUNTIME_CMD_ENABLED],
+                            runtimeCmds[RUNTIME_CMD_DISABLED]) < 0)
             goto error;
-        if (asprintf(&buffer, fmt,  printed ? "," : "",
-                     runtimeCommands, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt,  printed ? "," : "",
+                            runtimeCommands, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -531,14 +528,14 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
             if (!runtimeAttrs[rabt])
                 goto error;
         }
-        if (asprintf(&runtimeAttributes, runtimeAttributes_temp,
-                     runtimeAttrs[RUNTIME_ATTR_IMPLEMENTED],
-                     runtimeAttrs[RUNTIME_ATTR_CAN_BE_DISABLED],
-                     runtimeAttrs[RUNTIME_ATTR_ENABLED],
-                     runtimeAttrs[RUNTIME_ATTR_DISABLED]) < 0)
+        if (TPMLIB_asprintf(&runtimeAttributes, runtimeAttributes_temp,
+                            runtimeAttrs[RUNTIME_ATTR_IMPLEMENTED],
+                            runtimeAttrs[RUNTIME_ATTR_CAN_BE_DISABLED],
+                            runtimeAttrs[RUNTIME_ATTR_ENABLED],
+                            runtimeAttrs[RUNTIME_ATTR_DISABLED]) < 0)
             goto error;
-        if (asprintf(&buffer, fmt,  printed ? "," : "",
-                     runtimeAttributes, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt,  printed ? "," : "",
+                            runtimeAttributes, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -548,10 +545,10 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         (profileJSON = RuntimeProfileGetJSON(&g_RuntimeProfile))) {
         fmt = buffer;
         buffer = NULL;
-        if (asprintf(&profile, tpmProfile_temp, profileJSON) < 0)
+        if (TPMLIB_asprintf(&profile, tpmProfile_temp, profileJSON) < 0)
             goto error;
-        if (asprintf(&buffer, fmt, printed ? "," : "",
-                     profile, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt, printed ? "," : "",
+                            profile, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -567,11 +564,11 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         tmp = NULL;
 
         while (RuntimeProfileGetByIndex(idx, &json) == TPM_RC_SUCCESS) {
-            if (asprintf(&availableProfiles,
-                         idx > 0 ? tmp : availableProfiles_temp,
-                         idx > 0 ? "," : "",
-                         json,
-                         "%s%s%s") < 0) {
+            if (TPMLIB_asprintf(&availableProfiles,
+                                idx > 0 ? tmp : availableProfiles_temp,
+                                idx > 0 ? "," : "",
+                                json,
+                                "%s%s%s") < 0) {
                 free(json);
                 goto error;
             }
@@ -582,11 +579,11 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
             idx++;
         }
         availableProfiles = NULL;
-        if (asprintf(&availableProfiles, tmp, "", "", "") < 0)
+        if (TPMLIB_asprintf(&availableProfiles, tmp, "", "", "") < 0)
             goto error;
 
-        if (asprintf(&buffer, fmt, printed ? "," : "",
-                     availableProfiles, "%s%s%s") < 0)
+        if (TPMLIB_asprintf(&buffer, fmt, printed ? "," : "",
+                            availableProfiles, "%s%s%s") < 0)
             goto error;
         free(fmt);
         printed = true;
@@ -595,7 +592,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
-    if (asprintf(&buffer, fmt, "", "", "") < 0)
+    if (TPMLIB_asprintf(&buffer, fmt, "", "", "") < 0)
         goto error;
 
 exit:
