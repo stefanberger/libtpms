@@ -184,7 +184,7 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
 		 //     process
 		 Crypt_Int*          bnD,     // IN: private signing key
 		 const TPM2B_DIGEST* digest,  // IN: the digest to sign
-		 RAND_STATE*         rand     // IN: used in debug of signing
+		 RAND_STATE*         rand LIBTPMS_ATTR_UNUSED  // IN: used in debug of signing
 		 )
 {
     ECDSA_SIG*    sig = NULL;

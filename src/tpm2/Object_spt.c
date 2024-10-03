@@ -760,6 +760,7 @@ PublicAttributesValidation(
 		    return TPM_RCS_ATTRIBUTES;
 		}
 #else								// libtpms added begin
+            (void)primaryHierarchy;
 	    return TPM_RCS_ATTRIBUTES;
 #endif								// libtpms added end
 	}
@@ -785,6 +786,7 @@ PublicAttributesValidation(
 		    return TPM_RCS_ATTRIBUTES;
 		}
 #else								// libtpms added begin
+            (void)primaryHierarchy;
 	    return TPM_RCS_ATTRIBUTES;
 #endif								// libtpms added end
 	}
@@ -1078,7 +1080,7 @@ UnwrapOuter(OBJECT* protector,   // IN: The object that provides
 // 'nameAlg'
 // Returns the size of the marshaled area.
 static UINT16 MarshalSensitive(
-			       OBJECT*         parent,     // IN: the object parent (optional)
+			       OBJECT*         parent LIBTPMS_ATTR_UNUSED,     // IN: the object parent (optional)
 			       BYTE*           buffer,     // OUT: receiving buffer
 			       TPMT_SENSITIVE* sensitive,  // IN: the sensitive area to marshal
 			       TPMI_ALG_HASH   nameAlg     // IN:

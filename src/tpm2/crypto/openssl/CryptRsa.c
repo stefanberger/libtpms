@@ -1598,7 +1598,7 @@ CryptRsaEncrypt(
 		TPMT_RSA_DECRYPT            *scheme,        // IN: the type of padding and hash
 		//     if needed
 		const TPM2B                 *label,         // IN: in case it is needed
-		RAND_STATE                  *rand           // IN: random number generator
+		RAND_STATE                  *rand LIBTPMS_ATTR_UNUSED // IN: random number generator
 		//     state (mostly for testing)
 		)
 {
@@ -1809,7 +1809,7 @@ CryptRsaSign(
 	     TPMT_SIGNATURE      *sigOut,
 	     OBJECT              *key,           // IN: key to use
 	     TPM2B_DIGEST        *hIn,           // IN: the digest to sign
-	     RAND_STATE          *rand           // IN: the random number generator
+	     RAND_STATE          *rand LIBTPMS_ATTR_UNUSED // IN: the random number generator
 	     //      to use (mostly for testing)
 	     )
 {
