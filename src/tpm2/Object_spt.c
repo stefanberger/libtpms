@@ -427,6 +427,7 @@ CreateChecks(OBJECT*           parentObject,
 	    // comment out the next line in order to prevent a fixedTPM derivation
 	    // parent
 	    //            break;
+	    /* fallthrough */				// libtpms added
 	  case TPM_ALG_SYMCIPHER:
 	    // A restricted key symmetric key (SYMCIPHER and KEYEDHASH)
 	    // must have sensitiveDataOrigin SET unless it has fixedParent and
