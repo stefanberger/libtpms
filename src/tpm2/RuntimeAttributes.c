@@ -77,6 +77,8 @@ static const struct {
     ATTRIBUTE("drbg-continous-test", RUNTIME_ATTRIBUTE_DRBG_CONTINOUS_TEST,
 	      7),
     ATTRIBUTE("pct", RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST,
+              7),
+    ATTRIBUTE("no-ecc-key-derivation", RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION,
 	      7),
 };
 
