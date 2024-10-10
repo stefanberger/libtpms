@@ -65,6 +65,7 @@ const char defaultAlgorithmsProfile[] =
 
 static const struct RuntimeProfileDesc {
     const char *name;
+#define MAX_PROFILE_NAME_LEN  32
     const char *prefix;
     size_t prefix_len;
     const char *commandsProfile;
@@ -339,8 +340,17 @@ RuntimeProfileGetNameFromJSON(const char  *json,
 			      char       **name)
 {
     const char *regex = "^\\{.*[[:space:]]*\"Name\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
+    TPM_RC retVal;
+    size_t len;
 
-    return RuntimeProfileGetFromJSON(json, regex, name, false);
+    retVal = RuntimeProfileGetFromJSON(json, regex, name, false);
+    if (!retVal) {
+        len = strlen(*name);
+        if (len > MAX_PROFILE_NAME_LEN)
+            (*name)[MAX_PROFILE_NAME_LEN] = 0;
+    }
+
+    return retVal;
 }
 
 static TPM_RC
