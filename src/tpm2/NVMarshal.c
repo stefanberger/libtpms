@@ -4489,7 +4489,6 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size)
             offset += sizeof(handle);
 
             NvRead(&obj, entryRef + offset, sizeof(obj));
-            offset += sizeof(obj);
             written += ANY_OBJECT_Marshal(&obj, buffer, size);
         break;
         default:
