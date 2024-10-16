@@ -66,6 +66,7 @@
 //
 //** Includes
 #include "Platform.h"
+#include "tpm_library.h"					// libtpms added
 
 // In this sample platform, these are compile time constants, but are not required to be.
 #define MANUFACTURER    "IBM"
@@ -77,10 +78,13 @@
 #define FIRMWARE_V2     (0x00120000)
 #define MAX_SVN         255
 
-#if SIMULATION	// libtpms added
+#if SIMULATION							// libtpms added
 static uint32_t currentHash = FIRMWARE_V2;
-#endif
-static uint16_t currentSvn  = 10;
+#endif								// libtpms added begin
+MUST_BE(TPM_LIBRARY_VER_MAJOR == 0);
+MUST_BE(TPM_LIBRARY_VER_MICRO <= 15); /* 4 bits fir micro */	// libtpms added end
+static uint16_t currentSvn  = ((TPM_LIBRARY_VER_MINOR - 10) << 4 |
+                               TPM_LIBRARY_VER_MICRO);
 
 // Similar to the Core Library's ByteArrayToUint32, but usable in Platform code.
 static uint32_t StringToUint32(const char s[4])		// libtpms changed: added const
