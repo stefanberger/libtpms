@@ -76,7 +76,7 @@
 #define VENDOR_STRING_4 "\0\0\0\0"
 #define FIRMWARE_V1     (0x20240125)
 #define FIRMWARE_V2     (0x00120000)
-#define MAX_SVN         255
+//#define MAX_SVN         255					// libtpms changed
 
 #if SIMULATION							// libtpms added
 static uint32_t currentHash = FIRMWARE_V2;
@@ -140,11 +140,13 @@ LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void)
     return currentSvn;
 }
 
+#if 0								// libtpms added
 // return the TPM Firmware maximum SVN reported by getCapability.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareMaxSvn(void)
 {
     return MAX_SVN;
 }
+#endif								// libtpms added
 
 // Called by the simulator to set the TPM Firmware SVN reported by
 // getCapability.
