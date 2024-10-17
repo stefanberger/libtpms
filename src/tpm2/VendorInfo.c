@@ -177,6 +177,7 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
 					      uint8_t*  secret_buf,
 					      uint16_t* secret_size)
 {
+#if 0								// libtpms added
     int i;
 
     if(svn > currentSvn)
@@ -191,6 +192,14 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
 	}
 
     *secret_size = secret_buf_size;
+#endif								// libtpms added begin
+    HASH_STATE state;
+    UINT64 value = svn;
+
+    CryptHashStart(&state, TPM_ALG_SHA256);
+    CryptDigestUpdate2B(&state, &g_SvnBaseSecret.b);
+    CryptDigestUpdateInt(&state, 2, value);
+    *secret_size = CryptHashEnd(&state, secret_buf_size, secret_buf);// libtpms added end
 
     return 0;
 }
