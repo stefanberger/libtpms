@@ -166,7 +166,31 @@ now. RSA key OBJECTs may be 4 bytes bigger while others are smaller now.
 
 =item 7: (since v0.10)
 
-This I<StateFormatLevel> enabled the I<fips-host> attribute.
+This I<StateFormatLevel> enabled the following profile attributes:
+
+=over 2
+
+=item * no-unpadded-encryption
+
+=item * no-sha1-signing
+
+=item * no-sha1-verification
+
+=item * no-sha1-hmac-creation
+
+=item * no-sha1-hmac-verification
+
+=item * no-sha1-hmac
+
+=item * fips-host
+
+=item * drbg-continous-test
+
+=item * pct
+
+=item * no-ecc-key-derivation
+
+=back
 
 =back
 
