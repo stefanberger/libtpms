@@ -238,4 +238,10 @@ LIB_EXPORT int _plat__SvnBaseSecretGenerate(void)		// libtpms added begin
     DRBG_Generate(NULL, g_SvnBaseSecret.t.buffer, g_SvnBaseSecret.t.size);
 
     return 0;
+}
+
+LIB_EXPORT int _plat__SvnBaseSecretRecreate(void)
+{
+    // FIXME: Add a check for a profile attribute here to allow this?
+    return _plat__SvnBaseSecretGenerate();
 }								// libtpms added end

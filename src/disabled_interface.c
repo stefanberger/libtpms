@@ -110,6 +110,11 @@ static TPM_BOOL Disabled_WasManufactured(void)
     return FALSE;
 }
 
+static TPM_RESULT Disabled_RecreateSvnBaseSecret(void)
+{
+    return TPM_FAIL;
+}
+
 const struct tpm_interface DisabledInterface = {
     .MainInit = Disabled_MainInit,
     .Terminate = Disabled_Terminate,
@@ -128,4 +133,5 @@ const struct tpm_interface DisabledInterface = {
     .SetState = Disabled_SetState,
     .GetState = Disabled_GetState,
     .WasManufactured = Disabled_WasManufactured,
+    .RecreateSvnBaseSecret = Disabled_RecreateSvnBaseSecret,
 };

@@ -86,6 +86,7 @@ struct tpm_interface {
                            unsigned char **buffer, uint32_t *buflen);
     TPM_RESULT (*SetProfile)(const char *profile);
     TPM_BOOL (*WasManufactured)(void);
+    TPM_RESULT (*RecreateSvnBaseSecret)(void);
 };
 
 extern const struct tpm_interface DisabledInterface;
