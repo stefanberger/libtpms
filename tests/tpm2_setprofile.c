@@ -60,7 +60,7 @@ static const struct {
         .exp_profile =
           "{\"ActiveProfile\":{"
             "\"Name\":\"default-v1\","
-            "\"StateFormatLevel\":7,"
+            "\"StateFormatLevel\":8,"
             "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
                            "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
                            "0x17a-0x193,0x197,0x199-0x19c\","
@@ -71,6 +71,7 @@ static const struct {
                              "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
                              "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
                              "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
+            "\"Attributes\":\"svn-limited-hierarchy\","
             "\"Description\":\"This profile enables all libtpms v0.10-supported "
                               "commands and algorithms. This profile is compatible with "
                               "libtpms >= v0.10.\""
