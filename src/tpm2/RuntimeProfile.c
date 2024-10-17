@@ -150,6 +150,7 @@ static const struct RuntimeProfileDesc {
 	.prefix_len = 7,
 	.commandsProfile   = defaultCommandsProfile,
 	.algorithmsProfile = defaultAlgorithmsProfile,
+	/* no need to set attributes profile ever since user MUST provide it */
 	.stateFormatLevel = 2, /* minimum is '2', algos+cmds determine higher level */
 	.description = "This profile allows customization of enabled algorithms and commands. "
 		       "This profile requires at least libtpms v0.10.",
@@ -428,7 +429,7 @@ GetAttributesProfileFromJSON(
 			     char       **attributesProfile
 			     )
 {
-    const char *regex = "^\\{.*[[:space:]]*\"Attributes\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
+    const char *regex = "^\\{.*[[:space:]]*\"Attributes\"[[:space:]]*:[[:space:]]*\"([^\"]*)\".*\\}$";
     TPM_RC retVal;
 
     retVal = RuntimeProfileGetFromJSON(json, regex, attributesProfile, true, true);
@@ -729,7 +730,8 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
     }
 
     retVal = TPM_RC_MEMORY;
-    if (!attributesProfile && rp->attributesProfile) {
+    if (!attributesProfile && rp->attributesProfile && !rp->allowModifications) {
+        /* only use default if no modications are allowed; use NULL otherwise */
 	if (!(attributesProfile = strdup(rp->attributesProfile)))
 	    goto error;
     }
