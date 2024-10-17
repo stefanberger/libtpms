@@ -119,7 +119,7 @@ NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
 		  case TPM_RH_FW_PLATFORM:
 		  case TPM_RH_FW_NULL:
 #endif
-#if SVN_LIMITED_SUPPORT
+#if 0 //SVN_LIMITED_SUPPORT			// libtpms changed
 		  case TPM_RH_SVN_OWNER_BASE:
 		  case TPM_RH_SVN_ENDORSEMENT_BASE:
 		  case TPM_RH_SVN_PLATFORM_BASE:
@@ -135,6 +135,17 @@ NextPermanentHandle(TPM_HANDLE inHandle  // IN: the handle to check
 			
 			return inHandle;
 		    break;
+#if SVN_LIMITED_SUPPORT				// libtpms added begin
+		  case TPM_RH_SVN_OWNER_BASE:
+		  case TPM_RH_SVN_ENDORSEMENT_BASE:
+		  case TPM_RH_SVN_PLATFORM_BASE:
+		  case TPM_RH_SVN_NULL_BASE:
+			if(RuntimeProfileHasAttributeFlags(&g_RuntimeProfile,
+							   RUNTIME_ATTRIBUTE_SVN_LIMITED_HIERARCHY))
+			    return inHandle;
+
+		    break;
+#endif						// libtpms added end
 		  default:
 		    break;
 		}
