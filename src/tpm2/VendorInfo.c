@@ -67,6 +67,7 @@
 //** Includes
 #include "Platform.h"
 #include "tpm_library.h"					// libtpms added
+#include "Tpm.h"						// libtpms added
 
 // In this sample platform, these are compile time constants, but are not required to be.
 #define MANUFACTURER    "IBM"
@@ -82,9 +83,13 @@
 static uint32_t currentHash = FIRMWARE_V2;
 #endif								// libtpms added begin
 MUST_BE(TPM_LIBRARY_VER_MAJOR == 0);
-MUST_BE(TPM_LIBRARY_VER_MICRO <= 15); /* 4 bits fir micro */	// libtpms added end
+MUST_BE(TPM_LIBRARY_VER_MICRO <= 15); /* 4 bits for micro */
 static uint16_t currentSvn  = ((TPM_LIBRARY_VER_MINOR - 10) << 4 |
                                TPM_LIBRARY_VER_MICRO);
+
+/* A TPM-specific SVN base secret that is part of its permanent state */
+TPM2B_SVN_BASE_SECRET g_SvnBaseSecret;				// libtpms added end
+
 
 // Similar to the Core Library's ByteArrayToUint32, but usable in Platform code.
 static uint32_t StringToUint32(const char s[4])		// libtpms changed: added const
@@ -218,3 +223,10 @@ LIB_EXPORT uint32_t _plat__GetTpmType()
     return 1;  // just the value the reference code has returned in the past.
 }
 
+LIB_EXPORT int _plat__SvnBaseSecretGenerate(void)		// libtpms added begin
+{
+    g_SvnBaseSecret.t.size = sizeof(g_SvnBaseSecret.t.buffer);
+    DRBG_Generate(NULL, g_SvnBaseSecret.t.buffer, g_SvnBaseSecret.t.size);
+
+    return 0;
+}								// libtpms added end
