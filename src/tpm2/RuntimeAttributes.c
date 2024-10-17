@@ -111,8 +111,8 @@ RuntimeAttributesSetProfile(struct RuntimeAttributes *RuntimeAttributes,
 
     RuntimeAttributesInit(RuntimeAttributes);
 
-    /* NULL pointer for profile enables nothing */
-    if (!newProfile)
+    /* NULL pointer for profile or empty profiles enables nothing */
+    if (!newProfile || strlen(newProfile) == 0)
 	return TPM_RC_SUCCESS;
 
     token = newProfile;

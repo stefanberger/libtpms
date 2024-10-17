@@ -217,7 +217,7 @@ RuntimeProfileSetRuntimeProfile(struct RuntimeProfile           *RuntimeProfile,
 static TPM_RC
 RuntimeProfileCheckJSON(const char *json)
 {
-#define MAP_ENTRY_REGEX "[[:space:]]*\"[^\"]+\"[[:space:]]*:[[:space:]]*(\"[^\"]+\"|[[:digit:]]+)[[:space:]]*"
+#define MAP_ENTRY_REGEX "[[:space:]]*\"[^\"]+\"[[:space:]]*:[[:space:]]*(\"[^\"]*\"|[[:digit:]]+)[[:space:]]*"
     const char *regex = "^\\{[[:space:]]*("MAP_ENTRY_REGEX")?(,"MAP_ENTRY_REGEX")*\\}$";
 #undef MAP_ENTRY_REGEX
     TPM_RC retVal;
@@ -304,7 +304,8 @@ static TPM_RC
 RuntimeProfileGetFromJSON(const char  *json,
 			  const char  *regex,
 			  char       **value,
-			  bool         removeDuplicates)
+			  bool         removeDuplicates,
+			  bool         allowEmptyResult)
 {
     regmatch_t match[2];
     TPM_RC retVal;
@@ -318,7 +319,7 @@ RuntimeProfileGetFromJSON(const char  *json,
 	goto exit;
     }
 
-    if (match[1].rm_eo - match[1].rm_so == 0) {
+    if (match[1].rm_eo - match[1].rm_so == 0 && !allowEmptyResult) {
 	retVal = TPM_RC_SIZE;
 	goto exit;
     }
@@ -347,7 +348,7 @@ RuntimeProfileGetNameFromJSON(const char  *json,
     TPM_RC retVal;
     size_t len;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, name, false);
+    retVal = RuntimeProfileGetFromJSON(json, regex, name, false, false);
     if (!retVal) {
         len = strlen(*name);
         if (len > MAX_PROFILE_NAME_LEN)
@@ -365,7 +366,7 @@ RuntimeProfileGetDescriptionFromJSON(const char  *json,
     TPM_RC retVal;
     size_t len;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, description, false);
+    retVal = RuntimeProfileGetFromJSON(json, regex, description, false, false);
     if (retVal == TPM_RC_NO_RESULT) {
 	*description = NULL;
 	return TPM_RC_SUCCESS;
@@ -387,7 +388,7 @@ GetStateFormatLevelFromJSON(const char   *json,
     unsigned long v;
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, &str, false);
+    retVal = RuntimeProfileGetFromJSON(json, regex, &str, false, false);
     if (retVal)
 	return retVal;
 
@@ -413,7 +414,7 @@ GetAlgorithmsProfileFromJSON(const char  *json,
     const char *regex = "^\\{.*[[:space:]]*\"Algorithms\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, algorithmsProfile, true);
+    retVal = RuntimeProfileGetFromJSON(json, regex, algorithmsProfile, true, false);
     if (retVal == TPM_RC_NO_RESULT) {
 	*algorithmsProfile = NULL;
 	retVal = 0;
@@ -430,7 +431,7 @@ GetAttributesProfileFromJSON(
     const char *regex = "^\\{.*[[:space:]]*\"Attributes\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, attributesProfile, true);
+    retVal = RuntimeProfileGetFromJSON(json, regex, attributesProfile, true, true);
     if (retVal == TPM_RC_NO_RESULT) {
 	*attributesProfile = NULL;
 	retVal = 0;
@@ -445,7 +446,7 @@ GetCommandsProfileFromJSON(const char  *json,
     const char *regex = "^\\{.*[[:space:]]*\"Commands\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*\\}$";
     TPM_RC retVal;
 
-    retVal = RuntimeProfileGetFromJSON(json, regex, commandsProfile, true);
+    retVal = RuntimeProfileGetFromJSON(json, regex, commandsProfile, true, false);
     if (retVal == TPM_RC_NO_RESULT) {
 	*commandsProfile = NULL;
 	retVal = 0;
