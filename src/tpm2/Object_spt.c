@@ -766,7 +766,12 @@ PublicAttributesValidation(
 	}
     if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, svnLimited))
 	{
-#if SVN_LIMITED_SUPPORT						// libtpms added
+#if SVN_LIMITED_SUPPORT						// libtpms added begin
+            if(!RuntimeProfileHasAttributeFlags(&g_RuntimeProfile,
+                                                RUNTIME_ATTRIBUTE_SVN_LIMITED_HIERARCHY))
+	        {
+	            return TPM_RCS_ATTRIBUTES;
+	        }   						// libtpms added end
 	    if(parentObject != NULL)
 		{
 		    // For an ordinary object, svnLimited can only be set if its

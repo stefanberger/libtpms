@@ -308,6 +308,9 @@ static TPM_RC GetAdditionalSecret(const HIERARCHY_MODIFIER* modifier,       // I
 	  case HM_SVN_LIMITED:
 	      {
 #if SVN_LIMITED_SUPPORT
+                  if(!RuntimeProfileHasAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+                                                      RUNTIME_ATTRIBUTE_SVN_LIMITED_HIERARCHY))
+		      return TPM_RC_SVN_LIMITED;				// libtpms added end
 		  if(_plat__GetTpmFirmwareSvnSecret(modifier->min_svn,
 						    sizeof(secret_buffer->t.buffer),
 						    secret_buffer->t.buffer,
@@ -514,6 +517,9 @@ TPM_RC ValidateHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
 	  case HM_SVN_LIMITED:
 	      {
 #if SVN_LIMITED_SUPPORT
+                  if(!RuntimeProfileHasAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+                                                      RUNTIME_ATTRIBUTE_SVN_LIMITED_HIERARCHY))
+		      return TPM_RC_SVN_LIMITED;				// libtpms added end
 		  // SVN-limited hierarchies are only enabled for SVNs less than or
 		  // equal to the current firmware's SVN.
 		  if(modifier.min_svn > _plat__GetTpmFirmwareSvn())
