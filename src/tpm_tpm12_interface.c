@@ -520,6 +520,11 @@ static TPM_BOOL TPM12_WasManufactured(void)
     return FALSE;
 }
 
+static TPM_RESULT TPM12_RecreateSvnBaseSecret(void)
+{
+    return TPM_FAIL;
+}
+
 const struct tpm_interface TPM12Interface = {
     .MainInit = TPM12_MainInit,
     .Terminate = TPM12_Terminate,
@@ -539,4 +544,5 @@ const struct tpm_interface TPM12Interface = {
     .GetState = TPM12_GetState,
     .SetProfile = TPM12_SetProfile,
     .WasManufactured = TPM12_WasManufactured,
+    .RecreateSvnBaseSecret = TPM12_RecreateSvnBaseSecret,
 };
