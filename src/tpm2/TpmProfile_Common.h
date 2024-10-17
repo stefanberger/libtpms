@@ -313,7 +313,7 @@
 // Defines controlling Firmware- and SVN-limited objects
 //***********************************************
 #define FW_LIMITED_SUPPORT                    NO	// libtpms: NO
-#define SVN_LIMITED_SUPPORT                   NO	// libtpms: NO
+#define SVN_LIMITED_SUPPORT                   YES	// libtpms: YES (StateFormatLevel 8)
 
 //***********************************************
 // Defines controlling External NV
