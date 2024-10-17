@@ -42,6 +42,7 @@ LIBTPMS_0.10.0 {
     global:
 	TPMLIB_SetProfile;
 	TPMLIB_WasManufactured;
+	TPMLIB_RecreateSvnBaseSecret;
     local:
 	*;
 } LIBTPMS_0.6.0;
