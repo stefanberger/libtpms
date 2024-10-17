@@ -141,7 +141,10 @@ TPM_Manufacture(
             IsTestStateSet(ENTROPY),
             IsDrbgTested());
         return -1;
-    }                                      // libtpms added end
+    }
+    if (firstTime && _plat__SvnBaseSecretGenerate() < 0)
+        return -1;
+                                          // libtpms added end
     // default configuration for PCR
     PCRManufacture();
 
