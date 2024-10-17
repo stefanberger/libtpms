@@ -278,6 +278,11 @@ TPM_BOOL TPMLIB_WasManufactured(void)
     return tpm_iface[tpmvers_choice]->WasManufactured();
 }
 
+TPM_RESULT TPMLIB_RecreateSvnBaseSecret(void)
+{
+    return tpm_iface[tpmvers_choice]->RecreateSvnBaseSecret();
+}
+
 static struct libtpms_callbacks libtpms_cbs;
 
 struct libtpms_callbacks *TPMLIB_GetCallbacks(void)
