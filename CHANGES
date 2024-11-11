@@ -1,6 +1,19 @@
 CHANGES - changes for libtpms
 
 version 0.10.0:
+  - tpm2: Support for profiles: default-v1 & custom
+  - tpm2: Add new API call TPMLIB_SetProfile to enable user to set a profile
+  - tpm2: Extende TPMLIB_GetInfo to return profiles-related info
+  - tpm2: Implemented crypto tests and restrictions on crypto related to
+          FIPS-140-3; can be enabled with profiles
+  - tpm2: Enable Camellia-192 and AES-192
+  - tpm2: Implement TPMLIB_WasManufactured API call
+  - tpm2: Fixes for issues detected by static analyzers
+  - tpm2: Use OpenSSL-based KDFe implementation if possible
+  - tpm2: Update to TPM 2 spec rev 183 (many changes)
+  - tpm2: Better support for OpenSSL 3.x
+  - tpm2: Use Carmichael function for RSA priv. exponent D (>= 2048 bits)
+  - tpm2: Fixes for CVE-2023-1017 and CVE-2023-1018
   - tpm2: Fix of SignedCompareB().
     NOTE: This fix *may* result in backwards compatibility issues with
           PCR policies used by TPM2_PolicyCounterTimer and TPM2_PolicyNV
