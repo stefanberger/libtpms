@@ -282,18 +282,6 @@ AC_ARG_ENABLE([test-coverage],
   ]
 )
 
-AC_ARG_ENABLE([static-tests],
-  AS_HELP_STRING([--disable-static-tests], [Disable statically linked tests]),
-  [if test "$enableval" = "yes"; then
-    AM_CONDITIONAL(ENABLE_STATIC_TESTS, true)
-  else
-    AM_CONDITIONAL(ENABLE_STATIC_TESTS, false)
-  fi], [
-    AM_CONDITIONAL(ENABLE_STATIC_TESTS, true)
-    enable_static_tests=yes
-  ]
-)
-
 LT_INIT
 AC_PROG_CC
 AC_PROG_CXX
@@ -307,6 +295,14 @@ AC_C_CONST
 AC_C_INLINE
 
 AC_TYPE_SIZE_T
+
+AC_ARG_ENABLE([static-tests],
+  [AS_HELP_STRING([--disable-static-tests], [Disable statically linked tests])],,
+  [enable_static_tests=yes])
+dnl enable_state must be 'yes' for any static tests
+AS_IF([test "$enable_static_tests" = "yes" && test "$enable_static" = "yes"],
+      [enable_static_tests=yes],[enable_static_tests=no])
+AM_CONDITIONAL(ENABLE_STATIC_TESTS, [test "$enable_static_tests" = "yes"])
 
 AC_CHECK_LIB(c, clock_gettime, LIBRT_LIBS="", LIBRT_LIBS="-lrt")
 AC_SUBST([LIBRT_LIBS])
@@ -394,6 +390,7 @@ echo "With TPM2 support       : $with_tpm2"
 echo "HAVE_VERSION_SCRIPT     : $have_version_script"
 echo "Use openssl crypto for  : $use_openssl_functions_for"
 echo "Test coverage           : $enable_test_coverage"
+echo "Static build            : $enable_static"
 echo "Statically linked tests : $enable_static_tests"
 echo
 echo
