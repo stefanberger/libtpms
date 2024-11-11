@@ -8,6 +8,8 @@ int main(void)
     /* This is supposed to be the OBJECT that requires the most bytes
      * when it is marshalled: currently an RSA key
      */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
     OBJECT object = {
         .attributes = {
             .occupied = SET,
@@ -68,6 +70,7 @@ int main(void)
         },
         .seedCompatLevel = 1,
     };
+#pragma GCC diagnostics pop
     static const size_t exp_sizes[7] = {
         0, 2580, 2580, 2580, 2580, 2580, 2584,
     };
