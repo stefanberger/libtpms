@@ -1,3 +1,9 @@
+libtpms (0.10.0) RELEASED; urgency=medium
+
+  * Stable release
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Thu, 14 Nov 2024 09:00:00 -0500
+
 libtpms (0.10.0~dev1) UNRELEASED; urgency=medium
 
   * Developer release 1
