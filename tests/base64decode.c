@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     int res = EXIT_SUCCESS;
     TPM_RESULT rc;
     unsigned char *buf_input = NULL, *buf_cmp = NULL;
-    size_t len_input, len_cmp;
+    size_t len_input, len_cmp = 0;
     unsigned char *result = NULL;
     size_t result_len;
 
