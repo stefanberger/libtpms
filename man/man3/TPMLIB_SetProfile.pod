@@ -46,7 +46,7 @@ libtpms to version 0.9 from a later version.
 Profiles with the prefix 'default' enable as many algorithms and commands
 as possible. The 'default-v1' profile, introduced with libtpms v0.10, allows
 to run with libtpms v0.10 and later but will not allow to downgrade to
-earlir versions of libtpms, such as v0.9.
+earlier versions of libtpms, such as v0.9.
 
 A profile is a JSON map in string format. It must contain the 'Name'
 field with the name of a known profile. It may contain a field
@@ -75,17 +75,20 @@ The second profile selects the I<custom> profile but restricts the
 set of algorithms that the TPM 2 provides to those ones that are listed.
 Since 'sha1' and 'tdes' are missing in the list, it disables those algorithms.
 Note that the I<custom> profile is the only profile that allows customizations
-of enabled Algorthms and Commands.
+of enabled Algorithms, Commands, and Attributes (not shown here).
 
 Only a subset of the implemented algorithms can be disabled. To determine
 the list of algorithms that can be disabled, use the list of algorithms
 return by I<TPMLIB_GetInfo(TPMLIB_INFO_RUNTIME_ALGORITHMS)> in the
 'CanBeDisabled' field. Similarly, only a subset of the implemented commands
 can be disabled and I<TPMLIB_GetInfo(TPMLIB_INFO_RUNTIME_COMMANDS)> can
-be used to determine the list of 'CanBeDisabled' commands.
+be used to determine the list of 'CanBeDisabled' commands. No
+attributes are enabled by default, so all of them can be disabled.
+To see which attributes are implemented and can be enabled, use
+I<TPMLIB_GetInfo(TPMLIB_INFO_RUNTIME_ATTRIBUTES)>.
 
 Since it is possible to disable algorithms that are mandatory for the
-PC client TPM 2 one can create a TPM 2 instance that will cause
+PC Client TPM 2, one can create a TPM 2 instance that will cause
 applications to fail. Therefore, it is necessary to carefully select which
 algorithms to disable following the requirements of applications that will
 be used. At the same time the choice of enabled commands is important
@@ -122,7 +125,7 @@ The following lists the meaning of I<StateFormatLevel>s:
 
 =item 1: (since v0.10)
 
-This <StateFormatLevel> is reserved for the null profile. Only algorithms
+This I<StateFormatLevel> is reserved for the null profile. Only algorithms
 and commands supported by libtpms v0.9 are enabled. To remain compatible
 with libtpms v0.9 state format, the null profile will not be written as part
 of the state.
@@ -283,7 +286,7 @@ section on 'FIPS mode on the host'.
 
 =over 2
 
-=item * Turns on continous testing of the DRBG
+=item * Turns on continuous testing of the DRBG
 
 =back
 
