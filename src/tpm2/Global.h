@@ -265,6 +265,9 @@ typedef struct OBJECT
     // this field carries additional metadata
     // needed to derive the proof value for
     // the object.
+#if __LONG_WIDTH__ == 32
+    UINT8               _pad1[4]; /* 32 bit targets need padding */
+#endif
 
     // libtpms added: SEED_COMPAT_LEVEL to use for deriving child keys
     SEED_COMPAT_LEVEL   seedCompatLevel;
