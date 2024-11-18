@@ -871,6 +871,13 @@ static TPM_BOOL TPM2_WasManufactured(void)
     return g_wasManufactured;
 }
 
+static TPM_RESULT TPM2_RecreateSvnBaseSecret(void)
+{
+    if (_plat__SvnBaseSecretRecreate() == 0 && NvCommit())
+        return TPM_SUCCESS;
+    return TPM_FAIL;
+}
+
 const struct tpm_interface TPM2Interface = {
     .MainInit = TPM2_MainInit,
     .Terminate = TPM2_Terminate,
@@ -890,4 +897,5 @@ const struct tpm_interface TPM2Interface = {
     .GetState = TPM2_GetState,
     .SetProfile = TPM2_SetProfile,
     .WasManufactured = TPM2_WasManufactured,
+    .RecreateSvnBaseSecret = TPM2_RecreateSvnBaseSecret,
 };

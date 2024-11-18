@@ -128,6 +128,10 @@ TPM2B_TYPE(PROOF, PROOF_SIZE);
 // Definition for a Primary Seed value
 TPM2B_TYPE(SEED, PRIMARY_SEED_SIZE);
 
+// Definition for Svn base secret
+TPM2B_TYPE(SVN_BASE_SECRET, 16);
+extern TPM2B_SVN_BASE_SECRET g_SvnBaseSecret;
+
 // A CLOCK_NONCE is used to tag the time value in the authorization session and
 // in the ticket computation so that the ticket expires when there is a time
 // discontinuity. When the clock stops during normal operation, the nonce is

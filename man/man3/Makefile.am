@@ -16,6 +16,7 @@ man3_PODS = \
 	TPMLIB_GetVersion.pod \
 	TPMLIB_MainInit.pod \
 	TPMLIB_Process.pod \
+	TPMLIB_RecreateSvnBaseSecret.pod \
 	TPMLIB_RegisterCallbacks.pod \
 	TPMLIB_SetBufferSize.pod \
 	TPMLIB_SetDebugFD.pod \

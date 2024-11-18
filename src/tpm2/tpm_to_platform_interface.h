@@ -439,6 +439,9 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(
 					      );
 #endif  // SVN_LIMITED_SUPPORT
 
+LIB_EXPORT int _plat__SvnBaseSecretGenerate(void);		// libtpms added
+LIB_EXPORT int _plat__SvnBaseSecretRecreate(void);		// libtpms added
+
 #if FW_LIMITED_SUPPORT
 //***_plat__GetTpmFirmwareSecret()
 // Function: Obtain a Firmware Secret bound to the current firmware image.

@@ -80,6 +80,8 @@ static const struct {
               7),
     ATTRIBUTE("no-ecc-key-derivation", RUNTIME_ATTRIBUTE_NO_ECC_KEY_DERIVATION,
 	      7),
+    ATTRIBUTE("svn-limited-hierarchy", RUNTIME_ATTRIBUTE_SVN_LIMITED_HIERARCHY,
+	      8),
 };
 
 LIB_EXPORT void

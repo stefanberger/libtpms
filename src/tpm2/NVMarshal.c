@@ -5060,7 +5060,7 @@ exit_size:
  * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
  * - NVRAM locations  (NV_USER_DYNAMIC)
  */
-#define PERSISTENT_ALL_VERSION 4
+#define PERSISTENT_ALL_VERSION 5
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
@@ -5094,8 +5094,11 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     case 1:
         blob_version = 3;
         break;
+    case 2 ... 7:
+        blob_version = 4;
+        break;
     default:
-        blob_version = 4; /* since stateFormatLevel 2 */
+        blob_version = 5; /* since stateFormatLevel 8 */
         break;
     }
 
@@ -5111,6 +5114,10 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
         profileJSON = RuntimeProfileGetJSON(RuntimeProfile);
         assert(profileJSON);
         written += String_Marshal(profileJSON, buffer, size); // since v4
+    }
+    if (blob_version >= 5) {
+        written += TPM2B_Marshal(&g_SvnBaseSecret.b, sizeof(g_SvnBaseSecret.t.buffer),
+                                 buffer, size);
     }
     written += PACompileConstants_Marshal(buffer, size);
     written += PERSISTENT_DATA_Marshal(&pd, buffer, size, RuntimeProfile);
@@ -5166,6 +5173,12 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         if (hdr.version >= 4) {
             rc = String_Unmarshal(&profileJSON, buffer, size);
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (hdr.version >= 5) {
+            rc = TPM2B_Unmarshal(&g_SvnBaseSecret.b, sizeof(g_SvnBaseSecret.t.buffer),
+                                 buffer, size);
         }
     }
     if (rc == TPM_RC_SUCCESS) {

@@ -93,5 +93,12 @@ SEED_COMPAT_LEVEL RuntimeProfileGetSeedCompatLevel(void);
 BOOL
 RuntimeProfileRequiresAttributeFlags(struct RuntimeProfile *RuntimeProfile,
                                      unsigned int           attributeFlags);
+static inline BOOL
+RuntimeProfileHasAttributeFlags(struct RuntimeProfile *RuntimeProfile,
+                                unsigned int           attributeFlags)
+{
+    return RuntimeProfileRequiresAttributeFlags(RuntimeProfile,
+                                                attributeFlags);
+}
 
 #endif /* RUNTIME_PROFILE_H */

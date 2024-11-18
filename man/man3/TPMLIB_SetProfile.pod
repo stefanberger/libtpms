@@ -195,6 +195,10 @@ This I<StateFormatLevel> enabled the following profile attributes:
 
 =back
 
+=item 8: (since v0.10)
+
+This I<StateFormatLevel> enabled the I<svn-limited-hierarchy> attribute.
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.
@@ -304,6 +308,14 @@ keys
 =over 2
 
 =item * Prevent ECC key derivation
+
+=back
+
+=item B<svn-limited-hierarchy>: (since v0.10)
+
+=over 2
+
+=item * Enable the SVN-limited hierarchy
 
 =back
 

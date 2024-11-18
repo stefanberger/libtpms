@@ -175,6 +175,8 @@ TPM_RESULT TPMLIB_SetProfile(const char *profile);
 
 TPM_BOOL TPMLIB_WasManufactured(void);
 
+TPM_RESULT TPMLIB_RecreateSvnBaseSecret(void);
+
 #ifdef __cplusplus
 }
 #endif

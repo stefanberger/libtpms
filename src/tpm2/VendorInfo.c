@@ -66,6 +66,8 @@
 //
 //** Includes
 #include "Platform.h"
+#include "tpm_library.h"					// libtpms added
+#include "Tpm.h"						// libtpms added
 
 // In this sample platform, these are compile time constants, but are not required to be.
 #define MANUFACTURER    "IBM"
@@ -75,12 +77,19 @@
 #define VENDOR_STRING_4 "\0\0\0\0"
 #define FIRMWARE_V1     (0x20240125)
 #define FIRMWARE_V2     (0x00120000)
-#define MAX_SVN         255
+//#define MAX_SVN         255					// libtpms changed
 
-#if SIMULATION	// libtpms added
+#if SIMULATION							// libtpms added
 static uint32_t currentHash = FIRMWARE_V2;
-#endif
-static uint16_t currentSvn  = 10;
+#endif								// libtpms added begin
+MUST_BE(TPM_LIBRARY_VER_MAJOR == 0);
+MUST_BE(TPM_LIBRARY_VER_MICRO <= 15); /* 4 bits for micro */
+static uint16_t currentSvn  = ((TPM_LIBRARY_VER_MINOR - 10) << 4 |
+                               TPM_LIBRARY_VER_MICRO);
+
+/* A TPM-specific SVN base secret that is part of its permanent state */
+TPM2B_SVN_BASE_SECRET g_SvnBaseSecret;				// libtpms added end
+
 
 // Similar to the Core Library's ByteArrayToUint32, but usable in Platform code.
 static uint32_t StringToUint32(const char s[4])		// libtpms changed: added const
@@ -136,11 +145,13 @@ LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void)
     return currentSvn;
 }
 
+#if 0								// libtpms added
 // return the TPM Firmware maximum SVN reported by getCapability.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareMaxSvn(void)
 {
     return MAX_SVN;
 }
+#endif								// libtpms added
 
 // Called by the simulator to set the TPM Firmware SVN reported by
 // getCapability.
@@ -166,6 +177,7 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
 					      uint8_t*  secret_buf,
 					      uint16_t* secret_size)
 {
+#if 0								// libtpms added
     int i;
 
     if(svn > currentSvn)
@@ -180,6 +192,14 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
 	}
 
     *secret_size = secret_buf_size;
+#endif								// libtpms added begin
+    HASH_STATE state;
+    UINT64 value = svn;
+
+    CryptHashStart(&state, TPM_ALG_SHA256);
+    CryptDigestUpdate2B(&state, &g_SvnBaseSecret.b);
+    CryptDigestUpdateInt(&state, 2, value);
+    *secret_size = CryptHashEnd(&state, secret_buf_size, secret_buf);// libtpms added end
 
     return 0;
 }
@@ -212,3 +232,16 @@ LIB_EXPORT uint32_t _plat__GetTpmType()
     return 1;  // just the value the reference code has returned in the past.
 }
 
+LIB_EXPORT int _plat__SvnBaseSecretGenerate(void)		// libtpms added begin
+{
+    g_SvnBaseSecret.t.size = sizeof(g_SvnBaseSecret.t.buffer);
+    DRBG_Generate(NULL, g_SvnBaseSecret.t.buffer, g_SvnBaseSecret.t.size);
+
+    return 0;
+}
+
+LIB_EXPORT int _plat__SvnBaseSecretRecreate(void)
+{
+    // FIXME: Add a check for a profile attribute here to allow this?
+    return _plat__SvnBaseSecretGenerate();
+}								// libtpms added end
