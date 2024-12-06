@@ -41,6 +41,7 @@ matrix:
            TARGET="install" NPROC="nproc"
       dist: jammy
       before_script:
+      - sudo pip install setuptools==59.6.0  # Default Jammy version
       - sudo pip install cpp-coveralls
       script:
         ./autogen.sh ${CONFIG} &&
@@ -51,7 +52,7 @@ matrix:
          sudo rm -rf /dev/tpm* &&
          sudo apt -y install devscripts equivs python3-twisted expect
            libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2
-           python3-setuptools libjson-glib-dev &&
+           libjson-glib-dev &&
          ./autogen.sh --with-gnutls --prefix=/usr &&
          export SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 &&
          sudo make -j$(nproc) check &&
