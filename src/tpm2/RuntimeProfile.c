@@ -113,12 +113,18 @@ static const struct RuntimeProfileDesc {
 #define PROFILE_DEFAULT_IDX	0
 #define PROFILE_NULL_IDX	1
     [PROFILE_DEFAULT_IDX] = {
-	 /* Once libtpms v0.10 is done, this profile will become frozen */
-#define DEFAULT_PROFILE_NAME   "default-v1"
-	.name = DEFAULT_PROFILE_NAME,
-	.commandsProfile   = defaultCommandsProfile,
-	.algorithmsProfile = defaultAlgorithmsProfile,
-	.stateFormatLevel  = STATE_FORMAT_LEVEL_CURRENT, /* should always be the latest */
+	 /* do not change this profile */
+	.name = "default-v1",
+	.commandsProfile   = "0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,0x15b-0x15e,"
+			     "0x160-0x165,0x167-0x174,0x176-0x178,0x17a-0x193,0x197,"
+			     "0x199-0x19c",
+	.algorithmsProfile = "rsa,rsa-min-size=1024,tdes,tdes-min-size=128,sha1,hmac,"
+			     "aes,aes-min-size=128,mgf1,keyedhash,xor,sha256,sha384,sha512,"
+			     "null,rsassa,rsaes,rsapss,oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
+			     "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,ecc-nist,"
+			     "ecc-bn,ecc-sm2-p256,symcipher,camellia,camellia-min-size=128,cmac,"
+			     "ctr,ofb,cbc,cfb,ecb";
+	.stateFormatLevel  = 7,
 	.description = "This profile enables all libtpms v0.10-supported commands and "
 		       "algorithms. This profile is compatible with libtpms >= v0.10.",
 	.allowModifications = false,
