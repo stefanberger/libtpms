@@ -1,0 +1,73 @@
+name: Check
+
+on:
+  pull_request:
+    branches: [ "master", "stable-*" ]
+
+jobs:
+  build-ubuntu-focal:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          CFLAGS="-O3" ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --disable-use-openssl-functions
+          set +e
+          make -j$((2 * $(nproc))) distcheck
+          if [ $? -ne 0 ]; then
+            for f in tests/*.log; do echo ">>>>>>> $f <<<<<<<"; tail -n 50 $f; done
+            exit 1
+          fi
+          exit 0
+
+  build-ubuntu-noble:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
+          set +e
+          make -j$((2 * $(nproc))) distcheck
+          if [ $? -ne 0 ]; then
+            for f in tests/*.log; do echo ">>>>>>> $f <<<<<<<"; tail -n 50 $f; done
+            exit 1
+          fi
+          exit 0
+
+  build-coveralls:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build for coveralls.io
+        run: |
+          ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage
+          make -j$((2 * $(nproc)))
+          make -j$((2 * $(nproc))) check
+          sudo make install
+          git clone https://github.com/stefanberger/swtpm.git
+          pushd swtpm
+            sudo apt -y install devscripts equivs python3-twisted expect \
+              libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2 \
+              libjson-glib-dev libseccomp-dev
+            ./autogen.sh --with-gnutls --prefix=/usr
+            set +e
+            SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 make -j$((2 * $(nproc))) check
+            rc=$?
+          popd
+          if [ $rc -eq 0 ]; then
+            uidgid="$(id -nu):$(id -ng)"
+            sudo chown -R ${uidgid} ./
+            pip install setuptools==59.6.0  # Default Jammy version
+            pip install cpp-coveralls
+            cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
+          else
+            for f in swtpm/tests/*.log; do echo ">>>>>>> $f <<<<<<<"; tail -n 50 $f; done
+            exit 1
+          fi
+          exit 0
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
