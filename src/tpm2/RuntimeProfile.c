@@ -123,7 +123,7 @@ static const struct RuntimeProfileDesc {
 			     "null,rsassa,rsaes,rsapss,oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
 			     "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,ecc-nist,"
 			     "ecc-bn,ecc-sm2-p256,symcipher,camellia,camellia-min-size=128,cmac,"
-			     "ctr,ofb,cbc,cfb,ecb";
+			     "ctr,ofb,cbc,cfb,ecb",
 	.stateFormatLevel  = 7,
 	.description = "This profile enables all libtpms v0.10-supported commands and "
 		       "algorithms. This profile is compatible with libtpms >= v0.10.",
