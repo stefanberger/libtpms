@@ -1,0 +1,22 @@
+name: Coverity Scan
+
+on:
+  push:
+    branches: ["coverity_scan"]
+
+jobs:
+  coverity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure libtpms
+        run: ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
+
+      - uses: vapier/coverity-scan-action@v1
+        with:
+          command: make -j$(nproc)
+          project: libtpms
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
