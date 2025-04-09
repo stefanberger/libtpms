@@ -4952,8 +4952,10 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     rc = UINT32_Unmarshal(&datasize, buffer, size);
                 }
                 if (rc == TPM_RC_SUCCESS) {
-                    /* datasize cannot exceed 64k + a few bytes */
-                    if (datasize > (0x10000 + 0x100)) {
+                    /*
+                     * datasize cannot exceed MAX_NV_INDEX_SIZE (2048 bytes)
+                     */
+                    if (datasize > MAX_NV_INDEX_SIZE) {
                         TPMLIB_LogTPM2Error("datasize for NV_INDEX too "
                                             "large: %u\n", datasize);
                         rc = TPM_RC_SIZE;
@@ -4965,7 +4967,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     goto exit_size;
                 }
                 if (rc == TPM_RC_SUCCESS && datasize > 0) {
-                    BYTE buf[datasize];
+                    BYTE buf[MAX_NV_INDEX_SIZE];
                     rc = Array_Unmarshal(buf, datasize, buffer, size);
                     NvWrite(entryRef + o + offset, datasize, buf);
                     offset += datasize;
