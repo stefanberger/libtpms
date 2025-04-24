@@ -275,7 +275,7 @@ static const struct {
         .exp_profile =
           "{\"ActiveProfile\":{"
             "\"Name\":\"custom\","
-            "\"StateFormatLevel\":5,"
+            "\"StateFormatLevel\":8,"
             "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
                            "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
                            "0x17a-0x193,0x197,0x19b-0x19c\","
@@ -339,7 +339,7 @@ static const struct {
         .exp_profile =
           "{\"ActiveProfile\":{"
             "\"Name\":\"custom\","
-            "\"StateFormatLevel\":7,"
+            "\"StateFormatLevel\":8,"
             "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
                            "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
                            "0x17a-0x193,0x197\","
@@ -372,7 +372,7 @@ static const struct {
         .exp_profile =
           "{\"ActiveProfile\":{"
             "\"Name\":\"custom:test\","
-            "\"StateFormatLevel\":7,"
+            "\"StateFormatLevel\":8,"
             "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
                            "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
                            "0x17a-0x193,0x197,0x199-0x19c\","
