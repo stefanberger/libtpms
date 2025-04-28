@@ -89,7 +89,7 @@
 #else
 # include <endian.h>
 #endif
-#if defined __linux__ || defined __CYGWIN__
+#if defined __linux__ || defined __CYGWIN__ || defined __gnu_hurd__
  #if __BYTE_ORDER == __LITTLE_ENDIAN
   #define  BIG_ENDIAN_TPM       NO
  #endif
