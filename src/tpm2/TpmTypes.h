@@ -1483,6 +1483,7 @@ typedef union {
     TPMT_HA                 digest;
     TPM_HANDLE              handle;
 } TPMU_NAME;
+MUST_BE(sizeof(TPMU_NAME) == 2 + 64 + 2);
 /* Table 2:84 - Definition of TPM2B_NAME Structure  */
 typedef union {
     struct {

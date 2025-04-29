@@ -40,6 +40,14 @@
 
 #include "BackwardsCompatibilityObject.h"
 
+MUST_BE(offsetof(TPMU_NAME, digest.digest) == 2);
+MUST_BE(sizeof(TPMU_NAME) == 2 + 64 + 2 /*!*/);
+MUST_BE(sizeof(TPM2B_NAME) == 2 + 64 + 2 + 2);
+MUST_BE(sizeof(TPM2B_DIGEST) == 2 + 64);
+MUST_BE(sizeof(TPM2B_NAME) == 2 + 64 + 2 + 2);
+MUST_BE(sizeof(TPM2B_DIGEST) == 2 + 64);
+
+
 /* The following are data structure from libtpms 0.7.x with RSA 2048 support
  * that help to resume key and hash contexts (TPM2_ContextSave/Load) from this
  * earlier version. All structures that have different sizes in 0.8 are found
@@ -52,6 +60,7 @@ typedef union {
     }            t;
     TPM2B        b;
 } RSA2048_TPM2B_PUBLIC_KEY_RSA;
+MUST_BE(sizeof(RSA2048_TPM2B_PUBLIC_KEY_RSA) == 2 + 2048/8);
 
 typedef union {
     TPM2B_DIGEST                 keyedHash;
@@ -60,6 +69,8 @@ typedef union {
     TPMS_ECC_POINT               ecc;
 //    TPMS_DERIVE                derive;
 } RSA2048_TPMU_PUBLIC_ID;
+MUST_BE(sizeof(RSA2048_TPMU_PUBLIC_ID) == 2 + 2048/8);
+MUST_BE(sizeof(TPMS_ECC_POINT) == 2 * (2 + MAX_ECC_KEY_BYTES));
 
 typedef struct {
     TPMI_ALG_PUBLIC         type;
@@ -69,7 +80,11 @@ typedef struct {
     TPMU_PUBLIC_PARMS       parameters;
     RSA2048_TPMU_PUBLIC_ID  unique;
 } RSA2048_TPMT_PUBLIC;
-
+MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, nameAlg) == 2);
+MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, objectAttributes) == 2 + 2);
+MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, authPolicy) == 2 + 2 + 4);
+MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, parameters) == 2 + 2 + 4 + 66 + 2/*!*/);
+MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, unique) == 2 + 2 + 4 + 66 + 2 + 20);
 MUST_BE(sizeof(RSA2048_TPMT_PUBLIC) == 356);
 
 typedef union {
@@ -105,6 +120,9 @@ typedef struct {
     RSA2048_TPMU_SENSITIVE_COMPOSITE sensitive;
 } RSA2048_TPMT_SENSITIVE;
 
+MUST_BE(offsetof(RSA2048_TPMT_SENSITIVE, authValue) == 2);
+MUST_BE(offsetof(RSA2048_TPMT_SENSITIVE, seedValue) == 2 + 66);
+MUST_BE(offsetof(RSA2048_TPMT_SENSITIVE, sensitive) == 2 + 66 + 66);
 MUST_BE(sizeof(RSA2048_TPMT_SENSITIVE) == 776);
 
 BN_TYPE(old_prime, (2048 / 2));
@@ -149,6 +167,13 @@ typedef struct RSA2048_OBJECT
     UINT32             _pad;
 } RSA2048_OBJECT;
 
+MUST_BE(sizeof(OBJECT_ATTRIBUTES) == 4);
+MUST_BE(offsetof(RSA2048_OBJECT, publicArea) == 4);
+MUST_BE(offsetof(RSA2048_OBJECT, sensitive) == 4 + 356);
+MUST_BE(offsetof(RSA2048_OBJECT, privateExponent) == 4 + 356 + 776);
+MUST_BE(offsetof(RSA2048_OBJECT, qualifiedName) == 4 + 356 + 776 + 608);
+MUST_BE(offsetof(RSA2048_OBJECT, evictHandle) == 4 + 356 + 776 + 608 + 68 + 4);
+MUST_BE(offsetof(RSA2048_OBJECT, name) == 4 + 356 + 776 + 608 + 68 + 4 + 4);
 MUST_BE(sizeof(RSA2048_OBJECT) == 1896);
 
 TPMI_RH_HIERARCHY ObjectGetHierarchyFromAttributes(OBJECT* object)
@@ -259,6 +284,7 @@ typedef union {
     }            t;
     TPM2B        b;
 } RSA3072_TPM2B_PUBLIC_KEY_RSA;
+MUST_BE(sizeof(RSA3072_TPM2B_PUBLIC_KEY_RSA) == 2 + 3072/8);
 
 typedef union {
     TPM2B_DIGEST                 keyedHash;
@@ -270,6 +296,7 @@ typedef union {
 MUST_BE(sizeof(TPM2B_DIGEST) == 2 + BITS_TO_BYTES(512));
 MUST_BE(sizeof(TPMS_ECC_POINT) == 2 * (2 + BITS_TO_BYTES(638)));
 MUST_BE(sizeof(TPMS_DERIVE) == 2 * (2 + 32));
+MUST_BE(sizeof(RSA3072_TPMU_PUBLIC_ID) == 2 + 3072/8);
 
 typedef struct {
     TPMI_ALG_PUBLIC         type;
@@ -279,6 +306,11 @@ typedef struct {
     TPMU_PUBLIC_PARMS       parameters;
     RSA3072_TPMU_PUBLIC_ID          unique;
 } RSA3072_TPMT_PUBLIC;
+MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, nameAlg) == 2);
+MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, objectAttributes) == 2 + 2);
+MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, authPolicy) == 2 + 2 + 4);
+MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, parameters) == 2 + 2 + 4 + 66 + 2/*!*/);
+MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, unique) == 2 + 2 + 4 + 66 + 2 + 20);
 MUST_BE(sizeof(RSA3072_TPMT_PUBLIC) == 484);
 
 typedef union {
@@ -328,6 +360,9 @@ typedef struct RSA3072_privateExponent
     bn_rsa3072_prime_t          dQ;
     bn_rsa3072_prime_t          qInv;
 } RSA3072_privateExponent_t;
+MUST_BE(offsetof(RSA3072_privateExponent_t, dP) == 216);
+MUST_BE(offsetof(RSA3072_privateExponent_t, dQ) == 216 + 216);
+MUST_BE(offsetof(RSA3072_privateExponent_t, qInv) == 216 + 216 + 216);
 MUST_BE(sizeof(RSA3072_privateExponent_t) == 864);
 
 typedef struct RSA3072_OBJECT
@@ -355,6 +390,15 @@ typedef struct RSA3072_OBJECT
     // same size; simple padding at the end works here
     UINT8               _pad[3];
 } RSA3072_OBJECT;
+MUST_BE(sizeof(OBJECT_ATTRIBUTES) == 4);
+MUST_BE(offsetof(RSA3072_OBJECT, publicArea) == 4);
+MUST_BE(offsetof(RSA3072_OBJECT, sensitive) == 4 + 484);
+MUST_BE(offsetof(RSA3072_OBJECT, privateExponent) == 4 + 484 + 1096);
+MUST_BE(offsetof(RSA3072_OBJECT, qualifiedName) == 4 + 484 + 1096 + 864);
+MUST_BE(offsetof(RSA3072_OBJECT, evictHandle) == 4 + 484 + 1096 + 864 + 68 + 4);
+MUST_BE(offsetof(RSA3072_OBJECT, name) == 4 + 484 + 1096 + 864 + 68 + 4 + 4);
+MUST_BE(offsetof(RSA3072_OBJECT, seedCompatLevel) == 4 + 484 + 1096 + 864 + 68 + 4 + 4 + 70);
+MUST_BE(offsetof(RSA3072_OBJECT, _pad) == 4 + 484 + 1096 + 864 + 68 + 4 + 4 + 70 + 1);
 MUST_BE(sizeof(RSA3072_OBJECT) == 2600);
 
 static inline void CopyFromRSA3072PrimeT(ci_prime_t* dst,
