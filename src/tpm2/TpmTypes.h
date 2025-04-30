@@ -1482,6 +1482,7 @@ typedef union {
 typedef union {
     TPMT_HA                 digest;
     TPM_HANDLE              handle;
+    ARCH_PADDING(pad, 2 + 64 + 2);
 } TPMU_NAME;
 MUST_BE(sizeof(TPMU_NAME) == 2 + 64 + 2);
 /* Table 2:84 - Definition of TPM2B_NAME Structure  */
@@ -2208,6 +2209,7 @@ typedef union {
     TPMS_ECC_PARMS          eccDetail;
 #endif   // ALG_ECC
     TPMS_ASYM_PARMS         asymDetail;
+    ARCH_PADDING(pad, 20);
 } TPMU_PUBLIC_PARMS;
 /* Table 2:190 - Definition of TPMT_PUBLIC_PARMS Structure  */
 typedef struct {

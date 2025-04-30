@@ -111,4 +111,10 @@ typedef int SOCKET;
 #  define MUST_BE(e)
 #endif
 
+#if defined(__x86_64__) || defined(__m68k__)		// libtpms added begin
+# define ARCH_PADDING(NAME, SIZE)  char NAME[SIZE]
+#else
+# define ARCH_PADDING(NAME, SIZE)
+#endif							// libtpms added end
+
 #endif  // _COMPILER_DEPENDENCIES_H_
