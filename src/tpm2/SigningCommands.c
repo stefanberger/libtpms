@@ -116,11 +116,17 @@ TPM2_Sign(
     //
     // Input Validation
     if(!IsSigningObject(signObject))
+    {
 	return TPM_RCS_KEY + RC_Sign_keyHandle;
-    // pick a scheme for sign.  If the input sign scheme is not compatible with
-    // the default scheme, return an error.
+    }
+
+    // Pick a scheme for signing. If the input signing scheme is not compatible
+    // with the default scheme or the signing key type, return an error. If a
+    // valid hash algorithm is not specified, return an error.
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
+    {
 	return TPM_RCS_SCHEME + RC_Sign_inScheme;
+    }
     // If validation is provided, or the key is restricted, check the ticket
     if(in->validation.digest.t.size != 0
        || IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, restricted))
