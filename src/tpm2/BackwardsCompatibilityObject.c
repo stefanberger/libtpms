@@ -12,6 +12,9 @@ MUST_BE(sizeof(TPM2B_NAME) == 2 + 64 + 2 + 2);
 MUST_BE(sizeof(TPM2B_DIGEST) == 2 + 64);
 MUST_BE(sizeof(TPM2B_NAME) == 2 + 64 + 2 + 2);
 MUST_BE(sizeof(TPM2B_DIGEST) == 2 + 64);
+#ifdef ARCH_NEEDS_INT_PADDING
+MUST_BE(sizeof(TPMU_PUBLIC_PARMS) == 20);
+#endif
 
 /* The following are data structure from libtpms 0.7.x with RSA 2048 support
  * that help to resume key and hash contexts (TPM2_ContextSave/Load) from this
@@ -42,8 +45,10 @@ typedef struct {
     TPMI_ALG_HASH           nameAlg;
     TPMA_OBJECT             objectAttributes;
     TPM2B_DIGEST            authPolicy;
+    ARCH_PADDING(pad1, 2);
     TPMU_PUBLIC_PARMS       parameters;
     RSA2048_TPMU_PUBLIC_ID  unique;
+    ARCH_PADDING(pad2, 2);
 } RSA2048_TPMT_PUBLIC;
 MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, nameAlg) == 2);
 MUST_BE(offsetof(RSA2048_TPMT_PUBLIC, objectAttributes) == 2 + 2);
@@ -119,12 +124,14 @@ typedef struct RSA2048_OBJECT
     RSA2048_TPMT_SENSITIVE  sensitive;          // sensitive area of an object
     RSA2048_privateExponent_t privateExponent;  // Additional field for the private
     TPM2B_NAME          qualifiedName;      // object qualified name
+    ARCH_PADDING(pad1, 2);
     TPMI_DH_OBJECT      evictHandle;        // if the object is an evict object,
     // the original handle is kept here.
     // The 'working' handle will be the
     // handle of an object slot.
     TPM2B_NAME          name;               // Name of the object name. Kept here
     // to avoid repeatedly computing it.
+    ARCH_PADDING(pad2, 2);
 
     // libtpms added: OBJECT lies in NVRAM; to avoid that it needs different number
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
@@ -268,8 +275,10 @@ typedef struct {
     TPMI_ALG_HASH           nameAlg;
     TPMA_OBJECT             objectAttributes;
     TPM2B_DIGEST            authPolicy;
+    ARCH_PADDING(pad1, 2);
     TPMU_PUBLIC_PARMS       parameters;
     RSA3072_TPMU_PUBLIC_ID          unique;
+    ARCH_PADDING(pad2, 2);
 } RSA3072_TPMT_PUBLIC;
 MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, nameAlg) == 2);
 MUST_BE(offsetof(RSA3072_TPMT_PUBLIC, objectAttributes) == 2 + 2);
@@ -341,6 +350,7 @@ typedef struct RSA3072_OBJECT
     RSA3072_privateExponent_t privateExponent;    // Additional field for the private
 #endif					// libtpms added end
     TPM2B_NAME        qualifiedName;  // object qualified name
+    ARCH_PADDING(pad1, 2);
     TPMI_DH_OBJECT    evictHandle;    // if the object is an evict object,
     // the original handle is kept here.
     // The 'working' handle will be the
@@ -354,6 +364,7 @@ typedef struct RSA3072_OBJECT
     // of bytes on 32 bit and 64 bit architectures, we need to make sure it's the
     // same size; simple padding at the end works here
     UINT8               _pad[3];
+    ARCH_PADDING(pad2, 2);
 } RSA3072_OBJECT;
 MUST_BE(sizeof(OBJECT_ATTRIBUTES) == 4);
 MUST_BE(offsetof(RSA3072_OBJECT, publicArea) == 4);

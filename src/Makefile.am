@@ -604,6 +604,7 @@ noinst_HEADERS += \
 	tpm2/TPMCmd/tpm/include/tpm_public/VerifyConfiguration.h \
 	tpm2/Unmarshal_fp.h \
 	\
+	tpm2/TPMCmd/tpm/include/tpm_public/ArchSpecifics.h \
 	tpm2/BackwardsCompatibility.h \
 	tpm2/BackwardsCompatibilityBitArray.h \
 	tpm2/BackwardsCompatibilityObject.h \
