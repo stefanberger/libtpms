@@ -9,6 +9,7 @@
 #ifndef MAX_CAP_BUFFER
 #  error MAX_CAP_BUFFER must be defined before this file so it can calculate maximum capability sizes
 #endif
+#include "tpm_public/ArchSpecifics.h" // libtpms added
 #include "tpm_public/Capabilities.h"
 #include "tpm_public/TpmAlgorithmDefines.h"
 #include "tpm_public/TpmCalculatedAttributes.h"
@@ -1462,6 +1463,7 @@ typedef union
 {  // (Part 2: Structures)
     TPMT_HA    digest;
     TPM_HANDLE handle;
+    ARCH_PADDING(pad, 2 + 64 + 2);	// libtpms added: m68k
 } TPMU_NAME;
 
 typedef union
@@ -2350,6 +2352,7 @@ typedef union
     TPMS_ECC_PARMS eccDetail;
 #endif  // ALG_ECC
     TPMS_ASYM_PARMS asymDetail;
+    ARCH_PADDING(pad, 20);	// libtpms added: m68k
 } TPMU_PUBLIC_PARMS;
 
 typedef struct
