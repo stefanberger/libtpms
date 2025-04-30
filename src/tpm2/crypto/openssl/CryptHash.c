@@ -149,8 +149,8 @@ CryptGetHashDef(
 /*     FALSE hashAlg is not valid for this TPM */
 BOOL
 CryptHashIsValidAlg(
-		    TPM_ALG_ID       hashAlg,
-		    BOOL             flag
+		    TPM_ALG_ID       hashAlg,           // IN: the algorithm to check
+		    BOOL             isAlgNullValid     // IN: TRUE if TPM_ALG_NULL is to be treated
 		    )
 {
     switch(hashAlg)
@@ -173,7 +173,7 @@ CryptHashIsValidAlg(
 	    return TRUE;
 	    break;
 	  case ALG_NULL_VALUE:
-	    return flag;
+	    return isAlgNullValid;
 	    break;
 	  default:
 	    break;
