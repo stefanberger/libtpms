@@ -86,7 +86,6 @@ static const struct KeySizes s_KeySizesRSA[] = {
     { .enabled = RSA_1024, .size = 1024, .stateFormatLevel = 1 },
     { .enabled = RSA_2048, .size = 2048, .stateFormatLevel = 1 },
     { .enabled = RSA_3072, .size = 3072, .stateFormatLevel = 1 },
-    { .enabled = RSA_4096, .size = 4096, .stateFormatLevel = 8 },
     { .enabled = false   , .size = 0   , .stateFormatLevel = 0 },
 };
 static const struct KeySizes s_KeySizesECC[] = {

@@ -78,7 +78,7 @@ static const struct RuntimeProfileDesc {
      * This basically locks the name of the profile to the stateFormatLevel.
      */
     unsigned int stateFormatLevel;
-#define STATE_FORMAT_LEVEL_CURRENT 8
+#define STATE_FORMAT_LEVEL_CURRENT 7
 #define STATE_FORMAT_LEVEL_UNKNOWN 0 /* JSON didn't provide StateFormatLevel; this is only
 					allowed for the 'default' profile or when user
 					passed JSON via SetProfile() */
@@ -105,7 +105,6 @@ static const struct RuntimeProfileDesc {
  *      - drbg-continous-test
  *      - pct
  *      - no-ecc-key-derivation
- *  8 : Enabled 4096-bit RSA support
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
@@ -990,8 +989,8 @@ RuntimeProfileGetSeedCompatLevel(void)
     case 1: /* profile runs on v0.9 */
 	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
 
-    case 2 ... 8: /* profile runs on v0.10 */ {
-	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 8); // force update when this changes
+    case 2 ... 7: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 7); // force update when this changes
 	return SEED_COMPAT_LEVEL_LAST;
     }
 

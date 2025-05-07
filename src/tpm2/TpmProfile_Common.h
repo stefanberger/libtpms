@@ -162,7 +162,7 @@
 #define     RSA_1024                        (YES * ALG_RSA)
 #define     RSA_2048                        (YES * ALG_RSA)
 #define     RSA_3072                        (YES * ALG_RSA)
-#define     RSA_4096                        (YES * ALG_RSA) /* since libtpms v0.11 stateFormatLevel 8 */
+#define     RSA_4096                        (NO  * ALG_RSA)	/* libtpms: NO */
 #define     RSA_16384                       (NO  * ALG_RSA)
 
 #define     ALG_RSASSA                      (YES * ALG_RSA)
