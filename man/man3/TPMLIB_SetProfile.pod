@@ -195,10 +195,6 @@ This I<StateFormatLevel> enabled the following profile attributes:
 
 =back
 
-=item 8: (since v0.11)
-
-This I<StateFormatLevel> enabled 4096-bit RSA.
-
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.

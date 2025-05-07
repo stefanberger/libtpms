@@ -61,10 +61,8 @@ int main(void)
      * size of the OBJECT is the same on all architectures so that a full
      * NVRAM fits on all architectures
      */
-#if RSA_16384
+#if RSA_4096
 # error Unsupported RSA key size
-#elif RSA_4096
-# define OBJECT_EXP_SIZE 3312
 #elif RSA_3072
 # define OBJECT_EXP_SIZE 2608
 #elif RSA_2048
@@ -74,14 +72,11 @@ int main(void)
         fprintf(stderr, "sizeof(OBJECT) does not have expected size of %u bytes"
                         "but %zu bytes\n", OBJECT_EXP_SIZE, sizeof(OBJECT));
         fprintf(stderr, "sizeof(TPMT_PUBLIC) is now %zu bytes;"
-                        "was 356/484/612 bytes for 2048/3072/4096 bit RSA keys\n",
-                        sizeof(TPMT_PUBLIC));
+                        "was 356/484 bytes for 2048/3072 bit RSA keys\n", sizeof(TPMT_PUBLIC));
         fprintf(stderr, "sizeof(TPMT_SENSITIVE) is now %zu bytes;"
-                        "was 776/1096/1416 bytes for 2048/3072/4096 bit RSA keys\n",
-                        sizeof(TPMT_SENSITIVE));
+                        "was 776/1096 bytes for 2048/3072 bit RSA keys\n", sizeof(TPMT_SENSITIVE));
         fprintf(stderr, "sizeof(privateExponent_t) is now %zu bytes;"
-                        "was 608/864/1120 bytes for 2048/3072/4096 bit RSA keys\n",
-                        sizeof(privateExponent_t));
+                        "was 608/864 bytes for 2048/3072 bit RSA keys\n", sizeof(privateExponent_t));
         return EXIT_FAILURE;
     }
 

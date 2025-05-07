@@ -72,7 +72,7 @@ int main(void)
     };
 #pragma GCC diagnostics pop
     static const size_t exp_sizes[7] = {
-        0, 3284, 3284, 3284, 3284, 3284, 3288,
+        0, 2580, 2580, 2580, 2580, 2580, 2584,
     };
     BYTE buffer[2 * MAX_MARSHALLED_OBJECT_SIZE];
     UINT32 stateFormatLevel;
