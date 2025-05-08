@@ -272,9 +272,9 @@ exit:
 static void
 RuntimeProfileDedupStrItems(char *input)
 {
-    size_t len = strlen(input), slen;
     char *comma, *equals, *dup, *ncomma;
     char *pos = input;
+    size_t slen;
     bool found;
     char exp;
 
@@ -302,13 +302,14 @@ RuntimeProfileDedupStrItems(char *input)
             dup = strstr(ncomma + 1, pos);
             if (dup) {
                 /* ensure 'dup' is a prefix of 'pos' with either ',' or '\0' before it */
-                if ((dup[-1] == ',' || dup[-1] == 0) && dup[slen] == exp) {
-                    memmove(pos, comma + 1, len - slen);
+                if (((dup[-1] == ',' || dup[-1] == 0) && dup[slen] == exp) ||
+                     (dup[slen] == 0) /* last item in list */) {
+                    memmove(pos, comma + 1, strlen(comma + 1) + 1);
                     /* keep pos as-is */
                     found = true;
                     break;
                 }
-                /* only a prefix matched; continue search afer comma */
+                /* only a prefix matched; continue search after comma */
                 ncomma = index(dup, ',');
                 if (!ncomma)
                     break;
@@ -322,7 +323,6 @@ RuntimeProfileDedupStrItems(char *input)
                *equals = '=';
             pos = comma + 1;
         }
-        len -= (slen + 1);
     }
 }
 
