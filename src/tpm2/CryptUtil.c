@@ -92,12 +92,16 @@ static TPM_RC CryptHmacSign(TPMT_SIGNATURE* signature,  // OUT: signature
 					     g_RuntimeProfile.stateFormatLevel))
 	return TPM_RC_KEY_SIZE;							// libtpms added end
 
-    digestSize = CryptHmacStart2B(&hmacState,
-				  signature->signature.any.hashAlg,
-				  &signKey->sensitive.sensitive.bits.b);
-    CryptDigestUpdate2B(&hmacState.hashState, &hashData->b);
-    CryptHmacEnd(&hmacState, digestSize, (BYTE*)&signature->signature.hmac.digest);
-    return TPM_RC_SUCCESS;
+    if (signature->sigAlg == TPM_ALG_HMAC)
+    {
+	digestSize = CryptHmacStart2B(&hmacState,
+				      signature->signature.any.hashAlg,
+				      &signKey->sensitive.sensitive.bits.b);
+	CryptDigestUpdate2B(&hmacState.hashState, &hashData->b);
+	CryptHmacEnd(&hmacState, digestSize, (BYTE*)&signature->signature.hmac.digest);
+	return TPM_RC_SUCCESS;
+    }
+    return TPM_RC_SCHEME;
 }
 
 //*** CryptHMACVerifySignature()
@@ -1312,7 +1316,8 @@ BOOL CryptIsSplitSign(TPM_ALG_ID scheme  // IN: the algorithm selector
 }
 
 //*** CryptIsAsymSignScheme()
-// This function indicates if a scheme algorithm is a sign algorithm.
+// This function indicates if a scheme algorithm is a sign algorithm valid for the
+// public key type.
 BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the object
 			   TPMI_ALG_ASYM_SCHEME scheme       // IN: the scheme
 			   )
@@ -1341,9 +1346,11 @@ BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the 
 #if ALG_ECC
 	    // If ECC is implemented ECDSA is required
 	  case TPM_ALG_ECC:
+#  if !ALG_ECDSA
+#    error "ECDSA required if ECC enabled."
+#  endif
 	    switch(scheme)
 		{
-		    // Support for ECDSA is required for ECC
 		  case TPM_ALG_ECDSA:
 #  if ALG_ECDAA  // ECDAA is optional
 		  case TPM_ALG_ECDAA:
@@ -1366,6 +1373,59 @@ BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the 
 	    break;
 	}
     return isSignScheme;
+}
+
+//*** CryptIsValidSignScheme()
+// This function checks that a signing scheme is valid. This includes verifying
+// that the scheme signing algorithm is compatible with the signing object type
+// and that the scheme specifies a valid hash algorithm.
+static BOOL CryptIsValidSignScheme(TPMI_ALG_PUBLIC   publicType,  // IN: Type of the object
+				   TPMT_SIG_SCHEME*  scheme       // IN: the signing scheme
+)
+{
+    BOOL isValidSignScheme = TRUE;
+
+    switch(publicType)
+    {
+#if ALG_RSA
+	case TPM_ALG_RSA:
+	    isValidSignScheme = CryptIsAsymSignScheme(publicType, scheme->scheme);
+	    break;
+#endif  // ALG_RSA
+
+#if ALG_ECC
+	case TPM_ALG_ECC:
+	    isValidSignScheme = CryptIsAsymSignScheme(publicType, scheme->scheme);
+	    break;
+#endif  // ALG_ECC
+
+	case TPM_ALG_KEYEDHASH:
+	    if(scheme->scheme != TPM_ALG_HMAC)
+	    {
+		isValidSignScheme = FALSE;
+	    }
+	    break;
+
+	default:
+	    isValidSignScheme = FALSE;
+	    break;
+    }
+
+    // Ensure that a valid hash algorithm is specified. Pass 'flag' = FALSE to
+    // indicate that TPM_ALG_NULL should not be treated as valid.
+    //
+    // NOTE: 'details' is of type TPMU_SIG_SCHEME which is a union of many
+    // different signature scheme types. In all these types (including the type
+    // of 'any'), the very first member is of type TPMI_ALG_HASH. Therefore,
+    // when 'any.hashAlg' is set to a valid hash algorithm ID, the hash for any
+    // signature scheme type will also be a valid hash algorithm ID. (All valid
+    // hash algorithm IDs are the same for all signature scheme types.)
+    if(!CryptHashIsValidAlg(scheme->details.any.hashAlg, /* flag = */ FALSE))
+    {
+	isValidSignScheme = FALSE;
+    }
+
+    return isValidSignScheme;
 }
 
 //*** CryptIsAsymDecryptScheme()
@@ -1423,12 +1483,14 @@ BOOL CryptIsAsymDecryptScheme(TPMI_ALG_PUBLIC publicType,  // IN: Type of the ob
 
 //*** CryptSelectSignScheme()
 // This function is used by the attestation and signing commands.  It implements
-// the rules for selecting the signature scheme to use in signing. This function
-// requires that the signing key either be TPM_RH_NULL or be loaded.
+// the rules for selecting the signature scheme to use in signing and validates
+// that the selected scheme is compatible with the key type. It also ensures
+// the selected scheme specifies a valid hash algorithm. This function requires
+// that the signing key either be TPM_RH_NULL or be loaded.
 //
 // If a default scheme is defined in object, the default scheme should be chosen,
 // otherwise, the input scheme should be chosen.
-// In the case that  both object and input scheme has a non-NULL scheme
+// In the case that both object and input scheme has a non-NULL scheme
 // algorithm, if the schemes are compatible, the input scheme will be chosen.
 //
 // This function should not be called if 'signObject->publicArea.type' ==
@@ -1439,7 +1501,9 @@ BOOL CryptIsAsymDecryptScheme(TPMI_ALG_PUBLIC publicType,  // IN: Type of the ob
 //      FALSE(0)        both 'scheme' and key's default scheme are empty; or
 //                      'scheme' is empty while key's default scheme requires
 //                      explicit input scheme (split signing); or
-//                      non-empty default key scheme differs from 'scheme'
+//                      non-empty default key scheme differs from 'scheme'; or
+//                      'scheme' not valid for key type; or invalid hash
+//                      algorithm specified; or key type is ALG_SYMCIPHER
 BOOL CryptSelectSignScheme(OBJECT*          signObject,  // IN: signing key
 			   TPMT_SIG_SCHEME* scheme       // IN/OUT: signing scheme
 			   )
@@ -1461,17 +1525,24 @@ BOOL CryptSelectSignScheme(OBJECT*          signObject,  // IN: signing key
 	    // assignment to save typing.
 	    publicArea = &signObject->publicArea;
 
-	    // A symmetric cipher can be used to encrypt and decrypt but it can't
-	    // be used for signing
-	    if(publicArea->type == TPM_ALG_SYMCIPHER)
-		return FALSE;
-	    // Point to the scheme object
+	    // Get a pointer to the scheme object.
 	    if(CryptIsAsymAlgorithm(publicArea->type))
+	    {
 		objectScheme =
 		    (TPMT_SIG_SCHEME*)&publicArea->parameters.asymDetail.scheme;
-	    else
+	    }
+	    else if(publicArea->type == TPM_ALG_KEYEDHASH)
+	    {
 		objectScheme =
 		    (TPMT_SIG_SCHEME*)&publicArea->parameters.keyedHashDetail.scheme;
+	    }
+	    else
+	    {
+	        // Only asymmetric key types (RSA, ECC) and keyed hashes can be
+		// used for signing. A symmetric cipher can be used to encrypt and
+		// decrypt but can't be used for signing.
+		return FALSE;
+	    }
 
 	    // If the object doesn't have a default scheme, then use the
 	    // input scheme.
@@ -1479,8 +1550,6 @@ BOOL CryptSelectSignScheme(OBJECT*          signObject,  // IN: signing key
 		{
 		    // Input and default can't both be NULL
 		    OK = (scheme->scheme != TPM_ALG_NULL);
-		    // Assume that the scheme is compatible with the key. If not,
-		    // an error will be generated in the signing operation.
 		}
 	    else if(scheme->scheme == TPM_ALG_NULL)
 		{
@@ -1508,6 +1577,14 @@ BOOL CryptSelectSignScheme(OBJECT*          signObject,  // IN: signing key
 			(objectScheme->scheme == scheme->scheme)
 			&& (objectScheme->details.any.hashAlg == scheme->details.any.hashAlg);
 		}
+
+	    if(OK)
+		{
+		    // Check that the scheme is compatible with the key type and has a
+		    // valid hash algorithm specified.
+		    OK = CryptIsValidSignScheme(publicArea->type, scheme);
+		}
+
 	}
     return OK;
 }
