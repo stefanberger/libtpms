@@ -89,9 +89,9 @@ CryptGetHashDef(TPM_ALG_ID hashAlg);
 //  Return Type: BOOL
 //      TRUE(1)         hashAlg is a valid, implemented hash on this TPM
 //      FALSE(0)        hashAlg is not valid for this TPM
-BOOL CryptHashIsValidAlg(TPM_ALG_ID hashAlg,  // IN: the algorithm to check
-			 BOOL       flag  // IN: TRUE if TPM_ALG_NULL is to be treated
-			 //     as a valid hash
+BOOL CryptHashIsValidAlg(TPM_ALG_ID hashAlg,        // IN: the algorithm to check
+			 BOOL       isAlgNullValid  // IN: TRUE if TPM_ALG_NULL is to be treated
+						    //     as a valid hash
 			 );
 
 //*** CryptHashGetAlgByIndex()
