@@ -137,10 +137,15 @@ TPM2_VerifySignature(VerifySignature_In*  in,  // IN: input parameter list
 //      TPM_RC_SCHEME           the scheme is not compatible with sign key type,
 //                              or input scheme is not compatible with default
 //                              scheme, or the chosen scheme is not a valid
-//                              sign scheme
+//                              sign scheme, or the scheme hashAlg is not a
+//                              valid hash algorithm
 //      TPM_RC_TICKET           'validation' is not a valid ticket
 //      TPM_RC_VALUE            the value to sign is larger than allowed for the
 //                              type of 'keyHandle'
+//      TPM_RC_ATTRIBUTES       the key has the x509sign attribute and can't be
+//                              used in TPM2_Sign()
+//      TPM_RC_SIZE             the provided 'digest' does not match the size
+//                              of the scheme hashAlg digest
 
 TPM_RC
 TPM2_Sign(Sign_In*  in,  // IN: input parameter list
@@ -153,16 +158,23 @@ TPM2_Sign(Sign_In*  in,  // IN: input parameter list
     //
     // Input Validation
     if(!IsSigningObject(signObject))
+    {
 	return TPM_RCS_KEY + RC_Sign_keyHandle;
+    }
 
     // A key that will be used for x.509 signatures can't be used in TPM2_Sign().
     if(IS_ATTRIBUTE(signObject->publicArea.objectAttributes, TPMA_OBJECT, x509sign))
+    {
 	return TPM_RCS_ATTRIBUTES + RC_Sign_keyHandle;
+    }
 
-    // pick a scheme for sign.  If the input sign scheme is not compatible with
-    // the default scheme, return an error.
+    // Pick a scheme for signing. If the input signing scheme is not compatible
+    // with the default scheme or the signing key type, return an error. If a
+    // valid hash algorithm is not specified, return an error.
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
+    {
 	return TPM_RCS_SCHEME + RC_Sign_inScheme;
+    }
 
     // If validation is provided, or the key is restricted, check the ticket
     if(in->validation.digest.t.size != 0
