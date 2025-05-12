@@ -1334,7 +1334,7 @@ static TPM_RC CheckLockedOut(
 		    g_daUsed        = TRUE;
 		    gp.orderlyState = SU_DA_USED_VALUE;
 		    NV_SYNC_PERSISTENT(orderlyState);
-		    return TPM_RC_RETRY;
+		    return TPM_RC_SUCCESS; // libtpms changed: was TPM_RC_RETRY;
 		}
 #endif
 	}
