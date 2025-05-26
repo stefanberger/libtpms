@@ -50,6 +50,7 @@ jobs:
           sudo make install
           git clone https://github.com/stefanberger/swtpm.git
           pushd swtpm
+            sudo apt -y update
             sudo apt -y install devscripts equivs python3-twisted expect \
               libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2 \
               libjson-glib-dev libseccomp-dev
