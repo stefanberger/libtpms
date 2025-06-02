@@ -40,7 +40,7 @@ the volatile or save state blobs can be set.
 The B<TPMLIB_GetState()> function allows to get the current state of the TPM.
 For as long as the TPM has not been started, this function either returns the state
 blob previously set with B<TPMLIB_SetState()> or the state is read from a file.
-Once the TPM has been start the state of the running TPM is returned.
+Once the TPM has been started, the state of the running TPM is returned.
 
 The B<TPMLIB_STATE_SAVE_STATE> (save state) type of TPM state can be set with this
 function. The same state blob will be returned until TPM_Startup(ST_STATE) has been
