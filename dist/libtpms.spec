@@ -112,6 +112,14 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Jun 10 2025 Stefan Berger - 0.8.10-1
+- tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+- tpm2: Remove assigned-to value to offset because it is unused (Coverity)
+- Insert assert ensuring *buflen != BUFLEN_EMPTY_BUFFER (Coverity)
+- tpm2: Address Coverity Issue by casting '1' before shift (CID 1470813)
+- tpm2: Return TPM_RC_VALUE upon decryption failure
+- tpm12: Replace include of engine.h with err.h
+
 * Tue Feb 28 2023 Stefan Berger - 0.8.9-1
 - tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
 
