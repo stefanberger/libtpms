@@ -112,6 +112,14 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Jun 10 2025 Stefan Berger - 0.7.12-1
+- tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+- tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
+- tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size 0 (OSSL 3)
+- tpm2: Return TPM_RC_VALUE upon decryption failure
+- tpm2: Fix the returned number in the JSON
+- tpm12: Replace include of engine.h with err.h
+
 * Fri Nov 11 2022 Stefan Berger - 0.7.11-1
 - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
 - tpm2: Fix a potential overflow expression (coverity)
