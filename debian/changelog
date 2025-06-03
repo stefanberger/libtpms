@@ -1,41 +1,52 @@
-libtpms (0.9.7) RELEASED; urgency=medium
+libtpms (0.9.7) RELEASED; urgency=high
 
-  - tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
-  - tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
-  - tpm2: Sync CryptParameterDecrypt implementation  with upstream
-  - tpm2: Fix issue related to CryptGenerateKeyDes (TPM 2 errata v1.4)
-  - tpm2: Check size of TPM2B_NAME buffer before reading 2 bytes from it
+  * tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+  * tpm2: Remove assigned-to value to offset because it is unused (Coverity)
+  * tpm2: Insert assert ensuring *buflen != BUFLEN_EMPTY_BUFFER (Coverity)
+  * tpm2: Address Coverity Issue by casting '1' before shift (CID 1470813)
+  * tpm2: Filter bad input values to avoid underflow in FindNthSetBit (Coverity)
+  * tpm2: Address a possible unsigned integer underflow (Coverity)
+  * tpm2: Remove assigned to value to offset because it is unused (Coverity)
+  * tpm2: Initialize eccPublic before passing to TPMS_ECC_POINT_Unmarshal (Coverity)
+  * tpm2: Preserve more *target and restore them if needed (Coverity)
+  * tpm2: Return TPM_RC_VALUE upon decryption failure
+  * tpm12: Replace include of engine.h with err.h
+  * tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
+  * tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
+  * tpm2: Sync CryptParameterDecrypt implementation  with upstream
+  * tpm2: Fix issue related to CryptGenerateKeyDes (TPM 2 errata v1.4)
+  * tpm2: Check size of TPM2B_NAME buffer before reading 2 bytes from it
 
- -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 14 Aug 2023 09:00:00 -0500
+ -- Stefan Berger <stefanb@linux.ibm.com>  Tue, 10 Jun 2025 00:00:00 -0500
 
 libtpms (0.9.6) RELEASED; urgency=high
 
-  - tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
+  * tpm2: Check size of buffer before accessing it (CVE-2023-1017 & -1018)
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Tue, 28 Feb 2023 09:00:00 -0500
 
 libtpms (0.9.5) RELEASED; urgency=medium
 
-  - tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
-  - tpm2: Fix a potential overflow expression (coverity)
-  - tpm2: Fix size check in CryptSecretDecrypt
+  * tpm2: Do not set RSA_FLAG_NO_BLINDING on RSA keys anymore
+  * tpm2: Fix a potential overflow expression (coverity)
+  * tpm2: Fix size check in CryptSecretDecrypt
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Fri, 01 Jul 2022 09:00:00 -0500
 
 libtpms (0.9.4) RELEASED; urgency=medium
 
-  - tpm: #undef printf in case it is #define'd (OSS-Fuzz)
-  - tpm2: Check return code of BN_div()
-  - tpm2: Initialize variables due to gcc complaint (s390x, false positive)
-  - tpm12: Initialize variables due to gcc complaint (s390x, false positive)
-  - build-sys: Fix configure script to support _FORTIFY_SOURCE=3
+  * tpm: #undef printf in case it is #define'd (OSS-Fuzz)
+  * tpm2: Check return code of BN_div()
+  * tpm2: Initialize variables due to gcc complaint (s390x, false positive)
+  * tpm12: Initialize variables due to gcc complaint (s390x, false positive)
+  * build-sys: Fix configure script to support _FORTIFY_SOURCE=3
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 25 Apr 2022 09:00:00 -0500
 
 libtpms (0.9.3) RELEASED; urgency=medium
 
-  - build-sys: Add probing for -fstack-protector
-  - tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size (OSSL 3)
+  * build-sys: Add probing for -fstack-protector
+  * tpm2: Do not call EVP_PKEY_CTX_set0_rsa_oaep_label() for label of size (OSSL 3)
 
  -- Stefan Berger <stefanb@linux.ibm.com>  Mon, 07 Mar 2022 09:00:00 -0500
 
