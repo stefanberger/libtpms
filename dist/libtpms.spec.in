@@ -112,6 +112,15 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Jun 10 2025 Stefan Berger - 0.10.1-1
+- tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+- tpm2: fix build for LibreSSL 4.1.0
+- tpm2: In CheckLockedOut replace TPM_RC_RETRY with TPM_RC_SUCCESS
+- tpm2: Fix bugs in RuntimeProfileDedupStrItems
+- tpm2 + test: Make it compilable on Debian GNU Hurd
+- tpm2: Add asserts to silence compiler warning due to -Wstringop-overflow=
+- tpm2: Add padding to OBJECT for 32bit targets
+
 * Thu Nov 14 2024 Stefan Berger - 0.10.0-1
 - Release of version 0.10.0 (rev. 183)
 

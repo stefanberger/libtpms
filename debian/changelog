@@ -1,3 +1,15 @@
+libtpms (0.10.1) RELEASED; urgency=high
+
+  * tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+  * tpm2: fix build for LibreSSL 4.1.0
+  * tpm2: In CheckLockedOut replace TPM_RC_RETRY with TPM_RC_SUCCESS
+  * tpm2: Fix bugs in RuntimeProfileDedupStrItems
+  * tpm2 + test: Make it compilable on Debian GNU Hurd
+  * tpm2: Add asserts to silence compiler warning due to -Wstringop-overflow=
+  * tpm2: Add padding to OBJECT for 32bit targets
+
+ -- Stefan Berger <stefanb@linux.ibm.com>  Tue, 10 Jun 2025 00:00:00 -0500
+
 libtpms (0.10.0) RELEASED; urgency=medium
 
   * Stable release
