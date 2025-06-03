@@ -112,7 +112,18 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
-* Mon Aug 14 2023 Stefan Berger - 0.9.7-1
+* Tue Jun 10 2025 Stefan Berger - 0.9.7-1
+- tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
+- tpm2: Remove assigned-to value to offset because it is unused (Coverity)
+- tpm2: Insert assert ensuring *buflen != BUFLEN_EMPTY_BUFFER (Coverity)
+- tpm2: Address Coverity Issue by casting '1' before shift (CID 1470813)
+- tpm2: Filter bad input values to avoid underflow in FindNthSetBit (Coverity)
+- tpm2: Address a possible unsigned integer underflow (Coverity)
+- tpm2: Remove assigned to value to offset because it is unused (Coverity)
+- tpm2: Initialize eccPublic before passing to TPMS_ECC_POINT_Unmarshal (Coverity)
+- tpm2: Preserve more *target and restore them if needed (Coverity)
+- tpm2: Return TPM_RC_VALUE upon decryption failure
+- tpm12: Replace include of engine.h with err.h
 - tpm2: Fix issue in CryptParameterEncryption() (TPM 2 errata v1.4)
 - tpm2: Sync fix in TPM2_PolicyAuthorize() with upstream
 - tpm2: Sync CryptParameterDecrypt implementation  with upstream
