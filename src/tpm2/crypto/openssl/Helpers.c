@@ -717,17 +717,18 @@ error_free_ned:
 
 #endif /* ! OPENSSL_VERSION_NUMBER >= 0x30000000L */
 
-static int
+static TPM_RC
 ObjectGetPublicParameters(OBJECT      *key,     // IN
                           BIGNUM     **N,       // OUT
                           BIGNUM     **E        // OUT
                          )
 {
+    TPM_RC   retVal;
     BN_ULONG eval;
 
     *E = BN_new();
     if (*E == NULL)
-        return 0;
+        return TPM_RC_MEMORY;
 
     if(key->publicArea.parameters.rsaDetail.exponent != 0)
         eval = key->publicArea.parameters.rsaDetail.exponent;
@@ -735,20 +736,20 @@ ObjectGetPublicParameters(OBJECT      *key,     // IN
         eval = RSA_DEFAULT_PUBLIC_EXPONENT;
 
     if (BN_set_word(*E, eval) != 1)
-        goto error;
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     *N = BN_bin2bn(key->publicArea.unique.rsa.b.buffer,
                    key->publicArea.unique.rsa.b.size, NULL);
     if (*N == NULL)
-        goto error;
+        ERROR_EXIT(TPM_RC_FAILURE);
 
-    return 1;
+    return TPM_RC_SUCCESS;
 
-error:
+ Exit:
     BN_free(*E);
     *E = NULL;
 
-    return 0;
+    return retVal;
 }
 
 LIB_EXPORT TPM_RC
@@ -760,11 +761,12 @@ InitOpenSSLRSAPublicKey(OBJECT      *key,     // IN
     BIGNUM     *N = NULL;
     BIGNUM     *E = NULL;
 
-    if (ObjectGetPublicParameters(key, &N, &E) != 1 ||
-        BuildRSAKey(pkey, N, E, NULL, NULL, NULL, NULL, NULL, NULL) != 1)
-        ERROR_EXIT(TPM_RC_FAILURE);
+    retVal = ObjectGetPublicParameters(key, &N, &E);
+    if (retVal)
+        return retVal;
 
-    retVal = TPM_RC_SUCCESS;
+    if (BuildRSAKey(pkey, N, E, NULL, NULL, NULL, NULL, NULL, NULL) != 1)
+        ERROR_EXIT(TPM_RC_FAILURE);
 
  Exit:
     BN_free(N);
@@ -869,8 +871,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     if (!dP || !dQ || !qInv)
         ERROR_EXIT(TPM_RC_MEMORY);
 
-    if (ObjectGetPublicParameters(rsaKey, &N, &E) != 1)
-        ERROR_EXIT(TPM_RC_FAILURE);
+    retVal = ObjectGetPublicParameters(rsaKey, &N, &E);
+    if (retVal)
+        goto Exit;
 
     if(!rsaKey->attributes.privateExp)
         CryptRsaLoadPrivateExponent(&rsaKey->publicArea, &rsaKey->sensitive,
