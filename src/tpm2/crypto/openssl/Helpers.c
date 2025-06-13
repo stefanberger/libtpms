@@ -867,7 +867,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     TPM_RC        retVal;
 
     if (ObjectGetPublicParameters(rsaKey, &N, &E) != 1)
-        return TPM_RC_FAILURE;
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     if(!rsaKey->attributes.privateExp)
         CryptRsaLoadPrivateExponent(&rsaKey->publicArea, &rsaKey->sensitive,
