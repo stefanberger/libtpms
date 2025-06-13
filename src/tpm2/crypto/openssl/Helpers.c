@@ -866,6 +866,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BN_CTX       *ctx = NULL;
     TPM_RC        retVal;
 
+    if (!dP || !dQ || !qInv)
+        ERROR_EXIT(TPM_RC_MEMORY);
+
     if (ObjectGetPublicParameters(rsaKey, &N, &E) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
@@ -884,7 +887,7 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
         Q = BN_new();
         Qr = BN_new();
         if (ctx == NULL || Q == NULL || Qr == NULL)
-            ERROR_EXIT(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_MEMORY);
         /* Q = N/P; no remainder */
         BN_set_flags(P, BN_FLG_CONSTTIME); // P is secret
         if (!BN_div(Q, Qr, N, P, ctx) || !BN_is_zero(Qr))
@@ -952,7 +955,9 @@ OpenSSLCryptRsaGenerateKey(
     EVP_PKEY            *pkey = NULL;
     CRYPT_RSA_VAR(tmp);
 
-    if (bnE == NULL || BN_set_word(bnE, e) != 1)
+    if (bnE == NULL)
+        return TPM_RC_MEMORY;
+    if (BN_set_word(bnE, e) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
     if ((ctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL)) == NULL ||
@@ -1016,7 +1021,9 @@ OpenSSLCryptRsaGenerateKey(
     BIGNUM              *bnE = BN_new();
     CRYPT_RSA_VAR(tmp);
 
-    if (bnE == NULL || BN_set_word(bnE, e) != 1)
+    if (bnE == NULL)
+        return TPM_RC_MEMORY;
+    if (BN_set_word(bnE, e) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
     rsa = RSA_new();

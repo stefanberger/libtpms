@@ -194,6 +194,9 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
     const BIGNUM* s;
     BIGNUM*       d = BN_new();
 
+    if (!d)
+        return TPM_RC_MEMORY;
+
     d = BigInitialized(d, (bigConst)bnD);
 
     eckey = EC_KEY_new();
@@ -309,6 +312,9 @@ TpmEcc_ValidateSignatureEcdsa(
     BIGNUM*    r = BN_new();
     BIGNUM*    s = BN_new();
     EC_POINT*  q = EcPointInitialized((bn_point_t*)ecQ, E);
+
+    if (!r || !s)
+        ERROR_EXIT(TPM_RC_MEMORY);
 
     if (digest->b.size == CryptHashGetDigestSize(TPM_ALG_SHA1) &&
 	RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,

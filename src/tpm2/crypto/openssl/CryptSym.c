@@ -591,7 +591,7 @@ CryptSymmetricEncrypt(
         buffersize = TPM2_ROUNDUP(dSize, blockSize);
         buffer = malloc(buffersize);
         if (buffer == NULL)
-            ERROR_EXIT(TPM_RC_FAILURE);
+            ERROR_EXIT(TPM_RC_MEMORY);
 
         pOut = buffer;
     }
@@ -714,7 +714,7 @@ CryptSymmetricDecrypt(
     buffersize = TPM2_ROUNDUP(dSize + blockSize, blockSize);
     buffer = malloc(buffersize);
     if (buffer == NULL)
-        ERROR_EXIT(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_MEMORY);
 
 #if ALG_TDES && ALG_CTR
     if (algorithm == TPM_ALG_TDES && mode == TPM_ALG_CTR) {
