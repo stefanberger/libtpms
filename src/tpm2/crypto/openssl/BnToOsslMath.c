@@ -483,7 +483,8 @@ LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, const bigCurveDa
 	    if(E == NULL)
 		FAIL(FATAL_ERROR_ALLOCATION);
 	    P = EC_POINT_new(E->G);
-	    if(!EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
+	    if(P != NULL &&     // libtpms added
+	       !EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
 		P = NULL;
 	    BN_clear_free(bnX); // libtpms added
 	    BN_clear_free(bnY); // libtpms added
