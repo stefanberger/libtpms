@@ -67,9 +67,10 @@
 /* Need this define to get the private defines for this function */
 #define CRYPT_RSA_C
 #include "Tpm.h"
-#include "Helpers_fp.h"  // libtpms added
+#include "Helpers_fp.h"		// libtpms added begin
 
-#include <openssl/rsa.h> // libtpms added
+#include <openssl/rsa.h>
+#include <openssl/crypto.h>	// libtpms added end
 
 #if ALG_RSA
 /* 10.2.17.3 Obligatory Initialization Functions */
@@ -364,17 +365,21 @@ OaepDecode(
 	   TPM2B           *padded         // IN: the padded data
 	   )
 {
-    UINT32       i;
+    UINT32       i, j, k, l;
     BYTE         seedMask[MAX_DIGEST_SIZE];
     UINT32       hLen = CryptHashGetDigestSize(hashAlg);
     BYTE         mask[MAX_RSA_KEY_BYTES];
     BYTE        *pp;
     BYTE        *pm;
     TPM_RC       retVal = TPM_RC_SUCCESS;
+    BOOL         bad = FALSE;
+    NUMBYTES     sizemask;
     // Strange size (anything smaller can't be an OAEP padded block)
     // Also check for no leading 0
-    if((padded->size < (unsigned)((2 * hLen) + 2)) || (padded->buffer[0] != 0))
+    // padded->size should be the size of an RSA public key (128/256/384)
+    if(padded->size < (unsigned)((2 * hLen) + 2))
 	ERROR_RETURN(TPM_RC_VALUE);
+    bad |= (padded->buffer[0] != 0);
     // Use the hash size to determine what to put through MGF1 in order
     // to recover the seedMask
     CryptMGF_KDF(hLen, seedMask, hashAlg, padded->size - hLen - 1,
@@ -397,29 +402,46 @@ OaepDecode(
     if((CryptHashBlock(hashAlg, label->size, (BYTE *)label->buffer,
 		       hLen, seedMask)) != hLen)
 	FAIL(FATAL_ERROR_INTERNAL);
-    if(memcmp(seedMask, mask, hLen) != 0)
-	ERROR_RETURN(TPM_RC_VALUE);
-    // find the start of the data
+    bad |= (CRYPTO_memcmp(seedMask, mask, hLen) != 0);
+    // find the start of the data in constant-time (continue loop once found)
     pm = &mask[hLen];
-    for(i = (UINT32)padded->size - (2 * hLen) - 1; i > 0; i--)
-	{
-	    if(*pm++ != 0)
-		break;
-	}
+    i = 0;
+    for(l = (UINT32)padded->size - (2 * hLen) - 1; l > 0; l--)
+    {
+        UINT32 is_nonzero = (*pm != 0);  // 0 or 1
+        UINT32 not_found_yet = (i == 0); // 1 if we haven't found a non-zero yet
+        // Latch position on first non-zero: if is_nonzero AND not_found_yet, set j = i
+        i |= (l & (0 - (is_nonzero & not_found_yet)));
+        pm++;
+    }
+    // adjust pm according to 'i'; we would have left the loop once (*pm++ != 0)
+    pm = &mask[(UINT32)padded->size - hLen - i];
     // If we ran out of data or didn't end with 0x01, then return an error
-    if(i == 0 || pm[-1] != 0x01)
-	ERROR_RETURN(TPM_RC_VALUE);
+    bad |= i == 0;
+    // pm is at least at offset of hLen + 1 into mask => pm[-1] will not be out-of-bounds
+    bad |= pm[-1] != 0x01;
+
     // pm should be pointing at the first part of the data
     // and i is one greater than the number of bytes to move
-    i--;
-    if(i > dataOut->size)
-	// Special exit to preserve the size of the output buffer
-	return TPM_RC_VALUE;
+    i -= (i > 0);
+    bad |= i > dataOut->size;
+
+    // Limit i to dataOut->size;
+    j = i;
+    k = dataOut->size;
+    if(i > k)
+        i = k;
+    else
+        i = j;
+
     memcpy(dataOut->buffer, pm, i);
     dataOut->size = (UINT16)i;
+    retVal = bad ? TPM_RC_VALUE : TPM_RC_SUCCESS;
+
  Exit:
-    if(retVal != TPM_RC_SUCCESS)
-	dataOut->size = 0;
+    sizemask = retVal != TPM_RC_SUCCESS ? 0 : ~0;
+    dataOut->size &= sizemask;
+
     return retVal;
 }
 /* 10.2.17.4.7 PKCS1v1_5Encode() */
