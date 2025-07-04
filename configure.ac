@@ -358,9 +358,8 @@ AC_OUTPUT
 if test -z "$enable_debug" ; then
     enable_debug="no"
 fi
-if test -z "$with_tpm2"; then
-    with_tpm2=no
-fi
+AS_IF([test -z "$with_tpm2"],
+    [with_tpm2=no])
 
 echo
 echo "AM_CFLAGS=$AM_CFLAGS"
