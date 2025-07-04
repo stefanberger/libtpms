@@ -26,32 +26,6 @@ AC_SUBST([LIBTPMS_VER_MICRO])
 AC_SUBST([LIBTPMS_VERSION])
 AC_SUBST([LIBTPMS_VERSION_INFO])
 
-DEBUG=""
-AC_MSG_CHECKING([for debug-enabled build])
-AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],[create a debug build]),
-  [if test "$enableval" = "yes"; then
-     DEBUG="yes"
-     AC_MSG_RESULT([yes])
-   else
-     DEBUG="no"
-     AC_MSG_RESULT([no])
-   fi],
-  [DEBUG="no",
-   AC_MSG_RESULT([no])])
-
-if test "$DEBUG" = "yes"; then
-	CFLAGS="$CFLAGS -O0 -g -DDEBUG"
-fi
-
-debug_defines=
-if test "$DEBUG" = "yes"; then
-	debug_defines="-DTPM_DEBUG"
-	# Enable the following only if ABSOLUTELY necessary
-	# volatile state will be written and behavior changes
-	#"-DTPM_VOLATILE_STORE"
-fi
-AC_SUBST(DEBUG_DEFINES, $debug_defines)
-
 # AX_CHECK_LINK_FLAG needs autoconf 2.64 or later
 have_version_script="no"
 m4_if(
@@ -279,9 +253,6 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 LT_INIT
 
-#AM_GNU_GETTEXT_VERSION([0.15])
-#AM_GNU_GETTEXT([external])
-
 AC_C_CONST
 AC_C_INLINE
 
@@ -355,9 +326,6 @@ AC_CONFIG_FILES(Makefile                   \
 PKG_INSTALLDIR()
 AC_OUTPUT
 
-if test -z "$enable_debug" ; then
-    enable_debug="no"
-fi
 AS_IF([test -z "$with_tpm2"],
     [with_tpm2=no])
 

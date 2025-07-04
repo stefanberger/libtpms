@@ -54,8 +54,6 @@ libtpms_tpm12_la_CFLAGS += -DTPM_POSIX
 # build without maintenance commands
 libtpms_tpm12_la_CFLAGS += -DTPM_NOMAINTENANCE_COMMANDS
 
-libtpms_tpm12_la_CFLAGS += @DEBUG_DEFINES@
-
 CRYPTO_OBJFILES =
 
 libtpms_tpm12_la_SOURCES = \
