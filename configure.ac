@@ -160,89 +160,85 @@ use_openssl_functions_ecdsa=0
 use_openssl_functions_rsa=0
 use_openssl_functions_sskdf=0
 AC_ARG_ENABLE(use-openssl-functions,
-	AS_HELP_STRING([--disable-use-openssl-functions],
-		       [Use TPM 2 crypot code rather than OpenSSL crypto functions]),
+    AS_HELP_STRING([--disable-use-openssl-functions],
+                   [Use TPM 2 crypot code rather than OpenSSL crypto functions]),
 )
-AS_IF([test "x$enable_use_openssl_functions" != "xno"], [
-	if test "x$cryptolib" != "xopenssl"; then
-		AC_MSG_ERROR([OpenSSL crypto function usage requires openssl as crypto library])
-	fi
-	LIBS_save=$LIBS
-	# Check for symmetric key crypto functions
-	not_found=0
-	AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_new],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_EncryptInit_ex],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_aes_128_cbc],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_des_ede3_cbc],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_camellia_128_cbc],, not_found=1)
-	AC_CHECK_LIB([crypto], [DES_random_key],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_iv],, not_found=1)
-	if test "x$not_found" = "x0"; then
-		use_openssl_functions_symmetric=1
-		use_openssl_functions_for="symmetric (AES, TDES) "
-	fi
-	# Check for EC crypto support
-	not_found=0
-	AC_CHECK_LIB([crypto], [EC_KEY_set_group],, not_found=1)
-	AC_CHECK_LIB([crypto], [EC_KEY_generate_key],, not_found=1)
-	AC_CHECK_LIB([crypto], [EC_KEY_get0_private_key],, not_found=1)
-	if test "x$not_found" = "x0"; then
-		use_openssl_functions_ec=1
-		use_openssl_functions_for="${use_openssl_functions_for}general elliptic curve (EC) "
-	fi
-	# Check for ECDSA crypto support
-	not_found=0
-	AC_CHECK_LIB([crypto], [ECDSA_SIG_new],, not_found=1)
-	AC_CHECK_LIB([crypto], [ECDSA_SIG_set0],, not_found=1)
-	AC_CHECK_LIB([crypto], [ECDSA_do_verify],, not_found=1)
-	AC_CHECK_LIB([crypto], [ECDSA_do_sign],, not_found=1)
-	AC_CHECK_LIB([crypto], [EC_KEY_set_group],, not_found=1)
-	if test "x$not_found" = "x0"; then
-		use_openssl_functions_ecdsa=1
-		use_openssl_functions_for="${use_openssl_functions_for}elliptic curve (ECDSA) "
-	fi
-	# Check for RSA crypto functions
-	not_found=0
-	AC_CHECK_LIB([crypto], [RSA_set0_key],, not_found=1)
-	AC_CHECK_LIB([crypto], [RSA_set0_factors],, not_found=1)
-	AC_CHECK_LIB([crypto], [RSA_set0_crt_params],, not_found=1)
-	AC_CHECK_LIB([crypto], [RSA_generate_key_ex],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_new],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_assign],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt_init],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt_init],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_sign_init],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_sign],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_verify_init],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_PKEY_verify],, not_found=1)
-	AC_CHECK_LIB([crypto], [EVP_get_digestbyname],, not_found=1)
-	# OpenSSL 3.0 turned some #defines into functions
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set0_rsa_oaep_label],,
-	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set0_rsa_oaep_label],, not_found=1)
-	)
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_padding],,
-	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_padding],, not_found=1)
-	)
-	AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_oaep_md],,
-	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_oaep_md],, not_found=1)
-	)
-	AX_CHECK_DEFINE([<openssl/evp.h>], [EVP_PKEY_CTX_set_signature_md],,
-	    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_signature_md],, not_found=1)
-	)
-	if test "x$not_found" = "x0"; then
-		use_openssl_functions_rsa=1
-		use_openssl_functions_for="${use_openssl_functions_for}RSA "
-	fi
-
-	not_found=0
-	AX_CHECK_DEFINE([<openssl/core_names.h>], [OSSL_KDF_NAME_SSKDF],, not_found=1)
-	if test "x$not_found" = "x0"; then
-		use_openssl_functions_sskdf=1
-		use_openssl_functions_for="${use_openssl_functions_for}SSKDF (KDFe) "
-	fi
-	LIBS=$LIBS_save
+AS_IF([test "x$enable_use_openssl_functions" != "xno"],[
+    AS_IF([test "x$cryptolib" != "xopenssl"],
+         [AC_MSG_ERROR([OpenSSL crypto function usage requires openssl as crypto library])]
+    )
+    LIBS_save=$LIBS
+    # Check for symmetric key crypto functions
+    not_found=0
+    AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_new],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_EncryptInit_ex],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_aes_128_cbc],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_des_ede3_cbc],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_camellia_128_cbc],, [not_found=1])
+    AC_CHECK_LIB([crypto], [DES_random_key],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_CIPHER_CTX_iv],, [not_found=1])
+    AS_IF([test "x$not_found" = "x0"],
+        [use_openssl_functions_symmetric=1
+         use_openssl_functions_for="symmetric (AES, TDES) "])
+    # Check for EC crypto support
+    not_found=0
+    AC_CHECK_LIB([crypto], [EC_KEY_set_group],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EC_KEY_generate_key],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EC_KEY_get0_private_key],, [not_found=1])
+    AS_IF([test "x$not_found" = "x0"],
+        [use_openssl_functions_ec=1
+         use_openssl_functions_for="${use_openssl_functions_for}general elliptic curve (EC) "])
+    # Check for ECDSA crypto support
+    not_found=0
+    AC_CHECK_LIB([crypto], [ECDSA_SIG_new],, [not_found=1])
+    AC_CHECK_LIB([crypto], [ECDSA_SIG_set0],, [not_found=1])
+    AC_CHECK_LIB([crypto], [ECDSA_do_verify],, [not_found=1])
+    AC_CHECK_LIB([crypto], [ECDSA_do_sign],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EC_KEY_set_group],, [not_found=1])
+    AS_IF([test "x$not_found" = "x0"],
+        [use_openssl_functions_ecdsa=1
+         use_openssl_functions_for="${use_openssl_functions_for}elliptic curve (ECDSA) "])
+    # Check for RSA crypto functions
+    not_found=0
+    AC_CHECK_LIB([crypto], [RSA_set0_key],, [not_found=1])
+    AC_CHECK_LIB([crypto], [RSA_set0_factors],, [not_found=1])
+    AC_CHECK_LIB([crypto], [RSA_set0_crt_params],, [not_found=1])
+    AC_CHECK_LIB([crypto], [RSA_generate_key_ex],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_new],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_assign],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt_init],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_encrypt],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt_init],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_decrypt],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_sign_init],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_sign],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_verify_init],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_PKEY_verify],, [not_found=1])
+    AC_CHECK_LIB([crypto], [EVP_get_digestbyname],, [not_found=1])
+    # OpenSSL 3.0 turned some #defines into functions
+    AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set0_rsa_oaep_label],,
+        AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set0_rsa_oaep_label],, [not_found=1])
+    )
+    AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_padding],,
+        AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_padding],, [not_found=1])
+    )
+    AX_CHECK_DEFINE([<openssl/rsa.h>], [EVP_PKEY_CTX_set_rsa_oaep_md],,
+        AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_rsa_oaep_md],, [not_found=1])
+    )
+    AX_CHECK_DEFINE([<openssl/evp.h>], [EVP_PKEY_CTX_set_signature_md],,
+        AC_CHECK_LIB([crypto], [EVP_PKEY_CTX_set_signature_md],, [not_found=1])
+    )
+    AS_IF([test "x$not_found" = "x0"],
+        [use_openssl_functions_rsa=1
+         use_openssl_functions_for="${use_openssl_functions_for}RSA "]
+    )
+    not_found=0
+    AX_CHECK_DEFINE([<openssl/core_names.h>], [OSSL_KDF_NAME_SSKDF],, [not_found=1])
+    AS_IF([test "x$not_found" = "x0"],
+        [use_openssl_functions_sskdf=1
+         use_openssl_functions_for="${use_openssl_functions_for}SSKDF (KDFe) "]
+    )
+    LIBS=$LIBS_save
 ])
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=$use_openssl_functions_symmetric"
 CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_EC=$use_openssl_functions_ec"
