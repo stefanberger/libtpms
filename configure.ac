@@ -55,14 +55,14 @@ AC_SUBST(DEBUG_DEFINES, $debug_defines)
 # AX_CHECK_LINK_FLAG needs autoconf 2.64 or later
 have_version_script="no"
 m4_if(
-      m4_version_compare(
-                         m4_defn([AC_AUTOCONF_VERSION]),
-                         [2.64]),
-      -1,
-      [],
-      [AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/test.syms],
-                          [have_version_script="yes"],
-                          [])]
+   m4_version_compare(
+       m4_defn([AC_AUTOCONF_VERSION]),
+               [2.64]),
+   -1,
+   [],
+   [AX_CHECK_LINK_FLAG([-Wl,--version-script=$srcdir/src/test.syms],
+                       [have_version_script="yes"],
+                       [])]
 )
 
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
@@ -76,34 +76,33 @@ AS_IF([test "x$with_tpm1" != "xno"], [
 ])
 
 AC_ARG_WITH([tpm2],
-	AS_HELP_STRING([--with-tpm2],[build libtpms with TPM2 support]),
-	[],
-	[with_tpm2=yes]
+    AS_HELP_STRING([--with-tpm2],[build libtpms with TPM2 support]),
+    [],
+    [with_tpm2=yes]
 )
-AS_IF([test "x$with_tpm2" = xyes], [
-	AC_MSG_RESULT([Building with TPM2 support])
-	AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
-	AC_SUBST([WITH_TPM2], [1])
-	AM_CONDITIONAL(WITH_TPM2, true)
-	cryptolib=openssl
-], [
-	AM_CONDITIONAL(WITH_TPM2, false)
-	cryptolib=freebl
-])
+AS_IF([test "x$with_tpm2" = xyes],
+    [AC_MSG_RESULT([Building with TPM2 support])
+     AC_DEFINE_UNQUOTED([WITH_TPM2], 1, [whether to support TPM2])
+     AC_SUBST([WITH_TPM2], [1])
+     AM_CONDITIONAL(WITH_TPM2, true)
+     cryptolib=openssl],
+    [AM_CONDITIONAL(WITH_TPM2, false)
+     cryptolib=freebl]
+)
 
 AC_SUBST(cryptolib, $cryptolib)
 
 AC_ARG_WITH([openssl],
-            AS_HELP_STRING([--with-openssl],[build libtpms with openssl library]),
-              [AC_CHECK_LIB(crypto,
-                            [AES_set_encrypt_key],
-                            [],
-                            AC_MSG_ERROR(Faulty openssl crypto library))
-               AC_CHECK_HEADERS([openssl/aes.h],[],
-                            AC_MSG_ERROR(Is openssl-devel/libssl-dev installed?))
-               AC_MSG_RESULT([Building with openssl crypto library])
-               cryptolib=openssl
-              ]
+    AS_HELP_STRING([--with-openssl],[build libtpms with openssl library]),
+    [AC_CHECK_LIB(crypto,
+                  [AES_set_encrypt_key],
+                  [],
+                  AC_MSG_ERROR(Faulty openssl crypto library))
+     AC_CHECK_HEADERS([openssl/aes.h],[],
+                      AC_MSG_ERROR(Is openssl-devel/libssl-dev installed?))
+     AC_MSG_RESULT([Building with openssl crypto library])
+     cryptolib=openssl
+    ]
 )
 
 AS_CASE([$cryptolib],[freebl],
@@ -254,9 +253,11 @@ CFLAGS="$CFLAGS -DUSE_OPENSSL_FUNCTIONS_SSKDF=$use_openssl_functions_sskdf"
 AC_CHECK_LIB([crypto], [EC_POINT_get_affine_coordinates], found=1, found=0)
 CFLAGS="$CFLAGS -DUSE_EC_POINT_GET_AFFINE_COORDINATES_API=$found"
 
-AC_ARG_ENABLE([sanitizers], AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing]),
+AC_ARG_ENABLE([sanitizers],
+    [AS_HELP_STRING([--enable-sanitizers], [Enable address sanitizing])],
     [SANITIZERS="-fsanitize=address,undefined"], [])
-AC_ARG_ENABLE([fuzzer], AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer]),
+AC_ARG_ENABLE([fuzzer],
+    [AS_HELP_STRING([--enable-fuzzer], [Enable fuzzer])],
     [FUZZER="$SANITIZERS -fsanitize=fuzzer"
      AM_CONDITIONAL(WITH_FUZZER, true)],
     [AM_CONDITIONAL(WITH_FUZZER, false)])
@@ -292,8 +293,8 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 
 AC_ARG_ENABLE([static-tests],
-  [AS_HELP_STRING([--disable-static-tests], [Disable statically linked tests])],,
-  [enable_static_tests=yes])
+    [AS_HELP_STRING([--disable-static-tests], [Disable statically linked tests])],,
+    [enable_static_tests=yes])
 dnl enable_state must be 'yes' for any static tests
 AS_IF([test "$enable_static_tests" = "yes" && test "$enable_static" = "yes"],
       [enable_static_tests=yes],[enable_static_tests=no])
