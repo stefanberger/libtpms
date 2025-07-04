@@ -106,58 +106,53 @@ AC_ARG_WITH([openssl],
               ]
 )
 
-case "$cryptolib" in
-freebl)
-	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, true)
-	AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, false)
-        AC_DEFINE([USE_FREEBL_CRYPTO_LIBRARY],
-                  [1],
-                  [use freebl crypto library])
+AS_CASE([$cryptolib],[freebl],
+    [AM_CONDITIONAL(LIBTPMS_USE_FREEBL, true)
+     AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, false)
+     AC_DEFINE([USE_FREEBL_CRYPTO_LIBRARY],
+               [1],
+               [use freebl crypto library])
 
-	CFLAGS_save=$CFLAGS
+     CFLAGS_save=$CFLAGS
 
-	AC_CHECK_HEADERS([gmp.h],[],
-			 AC_MSG_ERROR(gmp-devel/libgmp-dev is bad))
+     AC_CHECK_HEADERS([gmp.h],[],
+                      AC_MSG_ERROR(gmp-devel/libgmp-dev is bad))
 
-	CFLAGS="$(nspr-config --cflags)"
-	if test $? -ne 0; then
-		AC_MSG_ERROR(Could not find nspr-config. Is nspr-devel/libnspr4-dev installed?)
-	fi
-	CPPFLAGS=$CFLAGS
-	AC_CHECK_HEADERS([plbase64.h],[],
-			 AC_MSG_ERROR(You must install nspr-devel/libnspr4-dev))
+     CFLAGS="$(nspr-config --cflags)"
+     AS_IF([test $? -ne 0],
+           [AC_MSG_ERROR(Could not find nspr-config. Is nspr-devel/libnspr4-dev installed?)])
+     CPPFLAGS=$CFLAGS
+     AC_CHECK_HEADERS([plbase64.h],[],
+                      AC_MSG_ERROR(You must install nspr-devel/libnspr4-dev))
 
-	CFLAGS="$(nss-config --cflags) $CFLAGS"
-	if test $? -ne 0; then
-		AC_MSG_ERROR(Could not find nss-config. Is nss-devel/libnss3-dev installed?)
-	fi
-	CPPFLAGS="$CPPFLAGS $CFLAGS"
-	AC_CHECK_HEADERS([sslerr.h],[],
-			 AC_MSG_ERROR(nss-devel/libnss3-dev is bad))
+     CFLAGS="$(nss-config --cflags) $CFLAGS"
+     AS_IF([test $? -ne 0],
+           [AC_MSG_ERROR(Could not find nss-config. Is nss-devel/libnss3-dev installed?)])
+     CPPFLAGS="$CPPFLAGS $CFLAGS"
+     AC_CHECK_HEADERS([sslerr.h],[],
+                      AC_MSG_ERROR(nss-devel/libnss3-dev is bad))
 
-	# Check for missing headers
-	AC_CHECK_HEADERS([blapi.h],[],
-			 AC_MSG_ERROR(nss-softokn-freebl-devel/libnss3-dev is missing blapi.h))
-	# Check for missing freebl library or missing library functions
-	LIBS_save="$LIBS"
-	LIBS="$(nss-config --libs) $(nspr-config --libs)"
-	AC_SEARCH_LIBS([AES_CreateContext], [freebl],[],
-             AC_MSG_ERROR("Could not find AES_CreateContext(). Is nss-softokn-freebl-devel/libnss3-dev installed?"),
-             [])
-	LIBS="$LIBS_save"
-	CFLAGS="$CFLAGS_save $CFLAGS"
-	enable_use_openssl_functions=no
-	;;
-openssl)
-	AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)
-	AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, true)
-        AC_DEFINE([USE_OPENSSL_CRYPTO_LIBRARY],
-                  [1],
-                  [use openssl crypto library])
-	LIBCRYPTO_EXTRA_CFLAGS="-DOPENSSL_SUPPRESS_DEPRECATED"
-	AC_SUBST([LIBCRYPTO_EXTRA_CFLAGS])
-	;;
-esac
+     # Check for missing headers
+     AC_CHECK_HEADERS([blapi.h],[],
+                      AC_MSG_ERROR(nss-softokn-freebl-devel/libnss3-dev is missing blapi.h))
+     # Check for missing freebl library or missing library functions
+     LIBS_save="$LIBS"
+     LIBS="$(nss-config --libs) $(nspr-config --libs)"
+     AC_SEARCH_LIBS([AES_CreateContext], [freebl],[],
+                    AC_MSG_ERROR("Could not find AES_CreateContext(). Is nss-softokn-freebl-devel/libnss3-dev installed?"),
+                    [])
+     LIBS="$LIBS_save"
+     CFLAGS="$CFLAGS_save $CFLAGS"
+     enable_use_openssl_functions=no
+    ],[openssl],
+    [AM_CONDITIONAL(LIBTPMS_USE_FREEBL, false)
+     AM_CONDITIONAL(LIBTPMS_USE_OPENSSL, true)
+     AC_DEFINE([USE_OPENSSL_CRYPTO_LIBRARY],
+               [1],
+               [use openssl crypto library])
+     LIBCRYPTO_EXTRA_CFLAGS="-DOPENSSL_SUPPRESS_DEPRECATED"
+     AC_SUBST([LIBCRYPTO_EXTRA_CFLAGS])]
+)
 
 use_openssl_functions_for=""
 use_openssl_functions_symmetric=0
