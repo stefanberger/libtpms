@@ -264,14 +264,13 @@ AM_CONDITIONAL([WITH_FUZZING_ENGINE], [test "x$LIB_FUZZING_ENGINE" != "x"])
 AC_SUBST([LIB_FUZZING_ENGINE])
 
 AC_ARG_ENABLE([test-coverage],
-  AS_HELP_STRING([--enable-test-coverage], [Enable test coverage flags]),
-  [if test "$enableval" = "yes"; then
-    COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage"
-    COVERAGE_LDFLAGS="-fprofile-arcs"
-    enable_static_tests=no  # some tests will not link
-  fi], [
-    enable_test_coverage=no
-  ]
+    AS_HELP_STRING([--enable-test-coverage], [Enable test coverage flags]),
+    [AS_IF([test "$enableval" = "yes"],
+         [COVERAGE_CFLAGS="-fprofile-arcs -ftest-coverage"
+          COVERAGE_LDFLAGS="-fprofile-arcs"
+          enable_static_tests=no  # some tests will not link],
+         [enable_test_coverage=no]
+    )]
 )
 
 LT_INIT
