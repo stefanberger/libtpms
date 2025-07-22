@@ -223,16 +223,6 @@
 // in compressed form.
 #define COMPRESSED_LISTS            NO /* libtpms: change in v0.10 */
 
-// This define is used to eliminate the use of bit-fields. It can be enabled for big-
-// or little-endian machines. For big-endian architectures that numbers bits in
-// registers from left to right (MSb0) this must be enabled. Little-endian machines
-// number from right to left with the least significant bit having assigned a bit
-// number of 0. These are LSb0 machines (they are also little-endian so they are also
-// least-significant byte 0 (LSB0) machines. Big-endian (MSB0) machines may number in
-// either direction (MSb0 or LSb0). For an MSB0+MSb0 machine this value is required to
-// be 'NO'
-#define USE_BIT_FIELD_STRUCTURES    NO
-
 // Enable the generation of RSA primes using a sieve.
 #define RSA_KEY_SIEVE               YES
 
