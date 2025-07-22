@@ -334,6 +334,7 @@ TPM_RC NvPublicFromNvPublic2(
 
     return TPM_RC_SUCCESS;
 }
+#endif						// libtpms added
 
 //*** NvDefineSpace()
 // This function combines the common functionality of TPM2_NV_DefineSpace and
@@ -507,4 +508,3 @@ TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
     // define the space.  A TPM_RC_NV_SPACE error may be returned at this point
     return NvDefineIndex(publicInfo, auth);
 }
-#endif						// libtpms added
