@@ -256,6 +256,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PrimeData.c \
 	tpm2/PropertyCap.c \
 	tpm2/RandomCommands.c \
+	tpm2/ReadOnlyControl.c \
 	tpm2/Response.c \
 	tpm2/ResponseCodeProcessing.c \
 	tpm2/RunCommand.c \
@@ -496,6 +497,7 @@ noinst_HEADERS += \
 	tpm2/PropertyCap_fp.h \
 	tpm2/Quote_fp.h \
 	tpm2/ReadClock_fp.h \
+	tpm2/ReadOnlyControl_fp.h \
 	tpm2/ReadPublic_fp.h \
 	tpm2/ResponseCodeProcessing_fp.h \
 	tpm2/Response_fp.h \
