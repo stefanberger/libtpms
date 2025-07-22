@@ -146,10 +146,6 @@
 // Implementation alternatives - don't  change external behavior
 ////////////////////////////////////////////////////////////////
 
-// Define TABLE_DRIVEN_DISPATCH to use tables rather than case statements
-// for command dispatch and handle unmarshaling
-#define TABLE_DRIVEN_DISPATCH       YES
-
 // This define is used to enable the new table-driven marshaling code.
 #define TABLE_DRIVEN_MARSHAL        NO
 
