@@ -406,6 +406,9 @@ const TPMA_CC    s_ccAttr [] = {
 #if (PAD_LIST || CC_SetCapability)
         TPMA_CC_INITIALIZER(0x019F, 0, 1, 0, 0, 1, 0, 0, 0),
 #endif
+#if (PAD_LIST || CC_ReadOnlyControl)
+    TPMA_CC_INITIALIZER(0x01A0, 0, 1, 0, 0, 1, 0, 0, 0),
+#endif
 #if (PAD_LIST || CC_Vendor_TCG_Test)
         TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
 #endif
@@ -417,82 +420,82 @@ const TPMA_CC    s_ccAttr [] = {
 const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #if (PAD_LIST || CC_NV_UndefineSpaceSpecial)
         (COMMAND_ATTRIBUTES)(CC_NV_UndefineSpaceSpecial * // 0x011F
-            (HANDLE_1_ADMIN+HANDLE_2_USER+PP_COMMAND)),
+            (HANDLE_1_ADMIN+HANDLE_2_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_EvictControl)
         (COMMAND_ATTRIBUTES)(CC_EvictControl * // 0x0120
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_HierarchyControl)
         (COMMAND_ATTRIBUTES)(CC_HierarchyControl * // 0x0121
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_UndefineSpace)
         (COMMAND_ATTRIBUTES)(CC_NV_UndefineSpace * // 0x0122
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST)
         (COMMAND_ATTRIBUTES)(0), // 0x0123
 #endif
 #if (PAD_LIST || CC_ChangeEPS)
         (COMMAND_ATTRIBUTES)(CC_ChangeEPS * // 0x0124
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_ChangePPS)
         (COMMAND_ATTRIBUTES)(CC_ChangePPS * // 0x0125
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_Clear)
         (COMMAND_ATTRIBUTES)(CC_Clear * // 0x0126
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_ClearControl)
         (COMMAND_ATTRIBUTES)(CC_ClearControl * // 0x0127
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_ClockSet)
         (COMMAND_ATTRIBUTES)(CC_ClockSet * // 0x0128
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_HierarchyChangeAuth)
         (COMMAND_ATTRIBUTES)(CC_HierarchyChangeAuth * // 0x0129
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_DefineSpace)
         (COMMAND_ATTRIBUTES)(CC_NV_DefineSpace * // 0x012A
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PCR_Allocate)
         (COMMAND_ATTRIBUTES)(CC_PCR_Allocate * // 0x012B
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PCR_SetAuthPolicy)
         (COMMAND_ATTRIBUTES)(CC_PCR_SetAuthPolicy * // 0x012C
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PP_Commands)
         (COMMAND_ATTRIBUTES)(CC_PP_Commands * // 0x012D
-            (HANDLE_1_USER+PP_REQUIRED)),
+            (HANDLE_1_USER+PP_REQUIRED+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_SetPrimaryPolicy)
         (COMMAND_ATTRIBUTES)(CC_SetPrimaryPolicy * // 0x012E
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_FieldUpgradeStart)
         (COMMAND_ATTRIBUTES)(CC_FieldUpgradeStart * // 0x012F
-            (DECRYPT_2+HANDLE_1_ADMIN+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_ADMIN+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_ClockRateAdjust)
         (COMMAND_ATTRIBUTES)(CC_ClockRateAdjust * // 0x0130
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_CreatePrimary)
         (COMMAND_ATTRIBUTES)(CC_CreatePrimary * // 0x0131
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+ENCRYPT_2+R_HANDLE)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+ENCRYPT_2+R_HANDLE+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_GlobalWriteLock)
         (COMMAND_ATTRIBUTES)(CC_NV_GlobalWriteLock * // 0x0132
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_GetCommandAuditDigest)
         (COMMAND_ATTRIBUTES)(CC_GetCommandAuditDigest * // 0x0133
@@ -500,7 +503,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_NV_Increment)
         (COMMAND_ATTRIBUTES)(CC_NV_Increment * // 0x0134
-            (HANDLE_1_USER)),
+            (HANDLE_1_USER+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_SetBits)
         (COMMAND_ATTRIBUTES)(CC_NV_SetBits * // 0x0135
@@ -524,11 +527,11 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_DictionaryAttackParameters)
         (COMMAND_ATTRIBUTES)(CC_DictionaryAttackParameters * // 0x013A
-            (HANDLE_1_USER)),
+            (HANDLE_1_USER+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_ChangeAuth)
         (COMMAND_ATTRIBUTES)(CC_NV_ChangeAuth * // 0x013B
-            (DECRYPT_2+HANDLE_1_ADMIN)),
+            (DECRYPT_2+HANDLE_1_ADMIN+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PCR_Event)
         (COMMAND_ATTRIBUTES)(CC_PCR_Event * // 0x013C
@@ -544,15 +547,15 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_SetAlgorithmSet)
         (COMMAND_ATTRIBUTES)(CC_SetAlgorithmSet * // 0x013F
-            (HANDLE_1_USER)),
+            (HANDLE_1_USER+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_SetCommandCodeAuditStatus)
         (COMMAND_ATTRIBUTES)(CC_SetCommandCodeAuditStatus * // 0x0140
-            (HANDLE_1_USER+PP_COMMAND)),
+            (HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_FieldUpgradeData)
         (COMMAND_ATTRIBUTES)(CC_FieldUpgradeData * // 0x0141
-            (DECRYPT_2)),
+            (DECRYPT_2+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_IncrementalSelfTest)
         (COMMAND_ATTRIBUTES)(CC_IncrementalSelfTest * // 0x0142
@@ -612,7 +615,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_ObjectChangeAuth)
         (COMMAND_ATTRIBUTES)(CC_ObjectChangeAuth * // 0x0150
-            (DECRYPT_2+HANDLE_1_ADMIN+ENCRYPT_2)),
+            (DECRYPT_2+HANDLE_1_ADMIN+ENCRYPT_2+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PolicySecret)
         (COMMAND_ATTRIBUTES)(CC_PolicySecret * // 0x0151
@@ -624,7 +627,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_Create)
         (COMMAND_ATTRIBUTES)(CC_Create * // 0x0153
-            (DECRYPT_2+HANDLE_1_USER+ENCRYPT_2)),
+            (DECRYPT_2+HANDLE_1_USER+ENCRYPT_2+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_ECDH_ZGen)
         (COMMAND_ATTRIBUTES)(CC_ECDH_ZGen * // 0x0154
@@ -812,7 +815,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_PCR_SetAuthValue)
         (COMMAND_ATTRIBUTES)(CC_PCR_SetAuthValue * // 0x0183
-            (DECRYPT_2+HANDLE_1_USER)),
+            (DECRYPT_2+HANDLE_1_USER+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_Certify)
         (COMMAND_ATTRIBUTES)(CC_NV_Certify * // 0x0184
@@ -868,7 +871,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_CreateLoaded)
         (COMMAND_ATTRIBUTES)(CC_CreateLoaded * // 0x0191
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+ENCRYPT_2+R_HANDLE)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+ENCRYPT_2+R_HANDLE+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_PolicyAuthorizeNV)
         (COMMAND_ATTRIBUTES)(CC_PolicyAuthorizeNV * // 0x0192
@@ -916,7 +919,7 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_NV_DefineSpace2)
         (COMMAND_ATTRIBUTES)(CC_NV_DefineSpace2 * // 0x019D
-            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND)),
+            (DECRYPT_2+HANDLE_1_USER+PP_COMMAND+RO_DISALLOW)),
 #endif
 #if (PAD_LIST || CC_NV_ReadPublic2)
         (COMMAND_ATTRIBUTES)(CC_NV_ReadPublic2 * // 0x019E
@@ -924,7 +927,11 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
 #endif
 #if (PAD_LIST || CC_SetCapability)
         (COMMAND_ATTRIBUTES)(CC_SetCapability * // 0x019F
-            (DECRYPT_2+HANDLE_1_USER)),
+            (DECRYPT_2+HANDLE_1_USER+RO_DISALLOW)),
+#endif
+#if (PAD_LIST || CC_ReadOnlyControl)
+        (COMMAND_ATTRIBUTES)(CC_ReadOnlyControl * // 0x01A0
+            (HANDLE_1_USER+PP_COMMAND)),
 #endif
 #if (PAD_LIST || CC_Vendor_TCG_Test)
         (COMMAND_ATTRIBUTES)(CC_Vendor_TCG_Test * // 0x0000

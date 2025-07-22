@@ -181,6 +181,12 @@ TPM2_NV_Write(
     TPMA_NV          attributes = nvIndex->publicArea.attributes;
     TPM_RC           result;
     // Input Validation
+
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(in->authHandle,
@@ -281,6 +287,12 @@ TPM2_NV_Extend(
     TPM2B_DIGEST            newDigest;
     HASH_STATE              hashState;
     // Input Validation
+
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(nvIndex->publicArea.attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(in->authHandle,
@@ -330,6 +342,12 @@ TPM2_NV_SetBits(
     UINT64           oldValue;
     UINT64           newValue;
     // Input Validation
+
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(nvIndex->publicArea.attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(in->authHandle,
@@ -365,6 +383,12 @@ TPM2_NV_WriteLock(
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     TPMA_NV          nvAttributes = nvIndex->publicArea.attributes;
     // Input Validation:
+
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(nvIndex->publicArea.attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common access checks, NvWriteAccessCheck() may return TPM_RC_NV_AUTHORIZATION
     // or TPM_RC_NV_LOCKED
     result = NvWriteAccessChecks(in->authHandle, in->nvIndex, nvAttributes);
@@ -464,6 +488,12 @@ TPM2_NV_ReadLock(
     NV_INDEX        *nvIndex = NvGetIndexInfo(in->nvIndex, &locator);
     TPMA_NV          nvAttributes = nvIndex->publicArea.attributes;
     // Input Validation
+
+    // Common Read-Only mode check. May return TPM_RC_READ_ONLY
+    result = NvReadOnlyModeChecks(nvIndex->publicArea.attributes);
+    if(result != TPM_RC_SUCCESS)
+        return result;
+
     // Common read access checks. NvReadAccessChecks() may return
     // TPM_RC_NV_AUTHORIZATION, TPM_RC_NV_LOCKED, or TPM_RC_NV_UNINITIALIZED
     result = NvReadAccessChecks(in->authHandle,
