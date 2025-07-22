@@ -280,9 +280,6 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             break;
         case TPM_PT_TOTAL_COMMANDS:
             // total number of commands implemented in the TPM
-            // Since the reference implementation does not have any
-            // vendor-defined commands, this will be the same as the
-            // number of library commands.
             {
 #if COMPRESSED_LISTS										// libtpms changed begin
                 (*value) = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); 	// libtpms changed: was COMMAND_COUNT
@@ -394,6 +391,10 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, ehEnable);
                 if(gc.phEnableNV)
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, phEnableNV);
+#if CC_ReadOnlyControl
+                if(gc.readOnly)
+                    SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, readOnly);
+#endif
                 if(g_prevOrderlyState != SU_NONE_VALUE)
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, orderly);
 

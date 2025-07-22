@@ -244,6 +244,13 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
     SESSION*   session;
     TPM2B_NAME entityName;
     UINT64     authTimeout = 0;
+
+#  if CC_ReadOnlyControl
+    // Don't allow on PIN PASS or PIN FAIL indices when in Read-Only mode
+    if(gc.readOnly && NvIsPinCountedIndex(in->authHandle))
+        return TPM_RC_READ_ONLY;
+# endif // CC_ReadOnlyControl
+
     // Input Validation
     // Get pointer to the session structure
     session = SessionGet(in->policySession);

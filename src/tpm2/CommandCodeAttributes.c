@@ -379,6 +379,14 @@ BOOL IsHandleInResponse(COMMAND_INDEX commandIndex)
     return ((s_commandAttributes[commandIndex] & R_HANDLE) != 0);
 }
 
+
+//*** IsDisallowedInReadOnlyMode()
+// This function determines if a command is disallowed when operating in Read-Only mode
+BOOL IsDisallowedInReadOnlyMode(COMMAND_INDEX commandIndex)
+{
+    return ((s_commandAttributes[commandIndex] & RO_DISALLOW) != 0);
+}
+
 //*** IsWriteOperation()
 // Checks to see if an operation will write to an NV Index and is subject to being
 // blocked by read-lock

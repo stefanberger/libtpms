@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			     				*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 -2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Includes
 #include "Tpm.h"
@@ -154,6 +96,34 @@ NvWriteAccessChecks(
     return TPM_RC_SUCCESS;
 }
 
+//*** NvReadOnlyModeChecks()
+// Common routine to verify whether an NV command is allowed on an index
+// with the given 'attributes' while the TPM is in Read-Only mode
+// Used by TPM2_NV_Write, TPM2_NV_Extend, TPM2_SetBits, TPM2_NV_WriteLock
+// and TPM2_NV_ReadLock
+//  Return Type: TPM_RC
+//      TPM_RC_SUCCESS     The command is allowed
+//      TPM_RC_READ_ONLY   The TPM is in Read-Only mode and the command is
+//                         not allowed
+//
+TPM_RC
+NvReadOnlyModeChecks(
+    TPMA_NV    attributes   // IN: the attributes of the index to check
+)
+{
+
+#  if CC_ReadOnlyControl
+    // When in Read-Only mode only allow the commands listed above on an
+    // index with the ORDERLY and CLEAR_STCLEAR attributes set
+    if(gc.readOnly &&
+       !(IS_ATTRIBUTE(attributes, TPMA_NV, ORDERLY) &&
+         IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR)))
+        return TPM_RC_READ_ONLY;
+#  endif // CC_ReadOnlyControl 
+
+    return TPM_RC_SUCCESS;
+}
+
 //*** NvClearOrderly()
 // This function is used to cause gp.orderlyState to be cleared to the
 // non-orderly state.
@@ -166,6 +136,29 @@ NvClearOrderly(void)
     return TPM_RC_SUCCESS;
 }
 
+//*** GetIndexAttributesByHandle()
+// Function to return the TPMA_NV attributes of an index given a handle
+// On success 'attributes' is set to receive the result
+//   Return Type: BOOL
+//      TRUE(1)   'index' is found
+//      FALSE(0)  'index' is not found or not an NV index handle
+static BOOL GetIndexAttributesByHandle(
+    TPM_HANDLE index,     // IN:  index handle
+    TPMA_NV*   attributes // OUT: index attributes
+)
+{
+    if(HandleGetType(index) == TPM_HT_NV_INDEX)
+    {
+        NV_INDEX* nvIndex = NvGetIndexInfo(index, NULL);
+        if(nvIndex != NULL)
+        {
+            *attributes = nvIndex->publicArea.attributes;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 //*** NvIsPinPassIndex()
 // Function to check to see if an NV index is a PIN Pass Index
 //  Return Type: BOOL
@@ -174,13 +167,23 @@ NvClearOrderly(void)
 BOOL NvIsPinPassIndex(TPM_HANDLE index  // IN: Handle to check
 )
 {
-    if(HandleGetType(index) == TPM_HT_NV_INDEX)
-    {
-        NV_INDEX* nvIndex = NvGetIndexInfo(index, NULL);
+    TPMA_NV attributes;
+    return GetIndexAttributesByHandle(index, &attributes) &&
+           IsNvPinPassIndex(attributes);
+}
 
-        return IsNvPinPassIndex(nvIndex->publicArea.attributes);
-    }
-    return FALSE;
+//*** NvIsPinCountedIndex()
+// Function to check to see if an NV index is either a PIN Pass
+// or a PIN FAIL Index
+//  Return Type: BOOL
+//      TRUE(1)         is pin pass or pin fail
+//      FALSE(0)        is neither pin pass nor pin fail
+BOOL NvIsPinCountedIndex(TPM_HANDLE index  // IN: Handle to check
+)
+{
+    TPMA_NV attributes;
+    return GetIndexAttributesByHandle(index, &attributes) &&
+           (IsNvPinPassIndex(attributes) || IsNvPinFailIndex(attributes));
 }
 
 //*** NvGetIndexName()

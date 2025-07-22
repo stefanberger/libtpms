@@ -191,10 +191,11 @@ static const struct {
     COMMAND(NV_DefineSpace2, true, 0), // not supported
     COMMAND(NV_ReadPublic2, true, 0), // not supported
     COMMAND(SetCapability, true, 0), // not supported
+    COMMAND(ReadOnlyControl, true, 0), // not supported
     /* all new commands added here MUST have CAN_BE_DISABLE = true */
 #undef COMMAND
 };
-MUST_BE(TPM_CC_LAST == TPM_CC_SetCapability); /* force update of above list when new commands added */
+MUST_BE(TPM_CC_LAST == TPM_CC_ReadOnlyControl); /* force update of above list when new commands added */
 
 static void
 RuntimeCommandsEnableAllCommands(struct RuntimeCommands *RuntimeCommands,
