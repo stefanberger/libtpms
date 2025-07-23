@@ -6,13 +6,15 @@
 #ifndef _PLATFORM_DATA_H_
 #define _PLATFORM_DATA_H_
 
-#ifndef EXTERN
-#  ifdef _PLATFORM_DATA_C_
-#    define EXTERN
-#  else
+#ifdef _PLATFORM_DATA_C_
+// instantiate the data below.
+#  undef EXTERN
+#  define EXTERN
+#else
+#  ifndef EXTERN
 #    define EXTERN extern
-#  endif  // _PLATFORM_DATA_C_
-#endif    // EXTERN
+#  endif  // EXTERN
+#endif    // _PLATFORM_DATA_C_
 
 // From Cancel.c
 // Cancel flag.  It is initialized as FALSE, which indicate the command is not
