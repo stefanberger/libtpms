@@ -7,8 +7,13 @@
 #ifndef _VERIFY_CONFIGURATION_H
 #define _VERIFY_CONFIGURATION_H
 
+MUST_BE(YES == 1);
+MUST_BE(NO == 0);
+
 // verify these defines are either YES or NO.
-#define MUST_BE_0_OR_1(x) MUST_BE(((x) == 0) || ((x) == 1))
+#define MUST_BE_0_OR_1(x) MUST_BE(((x) == NO) || ((x) == YES))
+#define MUST_BE_0(x)      MUST_BE((x) == NO)
+#define MUST_BE_1(x)      MUST_BE((x) == YES)
 
 // Debug Options
 MUST_BE_0_OR_1(DEBUG);
