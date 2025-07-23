@@ -287,10 +287,10 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Unique.c \
 	tpm2/Unmarshal.c \
 	tpm2/VendorInfo.c \
-	tpm2/Vendor_TCG_Test.c \
 	tpm2/X509_ECC.c \
 	tpm2/X509_RSA.c \
 	tpm2/X509_spt.c \
+	tpm2/VendorCommands/Vendor_TCG_Test.c \
 	tpm_tpm2_interface.c \
 	tpm_tpm2_tis.c \
 	\
@@ -567,7 +567,6 @@ noinst_HEADERS += \
 	tpm2/Unmarshal_fp.h \
 	tpm2/Unseal_fp.h \
 	tpm2/VendorInfo.h \
-	tpm2/Vendor_TCG_Test_fp.h \
 	tpm2/VerifyConfiguration.h \
 	tpm2/VerifySignature_fp.h \
 	tpm2/X509.h \
@@ -575,6 +574,12 @@ noinst_HEADERS += \
 	tpm2/X509_RSA_fp.h \
 	tpm2/X509_spt_fp.h \
 	tpm2/ZGen_2Phase_fp.h \
+	tpm2/VendorCommands/CommandAttributeData_s_ccAttr.inl \
+	tpm2/VendorCommands/CommandAttributeData_s_commandAttributes.inl \
+	tpm2/VendorCommands/CommandDispatchData_CommandStructures.inl \
+	tpm2/VendorCommands/CommandDispatchData_s_CommandDataArray.inl \
+	tpm2/VendorCommands/Vendor_TCG_Test_fp.h \
+	tpm2/VendorCommands/VendorCommandList.h \
 	\
 	tpm2/BackwardsCompatibility.h \
 	tpm2/BackwardsCompatibilityBitArray.h \

@@ -14,6 +14,8 @@
 #  error CC_YES and CC_NO should be defined by the command line file, not before
 #endif
 
+// Change these definitions to turn all commands ON or OFF. That is, to turn all
+// commands on, set CC_NO to YES. This is intended as a debug feature.
 #define CC_YES YES
 #define CC_NO  NO
 
@@ -157,7 +159,6 @@
 #define CC_StirRandom                 CC_YES
 #define CC_TestParms                  CC_YES
 #define CC_Unseal                     CC_YES
-#define CC_Vendor_TCG_Test            CC_NO	/* libtpms: NO */
 #define CC_VerifySignature            CC_YES
 #define CC_ZGen_2Phase                (CC_YES && ALG_ECC)
 #define CC_NV_DefineSpace2            CC_NO	/* libtpms: NO */
@@ -165,5 +166,9 @@
 #define CC_SetCapability              CC_NO	/* libtpms: NO */
 #define CC_ReadOnlyControl            CC_NO     /* libtpms: NO */
 #define CC_PolicyTransportSPDM        CC_NO     /* libtpms: NO */
+
+// clang-format on
+
+#include "VendorCommands/VendorCommandList.h"
 
 #endif  // _TPM_PROFILE_COMMAND_LIST_H_
