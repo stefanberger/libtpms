@@ -306,18 +306,18 @@ SESSION* SessionGet(TPM_HANDLE handle  // IN: session handle
     size_t       slotIndex;
     CONTEXT_SLOT sessionIndex;
 
-    pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+    pAssert_NULL(HandleGetType(handle) == TPM_HT_POLICY_SESSION
+                 || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     slotIndex = handle & HR_HANDLE_MASK;
 
-    pAssert(slotIndex < MAX_ACTIVE_SESSIONS);
+    pAssert_NULL(slotIndex < MAX_ACTIVE_SESSIONS);
 
     // get the contents of the session array.  Because session is loaded, we
     // should always get a valid sessionIndex
     sessionIndex = gr.contextArray[slotIndex] - 1;
 
-    pAssert(sessionIndex < MAX_LOADED_SESSIONS);
+    pAssert_NULL(sessionIndex < MAX_LOADED_SESSIONS);
 
     return &s_sessions[sessionIndex].session;
 }
