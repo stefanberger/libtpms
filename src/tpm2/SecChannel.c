@@ -54,6 +54,8 @@ SpdmCapGetTpmPubKeys(TPM_PUB_KEY spdmPubKey,  // IN: the starting TPM property
                      TPML_PUB_KEY* pubKeyList  // OUT: property list
 )
 {
+    NOT_REFERENCED(spdmPubKey);
+    NOT_REFERENCED(count);
     TPMI_YES_NO more = NO;
 
     // This reference implementation does not implement SPDM functionality and returns a single dummy TPM SPDM public key

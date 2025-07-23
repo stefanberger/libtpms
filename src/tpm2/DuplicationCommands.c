@@ -221,7 +221,7 @@ TPM2_Rewrap(
 	    // Note: this is mostly only an issue if there was no outer wrapper on
 	    // 'inDuplicate'. It could be as large as a TPM2B_PRIVATE buffer. If we add
 	    // a digest for an outer wrapper, it won't fit anymore.
-	    if((privateBlob.t.size + hashSize) > sizeof(out->outDuplicate.t.buffer))
+	    if((size_t)(privateBlob.t.size + hashSize) > sizeof(out->outDuplicate.t.buffer))
 		return TPM_RCS_VALUE + RC_Rewrap_inDuplicate;
 	    // Command output
 	    out->outDuplicate.t.size = privateBlob.t.size;
