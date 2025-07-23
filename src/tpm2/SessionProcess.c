@@ -93,6 +93,7 @@ static TPM_RC IncrementLockout(UINT32 sessionIndex)
     else
     {
         session = SessionGet(sessionHandle);
+        pAssert_RC(session);
         // If the session is bound to lockout, then use that as the relevant
         // handle. This means that an authorization failure with a bound session
         // bound to lockoutAuth will take precedence over any other
@@ -107,7 +108,7 @@ static TPM_RC IncrementLockout(UINT32 sessionIndex)
     }
     if(handle == TPM_RH_LOCKOUT)
     {
-        pAssert(gp.lockOutAuthEnabled == TRUE);
+        pAssert_RC(gp.lockOutAuthEnabled == TRUE);
 
         // lockout is no longer enabled
         gp.lockOutAuthEnabled = FALSE;
@@ -864,6 +865,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
             // Will add the nonce for the decrypt session.
             SESSION* decryptSession =
                 SessionGet(s_sessionHandles[s_decryptSessionIndex]);
+            pAssert_RC(decryptSession != NULL);
             nonceDecrypt = &decryptSession->nonceTPM;
         }
         // Now repeat for the encrypt session.
@@ -880,6 +882,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
 
     // Continue with the HMAC processing.
     session = SessionGet(s_sessionHandles[sessionIndex]);
+    pAssert_RC(session != NULL);
 
     // Generate HMAC key.
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
@@ -1003,6 +1006,7 @@ static TPM_RC CheckPolicyAuthSession(
     //
     // Initialize pointer to the authorization session.
     session = SessionGet(s_sessionHandles[sessionIndex]);
+    pAssert_RC(session != NULL);
 
     // If the command is TPM2_PolicySecret(), make sure that
     // either password or authValue is required
@@ -1233,6 +1237,7 @@ static TPM_RC RetrieveSessionData(
             return TPM_RC_REFERENCE_S0 + sessionIndex;
         sessionType = HandleGetType(s_sessionHandles[sessionIndex]);
         session     = SessionGet(s_sessionHandles[sessionIndex]);
+        pAssert_RC(session != NULL);
 
         // Check if the session is an HMAC/policy session.
         if((session->attributes.isPolicy == SET && sessionType == TPM_HT_HMAC_SESSION)
@@ -1416,6 +1421,7 @@ static TPM_RC CheckAuthSession(
     if(sessionHandle != TPM_RS_PW)
     {
         session = SessionGet(sessionHandle);
+        pAssert_RC(session != NULL);
 
         // Set includeAuth to indicate if DA checking will be required and if the
         // authValue will be included in any HMAC.
@@ -1580,7 +1586,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         return result;
     // There is no command in the TPM spec that has more handles than
     // MAX_SESSION_NUM.
-    pAssert(command->handleNum <= MAX_SESSION_NUM);
+    pAssert_RC(command->handleNum <= MAX_SESSION_NUM);
 
     // Associate the session with an authorization handle.
     for(i = 0; i < command->handleNum; i++)
@@ -1620,6 +1626,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         else
         {
             session = SessionGet(s_sessionHandles[sessionIndex]);
+            pAssert_RC(session != NULL);
 
             // A trial session can not appear in session area, because it cannot
             // be used for authorization, audit or encrypt/decrypt.
@@ -1658,7 +1665,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
                 return TPM_RCS_ATTRIBUTES + errorIndex;
 
             // no authValue included in any of the HMAC computations
-            pAssert(session != NULL);
+            pAssert_RC(session != NULL);
             session->attributes.includeAuth = CLEAR;
 
             // check HMAC for encrypt/decrypt/audit only sessions
@@ -1895,6 +1902,7 @@ static void UpdateAuditSessionStatus(
         if(s_sessionHandles[i] == TPM_RS_PW)
             continue;
         session = SessionGet(s_sessionHandles[i]);
+        pAssert_VOID_OK(session != NULL);
 
         // If a session is used for audit
         if(IS_ATTRIBUTE(s_attributes[i], TPMA_SESSION, audit))
@@ -2066,6 +2074,8 @@ static TPM2B_NONCE* BuildSingleResponseAuth(
 {
     // Fill in policy/HMAC based session response.
     SESSION* session = SessionGet(s_sessionHandles[sessionIndex]);
+    pAssert_NULL(session != NULL);
+
     //
     // If the session is a policy session with isPasswordNeeded SET, the
     // authorization field is empty.
@@ -2094,6 +2104,7 @@ static void UpdateAllNonceTPM(COMMAND* command  // IN: controlling structure
         if(s_sessionHandles[i] != TPM_RS_PW)
         {
             session = SessionGet(s_sessionHandles[i]);
+            pAssert_VOID_OK(session != NULL);
             // Update nonceTPM in both internal session and response.
             CryptRandomGenerate(session->nonceTPM.t.size, session->nonceTPM.t.buffer);
         }
@@ -2203,6 +2214,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                 // Compute the response HMAC and get a pointer to the nonce used.
                 // This function will also update the values if needed. Note, the
                 nonceTPM = BuildSingleResponseAuth(command, i, &responseAuth);
+                pAssert_RC(nonceTPM != NULL);
             }
             command->authSize +=
                 TPM2B_NONCE_Marshal(nonceTPM, &command->responseBuffer, NULL);

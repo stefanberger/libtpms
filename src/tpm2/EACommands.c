@@ -92,6 +92,7 @@ TPM2_PolicySigned(PolicySigned_In*  in,  // IN: input parameter list
     // Input Validation
     // Set up local pointers
     session = SessionGet(in->policySession);  // the session structure
+    pAssert_RC(session);
 
     // Only do input validation if this is not a trial policy session
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -254,6 +255,7 @@ TPM2_PolicySecret(PolicySecret_In*  in,  // IN: input parameter list
     // Input Validation
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //Only do input validation if this is not a trial policy session
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -360,6 +362,7 @@ TPM2_PolicyTicket(PolicyTicket_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // NOTE: A trial policy session is not allowed to use this command.
     // A ticket is used in place of a previously given authorization. Since
@@ -458,6 +461,7 @@ TPM2_PolicyOR(PolicyOR_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Compare and Update Internal Session policy if match
     for(i = 0; i < in->pHashList.count; i++)
@@ -613,6 +617,7 @@ TPM2_PolicyPhysicalPresence(PolicyPhysicalPresence_In* in  // IN: input paramete
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Update policy hash
     // policyDigestnew = hash(policyDigestold || TPM_CC_PolicyPhysicalPresence)
@@ -662,6 +667,7 @@ TPM2_PolicyLocality(PolicyLocality_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Get new locality setting in canonical form
     marshalBuffer[0] = 0;  // Code analysis says that this is not initialized
@@ -776,6 +782,7 @@ TPM2_PolicyNV(PolicyNV_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //If this is a trial policy, skip all validations and the operation
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -889,6 +896,7 @@ TPM2_PolicyCounterTimer(PolicyCounterTimer_In* in  // IN: input parameter list
 	return TPM_RCS_RANGE;
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     //If this is a trial policy, skip the check to see if the condition is met.
     if(session->attributes.isTrialPolicy == CLEAR)
@@ -970,6 +978,7 @@ TPM2_PolicyCommandCode(PolicyCommandCode_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     if(session->commandCode != 0 && session->commandCode != in->code)
 	return TPM_RCS_VALUE + RC_PolicyCommandCode_code;
@@ -1028,6 +1037,7 @@ TPM2_PolicyCpHash(PolicyCpHash_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // A valid cpHash must have the same size as session hash digest
     // NOTE: the size of the digest can't be zero because TPM_ALG_NULL
@@ -1094,6 +1104,7 @@ TPM2_PolicyNameHash(PolicyNameHash_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // A valid nameHash must have the same size as session hash digest
     // Since the authHashAlg for a session cannot be TPM_ALG_NULL, the digest size
@@ -1159,6 +1170,7 @@ TPM2_PolicyDuplicationSelect(
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // nameHash in session context must be empty
     if(session->u1.nameHash.t.size != 0)
@@ -1248,6 +1260,7 @@ TPM2_PolicyAuthorize(PolicyAuthorize_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     if(in->keySign.t.size < 2)
 	{
@@ -1337,6 +1350,7 @@ TPM2_PolicyAuthValue(PolicyAuthValue_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Update policy hash
     // policyDigestnew = hash(policyDigestold || TPM_CC_PolicyAuthValue)
@@ -1384,6 +1398,7 @@ TPM2_PolicyPassword(PolicyPassword_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Update policy hash
     // policyDigestnew = hash(policyDigestold || TPM_CC_PolicyAuthValue)
@@ -1422,6 +1437,8 @@ TPM2_PolicyGetDigest(
     // Command Output
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
+
     out->policyDigest = session->u2.policyDigest;
     return TPM_RC_SUCCESS;
 }
@@ -1448,6 +1465,7 @@ TPM2_PolicyNvWritten(PolicyNvWritten_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // If already set is this a duplicate (the same setting)? If it
     // is a conflicting setting, it is an error
@@ -1511,6 +1529,7 @@ TPM2_PolicyTemplate(PolicyTemplate_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // error if the templateHash in session context is not empty and is not the
     // same as the input or is not a template
@@ -1586,6 +1605,7 @@ TPM2_PolicyAuthorizeNV(PolicyAuthorizeNV_In* in)
     // Input Validation
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Skip checks if this is a trial policy
     if(!session->attributes.isTrialPolicy)
@@ -1702,6 +1722,7 @@ TPM2_PolicyCapability(PolicyCapability_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     if(session->attributes.isTrialPolicy == CLEAR)
 	{
@@ -1939,6 +1960,7 @@ TPM2_PolicyParameters(PolicyParameters_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // A valid pHash must have the same size as session hash digest
     // Since the authHashAlg for a session cannot be TPM_ALG_NULL, the digest size

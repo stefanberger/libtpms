@@ -27,6 +27,7 @@ TPM2_PolicyTransportSPDM(PolicyTransportSPDM_In* in  // IN: input parameter list
 
     // Get pointer to the session structure
     session = SessionGet(in->policySession);
+    pAssert_RC(session);
 
     // Check that TPM2_PolicyTransportSPDM has not previously been executed
     if(session->attributes.checkSecureChannel == SET)
