@@ -318,7 +318,7 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             }
         case TPM_PT_VENDOR_COMMANDS:
             // number of vendor commands that are implemented
-            *value = VENDOR_COMMAND_ARRAY_SIZE;
+            *value = VENDOR_COMMAND_ARRAY_COUNT;
             break;
         case TPM_PT_NV_BUFFER_MAX:
             // Maximum data size in an NV write command
