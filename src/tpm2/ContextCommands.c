@@ -459,7 +459,8 @@ TPM2_FlushContext(
 	    if(!IsObjectPresent(in->flushHandle))
 		return TPM_RCS_HANDLE + RC_FlushContext_flushHandle;
 	    // Flush object
-	    FlushObject(in->flushHandle);
+	    if(!FlushObject(in->flushHandle))
+	        return TPM_RC_FAILURE;
 	    break;
 	  case TPM_HT_HMAC_SESSION:
 	  case TPM_HT_POLICY_SESSION:
