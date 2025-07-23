@@ -457,6 +457,10 @@ TPM_CAP_Unmarshal(TPM_CAP *target, BYTE **buffer, INT32 *size)
 	  case TPM_CAP_ECC_CURVES:
 	  case TPM_CAP_AUTH_POLICIES:
 	  case TPM_CAP_ACT:
+#  if SEC_CHANNEL_SUPPORT
+          case TPM_CAP_PUB_KEYS:
+          case TPM_CAP_SPDM_SESSION_INFO:
+#  endif  // SEC_CHANNEL_SUPPORT
 	  case TPM_CAP_VENDOR_PROPERTY:
 	    break;
 	  default:

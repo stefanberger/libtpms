@@ -187,6 +187,21 @@ TPM2_GetCapability(
 						 in->propertyCount,
 						 &data->actData);
 	    break;
+#  if SEC_CHANNEL_SUPPORT
+        case TPM_CAP_PUB_KEYS:
+            // This reference implementation supports only a single TPM SPDM public key
+            if((TPM_PUB_KEY)in->property != TPM_PUB_KEY_TPM_SPDM_00)
+                return TPM_RCS_VALUE + RC_GetCapability_property;
+            out->moreData = SpdmCapGetTpmPubKeys(
+                (TPM_PUB_KEY)in->property, in->propertyCount, &data->pubKeys);
+            break;
+        case TPM_CAP_SPDM_SESSION_INFO:
+            // Input property must be 0
+            if(in->property != 0)
+                return TPM_RCS_VALUE + RC_GetCapability_property;
+            out->moreData = SpdmCapGetSessionInfo(&data->spdmSessionInfo);
+            break;
+#  endif  // SEC_CHANNEL_SUPPORT
 	  case TPM_CAP_VENDOR_PROPERTY:
 	    // vendor property is not implemented
 	  default:

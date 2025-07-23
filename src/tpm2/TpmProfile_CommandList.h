@@ -164,5 +164,6 @@
 #define CC_NV_ReadPublic2             CC_NO	/* libtpms: NO */
 #define CC_SetCapability              CC_NO	/* libtpms: NO */
 #define CC_ReadOnlyControl            CC_NO     /* libtpms: NO */
+#define CC_PolicyTransportSPDM        CC_NO     /* libtpms: NO */
 
 #endif  // _TPM_PROFILE_COMMAND_LIST_H_

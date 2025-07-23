@@ -713,6 +713,20 @@ TPMS_ACT_DATA_Marshal(TPMS_ACT_DATA *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+# if SEC_CHANNEL_SUPPORT
+// Table "Definition of TPMS_SPDM_SESSION_INFO Structure" (Part 2: Structures)
+
+UINT16
+TPMS_SPDM_SESSION_INFO_Marshal(TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size)
+{
+    UINT16 written = 0;
+
+    written += TPM2B_NAME_Marshal((TPM2B_NAME*)&(source->reqKeyName), buffer, size);
+    written += TPM2B_NAME_Marshal((TPM2B_NAME*)&(source->tpmKeyName), buffer, size);
+    return written;
+}
+#  endif  // SEC_CHANNEL_SUPPORT
+
 /* Table 2:94 - Definition of TPMS_TAGGED_PROPERTY Structure (StructuresTable()) */
 
 UINT16
@@ -922,6 +936,38 @@ TPML_ACT_DATA_Marshal(TPML_ACT_DATA *source, BYTE **buffer, INT32 *size)
     return written;
 }
 
+#  if SEC_CHANNEL_SUPPORT
+// Table "Definition of TPML_PUB_KEY Structure" (Part 2: Structures)
+UINT16
+TPML_PUB_KEY_Marshal(TPML_PUB_KEY* source, BYTE** buffer, INT32* size)
+{
+    UINT16 written = 0;
+
+    written += UINT32_Marshal((UINT32*)&(source->count), buffer, size);
+    written += TPM2B_PUBLIC_Array_Marshal((TPM2B_PUBLIC*)&(source->pubKeys),
+                                          buffer,
+                                          size,
+                                          (INT32)source->count);
+    return written;
+}
+
+// Table "Definition of TPML_SPDM_SESSION_INFO Structure" (Part 2: Structures)
+
+UINT16
+TPML_SPDM_SESSION_INFO_Marshal(TPML_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size)
+{
+    UINT16 written = 0;
+
+    written += UINT32_Marshal((UINT32*)&(source->count), buffer, size);
+    written += TPMS_SPDM_SESSION_INFO_Array_Marshal(
+                          (TPMS_SPDM_SESSION_INFO*)&(source->spdmSessionInfo),
+                          buffer,
+                          size,
+                          (INT32)source->count);
+    return written;
+}
+#  endif  // SEC_CHANNEL_SUPPORT
+
 /* Table 2:110 - Definition of TPMU_CAPABILITIES Union (StructuresTable()) */
 
 UINT16
@@ -963,6 +1009,15 @@ TPMU_CAPABILITIES_Marshal(TPMU_CAPABILITIES *source, BYTE **buffer, INT32 *size,
       case TPM_CAP_ACT:
 	written += TPML_ACT_DATA_Marshal(&source->actData, buffer, size);
 	break;
+#  if SEC_CHANNEL_SUPPORT
+      case TPM_CAP_PUB_KEYS:
+        written += TPML_PUB_KEY_Marshal((TPML_PUB_KEY*)&(source->pubKeys), buffer, size);
+        break;
+      case TPM_CAP_SPDM_SESSION_INFO:
+        written += TPML_SPDM_SESSION_INFO_Marshal(
+                (TPML_SPDM_SESSION_INFO*)&(source->spdmSessionInfo), buffer, size);      
+        break;
+#  endif  // SEC_CHANNEL_SUPPORT
       default:
 	pAssert(FALSE);
     }
@@ -2401,3 +2456,35 @@ TPML_AC_CAPABILITIES_Marshal(TPML_AC_CAPABILITIES *source, BYTE **buffer, INT32 
     return written;
 }
 
+#  if SEC_CHANNEL_SUPPORT
+// Array Marshal for TPM2B_PUBLIC
+UINT16
+TPM2B_PUBLIC_Array_Marshal(
+    TPM2B_PUBLIC* source, BYTE** buffer, INT32* size, INT32 count)
+{
+    UINT16 written = 0;
+    INT32  i;
+
+    for(i = 0; i < count; i++)
+    {
+        written += TPM2B_PUBLIC_Marshal(&source[i], buffer, size);
+    }
+    return written;
+}
+
+// Array Marshal for TPMS_SPDM_SESSION_INFO
+UINT16
+TPMS_SPDM_SESSION_INFO_Array_Marshal(
+    TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size, INT32 count)
+{
+    UINT16 written = 0;
+    INT32  i;
+
+    for(i = 0; i < count; i++)
+    {
+        written += TPMS_SPDM_SESSION_INFO_Marshal(&source[i], buffer, size);
+    }
+    return written;
+}
+
+#  endif  // SEC_CHANNEL_SUPPORT

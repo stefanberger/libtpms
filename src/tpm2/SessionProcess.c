@@ -71,6 +71,9 @@
 #include "Tpm.h"
 #include "ACT.h"
 #include "Marshal.h"
+#  if SEC_CHANNEL_SUPPORT
+#include "SecChannel_fp.h"
+#  endif  // SEC_CHANNEL_SUPPORT
 
 //
 //**  Authorization Support Functions
@@ -748,6 +751,64 @@ BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
     return MemoryEqual2B(&session->u1.pHash.b, &pHash.b);
 }
 
+#  if SEC_CHANNEL_SUPPORT
+//*** CompareScKeyNameHash()
+// This function computes the secure channel key name hash (from the requester and/or TPM key 
+// used to establish the secure channel session) and compares it to the scKeyNameHash in the 
+// session data, returning true if they are equal.
+BOOL CompareScKeyNameHash(SESSION* session,        // IN: session structure
+                          TPM2B_NAME* reqKeyName,  // IN: requester secure channel key name
+                          TPM2B_NAME* tpmKeyName   // IN: TPM secure channel key name
+)
+{
+    HASH_STATE   hashState;
+    TPM2B_DIGEST scKeyNameHash;
+    UINT16 zeroSize = 0x0000; 
+
+    // Compute secure channel key name hash
+    // scKeyNameHash = hash(reqKeyName.size || reqKeyName.name || tpmKeyName.size || tpmKeyName.name)
+    //  Start hash
+    scKeyNameHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
+
+    //  Include reqKeyName if it needs to be checked, otherwise include Empty Buffer
+    if(session->attributes.checkReqKey)
+    {
+        //  Add reqKeyName.size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), reqKeyName->t.size);
+
+        //  Add reqKeyName.name
+        CryptDigestUpdate2B(&hashState, &reqKeyName->b);
+    }
+    else
+    {
+        //  Add zero size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), zeroSize);
+    }
+
+    //  Include tpmKeyName if it needs to be checked, otherwise include Empty Buffer
+    if(session->attributes.checkTpmKey)
+    {
+        //  Add tpmKeyName.size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), tpmKeyName->t.size);
+
+        //  Add tpmKeyName.name
+        CryptDigestUpdate2B(&hashState, &tpmKeyName->b);
+    }
+    else
+    {
+        //  Add zero size
+        CryptDigestUpdateInt(&hashState, sizeof(UINT16), zeroSize);
+    }
+
+    //  Complete hash
+    CryptHashEnd2B(&hashState, &scKeyNameHash.b);
+
+    // and compare
+    return MemoryEqual(
+        session->scKeyNameHash.t.buffer, scKeyNameHash.t.buffer, scKeyNameHash.t.size);
+}
+#  endif  // SEC_CHANNEL_SUPPORT
+
 //*** CheckPWAuthSession()
 // This function validates the authorization provided in a PWAP session. It
 // compares the input value to authValue of the authorized entity. Argument
@@ -984,6 +1045,8 @@ static TPM_RC CheckSessionHMAC(
 //      TPM_RC_PP                   PP is required but not asserted
 //      TPM_RC_NV_UNAVAILABLE       NV is not available for write
 //      TPM_RC_NV_RATE              NV is rate limiting
+//      TPM_RC_CHANNEL              No secure channel is active
+//      TPM_RC_CHANNEL_KEY          Secure channel key is incorrect
 static TPM_RC CheckPolicyAuthSession(
     COMMAND* command,      // IN: primary parsing structure
     UINT32   sessionIndex  // IN: index of session to be processed
@@ -1116,6 +1179,25 @@ static TPM_RC CheckPolicyAuthSession(
            != (session->attributes.nvWrittenState == SET))
             return TPM_RC_POLICY_FAIL;
     }
+#  if SEC_CHANNEL_SUPPORT
+    if(session->attributes.checkSecureChannel)
+    {
+        TPM2B_NAME reqKeyName;
+        TPM2B_NAME tpmKeyName;
+
+        // Check that the authorized TPM command is protected by an SPDM session and 
+        // if so, get the names of the associated requester and TPM key
+        if(!IsSpdmSessionActive(&reqKeyName, &tpmKeyName))
+            return TPM_RC_CHANNEL;
+
+        // If required, check the requester or TPM secure channel key name by comparing scKeyNameHash
+        if(session->attributes.checkReqKey == SET || session->attributes.checkTpmKey == SET)
+        {
+            if(!CompareScKeyNameHash(session, &reqKeyName, &tpmKeyName))
+                return TPM_RC_CHANNEL_KEY;
+        }
+    }
+#  endif  // SEC_CHANNEL_SUPPORT
     return TPM_RC_SUCCESS;
 }
 
