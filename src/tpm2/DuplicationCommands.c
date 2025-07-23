@@ -78,6 +78,8 @@ TPM2_Duplicate(
     // Input Validation
     // Get duplicate object pointer
     object = HandleToObject(in->objectHandle);
+    pAssert_RC(object != NULL);
+
     // Get new parent
     newParent = HandleToObject(in->newParentHandle);
     // duplicate key must have fixParent bit CLEAR.
@@ -172,6 +174,8 @@ TPM2_Rewrap(
 	    // old parent key must be a storage object
 	    if(!ObjectIsStorage(in->oldParent))
 		return TPM_RCS_TYPE + RC_Rewrap_oldParent;
+
+	    pAssert_RC(oldParent != NULL);
 	    // Decrypt input secret data via asymmetric decryption.  A
 	    // TPM_RC_VALUE, TPM_RC_KEY or unmarshal errors may be returned at this
 	    // point
@@ -190,7 +194,7 @@ TPM2_Rewrap(
 	    hashSize = sizeof(UINT16) +
 		       CryptHashGetDigestSize(oldParent->publicArea.nameAlg);
 	    privateBlob.t.size = in->inDuplicate.t.size - hashSize;
-	    pAssert(privateBlob.t.size <= sizeof(privateBlob.t.buffer));
+	    pAssert_RC(privateBlob.t.size <= sizeof(privateBlob.t.buffer));
 	    MemoryCopy(privateBlob.t.buffer, in->inDuplicate.t.buffer + hashSize,
 		       privateBlob.t.size);
 	}
@@ -203,9 +207,13 @@ TPM2_Rewrap(
 	{
 	    OBJECT          *newParent;
 	    newParent = HandleToObject(in->newParent);
+
 	    // New parent must be a storage object
 	    if(!ObjectIsStorage(in->newParent))
 		return TPM_RCS_TYPE + RC_Rewrap_newParent;
+
+	    pAssert_RC(newParent != NULL);
+
 	    // Make new encrypt key and its associated secret structure.  A
 	    // TPM_RC_VALUE error may be returned at this point if RSA algorithm is
 	    // enabled in TPM
@@ -273,6 +281,8 @@ TPM2_Import(
 	return TPM_RCS_ATTRIBUTES + RC_Import_objectPublic;
     // Get parent pointer
     parentObject = HandleToObject(in->parentHandle);
+    pAssert_RC(parentObject != NULL);
+
     if(!ObjectIsParent(parentObject))
 	return TPM_RCS_TYPE + RC_Import_parentHandle;
     if(in->symmetricAlg.algorithm != TPM_ALG_NULL)
@@ -306,7 +316,7 @@ TPM2_Import(
 	    // TPM_RC_SIZE, TPM_RC_VALUE may be returned at this point
 	    result = CryptSecretDecrypt(parentObject, NULL, DUPLICATE_STRING,
 					&in->inSymSeed, &data);
-	    pAssert(result != TPM_RC_BINDING);
+	    pAssert_RC(result != TPM_RC_BINDING);
 	    if(result != TPM_RC_SUCCESS)
 		return RcSafeAddToResult(result, RC_Import_inSymSeed);
 	}
