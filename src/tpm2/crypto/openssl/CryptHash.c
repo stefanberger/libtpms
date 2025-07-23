@@ -358,7 +358,14 @@ void CryptDigestUpdate(PHASH_STATE hashState,  // IN: the hash context informati
                 &hashState->state.smac.state, dataSize, data);
 #endif  // SMAC_IMPLEMENTED
         else
-            FAIL(FATAL_ERROR_INTERNAL);
+        {
+            // this void assert is OK because these values only indicate the
+            // intention of the hash, but don't actually affect the hash
+            // calculation or buffer size calculations.  IOW, the failure
+            // set here can safely percolate out and be checked at a higher
+            // level.
+            FAIL_VOID(FATAL_ERROR_INTERNAL);
+        }
     }
     return;
 }
@@ -376,7 +383,7 @@ LIB_EXPORT UINT16 CryptHashEnd(PHASH_STATE hashState,  // IN: the state of hash 
                                BYTE*       dOut        // OUT: hash digest
 )
 {
-    pAssert(hashState->type == HASH_STATE_HASH);
+    pAssert_ZERO(hashState->type == HASH_STATE_HASH);
     return HashEnd(hashState, dOutSize, dOut);
 }
 
@@ -414,7 +421,10 @@ LIB_EXPORT void CryptDigestUpdate2B(PHASH_STATE  state,  // IN: the digest state
     // In CryptDigestUpdate(), if size is zero or buffer is NULL, then no change
     // to the digest occurs. This function should not provide a buffer if bIn is
     // not provided.
-    pAssert(bIn != NULL);
+    // as indicated by the comment above CryptDigestUpdate is tolerant of null, but
+    // we don't expect a null pointer here, so simply return but trigger failure
+    // mode because this is an unexpected internal programming error.
+    pAssert_VOID_OK(bIn != NULL);
     CryptDigestUpdate(state, bIn->size, bIn->buffer);
     return;
 }
@@ -537,7 +547,7 @@ LIB_EXPORT UINT16 CryptHmacEnd(PHMAC_STATE state,     // IN: the hash state buff
         return (state->hashState.state.smac.smacMethods.end)(
             &state->hashState.state.smac.state, dOutSize, dOut);
 #endif
-    pAssert(hState->type == HASH_STATE_HMAC);
+    pAssert_ZERO(hState->type == HASH_STATE_HMAC);
     hState->def = CryptGetHashDef(hState->hashAlg);
     // Change the state type for completion processing
     hState->type = HASH_STATE_HASH;
@@ -682,7 +692,7 @@ LIB_EXPORT UINT16 CryptKDFa(
     HMAC_STATE hState;
     UINT16     digestSize = CryptHashGetDigestSize(hashAlg);
 
-    pAssert(key != NULL && keyStream != NULL);
+    pAssert_ZERO(key != NULL && keyStream != NULL);
 
     TPM_DO_SELF_TEST(TPM_ALG_KDF1_SP800_108);
 
@@ -694,7 +704,7 @@ LIB_EXPORT UINT16 CryptKDFa(
 
     // If the size of the request is larger than the numbers will handle,
     // it is a fatal error.
-    pAssert(((sizeInBits + 7) / 8) <= INT16_MAX);
+    pAssert_ZERO(((sizeInBits + 7) / 8) <= INT16_MAX);
 
     // The number of bytes to be generated is the smaller of the sizeInBits bytes or
     // the number of requested blocks. The number of blocks is the smaller of the
@@ -776,7 +786,8 @@ LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in
     BYTE*      stream = keyStream;
     INT16      bytes;  // number of bytes to generate
 
-    pAssert(keyStream != NULL && Z != NULL && ((sizeInBits + 7) / 8) < INT16_MAX);
+    pAssert_ZERO(
+        keyStream != NULL && Z != NULL && ((sizeInBits + 7) / 8) < INT16_MAX);
     //
     hLen  = hashDef->digestSize;
     bytes = (INT16)((sizeInBits + 7) / 8);

@@ -50,11 +50,9 @@
 //
 //  'request' and 'response' may point to the same buffer
 //
-// Note: As of February, 2016, the failure processing has been moved to the
+// Note: The failure processing has been moved to the
 // platform-specific code. When the TPM code encounters an unrecoverable failure, it
-// will SET g_inFailureMode and call _plat__Fail(). That function should not return
-// but may call ExecuteCommand().
-//
+// will call _plat__Fail() and call _plat__InFailureMode() to query failure mode.
 LIB_EXPORT void ExecuteCommand(
     uint32_t        requestSize,   // IN: command buffer size
     unsigned char*  request,       // IN: command buffer
@@ -306,7 +304,7 @@ Cleanup:
             FAIL(FATAL_ERROR_INTERNAL);
         g_updateNV = UT_NONE;
     }
-    pAssert((UINT32)command.parameterSize <= maxResponse);
+    pAssert_NORET((UINT32)command.parameterSize <= maxResponse);
 
     // Clear unused bits in response buffer.
     MemorySet(*response + *responseSize, 0, maxResponse - *responseSize);
