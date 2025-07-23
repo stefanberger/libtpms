@@ -272,19 +272,19 @@ TPM2_PCR_Reset(
 
 #include "Tpm.h"
 /* This function is called to process a _TPM_Hash_Start() indication. */
-LIB_EXPORT void
-_TPM_Hash_Start(
-		void
-		)
+LIB_EXPORT BOOL _TPM_Hash_Start(void)
 {
     TPM_RC              result;
     TPMI_DH_OBJECT      handle;
     // If a DRTM sequence object exists, free it up
     if(g_DRTMHandle != TPM_RH_UNASSIGNED)
-	{
-	    FlushObject(g_DRTMHandle);
-	    g_DRTMHandle = TPM_RH_UNASSIGNED;
-	}
+    {
+        // ensure g_DRTMHandle is cleared
+        // and Flush sequence object
+        TPMI_DH_OBJECT oldHandle = g_DRTMHandle;
+        g_DRTMHandle             = TPM_RH_UNASSIGNED;
+        VERIFY(FlushObject(oldHandle), FATAL_ERROR_INTERNAL, FALSE);
+    }
     // Create an event sequence object and store the handle in global
     // g_DRTMHandle. A TPM_RC_OBJECT_MEMORY error may be returned at this point
     // The NULL value for the first parameter will cause the sequence structure to
@@ -312,23 +312,21 @@ _TPM_Hash_Start(
 	    // then there's a big problem
 	    pAssert(handle < TRANSIENT_LAST);
 	    // Free the slot
-	    FlushObject(handle);
+	    VERIFY(FlushObject(handle), FATAL_ERROR_INTERNAL, FALSE);
 	    // Try to create an event sequence object again.  This time, we must
 	    // succeed.
 	    result = ObjectCreateEventSequence(NULL, &g_DRTMHandle);
 	    if(result != TPM_RC_SUCCESS)
 		FAIL(FATAL_ERROR_INTERNAL);
 	}
-    return;
+    return TRUE;
 }
 
 #include "Tpm.h"
 /* This function is called to process a _TPM_Hash_Data() indication. */
-LIB_EXPORT void
-_TPM_Hash_Data(
-	       uint32_t         dataSize,      // IN: size of data to be extend
-	       unsigned char   *data           // IN: data buffer
-	       )
+LIB_EXPORT BOOL _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be extend
+			       unsigned char* data  // IN: data buffer
+)
 {
     UINT32           i;
     HASH_OBJECT     *hashObject;
@@ -338,7 +336,12 @@ _TPM_Hash_Data(
     // was not called so this function returns without doing
     // anything.
     if(g_DRTMHandle == TPM_RH_UNASSIGNED)
-	return;
+    {
+        // do not enter failure mode because this is an ordering issue that
+        // can be triggered by a BIOS issue, not an internal failure.
+        return FALSE;
+    }
+
     hashObject = (HASH_OBJECT *)HandleToObject(g_DRTMHandle);
     pAssert(hashObject->attributes.eventSeq);
     // For each of the implemented hash algorithms, update the digest with the
@@ -351,15 +354,12 @@ _TPM_Hash_Data(
 		// Update sequence object
 		CryptDigestUpdate(&hashObject->state.hashState[i], dataSize, data);
 	}
-    return;
+    return TRUE;
 }
 
 #include "Tpm.h"
 /* This function is called to process a _TPM_Hash_End() indication. */
-LIB_EXPORT void
-_TPM_Hash_End(
-	      void
-	      )
+LIB_EXPORT BOOL _TPM_Hash_End(void)
 {
     UINT32          i;
     TPM2B_DIGEST    digest;
@@ -369,7 +369,12 @@ _TPM_Hash_End(
     // been called, _TPM_Hash_End was previously called, or some other command
     // was executed and the sequence was aborted.
     if(g_DRTMHandle == TPM_RH_UNASSIGNED)
-	return;
+    {
+        // do not enter failure mode because this is an ordering issue that
+        // can be triggered by a BIOS issue, not an internal failure.
+        return FALSE;
+    }
+
     // Get DRTM sequence object
     hashObject = (HASH_OBJECT *)HandleToObject(g_DRTMHandle);
     // Is this _TPM_Hash_End after Startup or before
@@ -404,8 +409,10 @@ _TPM_Hash_End(
 		    PcrDrtm(pcrHandle, hash, &digest);
 		}
 	}
-    // Flush sequence object.
-    FlushObject(g_DRTMHandle);
-    g_DRTMHandle = TPM_RH_UNASSIGNED;
-    return;
+
+    // ensure g_DRTMHandle is cleared
+    // and Flush sequence object
+    TPMI_DH_OBJECT oldHandle = g_DRTMHandle;
+    g_DRTMHandle             = TPM_RH_UNASSIGNED;
+    return FlushObject(oldHandle);
 }
