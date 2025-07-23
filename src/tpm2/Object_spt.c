@@ -531,7 +531,7 @@ SchemeChecks(OBJECT*      parentObject,  // IN: parent (null if primary seed)
                 curveID     = publicArea->parameters.eccDetail.curveID;
                 curveScheme = CryptGetCurveSignScheme(curveID);
                 // The curveId must be valid or the unmarshaling is busted.
-                pAssert(curveScheme != NULL);
+                pAssert_RC(curveScheme != NULL);
 
                 // If the curveID requires a specific scheme, then the key must
                 // select the same scheme
@@ -1018,7 +1018,7 @@ UnwrapOuter(OBJECT* protector,   // IN: The object that provides
 // This function is used to marshal a sensitive area. Among other things, it
 // adjusts the size of the authValue to be no smaller than the digest of
 // 'nameAlg'
-// Returns the size of the marshaled area.
+// Returns the size of the marshaled area.  0 indicates an error
 static UINT16 MarshalSensitive(
     OBJECT*         parent LIBTPMS_ATTR_UNUSED,     // IN: the object parent (optional)
     BYTE*           buffer,     // OUT: receiving buffer
@@ -1039,6 +1039,7 @@ static UINT16 MarshalSensitive(
     // If the sensitive size is the special case for a prime in the type
     if((sensitive->sensitive.rsa.t.size & RSA_prime_flag) > 0)
     {
+        pAssert_ZERO(sensitive->sensitiveType == ALG_RSA_VALUE);
         UINT16 sizeSave = sensitive->sensitive.rsa.t.size;
         //
         // Turn off the flag that indicates that the sensitive->sensitive contains
@@ -1057,7 +1058,9 @@ static UINT16 MarshalSensitive(
     }
     else
 #endif
+    {
         retVal = TPMT_SENSITIVE_Marshal(sensitive, &buffer, NULL);
+    }
 
     // Marshal the size
     retVal = (UINT16)(retVal + UINT16_Marshal(&retVal, &sizeField, NULL));
@@ -1118,6 +1121,7 @@ TPM_RC SensitiveToPrivate(
 
     // Marshal the sensitive area including authValue size adjustments.
     dataSize = MarshalSensitive(parent, sensitiveData, sensitive, nameAlg);
+    pAssert_RC(dataSize != 0);  // 0 indicates a failure mode assertion
 
     //Produce outer wrap, including encryption and HMAC
     outPrivate->t.size = ProduceOuterWrap(
@@ -1167,7 +1171,7 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
     UINT16        ivSize;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Find the hash algorithm for integrity computation
     // For Temporary Object (parent == NULL) use self name algorithm;
@@ -1373,10 +1377,10 @@ DuplicateToSensitive(
     UINT16 dataSizeInput;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Make sure symDef and innerSymKey are not NULL
-    pAssert(symDef != NULL && innerSymKey != NULL);
+    pAssert_RC(symDef != NULL && innerSymKey != NULL);
 
     // Starting of sensitive data
     sensitiveData = inPrivate->buffer;
@@ -1400,7 +1404,7 @@ DuplicateToSensitive(
     if(symDef->algorithm != TPM_ALG_NULL)
     {
         // assume the input key size matches the symmetric definition
-        pAssert(innerSymKey->size == (symDef->keyBits.sym + 7) / 8);
+        pAssert_RC(innerSymKey->size == (symDef->keyBits.sym + 7) / 8);
 
         // Decrypt inner buffer in place
         CryptSymmetricDecrypt(sensitiveData,

@@ -155,8 +155,10 @@ void NvRead(void*  outBuffer,  // OUT: buffer to receive data
             UINT32 size        // IN: size of the value to read
 )
 {
-    // Input type should be valid
-    pAssert(nvOffset + size < NV_MEMORY_SIZE);
+    // Input addresses must be inside the memory buffer.
+    // void is OK because we simply skip the read, which is the only reasonable
+    // response.
+    pAssert_VOID_OK(nvOffset + size < NV_MEMORY_SIZE);
     _plat__NvMemoryRead(nvOffset, size, outBuffer);
     return;
 }
@@ -186,7 +188,12 @@ void NvUpdatePersistent(
     void*  buffer   // IN: the new data
 )
 {
-    pAssert(offset + size <= sizeof(gp));
+    // Input addresses must be inside the memory buffer. Any callers using the
+    // expected CLEAR_PERSISTENT macro should encounter a build error before
+    // tripping this assert so void is reasonable as a defense in depth against
+    // a manual caller of this function. Skipping the write is the only
+    // reasonable response.
+    pAssert_VOID_OK(offset + size <= sizeof(gp));
     MemoryCopy(&gp + offset, buffer, size);
     NvWrite(offset, size, buffer);
 }
@@ -198,7 +205,12 @@ void NvClearPersistent(UINT32 offset,  // IN: the offset in the PERMANENT_DATA
                        UINT32 size     // IN: number of bytes to clear
 )
 {
-    pAssert(offset + size <= sizeof(gp));
+    // Input addresses must be inside the memory buffer. Any callers using the
+    // expected CLEAR_PERSISTENT macro should encounter a build error before
+    // tripping this assert so void is reasonable as a defense in depth against
+    // a manual caller of this function. Skipping the write is the only
+    // reasonable response.
+    pAssert_VOID_OK(offset + size <= sizeof(gp));
     MemorySet((&gp) + offset, 0, size);
     NvWrite(offset, size, (&gp) + offset);
 }

@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			     Symmetric block cipher modes			*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2024				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-clause
 
 //** Introduction
 //
@@ -177,7 +119,7 @@ LIB_EXPORT TPM_RC CryptSymmetricEncrypt(
     BYTE*                   iv;
     BYTE                    defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
     //
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     memset((void *)&keySchedule, 0, sizeof(keySchedule));	/* silence false positive; coverity */
     memset(tmp, 0, sizeof(tmp));
     if(dSize == 0)
@@ -342,7 +284,7 @@ LIB_EXPORT TPM_RC CryptSymmetricDecrypt(
     encrypt = NULL;
     decrypt = NULL;
 
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
         return TPM_RC_SUCCESS;
 
@@ -565,7 +507,7 @@ CryptSymmetricEncrypt(
     UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
     TPM_RC               retVal = TPM_RC_SUCCESS;
 
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
     TPM_DO_SELF_TEST(algorithm);
@@ -623,7 +565,7 @@ CryptSymmetricEncrypt(
         EVP_EncryptUpdate(ctx, pOut, &outlen1, dIn, dSize) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
-    pAssert(outlen1 <= dSize || dSize >= outlen1 + blockSize);
+    pAssert_RC(outlen1 <= dSize || dSize >= outlen1 + blockSize);
 
     if (EVP_EncryptFinal_ex(ctx, pOut + outlen1, &outlen2) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
@@ -677,7 +619,7 @@ CryptSymmetricDecrypt(
     // in case statements and it can't tell if they are always initialized
     // when needed, so... Comment these out if the compiler can tell or doesn't
     // care that these are initialized before use.
-    pAssert(dOut != NULL && key != NULL && dIn != NULL);
+    pAssert_RC(dOut != NULL && key != NULL && dIn != NULL);
     if(dSize == 0)
 	return TPM_RC_SUCCESS;
     TPM_DO_SELF_TEST(algorithm);
@@ -736,20 +678,20 @@ CryptSymmetricDecrypt(
         EVP_DecryptUpdate(ctx, buffer, &outlen1, dIn, dSize) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
-    pAssert((int)buffersize >= outlen1);
+    pAssert_RC((int)buffersize >= outlen1);
 
     if ((int)buffersize <= outlen1 /* coverity */ ||
         EVP_DecryptFinal(ctx, &buffer[outlen1], &outlen2) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
 
-    pAssert((int)buffersize >= outlen1 + outlen2);
+    pAssert_RC((int)buffersize >= outlen1 + outlen2);
 
     if (ivInOut)
         retVal = CryptSymmetricGetUpdatedIV(ctx, ivInOut);
 
  Exit:
     if (retVal == TPM_RC_SUCCESS) {
-        pAssert(dSize >= outlen1 + outlen2);
+        pAssert_RC(dSize >= outlen1 + outlen2);
         memcpy(dOut, buffer, outlen1 + outlen2);
     }
 

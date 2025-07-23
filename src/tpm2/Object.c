@@ -99,7 +99,7 @@ BOOL IsObjectPresent(TPMI_DH_OBJECT handle  // IN: handle to be checked
 BOOL ObjectIsSequence(OBJECT* object  // IN: handle to be checked
 )
 {
-    pAssert(object != NULL);
+    pAssert_BOOL(object != NULL);
     return (object->attributes.hmacSeq == SET || object->attributes.hashSeq == SET
             || object->attributes.eventSeq == SET);
 }
@@ -120,9 +120,16 @@ OBJECT* HandleToObject(TPMI_DH_OBJECT handle  // IN: handle of the object
         return NULL;
     // In this implementation, the handle is determined by the slot occupied by the
     // object.
+    // this can be an underflow if TPM_Init hasn't happened or the usual handle
+    // checks are skipped.  Enter failure mode on this unexpected condition
+    if(handle < TRANSIENT_FIRST)
+    {
+        FAIL_NULL(FATAL_ERROR_ASSERT);
+    }
+
     index = handle - TRANSIENT_FIRST;
-    pAssert(index < MAX_LOADED_OBJECTS);
-    pAssert(s_objects[index].attributes.occupied);
+    pAssert_NULL(index < MAX_LOADED_OBJECTS);
+    pAssert_NULL(s_objects[index].attributes.occupied);
     return &s_objects[index];
 }
 
@@ -324,7 +331,7 @@ ObjectLoad(OBJECT* object,           // IN: pointer to object slot
     TPM_RC result = TPM_RC_SUCCESS;
     //
     // Do validations of public area object descriptions
-    pAssert(publicArea != NULL);
+    pAssert_RC(publicArea != NULL);
 
     // Is this public only or a no-name object?
     if(sensitive == NULL || publicArea->nameAlg == TPM_ALG_NULL)
@@ -637,12 +644,13 @@ ObjectContextLoadLibtpms(BYTE           *buffer,
 // This function frees an object slot.
 //
 // This function requires that the object is loaded.
+// returns FALSE and enters failure mode if the handle is invalid.
 BOOL FlushObject(TPMI_DH_OBJECT handle  // IN: handle to be freed
 )
 {
     UINT32 index = handle - TRANSIENT_FIRST;
-    //
-    pAssert(index < MAX_LOADED_OBJECTS);
+    // checks for underflow due to unsigned math
+    pAssert_BOOL(index < MAX_LOADED_OBJECTS);
     // Clear all the object attributes
     MemorySet((BYTE*)&(s_objects[index].attributes), 0, sizeof(OBJECT_ATTRIBUTES));
     return TRUE;
@@ -859,8 +867,8 @@ ObjectCapGetLoaded(TPMI_DH_OBJECT handle,     // IN: start handle
 {
     TPMI_YES_NO more = NO;
     UINT32      i;
-    //
-    pAssert(HandleGetType(handle) == TPM_HT_TRANSIENT);
+    // enter failure mode and stop iterating if we encounter an internal error
+    VERIFY(HandleGetType(handle) == TPM_HT_TRANSIENT, FATAL_ERROR_INTERNAL, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -875,7 +883,7 @@ ObjectCapGetLoaded(TPMI_DH_OBJECT handle,     // IN: start handle
         if(s_objects[i].attributes.occupied == TRUE)
         {
             // A valid transient object can not be the copy of a persistent object
-            pAssert(s_objects[i].attributes.evict == CLEAR);
+            VERIFY(s_objects[i].attributes.evict == CLEAR, FATAL_ERROR_INTERNAL, NO);
 
             if(handleList->count < count)
             {
@@ -903,7 +911,7 @@ BOOL ObjectCapGetOneLoaded(TPMI_DH_OBJECT handle)  // IN: handle
 {
     UINT32 i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_TRANSIENT);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_TRANSIENT);
 
     // Iterate object slots to get loaded object handles
     for(i = handle - TRANSIENT_FIRST; i < MAX_LOADED_OBJECTS; i++)
@@ -911,7 +919,7 @@ BOOL ObjectCapGetOneLoaded(TPMI_DH_OBJECT handle)  // IN: handle
         if(s_objects[i].attributes.occupied == TRUE)
         {
             // A valid transient object can not be the copy of a persistent object
-            pAssert(s_objects[i].attributes.evict == CLEAR);
+            pAssert_BOOL(s_objects[i].attributes.evict == CLEAR);
 
             return TRUE;
         }

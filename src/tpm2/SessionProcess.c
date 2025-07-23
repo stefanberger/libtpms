@@ -298,7 +298,7 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
                 OBJECT*     object;
                 TPMA_OBJECT attributes;
                 //
-                object     = HandleToObject(handle);
+                object = HandleToObject(handle);
                 pAssert_BOOL(object != NULL);
                 attributes = object->publicArea.objectAttributes;
 
@@ -482,7 +482,6 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
         default:
             break;
     }
-
     return result;
 }
 
@@ -598,7 +597,7 @@ static TPM2B_DIGEST* GetCpHash(COMMAND* command, TPMI_ALG_HASH hashAlg)
 {
     TPM2B_DIGEST* cpHash = GetCpHashPointer(command, hashAlg);
     //
-    pAssert(cpHash->t.size != 0);
+    pAssert_NULL(cpHash && cpHash->t.size != 0);
     return cpHash;
 }
 
@@ -1413,7 +1412,7 @@ static TPM_RC CheckAuthSession(
     TPM_HT     sessionHandleType = HandleGetType(sessionHandle);
     BOOL       authUsed;
     //
-    pAssert(sessionHandle != TPM_RH_UNASSIGNED);
+    pAssert_RC(sessionHandle != TPM_RH_UNASSIGNED);
 
     // Take care of physical presence
     if(associatedHandle == TPM_RH_PLATFORM)
@@ -1503,7 +1502,7 @@ static TPM_RC CheckAuthSession(
         NV_PIN    pinData;
         TPMA_NV   nvAttributes;
         //
-        pAssert(nvIndex != NULL);
+        pAssert_RC(nvIndex != NULL);
         nvAttributes = nvIndex->publicArea.attributes;
         // If this is a PIN FAIL index and the value has been written
         // then we can update the counter (increment or clear)
@@ -1708,7 +1707,8 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
         {
             extraKey.b.size = 0;
         }
-        size   = DecryptSize(command->index);
+        size = DecryptSize(command->index);
+        pAssert_RC(command->parameterSize <= INT32_MAX);
         result = CryptParameterDecryption(s_sessionHandles[s_decryptSessionIndex],
                                           &s_nonceCaller[s_decryptSessionIndex].b,
                                           command->parameterSize,
@@ -1825,7 +1825,7 @@ static void UpdateAuditDigest(
     TPM2B_DIGEST* cpHash = GetCpHash(command, hashAlg);
     TPM2B_DIGEST* rpHash = ComputeRpHash(command, hashAlg);
     //
-    pAssert(cpHash != NULL);
+    pAssert_VOID_OK(cpHash != NULL);
 
     // digestNew :=  hash (digestOld || cpHash || rpHash)
     // Start hash computation.
@@ -2082,7 +2082,6 @@ static TPM2B_NONCE* BuildSingleResponseAuth(
     SESSION* session = SessionGet(s_sessionHandles[sessionIndex]);
     pAssert_NULL(session != NULL);
 
-    //
     // If the session is a policy session with isPasswordNeeded SET, the
     // authorization field is empty.
     if(HandleGetType(s_sessionHandles[sessionIndex]) == TPM_HT_POLICY_SESSION
@@ -2133,7 +2132,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
 {
     TPM_RC result = TPM_RC_SUCCESS;
 
-    pAssert(command->authSize == 0);
+    pAssert_RC(command->authSize == 0);
 
     // Reset the parameter buffer to point to the start of the parameters so that
     // there is a starting point for any rpHash that might be generated and so there
@@ -2144,6 +2143,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     if(command->tag == TPM_ST_SESSIONS)
     {
         UpdateAllNonceTPM(command);
+        VERIFY_NOT_FAILED();
 
         // Encrypt first parameter if applicable. Parameter encryption should
         // happen after nonce update and before any rpHash is computed.
@@ -2166,6 +2166,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                                    &extraKey);
             }
             size = EncryptSize(command->index);
+            pAssert_RC(command->parameterSize <= INT32_MAX);
             // This function operates on internally-generated data that is
             // expected to be well-formed for parameter encryption.
             // In the event that there is a bug elsewhere in the code and the
@@ -2188,6 +2189,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     // Audit sessions should be processed regardless of the tag because
     // a command with no session may cause a change of the exclusivity state.
     UpdateAuditSessionStatus(command);
+    VERIFY_NOT_FAILED();
 #if CC_GetCommandAuditDigest
     // Command Audit
     if(CommandAuditIsRequired(command->index))
@@ -2198,7 +2200,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
     {
         UINT32 i;
         //
-        pAssert(command->sessionNum > 0);
+        pAssert_RC(command->sessionNum > 0);
 
         // Iterate over each session in the command session area, and create
         // corresponding sessions for response.
@@ -2229,7 +2231,10 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
             command->authSize +=
                 TPM2B_DIGEST_Marshal(&responseAuth, &command->responseBuffer, NULL);
             if(!IS_ATTRIBUTE(s_attributes[i], TPMA_SESSION, continueSession))
+            {
                 SessionFlush(s_sessionHandles[i]);
+                VERIFY_NOT_FAILED();
+            }
         }
     }
 

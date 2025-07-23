@@ -914,7 +914,7 @@ PCRAllocate(TPML_PCR_SELECTION* allocate,      // IN: required allocation
             }
         }
         // The j loop must exit with a match.
-        pAssert(j < newAllocate.count);
+        pAssert_RC(j < newAllocate.count);
     }
 
     // Max PCR in a bank is MIN(implemented PCR, PCR with attributes defined)
@@ -1252,7 +1252,7 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
     TPMI_YES_NO more = NO;
     UINT32      i;
 
-    pAssert(HandleGetType(handle) == TPM_HT_PCR);
+    VERIFY(HandleGetType(handle) == TPM_HT_PCR, FATAL_ERROR_INTERNAL, NO);
 
     // Initialize output handle list
     handleList->count = 0;
@@ -1286,7 +1286,7 @@ PCRCapGetHandles(TPMI_DH_PCR  handle,     // IN: start handle
 // This function is used to check whether a PCR handle exists.
 BOOL PCRCapGetOneHandle(TPMI_DH_PCR handle)  // IN: handle
 {
-    pAssert(HandleGetType(handle) == TPM_HT_PCR);
+    pAssert_BOOL(HandleGetType(handle) == TPM_HT_PCR);
 
     if((handle & HR_HANDLE_MASK) <= PCR_LAST)
     {

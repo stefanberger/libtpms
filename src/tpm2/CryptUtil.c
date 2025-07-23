@@ -1222,6 +1222,8 @@ CryptCreateObject(OBJECT*                object,  // IN: new object structure po
         DRBG_AdditionalData((DRBG_STATE*)rand, &gp.shProof.b);
         DRBG_AdditionalData((DRBG_STATE*)rand, &gp.ehProof.b);
     }
+    VERIFY_NOT_FAILED();
+
     // Generate a seedValue that is the size of the digest produced by nameAlg
     sensitive->seedValue.t.size =
         DRBG_Generate(rand,
