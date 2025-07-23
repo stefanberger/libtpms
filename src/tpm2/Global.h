@@ -1518,4 +1518,7 @@ EXTERN UINT16 s_ActUpdated;
 extern const TPMA_CC            s_ccAttr[];
 extern const COMMAND_ATTRIBUTES s_commandAttributes[];
 
+// TRUE if _TPM_Init() ran to completion.
+// checked by execute command
+EXTERN BOOL g_initCompleted;
 #endif  // GLOBAL_H
