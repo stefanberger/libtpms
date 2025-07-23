@@ -81,12 +81,24 @@ LIB_EXPORT void ExecuteCommand(
     // the sizes do not include the tag, command.code, requestSize, or the authorization
     // fields.
     //CommandResponseSizes();
+
     // Set flags for NV access state. This should happen before any other
     // operation that may require a NV write. Note, that this needs to be done
     // even when in failure mode. Otherwise, g_updateNV would stay SET while in
     // Failure mode and the NV would be written on each call.
     g_updateNV     = UT_NONE;
     g_clearOrderly = FALSE;
+
+    if(!g_initCompleted)
+    {
+        // no return because failure will happen immediately below. this is
+        // treated as fatal because it is a system level failure for there to be
+        // no TPM_INIT indication.  Since init is an out-of-band indication from
+        // Execute command, we don't return TPM_RC_INITIALIZE which refers to
+        // the TPM2_Startup command
+        FAIL_NORET(FATAL_ERROR_NO_INIT);
+    }
+
     if(g_inFailureMode)
     {
         // Do failure mode processing
