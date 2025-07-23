@@ -249,6 +249,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PlatformData.c \
 	tpm2/PlatformPcr.c \
 	tpm2/Policy_spt.c \
+	tpm2/PolicyTransportSPDM.c \
 	tpm2/Power.c \
 	tpm2/PowerPlat.c \
 	tpm2/PP.c \
@@ -260,6 +261,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/Response.c \
 	tpm2/ResponseCodeProcessing.c \
 	tpm2/RunCommand.c \
+	tpm2/SecChannel.c \
 	tpm2/Session.c \
 	tpm2/SessionCommands.c \
 	tpm2/SessionProcess.c \
@@ -490,6 +492,7 @@ noinst_HEADERS += \
 	tpm2/Policy_spt_fp.h \
 	tpm2/PolicyTemplate_fp.h \
 	tpm2/PolicyTicket_fp.h \
+	tpm2/PolicyTransportSPDM_fp.h \
 	tpm2/Power_fp.h \
 	tpm2/PP_Commands_fp.h \
 	tpm2/PP_fp.h \
@@ -505,6 +508,7 @@ noinst_HEADERS += \
 	tpm2/RsaTestData.h \
 	tpm2/RSA_Decrypt_fp.h \
 	tpm2/RSA_Encrypt_fp.h \
+	tpm2/SecChannel_fp.h \
 	tpm2/SelfTest.h \
 	tpm2/SelfTest_fp.h \
 	tpm2/SequenceComplete_fp.h \

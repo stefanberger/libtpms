@@ -97,6 +97,17 @@ BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
                            SESSION* session   // IN: session structure with pHash
 );
 
+#  if SEC_CHANNEL_SUPPORT
+//*** CompareScKeyNameHash()
+// This function computes the secure channel key name hash (from the requester and/or TPM key 
+// used to establish the secure channel session) and compares it to the scKeyNameHash in the 
+// session data, returning true if they are equal.
+BOOL CompareScKeyNameHash(SESSION* session,          // IN: session structure
+                          TPM2B_NAME* reqKeyName,    // IN: requester secure channel key name
+                          TPM2B_NAME* tpmKeyName     // IN: TPM secure channel key name
+);
+#  endif  // SEC_CHANNEL_SUPPORT
+
 //*** ParseSessionBuffer()
 // This function is the entry function for command session processing.
 // It iterates sessions in session area and reports if the required authorization

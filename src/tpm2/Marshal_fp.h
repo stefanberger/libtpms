@@ -176,6 +176,10 @@ extern "C" {
     TPMS_TAGGED_POLICY_Marshal(TPMS_TAGGED_POLICY *source, BYTE **buffer, INT32 *size);
     UINT16
     TPMS_ACT_DATA_Marshal(TPMS_ACT_DATA *source, BYTE **buffer, INT32 *size);
+#  if SEC_CHANNEL_SUPPORT
+    UINT16
+    TPMS_SPDM_SESSION_INFO_Marshal(TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size);
+#  endif  // SEC_CHANNEL_SUPPORT
     UINT16
     TPMS_TAGGED_PROPERTY_Marshal(TPMS_TAGGED_PROPERTY *source, BYTE **buffer, INT32 *size);
     UINT16
@@ -204,6 +208,12 @@ extern "C" {
     TPML_TAGGED_POLICY_Marshal(TPML_TAGGED_POLICY *source, BYTE **buffer, INT32 *size);
     UINT16
     TPML_ACT_DATA_Marshal(TPML_ACT_DATA *source, BYTE **buffer, INT32 *size);
+#if SEC_CHANNEL_SUPPORT
+    UINT16
+    TPML_PUB_KEY_Marshal(TPML_PUB_KEY* source, BYTE** buffer, INT32* size);
+    UINT16
+    TPML_SPDM_SESSION_INFO_Marshal(TPML_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size);
+#endif
     UINT16
     TPMU_CAPABILITIES_Marshal(TPMU_CAPABILITIES *source, BYTE **buffer, INT32 *size, UINT32 selector);
     UINT16
@@ -414,6 +424,12 @@ extern "C" {
     TPMS_SET_CAPABILITY_DATA_Unmarshal(TPMS_SET_CAPABILITY_DATA* target, BYTE** buffer, INT32* size);
     TPM_RC
     TPM2B_SET_CAPABILITY_DATA_Unmarshal(TPM2B_SET_CAPABILITY_DATA* target, BYTE** buffer, INT32* size);
+#  if SEC_CHANNEL_SUPPORT
+    UINT16
+    TPM2B_PUBLIC_Array_Marshal(TPM2B_PUBLIC* source, BYTE** buffer, INT32* size, INT32 count);
+    UINT16
+    TPMS_SPDM_SESSION_INFO_Array_Marshal(TPMS_SPDM_SESSION_INFO* source, BYTE** buffer, INT32* size, INT32 count);
+#  endif  // SEC_CHANNEL_SUPPORT
 #ifdef __cplusplus
 }
 #endif
