@@ -137,7 +137,7 @@ typedef struct
 #endif									// libtpms added
     unsigned occupied    : 1;  //15) SET when the slot is occupied.
     unsigned derivation  : 1;  //16) SET when the key is a derivation
-    //        parent
+                               //        parent
     unsigned external : 1;     //17) SET when the object is loaded with
     //    TPM2_LoadExternal();
     unsigned reserved : 14;    //18-31)			/* libtpms added */
@@ -340,10 +340,26 @@ typedef struct SESSION_ATTRIBUTES
     // SET if the pHash has been defined. This attribute is not SET unless
     // 'isPolicy' is SET.
     unsigned    isParametersHashDefined : 1;     /* libtpms added: for rev180; @stateFormatLevel 4 */
-    unsigned    _reserved : 16;         //17-32  /* libtpms added */
+#  if SEC_CHANNEL_SUPPORT || 1
+    // SET if the presence of a secure channel needs to be checked when the policy
+    // is used for authorization.
+    unsigned checkSecureChannel : 1;
+    // SET if the requester secure channel key needs to be checked when the policy
+    // is used for authorization. This attribute is only SET if checkSecureChannel
+    // is SET.
+    unsigned checkReqKey : 1;
+    // SET if the TPM secure channel key needs to be checked when the policy
+    // is used for authorization. This attribute is only SET if checkSecureChannel
+    // is SET.
+    unsigned checkTpmKey : 1;
+#  endif  // SEC_CHANNEL_SUPPORT
+    unsigned    _reserved : 13;         //17-32  /* libtpms added */
 #endif                                           /* libtpms added */
 #if BIG_ENDIAN_TPM == YES                        /* libtpms added begin */
-    unsigned    _reserved : 16;         //17-32
+    unsigned    _reserved : 13;         //17-32
+    unsigned    checkTpmKey : 1;
+    unsigned    checkReqKey : 1;
+    unsigned    checkSecureChannel : 1;
     unsigned    isParametersHashDefined : 1; //16
     unsigned    isNameHashDefined : 1;       //15
     unsigned    isTemplateHashDefined : 1;   //14) SET if the templateHash needs to be
@@ -419,6 +435,12 @@ typedef struct SESSION
         TPM2B_DIGEST policyDigest;  // policyHash
     } u2;                           // audit log and policyHash may
                                     // share space to save memory
+#  if SEC_CHANNEL_SUPPORT
+#    if CC_PolicyTransportSPDM
+#      error Need Marshaling support
+#    endif
+    TPM2B_DIGEST scKeyNameHash;     // the required secure channel key name hash
+#  endif  // SEC_CHANNEL_SUPPORT
 } SESSION;
 
 #  define EXPIRES_ON_RESET   INT32_MIN

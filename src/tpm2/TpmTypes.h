@@ -304,7 +304,8 @@ typedef UINT32 TPM_CC;
 #define TPM_CC_NV_ReadPublic2             (TPM_CC)(0x0000019E)
 #define TPM_CC_SetCapability              (TPM_CC)(0x0000019F)
 #define TPM_CC_ReadOnlyControl            (TPM_CC)(0x000001A0)
-#define TPM_CC_LAST                       (TPM_CC)(0x000001A0)
+#define TPM_CC_PolicyTransportSPDM        (TPM_CC)(0x000001A1)
+#define TPM_CC_LAST                       (TPM_CC)(0x000001A1)
 #define CC_VEND                           (TPM_CC)(0x20000000)
 #define TPM_CC_Vendor_TCG_Test            (TPM_CC)(0x20000000)
 
@@ -454,6 +455,7 @@ typedef UINT32 TPM_CC;
      + (ADD_FILL || CC_NV_ReadPublic2)               /* 0x0000019E */ \
      + (ADD_FILL || CC_SetCapability)                /* 0x0000019F */ \
      + (ADD_FILL || CC_ReadOnlyControl)              /* 0x000001A0 */ \
+     + (ADD_FILL || CC_PolicyTransportSPDM)          /* 0x000001A1 */ \
     )
 #if LIBRARY_COMMAND_ARRAY_SIZE == 0
 #  error "No commands are enabled -- something is terribly wrong."
@@ -573,6 +575,8 @@ typedef UINT32 TPM_RC;
 #define TPM_RCS_ECC_POINT        (TPM_RC)(RC_FMT1 + 0x027)
 #define TPM_RC_FW_LIMITED        (TPM_RC)(RC_FMT1 + 0x028)
 #define TPM_RC_SVN_LIMITED       (TPM_RC)(RC_FMT1 + 0x029)
+#define TPM_RC_CHANNEL           (TPM_RC)(RC_FMT1 + 0x030)
+#define TPM_RC_CHANNEL_KEY       (TPM_RC)(RC_FMT1 + 0x031)
 #define RC_WARN                  (TPM_RC)(0x900)
 #define TPM_RC_CONTEXT_GAP       (TPM_RC)(RC_WARN + 0x001)
 #define TPM_RC_OBJECT_MEMORY     (TPM_RC)(RC_WARN + 0x002)
@@ -687,21 +691,23 @@ typedef UINT8 TPM_SE;
 
 // Table "Definition of TPM_CAP Constants" (Part 2: Structures)
 typedef UINT32 TPM_CAP;
-#define TYPE_OF_TPM_CAP         UINT32
-#define TPM_CAP_FIRST           (TPM_CAP)(0x00000000)
-#define TPM_CAP_ALGS            (TPM_CAP)(0x00000000)
-#define TPM_CAP_HANDLES         (TPM_CAP)(0x00000001)
-#define TPM_CAP_COMMANDS        (TPM_CAP)(0x00000002)
-#define TPM_CAP_PP_COMMANDS     (TPM_CAP)(0x00000003)
-#define TPM_CAP_AUDIT_COMMANDS  (TPM_CAP)(0x00000004)
-#define TPM_CAP_PCRS            (TPM_CAP)(0x00000005)
-#define TPM_CAP_TPM_PROPERTIES  (TPM_CAP)(0x00000006)
-#define TPM_CAP_PCR_PROPERTIES  (TPM_CAP)(0x00000007)
-#define TPM_CAP_ECC_CURVES      (TPM_CAP)(0x00000008)
-#define TPM_CAP_AUTH_POLICIES   (TPM_CAP)(0x00000009)
-#define TPM_CAP_ACT             (TPM_CAP)(0x0000000A)
-#define TPM_CAP_LAST            (TPM_CAP)(0x0000000A)
-#define TPM_CAP_VENDOR_PROPERTY (TPM_CAP)(0x00000100)
+#define TYPE_OF_TPM_CAP           UINT32
+#define TPM_CAP_FIRST             (TPM_CAP)(0x00000000)
+#define TPM_CAP_ALGS              (TPM_CAP)(0x00000000)
+#define TPM_CAP_HANDLES           (TPM_CAP)(0x00000001)
+#define TPM_CAP_COMMANDS          (TPM_CAP)(0x00000002)
+#define TPM_CAP_PP_COMMANDS       (TPM_CAP)(0x00000003)
+#define TPM_CAP_AUDIT_COMMANDS    (TPM_CAP)(0x00000004)
+#define TPM_CAP_PCRS              (TPM_CAP)(0x00000005)
+#define TPM_CAP_TPM_PROPERTIES    (TPM_CAP)(0x00000006)
+#define TPM_CAP_PCR_PROPERTIES    (TPM_CAP)(0x00000007)
+#define TPM_CAP_ECC_CURVES        (TPM_CAP)(0x00000008)
+#define TPM_CAP_AUTH_POLICIES     (TPM_CAP)(0x00000009)
+#define TPM_CAP_ACT               (TPM_CAP)(0x0000000A)
+#define TPM_CAP_PUB_KEYS          (TPM_CAP)(0x0000000B)
+#define TPM_CAP_SPDM_SESSION_INFO (TPM_CAP)(0x0000000C)
+#define TPM_CAP_LAST              (TPM_CAP)(0x0000000C)
+#define TPM_CAP_VENDOR_PROPERTY   (TPM_CAP)(0x00000100)
 
 // Table "Definition of TPM_PT Constants" (Part 2: Structures)
 typedef UINT32 TPM_PT;
@@ -929,6 +935,11 @@ typedef TPM_HANDLE TPM_HC;
 #define HR_AC                 (TPM_HC)(((UINT32)TPM_HT_AC << HR_SHIFT))		// libtpms changed: UBSAN
 #define AC_FIRST              (TPM_HC)((HR_AC + 0))
 #define AC_LAST               (TPM_HC)((HR_AC + 0x0000FFFF))
+
+// Table "Definition of TPM_PUB_KEY Constants" (Part 2: Structures)
+typedef UINT32 TPM_PUB_KEY;
+#define TYPE_OF_TPM_PUB_KEY     UINT32
+#define TPM_PUB_KEY_TPM_SPDM_00 (TPM_PUB_KEY)(0x00000000)
 
 // Table "Definition of TPMA_ALGORITHM Bits" (Part 2: Structures)
 #define TYPE_OF_TPMA_ALGORITHM      UINT32
@@ -1536,6 +1547,14 @@ typedef struct
     TPMA_ACT   attributes;
 } TPMS_ACT_DATA;
 
+#  if SEC_CHANNEL_SUPPORT
+typedef struct
+{  // (Part 2: Structures)
+    TPM2B_NAME reqKeyName;
+    TPM2B_NAME tpmKeyName;
+} TPMS_SPDM_SESSION_INFO;
+#  endif  // SEC_CHANNEL_SUPPORT
+
 typedef struct
 {  // (Part 2: Structures)
     UINT32 count;
@@ -1614,34 +1633,19 @@ typedef struct
     TPMS_ACT_DATA actData[MAX_ACT_DATA];
 } TPML_ACT_DATA;
 
+#  if SEC_CHANNEL_SUPPORT
+typedef struct
+{  // (Part 2: Structures)
+    UINT32                 count;
+    TPMS_SPDM_SESSION_INFO spdmSessionInfo[MAX_SPDM_SESS_INFO];
+} TPML_SPDM_SESSION_INFO;
+#  endif  // SEC_CHANNEL_SUPPORT
+
 typedef struct
 {  // (Part 2: Structures)
     UINT32                count;
     TPM2B_VENDOR_PROPERTY vendorData[MAX_VENDOR_PROPERTY];
 } TPML_VENDOR_PROPERTY;
-
-typedef union
-{  // (Part 2: Structures)
-    TPML_ALG_PROPERTY        algorithms;
-    TPML_HANDLE              handles;
-    TPML_CCA                 command;
-    TPML_CC                  ppCommands;
-    TPML_CC                  auditCommands;
-    TPML_PCR_SELECTION       assignedPCR;
-    TPML_TAGGED_TPM_PROPERTY tpmProperties;
-    TPML_TAGGED_PCR_PROPERTY pcrProperties;
-#if ALG_ECC
-    TPML_ECC_CURVE eccCurves;
-#endif  // ALG_ECC
-    TPML_TAGGED_POLICY authPolicies;
-    TPML_ACT_DATA      actData;
-} TPMU_CAPABILITIES;
-
-typedef struct
-{  // (Part 2: Structures)
-    TPM_CAP           capability;
-    TPMU_CAPABILITIES data;
-} TPMS_CAPABILITY_DATA;
 
 typedef union
 {  // (Part 2: Structures)
@@ -2369,6 +2373,41 @@ typedef struct
     UINT16      size;
     TPMT_PUBLIC publicArea;
 } TPM2B_PUBLIC;
+
+#  if SEC_CHANNEL_SUPPORT
+typedef struct
+{  // (Part 2: Structures)
+    UINT32       count;
+    TPM2B_PUBLIC pubKeys[MAX_PUB_KEYS];
+} TPML_PUB_KEY;
+#  endif  // SEC_CHANNEL_SUPPORT
+
+typedef union
+{  // (Part 2: Structures)
+    TPML_ALG_PROPERTY        algorithms;
+    TPML_HANDLE              handles;
+    TPML_CCA                 command;
+    TPML_CC                  ppCommands;
+    TPML_CC                  auditCommands;
+    TPML_PCR_SELECTION       assignedPCR;
+    TPML_TAGGED_TPM_PROPERTY tpmProperties;
+    TPML_TAGGED_PCR_PROPERTY pcrProperties;
+#if ALG_ECC
+    TPML_ECC_CURVE           eccCurves;
+#endif  // ALG_ECC
+    TPML_TAGGED_POLICY       authPolicies;
+    TPML_ACT_DATA            actData;
+#  if SEC_CHANNEL_SUPPORT
+    TPML_PUB_KEY             pubKeys;
+    TPML_SPDM_SESSION_INFO   spdmSessionInfo;
+#  endif  // SEC_CHANNEL_SUPPORT
+} TPMU_CAPABILITIES;
+
+typedef struct
+{  // (Part 2: Structures)
+    TPM_CAP           capability;
+    TPMU_CAPABILITIES data;
+} TPMS_CAPABILITY_DATA;
 
 typedef union
 {  // (Part 2: Structures)

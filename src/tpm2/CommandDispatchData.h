@@ -3507,6 +3507,42 @@ PolicyParameters_COMMAND_DESCRIPTOR_t _PolicyParametersData = {
 #define _PolicyParametersDataAddress 0
 #endif // CC_PolicyParameters
 
+#if       CC_PolicyTransportSPDM
+#include    "PolicyTransportSPDM_fp.h"
+
+typedef TPM_RC (PolicyTransportSPDM_Entry)(
+    PolicyTransportSPDM_In*     in
+);
+
+typedef const struct
+{
+    PolicyTransportSPDM_Entry   *entry;
+    UINT16                      inSize;
+    UINT16                      outSize;
+    UINT16                      offsetOfTypes;
+    UINT16                      paramOffsets[2];
+    BYTE                        types[5];
+} PolicyTransportSPDM_COMMAND_DESCRIPTOR_t;
+
+PolicyTransportSPDM_COMMAND_DESCRIPTOR_t _PolicyTransportSPDMData = {
+    /* entry         */         &TPM2_PolicyTransportSPDM,
+    /* inSize        */         (UINT16)(sizeof(PolicyTransportSPDM_In)),
+    /* outSize       */         0,
+    /* offsetOfTypes */         offsetof(PolicyTransportSPDM_COMMAND_DESCRIPTOR_t, types),
+    /* offsets       */         {(UINT16)(offsetof(PolicyTransportSPDM_In, reqKeyName)),
+                                 (UINT16)(offsetof(PolicyTransportSPDM_In, tpmKeyName))},
+    /* types         */         {TPMI_SH_POLICY_H_UNMARSHAL,
+                                 TPM2B_NAME_P_UNMARSHAL,
+                                 TPM2B_NAME_P_UNMARSHAL,
+                                 END_OF_LIST,
+                                 END_OF_LIST}
+};
+
+#define _PolicyTransportSPDMDataAddress (&_PolicyTransportSPDMData)
+#else
+#define _PolicyTransportSPDMDataAddress 0
+#endif // CC_PolicyTransportSPDM
+
 #if       CC_CreatePrimary
 #include    "CreatePrimary_fp.h"
 
@@ -5599,6 +5635,9 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
 #if (PAD_LIST || CC_ReadControl)
         (COMMAND_DESCRIPTOR_t*)_ReadOnlyControlDataAddress,
 #endif // CC_ReadOnlyControl
+#if (PAD_LIST || CC_PolicyTransportSPDM)
+        (COMMAND_DESCRIPTOR_t*)_PolicyTransportSPDMDataAddress,
+#endif // CC_PolicyTransportSPDM
 #if (PAD_LIST || CC_Vendor_TCG_Test)
         (COMMAND_DESCRIPTOR_t*)_Vendor_TCG_TestDataAddress,
 #endif // CC_Vendor_TCG_Test
