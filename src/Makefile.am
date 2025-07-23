@@ -227,6 +227,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/HashCommands.c \
 	tpm2/Hierarchy.c \
 	tpm2/HierarchyCommands.c \
+	tpm2/Init.c \
 	tpm2/IntegrityCommands.c \
 	tpm2/IoBuffers.c \
 	tpm2/Locality.c \
@@ -291,6 +292,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/X509_RSA.c \
 	tpm2/X509_spt.c \
 	tpm2/VendorCommands/Vendor_TCG_Test.c \
+	tpm2/_TPM_Init.c \
 	tpm_tpm2_interface.c \
 	tpm_tpm2_tis.c \
 	\
@@ -464,6 +466,7 @@ noinst_HEADERS += \
 	tpm2/PlatformACT_fp.h \
 	tpm2/PlatformClock.h \
 	tpm2/PlatformData.h \
+	tpm2/platform_init_fp.h \
 	tpm2/platform_public_interface.h \
 	tpm2/platform_pcr_fp.h \
 	tpm2/platform_to_tpm_interface.h \
