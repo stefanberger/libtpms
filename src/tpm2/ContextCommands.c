@@ -516,6 +516,7 @@ TPM2_EvictControl(EvictControl_In* in  // IN: input parameter list
 
     // Get internal object pointer
     evictObject = HandleToObject(in->objectHandle);
+    pAssert_RC(evictObject != NULL);
 
     // Objects in a firmware-limited or SVN-limited hierarchy cannot be made
     // persistent.

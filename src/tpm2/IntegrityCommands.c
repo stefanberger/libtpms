@@ -343,7 +343,9 @@ LIB_EXPORT BOOL _TPM_Hash_Data(uint32_t dataSize,   // IN: size of data to be ex
     }
 
     hashObject = (HASH_OBJECT *)HandleToObject(g_DRTMHandle);
+    pAssert_BOOL(hashObject != NULL);
     pAssert(hashObject->attributes.eventSeq);
+
     // For each of the implemented hash algorithms, update the digest with the
     // data provided.
     for(i = 0; i < HASH_COUNT; i++)
@@ -377,6 +379,9 @@ LIB_EXPORT BOOL _TPM_Hash_End(void)
 
     // Get DRTM sequence object
     hashObject = (HASH_OBJECT *)HandleToObject(g_DRTMHandle);
+    pAssert_BOOL(hashObject != NULL);
+    pAssert_BOOL(hashObject->attributes.eventSeq);
+
     // Is this _TPM_Hash_End after Startup or before
     if(TPMIsStarted())
 	{

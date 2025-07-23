@@ -74,7 +74,11 @@ TPM2_HMAC_Start(
     // Input Validation
     // Get HMAC key object and public area pointers
     keyObject = HandleToObject(in->handle);
+    pAssert_RC(keyObject != NULL);
+
     publicArea = &keyObject->publicArea;
+    pAssert_RC(publicArea != NULL);
+
     // Make sure that the key is an HMAC key
     if(publicArea->type != TPM_ALG_KEYEDHASH)
 	return TPM_RCS_TYPE + RC_HMAC_Start_handle;
@@ -130,7 +134,10 @@ TPM2_MAC_Start(
     // Input Validation
     // Get HMAC key object and public area pointers
     keyObject = HandleToObject(in->handle);
+    pAssert_RC(keyObject != NULL);
     publicArea = &keyObject->publicArea;
+    pAssert_RC(publicArea != NULL);
+
     // Make sure that the key can do what is required
     result = CryptSelectMac(publicArea, &in->inScheme);
     // If the key is not able to do a MAC, indicate that the handle selects an
@@ -192,6 +199,8 @@ TPM2_SequenceUpdate(
     // Check that referenced object is a sequence object.
     if(!ObjectIsSequence(object))
 	return TPM_RCS_MODE + RC_SequenceUpdate_sequenceHandle;
+
+    pAssert_RC(object != NULL);
     // Internal Data Update
     if(object->attributes.eventSeq == SET)
 	{
@@ -247,6 +256,8 @@ TPM2_SequenceComplete(
     // Input validation
     // Get hash object pointer
     hashObject = (HASH_OBJECT *)HandleToObject(in->sequenceHandle);
+    pAssert_RC(hashObject != NULL);
+
     // input handle must be a hash or HMAC sequence object.
     if(hashObject->attributes.hashSeq == CLEAR
        && hashObject->attributes.hmacSeq == CLEAR)
@@ -332,6 +343,8 @@ TPM2_EventSequenceComplete(
     // Input validation
     // get the event sequence object pointer
     hashObject = (HASH_OBJECT *)HandleToObject(in->sequenceHandle);
+    pAssert_RC(hashObject != NULL);
+
     // input handle must reference an event sequence object
     if(hashObject->attributes.eventSeq != SET)
 	return TPM_RCS_MODE + RC_EventSequenceComplete_sequenceHandle;

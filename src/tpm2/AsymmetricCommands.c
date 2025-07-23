@@ -72,6 +72,8 @@ TPM2_RSA_Encrypt(
     TPMT_RSA_DECRYPT        *scheme;
     // Input Validation
     rsaKey = HandleToObject(in->keyHandle);
+    pAssert_RC(rsaKey != NULL);
+
     // selected key must be an RSA key
     if(rsaKey->publicArea.type != TPM_ALG_RSA)
 	return TPM_RCS_KEY + RC_RSA_Encrypt_keyHandle;
@@ -108,6 +110,8 @@ TPM2_RSA_Decrypt(
     TPMT_RSA_DECRYPT            *scheme;
     // Input Validation
     rsaKey = HandleToObject(in->keyHandle);
+    pAssert_RC(rsaKey != NULL);
+
     // The selected key must be an RSA key
     if(rsaKey->publicArea.type != TPM_ALG_RSA)
 	return TPM_RCS_KEY + RC_RSA_Decrypt_keyHandle;
@@ -151,6 +155,8 @@ TPM2_ECDH_KeyGen(
     TPM_RC                   result;
     // Input Validation
     eccKey = HandleToObject(in->keyHandle);
+    pAssert_RC(eccKey != NULL);
+
     // Referenced key must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_ECDH_KeyGen_keyHandle;
@@ -195,6 +201,8 @@ TPM2_ECDH_ZGen(
     OBJECT                  *eccKey;
     // Input Validation
     eccKey = HandleToObject(in->keyHandle);
+    pAssert_RC(eccKey != NULL);
+
     // Selected key must be a non-restricted, decrypt ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_ECDH_ZGen_keyHandle;
@@ -256,6 +264,8 @@ TPM2_ZGen_2Phase(
 
     // Input Validation
     eccKey = HandleToObject(in->keyA);
+    pAssert_RC(eccKey != NULL);
+
     // keyA must be an ECC key
     if(eccKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RCS_KEY + RC_ZGen_2Phase_keyA;
@@ -312,7 +322,9 @@ TPM2_ECC_Encrypt(
 		 ECC_Encrypt_Out  *out            // OUT: output parameter list
 		 )
 {
-    OBJECT          *pubKey = HandleToObject(in->keyHandle);
+    OBJECT* pubKey = HandleToObject(in->keyHandle);
+    pAssert_RC(pubKey != NULL);
+
     // Parameter validation
     if (pubKey->publicArea.type != TPM_ALG_ECC)
 	return TPM_RC_KEY + RC_ECC_Encrypt_keyHandle;
@@ -335,7 +347,9 @@ TPM2_ECC_Decrypt(
 		 ECC_Decrypt_Out  *out            // OUT: output parameter list
 		 )
 {
-    OBJECT          *key = HandleToObject(in->keyHandle);
+    OBJECT* key = HandleToObject(in->keyHandle);
+    pAssert_RC(key != NULL);
+
     // Parameter validation
     // Must be the correct type of key with correct attributes
     if (key->publicArea.type != TPM_ALG_ECC)

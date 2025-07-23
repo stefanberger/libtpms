@@ -121,7 +121,7 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
     TPMT_PUBLIC* publicArea;
     // Input Validation
     parentObject = HandleToObject(in->parentHandle);
-    pAssert(parentObject != NULL);
+    pAssert_RC(parentObject != NULL);
 
     // Does parent have the proper attributes?
     if(!ObjectIsParent(parentObject))
@@ -238,7 +238,7 @@ TPM2_Load(
     if(in->inPrivate.t.size == 0)
 	return TPM_RCS_SIZE + RC_Load_inPrivate;
     parentObject = HandleToObject(in->parentHandle);
-    pAssert(parentObject != NULL);
+    pAssert_RC(parentObject != NULL);
     // Is the object that is being used as the parent actually a parent.
     if(!ObjectIsParent(parentObject))
 	return TPM_RCS_TYPE + RC_Load_parentHandle;
@@ -343,6 +343,11 @@ TPM2_ReadPublic(
     // Can not read public area of a sequence object
     if(ObjectIsSequence(object))
 	return TPM_RC_SEQUENCE;
+
+    // deliberately after ObjectIsSequence in case ObjectInSequence decides a
+    // null object is a non-fatal error
+    pAssert_RC(object != NULL);
+
     // Command Output
     out->outPublic.publicArea = object->publicArea;
     out->name = object->name;
@@ -386,6 +391,10 @@ TPM2_ActivateCredential(
 		return TPM_RC_FAILURE;
 	    return RcSafeAddToResult(result, RC_ActivateCredential_secret);
 	}
+    // this assertion is deliberately late, after other validation has happened
+    // soas to not change existing behavior of the function
+    pAssert_RC(activateObject != NULL);
+
     // Retrieve secret data.  A TPM_RC_INTEGRITY error or unmarshal
     // errors may be returned at this point
     result = CredentialToSecret(&in->credentialBlob.b,
@@ -449,6 +458,8 @@ TPM2_Unseal(
     // Input Validation
     // Get pointer to loaded object
     object = HandleToObject(in->itemHandle);
+    pAssert_RC(object != NULL);
+
     // Input handle must be a data object
     if(object->publicArea.type != TPM_ALG_KEYEDHASH)
 	return TPM_RCS_TYPE + RC_Unseal_itemHandle;
