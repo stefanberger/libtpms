@@ -260,14 +260,14 @@ BOOL CryptIsSchemeAnonymous(TPM_ALG_ID scheme  // IN: the scheme algorithm to te
 //      bits            the number of bits required for the symmetric key
 //                      plus an IV
 */
-void ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: the key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be decrypted
+TPM_RC ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: the key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be decrypted
 )
 {
     // KDF output buffer
@@ -294,16 +294,16 @@ void ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
                   FALSE);
         MemoryCopy(iv.t.buffer, &symParmString[keySize], iv.t.size);
 
-        CryptSymmetricDecrypt(data,
-                              symAlg,
-                              keySizeInBits,
-                              symParmString,
-                              &iv,
-                              TPM_ALG_CFB,
-                              dataSize,
-                              data);
+        return CryptSymmetricDecrypt(data,
+                                     symAlg,
+                                     keySizeInBits,
+                                     symParmString,
+                                     &iv,
+                                     TPM_ALG_CFB,
+                                     dataSize,
+                                     data);
     }
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** ParmEncryptSym()
@@ -320,14 +320,14 @@ void ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
 //      bits            the number of bits required for the symmetric key
 //                      plus an IV
 */
-void ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: symmetric key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be encrypted
+TPM_RC ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: symmetric key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be encrypted
 )
 {
     // KDF output buffer
@@ -355,16 +355,16 @@ void ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
                   FALSE);
         MemoryCopy(iv.t.buffer, &symParmString[keySize], iv.t.size);
 
-        CryptSymmetricEncrypt(data,
-                              symAlg,
-                              keySizeInBits,
-                              symParmString,
-                              &iv,
-                              TPM_ALG_CFB,
-                              dataSize,
-                              data);
+        return CryptSymmetricEncrypt(data,
+                                     symAlg,
+                                     keySizeInBits,
+                                     symParmString,
+                                     &iv,
+                                     TPM_ALG_CFB,
+                                     dataSize,
+                                     data);
     }
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** CryptGenerateKeySymmetric()
@@ -421,14 +421,13 @@ static TPM_RC CryptGenerateKeySymmetric(
 
 //*** CryptXORObfuscation()
 // This function implements XOR obfuscation. It should not be called if the
-// hash algorithm is not implemented. The only return value from this function
-// is TPM_RC_SUCCESS.
-void CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
-                         TPM2B*     key,       // IN: KDF key
-                         TPM2B*     contextU,  // IN: contextU
-                         TPM2B*     contextV,  // IN: contextV
-                         UINT32     dataSize,  // IN: size of data buffer
-                         BYTE*      data       // IN/OUT: data to be XORed in place
+// hash algorithm is not implemented.
+TPM_RC CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
+                           TPM2B*     key,       // IN: KDF key
+                           TPM2B*     contextU,  // IN: contextU
+                           TPM2B*     contextV,  // IN: contextV
+                           UINT32     dataSize,  // IN: size of data buffer
+                           BYTE*      data       // IN/OUT: data to be XORed in place
 )
 {
     BYTE   mask[MAX_DIGEST_SIZE];  // Allocate a digest sized buffer
@@ -439,7 +438,7 @@ void CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
     UINT32 requestSize = dataSize * 8;
     INT32  remainBytes = (INT32)dataSize;
 
-    pAssert((key != NULL) && (data != NULL) && (hLen != 0));
+    pAssert_RC((key != NULL) && (data != NULL) && (hLen != 0));
 
     // Call KDFa to generate XOR mask
     for(; remainBytes > 0; remainBytes -= hLen)
@@ -460,7 +459,7 @@ void CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
         for(i = hLen < remainBytes ? hLen : remainBytes; i > 0; i--)
             *data++ ^= *pm++;
     }
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //****************************************************************************
@@ -873,12 +872,15 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
                 //    nonceCaller the parameter from the TPM2_StartAuthHMAC command
                 //    nullNonce   a zero-length nonce
                 // XOR Obfuscation in place
-                CryptXORObfuscation(decryptKey->publicArea.nameAlg,
-                                    &decryptKey->sensitive.sensitive.bits.b,
-                                    &nonceCaller->b,
-                                    NULL,
-                                    secret->t.size,
-                                    secret->t.secret);
+                result = CryptXORObfuscation(decryptKey->publicArea.nameAlg,
+                                             &decryptKey->sensitive.sensitive.bits.b,
+                                             &nonceCaller->b,
+                                             NULL,
+                                             secret->t.size,
+                                             secret->t.secret);
+                if(result != TPM_RC_SUCCESS)
+                    return result;
+
                 // Copy decrypted seed
                 MemoryCopy2B(&data->b, &secret->b, sizeof(data->t.buffer));
             }
@@ -934,7 +936,7 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
 
 //*** CryptParameterEncryption()
 // This function does in-place encryption of a response parameter.
-void CryptParameterEncryption(
+TPM_RC CryptParameterEncryption(
     TPM_HANDLE handle,             // IN: encrypt session handle
     TPM2B*     nonceCaller,        // IN: nonce caller
     INT32      bufferSize,         // IN: size of parameter buffer
@@ -946,6 +948,8 @@ void CryptParameterEncryption(
 )
 {
     SESSION* session = SessionGet(handle);  // encrypt session
+    pAssert_RC(session);
+
     TPM2B_TYPE(TEMP_KEY,
                (sizeof(extraKey->t.buffer) + sizeof(session->sessionKey.t.buffer)));
     TPM2B_TEMP_KEY key;             // encryption key
@@ -953,54 +957,54 @@ void CryptParameterEncryption(
 
     if(bufferSize < leadingSizeInByte)
     {
-        FAIL(FATAL_ERROR_INTERNAL);
-        return;
+        FAIL_RC(FATAL_ERROR_INTERNAL);
     }
 
     // Parameter encryption for a non-2B is not supported.
     if(leadingSizeInByte != 2)
     {
-        FAIL(FATAL_ERROR_INTERNAL);
-        return;
+        FAIL_RC(FATAL_ERROR_INTERNAL);
     }
 
     // Retrieve encrypted data size.
     if(UINT16_Unmarshal(&cipherSize, &buffer, &bufferSize) != TPM_RC_SUCCESS)
     {
-        FAIL(FATAL_ERROR_INTERNAL);
-        return;
+        FAIL_RC(FATAL_ERROR_INTERNAL);
     }
 
     if(cipherSize > bufferSize)
     {
-        FAIL(FATAL_ERROR_INTERNAL);
-        return;
+        FAIL_RC(FATAL_ERROR_INTERNAL);
     }
 
     // Compute encryption key by concatenating sessionKey with extra key
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
     MemoryConcat2B(&key.b, &extraKey->b, sizeof(key.t.buffer));
 
+    TPM_RC result;
     if(session->symmetric.algorithm == TPM_ALG_XOR)
-
+    {
         // XOR parameter encryption formulation:
         //    XOR(parameter, hash, sessionAuth, nonceNewer, nonceOlder)
-        CryptXORObfuscation(session->authHashAlg,
-                            &(key.b),
-                            &(session->nonceTPM.b),
-                            nonceCaller,
-                            (UINT32)cipherSize,
-                            buffer);
+        result = CryptXORObfuscation(session->authHashAlg,
+                                     &(key.b),
+                                     &(session->nonceTPM.b),
+                                     nonceCaller,
+                                     (UINT32)cipherSize,
+                                     buffer);
+    }
     else
-        ParmEncryptSym(session->symmetric.algorithm,
-                       session->authHashAlg,
-                       session->symmetric.keyBits.aes,
-                       &(key.b),
-                       nonceCaller,
-                       &(session->nonceTPM.b),
-                       (UINT32)cipherSize,
-                       buffer);
-    return;
+    {
+        result = ParmEncryptSym(session->symmetric.algorithm,
+                                session->authHashAlg,
+                                session->symmetric.keyBits.aes,
+                                &(key.b),
+                                nonceCaller,
+                                &(session->nonceTPM.b),
+                                (UINT32)cipherSize,
+                                buffer);
+    }
+    return result;
 }
 
 //*** CryptParameterDecryption()
@@ -1020,6 +1024,8 @@ CryptParameterDecryption(
 )
 {
     SESSION* session = SessionGet(handle);  // encrypt session
+    pAssert_RC(session);
+
     // The HMAC key is going to be the concatenation of the session key and any
     // additional key material (like the authValue). The size of both of these
     // is the size of the buffer which can contain a TPMT_HA.
@@ -1037,6 +1043,7 @@ CryptParameterDecryption(
     if(leadingSizeInByte != 2)
     {
         FAIL_RC(FATAL_ERROR_INTERNAL);
+        return TPM_RC_SIZE;
     }
 
     // Retrieve encrypted data size.
@@ -1054,28 +1061,33 @@ CryptParameterDecryption(
     MemoryCopy2B(&key.b, &session->sessionKey.b, sizeof(key.t.buffer));
     MemoryConcat2B(&key.b, &extraKey->b, sizeof(key.t.buffer));
 
+    TPM_RC result;
     if(session->symmetric.algorithm == TPM_ALG_XOR)
+    {
         // XOR parameter decryption formulation:
         //    XOR(parameter, hash, sessionAuth, nonceNewer, nonceOlder)
         // Call XOR obfuscation function
-        CryptXORObfuscation(session->authHashAlg,
-                            &key.b,
-                            nonceCaller,
-                            &(session->nonceTPM.b),
-                            (UINT32)cipherSize,
-                            buffer);
+        result = CryptXORObfuscation(session->authHashAlg,
+                                     &key.b,
+                                     nonceCaller,
+                                     &(session->nonceTPM.b),
+                                     (UINT32)cipherSize,
+                                     buffer);
+    }
     else
+    {
         // Assume that it is one of the symmetric block ciphers.
-        ParmDecryptSym(session->symmetric.algorithm,
-                       session->authHashAlg,
-                       session->symmetric.keyBits.sym,
-                       &key.b,
-                       nonceCaller,
-                       &session->nonceTPM.b,
-                       (UINT32)cipherSize,
-                       buffer);
+        result = ParmDecryptSym(session->symmetric.algorithm,
+                                session->authHashAlg,
+                                session->symmetric.keyBits.sym,
+                                &key.b,
+                                nonceCaller,
+                                &session->nonceTPM.b,
+                                (UINT32)cipherSize,
+                                buffer);
+    }
 
-    return TPM_RC_SUCCESS;
+    return result;
 }
 
 //*** CryptComputeSymmetricUnique()

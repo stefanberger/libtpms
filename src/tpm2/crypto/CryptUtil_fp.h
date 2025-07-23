@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			  Interfaces to the CryptoEngine			*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 /*(Auto-generated)
  *  Created by TpmPrototypes; Version 3.0 July 18, 2017
@@ -75,38 +17,38 @@ BOOL CryptIsSchemeAnonymous(TPM_ALG_ID scheme  // IN: the scheme algorithm to te
 
 //*** ParmDecryptSym()
 //  This function performs parameter decryption using symmetric block cipher.
-void ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: the key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be decrypted
+TPM_RC ParmDecryptSym(TPM_ALG_ID symAlg,         // IN: the symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: the key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be decrypted
 );
 
 //*** ParmEncryptSym()
 //  This function performs parameter encryption using symmetric block cipher.
-void ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
-                    TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
-                    UINT16     keySizeInBits,  // IN: symmetric key size in bits
-                    TPM2B*     key,            // IN: KDF HMAC key
-                    TPM2B*     nonceCaller,    // IN: nonce caller
-                    TPM2B*     nonceTpm,       // IN: nonce TPM
-                    UINT32     dataSize,       // IN: size of parameter buffer
-                    BYTE*      data            // OUT: buffer to be encrypted
+TPM_RC ParmEncryptSym(TPM_ALG_ID symAlg,         // IN: symmetric algorithm
+                      TPM_ALG_ID hash,           // IN: hash algorithm for KDFa
+                      UINT16     keySizeInBits,  // IN: symmetric key size in bits
+                      TPM2B*     key,            // IN: KDF HMAC key
+                      TPM2B*     nonceCaller,    // IN: nonce caller
+                      TPM2B*     nonceTpm,       // IN: nonce TPM
+                      UINT32     dataSize,       // IN: size of parameter buffer
+                      BYTE*      data            // OUT: buffer to be encrypted
 );
 
 //*** CryptXORObfuscation()
 // This function implements XOR obfuscation. It should not be called if the
 // hash algorithm is not implemented. The only return value from this function
 // is TPM_RC_SUCCESS.
-void CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
-                         TPM2B*     key,       // IN: KDF key
-                         TPM2B*     contextU,  // IN: contextU
-                         TPM2B*     contextV,  // IN: contextV
-                         UINT32     dataSize,  // IN: size of data buffer
-                         BYTE*      data       // IN/OUT: data to be XORed in place
+TPM_RC CryptXORObfuscation(TPM_ALG_ID hash,      // IN: hash algorithm for KDF
+                           TPM2B*     key,       // IN: KDF key
+                           TPM2B*     contextU,  // IN: contextU
+                           TPM2B*     contextV,  // IN: contextV
+                           UINT32     dataSize,  // IN: size of data buffer
+                           BYTE*      data       // IN/OUT: data to be XORed in place
 );
 
 //*** CryptInit()
@@ -202,7 +144,7 @@ CryptSecretDecrypt(OBJECT*      decryptKey,   // IN: decrypt key
 
 //*** CryptParameterEncryption()
 // This function does in-place encryption of a response parameter.
-void CryptParameterEncryption(
+TPM_RC CryptParameterEncryption(
     TPM_HANDLE handle,             // IN: encrypt session handle
     TPM2B*     nonceCaller,        // IN: nonce caller
     INT32      bufferSize,         // IN: size of parameter buffer
