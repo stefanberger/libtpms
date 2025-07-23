@@ -307,7 +307,6 @@ typedef UINT32 TPM_CC;
 #define TPM_CC_PolicyTransportSPDM        (TPM_CC)(0x000001A1)
 #define TPM_CC_LAST                       (TPM_CC)(0x000001A1)
 #define CC_VEND                           (TPM_CC)(0x20000000)
-#define TPM_CC_Vendor_TCG_Test            (TPM_CC)(0x20000000)
 
 // This large macro is needed to determine the maximum commandIndex. This value
 // is needed in order to size typdef'ed structures. As a consequence, the

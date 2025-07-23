@@ -78,7 +78,7 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
     // vendor-command, then it is out of range.
     if(vendor)
     {
-#if VENDOR_COMMAND_ARRAY_SIZE > 0
+#if VENDOR_COMMAND_ARRAY_COUNT > 0
         COMMAND_INDEX commandIndex;
         COMMAND_INDEX min;
         COMMAND_INDEX max;
@@ -144,7 +144,7 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
        < searchIndex)
     {
         // requested index is out of the range to the top
-#if VENDOR_COMMAND_ARRAY_SIZE > 0
+#if VENDOR_COMMAND_ARRAY_COUNT > 0
         // If there are vendor commands, then the first vendor command
         // is the next value greater than the commandCode.
         // NOTE: we got here if the starting index did not have the V bit but we
@@ -177,9 +177,11 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
         // The s_ccAttr array contains an extra entry at the end (a zero value).
         // Don't count this as an array entry. This means that max should start
         // out pointing to the last valid entry in the array which is - 2
-        pAssert(
-            max
-            == (sizeof(s_ccAttr) / sizeof(TPMA_CC) - VENDOR_COMMAND_ARRAY_SIZE - 2));
+        VERIFY(max
+                   == (sizeof(s_ccAttr) / sizeof(TPMA_CC) - VENDOR_COMMAND_ARRAY_COUNT
+                       - 2),
+               FATAL_ERROR_ASSERT,
+               UNIMPLEMENTED_COMMAND_INDEX);
         while(min <= max)
         {
             commandIndex = (min + max + 1) / 2;
@@ -378,7 +380,6 @@ BOOL IsHandleInResponse(COMMAND_INDEX commandIndex)
 {
     return ((s_commandAttributes[commandIndex] & R_HANDLE) != 0);
 }
-
 
 //*** IsDisallowedInReadOnlyMode()
 // This function determines if a command is disallowed when operating in Read-Only mode

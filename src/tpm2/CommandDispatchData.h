@@ -5190,41 +5190,7 @@ ACT_SetTimeout_COMMAND_DESCRIPTOR_t _ACT_SetTimeoutData = {
 #define _ACT_SetTimeoutDataAddress 0
 #endif // CC_ACT_SetTimeout
 
-#if       CC_Vendor_TCG_Test
-#include    "Vendor_TCG_Test_fp.h"
-
-typedef TPM_RC (Vendor_TCG_Test_Entry)(
-    Vendor_TCG_Test_In*         in,
-    Vendor_TCG_Test_Out*        out
-);
-
-
-typedef const struct
-{
-    Vendor_TCG_Test_Entry       *entry;
-    UINT16                      inSize;
-    UINT16                      outSize;
-    UINT16                      offsetOfTypes;
-    BYTE                        types[4];
-} Vendor_TCG_Test_COMMAND_DESCRIPTOR_t;
-
-Vendor_TCG_Test_COMMAND_DESCRIPTOR_t _Vendor_TCG_TestData = {
-    /* entry         */         &TPM2_Vendor_TCG_Test,
-    /* inSize        */         (UINT16)(sizeof(Vendor_TCG_Test_In)),
-    /* outSize       */         (UINT16)(sizeof(Vendor_TCG_Test_Out)),
-    /* offsetOfTypes */         offsetof(Vendor_TCG_Test_COMMAND_DESCRIPTOR_t, types),
-    /* offsets       */         // No parameter offsets
-    /* types         */         {TPM2B_DATA_P_UNMARSHAL,
-                                 END_OF_LIST,
-                                 TPM2B_DATA_P_MARSHAL,
-                                 END_OF_LIST}
-};
-
-#define _Vendor_TCG_TestDataAddress (&_Vendor_TCG_TestData)
-#else
-#define _Vendor_TCG_TestDataAddress 0
-#endif // CC_Vendor_TCG_Test
-
+#include "VendorCommands/CommandDispatchData_CommandStructures.inl"
 
 // Lookup table to access the per-command tables above
 
@@ -5634,14 +5600,14 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
 #endif // CC_SetCapability
 #if (PAD_LIST || CC_ReadControl)
         (COMMAND_DESCRIPTOR_t*)_ReadOnlyControlDataAddress,
-#endif // CC_ReadOnlyControl
+#endif // CC_ReadOnlyControl  
 #if (PAD_LIST || CC_PolicyTransportSPDM)
         (COMMAND_DESCRIPTOR_t*)_PolicyTransportSPDMDataAddress,
 #endif // CC_PolicyTransportSPDM
-#if (PAD_LIST || CC_Vendor_TCG_Test)
-        (COMMAND_DESCRIPTOR_t*)_Vendor_TCG_TestDataAddress,
-#endif // CC_Vendor_TCG_Test
 
+#include "VendorCommands/CommandDispatchData_s_CommandDataArray.inl"
+
+// list terminator
         0
 };
 

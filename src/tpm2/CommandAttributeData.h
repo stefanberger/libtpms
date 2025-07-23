@@ -412,12 +412,13 @@ const TPMA_CC    s_ccAttr [] = {
 #if (PAD_LIST || CC_PolicyTransportSPDM)
     TPMA_CC_INITIALIZER(0x01A1, 0, 0, 0, 0, 1, 0, 0, 0),
 #endif
-#if (PAD_LIST || CC_Vendor_TCG_Test)
-        TPMA_CC_INITIALIZER(0x0000, 0, 0, 0, 0, 0, 0, 1, 0),
-#endif
+
+// Include attributes for vendor commands
+#include "VendorCommands/CommandAttributeData_s_ccAttr.inl"
+
+// list terminator
         TPMA_ZERO_INITIALIZER()
 };
-
 
 // This is the command code attribute structure.
 const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
@@ -940,10 +941,11 @@ const COMMAND_ATTRIBUTES    s_commandAttributes [] = {
         (COMMAND_ATTRIBUTES)(CC_PolicyTransportSPDM * // 0x01A1
             (DECRYPT_2+ALLOW_TRIAL)),
 #endif
-#if (PAD_LIST || CC_Vendor_TCG_Test)
-        (COMMAND_ATTRIBUTES)(CC_Vendor_TCG_Test * // 0x0000
-            (DECRYPT_2+ENCRYPT_2)),
-#endif
+
+// Include attributes for vendor commands
+#include "VendorCommands/CommandAttributeData_s_commandAttributes.inl"
+
+// list terminator
         0
 };
 
