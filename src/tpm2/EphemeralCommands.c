@@ -100,6 +100,7 @@ TPM2_Commit(Commit_In*  in,  // IN: input parameter list
 	return TPM_RC_TYPE;					// libtpms added end
 
     eccKey = HandleToObject(in->signHandle);
+    pAssert_RC(eccKey != NULL);
     parms  = &eccKey->publicArea.parameters.eccDetail;
 
     // Input key must be an ECC key

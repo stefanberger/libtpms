@@ -86,6 +86,7 @@ TPM2_EncryptDecrypt(
     TPMA_OBJECT          attributes;
     // Input Validation
     symKey = HandleToObject(in->keyHandle);
+    pAssert_RC(symKey != NULL);
     mode = symKey->publicArea.parameters.symDetail.sym.mode.sym;
     attributes = symKey->publicArea.objectAttributes;
     // The input key should be a symmetric key
@@ -258,6 +259,7 @@ TPM2_HMAC(
     // Input Validation
     // Get HMAC key object and public area pointers
     hmacObject = HandleToObject(in->handle);
+    pAssert_RC(hmacObject != NULL);
     publicArea = &hmacObject->publicArea;
     // Make sure that the key is an HMAC key
     if(publicArea->type != TPM_ALG_KEYEDHASH)
@@ -318,6 +320,7 @@ TPM2_MAC(
     // Input Validation
     // Get MAC key object and public area pointers
     keyObject = HandleToObject(in->handle);
+    pAssert_RC(keyObject != NULL);
     publicArea = &keyObject->publicArea;
     // If the key is not able to do a MAC, indicate that the handle selects an
     // object that can't do a MAC

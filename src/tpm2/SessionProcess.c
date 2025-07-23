@@ -208,7 +208,7 @@ static BOOL IsPolicySessionRequired(COMMAND_INDEX commandIndex,  // IN: command 
         if(type == TPM_HT_TRANSIENT)
         {
             OBJECT* object = HandleToObject(s_associatedHandles[sessionIndex]);
-
+            pAssert_BOOL(object != NULL);
             if(!IS_ATTRIBUTE(
                    object->publicArea.objectAttributes, TPMA_OBJECT, adminWithPolicy))
                 return FALSE;
@@ -299,6 +299,7 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
                 TPMA_OBJECT attributes;
                 //
                 object     = HandleToObject(handle);
+                pAssert_BOOL(object != NULL);
                 attributes = object->publicArea.objectAttributes;
 
                 // authValue is always available for a sequence object.
@@ -433,6 +434,7 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
             // An evict object would already have been loaded and given a
             // transient object handle by this point.
             OBJECT* object = HandleToObject(handle);
+            pAssert_BOOL(object != NULL);
             // Policy authorization is not available for an object with only
             // public portion loaded.
             if(object->attributes.publicOnly == CLEAR)
@@ -480,6 +482,7 @@ static BOOL IsAuthPolicyAvailable(TPM_HANDLE    handle,        // IN: handle of 
         default:
             break;
     }
+
     return result;
 }
 

@@ -87,6 +87,7 @@ TPM2_Certify(
     certifyInfo.type = TPM_ST_ATTEST_CERTIFY;
     // NOTE: the certified object is not allowed to be TPM_ALG_NULL so
     // 'certifiedObject' will never be NULL
+    pAssert_RC(certifiedObject != NULL);  // should have been filtered earlier.
     certifyInfo.attested.certify.name = certifiedObject->name;
 
     // When using an anonymous signing scheme, need to set the qualified Name to the
@@ -123,6 +124,8 @@ TPM2_CertifyCreation(
 	return TPM_RCS_KEY + RC_CertifyCreation_signHandle;
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
 	return TPM_RCS_SCHEME + RC_CertifyCreation_inScheme;
+
+    pAssert_RC(certified != NULL);
     // CertifyCreation specific input validation
     // Re-compute ticket
     TicketComputeCreation(in->creationTicket.hierarchy, &certified->name,
@@ -339,6 +342,8 @@ TPM2_CertifyX509(
     INT16                    length;        // length for a tagged element
     ASN1UnmarshalContext     ctx;
     ASN1MarshalContext       ctxOut;
+    pAssert_RC(object != NULL);
+
     // certTBS holds an array of pointers and lengths. Each entry references the
     // corresponding value in a TBSCertificate structure. For example, the 1th
     // element references the version number

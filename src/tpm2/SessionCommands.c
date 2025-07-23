@@ -82,6 +82,7 @@ TPM2_StartAuthSession(
 	{
 	    // Get pointer to loaded decrypt key
 	    tpmKey = HandleToObject(in->tpmKey);
+	    pAssert_RC(tpmKey != NULL);
 	    // key must be asymmetric with its sensitive area loaded. Since this
 	    // command does not require authorization, the presence of the sensitive
 	    // area was not already checked as it is with most other commands that
@@ -118,6 +119,8 @@ TPM2_StartAuthSession(
 	  case TPM_HT_TRANSIENT:
 	      {
 		  OBJECT      *object = HandleToObject(in->bind);
+		  pAssert_RC(object != NULL);
+
 		  // If the bind handle references a transient object, make sure that we
 		  // can get to the authorization value. Also, make sure that the object
 		  // has a proper Name (nameAlg != TPM_ALG_NULL). If it doesn't, then

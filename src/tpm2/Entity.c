@@ -320,8 +320,9 @@ EntityGetAuthPolicy(TPMI_DH_ENTITY handle,     // IN: handle of entity
             // authPolicy for an object
             {
                 OBJECT* object = HandleToObject(handle);
-                *authPolicy    = object->publicArea.authPolicy;
-                hashAlg        = object->publicArea.nameAlg;
+                GOTO_ERROR_UNLESS(object != NULL);
+                *authPolicy = object->publicArea.authPolicy;
+                hashAlg     = object->publicArea.nameAlg;
             }
             break;
         case TPM_HT_NV_INDEX:
@@ -342,6 +343,7 @@ EntityGetAuthPolicy(TPMI_DH_ENTITY handle,     // IN: handle of entity
             FAIL(FATAL_ERROR_INTERNAL);
             break;
     }
+Error:
     return hashAlg;
 }
 
@@ -357,8 +359,17 @@ TPM2B_NAME* EntityGetName(TPMI_DH_ENTITY handle,  // IN: handle of entity
         {
             // Name for an object
             OBJECT* object = HandleToObject(handle);
-            // an object with no nameAlg has no name
-            if(object->publicArea.nameAlg == TPM_ALG_NULL)
+
+            if(object == NULL)
+            {
+                // should not have gotten in this function in this case but we
+                // can safely enter failure mode and return an empty name
+                // through the if statement below.
+                FAIL_NORET(FATAL_ERROR_ASSERT);
+            }
+
+            // an invalid object or an object with no nameAlg has no name
+            if(object == NULL || object->publicArea.nameAlg == TPM_ALG_NULL)
                 name->b.size = 0;
             else
                 *name = object->name;
@@ -435,6 +446,8 @@ EntityGetHierarchy(TPMI_DH_ENTITY handle  // IN :handle of entity
             {
                 OBJECT* object;
                 object = HandleToObject(handle);
+                VERIFY(object != NULL, FATAL_ERROR_ASSERT, TPM_RH_NULL);
+
                 if(object->attributes.ppsHierarchy)
                 {
                     hierarchy = TPM_RH_PLATFORM;
