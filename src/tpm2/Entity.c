@@ -232,7 +232,7 @@ EntityGetAuthValue(TPMI_DH_ENTITY handle,  // IN: handle of entity
                     // Authorization is available only when the private portion of
                     // the object is loaded.  The check should be made before
                     // this function is called
-                    pAssert(object->attributes.publicOnly == CLEAR);
+                    pAssert_ZERO(object && object->attributes.publicOnly == CLEAR);
                     pAuth = &object->sensitive.authValue;
                 }
             }

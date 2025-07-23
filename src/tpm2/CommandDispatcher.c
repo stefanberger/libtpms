@@ -111,12 +111,12 @@ ParseHandleBuffer(COMMAND* command)
     BYTE                  dType;
 
     // Make sure that nothing strange has happened
-    pAssert(
+    pAssert_RC(
         command->index < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t*));
     // Get the address of the descriptor for this command
     desc = s_CommandDataArray[command->index];
 
-    pAssert(desc != NULL);
+    pAssert_RC(desc != NULL);
     // Get the associated list of unmarshaling data types.
     types = &((BYTE*)desc)[desc->typesOffset];
 
@@ -199,12 +199,12 @@ CommandDispatcher(COMMAND* command)
     TPM_RC                result;
     //
     // Get the address of the descriptor for this command
-    pAssert(
+    pAssert_RC(
         command->index < sizeof(s_CommandDataArray) / sizeof(COMMAND_DESCRIPTOR_t*));
     desc = s_CommandDataArray[command->index];
 
     // Get the list of parameter types for this command
-    pAssert(desc != NULL);
+    pAssert_RC(desc != NULL);
     types = &((BYTE*)desc)[desc->typesOffset];
 
     // Get a pointer to the list of parameter offsets

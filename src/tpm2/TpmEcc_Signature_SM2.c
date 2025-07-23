@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			     							*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2023					*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 #include "Tpm.h"
 #include "TpmEcc_Signature_SM2_fp.h"
@@ -151,9 +93,9 @@ loop:
     ExtMath_Add(bnR, bnE, ExtEcc_PointX(Q1));
     ExtMath_Mod(bnR, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
 #  endif
     // if r=0 or r+k=n, return to A3;
     if(ExtMath_IsZero(bnR))
@@ -167,9 +109,9 @@ loop:
     ExtMath_AddWord(bnT, bnD, 1);
     ExtMath_ModInverse(bnT, bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnT,
-                                 "79BFCF3052C80DA7B939E0C6914A18CB"
-                                 "B2D96D8555256E83122743A7D4F5F956"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnT,
+                                    "79BFCF3052C80DA7B939E0C6914A18CB"
+                                    "B2D96D8555256E83122743A7D4F5F956"));
 #  endif
     // compute s = t * (k - r * dA) mod n
     ExtMath_ModMult(bnS, bnR, bnD, order);
@@ -178,9 +120,9 @@ loop:
     ExtMath_Add(bnS, bnK, bnS);
     ExtMath_ModMult(bnS, bnS, bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     if(ExtMath_IsZero(bnS))
         goto loop;
@@ -190,12 +132,12 @@ loop:
 // is (r, s).
 // This is handled by the common return code
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     return TPM_RC_SUCCESS;
 }
@@ -227,20 +169,20 @@ TPM_RC TpmEcc_ValidateSignatureEcSm2(
 
 #  ifdef _SM2_SIGN_DEBUG
     // Make sure that the input signature is the test signature
-    pAssert(TpmEccDebug_HexEqual(bnR,
-                                 "40F1EC59F793D9F49E09DCEF49130D41"
-                                 "94F79FB1EED2CAA55BACDB49C4E755D1"));
-    pAssert(TpmEccDebug_HexEqual(bnS,
-                                 "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
-                                 "67A457872FB09EC56327A67EC7DEEBE7"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnR,
+                                    "40F1EC59F793D9F49E09DCEF49130D41"
+                                    "94F79FB1EED2CAA55BACDB49C4E755D1"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnS,
+                                    "6FC6DAC32C5D5CF10C77DFB20F7C2EB6"
+                                    "67A457872FB09EC56327A67EC7DEEBE7"));
 #  endif
     // b)   compute t  := (r + s) mod n
     ExtMath_Add(bnT, bnR, bnS);
     ExtMath_Mod(bnT, order);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(TpmEccDebug_HexEqual(bnT,
-                                 "2B75F07ED7ECE7CCC1C8986B991F441A"
-                                 "D324D6D619FE06DD63ED32E0C997C801"));
+    pAssert_RC(TpmEccDebug_HexEqual(bnT,
+                                    "2B75F07ED7ECE7CCC1C8986B991F441A"
+                                    "D324D6D619FE06DD63ED32E0C997C801"));
 #  endif
     // c)   verify that t > 0
     OK = !ExtMath_IsZero(bnT);
@@ -251,10 +193,10 @@ TPM_RC TpmEcc_ValidateSignatureEcSm2(
     // d)   compute (x, y) := [s]G + [t]Q
     OK = ExtEcc_PointMultiplyAndAdd(P, NULL, bnS, ecQ, bnT, E);
 #  ifdef _SM2_SIGN_DEBUG
-    pAssert(OK
-            && TpmEccDebug_HexEqual(ExtEcc_PointX(P),
-                                    "110FCDA57615705D5E7B9324AC4B856D"
-                                    "23E6D9188B2AE47759514657CE25D112"));
+    pAssert_RC(OK
+               && TpmEccDebug_HexEqual(ExtEcc_PointX(P),
+                                       "110FCDA57615705D5E7B9324AC4B856D"
+                                       "23E6D9188B2AE47759514657CE25D112"));
 #  endif
     // e)   compute r' := (e + x) mod n (the x coordinate is in bnT)
     OK = OK && ExtMath_Add(bnRp, bnE, ExtEcc_PointX(P));

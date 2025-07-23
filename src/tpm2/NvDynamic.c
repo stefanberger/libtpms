@@ -605,11 +605,11 @@ static void NvObjectFromBuffer(OBJECT* object, BYTE* buf, UINT32 buf_size)
      */
     rc = ANY_OBJECT_Unmarshal(object, &buffer, &size, false);
     if (!rc) {
-        pAssert(size == 0);
+        pAssert_VOID_OK(size == 0);
     } else {
         /* It could not be unmarshalled, it must be a plain RSA3072_OBJECT */
         rc = RSA3072_OBJECT_Buffer_To_OBJECT(object, buf, buf_size);
-        pAssert(rc == TPM_RC_SUCCESS);
+        pAssert_VOID_OK(rc == TPM_RC_SUCCESS);
     }
 }							// libtpms added end
 
@@ -632,7 +632,7 @@ void NvReadObject(NV_REF  ref,    // IN: points to NV where index is located
     entrysize -= sizeof(NV_ENTRY_HEADER);
 
     /* read the flat object into a buffer */
-    pAssert(entrysize <= sizeof(buffer));
+    pAssert_VOID_OK(entrysize <= sizeof(buffer));
     NvRead(buffer, ref + sizeof(TPM_HANDLE), entrysize);
 
     NvObjectFromBuffer(object, buffer, entrysize);

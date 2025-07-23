@@ -151,7 +151,7 @@ CryptIncrementalSelfTest(TPML_ALG* toTest,   // IN: list of algorithms to be tes
     TPM_ALG_ID       alg;
     UINT32           i;
 
-    pAssert(toTest != NULL && toDoList != NULL);
+    pAssert_RC(toTest != NULL && toDoList != NULL);
     if(toTest->count > 0)
     {
         // Transcribe the toTest list into the toTestVector
