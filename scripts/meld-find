@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+if [ ! -f "$1" ]; then
+	echo "Cannot find file '$1' in libtpms repo."
+	exit 1
+fi
+
+if [ -z "${TCG_TPM_HOME}" ]; then
+	echo "TCG_TPM_HOME must be set to the TCG TPM repo checkout."
+	exit 1
+fi
+
+if [ ! -d "${TCG_TPM_HOME}" ]; then
+	echo "TCG_TPM_HOME must point to a directory."
+	exit 1
+fi
+
+
+fname=$(basename "$1")
+
+upstream=$(find "${TCG_TPM_HOME}" | grep -E "/${fname}\$")
+
+meld "${upstream}" "$1"

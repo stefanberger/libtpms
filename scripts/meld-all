@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+SKIP_FILES="(Marshal.c|Marshal_fp.h)"
+
+
+NO_MELD_FLAG=$((1<<0))
+
+main()
+{
+	local opts f fname upstream flags
+
+	flags=0
+
+	prgname="$0"
+	if ! opts=$(getopt -l "help,no-meld,diff-only" -n "$prgname" -- "$prgname" "$@"); then
+		echo "Error: Failed to parse options." >&2
+		return 1
+	fi
+	eval set -- "${opts}"
+
+	while :; do
+		case "$1" in
+			--no-meld|diff-only)
+				flags=$((flags | NO_MELD_FLAG))
+				shift
+				;;
+			--)
+				shift
+				break
+				;;
+			--help)
+				help "$prgname"
+				return 0
+				;;
+			*)
+				echo "Internal error: Unregonized option '$1'" >&2
+				shift
+				return
+				;;
+		esac
+	done
+
+	if [ ! -r "$1" ]; then
+		echo "Cannot find file '$1' in libtpms repo."
+		exit 1
+	fi
+
+	if [ ! -d "$1" ]; then
+		echo "'$1' is not a directory."
+		exit 1
+	fi
+
+	if [ ! -d "${TCG_TPM_HOME}" ]; then
+		echo "TCG_TPM_HOME must point to a directory."
+		exit 1
+	fi
+
+	for f in $(find "$1" -type f -name '*.[ch]'); do
+		fname=$(basename "$f")
+
+		if [[ "${fname}" =~ ^${SKIP_FILES}$ ]]; then
+			echo "skipping ${fname}"
+			continue
+		fi
+
+		upstream=$(find "${TCG_TPM_HOME}" | grep -E "/${fname}\$")
+
+		if [ -n "${upstream}" ]; then
+			# find first empty line presumably after license
+			line=$(grep -m 1 -E "^$" -n "${f}" | cut -d":" -f1)
+			if [ -z "$line" ]; then
+				if [ $((flags & NO_MELD_FLAG)) -eq 0 ]; then
+					meld "${upstrean}" "${f}"
+				else
+					echo "Something wrong with file $f"
+				fi
+			fi
+			line=$((line+1))
+			if [ $((flags & NO_MELD_FLAG)) -ne 0 ]; then
+				echo "============================================================================"
+				echo "${f}"
+				diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}"
+			fi
+			if ! diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}" >/dev/null; then
+				if [ $((flags & NO_MELD_FLAG)) -eq 0 ]; then
+					meld "${upstream}" "$f"
+				fi
+			else
+				echo "${f}: nothing to do"
+			fi
+		else
+			echo "Could not find file ${fname} in TCG TPM repo"
+		fi
+	done
+}
+
+main "$@"
+exit $?
