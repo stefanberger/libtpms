@@ -284,8 +284,8 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             // vendor-defined commands, this will be the same as the
             // number of library commands.
             {
-#if COMPRESSED_LISTS
-                (*value) = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); // libtpms changed: was COMMAND_COUNT
+#if COMPRESSED_LISTS										// libtpms changed begin
+                (*value) = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); 	// libtpms changed: was COMMAND_COUNT
 #else
                 COMMAND_INDEX commandIndex;
                 *value = 0;
@@ -297,14 +297,14 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                 {
                     (*value)++;  // count of all implemented
                 }
-#endif
+#endif												// libtpms changed end
                 break;
             }
         case TPM_PT_LIBRARY_COMMANDS:
             // number of commands from the TPM library that are implemented
             {
-#if COMPRESSED_LISTS
-                *value = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); // libtpms changed: was LIBRARY_COMMAND_ARRAY_SIZE
+#if COMPRESSED_LISTS										// libtpms changed begin
+                *value = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands);	// libtpms changed: was LIBRARY_COMMAND_ARRAY_SIZE
 #else
                 COMMAND_INDEX commandIndex;
                 *value = 0;
@@ -316,7 +316,7 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                 {
                     (*value)++;
                 }
-#endif
+#endif												// libtpms changed end
                 break;
             }
         case TPM_PT_VENDOR_COMMANDS:
@@ -397,10 +397,8 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                 if(g_prevOrderlyState != SU_NONE_VALUE)
                     SET_ATTRIBUTE(flags.attr, TPMA_STARTUP_CLEAR, orderly);
 
-                // Note: For a LSb0 machine, the bits in a bit field are in the correct
-                // order even if the machine is MSB0. For a MSb0 machine, a TPMA will
-                // be an integer manipulated by masking (USE_BIT_FIELD_STRUCTURES will
-                // be NO) so the bits are manipulate correctly.
+                // A TPMA will be an integer manipulated by masking so the bits
+                // are manipulated correctly regardless of machine endianness.
                 *value = flags.u32;
                 break;
             }

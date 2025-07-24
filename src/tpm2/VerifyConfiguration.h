@@ -38,7 +38,7 @@ MUST_BE_0_OR_1(SKIP_PROOF_ERRORS);
 // Implementation alternatives - should not change external behavior
 MUST_BE_0_OR_1(TABLE_DRIVEN_DISPATCH);
 MUST_BE_0_OR_1(TABLE_DRIVEN_MARSHAL);
-MUST_BE_0_OR_1(COMPRESSED_LISTS);
+MUST_BE_0_OR_1(COMPRESSED_LISTS);		// libtpms added
 MUST_BE_0_OR_1(RSA_KEY_SIEVE);
 
 // Implementation alternatives - changes external behavior
