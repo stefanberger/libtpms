@@ -375,11 +375,11 @@ typedef UINT32 TPM_CC;
 // packed (only defined commands) or dense
 // (having entries for unimplemented commands). This overly large macro
 // computes the size of the array and sets some global constants
-#if COMPRESSED_LISTS
+#if COMPRESSED_LISTS				// libtpms added begin
 #  define ADD_FILL 0
 #else
 #  define ADD_FILL 1
-#endif
+#endif						// libtpms added end
 #define LIBRARY_COMMAND_ARRAY_SIZE                                    \
     (0 + (ADD_FILL || CC_NV_UndefineSpaceSpecial)    /* 0x0000011F */ \
      + (ADD_FILL || CC_EvictControl)                 /* 0x00000120 */ \
@@ -511,6 +511,10 @@ typedef UINT32 TPM_CC;
      + (ADD_FILL || CC_NV_ReadPublic2)               /* 0x0000019E */ \
      + (ADD_FILL || CC_SetCapability)                /* 0x0000019F */ \
     )
+#if LIBRARY_COMMAND_ARRAY_SIZE == 0
+#  error "No commands are enabled -- something is terribly wrong."
+#endif
+
 #define VENDOR_COMMAND_ARRAY_SIZE (CC_Vendor_TCG_Test)
 #define COMMAND_COUNT             (LIBRARY_COMMAND_ARRAY_SIZE + VENDOR_COMMAND_ARRAY_SIZE)
 

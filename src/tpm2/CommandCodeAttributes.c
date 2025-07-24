@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*		Functions for testing various command properties		*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 // This file contains the functions for testing various command properties.
@@ -84,7 +26,7 @@ typedef UINT16 ATTRIBUTE_TYPE;
 
 //** Command Attribute Functions
 
-//*** NextImplementedIndex()
+//*** NextImplementedIndex()							// libtpms added begin
 // This function is used when the lists are not compressed. In a compressed list,
 // only the implemented commands are present. So, a search might find a value
 // but that value may not be implemented. This function checks to see if the input
@@ -99,8 +41,7 @@ static COMMAND_INDEX NextImplementedIndex(COMMAND_INDEX commandIndex)
 {
     for(; commandIndex < COMMAND_COUNT; commandIndex++)
     {
-       if((s_commandAttributes[commandIndex] & IS_IMPLEMENTED) &&		// libtpms changed
-          RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	// libtpms added begin
+       if(RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	// libtpms added begin
                                       GET_ATTRIBUTE(s_ccAttr[commandIndex],
                                                     TPMA_CC, commandIndex)))	// libtpms added end
             return commandIndex;
@@ -109,7 +50,7 @@ static COMMAND_INDEX NextImplementedIndex(COMMAND_INDEX commandIndex)
 }
 #else
 #  define NextImplementedIndex(x) (x)
-#endif
+#endif										// libtpms added end
 
 //*** GetClosestCommandIndex()
 // This function returns the command index for the command with a value that is
@@ -221,11 +162,11 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
     // the lowest value (needs to be an index for an implemented command
     if(GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex) >= searchIndex)
     {
-        return NextImplementedIndex(0);
+        return NextImplementedIndex(0);				// libtpms changed
     }
     else
     {
-#if COMPRESSED_LISTS
+#if COMPRESSED_LISTS							// libtpms added
         COMMAND_INDEX commandIndex = UNIMPLEMENTED_COMMAND_INDEX;
         COMMAND_INDEX min          = 0;
         COMMAND_INDEX max          = LIBRARY_COMMAND_ARRAY_SIZE - 1;
@@ -262,13 +203,13 @@ GetClosestCommandIndex(TPM_CC commandCode  // IN: the command code to start at
         // Note: this will necessarily be in range because of the earlier check
         // that the index was within range.
         return commandIndex + 1;
-#else
+#else									// libtpms added begin
         // The list is not compressed so offset into the array by the command
         // code value of the first entry in the list. Then go find the first
         // implemented command.
         return NextImplementedIndex(
-            searchIndex - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex)); // libtpms changed
-#endif
+            searchIndex - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex));
+#endif									// libtpms added end
     }
 }
 
@@ -286,23 +227,22 @@ CommandCodeToCommandIndex(TPM_CC commandCode  // IN: the command code to look up
     COMMAND_INDEX searchIndex = (COMMAND_INDEX)commandCode;
     BOOL          vendor      = (commandCode & CC_VEND) != 0;
     COMMAND_INDEX commandIndex;
-#if !COMPRESSED_LISTS
+#if !COMPRESSED_LISTS							// libtpms added begin
     if(!vendor)
     {
-        commandIndex = searchIndex - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex); // libtpms changed
+        commandIndex = searchIndex - (COMMAND_INDEX)GET_ATTRIBUTE(s_ccAttr[0], TPMA_CC, commandIndex);
         // Check for out of range or unimplemented.
         // Note, since a COMMAND_INDEX is unsigned, if searchIndex is smaller than
         // the lowest value of command, it will become a 'negative' number making
         // it look like a large unsigned number, this will cause it to fail
         // the unsigned check below.
         if(commandIndex >= LIBRARY_COMMAND_ARRAY_SIZE
-           || (s_commandAttributes[commandIndex] & IS_IMPLEMENTED) == 0
-           || !RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,	// libtpms added
-                                           commandCode))			// libtpms added
+           || !RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,
+                                           commandCode))
             return UNIMPLEMENTED_COMMAND_INDEX;
         return commandIndex;
     }
-#endif
+#endif									// libtpms added end
     // Need this code for any vendor code lookup or for compressed lists
     commandIndex = GetClosestCommandIndex(commandCode);
 
@@ -336,10 +276,7 @@ GetNextCommandIndex(COMMAND_INDEX commandIndex  // IN: the starting index
                                         GET_ATTRIBUTE(s_ccAttr[commandIndex],
                                                       TPMA_CC, commandIndex)))
             continue;								// libtpms added end
-#if !COMPRESSED_LISTS
-        if(s_commandAttributes[commandIndex] & IS_IMPLEMENTED)
-#endif
-            return commandIndex;
+        return commandIndex;
     }
     return UNIMPLEMENTED_COMMAND_INDEX;
 }
@@ -534,15 +471,10 @@ CommandCapGetCCList(TPM_CC commandCode,  // IN: start command code
         commandIndex != UNIMPLEMENTED_COMMAND_INDEX;
         commandIndex = GetNextCommandIndex(commandIndex))
     {
-#if !COMPRESSED_LISTS
-        // this check isn't needed for compressed lists.
-        if(!(s_commandAttributes[commandIndex] & IS_IMPLEMENTED))
-            continue;
-#endif
-        if (!RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,        // libtpms added begin
+        if (!RuntimeCommandsCheckEnabled(&g_RuntimeProfile.RuntimeCommands,		// libtpms added begin
                                          GET_ATTRIBUTE(s_ccAttr[commandIndex],
                                                        TPMA_CC, commandIndex)))
-             continue;                                                        // libtpms added end
+             continue;									// libtpms added end
         if(commandList->count < count)
         {
             // If the list is not full, add the attributes for this command.
