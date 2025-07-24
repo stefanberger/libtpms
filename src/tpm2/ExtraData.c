@@ -81,10 +81,10 @@
 // manufacture and CLEAR.  The buffer will contain the last value provided
 // to the Core library.
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
-						  uint32_t bufferSize)
+                                                  uint32_t bufferSize)
 {
     if(bufferSize != 0)
-	{
-	    memset((void*)pPlatformPersistentData, 0xFF, bufferSize);
-	}
+    {
+        memset((void*)pPlatformPersistentData, 0xFF, bufferSize);
+    }
 }

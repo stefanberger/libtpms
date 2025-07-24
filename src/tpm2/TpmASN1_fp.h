@@ -72,7 +72,7 @@
 //      TRUE(1)     success
 //      FALSE(0)    failure
 BOOL ASN1UnmarshalContextInitialize(
-				    ASN1UnmarshalContext* ctx, INT16 size, BYTE* buffer);
+    ASN1UnmarshalContext* ctx, INT16 size, BYTE* buffer);
 
 //***ASN1DecodeLength()
 // This function extracts the length of an element from 'buffer' starting at 'offset'.
@@ -107,7 +107,7 @@ BOOL ASN1GetBitStringValue(ASN1UnmarshalContext* ctx, UINT32* val);
 // This creates a structure for handling marshaling of an ASN.1 formatted data
 // structure.
 void ASN1InitialializeMarshalContext(
-				     ASN1MarshalContext* ctx, INT16 length, BYTE* buffer);
+    ASN1MarshalContext* ctx, INT16 length, BYTE* buffer);
 
 //*** ASN1StartMarshalContext()
 // This starts a new constructed element. It is constructed on 'top' of the value
@@ -173,7 +173,7 @@ ASN1PushTagAndLength(ASN1MarshalContext* ctx, BYTE tag, INT16 length);
 //      == 0        failure
 INT16
 ASN1PushTaggedOctetString(
-			  ASN1MarshalContext* ctx, INT16 size, const BYTE* string, BYTE tag);
+    ASN1MarshalContext* ctx, INT16 size, const BYTE* string, BYTE tag);
 
 //*** ASN1PushUINT()
 // This function pushes an native-endian integer value. This just changes a
@@ -192,9 +192,9 @@ ASN1PushUINT(ASN1MarshalContext* ctx, UINT32 integer);
 //      == 0        failure
 INT16
 ASN1PushInteger(ASN1MarshalContext* ctx,     // IN/OUT: buffer context
-		INT16               iLen,    // IN: octets of the integer
-		BYTE*               integer  // IN: big-endian integer
-		);
+                INT16               iLen,    // IN: octets of the integer
+                BYTE*               integer  // IN: big-endian integer
+);
 
 //*** ASN1PushOID()
 // This function is used to add an OID. An OID is 0x06 followed by a byte of size
@@ -207,4 +207,3 @@ INT16
 ASN1PushOID(ASN1MarshalContext* ctx, const BYTE* OID);
 
 #endif  // _TPM_ASN1_FP_H_
-

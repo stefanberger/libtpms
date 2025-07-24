@@ -70,18 +70,18 @@
 // It is used by TPM2_ConextSave and TPM2_ContextLoad to create the symmetric
 // encryption key and iv
 /*(See part 1 specification)
-  KDFa is used to generate the symmetric encryption key and IV. The parameters
-  of the call are:
-  Symkey = KDFa(hashAlg, hProof, vendorString, sequence, handle, bits)
-  where
-  hashAlg         a vendor-defined hash algorithm
-  hProof          the hierarchy proof as selected by the hierarchy parameter
-  of the TPMS_CONTEXT
-  vendorString    a value used to differentiate the uses of the KDF
-  sequence        the sequence parameter of the TPMS_CONTEXT
-  handle          the handle parameter of the TPMS_CONTEXT
-  bits            the number of bits needed for a symmetric key and IV for
-  the context encryption
+    KDFa is used to generate the symmetric encryption key and IV. The parameters
+    of the call are:
+        Symkey = KDFa(hashAlg, hProof, vendorString, sequence, handle, bits)
+    where
+    hashAlg         a vendor-defined hash algorithm
+    hProof          the hierarchy proof as selected by the hierarchy parameter
+                    of the TPMS_CONTEXT
+    vendorString    a value used to differentiate the uses of the KDF
+    sequence        the sequence parameter of the TPMS_CONTEXT
+    handle          the handle parameter of the TPMS_CONTEXT
+    bits            the number of bits needed for a symmetric key and IV for
+                    the context encryption
 */
 //  Return Type: TPM_RC
 //      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
@@ -92,13 +92,13 @@
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
 TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
-				   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
-				   TPM2B_IV*      iv       // OUT: the IV.
-				   )
+                                   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
+                                   TPM2B_IV*      iv       // OUT: the IV.
+)
 {
     TPM_RC result = TPM_RC_SUCCESS;
     UINT16 symKeyBits;  // number of bits in the parent's
-    //   symmetric key
+                        //   symmetric key
     TPM2B_PROOF proof;  // the proof value to use
 
     BYTE        kdfResult[sizeof(TPMU_HA) * 2];  // Value produced by the KDF
@@ -124,18 +124,18 @@ TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
     // Get proof value
     result = HierarchyGetProof(contextBlob->hierarchy, &proof);
     if(result != TPM_RC_SUCCESS)
-	return result;
+        return result;
 
     // KDFa to generate symmetric key and IV value
     CryptKDFa(CONTEXT_INTEGRITY_HASH_ALG,
-	      &proof.b,
-	      CONTEXT_KEY,
-	      &sequence2B.b,
-	      &handle2B.b,
-	      (symKey->t.size + iv->t.size) * 8,
-	      kdfResult,
-	      NULL,
-	      FALSE);
+              &proof.b,
+              CONTEXT_KEY,
+              &sequence2B.b,
+              &handle2B.b,
+              (symKey->t.size + iv->t.size) * 8,
+              kdfResult,
+              NULL,
+              FALSE);
 
     MemorySet(proof.b.buffer, 0, proof.b.size);
 
@@ -155,23 +155,23 @@ TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
 //       It is used by TPM2_ContextSave to create an integrity hash
 //       and by TPM2_ContextLoad to compare an integrity hash
 /*(See part 1 specification)
-  The HMAC integrity computation for a saved context is:
-  HMACvendorAlg(hProof, resetValue {|| clearCount} || sequence || handle ||
-  encContext)
-  where
-  HMACvendorAlg       HMAC using a vendor-defined hash algorithm
-  hProof              the hierarchy proof as selected by the hierarchy
-  parameter of the TPMS_CONTEXT
-  resetValue          either a counter value that increments on each TPM Reset
-  and is not reset over the lifetime of the TPM or a random
-  value that changes on each TPM Reset and has the size of
-  the digest produced by vendorAlg
-  clearCount          a counter value that is incremented on each TPM Reset
-  or TPM Restart. This value is only included if the handle
-  value is 0x80000002.
-  sequence            the sequence parameter of the TPMS_CONTEXT
-  handle              the handle parameter of the TPMS_CONTEXT
-  encContext          the encrypted context blob
+    The HMAC integrity computation for a saved context is:
+    HMACvendorAlg(hProof, resetValue {|| clearCount} || sequence || handle ||
+                encContext)
+    where
+    HMACvendorAlg       HMAC using a vendor-defined hash algorithm
+    hProof              the hierarchy proof as selected by the hierarchy
+                        parameter of the TPMS_CONTEXT
+    resetValue          either a counter value that increments on each TPM Reset
+                        and is not reset over the lifetime of the TPM or a random
+                        value that changes on each TPM Reset and has the size of
+                        the digest produced by vendorAlg
+    clearCount          a counter value that is incremented on each TPM Reset
+                        or TPM Restart. This value is only included if the handle
+                        value is 0x80000002.
+    sequence            the sequence parameter of the TPMS_CONTEXT
+    handle              the handle parameter of the TPMS_CONTEXT
+    encContext          the encrypted context blob
 */
 //  Return Type: TPM_RC
 //      TPM_RC_FW_LIMITED       The requested hierarchy is FW-limited, but the TPM
@@ -182,8 +182,8 @@ TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
 TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
-			       TPM2B_DIGEST* integrity     // OUT: integrity
-			       )
+                               TPM2B_DIGEST* integrity     // OUT: integrity
+)
 {
     TPM_RC      result = TPM_RC_SUCCESS;
     HMAC_STATE  hmacState;
@@ -193,11 +193,11 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
     // Get proof value
     result = HierarchyGetProof(contextBlob->hierarchy, &proof);
     if(result != TPM_RC_SUCCESS)
-	return result;
+        return result;
 
     // Start HMAC
     integrity->t.size =
-	CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
+        CryptHmacStart2B(&hmacState, CONTEXT_INTEGRITY_HASH_ALG, &proof.b);
 
     MemorySet(proof.b.buffer, 0, proof.b.size);
 
@@ -207,28 +207,28 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
     // Adding total reset counter so that the context cannot be
     // used after a TPM Reset
     CryptDigestUpdateInt(
-			 &hmacState.hashState, sizeof(gp.totalResetCount), gp.totalResetCount);
+        &hmacState.hashState, sizeof(gp.totalResetCount), gp.totalResetCount);
 
     // If this is a ST_CLEAR object, add the clear count
     // so that this contest cannot be loaded after a TPM Restart
     if(contextBlob->savedHandle == 0x80000002)
-	CryptDigestUpdateInt(
-			     &hmacState.hashState, sizeof(gr.clearCount), gr.clearCount);
+        CryptDigestUpdateInt(
+            &hmacState.hashState, sizeof(gr.clearCount), gr.clearCount);
 
     // Adding sequence number to the HMAC to make sure that it doesn't
     // get changed
     CryptDigestUpdateInt(
-			 &hmacState.hashState, sizeof(contextBlob->sequence), contextBlob->sequence);
+        &hmacState.hashState, sizeof(contextBlob->sequence), contextBlob->sequence);
 
     // Protect the handle
     CryptDigestUpdateInt(&hmacState.hashState,
-			 sizeof(contextBlob->savedHandle),
-			 contextBlob->savedHandle);
+                         sizeof(contextBlob->savedHandle),
+                         contextBlob->savedHandle);
 
     // Adding sensitive contextData, skip the leading integrity area
     CryptDigestUpdate(&hmacState.hashState,
-		      contextBlob->contextBlob.t.size - integritySize,
-		      contextBlob->contextBlob.t.buffer + integritySize);
+                      contextBlob->contextBlob.t.size - integritySize,
+                      contextBlob->contextBlob.t.buffer + integritySize);
 
     // Complete HMAC
     CryptHmacEnd2B(&hmacState, &integrity->b);
@@ -236,7 +236,7 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
     return TPM_RC_SUCCESS;
 }
 
-#if 0
+#if 0						// libtpms added
 //*** SequenceDataExport();
 // This function is used scan through the sequence object and
 // either modify the hash state data for export (contextSave) or to
@@ -247,21 +247,21 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
 // same size as the internal representation so nothing outsize of the hash context
 // area gets modified.
 void SequenceDataExport(
-			HASH_OBJECT*        object,       // IN: an internal hash object
-			HASH_OBJECT_BUFFER* exportObject  // OUT: a sequence context in a buffer
-			)
+    HASH_OBJECT*        object,       // IN: an internal hash object
+    HASH_OBJECT_BUFFER* exportObject  // OUT: a sequence context in a buffer
+)
 {
     // If the hash object is not an event, then only one hash context is needed
     int count = (object->attributes.eventSeq) ? HASH_COUNT : 1;
 
     for(count--; count >= 0; count--)
-	{
-	    HASH_STATE* hash       = &object->state.hashState[count];
-	    size_t      offset     = (BYTE*)hash - (BYTE*)object;
-	    BYTE*       exportHash = &((BYTE*)exportObject)[offset];
+    {
+        HASH_STATE* hash       = &object->state.hashState[count];
+        size_t      offset     = (BYTE*)hash - (BYTE*)object;
+        BYTE*       exportHash = &((BYTE*)exportObject)[offset];
 
-	    CryptHashExportState(hash, (EXPORT_HASH_STATE*)exportHash);
-	}
+        CryptHashExportState(hash, (EXPORT_HASH_STATE*)exportHash);
+    }
 }
 
 //*** SequenceDataImport();
@@ -274,20 +274,20 @@ void SequenceDataExport(
 // same size as the internal representation so nothing outsize of the hash context
 // area gets modified.
 void SequenceDataImport(
-			HASH_OBJECT*        object,       // IN/OUT: an internal hash object
-			HASH_OBJECT_BUFFER* exportObject  // IN/OUT: a sequence context in a buffer
-			)
+    HASH_OBJECT*        object,       // IN/OUT: an internal hash object
+    HASH_OBJECT_BUFFER* exportObject  // IN/OUT: a sequence context in a buffer
+)
 {
     // If the hash object is not an event, then only one hash context is needed
     int count = (object->attributes.eventSeq) ? HASH_COUNT : 1;
 
     for(count--; count >= 0; count--)
-	{
-	    HASH_STATE* hash       = &object->state.hashState[count];
-	    size_t      offset     = (BYTE*)hash - (BYTE*)object;
-	    BYTE*       importHash = &((BYTE*)exportObject)[offset];
-	    //
-	    CryptHashImportState(hash, (EXPORT_HASH_STATE*)importHash);
-	}
+    {
+        HASH_STATE* hash       = &object->state.hashState[count];
+        size_t      offset     = (BYTE*)hash - (BYTE*)object;
+        BYTE*       importHash = &((BYTE*)exportObject)[offset];
+        //
+        CryptHashImportState(hash, (EXPORT_HASH_STATE*)importHash);
+    }
 }
-#endif
+#endif						// libtpms added

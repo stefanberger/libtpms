@@ -66,8 +66,8 @@
 // If the input value does not exist, or the output does not exist, or the input
 // will not fit into the output the function returns NULL
 LIB_EXPORT Crypt_Int* TpmMath_IntFrom2B(Crypt_Int*   value,  // OUT:
-					const TPM2B* a2B     // IN: number to convert
-					);
+                                        const TPM2B* a2B     // IN: number to convert
+);
 
 //*** TpmMath_IntTo2B()
 //
@@ -78,10 +78,10 @@ LIB_EXPORT Crypt_Int* TpmMath_IntFrom2B(Crypt_Int*   value,  // OUT:
 // with zeros. If `size` is zero, then the TPM2B is assumed to be large enough
 // for the data and a2b->size will be adjusted accordingly.
 LIB_EXPORT BOOL TpmMath_IntTo2B(
-				const Crypt_Int* value,  // IN: value to convert
-				TPM2B*           a2B,    // OUT: buffer for output
-				NUMBYTES         size    // IN: Size of output buffer - see comments.
-				);
+    const Crypt_Int* value,  // IN: value to convert
+    TPM2B*           a2B,    // OUT: buffer for output
+    NUMBYTES         size    // IN: Size of output buffer - see comments.
+);
 
 //*** TpmMath_GetRandomBits()
 // This function gets random bits for use in various places.
@@ -95,10 +95,10 @@ LIB_EXPORT BOOL TpmMath_IntTo2B(
 //      TRUE(1)         success
 //      FALSE(0)        failure
 LIB_EXPORT BOOL TpmMath_GetRandomBits(
-				      BYTE*       pBuffer,  // OUT: buffer to set
-				      size_t      bits,     // IN: number of bits to generate (see remarks)
-				      RAND_STATE* rand      // IN: random engine
-				      );
+    BYTE*       pBuffer,  // OUT: buffer to set
+    size_t      bits,     // IN: number of bits to generate (see remarks)
+    RAND_STATE* rand      // IN: random engine
+);
 
 //*** TpmMath_GetRandomInteger
 // This function generates a random integer with the requested number of bits.
@@ -107,9 +107,9 @@ LIB_EXPORT BOOL TpmMath_GetRandomBits(
 // if either more bits, or the Crypt_Int* is too small to contain the requested bits
 // the TPM enters failure mode and this function returns FALSE.
 LIB_EXPORT BOOL TpmMath_GetRandomInteger(Crypt_Int* bn,  // OUT: integer buffer to set
-					 size_t     bits,  // IN: size of output,
-					 RAND_STATE* rand  // IN: random engine
-					 );
+                                         size_t     bits,  // IN: size of output,
+                                         RAND_STATE* rand  // IN: random engine
+);
 
 //*** TpmMath_GetRandomInRange()
 // This function is used to generate a random number r in the range 1 <= r < limit.
@@ -123,10 +123,10 @@ LIB_EXPORT BOOL TpmMath_GetRandomInteger(Crypt_Int* bn,  // OUT: integer buffer 
 //      TRUE(1)         success
 //      FALSE(0)        failure ('limit' is too small)
 LIB_EXPORT BOOL TpmMath_GetRandomInRange(
-					 Crypt_Int*       dest,   // OUT: integer buffer to set
-					 const Crypt_Int* limit,  // IN: limit (see remarks)
-					 RAND_STATE*      rand    // IN: random engine
-					 );
+    Crypt_Int*       dest,   // OUT: integer buffer to set
+    const Crypt_Int* limit,  // IN: limit (see remarks)
+    RAND_STATE*      rand    // IN: random engine
+);
 
 // BnMath.c					// libtpms added begin
 BOOL BnGenerateRandomInRangeAllBytes(bigNum      dest,

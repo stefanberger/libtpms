@@ -94,9 +94,9 @@ typedef struct
     BYTE size[sizeof(UINT16)];
     struct
     {
-	BYTE function[sizeof(UINT32)];
-	BYTE line[sizeof(UINT32)];
-	BYTE code[sizeof(UINT32)];
+        BYTE function[sizeof(UINT32)];
+        BYTE line[sizeof(UINT32)];
+        BYTE code[sizeof(UINT32)];
     } values;
     BYTE returnCode[sizeof(TPM_RC)];
 } GET_TEST_RESULT_PARAMETERS;
@@ -161,7 +161,7 @@ static INT32 MarshalUint32(UINT32 integer, BYTE** buffer)
 static BOOL Unmarshal32(UINT32* target, BYTE** buffer, INT32* size)
 {
     if((*size -= 4) < 0)
-	return FALSE;
+        return FALSE;
     *target = BYTE_ARRAY_TO_UINT32(*buffer);
     *buffer += 4;
     return TRUE;
@@ -171,7 +171,7 @@ static BOOL Unmarshal32(UINT32* target, BYTE** buffer, INT32* size)
 static BOOL Unmarshal16(UINT16* target, BYTE** buffer, INT32* size)
 {
     if((*size -= 2) < 0)
-	return FALSE;
+        return FALSE;
     *target = BYTE_ARRAY_TO_UINT16(*buffer);
     *buffer += 2;
     return TRUE;
@@ -271,19 +271,19 @@ TpmLogFailure(
 // failure values to be returned on TPM2_GetTestResult().
 NORETURN void TpmFail(
 #if FAIL_TRACE
-		      const char* function,
-		      int         line,
+    const char* function,
+    int         line,
 #else
-		      uint64_t locationCode,
+    uint64_t locationCode,
 #endif
-		      int failureCode)
+    int failureCode)
 {
 #if 0    /* libtpms added */
     // Save the values that indicate where the error occurred.
     // On a 64-bit machine, this may truncate the address of the string
     // of the function name where the error occurred.
 #if FAIL_TRACE
-    memcpy(&s_failFunction, function, sizeof(uint32_t));
+    memcpy(&s_failFunction, function, sizeof(uint32_t));	// libtpms changed
     s_failLine         = line;
 #else
     s_failFunction = (UINT32)(locationCode >> 32);
@@ -329,10 +329,10 @@ NORETURN void TpmFail(
 // This function is called by the interface code when the platform is in failure
 // mode.
 void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
-		    unsigned char*  inRequest,        // IN: command buffer
-		    uint32_t*       outResponseSize,  // OUT: response buffer size
-		    unsigned char** outResponse       // OUT: response buffer
-		    )
+                    unsigned char*  inRequest,        // IN: command buffer
+                    uint32_t*       outResponseSize,  // OUT: response buffer size
+                    unsigned char** outResponse       // OUT: response buffer
+)
 {
     UINT32 marshalSize;
     UINT32 capability;
@@ -344,120 +344,120 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
 
     // If there is no command buffer, then just return TPM_RC_FAILURE
     if(inRequestSize == 0 || inRequest == NULL)
-	goto FailureModeReturn;
+        goto FailureModeReturn;
     // If the header is not correct for TPM2_GetCapability() or
     // TPM2_GetTestResult() then just return the in failure mode response;
     if(!(Unmarshal16(&header.tag, &buffer, &size)
-	 && Unmarshal32(&header.size, &buffer, &size)
-	 && Unmarshal32(&header.code, &buffer, &size)))
-	goto FailureModeReturn;
+         && Unmarshal32(&header.size, &buffer, &size)
+         && Unmarshal32(&header.code, &buffer, &size)))
+        goto FailureModeReturn;
     if(header.tag != TPM_ST_NO_SESSIONS || header.size < 10)
-	goto FailureModeReturn;
+        goto FailureModeReturn;
     switch(header.code)
-	{
-	  case TPM_CC_GetTestResult:
-	    // make sure that the command size is correct
-	    if(header.size != 10)
-		goto FailureModeReturn;
-	    buffer      = &response[10];
-	    marshalSize = MarshalUint16(3 * sizeof(UINT32), &buffer);
-	    marshalSize += MarshalUint32(s_failFunction, &buffer);
-	    marshalSize += MarshalUint32(s_failLine, &buffer);
-	    marshalSize += MarshalUint32(s_failCode, &buffer);
-	    if(s_failCode == FATAL_ERROR_NV_UNRECOVERABLE)
-		marshalSize += MarshalUint32(TPM_RC_NV_UNINITIALIZED, &buffer);
-	    else
-		marshalSize += MarshalUint32(TPM_RC_FAILURE, &buffer);
-	    break;
-	  case TPM_CC_GetCapability:
-	    // make sure that the size of the command is exactly the size
-	    // returned for the capability, property, and count
-	    if(header.size != (10 + (3 * sizeof(UINT32)))
-	       // also verify that this is requesting TPM properties
-	       || !Unmarshal32(&capability, &buffer, &size)
-	       || capability != TPM_CAP_TPM_PROPERTIES
-	       || !Unmarshal32(&pt, &buffer, &size)
-	       || !Unmarshal32(&count, &buffer, &size))
-		goto FailureModeReturn;
+    {
+        case TPM_CC_GetTestResult:
+            // make sure that the command size is correct
+            if(header.size != 10)
+                goto FailureModeReturn;
+            buffer      = &response[10];
+            marshalSize = MarshalUint16(3 * sizeof(UINT32), &buffer);
+            marshalSize += MarshalUint32(s_failFunction, &buffer);
+            marshalSize += MarshalUint32(s_failLine, &buffer);
+            marshalSize += MarshalUint32(s_failCode, &buffer);
+            if(s_failCode == FATAL_ERROR_NV_UNRECOVERABLE)
+                marshalSize += MarshalUint32(TPM_RC_NV_UNINITIALIZED, &buffer);
+            else
+                marshalSize += MarshalUint32(TPM_RC_FAILURE, &buffer);
+            break;
+        case TPM_CC_GetCapability:
+            // make sure that the size of the command is exactly the size
+            // returned for the capability, property, and count
+            if(header.size != (10 + (3 * sizeof(UINT32)))
+               // also verify that this is requesting TPM properties
+               || !Unmarshal32(&capability, &buffer, &size)
+               || capability != TPM_CAP_TPM_PROPERTIES
+               || !Unmarshal32(&pt, &buffer, &size)
+               || !Unmarshal32(&count, &buffer, &size))
+                goto FailureModeReturn;
 
-	    if(count > 0)
-		count = 1;
-	    else if(pt > TPM_PT_FIRMWARE_VERSION_2)
-		count = 0;
-	    if(pt < TPM_PT_MANUFACTURER)
-		pt = TPM_PT_MANUFACTURER;
-	    // set up for return
-	    buffer = &response[10];
-	    // if the request was for a PT less than the last one
-	    // then we indicate more, otherwise, not.
-	    if(pt < TPM_PT_FIRMWARE_VERSION_2)
-		*buffer++ = YES;
-	    else
-		*buffer++ = NO;
-	    marshalSize = 1;
+            if(count > 0)
+                count = 1;
+            else if(pt > TPM_PT_FIRMWARE_VERSION_2)
+                count = 0;
+            if(pt < TPM_PT_MANUFACTURER)
+                pt = TPM_PT_MANUFACTURER;
+            // set up for return
+            buffer = &response[10];
+            // if the request was for a PT less than the last one
+            // then we indicate more, otherwise, not.
+            if(pt < TPM_PT_FIRMWARE_VERSION_2)
+                *buffer++ = YES;
+            else
+                *buffer++ = NO;
+            marshalSize = 1;
 
-	    // indicate the capability type
-	    marshalSize += MarshalUint32(capability, &buffer);
-	    // indicate the number of values that are being returned (0 or 1)
-	    marshalSize += MarshalUint32(count, &buffer);
-	    // indicate the property
-	    marshalSize += MarshalUint32(pt, &buffer);
+            // indicate the capability type
+            marshalSize += MarshalUint32(capability, &buffer);
+            // indicate the number of values that are being returned (0 or 1)
+            marshalSize += MarshalUint32(count, &buffer);
+            // indicate the property
+            marshalSize += MarshalUint32(pt, &buffer);
 
-	    if(count > 0)
-		switch(pt)
-		    {
-		      case TPM_PT_MANUFACTURER:
-			// the vendor ID unique to each TPM manufacturer
-			pt = _plat__GetManufacturerCapabilityCode();
-			break;
+            if(count > 0)
+                switch(pt)
+                {
+                    case TPM_PT_MANUFACTURER:
+                        // the vendor ID unique to each TPM manufacturer
+                        pt = _plat__GetManufacturerCapabilityCode();
+                        break;
 
-		      case TPM_PT_VENDOR_STRING_1:
-			// the first four characters of the vendor ID string
-			pt = _plat__GetVendorCapabilityCode(1);
-			break;
+                    case TPM_PT_VENDOR_STRING_1:
+                        // the first four characters of the vendor ID string
+                        pt = _plat__GetVendorCapabilityCode(1);
+                        break;
 
-		      case TPM_PT_VENDOR_STRING_2:
-			// the second four characters of the vendor ID string
-			pt = _plat__GetVendorCapabilityCode(2);
-			break;
+                    case TPM_PT_VENDOR_STRING_2:
+                        // the second four characters of the vendor ID string
+                        pt = _plat__GetVendorCapabilityCode(2);
+                        break;
 
-		      case TPM_PT_VENDOR_STRING_3:
-			// the third four characters of the vendor ID string
-			pt = _plat__GetVendorCapabilityCode(3);
-			break;
+                    case TPM_PT_VENDOR_STRING_3:
+                        // the third four characters of the vendor ID string
+                        pt = _plat__GetVendorCapabilityCode(3);
+                        break;
 
-		      case TPM_PT_VENDOR_STRING_4:
-			// the fourth four characters of the vendor ID string
-			pt = _plat__GetVendorCapabilityCode(4);
-			break;
+                    case TPM_PT_VENDOR_STRING_4:
+                        // the fourth four characters of the vendor ID string
+                        pt = _plat__GetVendorCapabilityCode(4);
+                        break;
 
-		      case TPM_PT_VENDOR_TPM_TYPE:
-			// vendor-defined value indicating the TPM model
-			// We just make up a number here
-			pt = _plat__GetTpmType();
-			break;
+                    case TPM_PT_VENDOR_TPM_TYPE:
+                        // vendor-defined value indicating the TPM model
+                        // We just make up a number here
+                        pt = _plat__GetTpmType();
+                        break;
 
-		      case TPM_PT_FIRMWARE_VERSION_1:
-			// the more significant 32-bits of a vendor-specific value
-			// indicating the version of the firmware
-			pt = _plat__GetTpmFirmwareVersionHigh();
-			break;
+                    case TPM_PT_FIRMWARE_VERSION_1:
+                        // the more significant 32-bits of a vendor-specific value
+                        // indicating the version of the firmware
+                        pt = _plat__GetTpmFirmwareVersionHigh();
+                        break;
 
-		      default:  // TPM_PT_FIRMWARE_VERSION_2:
-			// the less significant 32-bits of a vendor-specific value
-			// indicating the version of the firmware
-			pt = _plat__GetTpmFirmwareVersionLow();
-			break;
-		    }
-	    marshalSize += MarshalUint32(pt, &buffer);
-	    break;
-	  default:  // default for switch (cc)
-	    goto FailureModeReturn;
-	}
+                    default:  // TPM_PT_FIRMWARE_VERSION_2:
+                        // the less significant 32-bits of a vendor-specific value
+                        // indicating the version of the firmware
+                        pt = _plat__GetTpmFirmwareVersionLow();
+                        break;
+                }
+            marshalSize += MarshalUint32(pt, &buffer);
+            break;
+        default:  // default for switch (cc)
+            goto FailureModeReturn;
+    }
     // Now do the header
     buffer      = response;
     marshalSize = marshalSize + 10;              // Add the header size to the
-    // stuff already marshaled
+                                                 // stuff already marshaled
     MarshalUint16(TPM_ST_NO_SESSIONS, &buffer);  // structure tag
     MarshalUint32(marshalSize, &buffer);         // responseSize
     MarshalUint32(TPM_RC_SUCCESS, &buffer);      // response code
@@ -465,7 +465,7 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
     *outResponseSize = marshalSize;
     *outResponse     = (unsigned char*)&response;
     return;
- FailureModeReturn:
+FailureModeReturn:
     buffer      = response;
     marshalSize = MarshalUint16(TPM_ST_NO_SESSIONS, &buffer);
     marshalSize += MarshalUint32(10, &buffer);

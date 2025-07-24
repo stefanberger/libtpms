@@ -195,7 +195,7 @@ void _rpc__Signal_HashEnd(void);
 // This is the interface to the TPM code.
 //  Return Type: void
 void _rpc__Send_Command(
-			unsigned char locality, _IN_BUFFER request, _OUT_BUFFER* response);
+    unsigned char locality, _IN_BUFFER request, _OUT_BUFFER* response);
 
 //*** _rpc__Signal_CancelOn()
 // This function is used to turn on the indication to cancel a command in process.

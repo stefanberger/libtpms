@@ -75,7 +75,7 @@
 // and block cipher algorithm.
 UINT16
 CryptCmacStart(
-	       SMAC_STATE* state, TPMU_PUBLIC_PARMS* keyParms, TPM_ALG_ID macAlg, TPM2B* key);
+    SMAC_STATE* state, TPMU_PUBLIC_PARMS* keyParms, TPM_ALG_ID macAlg, TPM2B* key);
 
 //*** CryptCmacData()
 // This function is used to add data to the CMAC sequence computation. The function

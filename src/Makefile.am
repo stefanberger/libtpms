@@ -237,9 +237,9 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/MathOnByteBuffers.c \
 	tpm2/Memory.c \
 	tpm2/NVCommands.c \
-	tpm2/NVDynamic.c \
+	tpm2/NvDynamic.c \
 	tpm2/NVMem.c \
-	tpm2/NVReserved.c \
+	tpm2/NvReserved.c \
 	tpm2/NV_spt.c \
 	tpm2/Object.c \
 	tpm2/ObjectCommands.c \
@@ -268,7 +268,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/TestingCommands.c \
 	tpm2/Ticket.c \
 	tpm2/Time.c \
-	tpm2/TpmAsn1.c \
+	tpm2/TpmASN1.c \
 	tpm2/TpmBigNumThunks.c \
 	tpm2/TpmEcc_Signature_ECDAA.c \
 	tpm2/TpmEcc_Signature_ECDSA.c \
@@ -426,7 +426,7 @@ noinst_HEADERS += \
 	tpm2/NV_ChangeAuth_fp.h \
 	tpm2/NV_DefineSpace_fp.h \
 	tpm2/NV_DefineSpace2_fp.h \
-	tpm2/NVDynamic_fp.h \
+	tpm2/NvDynamic_fp.h \
 	tpm2/NV_Extend_fp.h \
 	tpm2/NV_GlobalWriteLock_fp.h \
 	tpm2/NV.h \
@@ -435,7 +435,7 @@ noinst_HEADERS += \
 	tpm2/NV_ReadLock_fp.h \
 	tpm2/NV_ReadPublic_fp.h \
 	tpm2/NV_ReadPublic2_fp.h \
-	tpm2/NVReserved_fp.h \
+	tpm2/NvReserved_fp.h \
 	tpm2/NV_SetBits_fp.h \
 	tpm2/NV_spt_fp.h \
 	tpm2/NV_UndefineSpace_fp.h \

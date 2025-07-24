@@ -86,60 +86,59 @@ typedef CRYPT_POINT_BUF(pointone, 1) Crypt_Point;
 typedef CRYPT_CURVE_BUF(curvebuft, MAX_ECC_KEY_BITS) Crypt_EccCurve;
 
 // produces bare typedef ci_<typename>_t
-#define CRYPT_INT_TYPE(typename, bits)					\
+#define CRYPT_INT_TYPE(typename, bits) \
     typedef CRYPT_INT_BUF(ci_##typename##_buf_t, bits) ci_##typename##_t
 
 // produces allocated `Crypt_Int* varname` backed by a
 // stack buffer named `<varname>_buf`.  Initialization at the discretion of the
 // ExtMath library.
-#define CRYPT_INT_VAR(varname, bits)				   \
-    CRYPT_INT_BUF(ci_##varname##_buf_t, bits) varname##_buf;		\
+#define CRYPT_INT_VAR(varname, bits)                         \
+    CRYPT_INT_BUF(ci_##varname##_buf_t, bits) varname##_buf; \
     Crypt_Int* varname = ExtMath_Initialize_Int((Crypt_Int*)&(varname##_buf), bits);
 
 // produces initialized `Crypt_Int* varname = (TPM2B) initializer` backed by a
 // stack buffer named `<varname>_buf`
-#define CRYPT_INT_INITIALIZED(varname, bits, initializer)		\
-    CRYPT_INT_BUF(cibuf##varname, bits) varname##_buf;			\
-    Crypt_Int* varname =						\
-		TpmMath_IntFrom2B(ExtMath_Initialize_Int((Crypt_Int*)&(varname##_buf), bits), \
-		  (TPM2B*)initializer);
+#define CRYPT_INT_INITIALIZED(varname, bits, initializer)           \
+    CRYPT_INT_BUF(cibuf##varname, bits) varname##_buf;              \
+    Crypt_Int* varname = TpmMath_IntFrom2B(                         \
+        ExtMath_Initialize_Int((Crypt_Int*)&(varname##_buf), bits), \
+        (TPM2B*)initializer);
 
 // convenience variants of above:
 // largest supported integer
 #define CRYPT_INT_MAX(varname) CRYPT_INT_VAR(varname, LARGEST_NUMBER_BITS)
 
-#define CRYPT_INT_MAX_INITIALIZED(name, initializer)			\
+#define CRYPT_INT_MAX_INITIALIZED(name, initializer) \
     CRYPT_INT_INITIALIZED(name, LARGEST_NUMBER_BITS, initializer)
 
 // A single RADIX_BITS value.
 #define CRYPT_INT_WORD(name) CRYPT_INT_VAR(name, RADIX_BITS)
 
-#define CRYPT_INT_WORD_INITIALIZED(varname, initializer)		\
-    CRYPT_INT_BUF(cibuf##varname, RADIX_BITS) varname##_buf;		\
-    Crypt_Int* varname = ExtMath_SetWord(				\
-			ExtMath_Initialize_Int((Crypt_Int*)&(varname##_buf), RADIX_BITS), \
-			initializer);
+#define CRYPT_INT_WORD_INITIALIZED(varname, initializer)                  \
+    CRYPT_INT_BUF(cibuf##varname, RADIX_BITS) varname##_buf;              \
+    Crypt_Int* varname = ExtMath_SetWord(                                 \
+        ExtMath_Initialize_Int((Crypt_Int*)&(varname##_buf), RADIX_BITS), \
+        initializer);
 
 // Crypt_EccCurve underlying types
-#define CRYPT_CURVE_INITIALIZED(varname, initializer)			\
-    CRYPT_CURVE_BUF(cv##varname, MAX_ECC_KEY_BITS) varname##_buf;	\
-    const Crypt_EccCurve* varname =					\
-			ExtEcc_CurveInitialize(&(varname##_buf), initializer)
+#define CRYPT_CURVE_INITIALIZED(varname, initializer)             \
+    CRYPT_CURVE_BUF(cv##varname, MAX_ECC_KEY_BITS) varname##_buf; \
+    const Crypt_EccCurve* varname =                               \
+        ExtEcc_CurveInitialize(&(varname##_buf), initializer)
 
 /* no guarantee free will be called in the presence of longjmp */
 #define CRYPT_CURVE_FREE(varname) ExtEcc_CurveFree(varname)
 
-#define CRYPT_POINT_VAR(varname)					\
+// Crypt_Point underlying types
+#define CRYPT_POINT_VAR(varname)                                           \
     CRYPT_POINT_BUF(cp_##varname##_buf_t, MAX_ECC_KEY_BITS) varname##_buf; \
-    Crypt_Point* varname =						\
-			ExtEcc_Initialize_Point((Crypt_Point*)&(varname##_buf), MAX_ECC_KEY_BITS);
+    Crypt_Point* varname =                                                 \
+        ExtEcc_Initialize_Point((Crypt_Point*)&(varname##_buf), MAX_ECC_KEY_BITS);
 
-
-#define CRYPT_POINT_INITIALIZED(varname, initValue)			\
-    CRYPT_POINT_BUF(cp_##varname##_buf_t, MAX_ECC_KEY_BITS) varname##_buf; \
-    Crypt_Point* varname = TpmEcc_PointFrom2B(				\
-		ExtEcc_Initialize_Point((Crypt_Point*)&(varname##_buf), MAX_ECC_KEY_BITS), \
-		initValue);
+#define CRYPT_POINT_INITIALIZED(varname, initValue)                                \
+    CRYPT_POINT_BUF(cp_##varname##_buf_t, MAX_ECC_KEY_BITS) varname##_buf;         \
+    Crypt_Point* varname = TpmEcc_PointFrom2B(                                     \
+        ExtEcc_Initialize_Point((Crypt_Point*)&(varname##_buf), MAX_ECC_KEY_BITS), \
+        initValue);
 
 #endif  //MATH_LIBRARY_INTERFACE_TYPES_H
-

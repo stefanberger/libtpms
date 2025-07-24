@@ -134,20 +134,20 @@ void NvCheckState(void)
     //
     func_return = _plat__GetNvReadyState();
     if(func_return == NV_READY)
-	{
-	    g_NvStatus = TPM_RC_SUCCESS;
-	}
+    {
+        g_NvStatus = TPM_RC_SUCCESS;
+    }
     else if(func_return == NV_WRITEFAILURE)
-	{
-	    g_NvStatus = TPM_RC_NV_UNAVAILABLE;
-	}
+    {
+        g_NvStatus = TPM_RC_NV_UNAVAILABLE;
+    }
     else
-	{
-	    // if(func_return == NV_RATE_LIMIT) or anything else
-	    // assume retry later might work
-	    g_NvStatus = TPM_RC_NV_RATE;
-	}
-    
+    {
+        // if(func_return == NV_RATE_LIMIT) or anything else
+        // assume retry later might work
+        g_NvStatus = TPM_RC_NV_RATE;
+    }
+
     return;
 }
 
@@ -170,11 +170,11 @@ BOOL NvPowerOn(void)
     // If power was lost, need to re-establish the RAM data that is loaded from
     // NV and initialize the static variables
     if(g_powerWasLost)
-	{
-	    if((nvError = _plat__NVEnable(NULL, 0)) < 0)
-		TpmLogFailure(FUNCTION_NAME, __LINE__, FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
-	    NvInitStatic();
-	}
+    {
+        if((nvError = _plat__NVEnable(NULL, 0)) < 0)
+            TpmLogFailure(FUNCTION_NAME, __LINE__, FATAL_ERROR_NV_UNRECOVERABLE);  /* libtpms changed */
+        NvInitStatic();
+    }
     return nvError == 0;
 }
 
@@ -209,9 +209,9 @@ void NvManufacture(void)
 //*** NvRead()
 // This function is used to move reserved data from NV memory to RAM.
 void NvRead(void*  outBuffer,  // OUT: buffer to receive data
-	    UINT32 nvOffset,   // IN: offset in NV of value
-	    UINT32 size        // IN: size of the value to read
-	    )
+            UINT32 nvOffset,   // IN: offset in NV of value
+            UINT32 size        // IN: size of the value to read
+)
 {
     // Input type should be valid
     pAssert(nvOffset + size < NV_MEMORY_SIZE);
@@ -223,17 +223,17 @@ void NvRead(void*  outBuffer,  // OUT: buffer to receive data
 // This function is used to post reserved data for writing to NV memory. Before
 // the TPM completes the operation, the value will be written.
 BOOL NvWrite(UINT32 nvOffset,  // IN: location in NV to receive data
-	     UINT32 size,      // IN: size of the data to move
-	     void*  inBuffer   // IN: location containing data to write
-	     )
+             UINT32 size,      // IN: size of the data to move
+             void*  inBuffer   // IN: location containing data to write
+)
 {
     // Input type should be valid
     if(nvOffset + size <= NV_MEMORY_SIZE)
-	{
-	    // Set the flag that a NV write happened
-	    SET_NV_UPDATE(UT_NV);
-	    return _plat__NvMemoryWrite(nvOffset, size, inBuffer);
-	}
+    {
+        // Set the flag that a NV write happened
+        SET_NV_UPDATE(UT_NV);
+        return _plat__NvMemoryWrite(nvOffset, size, inBuffer);
+    }
     return FALSE;
 }
 
@@ -242,10 +242,10 @@ BOOL NvWrite(UINT32 nvOffset,  // IN: location in NV to receive data
 // This function is used to update a value in the PERSISTENT_DATA structure and
 // commits the value to NV.
 void NvUpdatePersistent(
-			UINT32 offset,  // IN: location in PERMANENT_DATA to be updated
-			UINT32 size,    // IN: size of the value
-			void*  buffer   // IN: the new data
-			)
+    UINT32 offset,  // IN: location in PERMANENT_DATA to be updated
+    UINT32 size,    // IN: size of the value
+    void*  buffer   // IN: the new data
+)
 {
     pAssert(offset + size <= sizeof(gp));
     MemoryCopy(&gp + offset, buffer, size);
@@ -255,9 +255,9 @@ void NvUpdatePersistent(
 //*** NvClearPersistent()
 // This function is used to clear a persistent data entry and commit it to NV
 void NvClearPersistent(UINT32 offset,  // IN: the offset in the PERMANENT_DATA
-		       //     structure to be cleared (zeroed)
-		       UINT32 size     // IN: number of bytes to clear
-		       )
+                                       //     structure to be cleared (zeroed)
+                       UINT32 size     // IN: number of bytes to clear
+)
 {
     pAssert(offset + size <= sizeof(gp));
     MemorySet((&gp) + offset, 0, size);

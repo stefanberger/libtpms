@@ -82,9 +82,9 @@
 #define DRBG_IV_SIZE_BITS  (AES_MAX_BLOCK_SIZE * 8)
 #define DRBG_ALGORITHM     TPM_ALG_AES
 
-#define DRBG_ENCRYPT_SETUP(key, keySizeInBits, schedule)		\
+#define DRBG_ENCRYPT_SETUP(key, keySizeInBits, schedule) \
     TpmCryptSetEncryptKeyAES(key, keySizeInBits, schedule)
-#define DRBG_ENCRYPT(keySchedule, in, out)			\
+#define DRBG_ENCRYPT(keySchedule, in, out) \
     TpmCryptEncryptAES(SWIZZLE(keySchedule, in, out))
 
 #if((DRBG_KEY_SIZE_BITS % RADIX_BITS) != 0) || ((DRBG_IV_SIZE_BITS % RADIX_BITS) != 0)
@@ -162,7 +162,7 @@ typedef struct
     DRBG_SEED seed;          // contains the key and IV for the counter mode DRBG
     SEED_COMPAT_LEVEL seedCompatLevel;   // libtpms added: the compatibility level for keeping backwards compatibility
     UINT32    lastValue[4];  // used when the TPM does continuous self-test
-    // for FIPS compliance of DRBG
+                             // for FIPS compliance of DRBG
 } DRBG_STATE, *pDRBG_STATE;
 #define DRBG_MAGIC ((UINT32)0x47425244)  // "DRBG" backwards so that it displays
 

@@ -109,13 +109,13 @@ static void TimeNewEpoch(void)
 // until startup completes. When Startup is done, then it will create the epoch
 // nonce to complete the initializations by calling this function.
 BOOL TimeStartup(STARTUP_TYPE type  // IN: start up type
-		 )
+)
 {
     NOT_REFERENCED(type);
     // If the previous cycle is orderly shut down, the value of the safe bit
     // the same as previously saved.  Otherwise, it is not safe.
     if(!NV_IS_ORDERLY)
-	go.clockSafe = NO;
+        go.clockSafe = NO;
     return TRUE;
 }
 
@@ -126,34 +126,34 @@ BOOL TimeStartup(STARTUP_TYPE type  // IN: start up type
 // not cause an NV write, then go.clock is updated. If an NV write occurs, then
 // go.safe is SET.
 void TimeClockUpdate(UINT64 newTime  // IN: New time value in mS.
-		     )
+)
 {
 #define CLOCK_UPDATE_MASK ((1ULL << NV_CLOCK_UPDATE_INTERVAL) - 1)
 
     // Check to see if the update will cause a need for an nvClock update
     if((newTime | CLOCK_UPDATE_MASK) > (go.clock | CLOCK_UPDATE_MASK))
-	{
-	    pAssert(g_NvStatus == TPM_RC_SUCCESS);
+    {
+        pAssert(g_NvStatus == TPM_RC_SUCCESS);
 
-	    // Going to update the NV time state so SET the safe flag
-	    go.clockSafe = YES;
+        // Going to update the NV time state so SET the safe flag
+        go.clockSafe = YES;
 
-	    // update the time
-	    go.clock = newTime;
+        // update the time
+        go.clock = newTime;
 
-	    /* libtpms: Changing the clock alone does not cause the permanent
-	     *          state to be written to storage, there must be other
-	     *          reasons as well.
-	     */
-	    UPDATE_TYPE old_g_updateNV = g_updateNV;	// libtpms added
+	/* libtpms: Changing the clock alone does not cause the permanent
+	 *          state to be written to storage, there must be other
+	 *          reasons as well.
+	 */
+	UPDATE_TYPE old_g_updateNV = g_updateNV;	// libtpms added   
 
-	    NvWrite(NV_ORDERLY_DATA, sizeof(go), &go);
+        NvWrite(NV_ORDERLY_DATA, sizeof(go), &go);
 
-	    g_updateNV = old_g_updateNV;		// libtpms added
-	}
+        g_updateNV = old_g_updateNV;		// libtpms added
+    }
     else
-	// No NV update needed so just update
-	go.clock = newTime;
+        // No NV update needed so just update
+        go.clock = newTime;
 }
 
 //*** TimeUpdate()
@@ -170,9 +170,9 @@ void TimeUpdate(void)
     //
     // Make sure that we consume the current _plat__TimerWasStopped() state.
     if(_plat__TimerWasStopped())
-	{
-	    TimeNewEpoch();
-	}
+    {
+        TimeNewEpoch();
+    }
     // Get the difference between this call and the last time we updated the tick
     // timer.
     elapsed = _plat__TimerRead() - g_time;
@@ -209,7 +209,7 @@ void TimeUpdateToCurrent(void)
     // make any modifications to the internal clock value. Also, defer any clock
     // processing until TPM has run TPM2_Startup()
     if(!NV_IS_AVAILABLE || !TPMIsStarted())
-	return;
+        return;
 
     TimeUpdate();
 }
@@ -217,35 +217,35 @@ void TimeUpdateToCurrent(void)
 //*** TimeSetAdjustRate()
 // This function is used to perform rate adjustment on 'Time' and 'Clock'.
 void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
-		       )
+)
 {
     switch(adjust)
-	{
-	  case TPM_CLOCK_COARSE_SLOWER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER);
-	    break;
-	  case TPM_CLOCK_COARSE_FASTER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER);
-	    break;
-	  case TPM_CLOCK_MEDIUM_SLOWER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER);
-	    break;
-	  case TPM_CLOCK_MEDIUM_FASTER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER);
-	    break;
-	  case TPM_CLOCK_FINE_SLOWER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER);
-	    break;
-	  case TPM_CLOCK_FINE_FASTER:
-	    _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_FASTER);
-	    break;
-	  case TPM_CLOCK_NO_CHANGE:
-	    break;
-	  default:
-	    // should have been blocked sooner
-	    FAIL(FATAL_ERROR_INTERNAL);
-	    break;
-	}
+    {
+        case TPM_CLOCK_COARSE_SLOWER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER);
+            break;
+        case TPM_CLOCK_COARSE_FASTER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER);
+            break;
+        case TPM_CLOCK_MEDIUM_SLOWER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER);
+            break;
+        case TPM_CLOCK_MEDIUM_FASTER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER);
+            break;
+        case TPM_CLOCK_FINE_SLOWER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER);
+            break;
+        case TPM_CLOCK_FINE_FASTER:
+            _plat__ClockRateAdjust(PLAT_TPM_CLOCK_ADJUST_FINE_FASTER);
+            break;
+        case TPM_CLOCK_NO_CHANGE:
+            break;
+        default:
+            // should have been blocked sooner
+            FAIL(FATAL_ERROR_INTERNAL);
+            break;
+    }
 
     return;
 }
@@ -256,7 +256,7 @@ void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
 // and returns the marshaled size
 UINT16
 TimeGetMarshaled(TIME_INFO* dataBuffer  // OUT: result buffer
-		 )
+)
 {
     TPMS_TIME_INFO timeInfo;
 
@@ -279,9 +279,9 @@ void TimeFillInfo(TPMS_CLOCK_INFO* clockInfo)
     // If NV is not available, clock stopped advancing and the value reported is
     // not "safe".
     if(NV_IS_AVAILABLE)
-	clockInfo->safe = go.clockSafe;
+        clockInfo->safe = go.clockSafe;
     else
-	clockInfo->safe = NO;
+        clockInfo->safe = NO;
 
     return;
 }

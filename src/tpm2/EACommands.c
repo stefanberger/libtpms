@@ -1643,7 +1643,7 @@ TPM2_PolicyAuthorizeNV(PolicyAuthorizeNV_In* in)
 #include "CommandCodeAttributes_fp.h"
 #include "CryptEccMain_fp.h"
 #include "Handle_fp.h"
-#include "NVDynamic_fp.h"
+#include "NvDynamic_fp.h"
 #include "Object_fp.h"
 #include "PCR_fp.h"
 #include "PP_fp.h"

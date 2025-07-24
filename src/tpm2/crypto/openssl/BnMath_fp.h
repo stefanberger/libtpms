@@ -129,8 +129,8 @@ LIB_EXPORT bigNum BnSetWord(bigNum n, crypt_uword_t w);
 // This function will SET a bit in a bigNum. Bit 0 is the least-significant bit in
 // the 0th digit_t. The function always return TRUE
 LIB_EXPORT BOOL BnSetBit(bigNum       bn,     // IN/OUT: big number to modify
-			 unsigned int bitNum  // IN: Bit number to SET
-			 );
+                         unsigned int bitNum  // IN: Bit number to SET
+);
 
 //*** BnTestBit()
 // This function is used to check to see if a bit is SET in a bignum_t. The 0th bit
@@ -139,8 +139,8 @@ LIB_EXPORT BOOL BnSetBit(bigNum       bn,     // IN/OUT: big number to modify
 //      TRUE(1)         the bit is set
 //      FALSE(0)        the bit is not set or the number is out of range
 LIB_EXPORT BOOL BnTestBit(bigNum       bn,     // IN: number to check
-			  unsigned int bitNum  // IN: bit to test
-			  );
+                          unsigned int bitNum  // IN: bit to test
+);
 
 //***BnMaskBits()
 // This function is used to mask off high order bits of a big number.
@@ -151,8 +151,8 @@ LIB_EXPORT BOOL BnTestBit(bigNum       bn,     // IN: number to check
 //      TRUE(1)         result masked
 //      FALSE(0)        the input was not as large as the mask
 LIB_EXPORT BOOL BnMaskBits(bigNum        bn,      // IN/OUT: number to mask
-			   crypt_uword_t maskBit  // IN: the bit number for the mask.
-			   );
+                           crypt_uword_t maskBit  // IN: the bit number for the mask.
+);
 
 //*** BnShiftRight()
 // This function will shift a bigNum to the right by the shiftAmount.

@@ -70,26 +70,26 @@
 // curve. This is used for ECDSA sign and verification.
 #if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
 static Crypt_Int* TpmEcc_AdjustEcdsaDigest(
-					   Crypt_Int*          bnD,     // OUT: the adjusted digest
-					   const TPM2B_DIGEST* digest,  // IN: digest to adjust
-					   const Crypt_Int*    max      // IN: value that indicates the maximum
-					   //     number of bits in the results
-					   )
+    Crypt_Int*          bnD,     // OUT: the adjusted digest
+    const TPM2B_DIGEST* digest,  // IN: digest to adjust
+    const Crypt_Int*    max      // IN: value that indicates the maximum
+                                 //     number of bits in the results
+)
 {
     int bitsInMax = ExtMath_SizeInBits(max);
     int shift;
     //
     if(digest == NULL)
-	ExtMath_SetWord(bnD, 0);
+        ExtMath_SetWord(bnD, 0);
     else
-	{
-	    ExtMath_IntFromBytes(bnD,
-				 digest->t.buffer,
-				 (NUMBYTES)MIN(digest->t.size, BITS_TO_BYTES(bitsInMax)));
-	    shift = ExtMath_SizeInBits(bnD) - bitsInMax;
-	    if(shift > 0)
-		ExtMath_ShiftRight(bnD, bnD, shift);
-	}
+    {
+        ExtMath_IntFromBytes(bnD,
+                             digest->t.buffer,
+                             (NUMBYTES)MIN(digest->t.size, BITS_TO_BYTES(bitsInMax)));
+        shift = ExtMath_SizeInBits(bnD) - bitsInMax;
+        if(shift > 0)
+            ExtMath_ShiftRight(bnD, bnD, shift);
+    }
     return bnD;
 }
 #endif                                 // libtpms added
@@ -100,13 +100,13 @@ static Crypt_Int* TpmEcc_AdjustEcdsaDigest(
 #if !USE_OPENSSL_FUNCTIONS_ECDSA       // libtpms added
 TPM_RC
 TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signature
-		 Crypt_Int*            bnS,   // OUT: 's' component of the signature
-		 const Crypt_EccCurve* E,     // IN: the curve used in the signature
-		 //     process
-		 Crypt_Int*          bnD,     // IN: private signing key
-		 const TPM2B_DIGEST* digest,  // IN: the digest to sign
-		 RAND_STATE*         rand     // IN: used in debug of signing
-		 )
+                 Crypt_Int*            bnS,   // OUT: 's' component of the signature
+                 const Crypt_EccCurve* E,     // IN: the curve used in the signature
+                                              //     process
+                 Crypt_Int*          bnD,     // IN: private signing key
+                 const TPM2B_DIGEST* digest,  // IN: the digest to sign
+                 RAND_STATE*         rand     // IN: used in debug of signing
+)
 {
     CRYPT_ECC_NUM(bnK);
     CRYPT_ECC_NUM(bnIk);
@@ -135,48 +135,48 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
     // In the code below, q is n (that it, the order of the curve is p)
 
     do  // This implements the loop at step 6. If s is zero, start over.
-	{
-	    for(; tries > 0; tries--)
-		{
-		    // Step 1 and 2 -- generate an ephemeral key and the modular inverse
-		    // of the private key.
-		    if(!TpmEcc_GenerateKeyPair(bnK, ecR, E, rand))
-			continue;
-		    // get mutable copy of X coordinate
-		    ExtMath_Copy(bnX, ExtEcc_PointX(ecR));
-		    // x coordinate is mod p.  Make it mod q
-		    ExtMath_Mod(bnX, order);
-		    // Make sure that it is not zero;
-		    if(ExtMath_IsZero(bnX))
-			continue;
-		    // write the modular reduced version of r as part of the signature
-		    ExtMath_Copy(bnR, bnX);
-		    // Make sure that a modular inverse exists and try again if not
-		    OK = (ExtMath_ModInverse(bnIk, bnK, order));
-		    if(OK)
-			break;
-		}
-	    if(!OK)
-		goto Exit;
+    {
+        for(; tries > 0; tries--)
+        {
+            // Step 1 and 2 -- generate an ephemeral key and the modular inverse
+            // of the private key.
+            if(!TpmEcc_GenerateKeyPair(bnK, ecR, E, rand))
+                continue;
+            // get mutable copy of X coordinate
+            ExtMath_Copy(bnX, ExtEcc_PointX(ecR));
+            // x coordinate is mod p.  Make it mod q
+            ExtMath_Mod(bnX, order);
+            // Make sure that it is not zero;
+            if(ExtMath_IsZero(bnX))
+                continue;
+            // write the modular reduced version of r as part of the signature
+            ExtMath_Copy(bnR, bnX);
+            // Make sure that a modular inverse exists and try again if not
+            OK = (ExtMath_ModInverse(bnIk, bnK, order));
+            if(OK)
+                break;
+        }
+        if(!OK)
+            goto Exit;
 
-	    TpmEcc_AdjustEcdsaDigest(bnE, digest, order);
+        TpmEcc_AdjustEcdsaDigest(bnE, digest, order);
 
-	    // now have inverse of K (bnIk), e (bnE), r (bnR),  d (bnD) and
-	    // ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E))
-	    // Compute s = k^-1 (e + r*d)(mod q)
-	    //  first do s = r*d mod q
-	    ExtMath_ModMult(bnS, bnR, bnD, order);
-	    // s = e + s = e + r * d
-	    ExtMath_Add(bnS, bnE, bnS);
-	    // s = k^(-1)s (mod n) = k^(-1)(e + r * d)(mod n)
-	    ExtMath_ModMult(bnS, bnIk, bnS, order);
+        // now have inverse of K (bnIk), e (bnE), r (bnR),  d (bnD) and
+        // ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E))
+        // Compute s = k^-1 (e + r*d)(mod q)
+        //  first do s = r*d mod q
+        ExtMath_ModMult(bnS, bnR, bnD, order);
+        // s = e + s = e + r * d
+        ExtMath_Add(bnS, bnE, bnS);
+        // s = k^(-1)s (mod n) = k^(-1)(e + r * d)(mod n)
+        ExtMath_ModMult(bnS, bnIk, bnS, order);
 
-	    // If S is zero, try again
-	} while(ExtMath_IsZero(bnS));
- Exit:
+        // If S is zero, try again
+    } while(ExtMath_IsZero(bnS));
+Exit:
     return retVal;
 }
-#else // !USE_OPENSSL_FUNCTIONS_ECDSA  libtpms added begin
+#else // !USE_OPENSSL_FUNCTIONS_ECDSA				libtpms added begin
 TPM_RC
 TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signature
 		 Crypt_Int*            bnS,   // OUT: 's' component of the signature
@@ -227,23 +227,23 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
 
     return retVal;
 }
-#endif  // USE_OPENSSL_FUNCTIONS_ECDSA libtpms added end
+#endif  // USE_OPENSSL_FUNCTIONS_ECDSA					libtpms added end
 
 //*** TpmEcc_ValidateSignatureEcdsa()
 // This function validates an ECDSA signature. rIn and sIn should have been checked
 // to make sure that they are in the range 0 < 'v' < 'n'
 //  Return Type: TPM_RC
 //      TPM_RC_SIGNATURE           signature not valid
-#if !USE_OPENSSL_FUNCTIONS_ECDSA  // libtpms added
+#if !USE_OPENSSL_FUNCTIONS_ECDSA					// libtpms added
 TPM_RC
 TpmEcc_ValidateSignatureEcdsa(
-			      Crypt_Int*            bnR,  // IN: 'r' component of the signature
-			      Crypt_Int*            bnS,  // IN: 's' component of the signature
-			      const Crypt_EccCurve* E,    // IN: the curve used in the signature
-			      //     process
-			      const Crypt_Point*  ecQ,    // IN: the public point of the key
-			      const TPM2B_DIGEST* digest  // IN: the digest that was signed
-			      )
+    Crypt_Int*            bnR,  // IN: 'r' component of the signature
+    Crypt_Int*            bnS,  // IN: 's' component of the signature
+    const Crypt_EccCurve* E,    // IN: the curve used in the signature
+                                //     process
+    const Crypt_Point*  ecQ,    // IN: the public point of the key
+    const TPM2B_DIGEST* digest  // IN: the digest that was signed
+)
 {
     // Make sure that the allocation for the digest is big enough for a maximum
     // digest
@@ -272,7 +272,7 @@ TpmEcc_ValidateSignatureEcdsa(
     // Done at entry
     // 4. Compute w = (s')^-1 mod n, using the routine in Appendix B.1.
     if(!ExtMath_ModInverse(bnW, bnS, order))
-	goto Exit;
+        goto Exit;
     // 5. Compute u1 = (e' *   w) mod n, and compute u2 = (r' *  w) mod n.
     ExtMath_ModMult(bnU1, bnE, bnW, order);
     ExtMath_ModMult(bnU2, bnR, bnW, order);
@@ -280,18 +280,18 @@ TpmEcc_ValidateSignatureEcdsa(
     //    scalar multiplication and EC addition (see [Routines]). If R is equal to
     //    the point at infinity O, output INVALID.
     if(TpmEcc_PointMult(
-			ecR, ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E)), bnU1, ecQ, bnU2, E)
+           ecR, ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E)), bnU1, ecQ, bnU2, E)
        != TPM_RC_SUCCESS)
-	goto Exit;
+        goto Exit;
     // 7. Compute v = Rx mod n.
     ExtMath_Copy(bnV, ExtEcc_PointX(ecR));
     ExtMath_Mod(bnV, order);
     // 8. Compare v and r0. If v = r0, output VALID; otherwise, output INVALID
     if(ExtMath_UnsignedCmp(bnV, bnR) != 0)
-	goto Exit;
+        goto Exit;
 
     retVal = TPM_RC_SUCCESS;
- Exit:
+Exit:
     return retVal;
 }
 #else // USE_OPENSSL_FUNCTIONS_ECDSA     libtpms added begin

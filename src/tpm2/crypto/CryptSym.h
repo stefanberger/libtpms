@@ -89,27 +89,26 @@
 #   define IF_IMPLEMENTED_TDES(op)
 #endif
 
-#define FOR_EACH_SYM(op)	   \
-    IF_IMPLEMENTED_AES(op)	   \
-    IF_IMPLEMENTED_SM4(op)			\
-    IF_IMPLEMENTED_CAMELLIA(op)    \
+#define FOR_EACH_SYM(op)   \
+    IF_IMPLEMENTED_AES(op) \
+    IF_IMPLEMENTED_SM4(op) \
+    IF_IMPLEMENTED_CAMELLIA(op) \
     IF_IMPLEMENTED_TDES(op)
 
 						/* libtpms added begin */
-#define FOR_EACH_SYM_WITHOUT_TDES(op)	\
-    IF_IMPLEMENTED_AES(op)		\
-    IF_IMPLEMENTED_SM4(op)		\
+#define FOR_EACH_SYM_WITHOUT_TDES(op) \
+    IF_IMPLEMENTED_AES(op)            \
+    IF_IMPLEMENTED_SM4(op)            \
     IF_IMPLEMENTED_CAMELLIA(op)			/* libtpms added end */
 
 // Macros for creating the key schedule union
 #define KEY_SCHEDULE(SYM, sym) tpmKeySchedule##SYM sym;
-//#define     TDES    DES[3]			/* libtpms commented */
 typedef union tpmCryptKeySchedule_t {
     FOR_EACH_SYM_WITHOUT_TDES(KEY_SCHEDULE)	/* libtpms changed from FOR_EACH_SYM */
 
-#if ALG_TDES                            // libtpms added
+#if ALG_TDES					// libtpms added
     tpmKeyScheduleTDES  tdes[3];		/* libtpms added */
-#endif                                  // libtpms added
+#endif						// libtpms added
 
 #if SYMMETRIC_ALIGNMENT == 8
     uint64_t alignment;
@@ -142,17 +141,17 @@ typedef union tpmCryptKeySchedule_t {
 // functions that use these macros. Those parameters are set by the macro that
 // set the key schedule to be used for the call.
 
-#define ENCRYPT_CASE(ALG, alg)						\
-    case TPM_ALG_##ALG:							\
-    TpmCryptSetEncryptKey##ALG(key, keySizeInBits, &keySchedule.alg);	\
-    encrypt = (TpmCryptSetSymKeyCall_t)TpmCryptEncrypt##ALG;		\
-    final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;          \
-    break; // libtpms changed
-#define DECRYPT_CASE(ALG, alg)						\
-    case TPM_ALG_##ALG:							\
-    TpmCryptSetDecryptKey##ALG(key, keySizeInBits, &keySchedule.alg);	\
-    decrypt = (TpmCryptSetSymKeyCall_t)TpmCryptDecrypt##ALG;		\
-    final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;          \
-    break;  // libtpms changed
+#define ENCRYPT_CASE(ALG, alg)                                            \
+    case TPM_ALG_##ALG:                                                   \
+        TpmCryptSetEncryptKey##ALG(key, keySizeInBits, &keySchedule.alg); \
+        encrypt = (TpmCryptSetSymKeyCall_t)TpmCryptEncrypt##ALG;          \
+        final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;          \
+        break; // libtpms changed
+#define DECRYPT_CASE(ALG, alg)                                            \
+    case TPM_ALG_##ALG:                                                   \
+        TpmCryptSetDecryptKey##ALG(key, keySizeInBits, &keySchedule.alg); \
+        decrypt = (TpmCryptSetSymKeyCall_t)TpmCryptDecrypt##ALG;          \
+        final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;                   \
+        break;  // libtpms changed
 
 #endif  // CRYPT_SYM_H

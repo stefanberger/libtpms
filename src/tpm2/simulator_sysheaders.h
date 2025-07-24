@@ -70,7 +70,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef TPM_WINDOWS
 #ifdef _MSC_VER
 #  pragma warning(push, 3)
 // C4668 is supposed to be level 4, but this is still necessary to suppress the
@@ -80,12 +79,9 @@
 //
 // X is not defined as a preprocessor macro, assuming 0 for #if
 #  pragma warning(disable : 4668)
-#endif
 #  include <windows.h>
 #  include <winsock.h>
-#ifdef _MSC_VER
 #  pragma warning(pop)
-#endif
 typedef int socklen_t;
 #elif defined(__unix__) || defined(__APPLE__)
 #  include <unistd.h>

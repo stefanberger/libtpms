@@ -59,41 +59,38 @@
 /*										*/
 /********************************************************************************/
 
-/* C.2 Cancel.c */
-/* C.2.1. Description */
-/* This module simulates the cancel pins on the TPM. */
-/* C.2.2. Includes, Typedefs, Structures, and Defines */
+//** Description
+//
+//  This module simulates the cancel pins on the TPM.
+//
+//** Includes, Typedefs, Structures, and Defines
 #include "Platform.h"
-/* C.2.3. Functions */
-/* C.2.3.1. _plat__IsCanceled() */
-/* Check if the cancel flag is set */
-/* Return Values Meaning */
-/* TRUE(1) if cancel flag is set */
-/* FALSE(0) if cancel flag is not set */
-LIB_EXPORT int
-_plat__IsCanceled(
-		  void
-		  )
+
+//** Functions
+
+//***_plat__IsCanceled()
+// Check if the cancel flag is set
+//  Return Type: int
+//      TRUE(1)         if cancel flag is set
+//      FALSE(0)        if cancel flag is not set
+LIB_EXPORT int _plat__IsCanceled(void)
 {
     // return cancel flag
     return s_isCanceled;
 }
-/* C.2.3.2. _plat__SetCancel() */
-/* Set cancel flag. */
-LIB_EXPORT void
-_plat__SetCancel(
-		 void
-		 )
+
+//***_plat__SetCancel()
+
+// Set cancel flag.
+LIB_EXPORT void _plat__SetCancel(void)
 {
     s_isCanceled = TRUE;
     return;
 }
-/* C.2.3.3. _plat__ClearCancel() */
-/* Clear cancel flag */
-LIB_EXPORT void
-_plat__ClearCancel(
-		   void
-		   )
+
+//***_plat__ClearCancel()
+// Clear cancel flag
+LIB_EXPORT void _plat__ClearCancel(void)
 {
     s_isCanceled = FALSE;
     return;

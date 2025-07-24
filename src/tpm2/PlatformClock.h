@@ -59,17 +59,22 @@
 /*										*/
 /********************************************************************************/
 
-// C.16 PlatformClock.h This file contains the instance data for the Platform module. It is
-// collected in this file so that the state of the module is easier to manage.
+// This file contains the instance data for the Platform module. It is collected
+// in this file so that the state of the module is easier to manage.
+
 #ifndef _PLATFORM_CLOCK_H_
 #define _PLATFORM_CLOCK_H_
-#ifdef _MSC_VER
-#include <sys/types.h>
-#include <sys/timeb.h>
-#else
-#include <sys/time.h>
-#include <time.h>
+
+#ifndef _ARM_
+#  ifdef _MSC_VER
+#    include <sys/types.h>
+#    include <sys/timeb.h>
+#  else
+#    include <time.h>
+#  endif
 #endif
+#include <time.h>
+
 // CLOCK_NOMINAL is the number of hardware ticks per mS. A value of 300000 means that the nominal
 // clock rate used to drive the hardware clock is 30 MHz. The adjustment rates are used to determine
 // the conversion of the hardware ticks to internal hardware clock value. In practice, we would
@@ -86,4 +91,4 @@
 #define     CLOCK_ADJUST_FINE       1
 // The clock tolerance is +/-15% (4500 counts) Allow some guard band (16.7%)
 #define     CLOCK_ADJUST_LIMIT      5000
-#endif // _PLATFORM_CLOCK_H_
+#endif  // _PLATFORM_CLOCK_H_

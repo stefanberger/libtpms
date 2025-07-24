@@ -92,17 +92,17 @@
 // are all using consistent string values.
 
 // each instance must define a different struct since the buffer sizes vary.
-#define TPM2B_STRING(name, value)				     \
-    typedef union name##_					     \
-    {									\
-	struct								\
-	{								\
-	    UINT16 size;						\
-	    BYTE   buffer[sizeof(value)];				\
-	} t;								\
-	TPM2B b;							\
-    } TPM2B_##name##_;							\
-    const TPM2B_##name##_ name##_data = {{sizeof(value), {value}}};	\
+#define TPM2B_STRING(name, value)                                   \
+    typedef union name##_                                           \
+    {                                                               \
+        struct                                                      \
+        {                                                           \
+            UINT16 size;                                            \
+            BYTE   buffer[sizeof(value)];                           \
+        } t;                                                        \
+        TPM2B b;                                                    \
+    } TPM2B_##name##_;                                              \
+    const TPM2B_##name##_ name##_data = {{sizeof(value), {value}}}; \
     const TPM2B*          name        = &name##_data.b
 
 TPM2B_STRING(PRIMARY_OBJECT_CREATION, "Primary Object Creation");
@@ -127,19 +127,19 @@ TPM2B_STRING(OAEP_TEST_STRING, "OAEP Test Value");
 
 //*** g_rcIndex[]
 const UINT16 g_rcIndex[15]  = {TPM_RC_1,
-			       TPM_RC_2,
-			       TPM_RC_3,
-			       TPM_RC_4,
-			       TPM_RC_5,
-			       TPM_RC_6,
-			       TPM_RC_7,
-			       TPM_RC_8,
-			       TPM_RC_9,
-			       TPM_RC_A,
-			       TPM_RC_B,
-			       TPM_RC_C,
-			       TPM_RC_D,
-			       TPM_RC_E,
-			       TPM_RC_F};
+                               TPM_RC_2,
+                               TPM_RC_3,
+                               TPM_RC_4,
+                               TPM_RC_5,
+                               TPM_RC_6,
+                               TPM_RC_7,
+                               TPM_RC_8,
+                               TPM_RC_9,
+                               TPM_RC_A,
+                               TPM_RC_B,
+                               TPM_RC_C,
+                               TPM_RC_D,
+                               TPM_RC_E,
+                               TPM_RC_F};
 
 BOOL         g_manufactured = FALSE;

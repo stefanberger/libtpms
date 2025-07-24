@@ -101,9 +101,9 @@
 #  endif
 #endif  // FAIL_TRACE
 
-	// SETFAILED calls TpmFail.  It may or may not return based on the NO_LONGJMP flag.
-	// CODELOCATOR is a macro that expands to either one 64-bit value that encodes the
-	// location, or two parameters: Function Name and Line Number.
+// SETFAILED calls TpmFail.  It may or may not return based on the NO_LONGJMP flag.
+// CODELOCATOR is a macro that expands to either one 64-bit value that encodes the
+// location, or two parameters: Function Name and Line Number.
 #define SETFAILED(errorCode) (TpmFail(CODELOCATOR(), errorCode))
 
 // If implementation is using longjmp, then calls to TpmFail() will never
@@ -156,12 +156,12 @@
 #  define FAIL_RC(failCode)                SETFAILED(failCode)
 #  define FAIL_VOID(failCode)              SETFAILED(failCode)
 #  define FAIL_NULL(failCode)              SETFAILED(failCode)
-#  define FAIL_EXIT(failCode, returnVar, returnCode)	     \
-    do								     \
-	{							     \
-	    SETFAILED(failCode);				     \
-	    goto Exit;						     \
-	} while(0)
+#  define FAIL_EXIT(failCode, returnVar, returnCode) \
+      do                                             \
+      {                                              \
+          SETFAILED(failCode);                       \
+          goto Exit;                                 \
+      } while(0)
 
 #else  // NO_LONGJMP
 // no longjmp service is available
@@ -175,20 +175,20 @@
 #  define FAIL_NORET(failCode) SETFAILED(failCode)
 
 // fail and immediately return void
-#  define FAIL_VOID(failCode)		       \
-    do						       \
-	{					       \
-	    SETFAILED(failCode);		       \
-	    return;				       \
-	} while(0)
+#  define FAIL_VOID(failCode)  \
+      do                       \
+      {                        \
+          SETFAILED(failCode); \
+          return;              \
+      } while(0)
 
 // fail and immediately return a value
-#  define FAIL_IMMEDIATE(failCode, retval)			   \
-    do								   \
-	{								\
-	    SETFAILED(failCode);					\
-	    return retval;						\
-	} while(0)
+#  define FAIL_IMMEDIATE(failCode, retval) \
+      do                                   \
+      {                                    \
+          SETFAILED(failCode);             \
+          return retval;                   \
+      } while(0)
 
 // fail and return FALSE
 #  define FAIL_BOOL(failCode) FAIL_IMMEDIATE(failCode, FALSE)
@@ -200,13 +200,13 @@
 #  define FAIL_NULL(failCode) FAIL_IMMEDIATE(failCode, NULL)
 
 // fail and return using the goto exit pattern
-#  define FAIL_EXIT(failCode, returnVar, returnCode)			\
-    do									\
-	{								\
-	    SETFAILED(failCode);					\
-	    returnVar = returnCode;					\
-	    goto Exit;							\
-	} while(0)
+#  define FAIL_EXIT(failCode, returnVar, returnCode) \
+      do                                             \
+      {                                              \
+          SETFAILED(failCode);                       \
+          returnVar = returnCode;                    \
+          goto Exit;                                 \
+      } while(0)
 
 #endif
 
@@ -214,66 +214,66 @@
 // if it is not. If longjmp is being used, then the macro makes a call from
 // which there is no return. Otherwise, the function will return the given
 // return code.
-#define VERIFY(condition, failCode, returnCode)				\
-    do									\
-	{								\
-	    if(!(condition))						\
-		{							\
-		    FAIL_IMMEDIATE(failCode, returnCode);		\
-		}							\
-	} while(0)
+#define VERIFY(condition, failCode, returnCode)   \
+    do                                            \
+    {                                             \
+        if(!(condition))                          \
+        {                                         \
+            FAIL_IMMEDIATE(failCode, returnCode); \
+        }                                         \
+    } while(0)
 
 // this function also verifies a condition and enters failure mode, but sets a
 // return value and jumps to Exit on failure - allowing for cleanup.
-#define VERIFY_OR_EXIT(condition, failCode, returnVar, returnCode)	\
-    do									\
-	{								\
-	    if(!(condition))						\
-		{							\
-		    FAIL_EXIT(failCode, returnVar, returnCode);		\
-		}							\
-	} while(0)
+#define VERIFY_OR_EXIT(condition, failCode, returnVar, returnCode) \
+    do                                                             \
+    {                                                              \
+        if(!(condition))                                           \
+        {                                                          \
+            FAIL_EXIT(failCode, returnVar, returnCode);            \
+        }                                                          \
+    } while(0)
 
 // verify the given TPM_RC is success and we are not in
 // failure mode.  Otherwise, return immediately with TPM_RC_FAILURE.
 // note that failure mode is checked first so that an existing FATAL_* error code
 // is not overwritten with the default from this macro.
-#define VERIFY_RC(rc)							\
-    do									\
-	{								\
-	    if(g_inFailureMode)						\
-		{							\
-		    return TPM_RC_FAILURE;				\
-		}							\
-	    if(rc != TPM_RC_SUCCESS)					\
-		{							\
-		    FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, TPM_RC_FAILURE); \
-		}							\
-	} while(0)
+#define VERIFY_RC(rc)                                           \
+    do                                                          \
+    {                                                           \
+        if(g_inFailureMode)                                     \
+        {                                                       \
+            return TPM_RC_FAILURE;                              \
+        }                                                       \
+        if(rc != TPM_RC_SUCCESS)                                \
+        {                                                       \
+            FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, TPM_RC_FAILURE); \
+        }                                                       \
+    } while(0)
 
 // verify the TPM is not in failure mode or return failure
-#define VERIFY_NOT_FAILED()						\
-    do									\
-	{								\
-	    if(g_inFailureMode)						\
-		{							\
-		    return TPM_RC_FAILURE;				\
-		}							\
-	} while(0)
+#define VERIFY_NOT_FAILED()        \
+    do                             \
+    {                              \
+        if(g_inFailureMode)        \
+        {                          \
+            return TPM_RC_FAILURE; \
+        }                          \
+    } while(0)
 
 // Enter failure mode if the given TPM_RC is not success, return void.
-#define VERIFY_RC_VOID(rc)						\
-    do									\
-	{								\
-	    if(g_inFailureMode)						\
-		{							\
-		    return;						\
-		}							\
-	    if(rc != TPM_RC_SUCCESS)					\
-		{							\
-		    FAIL_VOID(FATAL_ERROR_ASSERT);			\
-		}							\
-	} while(0)
+#define VERIFY_RC_VOID(rc)                 \
+    do                                     \
+    {                                      \
+        if(g_inFailureMode)                \
+        {                                  \
+            return;                        \
+        }                                  \
+        if(rc != TPM_RC_SUCCESS)           \
+        {                                  \
+            FAIL_VOID(FATAL_ERROR_ASSERT); \
+        }                                  \
+    } while(0)
 
 // These VERIFY_CRYPTO macros all set failure mode to FATAL_ERROR_CRYPTO
 // and immediately return.  The general way to parse the names is:
@@ -300,95 +300,95 @@
 #define VERIFY_CRYPTO_OR_NULL(fn) VERIFY((fn), FATAL_ERROR_CRYPTO, NULL)
 
 // these VERIFY_CRYPTO macros all set a result value and goto Exit
-#define VERIFY_CRYPTO_OR_EXIT(fn, returnVar, returnCode)		\
+#define VERIFY_CRYPTO_OR_EXIT(fn, returnVar, returnCode) \
     VERIFY_OR_EXIT(fn, FATAL_ERROR_CRYPTO, returnVar, returnCode);
 
 // these VERIFY_CRYPTO_OR_EXIT functions assume the return value variable is
 // named retVal
-#define VERIFY_CRYPTO_OR_EXIT_RC(fn)					\
+#define VERIFY_CRYPTO_OR_EXIT_RC(fn) \
     VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, retVal, TPM_RC_FAILURE)
 
-#define VERIFY_CRYPTO_OR_EXIT_FALSE(fn)				\
+#define VERIFY_CRYPTO_OR_EXIT_FALSE(fn) \
     VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, retVal, FALSE)
 
-#define VERIFY_CRYPTO_RC_OR_EXIT(fn)			       \
-    do							       \
-	{							       \
-	    TPM_RC rc = fn;					       \
-	    if(rc != TPM_RC_SUCCESS)				       \
-		{							\
-		    FAIL_EXIT(FATAL_ERROR_CRYPTO, retVal, rc);		\
-		}							\
-	} while(0)
+#define VERIFY_CRYPTO_RC_OR_EXIT(fn)                   \
+    do                                                 \
+    {                                                  \
+        TPM_RC rc = fn;                                \
+        if(rc != TPM_RC_SUCCESS)                       \
+        {                                              \
+            FAIL_EXIT(FATAL_ERROR_CRYPTO, retVal, rc); \
+        }                                              \
+    } while(0)
 
 #if(defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
 #  define pAssert(a) ((void)0)
 #else
-#  define pAssert(a)					   \
-    do							   \
-	{							   \
-	    if(!(a))						   \
-		FAIL(FATAL_ERROR_PARAMETER);			   \
-	} while(0)
+#  define pAssert(a)                       \
+      do                                   \
+      {                                    \
+          if(!(a))                         \
+              FAIL(FATAL_ERROR_PARAMETER); \
+      } while(0)
 
-#  define pAssert_ZERO(a)						\
-    do									\
-	{								\
-	    if(!(a))							\
-		FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, 0);			\
-	} while(0);
+#  define pAssert_ZERO(a)                            \
+      do                                             \
+      {                                              \
+          if(!(a))                                   \
+              FAIL_IMMEDIATE(FATAL_ERROR_ASSERT, 0); \
+      } while(0);
 
-#  define pAssert_RC(a)				   \
-    do						   \
-	{						   \
-	    if(!(a))					   \
-		FAIL_RC(FATAL_ERROR_ASSERT);		   \
-	} while(0);
+#  define pAssert_RC(a)                    \
+      do                                   \
+      {                                    \
+          if(!(a))                         \
+              FAIL_RC(FATAL_ERROR_ASSERT); \
+      } while(0);
 
-#  define pAssert_BOOL(a)			     \
-    do						     \
-	{						     \
-	    if(!(a))					     \
-		FAIL_BOOL(FATAL_ERROR_ASSERT);		     \
-	} while(0);
+#  define pAssert_BOOL(a)                    \
+      do                                     \
+      {                                      \
+          if(!(a))                           \
+              FAIL_BOOL(FATAL_ERROR_ASSERT); \
+      } while(0);
 
-#  define pAssert_NULL(a)			     \
-    do						     \
-	{						     \
-	    if(!(a))					     \
-		FAIL_NULL(FATAL_ERROR_ASSERT);		     \
-	} while(0);
+#  define pAssert_NULL(a)                    \
+      do                                     \
+      {                                      \
+          if(!(a))                           \
+              FAIL_NULL(FATAL_ERROR_ASSERT); \
+      } while(0);
 
 // using FAIL_NORET isn't optimium but is available in limited cases that
 // result in wrong calculated values, and can be checked later
 // but should have no vulnerability implications.
-#  define pAssert_NORET(a)			      \
-    {						      \
-	if(!(a))					      \
-	    FAIL_NORET(FATAL_ERROR_ASSERT);		      \
-    }
+#  define pAssert_NORET(a)                    \
+      {                                       \
+          if(!(a))                            \
+              FAIL_NORET(FATAL_ERROR_ASSERT); \
+      }
 
 // this macro is used where a calling code has been verified to function correctly
 // when the failing assert immediately returns without an error code.
 // this can be because either the caller checks the fatal error flag, or
 // the state is safe and a higher-level check will catch it.
-#  define pAssert_VOID_OK(a)			     \
-    {						     \
-	if(!(a))					     \
-	    FAIL_VOID(FATAL_ERROR_ASSERT);		     \
-    }
+#  define pAssert_VOID_OK(a)                 \
+      {                                      \
+          if(!(a))                           \
+              FAIL_VOID(FATAL_ERROR_ASSERT); \
+      }
 
 #endif
 
 // These macros are commonly used in the "Crypt" code as a way to keep listings from
 // getting too long. This is not to save paper but to allow one to see more
 // useful stuff on the screen at any given time.  Neither macro sets failure mode.
-#define ERROR_EXIT(returnCode)	       \
-    do				       \
-	{				       \
-	    retVal = returnCode;	       \
-	    goto Exit;			       \
-	} while(0)
+#define ERROR_EXIT(returnCode) \
+    do                         \
+    {                          \
+        retVal = returnCode;   \
+        goto Exit;             \
+    } while(0)
 
 // braces are necessary for this usage:
 // if (y)
@@ -397,17 +397,17 @@
 // without braces the else would attach to the GOTO macro instead of the
 // outer if statement; given the amount of TPM code that doesn't use braces on
 // if statements, this is a live risk.
-#define GOTO_ERROR_UNLESS(_X)		      \
-    do					      \
-	{				      \
-	    if(!(_X))				      \
-		goto Error;			      \
-	} while(0)
+#define GOTO_ERROR_UNLESS(_X) \
+    do                        \
+    {                         \
+        if(!(_X))             \
+            goto Error;       \
+    } while(0)
 
 #include "MinMax.h"
 
 #ifndef IsOdd
-#  define IsOdd(a) (((a)&1) != 0)
+#  define IsOdd(a) (((a) & 1) != 0)
 #endif
 
 #ifndef BITS_TO_BYTES
@@ -455,10 +455,10 @@
 #  define SET_ATTRIBUTE(a, type, b)   (a.b = SET)
 #  define CLEAR_ATTRIBUTE(a, type, b) (a.b = CLEAR)
 #  define GET_ATTRIBUTE(a, type, b)   (a.b)
-#  define TPMA_ZERO_INITIALIZER()		  \
-    {							  \
-	0						  \
-    }
+#  define TPMA_ZERO_INITIALIZER() \
+      {                           \
+          0                       \
+      }
 #else
 #  define IS_ATTRIBUTE(a, type, b)    ((a & type##_##b) != 0)
 #  define SET_ATTRIBUTE(a, type, b)   (a |= type##_##b)

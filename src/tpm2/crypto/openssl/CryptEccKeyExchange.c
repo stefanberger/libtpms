@@ -83,18 +83,18 @@
 //        avf(Q) = xqm + 2ceil(f / 2)
 // Always returns TRUE(1).
 static BOOL avf1(Crypt_Int* bnX,  // IN/OUT: the reduced value
-		 Crypt_Int* bnN   // IN: the order of the curve
-		 )
+                 Crypt_Int* bnN   // IN: the order of the curve
+)
 {
     // compute f = 2^(ceil(ceil(log2(n)) / 2))
     int f = (ExtMath_SizeInBits(bnN) + 1) / 2;
     // x' = 2^f + (x mod 2^f)
     ExtMath_MaskBits(bnX, f);  // This is mod 2*2^f but it doesn't matter because
-    // the next operation will SET the extra bit anyway
+        // the next operation will SET the extra bit anyway
     if(!ExtMath_SetBit(bnX, f))
-	{
-	    FAIL(FATAL_ERROR_CRYPTO);
-	}
+    {
+        FAIL(FATAL_ERROR_CRYPTO);
+    }
     return TRUE;
 }
 
@@ -111,12 +111,12 @@ static BOOL avf1(Crypt_Int* bnX,  // IN/OUT: the reduced value
 //      TPM_RC_NO_RESULT        the value for dsA does not give a valid point on the
 //                              curve
 static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
-			TPM_ECC_CURVE curveId,  // IN: the curve for the computations
-			TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
-			TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
-			TPMS_ECC_POINT*      QsB,  // IN: static public party B key
-			TPMS_ECC_POINT*      QeB   // IN: ephemeral public party B key
-			)
+                        TPM_ECC_CURVE curveId,  // IN: the curve for the computations
+                        TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
+                        TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
+                        TPMS_ECC_POINT*      QsB,  // IN: static public party B key
+                        TPMS_ECC_POINT*      QeB   // IN: ephemeral public party B key
+)
 {
     CRYPT_CURVE_INITIALIZED(E, curveId);
     CRYPT_POINT_VAR(pQeA);
@@ -131,9 +131,9 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
     pAssert(
-	    outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL && dsA != NULL);
+        outZ != NULL && pQeB != NULL && pQsB != NULL && deA != NULL && dsA != NULL);
     // Process:
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
     //  2. P = h(implicitsigA)(Qe,B + avf(Qe,B)Qs,B).
@@ -142,9 +142,9 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
 
     // Compute the public ephemeral key pQeA = [de,A]G
     if((retVal =
-	TpmEcc_PointMult(pQeA, ExtEcc_CurveGetG(curveId), bnDeA, NULL, NULL, E))
+            TpmEcc_PointMult(pQeA, ExtEcc_CurveGetG(curveId), bnDeA, NULL, NULL, E))
        != TPM_RC_SUCCESS)
-	goto Exit;
+        goto Exit;
 
     //  1. implicitsigA = (de,A + avf(Qe,A)ds,A ) mod n.
     //  tA := (ds,A + de,A  avf(Xe,A)) mod n    (3)
@@ -162,11 +162,11 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     // Put this in because almost every case of h is == 1 so skip the call when
     // not necessary.
     if(!ExtMath_IsEqualWord(ExtEcc_CurveGetCofactor(curveId), 1))
-	// Cofactor is not 1 so compute Ta := Ta * h mod n
-	ExtMath_ModMult(bnTa,
-			bnTa,
-			ExtEcc_CurveGetCofactor(curveId),
-			ExtEcc_CurveGetOrder(curveId));
+        // Cofactor is not 1 so compute Ta := Ta * h mod n
+        ExtMath_ModMult(bnTa,
+                        bnTa,
+                        ExtEcc_CurveGetCofactor(curveId),
+                        ExtEcc_CurveGetOrder(curveId));
 
     // Now that 'tA' is (h * 'tA' mod n)
     // 'outZ' = (tA)(Qe,B + avf(Qe,B)Qs,B).
@@ -182,11 +182,11 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
     // If the result is not the point at infinity, return QeB
     TpmEcc_PointMult(pQeB, pQeB, bnTa, NULL, NULL, E);
     if(ExtEcc_IsInfinityPoint(pQeB))
-	ERROR_EXIT(TPM_RC_NO_RESULT);
+        ERROR_EXIT(TPM_RC_NO_RESULT);
     // Convert Crypt_Int* E to TPM2B E
     TpmEcc_PointTo2B(outZ, pQeB, E);
 
- Exit:
+Exit:
     CRYPT_CURVE_FREE(E);
     return retVal;
 }
@@ -198,13 +198,13 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
 // 6.1.1.2 Full Unified Model, C(2, 2, ECC CDH).
 //
 static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
-			 TPMS_ECC_POINT* outZe,  // OUT: Ze
-			 TPM_ECC_CURVE curveId,  // IN: the curve for the computations
-			 TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
-			 TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
-			 TPMS_ECC_POINT*      QsB,  // IN: static public party B key
-			 TPMS_ECC_POINT*      QeB  // IN: ephemeral public party B key
-			 )
+                         TPMS_ECC_POINT* outZe,  // OUT: Ze
+                         TPM_ECC_CURVE curveId,  // IN: the curve for the computations
+                         TPM2B_ECC_PARAMETER* dsA,  // IN: static private TPM key
+                         TPM2B_ECC_PARAMETER* deA,  // IN: ephemeral private TPM key
+                         TPMS_ECC_POINT*      QsB,  // IN: static public party B key
+                         TPMS_ECC_POINT*      QeB  // IN: ephemeral public party B key
+)
 {
     CRYPT_CURVE_INITIALIZED(E, curveId);
     CRYPT_ECC_INITIALIZED(bnAs, dsA);
@@ -216,22 +216,22 @@ static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_EXIT(TPM_RC_CURVE);
+        ERROR_EXIT(TPM_RC_CURVE);
     pAssert(
-	    outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+        outZs != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Do the point multiply for the Zs value ([dsA]QsB)
     retVal = TpmEcc_PointMult(ecZ, ecBs, bnAs, NULL, NULL, E);
     if(retVal == TPM_RC_SUCCESS)
-	{
-	    // Convert the Zs value.
-	    TpmEcc_PointTo2B(outZs, ecZ, E);
-	    // Do the point multiply for the Ze value ([deA]QeB)
-	    retVal = TpmEcc_PointMult(ecZ, ecBe, bnAe, NULL, NULL, E);
-	    if(retVal == TPM_RC_SUCCESS)
-		TpmEcc_PointTo2B(outZe, ecZ, E);
-	}
- Exit:
+    {
+        // Convert the Zs value.
+        TpmEcc_PointTo2B(outZs, ecZ, E);
+        // Do the point multiply for the Ze value ([deA]QeB)
+        retVal = TpmEcc_PointMult(ecZ, ecBe, bnAe, NULL, NULL, E);
+        if(retVal == TPM_RC_SUCCESS)
+            TpmEcc_PointTo2B(outZe, ecZ, E);
+    }
+Exit:
     CRYPT_CURVE_FREE(E);
     return retVal;
 }
@@ -242,46 +242,46 @@ static TPM_RC C_2_2_ECDH(TPMS_ECC_POINT* outZs,  // OUT: Zs
 //  Return Type: TPM_RC
 //      TPM_RC_SCHEME             scheme is not defined
 LIB_EXPORT TPM_RC CryptEcc2PhaseKeyExchange(
-					    TPMS_ECC_POINT*      outZ1,    // OUT: a computed point
-					    TPMS_ECC_POINT*      outZ2,    // OUT: and optional second point
-					    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
-					    TPM_ALG_ID           scheme,   // IN: the key exchange scheme
-					    TPM2B_ECC_PARAMETER* dsA,      // IN: static private TPM key
-					    TPM2B_ECC_PARAMETER* deA,      // IN: ephemeral private TPM key
-					    TPMS_ECC_POINT*      QsB,      // IN: static public party B key
-					    TPMS_ECC_POINT*      QeB       // IN: ephemeral public party B key
-					    )
+    TPMS_ECC_POINT*      outZ1,    // OUT: a computed point
+    TPMS_ECC_POINT*      outZ2,    // OUT: and optional second point
+    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+    TPM_ALG_ID           scheme,   // IN: the key exchange scheme
+    TPM2B_ECC_PARAMETER* dsA,      // IN: static private TPM key
+    TPM2B_ECC_PARAMETER* deA,      // IN: ephemeral private TPM key
+    TPMS_ECC_POINT*      QsB,      // IN: static public party B key
+    TPMS_ECC_POINT*      QeB       // IN: ephemeral public party B key
+)
 {
     pAssert(
-	    outZ1 != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
+        outZ1 != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Initialize the output points so that they are empty until one of the
     // functions decides otherwise
     outZ1->x.b.size = 0;
     outZ1->y.b.size = 0;
     if(outZ2 != NULL)
-	{
-	    outZ2->x.b.size = 0;
-	    outZ2->y.b.size = 0;
-	}
+    {
+        outZ2->x.b.size = 0;
+        outZ2->y.b.size = 0;
+    }
     switch(scheme)
-	{
-	  case TPM_ALG_ECDH:
-	    return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
-	    break;
+    {
+        case TPM_ALG_ECDH:
+            return C_2_2_ECDH(outZ1, outZ2, curveId, dsA, deA, QsB, QeB);
+            break;
 #  if ALG_ECMQV
-	  case TPM_ALG_ECMQV:
-	    return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
-	    break;
+        case TPM_ALG_ECMQV:
+            return C_2_2_MQV(outZ1, curveId, dsA, deA, QsB, QeB);
+            break;
 #  endif
 #  if ALG_SM2
-	  case TPM_ALG_SM2:
-	    return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
-	    break;
+        case TPM_ALG_SM2:
+            return SM2KeyExchange(outZ1, curveId, dsA, deA, QsB, QeB);
+            break;
 #  endif
-	  default:
-	    return TPM_RC_SCHEME;
-	}
+        default:
+            return TPM_RC_SCHEME;
+    }
 }
 
 #  if ALG_SM2
@@ -302,20 +302,20 @@ static UINT32 ComputeWForSM2(TPM_ECC_CURVE curveId)
 // the 'W' here is 1. This means that an input value of 14 (1110b) would return a
 // value of 110b with the standard but 10b with the scheme in SM2.
 static Crypt_Int* avfSm2(Crypt_Int* bn,  // IN/OUT: the reduced value
-			 UINT32     w    // IN: the value of w
-			 )
+                         UINT32     w    // IN: the value of w
+)
 {
     // a)   set w := ceil(ceil(log2(n)) / 2) - 1
     // b)   set x' := 2^w + ( x & (2^w - 1))
     // This is just like the avf for MQV where x' = 2^w + (x mod 2^w)
 
     ExtMath_MaskBits(bn, w);  // as with avf1, this is too big by a factor of 2 but
-    // it doesn't matter because we SET the extra bit
-    // anyway
+                              // it doesn't matter because we SET the extra bit
+                              // anyway
     if(!ExtMath_SetBit(bn, w))
-	{
-	    FAIL(FATAL_ERROR_CRYPTO);
-	}
+    {
+        FAIL(FATAL_ERROR_CRYPTO);
+    }
     return bn;
 }
 
@@ -333,13 +333,13 @@ static Crypt_Int* avfSm2(Crypt_Int* bn,  // IN/OUT: the reduced value
 //      TPM_RC_NO_RESULT        the value for dsA does not give a valid point on the
 //                              curve
 LIB_EXPORT TPM_RC SM2KeyExchange(
-				 TPMS_ECC_POINT*      outZ,     // OUT: the computed point
-				 TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
-				 TPM2B_ECC_PARAMETER* dsAIn,    // IN: static private TPM key
-				 TPM2B_ECC_PARAMETER* deAIn,    // IN: ephemeral private TPM key
-				 TPMS_ECC_POINT*      QsBIn,    // IN: static public party B key
-				 TPMS_ECC_POINT*      QeBIn     // IN: ephemeral public party B key
-				 )
+    TPMS_ECC_POINT*      outZ,     // OUT: the computed point
+    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+    TPM2B_ECC_PARAMETER* dsAIn,    // IN: static private TPM key
+    TPM2B_ECC_PARAMETER* deAIn,    // IN: ephemeral private TPM key
+    TPMS_ECC_POINT*      QsBIn,    // IN: static public party B key
+    TPMS_ECC_POINT*      QeBIn     // IN: ephemeral public party B key
+)
 {
     CRYPT_CURVE_INITIALIZED(E, curveId);
     CRYPT_ECC_INITIALIZED(dsA, dsAIn);
@@ -357,7 +357,7 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_EXIT(TPM_RC_CURVE);
+        ERROR_EXIT(TPM_RC_CURVE);
     pAssert(outZ != NULL && dsA != NULL && deA != NULL && QsB != NULL && QeB != NULL);
 
     // Compute the value for w
@@ -365,7 +365,7 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
 
     // Compute the public ephemeral key pQeA = [de,A]G
     if(!ExtEcc_PointMultiply(QeA, ExtEcc_CurveGetG(curveId), deA, E))
-	goto Exit;
+        goto Exit;
 
     //  tA := (ds,A + de,A  avf(Xe,A)) mod n    (3)
     //  Compute 'tA' = ('dsA' +  'deA'  avf('XeA')) mod n
@@ -381,21 +381,21 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
     // Put this in because almost every case of h is == 1 so skip the call when
     // not necessary.
     if(!ExtMath_IsEqualWord(ExtEcc_CurveGetCofactor(curveId), 1))
-	// Cofactor is not 1 so compute Ta := Ta * h mod n
-	ExtMath_ModMult(
-			Ta, Ta, ExtEcc_CurveGetCofactor(curveId), ExtEcc_CurveGetOrder(curveId));
+        // Cofactor is not 1 so compute Ta := Ta * h mod n
+        ExtMath_ModMult(
+            Ta, Ta, ExtEcc_CurveGetCofactor(curveId), ExtEcc_CurveGetOrder(curveId));
     // Now that 'tA' is (h * 'tA' mod n)
     // 'outZ' = ['tA'](QsB + [avf(QeB.x)](QeB)).
     ExtMath_Copy(XeB, ExtEcc_PointX(QeB));
     if(!ExtEcc_PointMultiplyAndAdd(Z, QsB, One, QeB, avfSm2(XeB, w), E))
-	goto Exit;
+        goto Exit;
     // QeB := [tA]QeB = [tA](QsB + [Xe,B]QeB) and check for at infinity
     if(!ExtEcc_PointMultiply(Z, Z, Ta, E))
-	goto Exit;
+        goto Exit;
     // Convert Crypt_Int* E to TPM2B E
     TpmEcc_PointTo2B(outZ, Z, E);
     retVal = TPM_RC_SUCCESS;
- Exit:
+Exit:
     CRYPT_CURVE_FREE(E);
     return retVal;
 }

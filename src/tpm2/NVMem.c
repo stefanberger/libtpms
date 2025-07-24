@@ -99,9 +99,9 @@ static int NvFileOpen(const char* mode)
     // Try to open an exist NVChip file for read/write
 #  if defined _MSC_VER && 1
     if(fopen_s(&s_NvFile, s_NvFilePath, mode) != 0)
-	{
-	    s_NvFile = NULL;
-	}
+    {
+        s_NvFile = NULL;
+    }
 #  else
     s_NvFile = fopen(s_NvFilePath, mode);
 #  endif
@@ -118,7 +118,7 @@ static int NvFileCommit(void)
     int OK;
     // If NV file is not available, return failure
     if(s_NvFile == NULL)
-	return 1;
+        return 1;
     // Write RAM data to NV
     fseek(s_NvFile, 0, SEEK_SET);
     OK = (NV_MEMORY_SIZE == fwrite(s_NV, 1, NV_MEMORY_SIZE, s_NvFile));
@@ -149,20 +149,20 @@ static long NvFileSize(int leaveAt)
     fileSize = ftell(s_NvFile);
     assert(fileSize >= 0);
     switch(leaveAt)
-	{
-	  case SEEK_SET:
-	    filePos = 0;
-	    /* fall through */
-	  case SEEK_CUR:
-	    irc = fseek(s_NvFile, filePos, SEEK_SET);
-	    assert(irc == 0);
-	    break;
-	  case SEEK_END:
-	    break;
-	  default:
-	    assert(FALSE);
-	    break;
-	}
+    {
+        case SEEK_SET:
+            filePos = 0;
+          /* fall through */
+        case SEEK_CUR:
+            irc = fseek(s_NvFile, filePos, SEEK_SET);
+            assert(irc == 0);
+            break;
+        case SEEK_END:
+            break;
+        default:
+            assert(FALSE);
+            break;
+    }
     return fileSize;
 }
 #endif
@@ -196,11 +196,11 @@ LIB_EXPORT void _plat__NvErrors(int recoverable, int unrecoverable)
 #define NV_ENABLE_SUCCESS 0
 #define NV_ENABLE_FAILED  (-1)
 LIB_EXPORT int _plat__NVEnable(
-			       void*  platParameter,  // platform specific parameter
-			       size_t paramSize       // size of parameter. If size == 0, then
-			       // parameter is a sizeof(void*) scalar and should
-			       // be cast to an integer (intptr_t), not dereferenced.
-			       )
+    void*  platParameter,  // platform specific parameter
+    size_t paramSize       // size of parameter. If size == 0, then
+                           // parameter is a sizeof(void*) scalar and should
+                           // be cast to an integer (intptr_t), not dereferenced.
+)
 {
     NOT_REFERENCED(platParameter);  // to keep compiler quiet
     NOT_REFERENCED(paramSize);      // to keep compiler quiet
@@ -232,46 +232,47 @@ _plat__NVEnable_NVChipFile(
     s_NV_recoverable   = FALSE;
 #if FILE_BACKED_NV
     if(s_NvFile != NULL)
-	return NV_ENABLE_SUCCESS;
+        return NV_ENABLE_SUCCESS;
     // Initialize all the bytes in the ram copy of the NV
     _plat__NvMemoryClear(0, NV_MEMORY_SIZE);
 
     // If the file exists
     if(NvFileOpen("r+b") >= 0)
-	{
-	    long fileSize = NvFileSize(SEEK_SET);  // get the file size and leave the
-	    // file pointer at the start
-	    //
-	    // If the size is right, read the data
-	    if(NV_MEMORY_SIZE == fileSize)
-		{
-		    s_NeedsManufacture = fread(s_NV, 1, NV_MEMORY_SIZE, s_NvFile)
-					 != NV_MEMORY_SIZE;
-		    if (s_NeedsManufacture) {			// libtpms changes start: set s_NV_unrecoverable on error
-		        s_NV_unrecoverable = TRUE;
-		        TPMLIB_LogTPM2Error("Could not read NVChip file: %s\n",
-			                    strerror(errno));	// libtpms changes end
-		    }
-		}
-	    else
-		{
-		    NvFileCommit();  // for any other size, initialize it
-		    s_NeedsManufacture = TRUE;
-		}
-	}
+    {
+        long fileSize = NvFileSize(SEEK_SET);  // get the file size and leave the
+                                               // file pointer at the start
+                                               //
+        // If the size is right, read the data
+        if(NV_MEMORY_SIZE == fileSize)
+        {
+            s_NeedsManufacture = fread(s_NV, 1, NV_MEMORY_SIZE, s_NvFile)
+                                 != NV_MEMORY_SIZE;
+            if (s_NeedsManufacture)			// libtpms changes start: set s_NV_unrecoverable on error
+            {
+                s_NV_unrecoverable = TRUE;
+		TPMLIB_LogTPM2Error("Could not read NVChip file: %s\n",
+		                    strerror(errno));	// libtpms changes end
+            }
+        }
+        else
+        {
+            NvFileCommit();  // for any other size, initialize it
+            s_NeedsManufacture = TRUE;
+        }
+    }
     // If NVChip file does not exist, try to create it for read/write.
     else if(NvFileOpen("w+b") >= 0)
-	{
-	    NvFileCommit();  // Initialize the file
-	    s_NeedsManufacture = TRUE;
-	}
+    {
+        NvFileCommit();  // Initialize the file
+        s_NeedsManufacture = TRUE;
+    }
     assert(NULL != s_NvFile);  // Just in case we are broken for some reason.
 #endif
     // NV contents have been initialized and the error checks have been performed. For
     // simulation purposes, use the signaling interface to indicate if an error is
     // to be simulated and the type of the error.
     if(s_NV_unrecoverable)
-	return NV_ENABLE_FAILED;
+        return NV_ENABLE_FAILED;
     s_NvIsAvailable = TRUE;
     return s_NV_recoverable;
 }
@@ -279,16 +280,16 @@ _plat__NVEnable_NVChipFile(
 //***_plat__NVDisable()
 // Disable NV memory
 LIB_EXPORT void _plat__NVDisable(
-				 void*  platParameter,  // platform specific parameter
-				 size_t paramSize       // size of parameter. If size == 0, then
-				 // parameter is a sizeof(void*) scalar and should
-				 // be cast to an integer (intptr_t), not dereferenced.
-				 )
+    void*  platParameter,  // platform specific parameter
+    size_t paramSize       // size of parameter. If size == 0, then
+                           // parameter is a sizeof(void*) scalar and should
+                           // be cast to an integer (intptr_t), not dereferenced.
+)
 {
     NOT_REFERENCED(paramSize);  // to keep compiler quiet
     int delete = ((intptr_t)platParameter != 0)
-		 ? TRUE
-		 : FALSE;  // IN: If TRUE (!=0), delete the NV contents.
+                     ? TRUE
+                     : FALSE;  // IN: If TRUE (!=0), delete the NV contents.
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     int ret = libtpms_plat__NVDisable();
@@ -298,20 +299,20 @@ LIB_EXPORT void _plat__NVDisable(
 
 #if FILE_BACKED_NV
     if(NULL != s_NvFile)
-	{
-	    fclose(s_NvFile);  // Close NV file
-	    // Alternative to deleting the file is to set its size to 0. This will not
-	    // match the NV size so the TPM will need to be remanufactured.
-	    if(delete)
-		{
-		    // Open for writing at the start. Sets the size to zero.
-		    if(NvFileOpen("w") >= 0)
-			{
-			    fflush(s_NvFile);
-			    fclose(s_NvFile);
-			}
-		}
-	}
+    {
+        fclose(s_NvFile);  // Close NV file
+        // Alternative to deleting the file is to set its size to 0. This will not
+        // match the NV size so the TPM will need to be remanufactured.
+        if(delete)
+        {
+            // Open for writing at the start. Sets the size to zero.
+            if(NvFileOpen("w") >= 0)
+            {
+                fflush(s_NvFile);
+                fclose(s_NvFile);
+            }
+        }
+    }
     s_NvFile = NULL;  // Set file handle to NULL
 #endif
     s_NvIsAvailable = FALSE;
@@ -334,10 +335,10 @@ LIB_EXPORT int _plat__GetNvReadyState(void)
 #endif /* TPM_LIBTPMS_CALLBACKS */
 
     if(!s_NvIsAvailable)
-	retVal = NV_WRITEFAILURE;
+        retVal = NV_WRITEFAILURE;
 #if FILE_BACKED_NV
     else
-	retVal = (s_NvFile == NULL);
+        retVal = (s_NvFile == NULL);
 #endif
     return retVal;
 }
@@ -348,16 +349,16 @@ LIB_EXPORT int _plat__GetNvReadyState(void)
 //      TRUE(1)         offset and size is within available NV size
 //      FALSE(0)        otherwise; also trigger failure mode
 LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
-				   unsigned int size,  // IN: size of bytes to read
-				   void*        data   // OUT: data buffer
-				   )
+                                   unsigned int size,  // IN: size of bytes to read
+                                   void*        data   // OUT: data buffer
+)
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
     if(startOffset + size <= NV_MEMORY_SIZE)
-	{
-	    memcpy(data, &s_NV[startOffset], size);  // Copy data from RAM
-	    return TRUE;
-	}
+    {
+        memcpy(data, &s_NV[startOffset], size);  // Copy data from RAM
+        return TRUE;
+    }
     return FALSE;
 }
 
@@ -369,16 +370,16 @@ LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
 //      NV_IS_SAME(0)           the NV location is the same as the test value
 //      NV_INVALID_LOCATION(-1) the NV location is invalid; also triggers failure mode
 LIB_EXPORT int _plat__NvGetChangedStatus(
-					 unsigned int startOffset,  // IN: read start
-					 unsigned int size,         // IN: size of bytes to read
-					 void*        data          // IN: data buffer
-					 )
+    unsigned int startOffset,  // IN: read start
+    unsigned int size,         // IN: size of bytes to read
+    void*        data          // IN: data buffer
+)
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
     if(startOffset + size <= NV_MEMORY_SIZE)
-	{
-	    return (memcmp(&s_NV[startOffset], data, size) != 0);
-	}
+    {
+        return (memcmp(&s_NV[startOffset], data, size) != 0);
+    }
     // the NV location is invalid; the assert above should have triggered failure
     // mode
     return NV_INVALID_LOCATION;
@@ -395,16 +396,16 @@ LIB_EXPORT int _plat__NvGetChangedStatus(
 //      TRUE(1)         offset and size is within available NV size
 //      FALSE(0)        otherwise; also trigger failure mode
 LIB_EXPORT int _plat__NvMemoryWrite(unsigned int startOffset,  // IN: write start
-				    unsigned int size,  // IN: size of bytes to write
-				    void*        data   // OUT: data buffer
-				    )
+                                    unsigned int size,  // IN: size of bytes to write
+                                    void*        data   // OUT: data buffer
+)
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
     if(startOffset + size <= NV_MEMORY_SIZE)
-	{
-	    memcpy(&s_NV[startOffset], data, size);  // Copy the data to the NV image
-	    return TRUE;
-	}
+    {
+        memcpy(&s_NV[startOffset], data, size);  // Copy the data to the NV image
+        return TRUE;
+    }
     return FALSE;
 }
 
@@ -412,16 +413,16 @@ LIB_EXPORT int _plat__NvMemoryWrite(unsigned int startOffset,  // IN: write star
 // Function is used to set a range of NV memory bytes to an implementation-dependent
 // value. The value represents the erase state of the memory.
 LIB_EXPORT int _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear start
-				    unsigned int size  // IN: number of bytes to clear
-				    )
+                                    unsigned int size  // IN: number of bytes to clear
+)
 {
     assert(startOffset + size <= NV_MEMORY_SIZE);
     if(startOffset + size <= NV_MEMORY_SIZE)
-	{
-	    // In this implementation, assume that the erase value for NV is all 1s
-	    memset(&s_NV[startOffset], 0xff, size);
-	    return TRUE;
-	}
+    {
+        // In this implementation, assume that the erase value for NV is all 1s
+        memset(&s_NV[startOffset], 0xff, size);
+        return TRUE;
+    }
     return FALSE;
 }
 
@@ -430,23 +431,23 @@ LIB_EXPORT int _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear star
 //      This function should ensure that if there overlap, the original data is
 //      copied before it is written
 LIB_EXPORT int _plat__NvMemoryMove(unsigned int sourceOffset,  // IN: source offset
-				   unsigned int destOffset,  // IN: destination offset
-				   unsigned int size  // IN: size of data being moved
-				   )
+                                   unsigned int destOffset,  // IN: destination offset
+                                   unsigned int size  // IN: size of data being moved
+)
 {
     assert(sourceOffset + size <= NV_MEMORY_SIZE);
     assert(destOffset + size <= NV_MEMORY_SIZE);
     if(sourceOffset + size <= NV_MEMORY_SIZE && destOffset + size <= NV_MEMORY_SIZE)
-	{
-	    memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);  // Move data in RAM
-#if 1    /* libtpms added begin */
-	    if (destOffset > sourceOffset)
-	        memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
-	    else
-	        memset(&s_NV[destOffset+size], 0, sourceOffset-destOffset);
-#endif   /* libtpms added end */
-	    return TRUE;
-	}
+    {
+        memmove(&s_NV[destOffset], &s_NV[sourceOffset], size);  // Move data in RAM
+#if 1						// libtpms added begin
+        if (destOffset > sourceOffset)
+            memset(&s_NV[sourceOffset], 0, destOffset-sourceOffset);
+        else
+            memset(&s_NV[destOffset+size], 0, sourceOffset-destOffset);
+#endif						// libtpms added end
+        return TRUE;
+    }
     return FALSE;
 }
 

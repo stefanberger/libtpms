@@ -87,9 +87,9 @@
 struct bignum_st
 {
     BN_ULONG* d;   /* Pointer to an array of 'BN_BITS2' bit
-		    * chunks. */
+                                    * chunks. */
     int       top; /* Index of last used d +1. */
-    /* The next are internal book keeping for bn_expand. */
+                   /* The next are internal book keeping for bn_expand. */
     int dmax;      /* Size of the d array. */
     int neg;       /* one if the number is negative */
     int flags;
@@ -97,7 +97,7 @@ struct bignum_st
 #else
 #  define EC_POINT_get_affine_coordinates EC_POINT_get_affine_coordinates_GFp
 #  define EC_POINT_set_affine_coordinates EC_POINT_set_affine_coordinates_GFp
-#endif // OPENSSL_VERSION_NUMBER
+#endif  // OPENSSL_VERSION_NUMBER
 #endif // libtpms added
 
 #if USE_OPENSSL_FUNCTIONS_ECDSA				// libtpms added begin
@@ -109,26 +109,26 @@ struct bignum_st
 #  define EC_POINT_set_affine_coordinates_GFp EC_POINT_set_affine_coordinates
 #endif							// libtpms added end
 
-	//** Macros and Defines
+//** Macros and Defines
 
-	// Make sure that the library is using the correct size for a crypt word
-#if defined THIRTY_TWO_BIT && (RADIX_BITS != 32)			\
-    || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT)		\
-	&& (RADIX_BITS != 64))
+// Make sure that the library is using the correct size for a crypt word
+#if defined THIRTY_TWO_BIT && (RADIX_BITS != 32)                \
+    || ((defined SIXTY_FOUR_BIT_LONG || defined SIXTY_FOUR_BIT) \
+        && (RADIX_BITS != 64))
 #  error Ossl library is using different radix
 #endif
 
 // Allocate a local BIGNUM value. For the allocation, a bigNum structure is created
 // as is a local BIGNUM. The bigNum is initialized and then the BIGNUM is
 // set to reference the local value.
-#define BIG_VAR(name, bits)		 \
-    BN_VAR(name##Bn, (bits));		 \
+#define BIG_VAR(name, bits)        \
+    BN_VAR(name##Bn, (bits));      \
     BIGNUM* _##name = BN_new();			/* libtpms */	\
     BIGNUM* name = BigInitialized(_##name	/* libtpms */	\
-									, BnInit(name##Bn, BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
+        , BnInit(name##Bn, BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
 
 // Allocate a BIGNUM and initialize with the values in a bigNum initializer
-#define BIG_INITIALIZED(name, initializer)				\
+#define BIG_INITIALIZED(name, initializer) \
     BIGNUM* _##name = BN_new();				/* libtpms */	\
     BIGNUM* name = BigInitialized(_##name, initializer) /* libtpms */
 
@@ -137,14 +137,14 @@ typedef struct
     const TPMBN_ECC_CURVE_CONSTANTS* C;  // the TPM curve values
     EC_GROUP*                        G;  // group parameters
     BN_CTX* CTX;  // the context for the math (this might not be
-    // the context in which the curve was created>;
+                  // the context in which the curve was created>;
 } OSSL_CURVE_DATA;
 
 // Define the curve data type expected by the TpmBigNum library:
 typedef OSSL_CURVE_DATA                     bigCurveData;
 
 TPM_INLINE const TPMBN_ECC_CURVE_CONSTANTS* AccessCurveConstants(
-								 const bigCurveData* E)
+    const bigCurveData* E)
 {
     return E->C;
 }

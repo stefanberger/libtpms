@@ -87,7 +87,7 @@ void TimePowerOn(void);
 // until startup completes. When Startup is done, then it will create the epoch
 // nonce to complete the initializations by calling this function.
 BOOL TimeStartup(STARTUP_TYPE type  // IN: start up type
-		 );
+);
 
 //*** TimeClockUpdate()
 // This function updates go.clock. If 'newTime' requires an update of NV, then
@@ -96,7 +96,7 @@ BOOL TimeStartup(STARTUP_TYPE type  // IN: start up type
 // not cause an NV write, then go.clock is updated. If an NV write occurs, then
 // go.safe is SET.
 void TimeClockUpdate(UINT64 newTime  // IN: New time value in mS.
-		     );
+);
 
 //*** TimeUpdate()
 // This function is used to update the time and clock values. If the TPM
@@ -129,7 +129,7 @@ void TimeUpdateToCurrent(void);
 //*** TimeSetAdjustRate()
 // This function is used to perform rate adjustment on 'Time' and 'Clock'.
 void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
-		       );
+);
 
 //*** TimeGetMarshaled()
 // This function is used to access TPMS_TIME_INFO in canonical form.
@@ -137,7 +137,7 @@ void TimeSetAdjustRate(TPM_CLOCK_ADJUST adjust  // IN: adjust constant
 // and returns the marshaled size
 UINT16
 TimeGetMarshaled(TIME_INFO* dataBuffer  // OUT: result buffer
-		 );
+);
 
 //*** TimeFillInfo
 // This function gathers information to fill in a TPMS_CLOCK_INFO structure.

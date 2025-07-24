@@ -79,13 +79,13 @@ void _rpc__Signal_PowerOn(bool isReset)
 {
     // if power is on and this is not a call to do TPM reset then return
     if(s_isPowerOn && !isReset)
-	return;
+        return;
     // If this is a reset but power is not on, then return
     if(isReset && !s_isPowerOn)
-	return;
+        return;
     // Unless this is just a reset, pass power on signal to platform
     if(!isReset)
-	_plat__Signal_PowerOn();
+        _plat__Signal_PowerOn();
     // Power on and reset both lead to _TPM_Init()
     _plat__Signal_Reset();
 
@@ -110,8 +110,8 @@ void _rpc__Signal_Restart(void)
 void _rpc__Signal_PowerOff(void)
 {
     if(s_isPowerOn)
-	// Pass power off signal to platform
-	_plat__Signal_PowerOff();
+        // Pass power off signal to platform
+        _plat__Signal_PowerOff();
     // This could be redundant, but...
     s_isPowerOn = false;
 
@@ -137,8 +137,8 @@ void _rpc__Signal_PhysicalPresenceOn(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... pass physical presence on to platform
-	_plat__Signal_PhysicalPresenceOn();
+        // ... pass physical presence on to platform
+        _plat__Signal_PhysicalPresenceOn();
     return;
 }
 
@@ -148,8 +148,8 @@ void _rpc__Signal_PhysicalPresenceOff(void)
 {
     // If TPM is power on...
     if(s_isPowerOn)
-	// ... pass physical presence off to platform
-	_plat__Signal_PhysicalPresenceOff();
+        // ... pass physical presence off to platform
+        _plat__Signal_PhysicalPresenceOff();
     return;
 }
 
@@ -160,8 +160,8 @@ void _rpc__Signal_Hash_Start(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... pass _TPM_Hash_Start signal to TPM
-	_TPM_Hash_Start();
+        // ... pass _TPM_Hash_Start signal to TPM
+        _TPM_Hash_Start();
     return;
 }
 
@@ -171,8 +171,8 @@ void _rpc__Signal_Hash_Data(_IN_BUFFER input)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... pass _TPM_Hash_Data signal to TPM
-	_TPM_Hash_Data(input.BufferSize, input.Buffer);
+        // ... pass _TPM_Hash_Data signal to TPM
+        _TPM_Hash_Data(input.BufferSize, input.Buffer);
     return;
 }
 
@@ -182,8 +182,8 @@ void _rpc__Signal_HashEnd(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... pass _TPM_HashEnd signal to TPM
-	_TPM_Hash_End();
+        // ... pass _TPM_HashEnd signal to TPM
+        _TPM_Hash_End();
     return;
 }
 #endif /* libtpms added */
@@ -192,19 +192,19 @@ void _rpc__Signal_HashEnd(void)
 // This is the interface to the TPM code.
 //  Return Type: void
 void _rpc__Send_Command(
-			unsigned char locality, _IN_BUFFER request, _OUT_BUFFER* response)
+    unsigned char locality, _IN_BUFFER request, _OUT_BUFFER* response)
 {
     // If TPM is power off, reject any commands.
     if(!s_isPowerOn)
-	{
-	    response->BufferSize = 0;
-	    return;
-	}
+    {
+        response->BufferSize = 0;
+        return;
+    }
     // Set the locality of the command so that it doesn't change during the command
     _plat__LocalitySet(locality);
     // Do implementation-specific command dispatch
     _plat__RunCommand(
-		      request.BufferSize, request.Buffer, &response->BufferSize, &response->Buffer);
+        request.BufferSize, request.Buffer, &response->BufferSize, &response->Buffer);
     return;
 }
 
@@ -217,8 +217,8 @@ void _rpc__Signal_CancelOn(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... set the platform canceling flag.
-	_plat__SetCancel();
+        // ... set the platform canceling flag.
+        _plat__SetCancel();
     return;
 }
 
@@ -228,8 +228,8 @@ void _rpc__Signal_CancelOff(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... set the platform canceling flag.
-	_plat__ClearCancel();
+        // ... set the platform canceling flag.
+        _plat__ClearCancel();
     return;
 }
 
@@ -241,8 +241,8 @@ void _rpc__Signal_NvOn(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... make the NV available
-	_plat__SetNvAvail();
+        // ... make the NV available
+        _plat__SetNvAvail();
     return;
 }
 #if 0 /* libtpms added */
@@ -254,8 +254,8 @@ void _rpc__Signal_NvOff(void)
 {
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... make NV not available
-	_plat__ClearNvAvail();
+        // ... make NV not available
+        _plat__ClearNvAvail();
     return;
 }
 
@@ -281,8 +281,8 @@ bool _rpc__ACT_GetSignaled(uint32_t actHandle)
 #if ACT_SUPPORT
     // If TPM power is on...
     if(s_isPowerOn)
-	// ... query the platform
-	return _plat__ACT_GetSignaled(actHandle - TPM_RH_ACT_0);
+        // ... query the platform
+        return _plat__ACT_GetSignaled(actHandle - TPM_RH_ACT_0);
 #else   // ACT_SUPPORT
     NOT_REFERENCED(actHandle);
 #endif  // ACT_SUPPORT

@@ -75,7 +75,7 @@
 //      TRUE(1)     success
 //      FALSE(0)    failure
 BOOL ASN1UnmarshalContextInitialize(
-				    ASN1UnmarshalContext* ctx, INT16 size, BYTE* buffer)
+    ASN1UnmarshalContext* ctx, INT16 size, BYTE* buffer)
 {
     GOTO_ERROR_UNLESS(buffer != NULL);
     GOTO_ERROR_UNLESS(size > 0);
@@ -84,7 +84,7 @@ BOOL ASN1UnmarshalContextInitialize(
     ctx->offset = 0;
     ctx->tag    = 0xFF;
     return TRUE;
- Error:
+Error:
     return FALSE;
 }
 
@@ -104,32 +104,32 @@ ASN1DecodeLength(ASN1UnmarshalContext* ctx)
     // If the number of octets of the entity is larger than 127, then the first octet
     // is the number of octets in the length specifier.
     if(first >= 0x80)
-	{
-	    // Make sure that this length field is contained with the structure being
-	    // parsed
-	    CHECK_SIZE(ctx, (first & 0x7F));
-	    if(first == 0x82)
-		{
-		    // Two octets of size
-		    // get the next value
-		    value = (INT16)NEXT_OCTET(ctx);
-		    // Make sure that the result will fit in an INT16
-		    GOTO_ERROR_UNLESS(value < 0x0080);
-		    // Shift up and add next octet
-		    value = (value << 8) + NEXT_OCTET(ctx);
-		}
-	    else if(first == 0x81)
-		value = NEXT_OCTET(ctx);
-	    // Sizes larger than will fit in a INT16 are an error
-	    else
-		goto Error;
-	}
+    {
+        // Make sure that this length field is contained with the structure being
+        // parsed
+        CHECK_SIZE(ctx, (first & 0x7F));
+        if(first == 0x82)
+        {
+            // Two octets of size
+            // get the next value
+            value = (INT16)NEXT_OCTET(ctx);
+            // Make sure that the result will fit in an INT16
+            GOTO_ERROR_UNLESS(value < 0x0080);
+            // Shift up and add next octet
+            value = (value << 8) + NEXT_OCTET(ctx);
+        }
+        else if(first == 0x81)
+            value = NEXT_OCTET(ctx);
+        // Sizes larger than will fit in a INT16 are an error
+        else
+            goto Error;
+    }
     else
-	value = first;
+        value = first;
     // Make sure that the size defined something within the current context
     CHECK_SIZE(ctx, value);
     return value;
- Error:
+Error:
     ctx->size = -1;  // Makes everything fail from now on.
     return -1;
 }
@@ -154,7 +154,7 @@ ASN1NextTag(ASN1UnmarshalContext* ctx)
     // Get the length field and return that
     return ASN1DecodeLength(ctx);
 
- Error:
+Error:
     // Attempt to read beyond the end of the context or an illegal tag
     ctx->size = -1;  // Persistent failure
     ctx->tag  = 0xFF;
@@ -188,26 +188,26 @@ BOOL ASN1GetBitStringValue(ASN1UnmarshalContext* ctx, UINT32* val)
     GOTO_ERROR_UNLESS((shift < 8) && ((length > 0) || (shift == 0)));
     // if there are any bytes left
     for(; length > 1; length--)
-	{
+    {
 
-	    // for all but the last octet, just shift and add the new octet
-	    GOTO_ERROR_UNLESS((value & 0xFF000000) == 0);  // can't loose significant bits
-	    value = (value << 8) + NEXT_OCTET(ctx);
-	}
+        // for all but the last octet, just shift and add the new octet
+        GOTO_ERROR_UNLESS((value & 0xFF000000) == 0);  // can't loose significant bits
+        value = (value << 8) + NEXT_OCTET(ctx);
+    }
     if(length == 1)
-	{
-	    // for the last octet, just shift the accumulated value enough to
-	    // accept the significant bits in the last octet and shift the last
-	    // octet down
-	    GOTO_ERROR_UNLESS(((value & (0xFF000000 << (8 - shift)))) == 0);
-	    value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
-	}
+    {
+        // for the last octet, just shift the accumulated value enough to
+        // accept the significant bits in the last octet and shift the last
+        // octet down
+        GOTO_ERROR_UNLESS(((value & (0xFF000000 << (8 - shift)))) == 0);
+        value = (value << (8 - shift)) + (NEXT_OCTET(ctx) >> shift);
+    }
     // 'Left justify' the result
     if(inputBits > 0)
-	value <<= (32 - inputBits);
+        value <<= (32 - inputBits);
     *val = value;
     return TRUE;
- Error:
+Error:
     ctx->size = -1;
     return FALSE;
 }
@@ -259,13 +259,13 @@ BOOL ASN1GetBitStringValue(ASN1UnmarshalContext* ctx, UINT32* val)
 // This creates a structure for handling marshaling of an ASN.1 formatted data
 // structure.
 void ASN1InitialializeMarshalContext(
-				     ASN1MarshalContext* ctx, INT16 length, BYTE* buffer)
+    ASN1MarshalContext* ctx, INT16 length, BYTE* buffer)
 {
     ctx->buffer = buffer;
     if(buffer)
-	ctx->offset = length;
+        ctx->offset = length;
     else
-	ctx->offset = INT16_MAX;
+        ctx->offset = INT16_MAX;
     ctx->end   = ctx->offset;
     ctx->depth = -1;
 }
@@ -309,7 +309,7 @@ ASN1EndEncapsulation(ASN1MarshalContext* ctx, BYTE tag)
 {
     // only add a leading zero for an encapsulated BIT STRING
     if(tag == ASN1_BITSTRING)
-	ASN1PushByte(ctx, 0);
+        ASN1PushByte(ctx, 0);
     ASN1PushTagAndLength(ctx, tag, ctx->end - ctx->offset);
     return ASN1EndMarshalContext(ctx);
 }
@@ -318,12 +318,12 @@ ASN1EndEncapsulation(ASN1MarshalContext* ctx, BYTE tag)
 BOOL ASN1PushByte(ASN1MarshalContext* ctx, BYTE b)
 {
     if(ctx->offset > 0)
-	{
-	    ctx->offset -= 1;
-	    if(ctx->buffer)
-		ctx->buffer[ctx->offset] = b;
-	    return TRUE;
-	}
+    {
+        ctx->offset -= 1;
+        if(ctx->buffer)
+            ctx->buffer[ctx->offset] = b;
+        return TRUE;
+    }
     ctx->offset = -1;
     return FALSE;
 }
@@ -346,9 +346,9 @@ ASN1PushBytes(ASN1MarshalContext* ctx, INT16 count, const BYTE* buffer)
     // if there are buffers, move the data, otherwise, assume that this is just a
     // test.
     if(count && buffer && ctx->buffer)
-	MemoryCopy(&ctx->buffer[ctx->offset], buffer, count);
+        MemoryCopy(&ctx->buffer[ctx->offset], buffer, count);
     return count;
- Error:
+Error:
     ctx->offset = -1;
     return 0;
 }
@@ -376,23 +376,23 @@ ASN1PushLength(ASN1MarshalContext* ctx, INT16 len)
     UINT16 start = ctx->offset;
     GOTO_ERROR_UNLESS(len >= 0);
     if(len <= 127)
-	ASN1PushByte(ctx, (BYTE)len);
+        ASN1PushByte(ctx, (BYTE)len);
     else
-	{
-	    ASN1PushByte(ctx, (BYTE)(len & 0xFF));
-	    len >>= 8;
-	    if(len == 0)
-		ASN1PushByte(ctx, 0x81);
-	    else
-		{
-		    ASN1PushByte(ctx, (BYTE)(len));
-		    ASN1PushByte(ctx, 0x82);
-		}
-	}
+    {
+        ASN1PushByte(ctx, (BYTE)(len & 0xFF));
+        len >>= 8;
+        if(len == 0)
+            ASN1PushByte(ctx, 0x81);
+        else
+        {
+            ASN1PushByte(ctx, (BYTE)(len));
+            ASN1PushByte(ctx, 0x82);
+        }
+    }
     goto Exit;
- Error:
+Error:
     ctx->offset = -1;
- Exit:
+Exit:
     return (ctx->offset > 0) ? start - ctx->offset : 0;
 }
 
@@ -416,7 +416,7 @@ ASN1PushTagAndLength(ASN1MarshalContext* ctx, BYTE tag, INT16 length)
 //      == 0        failure
 INT16
 ASN1PushTaggedOctetString(
-			  ASN1MarshalContext* ctx, INT16 size, const BYTE* string, BYTE tag)
+    ASN1MarshalContext* ctx, INT16 size, const BYTE* string, BYTE tag)
 {
     ASN1PushBytes(ctx, size, string);
     // PushTagAndLenght just tells how many octets it added so the total size of this
@@ -447,18 +447,18 @@ ASN1PushUINT(ASN1MarshalContext* ctx, UINT32 integer)
 //      == 0        failure
 INT16
 ASN1PushInteger(ASN1MarshalContext* ctx,     // IN/OUT: buffer context
-		INT16               iLen,    // IN: octets of the integer
-		BYTE*               integer  // IN: big-endian integer
-		)
+                INT16               iLen,    // IN: octets of the integer
+                BYTE*               integer  // IN: big-endian integer
+)
 {
     // no leading 0's
     while((*integer == 0) && (--iLen > 0))
-	integer++;
+        integer++;
     // Move the bytes to the buffer
     ASN1PushBytes(ctx, iLen, integer);
     // if needed, add a leading byte of 0 to make the number positive
     if(*integer & 0x80)
-	iLen += (INT16)ASN1PushByte(ctx, 0);
+        iLen += (INT16)ASN1PushByte(ctx, 0);
     // PushTagAndLenght just tells how many octets it added so the total size of this
     // element is the sum of those octets and the adjusted input size.
     iLen += ASN1PushTagAndLength(ctx, ASN1_INTEGER, iLen);
@@ -476,9 +476,9 @@ INT16
 ASN1PushOID(ASN1MarshalContext* ctx, const BYTE* OID)
 {
     if((*OID == ASN1_OBJECT_IDENTIFIER) && ((OID[1] & 0x80) == 0))
-	{
-	    return ASN1PushBytes(ctx, OID[1] + 2, OID);
-	}
+    {
+        return ASN1PushBytes(ctx, OID[1] + 2, OID);
+    }
     ctx->offset = -1;
     return 0;
 }

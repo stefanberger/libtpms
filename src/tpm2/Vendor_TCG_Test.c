@@ -1,9 +1,9 @@
 /********************************************************************************/
 /*										*/
-/*			     				*/
+/*			     							*/
 /*			     Written by Ken Goldman				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Vendor_TCG_Test.c 1548 2019-12-13 23:15:40Z kgoldman $			*/
+/*            $Id: Vendor_TCG_Test.c 1548 2019-12-13 23:15:40Z kgoldman $	*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -60,17 +60,17 @@
 /********************************************************************************/
 
 #include "Tpm.h"
-#include "Vendor_TCG_Test_fp.h"
-#include "Marshal_fp.h"
-#if CC_Vendor_TCG_Test
-/* A dummy function for testing. */
+
+#if CC_Vendor_TCG_Test  // Conditional expansion of this file
+#  include "Vendor_TCG_Test_fp.h"
+
 TPM_RC
-TPM2_Vendor_TCG_Test(
-		     Vendor_TCG_Test_In        *in,            // IN: input parameter list
-		     Vendor_TCG_Test_Out       *out            // OUT: output parameter list
-		     )
+TPM2_Vendor_TCG_Test(Vendor_TCG_Test_In*  in,  // IN: input parameter list
+                     Vendor_TCG_Test_Out* out  // OUT: output parameter list
+)
 {
     out->outputData = in->inputData;
     return TPM_RC_SUCCESS;
 }
-#endif // CC_Vendor_TCG_Test
+
+#endif  // CC_Vendor_TCG_Test

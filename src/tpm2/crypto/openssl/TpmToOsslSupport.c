@@ -103,7 +103,7 @@ void OsslContextLeave(BN_CTX* CTX)
 BN_CTX* OsslPushContext(BN_CTX* CTX)
 {
     if(CTX == NULL)
-	FAIL(FATAL_ERROR_ALLOCATION);
+        FAIL(FATAL_ERROR_ALLOCATION);
     BN_CTX_start(CTX);
     return CTX;
 }
@@ -114,7 +114,7 @@ void OsslPopContext(BN_CTX* CTX)
 {
     // BN_CTX_end can't be called with NULL. It will blow up.
     if(CTX != NULL)
-	BN_CTX_end(CTX);
+        BN_CTX_end(CTX);
 }
 
 #endif  // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL

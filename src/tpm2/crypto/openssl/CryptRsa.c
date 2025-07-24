@@ -109,10 +109,10 @@ static privateExponent* RsaInitializeExponent(privateExponent* Z)
     int         i;
     //
     for(i = 0; i < 5; i++)
-	{
-	    bn[i] = (Crypt_Int*)&(Z->entries[i]);
-	    ExtMath_Initialize_Int(bn[i], MAX_RSA_KEY_BITS / 2);
-	}
+    {
+        bn[i] = (Crypt_Int*)&(Z->entries[i]);
+        ExtMath_Initialize_Int(bn[i], MAX_RSA_KEY_BITS / 2);
+    }
     return Z;
 }
 
@@ -121,11 +121,11 @@ static privateExponent* RsaInitializeExponent(privateExponent* Z)
 static void MakePgreaterThanQ(privateExponent* Z)
 {
     if(ExtMath_UnsignedCmp(Z->P, Z->Q) < 0)
-	{
-	    Crypt_Int* bnT = Z->P;
-	    Z->P           = Z->Q;
-	    Z->Q           = bnT;
-	}
+    {
+        Crypt_Int* bnT = Z->P;
+        Z->P           = Z->Q;
+        Z->Q           = bnT;
+    }
 }
 
 #if 0					// 	libtpms added
@@ -150,11 +150,11 @@ static BOOL PackExponent(TPM2B_PRIVATE_KEY_RSA* packed, privateExponent* Z)
     pAssert((primeSize * 5) <= sizeof(packed->t.buffer));
     packed->t.size = (primeSize * 5) + RSA_prime_flag;
     for(i = 0; i < 5; i++)
-	if(!ExtMath_IntToBytes(
-			       (Crypt_Int*)&Z->entries[i], &packed->t.buffer[primeSize * i], &pS))
-	    return FALSE;
+        if(!ExtMath_IntToBytes(
+               (Crypt_Int*)&Z->entries[i], &packed->t.buffer[primeSize * i], &pS))
+            return FALSE;
     if(pS != primeSize)
-	return FALSE;
+        return FALSE;
     return TRUE;
 }
 
@@ -175,12 +175,12 @@ static BOOL UnpackExponent(TPM2B_PRIVATE_KEY_RSA* b, privateExponent* Z)
     GOTO_ERROR_UNLESS((primeSize % 5) == 0);
     primeSize /= 5;
     for(i = 0; i < 5; i++)
-	GOTO_ERROR_UNLESS(
-			  ExtMath_IntFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
-			  != NULL);
+        GOTO_ERROR_UNLESS(
+            ExtMath_IntFromBytes(bn[i], &b->t.buffer[primeSize * i], primeSize)
+            != NULL);
     MakePgreaterThanQ(Z);
     return TRUE;
- Error:
+Error:
     return FALSE;
 }
 #endif					// libtpms added
@@ -191,10 +191,10 @@ static BOOL UnpackExponent(TPM2B_PRIVATE_KEY_RSA* b, privateExponent* Z)
 //      TRUE(1)         success
 //      FALSE(0)        failure
 static BOOL ComputePrivateExponent(
-				   Crypt_Int*       pubExp,  // IN: the public exponent
-				   privateExponent* Z        // IN/OUT: on input, has primes P and Q. On
-				   //         output, has P, Q, dP, dQ, and pInv
-				   )
+    Crypt_Int*       pubExp,  // IN: the public exponent
+    privateExponent* Z        // IN/OUT: on input, has primes P and Q. On
+                              //         output, has P, Q, dP, dQ, and pInv
+)
 {
     BOOL pOK;
     BOOL qOK;
@@ -211,11 +211,11 @@ static BOOL ComputePrivateExponent(
     qOK = qOK && ExtMath_ModInverse(Z->dQ, pubExp, pT);
     // qInv = (1/q) mod p
     if(pOK && qOK)
-	pOK = qOK = ExtMath_ModInverse(Z->qInv, Z->Q, Z->P);
+        pOK = qOK = ExtMath_ModInverse(Z->qInv, Z->Q, Z->P);
     if(!pOK)
-	ExtMath_SetWord(Z->P, 0);
+        ExtMath_SetWord(Z->P, 0);
     if(!qOK)
-	ExtMath_SetWord(Z->Q, 0);
+        ExtMath_SetWord(Z->Q, 0);
     return pOK && qOK;
 }
 
@@ -227,7 +227,7 @@ static BOOL ComputePrivateExponent(
 //      TRUE(1)         success
 //      FALSE(0)        failure
 static BOOL RsaPrivateKeyOp(Crypt_Int* inOut,  // IN/OUT: number to be exponentiated
-			    privateExponent* Z)
+                            privateExponent* Z)
 {
     CRYPT_RSA_VAR(M1);
     CRYPT_RSA_VAR(M2);
@@ -248,7 +248,7 @@ static BOOL RsaPrivateKeyOp(Crypt_Int* inOut,  // IN/OUT: number to be exponenti
     GOTO_ERROR_UNLESS(ExtMath_Multiply(M, H, Z->Q));
     GOTO_ERROR_UNLESS(ExtMath_Add(inOut, M2, M));
     return TRUE;
- Error:
+Error:
     return FALSE;
 }
 
@@ -262,29 +262,29 @@ static BOOL RsaPrivateKeyOp(Crypt_Int* inOut,  // IN/OUT: number to be exponenti
 //
 #if !USE_OPENSSL_FUNCTIONS_RSA         // libtpms added
 static TPM_RC RSAEP(TPM2B* dInOut,  // IN: size of the encrypted block and the size of
-		    //     the encrypted value. It must be the size of
-		    //     the modulus.
-		    // OUT: the encrypted data. Will receive the
-		    //      decrypted value
-		    OBJECT* key     // IN: the key to use
-		    )
+                                    //     the encrypted value. It must be the size of
+                                    //     the modulus.
+                                    // OUT: the encrypted data. Will receive the
+                                    //      decrypted value
+                    OBJECT* key     // IN: the key to use
+)
 {
     TPM2B_TYPE(4BYTES, 4);
     TPM2B_4BYTES e2B;
     UINT32       e = key->publicArea.parameters.rsaDetail.exponent;
     //
     if(e == 0)
-	e = RSA_DEFAULT_PUBLIC_EXPONENT;
+        e = RSA_DEFAULT_PUBLIC_EXPONENT;
     UINT32_TO_BYTE_ARRAY(e, e2B.t.buffer);
     e2B.t.size = 4;
     return ModExpB(dInOut->size,
-		   dInOut->buffer,
-		   dInOut->size,
-		   dInOut->buffer,
-		   e2B.t.size,
-		   e2B.t.buffer,
-		   key->publicArea.unique.rsa.t.size,
-		   key->publicArea.unique.rsa.t.buffer);
+                   dInOut->buffer,
+                   dInOut->size,
+                   dInOut->buffer,
+                   e2B.t.size,
+                   e2B.t.buffer,
+                   key->publicArea.unique.rsa.t.size,
+                   key->publicArea.unique.rsa.t.buffer);
 }
 
 //*** RSADP()
@@ -300,34 +300,34 @@ static TPM_RC RSAEP(TPM2B* dInOut,  // IN: size of the encrypted block and the s
 //      TPM_RC_SIZE         the value to decrypt is larger than the modulus
 //
 static TPM_RC RSADP(TPM2B*  inOut,  // IN/OUT: the value to encrypt
-		    OBJECT* key     // IN: the key
-		    )
+                    OBJECT* key     // IN: the key
+)
 {
     CRYPT_RSA_INITIALIZED(bnM, inOut);
     NEW_PRIVATE_EXPONENT(Z);
     if(UnsignedCompareB(inOut->size,
-			inOut->buffer,
-			key->publicArea.unique.rsa.t.size,
-			key->publicArea.unique.rsa.t.buffer)
+                        inOut->buffer,
+                        key->publicArea.unique.rsa.t.size,
+                        key->publicArea.unique.rsa.t.buffer)
        >= 0)
-	return TPM_RC_SIZE;
+        return TPM_RC_SIZE;
     // private key operation requires that private exponent be loaded
     // During self-test, this might not be the case so load it up if it hasn't
     // already done
     // been done
     if(!key->attributes.privateExp)					// libtpms changed begin: use older verions
-	{
-	    if(CryptRsaLoadPrivateExponent(&key->publicArea, &key->sensitive, key)
-	       != TPM_RC_SUCCESS)
-		return TPM_RC_BINDING;
-	}
+    {
+        if(CryptRsaLoadPrivateExponent(&key->publicArea, &key->sensitive, key)
+           != TPM_RC_SUCCESS)
+            return TPM_RC_BINDING;
+    }
     GOTO_ERROR_UNLESS(TpmMath_IntFrom2B(Z->P, &key->sensitive.sensitive.rsa.b) != NULL);
     RsaSetExponentFromOld(Z, &key->privateExponent);
     // GOTO_ERROR_UNLESS(UnpackExponent(&key->sensitive.sensitive.rsa, Z));	// libtpms changed end
     GOTO_ERROR_UNLESS(RsaPrivateKeyOp(bnM, Z));
     GOTO_ERROR_UNLESS(TpmMath_IntTo2B(bnM, inOut, inOut->size));
     return TPM_RC_SUCCESS;
- Error:
+Error:
     return TPM_RC_FAILURE;
 }
 
@@ -339,12 +339,12 @@ static TPM_RC RSADP(TPM2B*  inOut,  // IN/OUT: the value to encrypt
 //      TPM_RC_VALUE     'hashAlg' is not valid or message size is too large
 //
 static TPM_RC OaepEncode(
-			 TPM2B*       padded,   // OUT: the pad data
-			 TPM_ALG_ID   hashAlg,  // IN: algorithm to use for padding
-			 const TPM2B* label,    // IN: null-terminated string (may be NULL)
-			 TPM2B*       message,  // IN: the message being padded
-			 RAND_STATE*  rand      // IN: the random number generator to use
-			 )
+    TPM2B*       padded,   // OUT: the pad data
+    TPM_ALG_ID   hashAlg,  // IN: algorithm to use for padding
+    const TPM2B* label,    // IN: null-terminated string (may be NULL)
+    TPM2B*       message,  // IN: the message being padded
+    RAND_STATE*  rand      // IN: the random number generator to use
+)
 {
     INT32  padLen;
     INT32  dbSize;
@@ -362,22 +362,22 @@ static TPM_RC OaepEncode(
     // A value of zero is not allowed because the KDF can't produce a result
     // if the digest size is zero.
     if(hLen == 0)
-	return TPM_RC_VALUE;
+        return TPM_RC_VALUE;
 
     // Basic size checks
     //  make sure digest isn't too big for key size
     if(padded->size < (2 * hLen) + 2)
-	ERROR_EXIT(TPM_RC_HASH);
+        ERROR_EXIT(TPM_RC_HASH);
 
     // and that message will fit messageSize <= k - 2hLen - 2
     if(message->size > (padded->size - (2 * hLen) - 2))
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     // Hash L even if it is null
     // Offset into padded leaving room for masked seed and byte of zero
     pp = &padded->buffer[hLen + 1];
     if(CryptHashBlock(hashAlg, label->size, (BYTE*)label->buffer, hLen, pp) != hLen)
-	ERROR_EXIT(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
 
     // concatenate PS of k  mLen  2hLen  2
     padLen = padded->size - message->size - (2 * hLen) - 2;
@@ -391,28 +391,28 @@ static TPM_RC OaepEncode(
 
     DRBG_Generate(rand, mySeed, (UINT16)hLen);
     if(g_inFailureMode)
-	ERROR_EXIT(TPM_RC_FAILURE);
+        ERROR_EXIT(TPM_RC_FAILURE);
     // mask = MGF1 (seed, nSize  hLen  1)
     CryptMGF_KDF(dbSize, mask, hashAlg, hLen, seed, 0);
 
     // Create the masked db
     pm = mask;
     for(i = dbSize; i > 0; i--)
-	*pp++ ^= *pm++;
+        *pp++ ^= *pm++;
     pp = &padded->buffer[hLen + 1];
 
     // Run the masked data through MGF1
     if(CryptMGF_KDF(hLen, &padded->buffer[1], hashAlg, dbSize, pp, 0)
        != (unsigned)hLen)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
     // Now XOR the seed to create masked seed
     pp = &padded->buffer[1];
     pm = seed;
     for(i = hLen; i > 0; i--)
-	*pp++ ^= *pm++;
+        *pp++ ^= *pm++;
     // Set the first byte to zero
     padded->buffer[0] = 0x00;
- Exit:
+Exit:
     return retVal;
 }
 
@@ -434,11 +434,11 @@ static TPM_RC OaepEncode(
 //
 //
 static TPM_RC OaepDecode(
-			 TPM2B*       dataOut,  // OUT: the recovered data
-			 TPM_ALG_ID   hashAlg,  // IN: algorithm to use for padding
-			 const TPM2B* label,    // IN: null-terminated string (may be NULL)
-			 TPM2B*       padded    // IN: the padded data
-			 )
+    TPM2B*       dataOut,  // OUT: the recovered data
+    TPM_ALG_ID   hashAlg,  // IN: algorithm to use for padding
+    const TPM2B* label,    // IN: null-terminated string (may be NULL)
+    TPM2B*       padded    // IN: the padded data
+)
 {
     UINT32 i;
     BYTE   seedMask[MAX_DIGEST_SIZE];
@@ -452,22 +452,22 @@ static TPM_RC OaepDecode(
     // Strange size (anything smaller can't be an OAEP padded block)
     // Also check for no leading 0
     if((padded->size < (unsigned)((2 * hLen) + 2)) || (padded->buffer[0] != 0))
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
     // Use the hash size to determine what to put through MGF1 in order
     // to recover the seedMask
     CryptMGF_KDF(hLen,
-		 seedMask,
-		 hashAlg,
-		 padded->size - hLen - 1,
-		 &padded->buffer[hLen + 1],
-		 0);
+                 seedMask,
+                 hashAlg,
+                 padded->size - hLen - 1,
+                 &padded->buffer[hLen + 1],
+                 0);
 
     // Recover the seed into seedMask
     pAssert(hLen <= sizeof(seedMask));
     pp = &padded->buffer[1];
     pm = seedMask;
     for(i = hLen; i > 0; i--)
-	*pm++ ^= *pp++;
+        *pm++ ^= *pp++;
 
     // Use the seed to generate the data mask
     CryptMGF_KDF(padded->size - hLen - 1, mask, hashAlg, hLen, seedMask, 0);
@@ -476,38 +476,38 @@ static TPM_RC OaepDecode(
     pp = &padded->buffer[hLen + 1];
     pm = mask;
     for(i = (padded->size - hLen - 1); i > 0; i--)
-	*pm++ ^= *pp++;
+        *pm++ ^= *pp++;
 
     // Make sure that the recovered data has the hash of the label
     // Put trial value in the seed mask
     if((CryptHashBlock(hashAlg, label->size, (BYTE*)label->buffer, hLen, seedMask))
        != hLen)
-	FAIL(FATAL_ERROR_INTERNAL);
+        FAIL(FATAL_ERROR_INTERNAL);
     if(memcmp(seedMask, mask, hLen) != 0)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     // find the start of the data
     pm = &mask[hLen];
     for(i = (UINT32)padded->size - (2 * hLen) - 1; i > 0; i--)
-	{
-	    if(*pm++ != 0)
-		break;
-	}
+    {
+        if(*pm++ != 0)
+            break;
+    }
     // If we ran out of data or didn't end with 0x01, then return an error
     if(i == 0 || pm[-1] != 0x01)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     // pm should be pointing at the first part of the data
     // and i is one greater than the number of bytes to move
     i--;
     if(i > dataOut->size)
-	// Special exit to preserve the size of the output buffer
-	return TPM_RC_VALUE;
+        // Special exit to preserve the size of the output buffer
+        return TPM_RC_VALUE;
     memcpy(dataOut->buffer, pm, i);
     dataOut->size = (UINT16)i;
- Exit:
+Exit:
     if(retVal != TPM_RC_SUCCESS)
-	dataOut->size = 0;
+        dataOut->size = 0;
     return retVal;
 }
 
@@ -518,17 +518,17 @@ static TPM_RC OaepDecode(
 //      TPM_RC_VALUE     message size is too large
 //
 static TPM_RC RSAES_PKCS1v1_5Encode(TPM2B* padded,   // OUT: the pad data
-				    TPM2B* message,  // IN: the message being padded
-				    RAND_STATE* rand)
+                                    TPM2B* message,  // IN: the message being padded
+                                    RAND_STATE* rand)
 {
     UINT32 ps = padded->size - message->size - 3;
     //
     if(message->size > padded->size - 11)
-	return TPM_RC_VALUE;
+        return TPM_RC_VALUE;
     // move the message to the end of the buffer
     memcpy(&padded->buffer[padded->size - message->size],
-	   message->buffer,
-	   message->size);
+           message->buffer,
+           message->size);
     // Set the first byte to 0x00 and the second to 0x02
     padded->buffer[0] = 0;
     padded->buffer[1] = 2;
@@ -536,7 +536,7 @@ static TPM_RC RSAES_PKCS1v1_5Encode(TPM2B* padded,   // OUT: the pad data
     // Fill with random bytes
     DRBG_Generate(rand, &padded->buffer[2], (UINT16)ps);
     if(g_inFailureMode)
-	return TPM_RC_FAILURE;
+        return TPM_RC_FAILURE;
 
     // Set the delimiter for the random field to 0
     padded->buffer[2 + ps] = 0;
@@ -544,12 +544,12 @@ static TPM_RC RSAES_PKCS1v1_5Encode(TPM2B* padded,   // OUT: the pad data
     // Now, the only messy part. Make sure that all the 'ps' bytes are non-zero
     // In this implementation, use the value of the current index
     for(ps++; ps > 1; ps--)
-	{
-	    if(padded->buffer[ps] == 0)
-		padded->buffer[ps] = 0x55;  // In the < 0.5% of the cases that the
-	    // random value is 0, just pick a value to
-	    // put into the spot.
-	}
+    {
+        if(padded->buffer[ps] == 0)
+            padded->buffer[ps] = 0x55;  // In the < 0.5% of the cases that the
+                                        // random value is 0, just pick a value to
+                                        // put into the spot.
+    }
     return TPM_RC_SUCCESS;
 }
 
@@ -561,8 +561,8 @@ static TPM_RC RSAES_PKCS1v1_5Encode(TPM2B* padded,   // OUT: the pad data
 //      TPM_RC_FAIL      decoding error or results would no fit into provided buffer
 //
 static TPM_RC RSAES_Decode(TPM2B* message,  // OUT: the recovered message
-			   TPM2B* coded     // IN: the encoded message
-			   )
+                           TPM2B* coded     // IN: the encoded message
+)
 {
     BOOL   fail = FALSE;
     UINT16 pSize;
@@ -571,10 +571,10 @@ static TPM_RC RSAES_Decode(TPM2B* message,  // OUT: the recovered message
     fail = (coded->buffer[0] != 0x00) | fail;
     fail = (coded->buffer[1] != 0x02) | fail;
     for(pSize = 2; pSize < coded->size; pSize++)
-	{
-	    if(coded->buffer[pSize] == 0)
-		break;
-	}
+    {
+        if(coded->buffer[pSize] == 0)
+            break;
+    }
     pSize++;
 
     // Make sure that pSize has not gone over the end and that there are at least 8
@@ -582,7 +582,7 @@ static TPM_RC RSAES_Decode(TPM2B* message,  // OUT: the recovered message
     fail = (pSize > coded->size) | fail;
     fail = ((pSize - 2) <= 8) | fail;
     if((message->size < (UINT16)(coded->size - pSize)) || fail)
-	return TPM_RC_VALUE;
+        return TPM_RC_VALUE;
     message->size = coded->size - pSize;
     memcpy(message->buffer, &coded->buffer[pSize], coded->size - pSize);
     return TPM_RC_SUCCESS;
@@ -603,9 +603,9 @@ CryptRsaPssSaltSize(INT16 hashSize, INT16 outSize)
     saltSize = (outSize - hashSize - 1) - 1;
     // Use the maximum salt size allowed by FIPS 186-4
     if(saltSize > hashSize)
-	saltSize = hashSize;
+        saltSize = hashSize;
     else if(saltSize < 0)
-	saltSize = 0;
+        saltSize = 0;
     return saltSize;
 }
 
@@ -616,10 +616,10 @@ CryptRsaPssSaltSize(INT16 hashSize, INT16 outSize)
 //
 //  Returns TPM_RC_SUCCESS or goes into failure mode.
 static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
-			TPM_ALG_ID  hashAlg,  // IN: hash algorithm for the encoding
-			TPM2B*      digest,   // IN: the digest
-			RAND_STATE* rand      // IN: random number source
-			)
+                        TPM_ALG_ID  hashAlg,  // IN: hash algorithm for the encoding
+                        TPM2B*      digest,   // IN: the digest
+                        RAND_STATE* rand      // IN: random number source
+)
 {
     UINT32     hLen = CryptHashGetDigestSize(hashAlg);
     BYTE       salt[MAX_RSA_KEY_BYTES - 1];
@@ -646,7 +646,7 @@ static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
     // Get set the salt
     DRBG_Generate(rand, salt, saltSize);
     if(g_inFailureMode)
-	return TPM_RC_FAILURE;
+        return TPM_RC_FAILURE;
 
     // Create the hash of the pad || input hash || salt
     CryptHashStart(&hashState, hashAlg);
@@ -657,7 +657,7 @@ static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
 
     // Create a mask
     if(CryptMGF_KDF(mLen, pOut, hashAlg, hLen, &pOut[mLen], 0) != mLen)
-	FAIL(FATAL_ERROR_INTERNAL);
+        FAIL(FATAL_ERROR_INTERNAL);
 
     // Since this implementation uses key sizes that are all even multiples of
     // 8, just need to make sure that the most significant bit is CLEAR
@@ -672,7 +672,7 @@ static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
 
     // XOR the salt data into the buffer
     for(; saltSize > 0; saltSize--)
-	*pOut++ ^= *ps++;
+        *pOut++ ^= *ps++;
 
     // and we are done
     return TPM_RC_SUCCESS;
@@ -695,10 +695,10 @@ static TPM_RC PssEncode(TPM2B*      out,      // OUT: the encoded buffer
 //      TPM_RC_VALUE         decode operation failed
 //
 static TPM_RC PssDecode(
-			TPM_ALG_ID hashAlg,  // IN: hash algorithm to use for the encoding
-			TPM2B*     dIn,      // In: the digest to compare
-			TPM2B*     eIn       // IN: the encoded data
-			)
+    TPM_ALG_ID hashAlg,  // IN: hash algorithm to use for the encoding
+    TPM2B*     dIn,      // In: the digest to compare
+    TPM2B*     eIn       // IN: the encoded data
+)
 {
     UINT32     hLen = CryptHashGetDigestSize(hashAlg);
     BYTE       mask[MAX_RSA_KEY_BYTES];
@@ -717,7 +717,7 @@ static TPM_RC PssDecode(
 
     // check the hash scheme
     if(hLen == 0)
-	ERROR_EXIT(TPM_RC_SCHEME);
+        ERROR_EXIT(TPM_RC_SCHEME);
 
     // most significant bit must be zero
     fail = pe[0] & 0x80;
@@ -738,16 +738,16 @@ static TPM_RC PssDecode(
     // advances eIn so that it will end up pointing to the seed data
     // which is the hash of the signature data
     for(i = mLen; i > 0; i--)
-	*pm++ ^= *pe++;
+        *pm++ ^= *pe++;
 
     // Find the first byte of 0x01 after a string of all 0x00
     for(pm = mask, i = mLen; i > 0; i--)
-	{
-	    if(*pm == 0x01)
-		break;
-	    else
-		fail |= *pm++;
-	}
+    {
+        if(*pm == 0x01)
+            break;
+        else
+            fail |= *pm++;
+    }
     // i should not be zero
     fail |= (i == 0);
 
@@ -756,15 +756,15 @@ static TPM_RC PssDecode(
     // is a problem for TPM applications but, usually, we don't fail so this
     // doesn't cost anything).
     if(fail)
-	{
-	    i  = mLen;
-	    pm = mask;
-	}
+    {
+        i  = mLen;
+        pm = mask;
+    }
     else
-	{
-	    pm++;
-	    i--;
-	}
+    {
+        pm++;
+        i--;
+    }
     // i contains the salt size and pm points to the salt. Going to use the input
     // hash and the seed to recreate the hash in the lower portion of eIn.
     CryptHashStart(&hashState, hashAlg);
@@ -783,13 +783,13 @@ static TPM_RC PssDecode(
 
     // Compare all bytes
     for(pm = mask; hLen > 0; hLen--)
-	// don't use fail = because that could skip the increment and compare
-	// operations after the first failure and that gives away timing
-	// information.
-	fail |= *pm++ ^ *pe++;
+        // don't use fail = because that could skip the increment and compare
+        // operations after the first failure and that gives away timing
+        // information.
+        fail |= *pm++ ^ *pe++;
 
     retVal = (fail != 0) ? TPM_RC_VALUE : TPM_RC_SUCCESS;
- Exit:
+Exit:
     return retVal;
 }
 
@@ -829,7 +829,7 @@ MakeDerTag(TPM_ALG_ID hashAlg, INT16 sizeOfBuffer, BYTE* buffer)
     *buffer++ = 0x04;
     *buffer++ = (BYTE)(info->digestSize);
     return oidSize + 8;
- Error:
+Error:
     return 0;
 }
 
@@ -841,10 +841,10 @@ MakeDerTag(TPM_ALG_ID hashAlg, INT16 sizeOfBuffer, BYTE* buffer)
 //      TPM_RC_SIZE         'eOutSize' is not large enough
 //      TPM_RC_VALUE        'hInSize' does not match the digest size of hashAlg
 static TPM_RC RSASSA_Encode(TPM2B* pOut,  // IN:OUT on in, the size of the public key
-			    //        on out, the encoded area
-			    TPM_ALG_ID hashAlg,  // IN: hash algorithm for PKCS1v1_5
-			    TPM2B*     hIn       // IN: digest value to encode
-			    )
+                                          //        on out, the encoded area
+                            TPM_ALG_ID hashAlg,  // IN: hash algorithm for PKCS1v1_5
+                            TPM2B*     hIn       // IN: digest value to encode
+)
 {
     BYTE   DER[20];
     BYTE*  der     = DER;
@@ -855,31 +855,31 @@ static TPM_RC RSASSA_Encode(TPM2B* pOut,  // IN:OUT on in, the size of the publi
 
     // Can't use this scheme if the algorithm doesn't have a DER string defined.
     if(derSize == 0)
-	ERROR_EXIT(TPM_RC_SCHEME);
+        ERROR_EXIT(TPM_RC_SCHEME);
 
     // If the digest size of 'hashAl' doesn't match the input digest size, then
     // the DER will misidentify the digest so return an error
     if(CryptHashGetDigestSize(hashAlg) != hIn->size)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
     fillSize = pOut->size - derSize - hIn->size - 3;
     eOut     = pOut->buffer;
 
     // Make sure that this combination will fit in the provided space
     if(fillSize < 8)
-	ERROR_EXIT(TPM_RC_SIZE);
+        ERROR_EXIT(TPM_RC_SIZE);
 
     // Start filling
     *eOut++ = 0;  // initial byte of zero
     *eOut++ = 1;  // byte of 0x01
     for(; fillSize > 0; fillSize--)
-	*eOut++ = 0xff;  // bunch of 0xff
+        *eOut++ = 0xff;  // bunch of 0xff
     *eOut++ = 0;         // another 0
     for(; derSize > 0; derSize--)
-	*eOut++ = *der++;  // copy the DER
+        *eOut++ = *der++;  // copy the DER
     der = hIn->buffer;
     for(fillSize = hIn->size; fillSize > 0; fillSize--)
-	*eOut++ = *der++;  // copy the hash
- Exit:
+        *eOut++ = *der++;  // copy the hash
+Exit:
     return retVal;
 }
 
@@ -891,10 +891,10 @@ static TPM_RC RSASSA_Encode(TPM2B* pOut,  // IN:OUT on in, the size of the publi
 //      TPM_RC_SCHEME        'haslAlg' is not supported
 //
 static TPM_RC RSASSA_Decode(
-			    TPM_ALG_ID hashAlg,  // IN: hash algorithm to use for the encoding
-			    TPM2B*     hIn,      // In: the digest to compare
-			    TPM2B*     eIn       // IN: the encoded data
-			    )
+    TPM_ALG_ID hashAlg,  // IN: hash algorithm to use for the encoding
+    TPM2B*     hIn,      // In: the digest to compare
+    TPM2B*     eIn       // IN: the encoded data
+)
 {
     BYTE   fail;
     BYTE   DER[20];
@@ -913,7 +913,7 @@ static TPM_RC RSASSA_Decode(
     // Can't use this scheme if the algorithm doesn't have a DER string
     // defined or if the provided hash isn't the right size
     if(derSize == 0 || (unsigned)hashSize != hIn->size)
-	ERROR_EXIT(TPM_RC_SCHEME);
+        ERROR_EXIT(TPM_RC_SCHEME);
 
     // Make sure that this combination will fit in the provided space
     // Since no data movement takes place, can just walk though this
@@ -926,16 +926,16 @@ static TPM_RC RSASSA_Decode(
     fail = *pe++;       // initial byte of zero
     fail |= *pe++ ^ 1;  // byte of 0x01
     for(; fillSize > 0; fillSize--)
-	fail |= *pe++ ^ 0xff;  // bunch of 0xff
+        fail |= *pe++ ^ 0xff;  // bunch of 0xff
     fail |= *pe++;             // another 0
     for(; derSize > 0; derSize--)
-	fail |= *pe++ ^ *der++;  // match the DER
+        fail |= *pe++ ^ *der++;  // match the DER
     digestSize = hIn->size;
     digest     = hIn->buffer;
     for(; digestSize > 0; digestSize--)
-	fail |= *pe++ ^ *digest++;  // match the hash
+        fail |= *pe++ ^ *digest++;  // match the hash
     retVal = (fail != 0) ? TPM_RC_VALUE : TPM_RC_SUCCESS;
- Exit:
+Exit:
     return retVal;
 }
 #endif                                 // libtpms added
@@ -954,9 +954,9 @@ static TPM_RC RSASSA_Decode(
 //
 // The return pointer may point to a TPM_ALG_NULL scheme.
 TPMT_RSA_DECRYPT* CryptRsaSelectScheme(
-				       TPMI_DH_OBJECT    rsaHandle,  // IN: handle of an RSA key
-				       TPMT_RSA_DECRYPT* scheme      // IN: a sign or decrypt scheme
-				       )
+    TPMI_DH_OBJECT    rsaHandle,  // IN: handle of an RSA key
+    TPMT_RSA_DECRYPT* scheme      // IN: a sign or decrypt scheme
+)
 {
     OBJECT*           rsaObject;
     TPMT_ASYM_SCHEME* keyScheme;
@@ -969,26 +969,26 @@ TPMT_RSA_DECRYPT* CryptRsaSelectScheme(
     // if the default scheme of the object is TPM_ALG_NULL, then select the
     // input scheme
     if(keyScheme->scheme == TPM_ALG_NULL)
-	{
-	    retVal = scheme;
-	}
+    {
+        retVal = scheme;
+    }
     // if the object scheme is not TPM_ALG_NULL and the input scheme is
     // TPM_ALG_NULL, then select the default scheme of the object.
     else if(scheme->scheme == TPM_ALG_NULL)
-	{
-	    // if input scheme is NULL
-	    retVal = (TPMT_RSA_DECRYPT*)keyScheme;
-	}
+    {
+        // if input scheme is NULL
+        retVal = (TPMT_RSA_DECRYPT*)keyScheme;
+    }
     // get here if both the object scheme and the input scheme are
     // not TPM_ALG_NULL. Need to insure that they are the same.
     // IMPLEMENTATION NOTE: This could cause problems if future versions have
     // schemes that have more values than just a hash algorithm. A new function
     // (IsSchemeSame()) might be needed then.
     else if(keyScheme->scheme == scheme->scheme
-	    && keyScheme->details.anySig.hashAlg == scheme->details.anySig.hashAlg)
-	{
-	    retVal = scheme;
-	}
+            && keyScheme->details.anySig.hashAlg == scheme->details.anySig.hashAlg)
+    {
+        retVal = scheme;
+    }
     // two different, incompatible schemes specified will return NULL
     return retVal;
 }
@@ -999,56 +999,56 @@ TPMT_RSA_DECRYPT* CryptRsaSelectScheme(
 //      TPM_RC_BINDING      public and private parts of 'rsaKey' are not matched
 TPM_RC
 CryptRsaLoadPrivateExponent(TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive,
-			    OBJECT                  *rsaKey	// libtpms added: Should only be NULL
-				// in case this function is called for parameter 'testing', such as by
-				// TPM2_Import() -> ObjectLoad().
-			   )
+                            OBJECT                  *rsaKey	// libtpms added: Should only be NULL
+                            // in case this function is called for parameter 'testing', such as by
+                            // TPM2_Import() -> ObjectLoad().
+)
 {
     if(!rsaKey || !rsaKey->attributes.privateExp)			// libtpms changed: still keep rsaKey for privateExp flag
-	{
-	    if((sensitive->sensitive.rsa.t.size * 2) == publicArea->unique.rsa.t.size)
-		{
-		    NEW_PRIVATE_EXPONENT(Z);
-		    CRYPT_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
-		    CRYPT_RSA_VAR(bnQr);
-		    CRYPT_INT_VAR(bnE, RADIX_BITS);
+    {
+        if((sensitive->sensitive.rsa.t.size * 2) == publicArea->unique.rsa.t.size)
+        {
+            NEW_PRIVATE_EXPONENT(Z);
+            CRYPT_RSA_INITIALIZED(bnN, &publicArea->unique.rsa);
+            CRYPT_RSA_VAR(bnQr);
+            CRYPT_INT_VAR(bnE, RADIX_BITS);
 
-		    TPM_DO_SELF_TEST(TPM_ALG_NULL);
+            TPM_DO_SELF_TEST(TPM_ALG_NULL);
 
-		    GOTO_ERROR_UNLESS((sensitive->sensitive.rsa.t.size * 2)
-				      == publicArea->unique.rsa.t.size);
-		    // Initialize the exponent
-		    ExtMath_SetWord(bnE, publicArea->parameters.rsaDetail.exponent);
-		    if(ExtMath_IsZero(bnE))
-			ExtMath_SetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
-		    // Convert first prime to 2B
-		    GOTO_ERROR_UNLESS(
-				      TpmMath_IntFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
+            GOTO_ERROR_UNLESS((sensitive->sensitive.rsa.t.size * 2)
+                              == publicArea->unique.rsa.t.size);
+            // Initialize the exponent
+            ExtMath_SetWord(bnE, publicArea->parameters.rsaDetail.exponent);
+            if(ExtMath_IsZero(bnE))
+                ExtMath_SetWord(bnE, RSA_DEFAULT_PUBLIC_EXPONENT);
+            // Convert first prime to 2B
+            GOTO_ERROR_UNLESS(
+                TpmMath_IntFrom2B(Z->P, &sensitive->sensitive.rsa.b) != NULL);
 
-		    // Find the second prime by division. This uses 'bQ' rather than Z->Q
-		    // because the division could make the quotient larger than a prime during
-		    // some intermediate step.
-		    GOTO_ERROR_UNLESS(ExtMath_Divide(Z->Q, bnQr, bnN, Z->P));
-		    GOTO_ERROR_UNLESS(ExtMath_IsZero(bnQr));
-		    // Compute the private exponent and return it if found
-		    if (rsaKey) {					// libtpms added begin
-			RsaInitializeExponentOld(&rsaKey->privateExponent);
-			ExtMath_Copy((Crypt_Int *)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
-		    }							// libtpms added end
-		    GOTO_ERROR_UNLESS(ComputePrivateExponent(bnE, Z));
-		    // GOTO_ERROR_UNLESS(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
+            // Find the second prime by division. This uses 'bQ' rather than Z->Q
+            // because the division could make the quotient larger than a prime during
+            // some intermediate step.
+            GOTO_ERROR_UNLESS(ExtMath_Divide(Z->Q, bnQr, bnN, Z->P));
+            GOTO_ERROR_UNLESS(ExtMath_IsZero(bnQr));
+            // Compute the private exponent and return it if found
+            if (rsaKey) {					// libtpms added begin
+                RsaInitializeExponentOld(&rsaKey->privateExponent);
+                ExtMath_Copy((Crypt_Int *)&rsaKey->privateExponent.Q, Z->Q);	// preserve Q
+            }							// libtpms added end
+            GOTO_ERROR_UNLESS(ComputePrivateExponent(bnE, Z));
+            // GOTO_ERROR_UNLESS(PackExponent(&sensitive->sensitive.rsa, Z)); // libtpms: never pack/unpack
 
-		    if (rsaKey)	{					// libtpms added begin
-			RsaSetExponentOld(&rsaKey->privateExponent, Z);	// preserve dP, dQ, qInv
-		    }							// libtpms added end
-		}
-	    else
-		assert(FALSE);						// libtpms changed begin
-	    if (rsaKey)
-		rsaKey->attributes.privateExp = TRUE;
-	}
+            if (rsaKey)	{					// libtpms added begin
+                RsaSetExponentOld(&rsaKey->privateExponent, Z);	// preserve dP, dQ, qInv
+            }							// libtpms added end
+        }
+        else
+            assert(FALSE);						// libtpms changed begin
+        if (rsaKey)
+            rsaKey->attributes.privateExp = TRUE;
+    }
     return TPM_RC_SUCCESS;
- Error:
+Error:
     return TPM_RC_BINDING;
 }
 
@@ -1127,15 +1127,15 @@ CryptRSAPairwiseConsistencyTest(OBJECT *key)
 //      TPM_RC_SCHEME    'padType' is not a supported scheme
 //
 LIB_EXPORT TPM_RC CryptRsaEncrypt(
-				  TPM2B_PUBLIC_KEY_RSA* cOut,    // OUT: the encrypted data
-				  TPM2B*                dIn,     // IN: the data to encrypt
-				  OBJECT*               key,     // IN: the key used for encryption
-				  TPMT_RSA_DECRYPT*     scheme,  // IN: the type of padding and hash
-				  //     if needed
-				  const TPM2B* label,            // IN: in case it is needed
-				  RAND_STATE*  rand              // IN: random number generator
-				  //     state (mostly for testing)
-				  )
+    TPM2B_PUBLIC_KEY_RSA* cOut,    // OUT: the encrypted data
+    TPM2B*                dIn,     // IN: the data to encrypt
+    OBJECT*               key,     // IN: the key used for encryption
+    TPMT_RSA_DECRYPT*     scheme,  // IN: the type of padding and hash
+                                   //     if needed
+    const TPM2B* label,            // IN: in case it is needed
+    RAND_STATE*  rand              // IN: random number generator
+                                   //     state (mostly for testing)
+)
 {
     TPM_RC               retVal = TPM_RC_SUCCESS;
     TPM2B_PUBLIC_KEY_RSA dataIn;
@@ -1143,57 +1143,57 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
     // if the input and output buffers are the same, copy the input to a scratch
     // buffer so that things don't get messed up.
     if(dIn == &cOut->b)
-	{
-	    MemoryCopy2B(&dataIn.b, dIn, sizeof(dataIn.t.buffer));
-	    dIn = &dataIn.b;
-	}
+    {
+        MemoryCopy2B(&dataIn.b, dIn, sizeof(dataIn.t.buffer));
+        dIn = &dataIn.b;
+    }
     // All encryption schemes return the same size of data
     cOut->t.size = key->publicArea.unique.rsa.t.size;
     TPM_DO_SELF_TEST(scheme->scheme);
 
     switch(scheme->scheme)
-	{
-	  case TPM_ALG_NULL:  // 'raw' encryption
-	      {
-		  INT32 i;
-		  INT32 dSize = dIn->size;
-		  // dIn can have more bytes than cOut as long as the extra bytes
-		  // are zero. Note: the more significant bytes of a number in a byte
-		  // buffer are the bytes at the start of the array.
-		  if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
-							   RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
-		      ERROR_EXIT(TPM_RC_SCHEME);				// libtpms added end
-		  for(i = 0; (i < dSize) && (dIn->buffer[i] == 0); i++)
-		      ;
-		  dSize -= i;
-		  if(dSize > cOut->t.size)
-		      ERROR_EXIT(TPM_RC_VALUE);
-		  // Pad cOut with zeros if dIn is smaller
-		  memset(cOut->t.buffer, 0, cOut->t.size - dSize);
-		  // And copy the rest of the value
-		  memcpy(&cOut->t.buffer[cOut->t.size - dSize], &dIn->buffer[i], dSize);
+    {
+        case TPM_ALG_NULL:  // 'raw' encryption
+        {
+            INT32 i;
+            INT32 dSize = dIn->size;
+            // dIn can have more bytes than cOut as long as the extra bytes
+            // are zero. Note: the more significant bytes of a number in a byte
+            // buffer are the bytes at the start of the array.
+            if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+                                                     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+                ERROR_EXIT(TPM_RC_SCHEME);				// libtpms added end
+            for(i = 0; (i < dSize) && (dIn->buffer[i] == 0); i++)
+                ;
+            dSize -= i;
+            if(dSize > cOut->t.size)
+                ERROR_EXIT(TPM_RC_VALUE);
+            // Pad cOut with zeros if dIn is smaller
+            memset(cOut->t.buffer, 0, cOut->t.size - dSize);
+            // And copy the rest of the value
+            memcpy(&cOut->t.buffer[cOut->t.size - dSize], &dIn->buffer[i], dSize);
 
-		  // If the size of dIn is the same as cOut dIn could be larger than
-		  // the modulus. If it is, then RSAEP() will catch it.
-	      }
-	      break;
-	  case TPM_ALG_RSAES:
-	    retVal = RSAES_PKCS1v1_5Encode(&cOut->b, dIn, rand);
-	    break;
-	  case TPM_ALG_OAEP:
-	    retVal =
-		OaepEncode(&cOut->b, scheme->details.oaep.hashAlg, label, dIn, rand);
-	    break;
-	  default:
-	    ERROR_EXIT(TPM_RC_SCHEME);
-	    break;
-	}
+            // If the size of dIn is the same as cOut dIn could be larger than
+            // the modulus. If it is, then RSAEP() will catch it.
+        }
+        break;
+        case TPM_ALG_RSAES:
+            retVal = RSAES_PKCS1v1_5Encode(&cOut->b, dIn, rand);
+            break;
+        case TPM_ALG_OAEP:
+            retVal =
+                OaepEncode(&cOut->b, scheme->details.oaep.hashAlg, label, dIn, rand);
+            break;
+        default:
+            ERROR_EXIT(TPM_RC_SCHEME);
+            break;
+    }
     // All the schemes that do padding will come here for the encryption step
     // Check that the Encoding worked
     if(retVal == TPM_RC_SUCCESS)
-	// Padding OK so do the encryption
-	retVal = RSAEP(&cOut->b, key);
- Exit:
+        // Padding OK so do the encryption
+        retVal = RSAEP(&cOut->b, key);
+Exit:
     return retVal;
 }
 
@@ -1210,12 +1210,12 @@ LIB_EXPORT TPM_RC CryptRsaEncrypt(
 //      TPM_RC_SCHEME      'padType' is not supported
 //
 LIB_EXPORT TPM_RC CryptRsaDecrypt(
-				  TPM2B*            dOut,    // OUT: the decrypted data
-				  TPM2B*            cIn,     // IN: the data to decrypt
-				  OBJECT*           key,     // IN: the key to use for decryption
-				  TPMT_RSA_DECRYPT* scheme,  // IN: the padding scheme
-				  const TPM2B*      label    // IN: in case it is needed for the scheme
-				  )
+    TPM2B*            dOut,    // OUT: the decrypted data
+    TPM2B*            cIn,     // IN: the data to decrypt
+    OBJECT*           key,     // IN: the key to use for decryption
+    TPMT_RSA_DECRYPT* scheme,  // IN: the padding scheme
+    const TPM2B*      label    // IN: in case it is needed for the scheme
+)
 {
     TPM_RC retVal;
 
@@ -1224,7 +1224,7 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
 
     // Size is checked to make sure that the encrypted value is the right size
     if(cIn->size != key->publicArea.unique.rsa.t.size)
-	ERROR_EXIT(TPM_RC_SIZE);
+        ERROR_EXIT(TPM_RC_SIZE);
 
     TPM_DO_SELF_TEST(scheme->scheme);
 
@@ -1232,30 +1232,30 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
     // go handle the decoding.
     retVal = RSADP(cIn, key);
     if(retVal == TPM_RC_SUCCESS)
-	{
-	    // Remove padding
-	    switch(scheme->scheme)
-		{
-		  case TPM_ALG_NULL:
-		    if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
-							     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
-			return TPM_RC_SCHEME;					// libtpms added end
-		    if(dOut->size < cIn->size)
-			return TPM_RC_VALUE;
-		    MemoryCopy2B(dOut, cIn, dOut->size);
-		    break;
-		  case TPM_ALG_RSAES:
-		    retVal = RSAES_Decode(dOut, cIn);
-		    break;
-		  case TPM_ALG_OAEP:
-		    retVal = OaepDecode(dOut, scheme->details.oaep.hashAlg, label, cIn);
-		    break;
-		  default:
-		    retVal = TPM_RC_SCHEME;
-		    break;
-		}
-	}
- Exit:
+    {
+        // Remove padding
+        switch(scheme->scheme)
+        {
+            case TPM_ALG_NULL:
+                if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
+                                                         RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
+                    return TPM_RC_SCHEME;					// libtpms added end
+                if(dOut->size < cIn->size)
+                    return TPM_RC_VALUE;
+                MemoryCopy2B(dOut, cIn, dOut->size);
+                break;
+            case TPM_ALG_RSAES:
+                retVal = RSAES_Decode(dOut, cIn);
+                break;
+            case TPM_ALG_OAEP:
+                retVal = OaepDecode(dOut, scheme->details.oaep.hashAlg, label, cIn);
+                break;
+            default:
+                retVal = TPM_RC_SCHEME;
+                break;
+        }
+    }
+Exit:
     return retVal;
 }
 
@@ -1268,11 +1268,11 @@ LIB_EXPORT TPM_RC CryptRsaDecrypt(
 //      TPM_RC_VALUE        'hInSize' does not match 'hashAlg' (for RSASSA)
 //
 LIB_EXPORT TPM_RC CryptRsaSign(TPMT_SIGNATURE* sigOut,
-			       OBJECT*         key,  // IN: key to use
-			       TPM2B_DIGEST*   hIn,  // IN: the digest to sign
-			       RAND_STATE* rand  // IN: the random number generator
-			       //      to use (mostly for testing)
-			       )
+                               OBJECT*         key,  // IN: key to use
+                               TPM2B_DIGEST*   hIn,  // IN: the digest to sign
+                               RAND_STATE* rand  // IN: the random number generator
+                                                 //      to use (mostly for testing)
+)
 {
     TPM_RC retVal = TPM_RC_SUCCESS;
     UINT16 modSize;
@@ -1288,29 +1288,29 @@ LIB_EXPORT TPM_RC CryptRsaSign(TPMT_SIGNATURE* sigOut,
     TPM_DO_SELF_TEST(sigOut->sigAlg);
 
     switch(sigOut->sigAlg)
-	{
-	  case TPM_ALG_NULL:
-	    sigOut->signature.rsapss.sig.t.size = 0;
-	    return TPM_RC_SUCCESS;
-	  case TPM_ALG_RSAPSS:
-	    retVal = PssEncode(&sigOut->signature.rsapss.sig.b,
-			       sigOut->signature.rsapss.hash,
-			       &hIn->b,
-			       rand);
-	    break;
-	  case TPM_ALG_RSASSA:
-	    retVal = RSASSA_Encode(&sigOut->signature.rsassa.sig.b,
-				   sigOut->signature.rsassa.hash,
-				   &hIn->b);
-	    break;
-	  default:
-	    retVal = TPM_RC_SCHEME;
-	}
+    {
+        case TPM_ALG_NULL:
+            sigOut->signature.rsapss.sig.t.size = 0;
+            return TPM_RC_SUCCESS;
+        case TPM_ALG_RSAPSS:
+            retVal = PssEncode(&sigOut->signature.rsapss.sig.b,
+                               sigOut->signature.rsapss.hash,
+                               &hIn->b,
+                               rand);
+            break;
+        case TPM_ALG_RSASSA:
+            retVal = RSASSA_Encode(&sigOut->signature.rsassa.sig.b,
+                                   sigOut->signature.rsassa.hash,
+                                   &hIn->b);
+            break;
+        default:
+            retVal = TPM_RC_SCHEME;
+    }
     if(retVal == TPM_RC_SUCCESS)
-	{
-	    // Do the encryption using the private key
-	    retVal = RSADP(&sigOut->signature.rsapss.sig.b, key);
-	}
+    {
+        // Do the encryption using the private key
+        retVal = RSADP(&sigOut->signature.rsapss.sig.b, key);
+    }
     return retVal;
 }
 
@@ -1324,51 +1324,51 @@ LIB_EXPORT TPM_RC CryptRsaSign(TPMT_SIGNATURE* sigOut,
 //      TPM_RC_SCHEME       unsupported scheme or hash algorithm
 //
 LIB_EXPORT TPM_RC CryptRsaValidateSignature(
-					    TPMT_SIGNATURE* sig,    // IN: signature
-					    OBJECT*         key,    // IN: public modulus
-					    TPM2B_DIGEST*   digest  // IN: The digest being validated
-					    )
+    TPMT_SIGNATURE* sig,    // IN: signature
+    OBJECT*         key,    // IN: public modulus
+    TPM2B_DIGEST*   digest  // IN: The digest being validated
+)
 {
     TPM_RC retVal;
     //
     // Fatal programming errors
     pAssert(key != NULL && sig != NULL && digest != NULL);
     switch(sig->sigAlg)
-	{
-	  case TPM_ALG_RSAPSS:
-	  case TPM_ALG_RSASSA:
-	    break;
-	  default:
-	    return TPM_RC_SCHEME;
-	}
+    {
+        case TPM_ALG_RSAPSS:
+        case TPM_ALG_RSASSA:
+            break;
+        default:
+            return TPM_RC_SCHEME;
+    }
 
     // Errors that might be caused by calling parameters
     if(sig->signature.rsassa.sig.t.size != key->publicArea.unique.rsa.t.size)
-	ERROR_EXIT(TPM_RC_SIGNATURE);
+        ERROR_EXIT(TPM_RC_SIGNATURE);
 
     TPM_DO_SELF_TEST(sig->sigAlg);
 
     // Decrypt the block
     retVal = RSAEP(&sig->signature.rsassa.sig.b, key);
     if(retVal == TPM_RC_SUCCESS)
-	{
-	    switch(sig->sigAlg)
-		{
-		  case TPM_ALG_RSAPSS:
-		    retVal = PssDecode(sig->signature.any.hashAlg,
-				       &digest->b,
-				       &sig->signature.rsassa.sig.b);
-		    break;
-		  case TPM_ALG_RSASSA:
-		    retVal = RSASSA_Decode(sig->signature.any.hashAlg,
-					   &digest->b,
-					   &sig->signature.rsassa.sig.b);
-		    break;
-		  default:
-		    return TPM_RC_SCHEME;
-		}
-	}
- Exit:
+    {
+        switch(sig->sigAlg)
+        {
+            case TPM_ALG_RSAPSS:
+                retVal = PssDecode(sig->signature.any.hashAlg,
+                                   &digest->b,
+                                   &sig->signature.rsassa.sig.b);
+                break;
+            case TPM_ALG_RSASSA:
+                retVal = RSASSA_Decode(sig->signature.any.hashAlg,
+                                       &digest->b,
+                                       &sig->signature.rsassa.sig.b);
+                break;
+            default:
+                return TPM_RC_SCHEME;
+        }
+    }
+Exit:
     return (retVal != TPM_RC_SUCCESS) ? TPM_RC_SIGNATURE : TPM_RC_SUCCESS;
 }
 #endif                                 // libtpms added
@@ -1376,9 +1376,9 @@ LIB_EXPORT TPM_RC CryptRsaValidateSignature(
 #  if SIMULATION && USE_RSA_KEY_CACHE
 extern int s_rsaKeyCacheEnabled;
 int        GetCachedRsaKey(
-			   TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive, RAND_STATE* rand);
-#    define GET_CACHED_KEY(publicArea, sensitive, rand)			\
-    (s_rsaKeyCacheEnabled && GetCachedRsaKey(publicArea, sensitive, rand))
+           TPMT_PUBLIC* publicArea, TPMT_SENSITIVE* sensitive, RAND_STATE* rand);
+#    define GET_CACHED_KEY(publicArea, sensitive, rand) \
+        (s_rsaKeyCacheEnabled && GetCachedRsaKey(publicArea, sensitive, rand))
 #  else
 #    define GET_CACHED_KEY(key, rand)
 #  endif
@@ -1417,12 +1417,12 @@ int        GetCachedRsaKey(
 //      TPM_RC_RANGE        public exponent is not supported
 //      TPM_RC_VALUE        could not find a prime using the provided parameters
 LIB_EXPORT TPM_RC CryptRsaGenerateKey(
-				      TPMT_PUBLIC*    publicArea,
-				      TPMT_SENSITIVE* sensitive,
-				      OBJECT*         rsaKey,      // libtpms added IN/OUT: The object structure in which the key is created.
-				      RAND_STATE*     rand  // IN: if not NULL, the deterministic
-				      //     RNG state
-				      )
+    TPMT_PUBLIC*    publicArea,
+    TPMT_SENSITIVE* sensitive,
+    OBJECT*         rsaKey,      // libtpms added IN/OUT: The object structure in which the key is created.
+    RAND_STATE*     rand  // IN: if not NULL, the deterministic
+                          //     RNG state
+)
 {
     UINT32 i;
     CRYPT_RSA_VAR(bnD);
@@ -1440,15 +1440,15 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     // not supported
     e = publicArea->parameters.rsaDetail.exponent;
     if(e == 0)
-	e = RSA_DEFAULT_PUBLIC_EXPONENT;
+        e = RSA_DEFAULT_PUBLIC_EXPONENT;
     else
-	{
-	    if(e < 65537)
-		ERROR_EXIT(TPM_RC_RANGE);
-	    // Check that e is prime
-	    if(!IsPrimeInt(e))
-		ERROR_EXIT(TPM_RC_RANGE);
-	}
+    {
+        if(e < 65537)
+            ERROR_EXIT(TPM_RC_RANGE);
+        // Check that e is prime
+        if(!IsPrimeInt(e))
+            ERROR_EXIT(TPM_RC_RANGE);
+    }
     ExtMath_SetWord(bnPubExp, e);
 
     // check for supported key size.
@@ -1456,14 +1456,14 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     if(((keySizeInBits % 1024) != 0)
        || (keySizeInBits > MAX_RSA_KEY_BITS)  // this might be redundant, but...
        || (keySizeInBits == 0))
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     // Set the prime size for instrumentation purposes
     INSTRUMENT_SET(PrimeIndex, PRIME_INDEX(keySizeInBits / 2));
 
 #  if SIMULATION && USE_RSA_KEY_CACHE
     if(GET_CACHED_KEY(publicArea, sensitive, rand))
-	return TPM_RC_SUCCESS;
+        return TPM_RC_SUCCESS;
 #  endif
 
     // Make sure that key generation has been tested
@@ -1486,93 +1486,93 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
     // over and find a new pair of primes.
 
     for(i = 1; (retVal == TPM_RC_NO_RESULT) && (i != 100); i++)
-	{
-	    if(_plat__IsCanceled())
-		ERROR_EXIT(TPM_RC_CANCELED);
+    {
+        if(_plat__IsCanceled())
+            ERROR_EXIT(TPM_RC_CANCELED);
 
-	    if(TpmRsa_GeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand)
-	       == TPM_RC_FAILURE)
-		{
-		    retVal = TPM_RC_FAILURE;
-		    goto Exit;
-		}
+        if(TpmRsa_GeneratePrimeForRSA(Z->P, keySizeInBits / 2, e, rand)
+           == TPM_RC_FAILURE)
+        {
+            retVal = TPM_RC_FAILURE;
+            goto Exit;
+        }
 
-	    INSTRUMENT_INC(PrimeCounts[PrimeIndex]);
+        INSTRUMENT_INC(PrimeCounts[PrimeIndex]);
 
-	    // If this is the second prime, make sure that it differs from the
-	    // first prime by at least 2^100
-	    if(ExtMath_IsZero(Z->Q))
-		{
-		    // copy p to q and compute another prime in p
-		    ExtMath_Copy(Z->Q, Z->P);
-		    continue;
-		}
-	    // Make sure that the difference is at least 100 bits. Need to do it this
-	    // way because the big numbers are only positive values
-	    if(ExtMath_UnsignedCmp(Z->P, Z->Q) < 0)
-		ExtMath_Subtract(bnD, Z->Q, Z->P);
-	    else
-		ExtMath_Subtract(bnD, Z->P, Z->Q);
-	    if(ExtMath_MostSigBitNum(bnD) < 100)
-		continue;
+        // If this is the second prime, make sure that it differs from the
+        // first prime by at least 2^100
+        if(ExtMath_IsZero(Z->Q))
+        {
+            // copy p to q and compute another prime in p
+            ExtMath_Copy(Z->Q, Z->P);
+            continue;
+        }
+        // Make sure that the difference is at least 100 bits. Need to do it this
+        // way because the big numbers are only positive values
+        if(ExtMath_UnsignedCmp(Z->P, Z->Q) < 0)
+            ExtMath_Subtract(bnD, Z->Q, Z->P);
+        else
+            ExtMath_Subtract(bnD, Z->P, Z->Q);
+        if(ExtMath_MostSigBitNum(bnD) < 100)
+            continue;
 
-	    //Form the public modulus and set the unique value
-	    ExtMath_Multiply(bnN, Z->P, Z->Q);
-	    TpmMath_IntTo2B(
-			    bnN, &publicArea->unique.rsa.b, (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
-	    // Make sure everything came out right. The MSb of the values must be one
-	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
-	       || (publicArea->unique.rsa.t.size
-		   != (NUMBYTES)BITS_TO_BYTES(keySizeInBits)))
-		FAIL(FATAL_ERROR_INTERNAL);
+        //Form the public modulus and set the unique value
+        ExtMath_Multiply(bnN, Z->P, Z->Q);
+        TpmMath_IntTo2B(
+            bnN, &publicArea->unique.rsa.b, (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
+        // Make sure everything came out right. The MSb of the values must be one
+        if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
+           || (publicArea->unique.rsa.t.size
+               != (NUMBYTES)BITS_TO_BYTES(keySizeInBits)))
+            FAIL(FATAL_ERROR_INTERNAL);
 
-	    // Add the prime to the sensitive area		// libtpms added begin
-	    TpmMath_IntTo2B(Z->P, &sensitive->sensitive.rsa.b,
-			    (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);	// libtpms added end
+        // Add the prime to the sensitive area				// libtpms added begin
+        TpmMath_IntTo2B(Z->P, &sensitive->sensitive.rsa.b,
+                       (NUMBYTES)BITS_TO_BYTES(keySizeInBits) / 2);	// libtpms added end
+        ExtMath_Copy((Crypt_Int*)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
 
-	    ExtMath_Copy((Crypt_Int*)&rsaKey->privateExponent.Q, Z->Q);	// libtpms added: preserve Q
-	    // Make sure that we can form the private exponent values
-	    if(ComputePrivateExponent(bnPubExp, Z) != TRUE)
-		{
-		    // If ComputePrivateExponent could not find an inverse for
-		    // Q, then copy P and recompute P. This might
-		    // cause both to be recomputed if P is also zero
-		    if(ExtMath_IsZero(Z->Q))
-			ExtMath_Copy(Z->Q, Z->P);
-		    continue;
-		}
-	    RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
+        // Make sure that we can form the private exponent values
+        if(ComputePrivateExponent(bnPubExp, Z) != TRUE)
+        {
+            // If ComputePrivateExponent could not find an inverse for
+            // Q, then copy P and recompute P. This might
+            // cause both to be recomputed if P is also zero
+            if(ExtMath_IsZero(Z->Q))
+                ExtMath_Copy(Z->Q, Z->P);
+            continue;
+        }
+        RsaSetExponentOld(&rsaKey->privateExponent, Z);	// libtpms added: preserve dP, dQ, qInv
 
-	    // Pack the private exponent into the sensitive area
-	    // PackExponent(&sensitive->sensitive.rsa, Z);	// libtpms changed: never pack
-	    // Make sure everything came out right. The MSb of the values must be one
-	    if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
-	       || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
-		FAIL(FATAL_ERROR_INTERNAL);
+        // Pack the private exponent into the sensitive area
+        // PackExponent(&sensitive->sensitive.rsa, Z);	// libtpms changed: never pack
+        // Make sure everything came out right. The MSb of the values must be one
+        if(((publicArea->unique.rsa.t.buffer[0] & 0x80) == 0)
+           || ((sensitive->sensitive.rsa.t.buffer[0] & 0x80) == 0))
+            FAIL(FATAL_ERROR_INTERNAL);
 
-	    retVal = TPM_RC_SUCCESS;
-	    // Do a trial encryption decryption if this is a signing key
-	    if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
-		{
-		    CRYPT_RSA_VAR(temp1);
-		    CRYPT_RSA_VAR(temp2);
-		    TpmMath_GetRandomInRange(temp1, bnN, rand);
+        retVal = TPM_RC_SUCCESS;
+        // Do a trial encryption decryption if this is a signing key
+        if(IS_ATTRIBUTE(publicArea->objectAttributes, TPMA_OBJECT, sign))
+        {
+            CRYPT_RSA_VAR(temp1);
+            CRYPT_RSA_VAR(temp2);
+            TpmMath_GetRandomInRange(temp1, bnN, rand);
 
-		    // Encrypt with public exponent...
-		    ExtMath_ModExp(temp2, temp1, bnPubExp, bnN);
-		    // ...  then decrypt with private exponent
-		    RsaPrivateKeyOp(temp2, Z);
+            // Encrypt with public exponent...
+            ExtMath_ModExp(temp2, temp1, bnPubExp, bnN);
+            // ...  then decrypt with private exponent
+            RsaPrivateKeyOp(temp2, Z);
 
-		    // If the starting and ending values are not the same,
-		    // start over )-;
-		    if(ExtMath_UnsignedCmp(temp2, temp1) != 0)
-			{
-			    ExtMath_SetWord(Z->Q, 0);
-			    retVal = TPM_RC_NO_RESULT;
-			}
-		}
-	}
- Exit:
+            // If the starting and ending values are not the same,
+            // start over )-;
+            if(ExtMath_UnsignedCmp(temp2, temp1) != 0)
+            {
+                ExtMath_SetWord(Z->Q, 0);
+                retVal = TPM_RC_NO_RESULT;
+            }
+        }
+    }
+Exit:
     if(retVal == TPM_RC_SUCCESS)
 	rsaKey->attributes.privateExp = SET;
 
@@ -1580,11 +1580,11 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
  pct:
 #endif
     if(retVal == TPM_RC_SUCCESS &&
-       RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
-                                            RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST)) {
-	retVal = CryptRSAPairwiseConsistencyTest(rsaKey);
-	if (retVal)
-	    retVal = TPM_RC_FAILURE;
+        RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+                                             RUNTIME_ATTRIBUTE_PAIRWISE_CONSISTENCY_TEST)) {
+        retVal = CryptRSAPairwiseConsistencyTest(rsaKey);
+        if (retVal)
+            retVal = TPM_RC_FAILURE;
     }						// libtpms added end
     return retVal;
 }

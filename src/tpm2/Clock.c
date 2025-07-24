@@ -175,16 +175,16 @@ clock_t debugTime;
 LIB_EXPORT uint64_t _plat__RealTime(void)
 {
     clock64_t time;
-    //#ifdef _MSC_VER	kgold
+    //#ifdef _MSC_VER	kgold		// libtpms changed begin
 #ifdef TPM_WINDOWS
-    #include <sys/timeb.h>
+    #include <sys/timeb.h>		// libtpms changed end
     struct _timeb sysTime;
     //
     _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
     time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
     // set the time back by one hour if daylight savings
     if(sysTime.dstflag)
-	time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
+        time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
 #else
     // hopefully, this will work with most UNIX systems
     struct timespec systime;
@@ -226,7 +226,7 @@ LIB_EXPORT uint64_t _plat__TimerRead(void)
 #  error "need a defintion for reading the hardware clock"
     return HARDWARE_CLOCK
 #else
-	clock64_t timeDiff;
+    clock64_t timeDiff;
     clock64_t adjustedTimeDiff;
     clock64_t timeNow;
     clock64_t readjustedTimeDiff;
@@ -236,17 +236,17 @@ LIB_EXPORT uint64_t _plat__TimerRead(void)
 
     // if this hasn't been initialized, initialize it
     if(s_lastSystemTime == 0)
-	{
-	    s_lastSystemTime   = timeNow;
-	    debugTime          = clock();
-	    s_lastReportedTime = 0;
-	    s_realTimePrevious = 0;
-	}
+    {
+        s_lastSystemTime   = timeNow;
+        debugTime          = clock();
+        s_lastReportedTime = 0;
+        s_realTimePrevious = 0;
+    }
     // The system time can bounce around and that's OK as long as we don't allow
     // time to go backwards. When the time does appear to go backwards, set
     // lastSystemTime to be the new value and then update the reported time.
     if(timeNow < s_lastReportedTime)
-	s_lastSystemTime = timeNow;
+        s_lastSystemTime = timeNow;
     s_lastReportedTime = s_lastReportedTime + timeNow - s_lastSystemTime;
     s_lastSystemTime   = timeNow;
     timeNow            = s_lastReportedTime;
@@ -257,7 +257,7 @@ LIB_EXPORT uint64_t _plat__TimerRead(void)
     // uses that value and does the rate adjustment on the time value.
     // If there is no difference in time, then skip all the computations
     if(s_realTimePrevious >= timeNow)
-	return s_tpmTime;
+        return s_tpmTime;
     // Compute the amount of time since the last update of the system clock
     timeDiff = timeNow - s_realTimePrevious;
 
@@ -324,71 +324,33 @@ LIB_EXPORT void _plat__ClockRateAdjust(_plat__ClockAdjustStep adjust)
     // We expect the caller should only use a fixed set of constant values to
     // adjust the rate
     switch(adjust)
-	{
-	    // slower increases the divisor
-	  case PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER:
-	    s_adjustRate += CLOCK_ADJUST_COARSE;
-	    break;
-	  case PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER:
-	    s_adjustRate += CLOCK_ADJUST_MEDIUM;
-	    break;
-	  case PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER:
-	    s_adjustRate += CLOCK_ADJUST_FINE;
-	    break;
-	    // faster decreases the divisor
-	  case PLAT_TPM_CLOCK_ADJUST_FINE_FASTER:
-	    s_adjustRate -= CLOCK_ADJUST_FINE;
-	    break;
-	  case PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER:
-	    s_adjustRate -= CLOCK_ADJUST_MEDIUM;
-	    break;
-	  case PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER:
-	    s_adjustRate -= CLOCK_ADJUST_COARSE;
-	    break;
-	}
+    {
+        // slower increases the divisor
+        case PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER:
+            s_adjustRate += CLOCK_ADJUST_COARSE;
+            break;
+        case PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER:
+            s_adjustRate += CLOCK_ADJUST_MEDIUM;
+            break;
+        case PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER:
+            s_adjustRate += CLOCK_ADJUST_FINE;
+            break;
+        // faster decreases the divisor
+        case PLAT_TPM_CLOCK_ADJUST_FINE_FASTER:
+            s_adjustRate -= CLOCK_ADJUST_FINE;
+            break;
+        case PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER:
+            s_adjustRate -= CLOCK_ADJUST_MEDIUM;
+            break;
+        case PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER:
+            s_adjustRate -= CLOCK_ADJUST_COARSE;
+            break;
+    }
 
     if(s_adjustRate > (CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT))
-	s_adjustRate = CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT;
+        s_adjustRate = CLOCK_NOMINAL + CLOCK_ADJUST_LIMIT;
     if(s_adjustRate < (CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT))
-	s_adjustRate = CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT;
+        s_adjustRate = CLOCK_NOMINAL - CLOCK_ADJUST_LIMIT;
 
     return;
 }
-
-#if 0
-
-/* added for portability because Linux clock is 32 bits */
-
-#include <stdint.h>
-#include <stdio.h>
-#include <time.h>
-
-#include "TpmFail_fp.h"
-
-LIB_EXPORT uint64_t
-_plat__RealTime(
-		void
-		)
-{
-    clock64_t           time;
-    //#ifdef _MSC_VER	kgold
-#ifdef TPM_WINDOWS
-    #include <sys/timeb.h>
-    struct _timeb       sysTime;
-    //
-    _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
-    time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
-    // set the time back by one hour if daylight savings
-    if(sysTime.dstflag)
-	time -= 1000 * 60 * 60;  // mSec/sec * sec/min * min/hour = ms/hour
-#else
-    // hopefully, this will work with most UNIX systems
-    struct timespec     systime;
-    //
-    clock_gettime(CLOCK_MONOTONIC, &systime);
-    time = (clock64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
-#endif
-    return time;
-}
-
-#endif

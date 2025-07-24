@@ -77,7 +77,7 @@ void HierarchyPreInstall_Init(void);
 // This function is called at TPM2_Startup() to initialize the hierarchy
 // related values.
 BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
-		      );
+);
 
 //*** HierarchyGetProof()
 // This function derives the proof value associated with a hierarchy. It returns a
@@ -92,8 +92,8 @@ BOOL HierarchyStartup(STARTUP_TYPE type  // IN: start up type
 //                              to derive the Firmware SVN Secret for the requested
 //                              SVN.
 TPM_RC HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant
-			 TPM2B_PROOF*      proof       // OUT: proof buffer
-			 );
+                         TPM2B_PROOF*      proof       // OUT: proof buffer
+);
 
 //*** HierarchyGetPrimarySeed()
 // This function derives the primary seed of a hierarchy.
@@ -107,8 +107,8 @@ TPM_RC HierarchyGetProof(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy constant
 //                              to derive the Firmware SVN Secret for the requested
 //                              SVN.
 TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
-			       TPM2B_SEED*       seed        // OUT: seed buffer
-			       );
+                               TPM2B_SEED*       seed        // OUT: seed buffer
+);
 
 //*** ValidateHierarchy()
 // This function ensures a given hierarchy is valid and enabled.
@@ -121,13 +121,12 @@ TPM_RC HierarchyGetPrimarySeed(TPMI_RH_HIERARCHY hierarchy,  // IN: hierarchy
 //                              is greater than the TPM's current SVN.
 //      TPM_RC_VALUE            Hierarchy is not valid
 TPM_RC ValidateHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
-			 );
+);
 
 // libtpms added begin
 SEED_COMPAT_LEVEL
-HierarchyGetPrimarySeedCompatLevel(
-                                   TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
-                                   );
+HierarchyGetPrimarySeedCompatLevel(TPMI_RH_HIERARCHY    hierarchy     // IN: hierarchy
+);
 // libtpms added end
 
 //*** HierarchyIsEnabled()
@@ -137,24 +136,24 @@ HierarchyGetPrimarySeedCompatLevel(
 //      TRUE(1)         hierarchy is enabled
 //      FALSE(0)        hierarchy is disabled
 BOOL HierarchyIsEnabled(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy
-			);
+);
 
 //*** HierarchyNormalizeHandle
 // This function accepts a handle that may or may not be FW- or SVN-bound,
 // and returns the base hierarchy to which the handle refers.
 TPMI_RH_HIERARCHY HierarchyNormalizeHandle(TPMI_RH_HIERARCHY handle  // IN
-					   );
+);
 
 //*** HierarchyIsFirmwareLimited
 // This function accepts a hierarchy handle and returns whether it is firmware-
 // limited.
 BOOL HierarchyIsFirmwareLimited(TPMI_RH_HIERARCHY handle  // IN
-				);
+);
 
 //*** HierarchyIsSvnLimited
 // This function accepts a hierarchy handle and returns whether it is SVN-
 // limited.
 BOOL HierarchyIsSvnLimited(TPMI_RH_HIERARCHY handle  // IN
-			   );
+);
 
 #endif  // _HIERARCHY_FP_H_

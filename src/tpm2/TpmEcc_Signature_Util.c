@@ -79,12 +79,12 @@
 //      TPM_RC_NO_RESULT        the result of the operation was zero or 'r' (mod 'n')
 //                              is zero
 TPM_RC TpmEcc_SchnorrCalculateS(
-				Crypt_Int*       bnS,  // OUT: 's' component of the signature
-				const Crypt_Int* bnK,  // IN: a random value
-				Crypt_Int*       bnR,  // IN: the signature 'r' value
-				const Crypt_Int* bnD,  // IN: the private key
-				const Crypt_Int* bnN   // IN: the order of the curve
-				)
+    Crypt_Int*       bnS,  // OUT: 's' component of the signature
+    const Crypt_Int* bnK,  // IN: a random value
+    Crypt_Int*       bnR,  // IN: the signature 'r' value
+    const Crypt_Int* bnD,  // IN: the private key
+    const Crypt_Int* bnN   // IN: the order of the curve
+)
 {
     // Need a local temp value to store the intermediate computation because product
     // size can be larger than will fit in bnS.
@@ -93,7 +93,7 @@ TPM_RC TpmEcc_SchnorrCalculateS(
     // Reduce bnR without changing the input value
     ExtMath_Divide(NULL, bnT1, bnR, bnN);
     if(ExtMath_IsZero(bnT1))
-	return TPM_RC_NO_RESULT;
+        return TPM_RC_NO_RESULT;
     // compute s = (k + r * d)(mod n)
     // r * d
     ExtMath_Multiply(bnT1, bnT1, bnD);

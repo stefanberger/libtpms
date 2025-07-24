@@ -81,9 +81,9 @@ X509PushPoint(ASN1MarshalContext* ctx, TPMS_ECC_POINT* p)
     // coordinates of the public point, bottom up
     ASN1StartMarshalContext(ctx);  // BIT STRING
     {
-	ASN1PushBytes(ctx, p->y.t.size, p->y.t.buffer);
-	ASN1PushBytes(ctx, p->x.t.size, p->x.t.buffer);
-	ASN1PushByte(ctx, 0x04);
+        ASN1PushBytes(ctx, p->y.t.size, p->y.t.buffer);
+        ASN1PushBytes(ctx, p->x.t.size, p->x.t.buffer);
+        ASN1PushByte(ctx, 0x04);
     }
     return ASN1EndEncapsulation(ctx, ASN1_BITSTRING);  // Ends BIT STRING
 }
@@ -95,33 +95,33 @@ X509PushPoint(ASN1MarshalContext* ctx, TPMS_ECC_POINT* p)
 //     == 0         failure
 INT16
 X509AddSigningAlgorithmECC(
-			   OBJECT* signKey, TPMT_SIG_SCHEME* scheme, ASN1MarshalContext* ctx)
+    OBJECT* signKey, TPMT_SIG_SCHEME* scheme, ASN1MarshalContext* ctx)
 {
     PHASH_DEF hashDef = CryptGetHashDef(scheme->details.any.hashAlg);
     //
     NOT_REFERENCED(signKey);
     // If the desired hashAlg definition wasn't found...
     if(hashDef->hashAlg != scheme->details.any.hashAlg)
-	return 0;
+        return 0;
 
     switch(scheme->scheme)
-	{
+    {
 #if ALG_ECDSA
-	  case TPM_ALG_ECDSA:
-	    // Make sure that we have an OID for this hash and ECC
-	    if((hashDef->ECDSA)[0] != ASN1_OBJECT_IDENTIFIER)
-		break;
-	    // if this is just an implementation check, indicate that this
-	    // combination is supported
-	    if(!ctx)
-		return 1;
-	    ASN1StartMarshalContext(ctx);
-	    ASN1PushOID(ctx, hashDef->ECDSA);
-	    return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
+        case TPM_ALG_ECDSA:
+            // Make sure that we have an OID for this hash and ECC
+            if((hashDef->ECDSA)[0] != ASN1_OBJECT_IDENTIFIER)
+                break;
+            // if this is just an implementation check, indicate that this
+            // combination is supported
+            if(!ctx)
+                return 1;
+            ASN1StartMarshalContext(ctx);
+            ASN1PushOID(ctx, hashDef->ECDSA);
+            return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);
 #endif  //  ALG_ECDSA
-	  default:
-	    break;
-	}
+        default:
+            break;
+    }
     return 0;
 }
 
@@ -136,9 +136,9 @@ INT16
 X509AddPublicECC(OBJECT* object, ASN1MarshalContext* ctx)
 {
     const BYTE* curveOid =
-	CryptEccGetOID(object->publicArea.parameters.eccDetail.curveID);
+        CryptEccGetOID(object->publicArea.parameters.eccDetail.curveID);
     if((curveOid == NULL) || (*curveOid != ASN1_OBJECT_IDENTIFIER))
-	return 0;
+        return 0;
     //
     //
     //  SEQUENCE (2 elem) 1st
@@ -150,16 +150,16 @@ X509AddPublicECC(OBJECT* object, ASN1MarshalContext* ctx)
     // If this is a check to see if the key can be encoded, it can.
     // Need to mark the end sequence
     if(ctx == NULL)
-	return 1;
+        return 1;
     ASN1StartMarshalContext(ctx);  // SEQUENCE (2 elem) 1st
     {
-	X509PushPoint(ctx, &object->publicArea.unique.ecc);  // BIT STRING
-	ASN1StartMarshalContext(ctx);                        // SEQUENCE (2 elem) 2nd
-	{
-	    ASN1PushOID(ctx, curveOid);        // curve dependent
-	    ASN1PushOID(ctx, OID_ECC_PUBLIC);  // (1.2.840.10045.2.1)
-	}
-	ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 2nd
+        X509PushPoint(ctx, &object->publicArea.unique.ecc);  // BIT STRING
+        ASN1StartMarshalContext(ctx);                        // SEQUENCE (2 elem) 2nd
+        {
+            ASN1PushOID(ctx, curveOid);        // curve dependent
+            ASN1PushOID(ctx, OID_ECC_PUBLIC);  // (1.2.840.10045.2.1)
+        }
+        ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 2nd
     }
     return ASN1EndEncapsulation(ctx, ASN1_CONSTRUCTED_SEQUENCE);  // Ends SEQUENCE 1st
 }

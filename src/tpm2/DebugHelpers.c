@@ -59,102 +59,89 @@
 /*										*/
 /********************************************************************************/
 
-/* C.13	DebugHelpers.c */
-/* C.13.1.	Description */
-/* This file contains the NV read and write access methods. This implementation uses RAM/file and
-   does not manage the RAM/file as NV blocks. The implementation may become more sophisticated over
-   time. */
-/* C.13.2.	Includes and Local */
-#include    <stdio.h>
-#include    <time.h>
+//** Description
+//
+//    This file contains the NV read and write access methods.  This implementation
+//    uses RAM/file and does not manage the RAM/file as NV blocks.
+//    The implementation may become more sophisticated over time.
+//
+
+//** Includes and Local
+#include <stdio.h>
+#include <time.h>
 #include "Platform.h"
-#include "DebugHelpers_fp.h"
 
 #if CERTIFYX509_DEBUG
-const char       *debugFileName = "DebugFile.txt";
 
-/* C.13.2.1.	fileOpen() */
+const char* debugFileName = "DebugFile.txt";
 
-/* This exists to allow use of the safe version of fopen() with a MS runtime. */
-
-static FILE *
-fileOpen(
-	 const char       *fn,
-	 const char       *mode
-	 )
+//*** fileOpen()
+// This exists to allow use of the 'safe' version of fopen() with a MS runtime.
+static FILE* fileOpen(const char* fn, const char* mode)
 {
-    FILE        *f;
-#   if defined _MSC_VER
+    FILE*     f;
+#  if defined _MSC_VER
     if(fopen_s(&f, fn, mode) != 0)
-	f = NULL;
-#   else
+        f = NULL;
+#  else
     f = fopen(fn, mode);
-#   endif
+#  endif
     return f;
 }
-/* C.13.2.2.	DebugFileInit() */
-/* This function initializes the file containing the debug data with the time of the file
-   creation. */
-/* This function opens the file used to hold the debug data. */
-/* Return Value	Meaning */
-/* 0	success */
-/* != 0	error */
-int
-DebugFileInit(
-	      void
-	      )
+
+//*** DebugFileInit()
+// This function initializes the file containing the debug data with the time of the
+// file creation.
+//  Return Type: int
+//   0              success
+//  != 0            error
+int DebugFileInit(void)
 {
-    FILE	*f = NULL;
-    time_t	t = time(NULL);
-    //
-    // Get current date and time.
-#   if defined _MSC_VER
-    char                 timeString[100];
+    FILE*  f = NULL;
+    time_t t = time(NULL);
+//
+// Get current date and time.
+#  if defined _MSC_VER
+    char      timeString[100];
     ctime_s(timeString, (size_t)sizeof(timeString), &t);
-#   else
-    char                *timeString;
+#  else
+    char* timeString;
     timeString = ctime(&t);
-#   endif
+#  endif
     // Try to open the debug file
     f = fileOpen(debugFileName, "w");
     if(f)
-	{
-	    /* Initialize the contents with the time. */
-	    fprintf(f, "%s\n", timeString);
-	    fclose(f);
-	    return 0;
-	}
+    {
+        // Initialize the contents with the time.
+        fprintf(f, "%s\n", timeString);
+        fclose(f);
+        return 0;
+    }
     return -1;
 }
 
-/* C.13.2.3.	DebugDumpBuffer() */
-
-void
-DebugDumpBuffer(
-		int             size,
-		unsigned char   *buf,
-		const char      *identifier
-		)
+//*** DebugDumpBuffer()
+void DebugDumpBuffer(int size, unsigned char* buf, const char* identifier)
 {
-    int             i;
+    int i;
     //
-    FILE *f = fileOpen(debugFileName, "a");
+    FILE* f = fileOpen(debugFileName, "a");
     if(!f)
-	return;
+        return;
     if(identifier)
-	fprintf(f, "%s\n", identifier);
+        fprintf(f, "%s\n", identifier);
     if(buf)
-	{
-	    for(i = 0; i < size; i++)
-		{
-		    if(((i % 16) == 0) && (i))
-			fprintf(f, "\n");
-		    fprintf(f, " %02X", buf[i]);
-		}
-	    if((size % 16) != 0)
-		fprintf(f, "\n");
-	}
+    {
+        for(i = 0; i < size; i++)
+        {
+            if(((i % 16) == 0) && (i))
+                fprintf(f, "\n");
+            fprintf(f, " %02X", buf[i]);
+        }
+        if((size % 16) != 0)
+            fprintf(f, "\n");
+    }
     fclose(f);
 }
 
-#endif // CERTIFYX509_DEBUG
+#endif  // CERTIFYX509_DEBUG

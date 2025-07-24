@@ -100,13 +100,13 @@ void CommandAuditPreInstall_Init(void)
 //*** CommandAuditStartup()
 // This function clears the command audit digest on a TPM Reset.
 BOOL CommandAuditStartup(STARTUP_TYPE type  // IN: start up type
-			 )
+)
 {
     if((type != SU_RESTART) && (type != SU_RESUME))
-	{
-	    // Reset the digest size to initialize the digest
-	    gr.commandAuditDigest.t.size = 0;
-	}
+    {
+        // Reset the digest size to initialize the digest
+        gr.commandAuditDigest.t.size = 0;
+    }
     return TRUE;
 }
 
@@ -124,24 +124,24 @@ BOOL CommandAuditStartup(STARTUP_TYPE type  // IN: start up type
 //      TRUE(1)         command code audit status was changed
 //      FALSE(0)        command code audit status was not changed
 BOOL CommandAuditSet(TPM_CC commandCode  // IN: command code
-		     )
+)
 {
     COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
 
     // Only SET a bit if the corresponding command is implemented
     if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
-	{
-	    // Can't audit shutdown
-	    if(commandCode != TPM_CC_Shutdown)
-		{
-		    if(!TEST_BIT(commandIndex, gp.auditCommands))
-			{
-			    // Set bit
-			    SET_BIT(commandIndex, gp.auditCommands);
-			    return TRUE;
-			}
-		}
-	}
+    {
+        // Can't audit shutdown
+        if(commandCode != TPM_CC_Shutdown)
+        {
+            if(!TEST_BIT(commandIndex, gp.auditCommands))
+            {
+                // Set bit
+                SET_BIT(commandIndex, gp.auditCommands);
+                return TRUE;
+            }
+        }
+    }
     // No change
     return FALSE;
 }
@@ -158,25 +158,25 @@ BOOL CommandAuditSet(TPM_CC commandCode  // IN: command code
 //      TRUE(1)         command code audit status was changed
 //      FALSE(0)        command code audit status was not changed
 BOOL CommandAuditClear(TPM_CC commandCode  // IN: command code
-		       )
+)
 {
     COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
 
     // Do nothing if the command is not implemented
     if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
-	{
-	    // The bit associated with TPM_CC_SetCommandCodeAuditStatus() cannot be
-	    // cleared
-	    if(commandCode != TPM_CC_SetCommandCodeAuditStatus)
-		{
-		    if(TEST_BIT(commandIndex, gp.auditCommands))
-			{
-			    // Clear bit
-			    CLEAR_BIT(commandIndex, gp.auditCommands);
-			    return TRUE;
-			}
-		}
-	}
+    {
+        // The bit associated with TPM_CC_SetCommandCodeAuditStatus() cannot be
+        // cleared
+        if(commandCode != TPM_CC_SetCommandCodeAuditStatus)
+        {
+            if(TEST_BIT(commandIndex, gp.auditCommands))
+            {
+                // Clear bit
+                CLEAR_BIT(commandIndex, gp.auditCommands);
+                return TRUE;
+            }
+        }
+    }
     // No change
     return FALSE;
 }
@@ -187,7 +187,7 @@ BOOL CommandAuditClear(TPM_CC commandCode  // IN: command code
 //      TRUE(1)         command is audited
 //      FALSE(0)        command is not audited
 BOOL CommandAuditIsRequired(COMMAND_INDEX commandIndex  // IN: command index
-			    )
+)
 {
     // Check the bit map.  If the bit is SET, command audit is required
     return (TEST_BIT(commandIndex, gp.auditCommands));
@@ -202,9 +202,9 @@ BOOL CommandAuditIsRequired(COMMAND_INDEX commandIndex  // IN: command index
 //      NO          all the available command code has been returned
 TPMI_YES_NO
 CommandAuditCapGetCCList(TPM_CC   commandCode,  // IN: start command code
-			 UINT32   count,        // IN: count of returned TPM_CC
-			 TPML_CC* commandList   // OUT: list of TPM_CC
-			 )
+                         UINT32   count,        // IN: count of returned TPM_CC
+                         TPML_CC* commandList   // OUT: list of TPM_CC
+)
 {
     TPMI_YES_NO   more = NO;
     COMMAND_INDEX commandIndex;
@@ -214,37 +214,37 @@ CommandAuditCapGetCCList(TPM_CC   commandCode,  // IN: start command code
 
     // The maximum count of command we may return is MAX_CAP_CC
     if(count > MAX_CAP_CC)
-	count = MAX_CAP_CC;
+        count = MAX_CAP_CC;
 
     // Find the implemented command that has a command code that is the same or
     // higher than the input
     // Collect audit commands
     for(commandIndex = GetClosestCommandIndex(commandCode);
-	commandIndex != UNIMPLEMENTED_COMMAND_INDEX;
-	commandIndex = GetNextCommandIndex(commandIndex))
-	{
-	    if(CommandAuditIsRequired(commandIndex))
-		{
-		    if(commandList->count < count)
-			{
-			    // If we have not filled up the return list, add this command
-			    // code to its
-			    TPM_CC cc =
-				GET_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, commandIndex);
-			    if(IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V))
-				cc += (1 << 29);
-			    commandList->commandCodes[commandList->count] = cc;
-			    commandList->count++;
-			}
-		    else
-			{
-			    // If the return list is full but we still have command
-			    // available, report this and stop iterating
-			    more = YES;
-			    break;
-			}
-		}
-	}
+        commandIndex != UNIMPLEMENTED_COMMAND_INDEX;
+        commandIndex = GetNextCommandIndex(commandIndex))
+    {
+        if(CommandAuditIsRequired(commandIndex))
+        {
+            if(commandList->count < count)
+            {
+                // If we have not filled up the return list, add this command
+                // code to its
+                TPM_CC cc =
+                    GET_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, commandIndex);
+                if(IS_ATTRIBUTE(s_ccAttr[commandIndex], TPMA_CC, V))
+                    cc += (1 << 29);
+                commandList->commandCodes[commandList->count] = cc;
+                commandList->count++;
+            }
+            else
+            {
+                // If the return list is full but we still have command
+                // available, report this and stop iterating
+                more = YES;
+                break;
+            }
+        }
+    }
 
     return more;
 }
@@ -255,9 +255,9 @@ BOOL CommandAuditCapGetOneCC(TPM_CC commandCode)  // IN: command code
 {
     COMMAND_INDEX commandIndex = CommandCodeToCommandIndex(commandCode);
     if(commandIndex != UNIMPLEMENTED_COMMAND_INDEX)
-	{
-	    return CommandAuditIsRequired(commandIndex);
-	}
+    {
+        return CommandAuditIsRequired(commandIndex);
+    }
     return FALSE;
 }
 
@@ -267,7 +267,7 @@ BOOL CommandAuditCapGetOneCC(TPM_CC commandCode)  // IN: command code
 // added to a hash. This operates as if all the audited command codes were
 // concatenated and then hashed.
 void CommandAuditGetDigest(TPM2B_DIGEST* digest  // OUT: command digest
-			   )
+)
 {
     TPM_CC        commandCode;
     COMMAND_INDEX commandIndex;
@@ -278,13 +278,13 @@ void CommandAuditGetDigest(TPM2B_DIGEST* digest  // OUT: command digest
 
     // Add command code
     for(commandIndex = 0; commandIndex < COMMAND_COUNT; commandIndex++)
-	{
-	    if(CommandAuditIsRequired(commandIndex))
-		{
-		    commandCode = GetCommandCode(commandIndex);
-		    CryptDigestUpdateInt(&hashState, sizeof(commandCode), commandCode);
-		}
-	}
+    {
+        if(CommandAuditIsRequired(commandIndex))
+        {
+            commandCode = GetCommandCode(commandIndex);
+            CryptDigestUpdateInt(&hashState, sizeof(commandCode), commandCode);
+        }
+    }
 
     // Complete hash
     CryptHashEnd2B(&hashState, &digest->b);
