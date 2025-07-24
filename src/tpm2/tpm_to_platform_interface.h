@@ -126,14 +126,14 @@ LIB_EXPORT int _plat__TimerWasStopped(void);
 // values are defined here to insulate them from spec changes and to avoid
 // needing visibility to the doc-generated structure headers.
 typedef enum _plat__ClockAdjustStep
-    {
-	PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER = -3,
-	PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER = -2,
-	PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER   = -1,
-	PLAT_TPM_CLOCK_ADJUST_FINE_FASTER   = 1,
-	PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER = 2,
-	PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER = 3
-    } _plat__ClockAdjustStep;
+{
+    PLAT_TPM_CLOCK_ADJUST_COARSE_SLOWER = -3,
+    PLAT_TPM_CLOCK_ADJUST_MEDIUM_SLOWER = -2,
+    PLAT_TPM_CLOCK_ADJUST_FINE_SLOWER   = -1,
+    PLAT_TPM_CLOCK_ADJUST_FINE_FASTER   = 1,
+    PLAT_TPM_CLOCK_ADJUST_MEDIUM_FASTER = 2,
+    PLAT_TPM_CLOCK_ADJUST_COARSE_FASTER = 3
+} _plat__ClockAdjustStep;
 LIB_EXPORT void _plat__ClockRateAdjust(_plat__ClockAdjustStep adjustment);
 
 					// libtpms: added begin
@@ -159,19 +159,19 @@ void DebugDumpBuffer(int size, unsigned char* buf, const char* identifier);
 #endif					// libtpms: added
 #endif  // CERTIFYX509_DEBUG
 
-	//** From Entropy.c
+//** From Entropy.c
 
-	//*** _plat__GetEntropy()
-	// This function is used to get available hardware entropy. In a hardware
-	// implementation of this function, there would be no call to the system
-	// to get entropy.
-	//  Return Type: int32_t
-	//  < 0        hardware failure of the entropy generator, this is sticky
-	// >= 0        the returned amount of entropy (bytes)
-	//
+//*** _plat__GetEntropy()
+// This function is used to get available hardware entropy. In a hardware
+// implementation of this function, there would be no call to the system
+// to get entropy.
+//  Return Type: int32_t
+//  < 0        hardware failure of the entropy generator, this is sticky
+// >= 0        the returned amount of entropy (bytes)
+//
 LIB_EXPORT int32_t _plat__GetEntropy(unsigned char* entropy,  // output buffer
-				     uint32_t       amount    // amount requested
-				     );
+                                     uint32_t       amount    // amount requested
+);
 
 //** From LocalityPlat.c
 
@@ -198,17 +198,17 @@ LIB_EXPORT unsigned char _plat__LocalityGet(void);
 //      >0          if recoverable error
 //      <0          if unrecoverable error
 LIB_EXPORT int _plat__NVEnable(
-			       void*  platParameter,  // platform specific parameter
-			       size_t paramSize       // size of parameter. If size == 0, then
-			       // parameter is a sizeof(void*) scalar and should
-			       // be cast to an integer (intptr_t), not dereferenced.
-			       );
+    void*  platParameter,  // platform specific parameter
+    size_t paramSize       // size of parameter. If size == 0, then
+                           // parameter is a sizeof(void*) scalar and should
+                           // be cast to an integer (intptr_t), not dereferenced.
+);
 
 					// libtpms: added begin
 LIB_EXPORT int
 _plat__NVEnable_NVChipFile(
-		void            *platParameter  // IN: platform specific parameters
-		);
+    void            *platParameter  // IN: platform specific parameters
+);
 					// libtpms: added end
 
 //***_plat__GetNvReadyState()
@@ -228,9 +228,9 @@ LIB_EXPORT int _plat__GetNvReadyState(void);
 //      TRUE(1)         offset and size is within available NV size
 //      FALSE(0)        otherwise; also trigger failure mode
 LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
-				   unsigned int size,  // IN: size of bytes to read
-				   void*        data   // OUT: data buffer
-				   );
+                                   unsigned int size,  // IN: size of bytes to read
+                                   void*        data   // OUT: data buffer
+);
 
 //*** _plat__NvGetChangedStatus()
 // This function checks to see if the NV is different from the test value. This is
@@ -243,10 +243,10 @@ LIB_EXPORT int _plat__NvMemoryRead(unsigned int startOffset,  // IN: read start
 #define NV_IS_SAME          (0)
 #define NV_INVALID_LOCATION (-1)
 LIB_EXPORT int _plat__NvGetChangedStatus(
-					 unsigned int startOffset,  // IN: read start
-					 unsigned int size,         // IN: size of bytes to read
-					 void*        data          // IN: data buffer
-					 );
+    unsigned int startOffset,  // IN: read start
+    unsigned int size,         // IN: size of bytes to read
+    void*        data          // IN: data buffer
+);
 
 //***_plat__NvMemoryWrite()
 // This function is used to update NV memory. The "write" is to a memory copy of
@@ -259,25 +259,25 @@ LIB_EXPORT int _plat__NvGetChangedStatus(
 //      TRUE(1)         offset and size is within available NV size
 //      FALSE(0)        otherwise; also trigger failure mode
 LIB_EXPORT int _plat__NvMemoryWrite(unsigned int startOffset,  // IN: write start
-				    unsigned int size,  // IN: size of bytes to write
-				    void*        data   // OUT: data buffer
-				    );
+                                    unsigned int size,  // IN: size of bytes to write
+                                    void*        data   // OUT: data buffer
+);
 
 //***_plat__NvMemoryClear()
 // Function is used to set a range of NV memory bytes to an implementation-dependent
 // value. The value represents the erase state of the memory.
 LIB_EXPORT int _plat__NvMemoryClear(unsigned int startOffset,  // IN: clear start
-				    unsigned int size  // IN: number of bytes to clear
-				    );
+                                    unsigned int size  // IN: number of bytes to clear
+);
 
 //***_plat__NvMemoryMove()
 // Function: Move a chunk of NV memory from source to destination
 //      This function should ensure that if there overlap, the original data is
 //      copied before it is written
 LIB_EXPORT int _plat__NvMemoryMove(unsigned int sourceOffset,  // IN: source offset
-				   unsigned int destOffset,  // IN: destination offset
-				   unsigned int size  // IN: size of data being moved
-				   );
+                                   unsigned int destOffset,  // IN: destination offset
+                                   unsigned int size  // IN: size of data being moved
+);
 
 //***_plat__NvCommit()
 // This function writes the local copy of NV to NV for permanent store. It will write
@@ -310,7 +310,7 @@ LIB_EXPORT int _plat__ACT_GetImplemented(uint32_t act);
 // timers keep running, the returned value can get stale immediately. The actual count
 // value will be no greater than the returned value.
 LIB_EXPORT uint32_t _plat__ACT_GetRemaining(uint32_t act  //IN: the ACT selector
-					    );
+);
 
 //*** _plat__ACT_GetSignaled()
 LIB_EXPORT int _plat__ACT_GetSignaled(uint32_t act  //IN: number of ACT to check
@@ -325,8 +325,8 @@ LIB_EXPORT void _plat__ACT_SetSignaled(uint32_t act, int on);
 // is TRUE, then the ACT signaled state is SET and if 'newValue' is 0, nothing
 // is posted.
 LIB_EXPORT int _plat__ACT_UpdateCounter(uint32_t act,      // IN: ACT to update
-					uint32_t newValue  // IN: the value to post
-					);
+                                        uint32_t newValue  // IN: the value to post
+);
 
 //***_plat__ACT_EnableTicks()
 // This enables and disables the processing of the once-per-second ticks. This should
@@ -340,20 +340,20 @@ LIB_EXPORT int _plat__ACT_Initialize(void);
 
 #endif  // ACT_SUPPORT
 
-	//** From PowerPlat.c
+//** From PowerPlat.c
 
-	//*** _plat__WasPowerLost()
-	// Test whether power was lost before a _TPM_Init.
-	//
-	// This function will clear the "hardware" indication of power loss before return.
-	// This means that there can only be one spot in the TPM code where this value
-	// gets read. This method is used here as it is the most difficult to manage in the
-	// TPM code and, if the hardware actually works this way, it is hard to make it
-	// look like anything else. So, the burden is placed on the TPM code rather than the
-	// platform code
-	//  Return Type: int
-	//      TRUE(1)         power was lost
-	//      FALSE(0)        power was not lost
+//*** _plat__WasPowerLost()
+// Test whether power was lost before a _TPM_Init.
+//
+// This function will clear the "hardware" indication of power loss before return.
+// This means that there can only be one spot in the TPM code where this value
+// gets read. This method is used here as it is the most difficult to manage in the
+// TPM code and, if the hardware actually works this way, it is hard to make it
+// look like anything else. So, the burden is placed on the TPM code rather than the
+// platform code
+//  Return Type: int
+//      TRUE(1)         power was lost
+//      FALSE(0)        power was not lost
 LIB_EXPORT int _plat__WasPowerLost(void);
 
 //** From PPPlat.c
@@ -383,9 +383,9 @@ LIB_EXPORT NORETURN void _plat__Fail(void);
 // 0 = RESERVED, do not use
 // 1 = the VENDOR_PERMANENT_AUTH_HANDLE authorization value for this device
 LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
-				     uint32_t       bSize,  // size of the buffer
-				     unsigned char* b       // output buffer
-				     );
+                                     uint32_t       bSize,  // size of the buffer
+                                     unsigned char* b       // output buffer
+);
 #endif
 
 //** _plat__GetPlatformManufactureData
@@ -397,11 +397,11 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 // manufacture and CLEAR.  The buffer will contain the last value provided
 // to the Core library.
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
-						  uint32_t bufferSize);
+                                                  uint32_t bufferSize);
 
 // return the 4 character Manufacturer Capability code.  This
 // should come from the platform library since that is provided by the manufacturer
-LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);
+LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);	// libtpms changed
 
 // return the 4 character VendorStrings for Capabilities.
 // Index is ONE-BASED, and may be in the range [1,4] inclusive.
@@ -411,11 +411,11 @@ LIB_EXPORT uint32_t _plat__GetVendorCapabilityCode(int index);
 
 // return the most-significant 32-bits of the TPM Firmware Version reported by
 // getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);	// libtpms changed
 
 // return the least-significant 32-bits of the TPM Firmware Version reported by
 // getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);	// libtpms changed
 
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
@@ -432,11 +432,11 @@ LIB_EXPORT uint16_t _plat__GetTpmFirmwareMaxSvn(void);
 //  0           success
 //  != 0        error
 LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(
-					      uint16_t  svn,              // IN: specified SVN
-					      uint16_t  secret_buf_size,  // IN: size of secret buffer
-					      uint8_t*  secret_buf,       // OUT: secret buffer
-					      uint16_t* secret_size       // OUT: secret buffer
-					      );
+    uint16_t  svn,              // IN: specified SVN
+    uint16_t  secret_buf_size,  // IN: size of secret buffer
+    uint8_t*  secret_buf,       // OUT: secret buffer
+    uint16_t* secret_size       // OUT: secret buffer
+);
 #endif  // SVN_LIMITED_SUPPORT
 
 #if FW_LIMITED_SUPPORT
@@ -446,14 +446,14 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(
 //  0           success
 //  != 0        error
 LIB_EXPORT int _plat__GetTpmFirmwareSecret(
-					   uint16_t  secret_buf_size,  // IN: size of secret buffer
-					   uint8_t*  secret_buf,       // OUT: secret buffer
-					   uint16_t* secret_size       // OUT: secret buffer
-					   );
+    uint16_t  secret_buf_size,  // IN: size of secret buffer
+    uint8_t*  secret_buf,       // OUT: secret buffer
+    uint16_t* secret_size       // OUT: secret buffer
+);
 #endif  // FW_LIMITED_SUPPORT
 
-	// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
-LIB_EXPORT uint32_t _plat__GetTpmType(void);
+// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
+LIB_EXPORT uint32_t _plat__GetTpmType(void);	// libtpms changed
 
 // platform PCR initialization functions
 #include "platform_pcr_fp.h"

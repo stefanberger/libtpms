@@ -71,8 +71,8 @@
 // digestSize for the nameAlg. It will then pad with zeros to the size of the
 // digest.
 BOOL AdjustAuthSize(TPM2B_AUTH*   auth,    // IN/OUT: value to adjust
-		    TPMI_ALG_HASH nameAlg  // IN:
-		    );
+                    TPMI_ALG_HASH nameAlg  // IN:
+);
 
 //*** AreAttributesForParent()
 // This function is called by create, load, and import functions.
@@ -83,7 +83,7 @@ BOOL AdjustAuthSize(TPM2B_AUTH*   auth,    // IN/OUT: value to adjust
 //      TRUE(1)         properties are those of a parent
 //      FALSE(0)        properties are not those of a parent
 BOOL ObjectIsParent(OBJECT* parentObject  // IN: parent handle
-		    );
+);
 
 //*** CreateChecks()
 // Attribute checks that are unique to creation.
@@ -99,9 +99,9 @@ BOOL ObjectIsParent(OBJECT* parentObject  // IN: parent handle
 //      other                   returns from PublicAttributesValidation()
 TPM_RC
 CreateChecks(OBJECT*           parentObject,
-	     TPMI_RH_HIERARCHY primaryHierarchy,
-	     TPMT_PUBLIC*      publicArea,
-	     UINT16            sensitiveDataSize);
+             TPMI_RH_HIERARCHY primaryHierarchy,
+             TPMT_PUBLIC*      publicArea,
+             UINT16            sensitiveDataSize);
 
 //*** SchemeChecks
 // This function is called by TPM2_LoadExternal() and PublicAttributesValidation().
@@ -119,8 +119,8 @@ CreateChecks(OBJECT*           parentObject,
 //                          TPM_ALG_NULL
 TPM_RC
 SchemeChecks(OBJECT*      parentObject,  // IN: parent (null if primary seed)
-	     TPMT_PUBLIC* publicArea     // IN: public area of the object
-	     );
+             TPMT_PUBLIC* publicArea     // IN: public area of the object
+);
 
 //*** PublicAttributesValidation()
 // This function validates the values in the public area of an object.
@@ -144,29 +144,29 @@ SchemeChecks(OBJECT*      parentObject,  // IN: parent (null if primary seed)
 //   other                  returns from SchemeChecks()
 TPM_RC
 PublicAttributesValidation(
-			   // IN: input parent object (if ordinary or derived object; NULL otherwise)
-			   OBJECT* parentObject,
-			   // IN: hierarchy (if primary object; 0 otherwise)
-			   TPMI_RH_HIERARCHY primaryHierarchy,
-			   // IN: public area of the object
-			   TPMT_PUBLIC* publicArea);
+    // IN: input parent object (if ordinary or derived object; NULL otherwise)
+    OBJECT* parentObject,
+    // IN: hierarchy (if primary object; 0 otherwise)
+    TPMI_RH_HIERARCHY primaryHierarchy,
+    // IN: public area of the object
+    TPMT_PUBLIC* publicArea);
 
 //*** FillInCreationData()
 // Fill in creation data for an object.
 //  Return Type: void
 void FillInCreationData(
-			TPMI_DH_OBJECT       parentHandle,   // IN: handle of parent
-			TPMI_ALG_HASH        nameHashAlg,    // IN: name hash algorithm
-			TPML_PCR_SELECTION*  creationPCR,    // IN: PCR selection
-			TPM2B_DATA*          outsideData,    // IN: outside data
-			TPM2B_CREATION_DATA* outCreation,    // OUT: creation data for output
-			TPM2B_DIGEST*        creationDigest  // OUT: creation digest
-			);
+    TPMI_DH_OBJECT       parentHandle,   // IN: handle of parent
+    TPMI_ALG_HASH        nameHashAlg,    // IN: name hash algorithm
+    TPML_PCR_SELECTION*  creationPCR,    // IN: PCR selection
+    TPM2B_DATA*          outsideData,    // IN: outside data
+    TPM2B_CREATION_DATA* outCreation,    // OUT: creation data for output
+    TPM2B_DIGEST*        creationDigest  // OUT: creation digest
+);
 
 //*** GetSeedForKDF()
 // Get a seed for KDF.  The KDF for encryption and HMAC key use the same seed.
 const TPM2B* GetSeedForKDF(OBJECT* protector  // IN: the protector handle
-			   );
+);
 
 //*** ProduceOuterWrap()
 // This function produce outer wrap for a buffer containing the sensitive data.
@@ -181,21 +181,21 @@ const TPM2B* GetSeedForKDF(OBJECT* protector  // IN: the protector handle
 //  d) returns the total size of blob with outer wrap.
 UINT16
 ProduceOuterWrap(OBJECT* protector,   // IN: The handle of the object that provides
-		 //     protection.  For object, it is parent
-		 //     handle. For credential, it is the handle
-		 //     of encrypt object.
-		 TPM2B*     name,     // IN: the name of the object
-		 TPM_ALG_ID hashAlg,  // IN: hash algorithm for outer wrap
-		 TPM2B*     seed,     // IN: an external seed may be provided for
-		 //     duplication blob. For non duplication
-		 //     blob, this parameter should be NULL
-		 BOOL   useIV,        // IN: indicate if an IV is used
-		 UINT16 dataSize,     // IN: the size of sensitive data, excluding the
-		 //     leading integrity buffer size or the
-		 //     optional iv size
-		 BYTE* outerBuffer    // IN/OUT: outer buffer with sensitive data in
-		 //     it
-		 );
+                                      //     protection.  For object, it is parent
+                                      //     handle. For credential, it is the handle
+                                      //     of encrypt object.
+                 TPM2B*     name,     // IN: the name of the object
+                 TPM_ALG_ID hashAlg,  // IN: hash algorithm for outer wrap
+                 TPM2B*     seed,     // IN: an external seed may be provided for
+                                      //     duplication blob. For non duplication
+                                      //     blob, this parameter should be NULL
+                 BOOL   useIV,        // IN: indicate if an IV is used
+                 UINT16 dataSize,     // IN: the size of sensitive data, excluding the
+                                      //     leading integrity buffer size or the
+                                      //     optional iv size
+                 BYTE* outerBuffer    // IN/OUT: outer buffer with sensitive data in
+                                      //     it
+);
 
 //*** UnwrapOuter()
 // This function remove the outer wrap of a blob containing sensitive data
@@ -211,20 +211,20 @@ ProduceOuterWrap(OBJECT* protector,   // IN: The handle of the object that provi
 //                               algorithm block size
 TPM_RC
 UnwrapOuter(OBJECT* protector,   // IN: The object that provides
-	    //     protection.  For object, it is parent
-	    //     handle. For credential, it is the
-	    //     encrypt object.
-	    TPM2B*     name,     // IN: the name of the object
-	    TPM_ALG_ID hashAlg,  // IN: hash algorithm for outer wrap
-	    TPM2B*     seed,     // IN: an external seed may be provided for
-	    //     duplication blob. For non duplication
-	    //     blob, this parameter should be NULL.
-	    BOOL   useIV,        // IN: indicates if an IV is used
-	    UINT16 dataSize,     // IN: size of sensitive data in outerBuffer,
-	    //     including the leading integrity buffer
-	    //     size, and an optional iv area
-	    BYTE* outerBuffer    // IN/OUT: sensitive data
-	    );
+                                 //     protection.  For object, it is parent
+                                 //     handle. For credential, it is the
+                                 //     encrypt object.
+            TPM2B*     name,     // IN: the name of the object
+            TPM_ALG_ID hashAlg,  // IN: hash algorithm for outer wrap
+            TPM2B*     seed,     // IN: an external seed may be provided for
+                                 //     duplication blob. For non duplication
+                                 //     blob, this parameter should be NULL.
+            BOOL   useIV,        // IN: indicates if an IV is used
+            UINT16 dataSize,     // IN: size of sensitive data in outerBuffer,
+                                 //     including the leading integrity buffer
+                                 //     size, and an optional iv area
+            BYTE* outerBuffer    // IN/OUT: sensitive data
+);
 
 //*** SensitiveToPrivate()
 // This function prepare the private blob for off the chip storage
@@ -233,15 +233,15 @@ UnwrapOuter(OBJECT* protector,   // IN: The object that provides
 //  b) applies encryption to the sensitive area; and
 //  c) applies outer integrity computation.
 void SensitiveToPrivate(
-			TPMT_SENSITIVE* sensitive,  // IN: sensitive structure
-			TPM2B_NAME*     name,       // IN: the name of the object
-			OBJECT*         parent,     // IN: The parent object
-			TPM_ALG_ID      nameAlg,    // IN: hash algorithm in public area.  This
-			//     parameter is used when parentHandle is
-			//     NULL, in which case the object is
-			//     temporary.
-			TPM2B_PRIVATE* outPrivate   // OUT: output private structure
-			);
+    TPMT_SENSITIVE* sensitive,  // IN: sensitive structure
+    TPM2B_NAME*     name,       // IN: the name of the object
+    OBJECT*         parent,     // IN: The parent object
+    TPM_ALG_ID      nameAlg,    // IN: hash algorithm in public area.  This
+                                //     parameter is used when parentHandle is
+                                //     NULL, in which case the object is
+                                //     temporary.
+    TPM2B_PRIVATE* outPrivate   // OUT: output private structure
+);
 
 //*** PrivateToSensitive()
 // Unwrap a input private area.  Check the integrity, decrypt and retrieve data
@@ -259,18 +259,18 @@ void SensitiveToPrivate(
 //                              size
 TPM_RC
 PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
-		   TPM2B*     name,       // IN: the name of the object
-		   OBJECT*    parent,     // IN: parent object
-		   TPM_ALG_ID nameAlg,    // IN: hash algorithm in public area.  It is
-		   //     passed separately because we only pass
-		   //     name, rather than the whole public area
-		   //     of the object.  This parameter is used in
-		   //     the following two cases: 1. primary
-		   //     objects. 2. duplication blob with inner
-		   //     wrap.  In other cases, this parameter
-		   //     will be ignored
-		   TPMT_SENSITIVE* sensitive  // OUT: sensitive structure
-		   );
+                   TPM2B*     name,       // IN: the name of the object
+                   OBJECT*    parent,     // IN: parent object
+                   TPM_ALG_ID nameAlg,    // IN: hash algorithm in public area.  It is
+                   //     passed separately because we only pass
+                   //     name, rather than the whole public area
+                   //     of the object.  This parameter is used in
+                   //     the following two cases: 1. primary
+                   //     objects. 2. duplication blob with inner
+                   //     wrap.  In other cases, this parameter
+                   //     will be ignored
+                   TPMT_SENSITIVE* sensitive  // OUT: sensitive structure
+);
 
 //*** SensitiveToDuplicate()
 // This function prepare the duplication blob from the sensitive area.
@@ -279,26 +279,26 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
 //  b) applies inner wrap to the sensitive area if required; and
 //  c) applies outer wrap if required.
 void SensitiveToDuplicate(
-			  TPMT_SENSITIVE* sensitive,    // IN: sensitive structure
-			  TPM2B*          name,         // IN: the name of the object
-			  OBJECT*         parent,       // IN: The new parent object
-			  TPM_ALG_ID      nameAlg,      // IN: hash algorithm in public area. It
-			  //     is passed separately because we
-			  //     only pass name, rather than the
-			  //     whole public area of the object.
-			  TPM2B* seed,                  // IN: the external seed. If external
-			  //     seed is provided with size of 0,
-			  //     no outer wrap should be applied
-			  //     to duplication blob.
-			  TPMT_SYM_DEF_OBJECT* symDef,  // IN: Symmetric key definition. If the
-			  //     symmetric key algorithm is NULL,
-			  //     no inner wrap should be applied.
-			  TPM2B_DATA* innerSymKey,      // IN/OUT: a symmetric key may be
-			  //     provided to encrypt the inner
-			  //     wrap of a duplication blob. May
-			  //     be generated here if needed.
-			  TPM2B_PRIVATE* outPrivate     // OUT: output private structure
-			  );
+    TPMT_SENSITIVE* sensitive,    // IN: sensitive structure
+    TPM2B*          name,         // IN: the name of the object
+    OBJECT*         parent,       // IN: The new parent object
+    TPM_ALG_ID      nameAlg,      // IN: hash algorithm in public area. It
+                                  //     is passed separately because we
+                                  //     only pass name, rather than the
+                                  //     whole public area of the object.
+    TPM2B* seed,                  // IN: the external seed. If external
+                                  //     seed is provided with size of 0,
+                                  //     no outer wrap should be applied
+                                  //     to duplication blob.
+    TPMT_SYM_DEF_OBJECT* symDef,  // IN: Symmetric key definition. If the
+                                  //     symmetric key algorithm is NULL,
+                                  //     no inner wrap should be applied.
+    TPM2B_DATA* innerSymKey,      // IN/OUT: a symmetric key may be
+                                  //     provided to encrypt the inner
+                                  //     wrap of a duplication blob. May
+                                  //     be generated here if needed.
+    TPM2B_PRIVATE* outPrivate     // OUT: output private structure
+);
 
 //*** DuplicateToSensitive()
 // Unwrap a duplication blob.  Check the integrity, decrypt and retrieve data
@@ -314,22 +314,22 @@ void SensitiveToDuplicate(
 //      TPM_RC_SIZE              unmarshaling sensitive data from 'inPrivate' failed
 TPM_RC
 DuplicateToSensitive(
-		     TPM2B*     inPrivate,         // IN: input private structure
-		     TPM2B*     name,              // IN: the name of the object
-		     OBJECT*    parent,            // IN: the parent
-		     TPM_ALG_ID nameAlg,           // IN: hash algorithm in public area.
-		     TPM2B*     seed,              // IN: an external seed may be provided.
-		     //     If external seed is provided with
-		     //     size of 0, no outer wrap is
-		     //     applied
-		     TPMT_SYM_DEF_OBJECT* symDef,  // IN: Symmetric key definition. If the
-		     //     symmetric key algorithm is NULL,
-		     //     no inner wrap is applied
-		     TPM2B* innerSymKey,           // IN: a symmetric key may be provided
-		     //     to decrypt the inner wrap of a
-		     //     duplication blob.
-		     TPMT_SENSITIVE* sensitive     // OUT: sensitive structure
-		     );
+    TPM2B*     inPrivate,         // IN: input private structure
+    TPM2B*     name,              // IN: the name of the object
+    OBJECT*    parent,            // IN: the parent
+    TPM_ALG_ID nameAlg,           // IN: hash algorithm in public area.
+    TPM2B*     seed,              // IN: an external seed may be provided.
+                                  //     If external seed is provided with
+                                  //     size of 0, no outer wrap is
+                                  //     applied
+    TPMT_SYM_DEF_OBJECT* symDef,  // IN: Symmetric key definition. If the
+                                  //     symmetric key algorithm is NULL,
+                                  //     no inner wrap is applied
+    TPM2B* innerSymKey,           // IN: a symmetric key may be provided
+                                  //     to decrypt the inner wrap of a
+                                  //     duplication blob.
+    TPMT_SENSITIVE* sensitive     // OUT: sensitive structure
+);
 
 //*** SecretToCredential()
 // This function prepare the credential blob from a secret (a TPM2B_DIGEST)
@@ -339,11 +339,11 @@ DuplicateToSensitive(
 //  c) computes integrity HMAC and append to the beginning of the buffer; and
 //  d) sets the total size of TPM2B_ID_OBJECT buffer.
 void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
-			TPM2B*           name,        // IN: the name of the object
-			TPM2B*           seed,        // IN: an external seed.
-			OBJECT*          protector,   // IN: the protector
-			TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
-			);
+                        TPM2B*           name,        // IN: the name of the object
+                        TPM2B*           seed,        // IN: an external seed.
+                        OBJECT*          protector,   // IN: the protector
+                        TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
+);
 
 //*** CredentialToSecret()
 // Unwrap a credential.  Check the integrity, decrypt and retrieve data
@@ -361,11 +361,11 @@ void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
 //                               block size
 TPM_RC
 CredentialToSecret(TPM2B*        inIDObject,  // IN: input credential blob
-		   TPM2B*        name,        // IN: the name of the object
-		   TPM2B*        seed,        // IN: an external seed.
-		   OBJECT*       protector,   // IN: the protector
-		   TPM2B_DIGEST* secret       // OUT: secret information
-		   );
+                   TPM2B*        name,        // IN: the name of the object
+                   TPM2B*        seed,        // IN: an external seed.
+                   OBJECT*       protector,   // IN: the protector
+                   TPM2B_DIGEST* secret       // OUT: secret information
+);
 
 //*** MemoryRemoveTrailingZeros()
 // This function is used to adjust the length of an authorization value.
@@ -375,16 +375,16 @@ CredentialToSecret(TPM2B*        inIDObject,  // IN: input credential blob
 // This function returns the number of non-zero octets in the buffer.
 UINT16
 MemoryRemoveTrailingZeros(TPM2B_AUTH* auth  // IN/OUT: value to adjust
-			  );
+);
 
 //*** SetLabelAndContext()
 // This function sets the label and context for a derived key. It is possible
 // that 'label' or 'context' can end up being an Empty Buffer.
 TPM_RC
 SetLabelAndContext(TPMS_DERIVE* labelContext,       // IN/OUT: the recovered label and
-		   //      context
-		   TPM2B_SENSITIVE_DATA* sensitive  // IN: the sensitive data
-		   );
+                                                    //      context
+                   TPM2B_SENSITIVE_DATA* sensitive  // IN: the sensitive data
+);
 
 //*** UnmarshalToPublic()
 // Support function to unmarshal the template. This is used because the
@@ -396,10 +396,10 @@ SetLabelAndContext(TPMS_DERIVE* labelContext,       // IN/OUT: the recovered lab
 // a 'label' and 'context' that are unmarshaled into 'derive'.
 TPM_RC
 UnmarshalToPublic(TPMT_PUBLIC*    tOut,  // OUT: output
-		  TPM2B_TEMPLATE* tIn,   // IN:
-		  BOOL derivation,       // IN: indicates if this is for a derivation
-		  TPMS_DERIVE* labelContext  // OUT: label and context if derivation
-		  );
+                  TPM2B_TEMPLATE* tIn,   // IN:
+                  BOOL derivation,       // IN: indicates if this is for a derivation
+                  TPMS_DERIVE* labelContext  // OUT: label and context if derivation
+);
 
 #if 0 /* libtpms added */
 //*** ObjectSetExternal()

@@ -63,7 +63,7 @@
 // for Ecc functions.
 #include "Tpm.h"
 #include "TpmMath_Util_fp.h"
-#include "TpmEcc_Util_fp.h"
+#include "TpmEcc_Util_fp.h"		// libtpms added
 
 #if ALG_ECC
 
@@ -82,18 +82,18 @@
 // differently, then the caller must perform the correct validation before/after
 // this function.
 LIB_EXPORT Crypt_Point* TpmEcc_PointFrom2B(
-					   Crypt_Point*    ecP,  // OUT: the preallocated point structure
-					   TPMS_ECC_POINT* p     // IN: the number to convert
-					   )
+    Crypt_Point*    ecP,  // OUT: the preallocated point structure
+    TPMS_ECC_POINT* p     // IN: the number to convert
+)
 {
-   if(p == NULL)
-	return NULL;
+    if(p == NULL)
+        return NULL;
 
     if(ecP != NULL)
-	{
-	    return ExtEcc_PointFromBytes(
-					 ecP, p->x.t.buffer, p->x.t.size, p->y.t.buffer, p->y.t.size);
-	}
+    {
+        return ExtEcc_PointFromBytes(
+            ecP, p->x.t.buffer, p->x.t.size, p->y.t.buffer, p->y.t.size);
+    }
     return ecP;  // will return NULL if ecP is NULL.
 }
 
@@ -104,10 +104,10 @@ LIB_EXPORT Crypt_Point* TpmEcc_PointFrom2B(
 // The presumption is that the TPMS_ECC_POINT is large enough to hold 2 TPM2B
 // values, each as large as a MAX_ECC_PARAMETER_BYTES
 LIB_EXPORT BOOL TpmEcc_PointTo2B(
-				 TPMS_ECC_POINT*       p,    // OUT: the converted 2B structure
-				 const Crypt_Point*    ecP,  // IN: the values to be converted
-				 const Crypt_EccCurve* E     // IN: curve descriptor for the point
-				 )
+    TPMS_ECC_POINT*       p,    // OUT: the converted 2B structure
+    const Crypt_Point*    ecP,  // IN: the values to be converted
+    const Crypt_EccCurve* E     // IN: curve descriptor for the point
+)
 {
     pAssert(p && ecP && E);
     TPM_ECC_CURVE curveId = ExtEcc_CurveGetCurveId(E);
@@ -117,7 +117,7 @@ LIB_EXPORT BOOL TpmEcc_PointTo2B(
     p->x.t.size = size;
     p->y.t.size = size;
     return ExtEcc_PointToBytes(
-			       ecP, p->x.t.buffer, &p->x.t.size, p->y.t.buffer, &p->y.t.size);
+        ecP, p->x.t.buffer, &p->x.t.size, p->y.t.buffer, &p->y.t.size);
 }
 
 #endif  // ALG_ECC

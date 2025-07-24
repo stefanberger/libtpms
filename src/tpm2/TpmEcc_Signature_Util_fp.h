@@ -76,12 +76,12 @@
 //      TPM_RC_NO_RESULT        the result of the operation was zero or 'r' (mod 'n')
 //                              is zero
 TPM_RC TpmEcc_SchnorrCalculateS(
-				Crypt_Int*       bnS,  // OUT: 's' component of the signature
-				const Crypt_Int* bnK,  // IN: a random value
-				Crypt_Int*       bnR,  // IN: the signature 'r' value
-				const Crypt_Int* bnD,  // IN: the private key
-				const Crypt_Int* bnN   // IN: the order of the curve
-				);
+    Crypt_Int*       bnS,  // OUT: 's' component of the signature
+    const Crypt_Int* bnK,  // IN: a random value
+    Crypt_Int*       bnR,  // IN: the signature 'r' value
+    const Crypt_Int* bnD,  // IN: the private key
+    const Crypt_Int* bnN   // IN: the order of the curve
+);
 
 #endif  // ALG_ECC
 #endif  // _TPMECC_SIGNATURE_UTIL_FP_H_

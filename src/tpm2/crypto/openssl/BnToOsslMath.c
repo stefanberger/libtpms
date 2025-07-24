@@ -105,25 +105,25 @@ BOOL OsslToTpmBn(bigNum bn, const BIGNUM* osslBn)	// libtpms: added 'const'
     int buffer_len;				// libtpms added
 
     if(bn != NULL)
-	{
+    {
 #if 1		// libtpms: added begin
-	    int num_bytes;
+        int num_bytes;
 
-	    num_bytes = BN_num_bytes(osslBn);
-	    GOTO_ERROR_UNLESS(num_bytes >= 0 && sizeof(buffer) >= (size_t)num_bytes);
-	    buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
-	    BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
+        num_bytes = BN_num_bytes(osslBn);
+        GOTO_ERROR_UNLESS(num_bytes >= 0 && sizeof(buffer) >= (size_t)num_bytes);
+        buffer_len = BN_bn2bin(osslBn, buffer);	/* ossl to bin */
+        BnFromBytes(bn, buffer, buffer_len);	/* bin to TPM */
 #else		// libtpms: added end
-	    int i;
-	    //
-	    GOTO_ERROR_UNLESS((unsigned)osslBn->top <= BnGetAllocated(bn));
-	    for(i = 0; i < osslBn->top; i++)
-		bn->d[i] = osslBn->d[i];
-	    BnSetTop(bn, osslBn->top);
-#endif		// libtpms: added
-	}
+        int i;
+        //
+        GOTO_ERROR_UNLESS((unsigned)osslBn->top <= BnGetAllocated(bn));
+        for(i = 0; i < osslBn->top; i++)
+            bn->d[i] = osslBn->d[i];
+        BnSetTop(bn, osslBn->top);
+#endif	// libtpms: added
+    }
     return TRUE;
- Error:
+Error:
     return FALSE;
 }
 
@@ -140,9 +140,9 @@ BIGNUM* BigInitialized(BIGNUM* toInit, bigConst initializer)
 #endif		// libtpms: added end
 
     if(initializer == NULL)
-	FAIL(FATAL_ERROR_PARAMETER);
+        FAIL(FATAL_ERROR_PARAMETER);
     if(toInit == NULL || initializer == NULL)
-	return NULL;
+        return NULL;
 #if 1		// libtpms: added begin
     BnToBytes(initializer, buffer, &buffer_len);	/* TPM to bin */
     _toInit = BN_bin2bn(buffer, buffer_len, NULL);	/* bin to ossl */
@@ -174,31 +174,31 @@ static void BIGNUM_print(const char* label, const BIGNUM* a, BOOL eol)
     int       notZero = FALSE;
 
     if(label != NULL)
-	printf("%s", label);
+        printf("%s", label);
     if(a == NULL)
-	{
-	    printf("NULL");
-	    goto done;
-	}
+    {
+        printf("NULL");
+        goto done;
+    }
     if(a->neg)
-	printf("-");
+        printf("-");
     for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
-	{
-	    int      j;
-	    BN_ULONG l = *d--;
-	    for(j = BN_BITS2 - 8; j >= 0; j -= 8)
-		{
-		    BYTE b  = (BYTE)((l >> j) & 0xFF);
-		    notZero = notZero || (b != 0);
-		    if(notZero)
-			printf("%02x", b);
-		}
-	    if(!notZero)
-		printf("0");
-	}
- done:
+    {
+        int      j;
+        BN_ULONG l = *d--;
+        for(j = BN_BITS2 - 8; j >= 0; j -= 8)
+        {
+            BYTE b  = (BYTE)((l >> j) & 0xFF);
+            notZero = notZero || (b != 0);
+            if(notZero)
+                printf("%02x", b);
+        }
+        if(!notZero)
+            printf("0");
+    }
+done:
     if(eol)
-	printf("\n");
+        printf("\n");
     return;
 }
 #  endif
@@ -213,7 +213,7 @@ static BIGNUM* BnNewVariable(BN_CTX* CTX)
     // This check is intended to protect against calling this function without
     // having initialized the CTX.
     if((CTX == NULL) || ((new = BN_CTX_get(CTX)) == NULL))
-	FAIL(FATAL_ERROR_ALLOCATION);
+        FAIL(FATAL_ERROR_ALLOCATION);
     return new;
 }
 
@@ -228,10 +228,10 @@ BOOL BnMathLibraryCompatibilityCheck(void)
     crypt_uword_t i;
 #endif		// libtpms: added
     BYTE test[] = {0x1F, 0x1E, 0x1D, 0x1C, 0x1B, 0x1A, 0x19, 0x18, 0x17, 0x16, 0x15,
-		   0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A,
-		   0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
+                   0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A,
+                   0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
     BN_VAR(tpmTemp, sizeof(test) * 8);  // allocate some space for a test value
-    //
+                                        //
     // Convert the test data to a bigNum
     BnFromBytes(tpmTemp, test, sizeof(test));
     // Convert the test data to an OpenSSL BIGNUM
@@ -240,12 +240,12 @@ BOOL BnMathLibraryCompatibilityCheck(void)
 #if 0		// libtpms: added
     GOTO_ERROR_UNLESS(osslTemp->top == (int)tpmTemp->size);
     for(i = 0; i < tpmTemp->size; i++)
-	GOTO_ERROR_UNLESS(osslTemp->d[i] == tpmTemp->d[i]);
+        GOTO_ERROR_UNLESS(osslTemp->d[i] == tpmTemp->d[i]);
 #endif		// libtpms: added
     OSSL_LEAVE();
     return 1;
 #if 0		// libtpms: added
- Error:
+Error:
     return 0;
 #endif		// libtpms: added
 }
@@ -271,9 +271,9 @@ LIB_EXPORT BOOL BnModMult(bigNum result, bigConst op1, bigConst op2, bigConst mo
     GOTO_ERROR_UNLESS(BN_div(NULL, bnResult, bnTemp, bnMod, CTX));
     GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bnMod); // libtpms added
     BN_clear_free(bnOp2); // libtpms added
     BN_clear_free(bnOp1); // libtpms added
@@ -297,9 +297,9 @@ LIB_EXPORT BOOL BnMult(bigNum result, bigConst multiplicand, bigConst multiplier
     GOTO_ERROR_UNLESS(BN_mul(bnTemp, bnA, bnB, CTX));
     GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnTemp));
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bnB); // libtpms added
     BN_clear_free(bnA); // libtpms added
     OSSL_LEAVE();
@@ -313,7 +313,7 @@ LIB_EXPORT BOOL BnMult(bigNum result, bigConst multiplicand, bigConst multiplier
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation
 LIB_EXPORT BOOL BnDiv(
-		      bigNum quotient, bigNum remainder, bigConst dividend, bigConst divisor)
+    bigNum quotient, bigNum remainder, bigConst dividend, bigConst divisor)
 {
     OSSL_ENTER();
     BIGNUM* bnQ = BN_NEW();
@@ -323,7 +323,7 @@ LIB_EXPORT BOOL BnDiv(
     BIG_INITIALIZED(bnSor, divisor);
     //
     if(BnEqualZero(divisor))
-	FAIL(FATAL_ERROR_DIVIDE_ZERO);
+        FAIL(FATAL_ERROR_DIVIDE_ZERO);
     GOTO_ERROR_UNLESS(BN_div(bnQ, bnR, bnDend, bnSor, CTX));
     GOTO_ERROR_UNLESS(OsslToTpmBn(quotient, bnQ));
     GOTO_ERROR_UNLESS(OsslToTpmBn(remainder, bnR));
@@ -333,9 +333,9 @@ LIB_EXPORT BOOL BnDiv(
     BIGNUM_PRINT("   bnQuotient: ", bnQ, TRUE);
     BIGNUM_PRINT("  bnRemainder: ", bnR, TRUE);
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bnSor);  // libtpms added
     BN_clear_free(bnDend); // libtpms added
     OSSL_LEAVE();
@@ -350,9 +350,9 @@ LIB_EXPORT BOOL BnDiv(
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation
 LIB_EXPORT BOOL BnGcd(bigNum   gcd,      // OUT: the common divisor
-		      bigConst number1,  // IN:
-		      bigConst number2   // IN:
-		      )
+                      bigConst number1,  // IN:
+                      bigConst number2   // IN:
+)
 {
     OSSL_ENTER();
     BIGNUM* bnGcd = BN_NEW();
@@ -364,9 +364,9 @@ LIB_EXPORT BOOL BnGcd(bigNum   gcd,      // OUT: the common divisor
     GOTO_ERROR_UNLESS(BN_gcd(bnGcd, bn1, bn2, CTX));
     GOTO_ERROR_UNLESS(OsslToTpmBn(gcd, bnGcd));
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bn2);  // libtpms added
     BN_clear_free(bn1);  // libtpms added
     OSSL_LEAVE();
@@ -381,10 +381,10 @@ LIB_EXPORT BOOL BnGcd(bigNum   gcd,      // OUT: the common divisor
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation
 LIB_EXPORT BOOL BnModExp(bigNum   result,    // OUT: the result
-			 bigConst number,    // IN: number to exponentiate
-			 bigConst exponent,  // IN:
-			 bigConst modulus    // IN:
-			 )
+                         bigConst number,    // IN: number to exponentiate
+                         bigConst exponent,  // IN:
+                         bigConst modulus    // IN:
+)
 {
     OSSL_ENTER();
     BIGNUM* bnResult = BN_NEW();
@@ -397,9 +397,9 @@ LIB_EXPORT BOOL BnModExp(bigNum   result,    // OUT: the result
     GOTO_ERROR_UNLESS(BN_mod_exp(bnResult, bnN, bnE, bnM, CTX));
     GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bnM); // libtpms added
     BN_clear_free(bnE); // libtpms added
     BN_clear_free(bnN); // libtpms added
@@ -425,9 +425,9 @@ LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus)
     GOTO_ERROR_UNLESS(BN_mod_inverse(bnResult, bnN, bnM, CTX) != NULL);
     GOTO_ERROR_UNLESS(OsslToTpmBn(result, bnResult));
     goto Exit;
- Error:
+Error:
     OK = FALSE;
- Exit:
+Exit:
     BN_clear_free(bnM); // libtpms added
     BN_clear_free(bnN); // libtpms added
     OSSL_LEAVE();
@@ -442,9 +442,9 @@ LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus)
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation
 static BOOL PointFromOssl(bigPoint            pOut,  // OUT: resulting point
-			  EC_POINT*           pIn,   // IN: the point to return
-			  const bigCurveData* E      // IN: the curve
-			  )
+                          EC_POINT*           pIn,   // IN: the point to return
+                          const bigCurveData* E      // IN: the curve
+)
 {
     BIGNUM* x = NULL;
     BIGNUM* y = NULL;
@@ -455,17 +455,17 @@ static BOOL PointFromOssl(bigPoint            pOut,  // OUT: resulting point
     y = BN_CTX_get(E->CTX);
 
     if(y == NULL)
-	FAIL(FATAL_ERROR_ALLOCATION);
+        FAIL(FATAL_ERROR_ALLOCATION);
     // If this returns false, then the point is at infinity
     OK = EC_POINT_get_affine_coordinates_GFp(E->G, pIn, x, y, E->CTX);
     if(OK)
-	{
-	    OsslToTpmBn(pOut->x, x);
-	    OsslToTpmBn(pOut->y, y);
-	    BnSetWord(pOut->z, 1);
-	}
+    {
+        OsslToTpmBn(pOut->x, x);
+        OsslToTpmBn(pOut->y, y);
+        BnSetWord(pOut->z, 1);
+    }
     else
-	BnSetWord(pOut->z, 0);
+        BnSetWord(pOut->z, 0);
     BN_CTX_end(E->CTX);
     return OK;
 }
@@ -477,18 +477,18 @@ LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, const bigCurveDa
     EC_POINT* P = NULL;
 
     if(initializer != NULL)
-	{
-	    BIG_INITIALIZED(bnX, initializer->x);
-	    BIG_INITIALIZED(bnY, initializer->y);
-	    if(E == NULL)
-		FAIL(FATAL_ERROR_ALLOCATION);
-	    P = EC_POINT_new(E->G);
-	    if(P != NULL &&     // libtpms added
-	       !EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
-		P = NULL;
-	    BN_clear_free(bnX); // libtpms added
-	    BN_clear_free(bnY); // libtpms added
-	}
+    {
+        BIG_INITIALIZED(bnX, initializer->x);
+        BIG_INITIALIZED(bnY, initializer->y);
+        if(E == NULL)
+            FAIL(FATAL_ERROR_ALLOCATION);
+        P = EC_POINT_new(E->G);
+        if(P != NULL &&     // libtpms added
+           !EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, E->CTX))
+            P = NULL;
+        BN_clear_free(bnX); // libtpms added
+        BN_clear_free(bnY); // libtpms added
+    }
     return P;
 }
 
@@ -501,63 +501,63 @@ LIB_EXPORT EC_POINT* EcPointInitialized(pointConst initializer, const bigCurveDa
 //                  in initializing the curve data
 //      non-NULL    points to 'E'
 LIB_EXPORT bigCurveData* BnCurveInitialize(
-					   bigCurveData* E,       // IN: curve structure to initialize
-					   TPM_ECC_CURVE curveId  // IN: curve identifier
-					   )
+    bigCurveData* E,       // IN: curve structure to initialize
+    TPM_ECC_CURVE curveId  // IN: curve identifier
+)
 {
     const TPMBN_ECC_CURVE_CONSTANTS* C = BnGetCurveData(curveId);
     if(C == NULL)
-	E = NULL;
+        E = NULL;
     if(E != NULL)
-	{
-	    // This creates the OpenSSL memory context that stays in effect as long as the
-	    // curve (E) is defined.
-	    OSSL_ENTER();  // if the allocation fails, the TPM fails
-	    EC_POINT* P = NULL;
-	    BIG_INITIALIZED(bnP, C->prime);
-	    BIG_INITIALIZED(bnA, C->a);
-	    BIG_INITIALIZED(bnB, C->b);
-	    BIG_INITIALIZED(bnX, C->base.x);
-	    BIG_INITIALIZED(bnY, C->base.y);
-	    BIG_INITIALIZED(bnN, C->order);
-	    BIG_INITIALIZED(bnH, C->h);
-	    //
-	    E->C   = C;
-	    E->CTX = CTX;
+    {
+        // This creates the OpenSSL memory context that stays in effect as long as the
+        // curve (E) is defined.
+        OSSL_ENTER();  // if the allocation fails, the TPM fails
+        EC_POINT* P = NULL;
+        BIG_INITIALIZED(bnP, C->prime);
+        BIG_INITIALIZED(bnA, C->a);
+        BIG_INITIALIZED(bnB, C->b);
+        BIG_INITIALIZED(bnX, C->base.x);
+        BIG_INITIALIZED(bnY, C->base.y);
+        BIG_INITIALIZED(bnN, C->order);
+        BIG_INITIALIZED(bnH, C->h);
+        //
+        E->C   = C;
+        E->CTX = CTX;
 
-	    // initialize EC group, associate a generator point and initialize the point
-	    // from the parameter data
-	    // Create a group structure
-	    E->G = EC_GROUP_new_curve_GFp(bnP, bnA, bnB, CTX);
-	    GOTO_ERROR_UNLESS(E->G != NULL);
+        // initialize EC group, associate a generator point and initialize the point
+        // from the parameter data
+        // Create a group structure
+        E->G = EC_GROUP_new_curve_GFp(bnP, bnA, bnB, CTX);
+        GOTO_ERROR_UNLESS(E->G != NULL);
 
-	    // Allocate a point in the group that will be used in setting the
-	    // generator. This is not needed after the generator is set.
-	    P = EC_POINT_new(E->G);
-	    GOTO_ERROR_UNLESS(P != NULL);
+        // Allocate a point in the group that will be used in setting the
+        // generator. This is not needed after the generator is set.
+        P = EC_POINT_new(E->G);
+        GOTO_ERROR_UNLESS(P != NULL);
 
-	    // Need to use this in case Montgomery method is being used
-	    GOTO_ERROR_UNLESS(
-			      EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
-	    // Now set the generator
-	    GOTO_ERROR_UNLESS(EC_GROUP_set_generator(E->G, P, bnN, bnH));
+        // Need to use this in case Montgomery method is being used
+        GOTO_ERROR_UNLESS(
+            EC_POINT_set_affine_coordinates_GFp(E->G, P, bnX, bnY, CTX));
+        // Now set the generator
+        GOTO_ERROR_UNLESS(EC_GROUP_set_generator(E->G, P, bnN, bnH));
 
-	    EC_POINT_free(P);
-	    goto Exit_free;  // libtpms changed
-	Error:
-	    EC_POINT_free(P);
-	    BnCurveFree(E);
-	    E = NULL;
+        EC_POINT_free(P);
+        goto Exit_free;  // libtpms changed
+Error:
+        EC_POINT_free(P);
+        BnCurveFree(E);
+        E = NULL;
 
  Exit_free:			// libtpms added begin
-	    BN_clear_free(bnH);
-	    BN_clear_free(bnN);
-	    BN_clear_free(bnY);
-	    BN_clear_free(bnX);
-	    BN_clear_free(bnB);
-	    BN_clear_free(bnA);
-	    BN_clear_free(bnP); // libtpms added end
-	}
+        BN_clear_free(bnH);
+        BN_clear_free(bnN);
+        BN_clear_free(bnY);
+        BN_clear_free(bnX);
+        BN_clear_free(bnB);
+        BN_clear_free(bnA);
+        BN_clear_free(bnP); // libtpms added end
+    }
 // Exit:
     return E;
 }
@@ -568,10 +568,10 @@ LIB_EXPORT bigCurveData* BnCurveInitialize(
 LIB_EXPORT void BnCurveFree(bigCurveData* E)
 {
     if(E)
-	{
-	    EC_GROUP_free(E->G);
-	    OsslContextLeave(E->CTX);
-	}
+    {
+        EC_GROUP_free(E->G);
+        OsslContextLeave(E->CTX);
+    }
 }
 
 //*** BnEccModMult()
@@ -580,18 +580,18 @@ LIB_EXPORT void BnCurveFree(bigCurveData* E)
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation; treat as result being point at infinity
 LIB_EXPORT BOOL BnEccModMult(bigPoint   R,  // OUT: computed point
-			     pointConst S,  // IN: point to multiply by 'd' (optional)
-			     bigConst   d,  // IN: scalar for [d]S
-			     const bigCurveData* E)
+                             pointConst S,  // IN: point to multiply by 'd' (optional)
+                             bigConst   d,  // IN: scalar for [d]S
+                             const bigCurveData* E)
 {
     EC_POINT* pR = EC_POINT_new(E->G);
     EC_POINT* pS = EcPointInitialized(S, E);
     BIG_INITIALIZED(bnD, d);
 
     if(S == NULL)
-	EC_POINT_mul(E->G, pR, bnD, NULL, NULL, E->CTX);
+        EC_POINT_mul(E->G, pR, bnD, NULL, NULL, E->CTX);
     else
-	EC_POINT_mul(E->G, pR, NULL, pS, bnD, E->CTX);
+        EC_POINT_mul(E->G, pR, NULL, pS, bnD, E->CTX);
     PointFromOssl(R, pR, E);
     EC_POINT_clear_free(pR); // libtpms changed
     EC_POINT_clear_free(pS); // libtpms changed
@@ -605,12 +605,12 @@ LIB_EXPORT BOOL BnEccModMult(bigPoint   R,  // OUT: computed point
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation; treat as result being point at infinity
 LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
-			      pointConst          S,  // IN: optional point
-			      bigConst            d,  // IN: scalar for [d]S or [d]G
-			      pointConst          Q,  // IN: second point
-			      bigConst            u,  // IN: second scalar
-			      const bigCurveData* E   // IN: curve
-			      )
+                              pointConst          S,  // IN: optional point
+                              bigConst            d,  // IN: scalar for [d]S or [d]G
+                              pointConst          Q,  // IN: second point
+                              bigConst            u,  // IN: second scalar
+                              const bigCurveData* E   // IN: curve
+)
 {
     EC_POINT* pR = EC_POINT_new(E->G);
     EC_POINT* pS = EcPointInitialized(S, E);
@@ -619,39 +619,38 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
     BIG_INITIALIZED(bnU, u);
 
     if(S == NULL || S == (pointConst) & (AccessCurveConstants(E)->base))
-	EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
+        EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
-	{
+    {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L || (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x4010000fL)
-	    EC_POINT *pR1 = EC_POINT_new(E->G);
-	    EC_POINT *pR2 = EC_POINT_new(E->G);
-	    int OK;
+         EC_POINT *pR1 = EC_POINT_new(E->G);
+         EC_POINT *pR2 = EC_POINT_new(E->G);
+         int OK;
 
-	    pAssert(pR1 && pR2);
-	    OK = EC_POINT_mul(E->G, pR1, NULL, pS, bnD, E->CTX);
-	    OK &= EC_POINT_mul(E->G, pR2, NULL, pQ, bnU, E->CTX);
-	    OK &= EC_POINT_add(E->G, pR, pR1, pR2, E->CTX);
-	    pAssert(OK);
+         pAssert(pR1 && pR2);
+         OK = EC_POINT_mul(E->G, pR1, NULL, pS, bnD, E->CTX);
+         OK &= EC_POINT_mul(E->G, pR2, NULL, pQ, bnU, E->CTX);
+         OK &= EC_POINT_add(E->G, pR, pR1, pR2, E->CTX);
+         pAssert(OK);
 
-	    EC_POINT_clear_free(pR1);
-	    EC_POINT_clear_free(pR2);
+         EC_POINT_clear_free(pR1);
+         EC_POINT_clear_free(pR2);
 #else
-	    const EC_POINT* points[2];
-	    const BIGNUM*   scalars[2];
-	    points[0]  = pS;
-	    points[1]  = pQ;
-	    scalars[0] = bnD;
-	    scalars[1] = bnU;
-	    EC_POINTs_mul(E->G, pR, NULL, 2, points, scalars, E->CTX);
+        const EC_POINT* points[2];
+        const BIGNUM*   scalars[2];
+        points[0]  = pS;
+        points[1]  = pQ;
+        scalars[0] = bnD;
+        scalars[1] = bnU;
+        EC_POINTs_mul(E->G, pR, NULL, 2, points, scalars, E->CTX);
 #endif
-	}
+    }
     PointFromOssl(R, pR, E);
     EC_POINT_clear_free(pR); // libtpms changed
     EC_POINT_clear_free(pS); // libtpms changed
     EC_POINT_clear_free(pQ); // libtpms changed
     BN_clear_free(bnD); // libtpms added
     BN_clear_free(bnU); // libtpms added
-
     return !BnEqualZero(R->z);
 }
 
@@ -661,10 +660,10 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
 //      TRUE(1)         success
 //      FALSE(0)        failure in operation; treat as result being point at infinity
 LIB_EXPORT BOOL BnEccAdd(bigPoint            R,  // OUT: computed point
-			 pointConst          S,  // IN: first point to add
-			 pointConst          Q,  // IN: second point
-			 const bigCurveData* E   // IN: curve
-			 )
+                         pointConst          S,  // IN: first point to add
+                         pointConst          Q,  // IN: second point
+                         const bigCurveData* E   // IN: curve
+)
 {
     EC_POINT* pR = EC_POINT_new(E->G);
     EC_POINT* pS = EcPointInitialized(S, E);

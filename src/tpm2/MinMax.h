@@ -74,4 +74,3 @@
 #endif
 
 #endif  // _MIN_MAX_H_
-

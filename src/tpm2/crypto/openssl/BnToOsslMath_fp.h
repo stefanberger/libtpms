@@ -76,7 +76,7 @@
 //      TRUE(1)         success
 //      FALSE(0)        failure because value will not fit or OpenSSL variable doesn't
 //                      exist
-BOOL OsslToTpmBn(bigNum bn, const BIGNUM* osslBn);
+BOOL OsslToTpmBn(bigNum bn, const BIGNUM* osslBn);		// libtpms changed
 
 //*** BigInitialized()
 // This function initializes an OSSL BIGNUM from a TPM bigConst. Do not use this for
@@ -91,4 +91,4 @@ EC_POINT *EcPointInitialized(pointConst          initializer,
 			     );
 // libtpms added end
 
-#endif // _TPM_TO_OSSL_MATH_FP_H_
+#endif  // _TPM_TO_OSSL_MATH_FP_H_

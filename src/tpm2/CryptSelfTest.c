@@ -79,22 +79,22 @@
 //*** RunSelfTest()
 // Local function to run self-test
 static TPM_RC CryptRunSelfTests(
-				ALGORITHM_VECTOR* toTest  // IN: the vector of the algorithms to test
-				)
+    ALGORITHM_VECTOR* toTest  // IN: the vector of the algorithms to test
+)
 {
     TPM_ALG_ID alg;
 
     // For each of the algorithms that are in the toTestVecor, need to run a
     // test
     for(alg = TPM_ALG_FIRST; alg <= TPM_ALG_LAST; alg++)
-	{
-	    if(TEST_BIT(alg, *toTest))
-		{
-		    TPM_RC result = CryptTestAlgorithm(alg, toTest);
-		    if(result != TPM_RC_SUCCESS)
-			return result;
-		}
-	}
+    {
+        if(TEST_BIT(alg, *toTest))
+        {
+            TPM_RC result = CryptTestAlgorithm(alg, toTest);
+            if(result != TPM_RC_SUCCESS)
+                return result;
+        }
+    }
     return TPM_RC_SUCCESS;
 }
 
@@ -114,19 +114,19 @@ static TPM_RC CryptRunSelfTests(
 LIB_EXPORT
 TPM_RC
 CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
-	      )
+)
 {
 #if ALLOW_FORCE_FAILURE_MODE
     if(g_forceFailureMode)
-	FAIL(FATAL_ERROR_FORCED);
+        FAIL(FATAL_ERROR_FORCED);
 #endif
 
     // If the caller requested a full test, then reset the to test vector so that
     // all the tests will be run
     if(fullTest == YES)
-	{
-	    MemoryCopy(g_toTest, g_implementedAlgorithms, sizeof(g_toTest));
-	}
+    {
+        MemoryCopy(g_toTest, g_implementedAlgorithms, sizeof(g_toTest));
+    }
     return CryptRunSelfTests(&g_toTest);
 }
 
@@ -144,8 +144,8 @@ CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
 //      TPM_RC_VALUE            an algorithm in the toTest list is not implemented
 TPM_RC
 CryptIncrementalSelfTest(TPML_ALG* toTest,   // IN: list of algorithms to be tested
-			 TPML_ALG* toDoList  // OUT: list of algorithms needing test
-			 )
+                         TPML_ALG* toDoList  // OUT: list of algorithms needing test
+)
 {
     ALGORITHM_VECTOR toTestVector = {0};
     TPM_ALG_ID       alg;
@@ -153,36 +153,36 @@ CryptIncrementalSelfTest(TPML_ALG* toTest,   // IN: list of algorithms to be tes
 
     pAssert(toTest != NULL && toDoList != NULL);
     if(toTest->count > 0)
-	{
-	    // Transcribe the toTest list into the toTestVector
-	    for(i = 0; i < toTest->count; i++)
-		{
-		    alg = toTest->algorithms[i];
+    {
+        // Transcribe the toTest list into the toTestVector
+        for(i = 0; i < toTest->count; i++)
+        {
+            alg = toTest->algorithms[i];
 
-		    // make sure that the algorithm value is not out of range
-		    if((alg > TPM_ALG_LAST) || !TEST_BIT(alg, g_implementedAlgorithms))
-			return TPM_RC_VALUE;
-						// libtpms added begin
-		    if(!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
-						     alg))
-			return TPM_RC_VALUE;
-						// libtpms added end
-		    SET_BIT(alg, toTestVector);
-		}
-	    // Run the test
-	    if(CryptRunSelfTests(&toTestVector) == TPM_RC_CANCELED)
-		return TPM_RC_CANCELED;
-	}
+            // make sure that the algorithm value is not out of range
+            if((alg > TPM_ALG_LAST) || !TEST_BIT(alg, g_implementedAlgorithms))
+                return TPM_RC_VALUE;
+								// libtpms added begin
+            if(!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+                                             alg))
+                return TPM_RC_VALUE;
+								// libtpms added end
+            SET_BIT(alg, toTestVector);
+        }
+        // Run the test
+        if(CryptRunSelfTests(&toTestVector) == TPM_RC_CANCELED)
+            return TPM_RC_CANCELED;
+    }
     // Fill in the toDoList with the algorithms that are still untested
     toDoList->count = 0;
 
     for(alg = TPM_ALG_FIRST;
-	toDoList->count < MAX_ALG_LIST_SIZE && alg <= TPM_ALG_LAST;
-	alg++)
-	{
-	    if(TEST_BIT(alg, g_toTest))
-		toDoList->algorithms[toDoList->count++] = alg;
-	}
+        toDoList->count < MAX_ALG_LIST_SIZE && alg <= TPM_ALG_LAST;
+        alg++)
+    {
+        if(TEST_BIT(alg, g_toTest))
+            toDoList->algorithms[toDoList->count++] = alg;
+    }
     return TPM_RC_SUCCESS;
 }
 
@@ -231,11 +231,11 @@ CryptTestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
     // will over report. This can be changed so that any call to check on which
     // algorithms have tests, 'toTest' can be cleared.
     if(alg != TPM_ALG_ERROR)
-	{
-	    CLEAR_BIT(alg, g_toTest);
-	    if(toTest != NULL)
-		CLEAR_BIT(alg, *toTest);
-	}
+    {
+        CLEAR_BIT(alg, g_toTest);
+        if(toTest != NULL)
+            CLEAR_BIT(alg, *toTest);
+    }
     result = TPM_RC_SUCCESS;
 #endif
     return result;

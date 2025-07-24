@@ -104,26 +104,31 @@
 #ifndef CONTEXT_INTEGRITY_HASH_SIZE
 #  define CONTEXT_INTEGRITY_HASH_SIZE CONCAT(CONTEXT_HASH_ALGORITHM, _DIGEST_SIZE)
 #endif
+
 #if ALG_RSA
-#  define RSA_SECURITY_STRENGTH				     \
-    (MAX_RSA_KEY_BITS >= 15360						\
-     ? 256								\
-     : (MAX_RSA_KEY_BITS >= 7680					\
-	? 192								\
-	: (MAX_RSA_KEY_BITS >= 3072					\
-	   ? 128							\
-	   : (MAX_RSA_KEY_BITS >= 2048					\
-	      ? 112							\
-	      : (MAX_RSA_KEY_BITS >= 1024 ? 80 : 0)))))
+// This table taken from SP800-57 part 1, Table 2.
+// for other key lengths, https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/fips140-2/fips1402ig.pdf
+// provides the following formula for RSA for a key of modulus length L.
+// $$x = \frac{1.923 * \sqrt[3]{L * \ln(2)} * \sqrt[3]{(\ln(L*\ln(2)))^2} - 4.69}{\ln(2)}$$
+#  define RSA_SECURITY_STRENGTH                      \
+      (MAX_RSA_KEY_BITS >= 15360                     \
+           ? 256                                     \
+           : (MAX_RSA_KEY_BITS >= 7680               \
+                  ? 192                              \
+                  : (MAX_RSA_KEY_BITS >= 3072        \
+                         ? 128                       \
+                         : (MAX_RSA_KEY_BITS >= 2048 \
+                                ? 112                \
+                                : (MAX_RSA_KEY_BITS >= 1024 ? 80 : 0)))))
 #else
 #  define RSA_SECURITY_STRENGTH 0
 #endif  // ALG_RSA
 
 #if ALG_ECC
-#  define ECC_SECURITY_STRENGTH		\
-    (MAX_ECC_KEY_BITS >= 521				\
-     ? 256								\
-     : (MAX_ECC_KEY_BITS >= 384 ? 192 : (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
+#  define ECC_SECURITY_STRENGTH \
+      (MAX_ECC_KEY_BITS >= 521  \
+           ? 256                \
+           : (MAX_ECC_KEY_BITS >= 384 ? 192 : (MAX_ECC_KEY_BITS >= 256 ? 128 : 0)))
 #else
 #  define ECC_SECURITY_STRENGTH 0
 #endif  // ALG_ECC
@@ -135,16 +140,16 @@
 // Unless some algorithm is broken...
 #define MAX_SYM_SECURITY_STRENGTH MAX_SYM_KEY_BITS
 
-#define MAX_SECURITY_STRENGTH_BITS	    \
-    MAX(MAX_ASYM_SECURITY_STRENGTH,					\
-	MAX(MAX_SYM_SECURITY_STRENGTH, MAX_HASH_SECURITY_STRENGTH))
+#define MAX_SECURITY_STRENGTH_BITS  \
+    MAX(MAX_ASYM_SECURITY_STRENGTH, \
+        MAX(MAX_SYM_SECURITY_STRENGTH, MAX_HASH_SECURITY_STRENGTH))
 
 // This is the size that was used before the 1.38 errata requiring that P1.14.4 be
 // followed
 #define PROOF_SIZE CONTEXT_INTEGRITY_HASH_SIZE
 
 // As required by P1.14.4
-#define COMPLIANT_PROOF_SIZE						\
+#define COMPLIANT_PROOF_SIZE \
     (MAX(CONTEXT_INTEGRITY_HASH_SIZE, (2 * MAX_SYM_KEY_BYTES)))
 
 // As required by P1.14.3.1

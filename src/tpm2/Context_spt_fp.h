@@ -79,9 +79,9 @@
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
 TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context blob
-				   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
-				   TPM2B_IV*      iv       // OUT: the IV.
-				   );
+                                   TPM2B_SYM_KEY* symKey,  // OUT: the symmetric key
+                                   TPM2B_IV*      iv       // OUT: the IV.
+);
 
 //*** ComputeContextIntegrity()
 // Generate the integrity hash for a context
@@ -96,8 +96,8 @@ TPM_RC ComputeContextProtectionKey(TPMS_CONTEXT*  contextBlob,  // IN: context b
 //                              failed to derive the Firmware SVN Secret for the
 //                              requested SVN.
 TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
-			       TPM2B_DIGEST* integrity     // OUT: integrity
-			       );
+                               TPM2B_DIGEST* integrity     // OUT: integrity
+);
 
 //*** SequenceDataExport()
 // This function is used scan through the sequence object and
@@ -109,9 +109,9 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
 // same size as the internal representation so nothing outsize of the hash context
 // area gets modified.
 void SequenceDataExport(
-			HASH_OBJECT*        object,       // IN: an internal hash object
-			HASH_OBJECT_BUFFER* exportObject  // OUT: a sequence context in a buffer
-			);
+    HASH_OBJECT*        object,       // IN: an internal hash object
+    HASH_OBJECT_BUFFER* exportObject  // OUT: a sequence context in a buffer
+);
 
 //*** SequenceDataImport()
 // This function is used scan through the sequence object and
@@ -123,8 +123,8 @@ void SequenceDataExport(
 // same size as the internal representation so nothing outsize of the hash context
 // area gets modified.
 void SequenceDataImport(
-			HASH_OBJECT*        object,       // IN/OUT: an internal hash object
-			HASH_OBJECT_BUFFER* exportObject  // IN/OUT: a sequence context in a buffer
-			);
+    HASH_OBJECT*        object,       // IN/OUT: an internal hash object
+    HASH_OBJECT_BUFFER* exportObject  // IN/OUT: a sequence context in a buffer
+);
 
 #endif  // _CONTEXT_SPT_FP_H_

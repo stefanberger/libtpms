@@ -59,32 +59,35 @@
 /*										*/
 /********************************************************************************/
 
-#ifndef INTERNALROUTINES_H
-#define INTERNALROUTINES_H
+#ifndef INTERNAL_ROUTINES_H
+#define INTERNAL_ROUTINES_H
 
 #if !defined _LIB_SUPPORT_H_ && !defined _TPM_H_
-#error "Should not be called"
+#  error "Should not be called"
 #endif
-/* DRTM functions */
+
+// DRTM functions
 #include "_TPM_Hash_Start_fp.h"
 #include "_TPM_Hash_Data_fp.h"
 #include "_TPM_Hash_End_fp.h"
-/* Internal subsystem functions */
+
+// Internal subsystem functions
 #include "Object_fp.h"
 #include "Context_spt_fp.h"
 #include "Object_spt_fp.h"
 #include "Entity_fp.h"
 #include "Session_fp.h"
 #include "Hierarchy_fp.h"
-#include "NVReserved_fp.h"
-#include "NVDynamic_fp.h"
+#include "NvReserved_fp.h"
+#include "NvDynamic_fp.h"
 #include "NV_spt_fp.h"
 #include "ACT_spt_fp.h"
 #include "PCR_fp.h"
 #include "DA_fp.h"
 #include "TpmFail_fp.h"
 #include "SessionProcess_fp.h"
-/* Internal support functions */
+
+// Internal support functions
 #include "CommandCodeAttributes_fp.h"
 #include "Marshal_fp.h"
 #include "Unmarshal_fp.h"	/* kgold */
@@ -97,10 +100,12 @@
 #include "Power_fp.h"
 #include "Response_fp.h"
 #include "CommandDispatcher_fp.h"
+
 #if CC_AC_Send
 #   include "AC_spt_fp.h"
 #endif // CC_AC_Send
-/* Miscellaneous */
+
+// Miscellaneous
 #include "Bits_fp.h"
 #include "AlgorithmCap_fp.h"
 #include "PropertyCap_fp.h"
@@ -122,21 +127,24 @@
 #include "MathOnByteBuffers_fp.h"
 #include "CryptSym_fp.h"
 #include "AlgorithmTests_fp.h"
+
 #if ALG_RSA
-#include "CryptRsa_fp.h"
-#include "CryptPrimeSieve_fp.h"
+#  include "CryptRsa_fp.h"
+#  include "CryptPrimeSieve_fp.h"
 #endif
+
 #if ALG_ECC
-#include "CryptEccMain_fp.h"
-#include "CryptEccSignature_fp.h"
-#include "CryptEccKeyExchange_fp.h"
-#include "CryptEccCrypt_fp.h"
+#  include "CryptEccMain_fp.h"
+#  include "CryptEccSignature_fp.h"
+#  include "CryptEccKeyExchange_fp.h"
+#  include "CryptEccCrypt_fp.h"
 #endif
+
 #if CC_MAC || CC_MAC_Start
-#   include "CryptSmac_fp.h"
-#   if ALG_CMAC
-#       include "CryptCmac_fp.h"
-#   endif
+#  include "CryptSmac_fp.h"
+#  if ALG_CMAC
+#    include "CryptCmac_fp.h"
+#  endif
 #endif
 // Asymmetric Support library Interface
 // TODO_RENAME_INC_FOLDER: needs a component prefix

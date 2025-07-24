@@ -59,29 +59,26 @@
 /*										*/
 /********************************************************************************/
 
-/* C.5 LocalityPlat.c */
-/* C.5.1. Includes */
+//** Includes
 #include "Platform.h"
-/* C.5.2. Functions */
-/* C.5.2.1. _plat__LocalityGet() */
-/* Get the most recent command locality in locality value form. This is an integer value for
-   locality and not a locality structure The locality can be 0-4 or 32-255. 5-31 is not allowed. */
-LIB_EXPORT unsigned char
-_plat__LocalityGet(
-		   void
-		   )
+
+//** Functions
+
+//***_plat__LocalityGet()
+// Get the most recent command locality in locality value form.
+// This is an integer value for locality and not a locality structure
+// The locality can be 0-4 or 32-255. 5-31 is not allowed.
+LIB_EXPORT unsigned char _plat__LocalityGet(void)
 {
     return s_locality;
 }
-/* C.5.2.2. _plat__LocalitySet() */
-/* Set the most recent command locality in locality value form */
-LIB_EXPORT void
-_plat__LocalitySet(
-		   unsigned char    locality
-		   )
+
+//***_plat__LocalitySet()
+// Set the most recent command locality in locality value form
+LIB_EXPORT void _plat__LocalitySet(unsigned char locality)
 {
     if(locality > 4 && locality < 32)
-	locality = 0;
+        locality = 0;
     s_locality = locality;
     return;
 }

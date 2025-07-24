@@ -72,12 +72,12 @@
 // value. If the resulting number can have more bits of significance than
 // 'reference'.
 static void SchnorrReduce(TPM2B*           number,    // IN/OUT: Value to reduce
-			  const Crypt_Int* reference  // IN: the reference value
-			  )
+                          const Crypt_Int* reference  // IN: the reference value
+)
 {
     UINT16 maxBytes = (UINT16)BITS_TO_BYTES(ExtMath_SizeInBits(reference));
     if(number->size > maxBytes)
-	number->size = maxBytes;
+        number->size = maxBytes;
 }
 
 //*** SchnorrEcc()
@@ -94,14 +94,14 @@ static void SchnorrReduce(TPM2B*           number,    // IN/OUT: Value to reduce
 //      TPM_RC_NO_RESULT        failure in the Schnorr sign process
 //      TPM_RC_SCHEME           hashAlg can't produce zero-length digest
 TPM_RC TpmEcc_SignEcSchnorr(
-			    Crypt_Int*            bnR,      // OUT: 'r' component of the signature
-			    Crypt_Int*            bnS,      // OUT: 's' component of the signature
-			    const Crypt_EccCurve* E,        // IN: the curve used in signing
-			    Crypt_Int*            bnD,      // IN: the signing key
-			    const TPM2B_DIGEST*   digest,   // IN: the digest to sign
-			    TPM_ALG_ID            hashAlg,  // IN: signing scheme (contains a hash)
-			    RAND_STATE*           rand      // IN: non-NULL when testing
-			    )
+    Crypt_Int*            bnR,      // OUT: 'r' component of the signature
+    Crypt_Int*            bnS,      // OUT: 's' component of the signature
+    const Crypt_EccCurve* E,        // IN: the curve used in signing
+    Crypt_Int*            bnD,      // IN: the signing key
+    const TPM2B_DIGEST*   digest,   // IN: the digest to sign
+    TPM_ALG_ID            hashAlg,  // IN: signing scheme (contains a hash)
+    RAND_STATE*           rand      // IN: non-NULL when testing
+)
 {
     HASH_STATE hashState;
     UINT16     digestSize = CryptHashGetDigestSize(hashAlg);
@@ -116,7 +116,7 @@ TPM_RC TpmEcc_SignEcSchnorr(
     //
     // Parameter checks
     if(E == NULL)
-	ERROR_EXIT(TPM_RC_VALUE);
+        ERROR_EXIT(TPM_RC_VALUE);
 
     order = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
     prime = ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E));
@@ -124,36 +124,36 @@ TPM_RC TpmEcc_SignEcSchnorr(
     // If the digest does not produce a hash, then null the signature and return
     // a failure.
     if(digestSize == 0)
-	{
-	    ExtMath_SetWord(bnR, 0);
-	    ExtMath_SetWord(bnS, 0);
-	    ERROR_EXIT(TPM_RC_SCHEME);
-	}
+    {
+        ExtMath_SetWord(bnR, 0);
+        ExtMath_SetWord(bnS, 0);
+        ERROR_EXIT(TPM_RC_SCHEME);
+    }
     do
-	{
-	    // Generate a random key pair
-	    if(!TpmEcc_GenerateKeyPair(bnK, ecR, E, rand))
-		break;
-	    // Convert R.x to a string
-	    TpmMath_IntTo2B(ExtEcc_PointX(ecR),
-			    e,
-			    (NUMBYTES)BITS_TO_BYTES(ExtMath_SizeInBits(prime)));
+    {
+        // Generate a random key pair
+        if(!TpmEcc_GenerateKeyPair(bnK, ecR, E, rand))
+            break;
+        // Convert R.x to a string
+        TpmMath_IntTo2B(ExtEcc_PointX(ecR),
+                        e,
+                        (NUMBYTES)BITS_TO_BYTES(ExtMath_SizeInBits(prime)));
 
-	    // f) compute r = Hash(e || P) (mod n)
-	    CryptHashStart(&hashState, hashAlg);
-	    CryptDigestUpdate2B(&hashState, e);
-	    CryptDigestUpdate2B(&hashState, &digest->b);
-	    e->size = CryptHashEnd(&hashState, digestSize, e->buffer);
-	    // Reduce the hash size if it is larger than the curve order
-	    SchnorrReduce(e, order);
-	    // Convert hash to number
-	    TpmMath_IntFrom2B(bnR, e);
-	    // libtpms: Note: e is NOT a concern for constant-timeness
-	    // Do the Schnorr computation
-	    retVal = TpmEcc_SchnorrCalculateS(
-					      bnS, bnK, bnR, bnD, ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E)));
-	} while(retVal == TPM_RC_NO_RESULT);
- Exit:
+        // f) compute r = Hash(e || P) (mod n)
+        CryptHashStart(&hashState, hashAlg);
+        CryptDigestUpdate2B(&hashState, e);
+        CryptDigestUpdate2B(&hashState, &digest->b);
+        e->size = CryptHashEnd(&hashState, digestSize, e->buffer);
+        // Reduce the hash size if it is larger than the curve order
+        SchnorrReduce(e, order);
+        // Convert hash to number
+        TpmMath_IntFrom2B(bnR, e);
+        // libtpms: Note: e is NOT a concern for constant-timeness
+        // Do the Schnorr computation
+        retVal = TpmEcc_SchnorrCalculateS(
+            bnS, bnK, bnR, bnD, ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E)));
+    } while(retVal == TPM_RC_NO_RESULT);
+Exit:
     return retVal;
 }
 
@@ -162,14 +162,14 @@ TPM_RC TpmEcc_SignEcSchnorr(
 //  Return Type: TPM_RC
 //      TPM_RC_SIGNATURE        signature not valid
 TPM_RC TpmEcc_ValidateSignatureEcSchnorr(
-					 Crypt_Int*            bnR,      // IN: 'r' component of the signature
-					 Crypt_Int*            bnS,      // IN: 's' component of the signature
-					 TPM_ALG_ID            hashAlg,  // IN: hash algorithm of the signature
-					 const Crypt_EccCurve* E,        // IN: the curve used in the signature
-					 //     process
-					 Crypt_Point*        ecQ,        // IN: the public point of the key
-					 const TPM2B_DIGEST* digest      // IN: the digest that was signed
-					 )
+    Crypt_Int*            bnR,      // IN: 'r' component of the signature
+    Crypt_Int*            bnS,      // IN: 's' component of the signature
+    TPM_ALG_ID            hashAlg,  // IN: hash algorithm of the signature
+    const Crypt_EccCurve* E,        // IN: the curve used in the signature
+                                    //     process
+    Crypt_Point*        ecQ,        // IN: the public point of the key
+    const TPM2B_DIGEST* digest      // IN: the digest that was signed
+)
 {
     CRYPT_INT_MAX(bnRn);
     CRYPT_POINT_VAR(ecE);
@@ -192,27 +192,27 @@ TPM_RC TpmEcc_ValidateSignatureEcSchnorr(
     ExtMath_Subtract(bnRn, order, bnR);
     // E = [s]G + [-r]Q
     OK = TpmEcc_PointMult(
-			  ecE, ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E)), bnS, ecQ, bnRn, E)
-	 == TPM_RC_SUCCESS;
+             ecE, ExtEcc_CurveGetG(ExtEcc_CurveGetCurveId(E)), bnS, ecQ, bnRn, E)
+         == TPM_RC_SUCCESS;
     //   // reduce the x portion of E mod q
     //    OK = OK && ExtMath_Mod(ecE->x, order);
     // Convert to byte string
     OK = OK
-	 && TpmMath_IntTo2B(ExtEcc_PointX(ecE),
-			    &Ex2.b,
-			    (NUMBYTES)(BITS_TO_BYTES(ExtMath_SizeInBits(order))));
+         && TpmMath_IntTo2B(ExtEcc_PointX(ecE),
+                            &Ex2.b,
+                            (NUMBYTES)(BITS_TO_BYTES(ExtMath_SizeInBits(order))));
     if(OK)
-	{
-	    // Ex = h(pE.x || digest)
-	    CryptHashStart(&hashState, hashAlg);
-	    CryptDigestUpdate(&hashState, Ex2.t.size, Ex2.t.buffer);
-	    CryptDigestUpdate(&hashState, digest->t.size, digest->t.buffer);
-	    Ex2.t.size = CryptHashEnd(&hashState, digestSize, Ex2.t.buffer);
-	    SchnorrReduce(&Ex2.b, order);
-	    TpmMath_IntFrom2B(bnEx, &Ex2.b);
-	    // see if Ex matches R
-	    OK = ExtMath_UnsignedCmp(bnEx, bnR) == 0;
-	}
+    {
+        // Ex = h(pE.x || digest)
+        CryptHashStart(&hashState, hashAlg);
+        CryptDigestUpdate(&hashState, Ex2.t.size, Ex2.t.buffer);
+        CryptDigestUpdate(&hashState, digest->t.size, digest->t.buffer);
+        Ex2.t.size = CryptHashEnd(&hashState, digestSize, Ex2.t.buffer);
+        SchnorrReduce(&Ex2.b, order);
+        TpmMath_IntFrom2B(bnEx, &Ex2.b);
+        // see if Ex matches R
+        OK = ExtMath_UnsignedCmp(bnEx, bnR) == 0;
+    }
     return (OK) ? TPM_RC_SUCCESS : TPM_RC_SIGNATURE;
 }
 

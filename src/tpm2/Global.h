@@ -157,36 +157,36 @@ typedef struct
 {
 #if LITTLE_ENDIAN_TPM == YES                          /* libtpms added */
     unsigned publicOnly : 1;    //0) SET if only the public portion of
-    //   an object is loaded
+                                //   an object is loaded
     unsigned epsHierarchy : 1;  //1) SET if the object belongs to EPS
-    //   Hierarchy
+                                //   Hierarchy
     unsigned ppsHierarchy : 1;  //2) SET if the object belongs to PPS
-    //   Hierarchy
+                                //   Hierarchy
     unsigned spsHierarchy : 1;  //3) SET f the object belongs to SPS
-    //   Hierarchy
+                                //   Hierarchy
     unsigned evict : 1;         //4) SET if the object is a platform or
-    //   owner evict object.  Platform-
-    //   evict object belongs to PPS
-    //   hierarchy, owner-evict object
-    //   belongs to SPS or EPS hierarchy.
-    //   This bit is also used to mark a
-    //   completed sequence object so it
-    //   will be flush when the
-    //   SequenceComplete command succeeds.
+                                //   owner evict object.  Platform-
+                                //   evict object belongs to PPS
+                                //   hierarchy, owner-evict object
+                                //   belongs to SPS or EPS hierarchy.
+                                //   This bit is also used to mark a
+                                //   completed sequence object so it
+                                //   will be flush when the
+                                //   SequenceComplete command succeeds.
     unsigned primary   : 1;     //5) SET for a primary object
     unsigned temporary : 1;     //6) SET for a temporary object
     unsigned stClear   : 1;     //7) SET for an stClear object
     unsigned hmacSeq   : 1;     //8) SET for an HMAC or MAC sequence
-    //   object
+                                //   object
     unsigned hashSeq    : 1;    //9) SET for a hash sequence object
     unsigned eventSeq   : 1;    //10) SET for an event sequence object
     unsigned ticketSafe : 1;    //11) SET if a ticket is safe to create
-    //    for hash sequence object
+                                //    for hash sequence object
     unsigned firstBlock : 1;    //12) SET if the first block of hash
-    //    data has been received.  It
-    //    works with ticketSafe bit
+                                //    data has been received.  It
+                                //    works with ticketSafe bit
     unsigned isParent : 1;      //13) SET if the key has the proper
-    //    attributes to be a parent key
+                                //    attributes to be a parent key
     unsigned privateExp : 1;    //14) SET when the private exponent  	// libtpms: keep
     //                                          //    of an RSA key has been validated.
 #if 0									// lbtpms added
@@ -253,18 +253,18 @@ typedef struct OBJECT
 #endif					// libtpms added end
     TPM2B_NAME        qualifiedName;  // object qualified name
     TPMI_DH_OBJECT    evictHandle;    // if the object is an evict object,
-    // the original handle is kept here.
-    // The 'working' handle will be the
-    // handle of an object slot.
+                                      // the original handle is kept here.
+                                      // The 'working' handle will be the
+                                      // handle of an object slot.
     TPM2B_NAME name;                  // Name of the object name. Kept here
-    // to avoid repeatedly computing it.
+                                      // to avoid repeatedly computing it.
     TPMI_RH_HIERARCHY hierarchy;      // Hierarchy for the object. While the
-    // base hierarchy can be deduced from
-    // 'attributes', if the hierarchy is
-    // firmware-bound or SVN-bound then
-    // this field carries additional metadata
-    // needed to derive the proof value for
-    // the object.
+                                      // base hierarchy can be deduced from
+                                      // 'attributes', if the hierarchy is
+                                      // firmware-bound or SVN-bound then
+                                      // this field carries additional metadata
+                                      // needed to derive the proof value for
+                                      // the object.
 #if __LONG_WIDTH__ == 32
     UINT8               _pad1[4]; /* 32 bit targets need padding */
 #endif
@@ -292,13 +292,13 @@ typedef struct HASH_OBJECT
     TPMI_ALG_PUBLIC   type;              // algorithm
     TPMI_ALG_HASH     nameAlg;           // name algorithm
     TPMA_OBJECT       objectAttributes;  // object attributes
-    
+
     // The data below is unique to a sequence object
     TPM2B_AUTH auth;  // authorization for use of sequence
     union
     {
-	HASH_STATE hashState[HASH_COUNT];
-	HMAC_STATE hmacState;
+        HASH_STATE hashState[HASH_COUNT];
+        HMAC_STATE hmacState;
     } state;
 } HASH_OBJECT;
 
@@ -436,46 +436,46 @@ typedef struct SESSION
 {
     SESSION_ATTRIBUTES attributes;  // session attributes
     UINT32             pcrCounter;  // PCR counter value when PCR is
-    // included (policy session)
-    // If no PCR is included, this
-    // value is 0.
+                                    // included (policy session)
+                                    // If no PCR is included, this
+                                    // value is 0.
     UINT64 startTime;               // The value in g_time when the session
-    // was started (policy session)
+                                    // was started (policy session)
     UINT64 timeout;                 // The timeout relative to g_time
-    // There is no timeout if this value
-    // is 0.
+                                    // There is no timeout if this value
+                                    // is 0.
     CLOCK_NONCE epoch;              // The g_clockEpoch value when the
-    // session was started. If g_clockEpoch
-    // does not match this value when the
-    // timeout is used, then
-    // then the command will fail.
+                                    // session was started. If g_clockEpoch
+                                    // does not match this value when the
+                                    // timeout is used, then
+                                    // then the command will fail.
     TPM_CC        commandCode;      // command code (policy session)
     TPM_ALG_ID    authHashAlg;      // session hash algorithm
     TPMA_LOCALITY commandLocality;  // command locality (policy session)
     TPMT_SYM_DEF  symmetric;        // session symmetric algorithm (if any)
     TPM2B_AUTH    sessionKey;       // session secret value used for
-    // this session
+                                    // this session
     TPM2B_NONCE nonceTPM;           // last TPM-generated nonce for
-    // generating HMAC and encryption keys
+                                    // generating HMAC and encryption keys
     union
     {
-	TPM2B_NAME boundEntity;  // value used to track the entity to
-	// which the session is bound
-	
-	TPM2B_DIGEST cpHash;        // the required cpHash value for the
-	// command being authorized
-	TPM2B_DIGEST nameHash;      // the required nameHash
-	TPM2B_DIGEST templateHash;  // the required template for creation
-	TPM2B_DIGEST pHash;         // the required parameter hash value for the
-	// command being authorized
+        TPM2B_NAME boundEntity;  // value used to track the entity to
+                                 // which the session is bound
+
+        TPM2B_DIGEST cpHash;        // the required cpHash value for the
+                                    // command being authorized
+        TPM2B_DIGEST nameHash;      // the required nameHash
+        TPM2B_DIGEST templateHash;  // the required template for creation
+        TPM2B_DIGEST pHash;         // the required parameter hash value for the
+                                    // command being authorized
     } u1;
-    
+
     union
     {
-	TPM2B_DIGEST auditDigest;   // audit session digest
-	TPM2B_DIGEST policyDigest;  // policyHash
+        TPM2B_DIGEST auditDigest;   // audit session digest
+        TPM2B_DIGEST policyDigest;  // policyHash
     } u2;                           // audit log and policyHash may
-    // share space to save memory
+                                    // share space to save memory
 } SESSION;
 
 #  define EXPIRES_ON_RESET   INT32_MIN
@@ -499,7 +499,7 @@ typedef BYTE SESSION_BUF[sizeof(SESSION)];
 typedef struct PCR_SAVE
 {
     FOR_EACH_HASH(PCR_SAVE_SPACE)
-    
+
     // This counter increments whenever the PCR are updated.
     // NOTE: A platform-specific specification may designate
     //       certain PCR changes as not causing this counter
@@ -531,11 +531,11 @@ typedef struct PCR_AUTH_VALUE
 // This enumeration is the possible startup types. The type is determined
 // by the combination of TPM2_ShutDown and TPM2_Startup.
 typedef enum
-    {
-	SU_RESET,
-	SU_RESTART,
-	SU_RESUME
-    } STARTUP_TYPE;
+{
+    SU_RESET,
+    SU_RESTART,
+    SU_RESUME
+} STARTUP_TYPE;
 
 //**NV
 
@@ -797,15 +797,15 @@ typedef struct
     // data provided by the platform library during manufacturing.
     // Opaque to the TPM Core library, but may be used by the platform library.
     BYTE platformReserved[PERSISTENT_DATA_PLATFORM_SPACE];
-    
+
     //*********************************************************************************
     //          Hierarchy
     //*********************************************************************************
     // The values in this section are related to the hierarchies.
-    
+
     BOOL disableClear;  // TRUE if TPM2_Clear() using
-    // lockoutAuth is disabled
-    
+                        // lockoutAuth is disabled
+
     // Hierarchy authPolicies
     TPMI_ALG_HASH ownerAlg;
     TPMI_ALG_HASH endorsementAlg;
@@ -813,12 +813,12 @@ typedef struct
     TPM2B_DIGEST  ownerPolicy;
     TPM2B_DIGEST  endorsementPolicy;
     TPM2B_DIGEST  lockoutPolicy;
-    
+
     // Hierarchy authValues
     TPM2B_AUTH ownerAuth;
     TPM2B_AUTH endorsementAuth;
     TPM2B_AUTH lockoutAuth;
-    
+
     // Primary Seeds
     TPM2B_SEED EPSeed;
     TPM2B_SEED SPSeed;
@@ -828,13 +828,13 @@ typedef struct
     SEED_COMPAT_LEVEL   SPSeedCompatLevel;
     SEED_COMPAT_LEVEL   PPSeedCompatLevel; // libtpms added end
     // Note there is a nullSeed in the state_reset memory.
-    
+
     // Hierarchy proofs
     TPM2B_PROOF phProof;
     TPM2B_PROOF shProof;
     TPM2B_PROOF ehProof;
     // Note there is a nullProof in the state_reset memory.
-    
+
     //*********************************************************************************
     //          Reset Events
     //*********************************************************************************
@@ -843,28 +843,28 @@ typedef struct
     // manufacture process. It is used to invalidate all saved contexts after a TPM
     // Reset.
     UINT64 totalResetCount;
-    
+
     // This counter increments on each TPM Reset. The counter is reset by
     // TPM2_Clear().
     UINT32 resetCount;
-    
-    //*********************************************************************************
-    //          PCR
-    //*********************************************************************************
-    // This structure hold the policies for those PCR that have an update policy.
-    // This implementation only supports a single group of PCR controlled by
-    // policy. If more are required, then this structure would be changed to
-    // an array.
+
+//*********************************************************************************
+//          PCR
+//*********************************************************************************
+// This structure hold the policies for those PCR that have an update policy.
+// This implementation only supports a single group of PCR controlled by
+// policy. If more are required, then this structure would be changed to
+// an array.
 #  if defined  NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     PCR_POLICY pcrPolicies;
 #  endif
-    
+
     // This structure indicates the allocation of PCR. The structure contains a
     // list of PCR allocations for each implemented algorithm. If no PCR are
     // allocated for an algorithm, a list entry still exists but the bit map
     // will contain no SET bits.
     TPML_PCR_SELECTION pcrAllocated;
-    
+
     //*********************************************************************************
     //          Physical Presence
     //*********************************************************************************
@@ -875,41 +875,41 @@ typedef struct
     //
     // These bits may be changed with TPM2_PP_Commands().
     BYTE ppList[(COMMAND_COUNT + 7) / 8];
-    
+
     //*********************************************************************************
     //          Dictionary attack values
     //*********************************************************************************
     // These values are used for dictionary attack tracking and control.
     UINT32 failedTries;  // the current count of unexpired
-    // authorization failures
-    
+                         // authorization failures
+
     UINT32 maxTries;  // number of unexpired authorization
-    // failures before the TPM is in
-    // lockout
-    
+                      // failures before the TPM is in
+                      // lockout
+
     UINT32 recoveryTime;  // time between authorization failures
-    // before failedTries is decremented
-    
+                          // before failedTries is decremented
+
     UINT32 lockoutRecovery;  // time that must expire between
-    // authorization failures associated
-    // with lockoutAuth
-    
+                             // authorization failures associated
+                             // with lockoutAuth
+
     BOOL lockOutAuthEnabled;  // TRUE if use of lockoutAuth is
-    // allowed
-    
+                              // allowed
+
     //*****************************************************************************
     //            Orderly State
     //*****************************************************************************
     // The orderly state for current cycle
     TPM_SU orderlyState;
-    
+
     //*****************************************************************************
     //           Command audit values.
     //*****************************************************************************
     BYTE          auditCommands[((COMMAND_COUNT + 1) + 7) / 8];
     TPMI_ALG_HASH auditHashAlg;
     UINT64        auditCounter;
-    
+
     //*****************************************************************************
     //           Algorithm selection
     //*****************************************************************************
@@ -917,7 +917,7 @@ typedef struct
     // The 'algorithmSet' value indicates the collection of algorithms that are
     // currently in used on the TPM.  The interpretation of value is vendor dependent.
     UINT32 algorithmSet;
-    
+
     //*****************************************************************************
     //           Firmware version
     //*****************************************************************************
@@ -927,26 +927,26 @@ typedef struct
     // is consistent with vendor needs. The values are maintained in RAM for simplified
     // access with a master version in NV.  These values are modified in a
     // vendor-specific way.
-    
+
     // g_firmwareV1 contains the more significant 32-bits of the vendor version number.
     // In the reference implementation, if this value is printed as a hex
     // value, it will have the format of YYYYMMDD
     UINT32 firmwareV1;
-    
+
     // g_firmwareV1 contains the less significant 32-bits of the vendor version number.
     // In the reference implementation, if this value is printed as a hex
     // value, it will have the format of 00 HH MM SS
     UINT32 firmwareV2;
-    //*****************************************************************************
-    //           Timer Epoch
-    //*****************************************************************************
-    // timeEpoch contains a nonce that has a vendor=specific size (should not be
-    // less than 8 bytes. This nonce changes when the clock epoch changes. The clock
-    // epoch changes when there is a discontinuity in the timing of the TPM.
+//*****************************************************************************
+//           Timer Epoch
+//*****************************************************************************
+// timeEpoch contains a nonce that has a vendor=specific size (should not be
+// less than 8 bytes. This nonce changes when the clock epoch changes. The clock
+// epoch changes when there is a discontinuity in the timing of the TPM.
 #  if !CLOCK_STOPS
     CLOCK_NONCE timeEpoch;
 #  endif
-    
+
 } PERSISTENT_DATA;
 
 EXTERN PERSISTENT_DATA gp;
@@ -962,18 +962,18 @@ typedef struct orderly_data
     //*****************************************************************************
     //           TIME
     //*****************************************************************************
-    
+
     // Clock has two parts. One is the state save part and one is the NV part. The
     // state save version is updated on each command. When the clock rolls over, the
     // NV version is updated. When the TPM starts up, if the TPM was shutdown in and
     // orderly way, then the sClock value is used to initialize the clock. If the
     // TPM shutdown was not orderly, then the persistent value is used and the safe
     // attribute is clear.
-    
+
     UINT64      clock;      // The orderly version of clock
     TPMI_YES_NO clockSafe;  // Indicates if the clock value is
-    // safe.
-    
+                            // safe.
+
     // In many implementations, the quality of the entropy available is not that
     // high. To compensate, the current value of the drbgState can be saved and
     // restored on each power cycle. This prevents the internal state from reverting
@@ -981,31 +981,31 @@ typedef struct orderly_data
     // of entropy. By keeping the old state and adding entropy, the entropy will
     // accumulate.
     DRBG_STATE drbgState;
-    
-    // These values allow the accumulation of self-healing time across orderly shutdown
-    // of the TPM.
+
+// These values allow the accumulation of self-healing time across orderly shutdown
+// of the TPM.
 #  if ACCUMULATE_SELF_HEAL_TIMER
     UINT64 selfHealTimer;  // current value of s_selfHealTimer
     UINT64 lockoutTimer;   // current value of s_lockoutTimer
     UINT64 time;           // current value of g_time at shutdown
 #  endif                   // ACCUMULATE_SELF_HEAL_TIMER
-    
+
 #ifndef __ACT_DISABLED	// libtpms added
 #error ACT not supported in ORDERLY_DATA!
-    // These are the ACT Timeout values. They are saved with the other timers
+// These are the ACT Timeout values. They are saved with the other timers
 #  define DefineActData(N) ACT_STATE ACT_##N;
     FOR_EACH_ACT(DefineActData)
-    
+
     // this is the 'signaled' attribute data for all the ACT. It is done this way so
     // that they can be manipulated by ACT number rather than having to access a
     // structure.
     UINT16 signaledACT;
     UINT16 preservedSignaled;
-    
+
 #  if ORDERLY_DATA_PADDING != 0
     BYTE reserved[ORDERLY_DATA_PADDING];
 #  endif
-    
+
 #endif			// libtpms added
 } ORDERLY_DATA;
 
@@ -1042,27 +1042,27 @@ typedef struct state_clear_data
     TPMI_ALG_HASH platformAlg;     // default reset is TPM_ALG_NULL
     TPM2B_DIGEST  platformPolicy;  // default reset is an Empty Buffer
     TPM2B_AUTH    platformAuth;    // default reset is an Empty Buffer
-    
+
     //*****************************************************************************
     //           PCR
     //*****************************************************************************
     // The set of PCR to be saved on Shutdown(STATE)
     PCR_SAVE pcrSave;  // default reset is 0...0
-    
+
     // This structure hold the authorization values for those PCR that have an
     // update authorization.
     // This implementation only supports a single group of PCR controlled by
     // authorization. If more are required, then this structure would be changed to
     // an array.
     PCR_AUTHVALUE pcrAuthValues;
-    
+
 #ifndef __ACT_DISABLED	// libtpms added
-    //*****************************************************************************
-    //           ACT
-    //*****************************************************************************
+//*****************************************************************************
+//           ACT
+//*****************************************************************************
 #  define DefineActPolicySpace(N) TPMT_HA act_##N;
     FOR_EACH_ACT(DefineActPolicySpace)
-    
+
 #  if STATE_CLEAR_DATA_PADDING != 0
     BYTE reserved[STATE_CLEAR_DATA_PADDING];
 #  endif
@@ -1089,14 +1089,14 @@ typedef struct state_reset_data
     //          Hierarchy Control
     //*****************************************************************************
     TPM2B_PROOF nullProof;  // The proof value associated with
-    // the TPM_RH_NULL hierarchy. The
-    // default reset value is from the RNG.
-    
+                            // the TPM_RH_NULL hierarchy. The
+                            // default reset value is from the RNG.
+
     TPM2B_SEED nullSeed;  // The seed value for the TPM_RN_NULL
+                          // hierarchy. The default reset value
+                          // is from the RNG.
     SEED_COMPAT_LEVEL   nullSeedCompatLevel; // libtpms added
-    // hierarchy. The default reset value
-    // is from the RNG.
-    
+
     //*****************************************************************************
     //           Context
     //*****************************************************************************
@@ -1107,21 +1107,21 @@ typedef struct state_reset_data
     // If 'clearCount' is at its maximum value when the TPM receives a Shutdown(STATE),
     // the TPM will return TPM_RC_RANGE and the TPM will only accept Shutdown(CLEAR).
     UINT32 clearCount;  // The default reset value is 0.
-    
+
     UINT64 objectContextID;  // This is the context ID for a saved
-    //  object context. The default reset
-    //  value is 0.
+                             //  object context. The default reset
+                             //  value is 0.
     CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];  // This array contains
-    // contains the values used to track
-    // the version numbers of saved
-    // contexts (see
-    // Session.c in for details). The
-    // default reset value is {0}.
-    
+        // contains the values used to track
+        // the version numbers of saved
+        // contexts (see
+        // Session.c in for details). The
+        // default reset value is {0}.
+
     CONTEXT_COUNTER contextCounter;  // This is the value from which the
-    // 'contextID' is derived. The
-    // default reset value is {0}.
-    
+                                     // 'contextID' is derived. The
+                                     // default reset value is {0}.
+
     //*****************************************************************************
     //           Command Audit
     //*****************************************************************************
@@ -1130,18 +1130,18 @@ typedef struct state_reset_data
     // TPM will extend the cpHash and rpHash for the command to this value. If this
     // digest was the Zero Digest before the cpHash was extended, the audit counter
     // is incremented.
-    
+
     TPM2B_DIGEST commandAuditDigest;  // This value is set to an Empty Digest
-    // by TPM2_GetCommandAuditDigest() or a
-    // TPM Reset.
-    
+                                      // by TPM2_GetCommandAuditDigest() or a
+                                      // TPM Reset.
+
     //*****************************************************************************
     //           Boot counter
     //*****************************************************************************
-    
+
     UINT32 restartCount;  // This counter counts TPM Restarts.
-    // The default reset value is 0.
-    
+                          // The default reset value is 0.
+
     //*********************************************************************************
     //            PCR
     //*********************************************************************************
@@ -1153,25 +1153,25 @@ typedef struct state_reset_data
     // NOTE: A platform-specific specification may designate that certain PCR changes
     //       do not increment this counter to increment.
     UINT32 pcrCounter;  // The default reset value is 0.
-    
+
 #  if ALG_ECC
-    
+
     //*****************************************************************************
     //         ECDAA
     //*****************************************************************************
     UINT64 commitCounter;  // This counter increments each time
-    // TPM2_Commit() returns
-    // TPM_RC_SUCCESS. The default reset
-    // value is 0.
-    
+                           // TPM2_Commit() returns
+                           // TPM_RC_SUCCESS. The default reset
+                           // value is 0.
+
     TPM2B_NONCE commitNonce;  // This random value is used to compute
-    // the commit values. The default reset
-    // value is from the RNG.
-    
+                              // the commit values. The default reset
+                              // value is from the RNG.
+
     // This implementation relies on the number of bits in g_commitArray being a
     // power of 2 (8, 16, 32, 64, etc.) and no greater than 64K.
     BYTE commitArray[16];  // The default reset value is {0}.
-    
+
 #  endif  // ALG_ECC
 #  if STATE_RESET_DATA_PADDING != 0
     BYTE reserved[STATE_RESET_DATA_PADDING];
@@ -1225,14 +1225,14 @@ EXTERN CONTEXT_SLOT s_ContextSlotMask;
 //** Global Macro Definitions
 // The NV_READ_PERSISTENT and NV_WRITE_PERSISTENT macros are used to access members
 // of the PERSISTENT_DATA structure in NV.
-#  define NV_READ_PERSISTENT(to, from)					\
-    NvRead(&to, offsetof(PERSISTENT_DATA, from), sizeof(to))
+#  define NV_READ_PERSISTENT(to, from) \
+      NvRead(&to, offsetof(PERSISTENT_DATA, from), sizeof(to))
 
-#  define NV_WRITE_PERSISTENT(to, from)					\
-    NvWrite(offsetof(PERSISTENT_DATA, to), sizeof(gp.to), &from)
+#  define NV_WRITE_PERSISTENT(to, from) \
+      NvWrite(offsetof(PERSISTENT_DATA, to), sizeof(gp.to), &from)
 
-#  define CLEAR_PERSISTENT(item)					\
-    NvClearPersistent(offsetof(PERSISTENT_DATA, item), sizeof(gp.item))
+#  define CLEAR_PERSISTENT(item) \
+      NvClearPersistent(offsetof(PERSISTENT_DATA, item), sizeof(gp.item))
 
 #  define NV_SYNC_PERSISTENT(item) NV_WRITE_PERSISTENT(item, gp.item)
 
@@ -1248,9 +1248,9 @@ typedef struct _COMMAND_FLAGS_
 {
 #if LITTLE_ENDIAN_TPM == YES               /* libtpms added */
     unsigned trialPolicy : 1;  //1) If SET, one of the handles references a
-    //   trial policy and authorization may be
-    //   skipped. This is only allowed for a policy
-    //   command.
+                               //   trial policy and authorization may be
+                               //   skipped. This is only allowed for a policy
+                               //   command.
     unsigned    reserved : 31;     //2-31) /* libtpms added begin */
 #endif
 #if BIG_ENDIAN_TPM == YES
@@ -1276,20 +1276,20 @@ typedef struct COMMAND
     TPM_CC        code;                  // the parsed command code
     COMMAND_INDEX index;                 // the computed command index
     UINT32        handleNum;             // the number of entity handles in the
-    //   handle area of the command
+                                         //   handle area of the command
     TPM_HANDLE handles[MAX_HANDLE_NUM];  // the parsed handle values
     UINT32     sessionNum;               // the number of sessions found
     INT32      parameterSize;            // starts out with the parsed command size
-    // and is reduced and values are
-    // unmarshaled. Just before calling the
-    // command actions, this should be zero.
-    // After the command actions, this number
-    // should grow as values are marshaled
-    // in to the response buffer.
+                                         // and is reduced and values are
+                                         // unmarshaled. Just before calling the
+                                         // command actions, this should be zero.
+                                         // After the command actions, this number
+                                         // should grow as values are marshaled
+                                         // in to the response buffer.
     INT32 authSize;                      // this is initialized with the parsed size
-    // of authorizationSize field and should
-    // be zero when the authorizations are
-    // parsed.
+                                         // of authorizationSize field and should
+                                         // be zero when the authorizations are
+                                         // parsed.
     BYTE* parameterBuffer;               // input to ExecuteCommand
     BYTE* responseBuffer;                // input to ExecuteCommand
     FOR_EACH_HASH(CP_HASH)               // space for the CP hashes
@@ -1501,7 +1501,7 @@ EXTERN int s_freeSessionSlots;
 // dispatch code will marshal the response values into the final output buffer.
 EXTERN UINT64 s_actionIoBuffer[768];  // action I/O buffer
 EXTERN UINT32 s_actionIoAllocation;   // number of UIN64 allocated for the
-// action input structure
+                                      // action input structure
 #  endif                              // IO_BUFFER_C
 
 //*****************************************************************************

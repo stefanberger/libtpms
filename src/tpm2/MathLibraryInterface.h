@@ -112,10 +112,10 @@ LIB_EXPORT Crypt_Int* ExtMath_Initialize_Int(Crypt_Int* buffer, NUMBYTES bits);
 // initialized with it's maximum size. Byte-based Initializers must be MSB first
 // (TPM external format).
 LIB_EXPORT Crypt_Int* ExtMath_IntFromBytes(
-					   Crypt_Int* buffer, const BYTE* input, NUMBYTES byteCount);
+    Crypt_Int* buffer, const BYTE* input, NUMBYTES byteCount);
 // Convert Crypt_Int into external format as a byte array.
 LIB_EXPORT BOOL ExtMath_IntToBytes(
-				   const Crypt_Int* value, BYTE* output, NUMBYTES* pByteCount);
+    const Crypt_Int* value, BYTE* output, NUMBYTES* pByteCount);
 // Set Crypt_Int to a given small value. Words are native format.
 LIB_EXPORT Crypt_Int* ExtMath_SetWord(Crypt_Int* buffer, crypt_uword_t word);
 
@@ -135,45 +135,45 @@ LIB_EXPORT BOOL ExtMath_Copy(Crypt_Int* out, const Crypt_Int* in);
 //** ExtMath_Multiply()
 // Multiplies two numbers and returns the result
 LIB_EXPORT BOOL ExtMath_Multiply(
-				 Crypt_Int* result, const Crypt_Int* multiplicand, const Crypt_Int* multiplier);
+    Crypt_Int* result, const Crypt_Int* multiplicand, const Crypt_Int* multiplier);
 
 //** ExtMath_Divide()
 // This function divides two Crypt_Int* values. The function returns FALSE if there is
 // an error in the operation. Quotient may be null, in which case this function returns
 // only the remainder.
 LIB_EXPORT BOOL ExtMath_Divide(Crypt_Int*       quotient,
-			       Crypt_Int*       remainder,
-			       const Crypt_Int* dividend,
-			       const Crypt_Int* divisor);
+                               Crypt_Int*       remainder,
+                               const Crypt_Int* dividend,
+                               const Crypt_Int* divisor);
 
 //** ExtMath_GCD()
 // Get the greatest common divisor of two numbers. This function is only needed
 // when the TPM implements RSA.
 LIB_EXPORT BOOL ExtMath_GCD(
-			    Crypt_Int* gcd, const Crypt_Int* number1, const Crypt_Int* number2);
+    Crypt_Int* gcd, const Crypt_Int* number1, const Crypt_Int* number2);
 
 //*** ExtMath_Add()
 // This function adds two Crypt_Int* values. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_Add(
-			    Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
+    Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
 
 //*** ExtMath_AddWord()
 // This function adds a word value to a Crypt_Int*. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_AddWord(
-				Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
+    Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
 
 //*** ExtMath_Subtract()
 // This function does subtraction of two Crypt_Int* values and returns result = op1 - op2
 // when op1 is greater than op2. If op2 is greater than op1, then a fault is
 // generated. This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_Subtract(
-				 Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
+    Crypt_Int* result, const Crypt_Int* op1, const Crypt_Int* op2);
 
 //*** ExtMath_SubtractWord()
 // This function subtracts a word value from a Crypt_Int*. This function always
 // returns TRUE.
 LIB_EXPORT BOOL ExtMath_SubtractWord(
-				     Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
+    Crypt_Int* result, const Crypt_Int* op, crypt_uword_t word);
 
 // ###############################
 // Modular Arithmetic, writ large
@@ -189,25 +189,25 @@ LIB_EXPORT BOOL ExtMath_Mod(Crypt_Int* valueAndResult, const Crypt_Int* modulus)
 //** ExtMath_ModMult()
 // Compute result = (op1 * op2) mod modulus
 LIB_EXPORT BOOL ExtMath_ModMult(Crypt_Int*       result,
-				const Crypt_Int* op1,
-				const Crypt_Int* op2,
-				const Crypt_Int* modulus);
+                                const Crypt_Int* op1,
+                                const Crypt_Int* op2,
+                                const Crypt_Int* modulus);
 
 //** ExtMath_ModExp()
 // Compute result = (number ^ exponent) mod modulus
 // where ^ indicates exponentiation.
 // This function is only needed when the TPM implements RSA.
 LIB_EXPORT BOOL ExtMath_ModExp(Crypt_Int*       result,
-			       const Crypt_Int* number,
-			       const Crypt_Int* exponent,
-			       const Crypt_Int* modulus);
+                               const Crypt_Int* number,
+                               const Crypt_Int* exponent,
+                               const Crypt_Int* modulus);
 
 //** ExtMath_ModInverse()
 // Compute the modular multiplicative inverse.
 // result = (number ^ -1) mod modulus
 // This function is only needed when the TPM implements RSA.
 LIB_EXPORT BOOL ExtMath_ModInverse(
-				   Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* modulus);
+    Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* modulus);
 
 //** ExtMath_ModInversePrime()
 // Compute the modular multiplicative inverse. This is an optimized function for
@@ -218,14 +218,14 @@ LIB_EXPORT BOOL ExtMath_ModInverse(
 // modulus is prime via a timing side-channel. In many cases (e.g. ECC primes),
 // the prime is not sensitive and this optimized route can be used.
 LIB_EXPORT BOOL ExtMath_ModInversePrime(
-					Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* primeModulus);
+    Crypt_Int* result, const Crypt_Int* number, const Crypt_Int* primeModulus);
 
 //*** ExtMath_ModWord()
 // compute numerator
 // This function does modular division of a big number when the modulus is a
 // word value.
 LIB_EXPORT crypt_word_t ExtMath_ModWord(const Crypt_Int* numerator,
-					crypt_word_t     modulus);
+                                        crypt_word_t     modulus);
 
 // ###############################
 // Queries
@@ -296,8 +296,8 @@ LIB_EXPORT unsigned ExtMath_SizeInBits(const Crypt_Int* n);
 // should return FALSE, and the TPM will enter failure mode.
 // Return Type: BOOL
 LIB_EXPORT BOOL ExtMath_SetBit(Crypt_Int*   bn,     // IN/OUT: big number to modify
-			       unsigned int bitNum  // IN: Bit number to SET
-			       );
+                               unsigned int bitNum  // IN: Bit number to SET
+);
 
 //*** ExtMath_TestBit()
 // This function is used to check to see if a bit is SET in a bignum_t. The 0th bit
@@ -306,8 +306,8 @@ LIB_EXPORT BOOL ExtMath_SetBit(Crypt_Int*   bn,     // IN/OUT: big number to mod
 //      TRUE(1)         the bit is set
 //      FALSE(0)        the bit is not set or the number is out of range
 LIB_EXPORT BOOL ExtMath_TestBit(Crypt_Int*   bn,     // IN: number to check
-				unsigned int bitNum  // IN: bit to test
-				);
+                                unsigned int bitNum  // IN: bit to test
+);
 
 //***ExtMath_MaskBits()
 // This function is used to mask off high order bits of a big number.
@@ -318,15 +318,15 @@ LIB_EXPORT BOOL ExtMath_TestBit(Crypt_Int*   bn,     // IN: number to check
 //      TRUE(1)         result masked
 //      FALSE(0)        the input was not as large as the mask
 LIB_EXPORT BOOL ExtMath_MaskBits(
-				 Crypt_Int*    bn,      // IN/OUT: number to mask
-				 crypt_uword_t maskBit  // IN: the bit number for the mask.
-				 );
+    Crypt_Int*    bn,      // IN/OUT: number to mask
+    crypt_uword_t maskBit  // IN: the bit number for the mask.
+);
 
 //*** ExtMath_ShiftRight()
 // This function will shift a Crypt_Int* to the right by the shiftAmount.
 // This function always returns TRUE.
 LIB_EXPORT BOOL ExtMath_ShiftRight(
-				   Crypt_Int* result, const Crypt_Int* toShift, uint32_t shiftAmount);
+    Crypt_Int* result, const Crypt_Int* toShift, uint32_t shiftAmount);
 
 // ***************************************************************************
 // ECC Functions
@@ -337,7 +337,7 @@ LIB_EXPORT BOOL ExtMath_ShiftRight(
 
 //** initialize point structure given memory size of each coordinate
 LIB_EXPORT Crypt_Point* ExtEcc_Initialize_Point(Crypt_Point* buffer,
-						NUMBYTES     bitsPerCoord);
+                                                NUMBYTES     bitsPerCoord);
 
 //** ExtEcc_CurveInitialize()
 // This function is used to initialize a Crypt_EccCurve structure. The
@@ -345,7 +345,7 @@ LIB_EXPORT Crypt_Point* ExtEcc_Initialize_Point(Crypt_Point* buffer,
 // set by a different function. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT const Crypt_EccCurve* ExtEcc_CurveInitialize(Crypt_EccCurve* E,
-							TPM_ECC_CURVE   curveId);
+                                                        TPM_ECC_CURVE   curveId);
 
 // #################
 // DESTRUCTOR - See Warning
@@ -362,13 +362,13 @@ LIB_EXPORT void ExtEcc_CurveFree(const Crypt_EccCurve* E);
 // #################
 //** point structure to/from raw coordinate buffers.
 LIB_EXPORT Crypt_Point* ExtEcc_PointFromBytes(Crypt_Point* buffer,
-					      const BYTE*  x,
-					      NUMBYTES     nBytesX,
-					      const BYTE*  y,
-					      NUMBYTES     nBytesY);
+                                              const BYTE*  x,
+                                              NUMBYTES     nBytesX,
+                                              const BYTE*  y,
+                                              NUMBYTES     nBytesY);
 
 LIB_EXPORT BOOL         ExtEcc_PointToBytes(
-					    const Crypt_Point* point, BYTE* x, NUMBYTES* nBytesX, BYTE* y, NUMBYTES* nBytesY);
+            const Crypt_Point* point, BYTE* x, NUMBYTES* nBytesX, BYTE* y, NUMBYTES* nBytesY);
 
 // ####################
 // ECC Point Operations
@@ -379,29 +379,29 @@ LIB_EXPORT BOOL         ExtEcc_PointToBytes(
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT BOOL ExtEcc_PointMultiply(Crypt_Point*          R,
-				     const Crypt_Point*    S,
-				     const Crypt_Int*      d,
-				     const Crypt_EccCurve* E);
+                                     const Crypt_Point*    S,
+                                     const Crypt_Int*      d,
+                                     const Crypt_EccCurve* E);
 
 //** ExtEcc_PointMultiplyAndAdd()
 // This function does a point multiply of the form R = [d]S + [u]Q. A return of
 // FALSE indicates that the result was the point at infinity. This function is only
 // needed if the TPM supports ECC.
 LIB_EXPORT BOOL ExtEcc_PointMultiplyAndAdd(Crypt_Point*          R,
-					   const Crypt_Point*    S,
-					   const Crypt_Int*      d,
-					   const Crypt_Point*    Q,
-					   const Crypt_Int*      u,
-					   const Crypt_EccCurve* E);
+                                           const Crypt_Point*    S,
+                                           const Crypt_Int*      d,
+                                           const Crypt_Point*    Q,
+                                           const Crypt_Int*      u,
+                                           const Crypt_EccCurve* E);
 
 //** ExtEcc_PointAdd()
 // This function does a point add R = S + Q. A return of FALSE
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT BOOL ExtEcc_PointAdd(Crypt_Point*          R,
-				const Crypt_Point*    S,
-				const Crypt_Point*    Q,
-				const Crypt_EccCurve* E);
+                                const Crypt_Point*    S,
+                                const Crypt_Point*    Q,
+                                const Crypt_EccCurve* E);
 
 // #####################
 // ECC Point Information

@@ -95,7 +95,7 @@ BOOL BnMathLibraryCompatibilityCheck(void);
 //** BnModMult()
 // Does 'op1' * 'op2' and divide by 'modulus' returning the remainder of the divide.
 LIB_EXPORT BOOL BnModMult(
-			  bigNum result, bigConst op1, bigConst op2, bigConst modulus);
+    bigNum result, bigConst op1, bigConst op2, bigConst modulus);
 
 //** BnMult()
 // Multiplies two numbers and returns the result
@@ -105,7 +105,7 @@ LIB_EXPORT BOOL BnMult(bigNum result, bigConst multiplicand, bigConst multiplier
 // This function divides two bigNum values. The function returns FALSE if there is
 // an error in the operation.
 LIB_EXPORT BOOL BnDiv(
-		      bigNum quotient, bigNum remainder, bigConst dividend, bigConst divisor);
+    bigNum quotient, bigNum remainder, bigConst dividend, bigConst divisor);
 //** BnMod()
 #define BnMod(a, b) BnDiv(NULL, (a), (a), (b))
 
@@ -119,11 +119,11 @@ LIB_EXPORT BOOL BnGcd(bigNum gcd, bigConst number1, bigConst number2);
 // Do modular exponentiation using bigNum values. This function is only needed
 // when the TPM implements RSA.
 LIB_EXPORT BOOL BnModExp(
-			 bigNum result, bigConst number, bigConst exponent, bigConst modulus);
+    bigNum result, bigConst number, bigConst exponent, bigConst modulus);
 #endif  // ALG_RSA
 
-	//** BnModInverse()
-	// Modular multiplicative inverse.
+//** BnModInverse()
+// Modular multiplicative inverse.
 LIB_EXPORT BOOL BnModInverse(bigNum result, bigConst number, bigConst modulus);
 
 #if ALG_ECC
@@ -145,25 +145,25 @@ LIB_EXPORT void BnCurveFree(bigCurveData* E);
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT BOOL BnEccModMult(
-			     bigPoint R, pointConst S, bigConst d, const bigCurveData* E);
+    bigPoint R, pointConst S, bigConst d, const bigCurveData* E);
 
 //** BnEccModMult2()
 // This function does a point multiply of the form R = [d]S + [u]Q. A return of
 // FALSE indicates that the result was the point at infinity. This function is only
 // needed if the TPM supports ECC.
 LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,
-			      pointConst          S,
-			      bigConst            d,
-			      pointConst          Q,
-			      bigConst            u,
-			      const bigCurveData* E);
+                              pointConst          S,
+                              bigConst            d,
+                              pointConst          Q,
+                              bigConst            u,
+                              const bigCurveData* E);
 
 //** BnEccAdd()
 // This function does a point add R = S + Q. A return of FALSE
 // indicates that the result was the point at infinity. This function is only needed
 // if the TPM supports ECC.
 LIB_EXPORT BOOL BnEccAdd(
-			 bigPoint R, pointConst S, pointConst Q, const bigCurveData* E);
+    bigPoint R, pointConst S, pointConst Q, const bigCurveData* E);
 
 #endif  // ALG_ECC
 

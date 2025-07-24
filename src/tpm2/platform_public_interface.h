@@ -58,6 +58,7 @@
 /*										*/
 /********************************************************************************/
 
+
 // This file contains the interface into the platform layer from external callers.
 // External callers are expected to be implementation specific, and may be a simulator
 // or some other implementation
@@ -112,11 +113,11 @@ LIB_EXPORT void _plat__NvErrors(int recoverable, int unrecoverable);
 //***_plat__NVDisable()
 // Disable NV memory
 LIB_EXPORT void _plat__NVDisable(
-				 void*  platParameter,  // platform specific parameter
-				 size_t paramSize       // size of parameter. If size == 0, then
-				 // parameter is a sizeof(void*) scalar and should
-				 // be cast to an integer (intptr_t), not dereferenced.
-				 );
+    void*  platParameter,  // platform specific parameter
+    size_t paramSize       // size of parameter. If size == 0, then
+                           // parameter is a sizeof(void*) scalar and should
+                           // be cast to an integer (intptr_t), not dereferenced.
+);
 
 //***_plat__SetNvAvail()
 // Set the current NV state to available.  This function is for testing purpose
@@ -137,7 +138,7 @@ LIB_EXPORT int _plat__NVNeedsManufacture(void);
 
 //*** _plat__ACT_GetPending()
 LIB_EXPORT int _plat__ACT_GetPending(uint32_t act  //IN: number of ACT to check
-				     );
+);
 
 //*** _plat__ACT_Tick()
 // This processes the once-per-second clock tick from the hardware. This is set up
@@ -196,10 +197,10 @@ LIB_EXPORT void _plat__SetTpmFirmwareSvn(uint16_t svn);
 // time, the TPM will be in failure mode so ExecuteCommand will simply build
 // a failure response and return.
 LIB_EXPORT void _plat__RunCommand(
-				  uint32_t        requestSize,   // IN: command buffer size
-				  unsigned char*  request,       // IN: command buffer
-				  uint32_t*       responseSize,  // IN/OUT: response buffer size
-				  unsigned char** response       // IN/OUT: response buffer
-				  );
+    uint32_t        requestSize,   // IN: command buffer size
+    unsigned char*  request,       // IN: command buffer
+    uint32_t*       responseSize,  // IN/OUT: response buffer size
+    unsigned char** response       // IN/OUT: response buffer
+);
 
 #endif  // _PLATFORM_PUBLIC_INTERFACE_H_

@@ -82,15 +82,15 @@
 // and turns signaling back on if necessary.
 #ifndef __ACT_DISABLED	// libtpms added
 static void _ActResume(UINT32     act,     //IN: the act number
-		       ACT_STATE* actData  //IN: pointer to the saved ACT data
-		       )
+                       ACT_STATE* actData  //IN: pointer to the saved ACT data
+)
 {
     // If the act was non-zero, then restore the counter value.
     if(actData->remaining > 0)
-	_plat__ACT_UpdateCounter(act, actData->remaining);
+        _plat__ACT_UpdateCounter(act, actData->remaining);
     // if the counter was zero and the ACT signaling, enable the signaling.
     else if(go.signaledACT & (1 << act))
-	_plat__ACT_SetSignaled(act, TRUE);
+        _plat__ACT_SetSignaled(act, TRUE);
 }
 #endif			// libtpms added
 
@@ -100,35 +100,35 @@ BOOL ActStartup(STARTUP_TYPE type)
 {
     // Reset all the ACT hardware
     _plat__ACT_Initialize();
-    
+
     // If this not a cold start, copy all the current 'signaled' settings to
     // 'preservedSignaled'.
 #ifndef __ACT_DISABLED	// libtpms added
     if(g_powerWasLost)
-	go.preservedSignaled = 0;
+        go.preservedSignaled = 0;
     else
-	go.preservedSignaled |= go.signaledACT;
+        go.preservedSignaled |= go.signaledACT;
 #endif			// libtpms added
-    
+
     // For TPM_RESET or TPM_RESTART, the ACTs will all be disabled and the output
     // de-asserted.
     if(type != SU_RESUME)
-	{
+    {
 #ifndef __ACT_DISABLED	// libtpms added
-	    go.signaledACT = 0;
+        go.signaledACT = 0;
 #endif			// libtpms added
-#  define CLEAR_ACT_POLICY(N)					      \
-	    go.ACT_##N.hashAlg           = TPM_ALG_NULL;	      \
-	    go.ACT_##N.authPolicy.b.size = 0;
-	    FOR_EACH_ACT(CLEAR_ACT_POLICY)
-		}
+#  define CLEAR_ACT_POLICY(N)                      \
+      go.ACT_##N.hashAlg           = TPM_ALG_NULL; \
+      go.ACT_##N.authPolicy.b.size = 0;
+        FOR_EACH_ACT(CLEAR_ACT_POLICY)
+    }
     else
-	{
-	    // Resume each of the implemented ACT
+    {
+        // Resume each of the implemented ACT
 #  define RESUME_ACT(N) _ActResume(0x##N, &go.ACT_##N);
-	    
-	    FOR_EACH_ACT(RESUME_ACT)
-		}
+
+        FOR_EACH_ACT(RESUME_ACT)
+    }
     // set no ACT updated since last startup. This is to enable the halving of the
     // timeout value
     s_ActUpdated = 0;
@@ -146,13 +146,13 @@ static void _ActSaveState(UINT32 act, P_ACT_STATE actData)
     // If the ACT hasn't been updated since the last startup, then it should be
     // be halved.
     if((s_ActUpdated & (1 << act)) == 0)
-	{
-	    // Don't halve if the count is set to max or if halving would make it zero
-	    if((actData->remaining != UINT32_MAX) && (actData->remaining > 1))
-		actData->remaining /= 2;
-	}
+    {
+        // Don't halve if the count is set to max or if halving would make it zero
+        if((actData->remaining != UINT32_MAX) && (actData->remaining > 1))
+            actData->remaining /= 2;
+    }
     if(_plat__ACT_GetSignaled(act))
-	go.signaledACT |= (1 << act);
+        go.signaledACT |= (1 << act);
 }
 
 //*** ActGetSignaled()
@@ -168,7 +168,7 @@ BOOL ActGetSignaled(TPM_RH actHandle)
 //***ActShutdown()
 // This function saves the current state of the counters
 BOOL ActShutdown(TPM_SU state  //IN: the type of the shutdown.
-		 )
+)
 {
     // if this is not shutdown state, then the only type of startup is TPM_RESTART
     // so the timer values will be cleared. If this is shutdown state, get the current
@@ -176,16 +176,16 @@ BOOL ActShutdown(TPM_SU state  //IN: the type of the shutdown.
     // since the last restart, divide the time by 2 so that there is no attack on the
     // countdown by saving the countdown state early and then not using the TPM.
     if(state == TPM_SU_STATE)
-	{
-	    // This will be populated as each of the ACT is queried
+    {
+        // This will be populated as each of the ACT is queried
 #ifndef __ACT_DISABLED		// libtpms added
-	    go.signaledACT = 0;
+        go.signaledACT = 0;
 #endif				// libtpms added
-	    // Get the current count and the signaled state
+        // Get the current count and the signaled state
 #  define SAVE_ACT_STATE(N) _ActSaveState(0x##N, &go.ACT_##N);
-	    
-	    FOR_EACH_ACT(SAVE_ACT_STATE);
-	}
+
+        FOR_EACH_ACT(SAVE_ACT_STATE);
+    }
     return TRUE;
 }
 
@@ -196,16 +196,16 @@ BOOL ActIsImplemented(UINT32 act)
 {
     // This switch accounts for the TPM implemented values.
     switch(act)
-	{
+    {
 #ifndef __ACT_DISABLED	// libtpms added
-	    FOR_EACH_ACT(CASE_ACT_NUMBER)
-		// This ensures that the platform implements the values implemented by
-		// the TPM
-		return _plat__ACT_GetImplemented(act);
+        FOR_EACH_ACT(CASE_ACT_NUMBER)
+        // This ensures that the platform implements the values implemented by
+        // the TPM
+        return _plat__ACT_GetImplemented(act);
 #endif			// libtpms added
-	  default:
-	    break;
-	}
+        default:
+            break;
+    }
     return FALSE;
 }
 
@@ -215,8 +215,8 @@ BOOL ActIsImplemented(UINT32 act)
 // it returns TPM_RC_RETRY so that the update can be tried again later.
 TPM_RC
 ActCounterUpdate(TPM_RH handle,   //IN: the handle of the act
-		 UINT32 newValue  //IN: the value to set in the ACT
-		 )
+                 UINT32 newValue  //IN: the value to set in the ACT
+)
 {
     UINT32 act;
     TPM_RC result;
@@ -224,31 +224,31 @@ ActCounterUpdate(TPM_RH handle,   //IN: the handle of the act
     act = handle - TPM_RH_ACT_0;
     // This should never fail, but...
     if(!_plat__ACT_GetImplemented(act))
-	result = TPM_RC_VALUE;
+        result = TPM_RC_VALUE;
     else
-	{
-	    // Will need to clear orderly so fail if we are orderly and NV is
-	    // not available
-	    if(NV_IS_ORDERLY)
-		RETURN_IF_NV_IS_NOT_AVAILABLE;
-	    // if the attempt to update the counter fails, it means that there is an
-	    // update pending so wait until it has occurred and then do an update.
-	    if(!_plat__ACT_UpdateCounter(act, newValue))
-		result = TPM_RC_RETRY;
-	    else
-		{
-		    // Indicate that the ACT has been updated since last TPM2_Startup().
-		    s_ActUpdated |= (UINT16)(1 << act);
-		    
-		    // Clear the preservedSignaled attribute.
-		    go.preservedSignaled &= ~((UINT16)(1 << act));
-		    
-		    // Need to clear the orderly flag
-		    g_clearOrderly = TRUE;
-		    
-		    result         = TPM_RC_SUCCESS;
-		}
-	}
+    {
+        // Will need to clear orderly so fail if we are orderly and NV is
+        // not available
+        if(NV_IS_ORDERLY)
+            RETURN_IF_NV_IS_NOT_AVAILABLE;
+        // if the attempt to update the counter fails, it means that there is an
+        // update pending so wait until it has occurred and then do an update.
+        if(!_plat__ACT_UpdateCounter(act, newValue))
+            result = TPM_RC_RETRY;
+        else
+        {
+            // Indicate that the ACT has been updated since last TPM2_Startup().
+            s_ActUpdated |= (UINT16)(1 << act);
+
+            // Clear the preservedSignaled attribute.
+            go.preservedSignaled &= ~((UINT16)(1 << act));
+
+            // Need to clear the orderly flag
+            g_clearOrderly = TRUE;
+
+            result         = TPM_RC_SUCCESS;
+        }
+    }
     return result;
 }
 #endif		// libtpms added
@@ -260,49 +260,49 @@ ActCounterUpdate(TPM_RH handle,   //IN: the handle of the act
 //      NO              if no more ACT data to
 TPMI_YES_NO
 ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starting ACT
-		     UINT32         maxCount,   // IN: maximum allowed return values
-		     TPML_ACT_DATA* actList     // OUT: ACT data list
-		     )
+                     UINT32         maxCount,   // IN: maximum allowed return values
+                     TPML_ACT_DATA* actList     // OUT: ACT data list
+)
 {
     // Initialize output property list
     actList->count = 0;
-    
+
     // Make sure that the starting handle value is in range (again)
     if((actHandle < TPM_RH_ACT_0) || (actHandle > TPM_RH_ACT_F))
-	return FALSE;
+        return FALSE;
     // The maximum count of curves we may return is MAX_ECC_CURVES
     if(maxCount > MAX_ACT_DATA)
 	maxCount = MAX_ACT_DATA;
     // Scan the ACT data from the starting ACT
     for(; actHandle <= TPM_RH_ACT_F; actHandle++)
-	{
-	    UINT32 act = actHandle - TPM_RH_ACT_0;
-	    if(actList->count < maxCount)
-		{
-		    if(ActIsImplemented(act))
-			{
-			    TPMS_ACT_DATA* actData = &actList->actData[actList->count];
-			    //
-			    memset(&actData->attributes, 0, sizeof(actData->attributes));
-			    actData->handle  = actHandle;
-			    actData->timeout = _plat__ACT_GetRemaining(act);
-			    if(_plat__ACT_GetSignaled(act))
-				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
-			    else
-				CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+    {
+        UINT32 act = actHandle - TPM_RH_ACT_0;
+        if(actList->count < maxCount)
+        {
+            if(ActIsImplemented(act))
+            {
+                TPMS_ACT_DATA* actData = &actList->actData[actList->count];
+                //
+                memset(&actData->attributes, 0, sizeof(actData->attributes));
+                actData->handle  = actHandle;
+                actData->timeout = _plat__ACT_GetRemaining(act);
+                if(_plat__ACT_GetSignaled(act))
+                    SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+                else
+                    CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
 #ifndef __ACT_DISABLED	// libtpms added
-			    if(go.preservedSignaled & (1 << act))
-				SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
+                if(go.preservedSignaled & (1 << act))
+                    SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
 #endif			// libtpms added
-			    actList->count++;
-			}
-		}
-	    else
-		{
-		    if(_plat__ACT_GetImplemented(act))
-			return YES;
-		}
-	}
+                actList->count++;
+            }
+        }
+        else
+        {
+            if(_plat__ACT_GetImplemented(act))
+                return YES;
+        }
+    }
     // If we get here, either all of the ACT values were put in the list, or the list
     // was filled and there are no more ACT values to return
     return NO;
@@ -312,24 +312,24 @@ ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starti
 //*** ActGetOneCapability()
 // This function returns an ACT's capability, if present.
 BOOL ActGetOneCapability(TPM_HANDLE     actHandle,  // IN: the handle for the ACT
-			 TPMS_ACT_DATA* actData     // OUT: ACT data
-			 )
+                         TPMS_ACT_DATA* actData     // OUT: ACT data
+)
 {
     UINT32 act = actHandle - TPM_RH_ACT_0;
-    
+
     if(ActIsImplemented(actHandle - TPM_RH_ACT_0))
-	{
-	    memset(&actData->attributes, 0, sizeof(actData->attributes));
-	    actData->handle  = actHandle;
-	    actData->timeout = _plat__ACT_GetRemaining(act);
-	    if(_plat__ACT_GetSignaled(act))
-		SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
-	    else
-		CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
-	    if(go.preservedSignaled & (1 << act))
-		SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
-	    return TRUE;
-	}
+    {
+        memset(&actData->attributes, 0, sizeof(actData->attributes));
+        actData->handle  = actHandle;
+        actData->timeout = _plat__ACT_GetRemaining(act);
+        if(_plat__ACT_GetSignaled(act))
+            SET_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+        else
+            CLEAR_ATTRIBUTE(actData->attributes, TPMA_ACT, signaled);
+        if(go.preservedSignaled & (1 << act))
+            SET_ATTRIBUTE(actData->attributes, TPMA_ACT, preserveSignaled);
+        return TRUE;
+    }
     return FALSE;
 }
 #endif				// libtpms: added

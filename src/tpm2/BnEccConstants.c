@@ -93,13 +93,13 @@
 #  define TO_ECC_528(a, b, c, d, e, f, g, h, i)    i, h, g, f, e, d, c, b, a
 #  define TO_ECC_640(a, b, c, d, e, f, g, h, i, j) j, i, h, g, f, e, d, c, b, a
 
-#  define BN_MIN_ALLOC(bytes)						\
-    (BYTES_TO_CRYPT_WORDS(bytes) == 0) ? 1 : BYTES_TO_CRYPT_WORDS(bytes)
-#  define ECC_CONST(NAME, bytes, initializer)			    \
-    const struct						    \
-    {								    \
-	crypt_uword_t allocate, size, d[BN_MIN_ALLOC(bytes)];		\
-    } NAME = {BN_MIN_ALLOC(bytes), BYTES_TO_CRYPT_WORDS(bytes), {initializer}}
+#  define BN_MIN_ALLOC(bytes) \
+      (BYTES_TO_CRYPT_WORDS(bytes) == 0) ? 1 : BYTES_TO_CRYPT_WORDS(bytes)
+#  define ECC_CONST(NAME, bytes, initializer)                   \
+      const struct                                              \
+      {                                                         \
+          crypt_uword_t allocate, size, d[BN_MIN_ALLOC(bytes)]; \
+      } NAME = {BN_MIN_ALLOC(bytes), BYTES_TO_CRYPT_WORDS(bytes), {initializer}}
 
 // This file contains the raw data for ECC curve constants. The data is wrapped
 // in macros so this file can be included in other files that format the data in
@@ -110,98 +110,98 @@
 
 #  if ECC_NIST_P192
 const TPMBN_ECC_CURVE_CONSTANTS NIST_P192 = {TPM_ECC_NIST_P192,
-					     (bigNum)&NIST_P192_p,
-					     (bigNum)&NIST_P192_n,
-					     (bigNum)&NIST_P192_h,
-					     (bigNum)&NIST_P192_a,
-					     (bigNum)&NIST_P192_b,
-					     {(bigNum)&NIST_P192_gX,
-					      (bigNum)&NIST_P192_gY,
-					      (bigNum)&NIST_P192_gZ}};
+                                             (bigNum)&NIST_P192_p,
+                                             (bigNum)&NIST_P192_n,
+                                             (bigNum)&NIST_P192_h,
+                                             (bigNum)&NIST_P192_a,
+                                             (bigNum)&NIST_P192_b,
+                                             {(bigNum)&NIST_P192_gX,
+                                              (bigNum)&NIST_P192_gY,
+                                              (bigNum)&NIST_P192_gZ}};
 #  endif  // ECC_NIST_P192
 
 #  if ECC_NIST_P224
 const TPMBN_ECC_CURVE_CONSTANTS NIST_P224 = {TPM_ECC_NIST_P224,
-					     (bigNum)&NIST_P224_p,
-					     (bigNum)&NIST_P224_n,
-					     (bigNum)&NIST_P224_h,
-					     (bigNum)&NIST_P224_a,
-					     (bigNum)&NIST_P224_b,
-					     {(bigNum)&NIST_P224_gX,
-					      (bigNum)&NIST_P224_gY,
-					      (bigNum)&NIST_P224_gZ}};
+                                             (bigNum)&NIST_P224_p,
+                                             (bigNum)&NIST_P224_n,
+                                             (bigNum)&NIST_P224_h,
+                                             (bigNum)&NIST_P224_a,
+                                             (bigNum)&NIST_P224_b,
+                                             {(bigNum)&NIST_P224_gX,
+                                              (bigNum)&NIST_P224_gY,
+                                              (bigNum)&NIST_P224_gZ}};
 #  endif  // ECC_NIST_P224
 
 #  if ECC_NIST_P256
 const TPMBN_ECC_CURVE_CONSTANTS NIST_P256 = {TPM_ECC_NIST_P256,
-					     (bigNum)&NIST_P256_p,
-					     (bigNum)&NIST_P256_n,
-					     (bigNum)&NIST_P256_h,
-					     (bigNum)&NIST_P256_a,
-					     (bigNum)&NIST_P256_b,
-					     {(bigNum)&NIST_P256_gX,
-					      (bigNum)&NIST_P256_gY,
-					      (bigNum)&NIST_P256_gZ}};
+                                             (bigNum)&NIST_P256_p,
+                                             (bigNum)&NIST_P256_n,
+                                             (bigNum)&NIST_P256_h,
+                                             (bigNum)&NIST_P256_a,
+                                             (bigNum)&NIST_P256_b,
+                                             {(bigNum)&NIST_P256_gX,
+                                              (bigNum)&NIST_P256_gY,
+                                              (bigNum)&NIST_P256_gZ}};
 #  endif  // ECC_NIST_P256
 
 #  if ECC_NIST_P384
 const TPMBN_ECC_CURVE_CONSTANTS NIST_P384 = {TPM_ECC_NIST_P384,
-					     (bigNum)&NIST_P384_p,
-					     (bigNum)&NIST_P384_n,
-					     (bigNum)&NIST_P384_h,
-					     (bigNum)&NIST_P384_a,
-					     (bigNum)&NIST_P384_b,
-					     {(bigNum)&NIST_P384_gX,
-					      (bigNum)&NIST_P384_gY,
-					      (bigNum)&NIST_P384_gZ}};
+                                             (bigNum)&NIST_P384_p,
+                                             (bigNum)&NIST_P384_n,
+                                             (bigNum)&NIST_P384_h,
+                                             (bigNum)&NIST_P384_a,
+                                             (bigNum)&NIST_P384_b,
+                                             {(bigNum)&NIST_P384_gX,
+                                              (bigNum)&NIST_P384_gY,
+                                              (bigNum)&NIST_P384_gZ}};
 #  endif  // ECC_NIST_P384
 
 #  if ECC_NIST_P521
 const TPMBN_ECC_CURVE_CONSTANTS NIST_P521 = {TPM_ECC_NIST_P521,
-					     (bigNum)&NIST_P521_p,
-					     (bigNum)&NIST_P521_n,
-					     (bigNum)&NIST_P521_h,
-					     (bigNum)&NIST_P521_a,
-					     (bigNum)&NIST_P521_b,
-					     {(bigNum)&NIST_P521_gX,
-					      (bigNum)&NIST_P521_gY,
-					      (bigNum)&NIST_P521_gZ}};
+                                             (bigNum)&NIST_P521_p,
+                                             (bigNum)&NIST_P521_n,
+                                             (bigNum)&NIST_P521_h,
+                                             (bigNum)&NIST_P521_a,
+                                             (bigNum)&NIST_P521_b,
+                                             {(bigNum)&NIST_P521_gX,
+                                              (bigNum)&NIST_P521_gY,
+                                              (bigNum)&NIST_P521_gZ}};
 #  endif  // ECC_NIST_P521
 
 #  if ECC_BN_P256
 const TPMBN_ECC_CURVE_CONSTANTS BN_P256 = {TPM_ECC_BN_P256,
-					   (bigNum)&BN_P256_p,
-					   (bigNum)&BN_P256_n,
-					   (bigNum)&BN_P256_h,
-					   (bigNum)&BN_P256_a,
-					   (bigNum)&BN_P256_b,
-					   {(bigNum)&BN_P256_gX,
-					    (bigNum)&BN_P256_gY,
-					    (bigNum)&BN_P256_gZ}};
+                                           (bigNum)&BN_P256_p,
+                                           (bigNum)&BN_P256_n,
+                                           (bigNum)&BN_P256_h,
+                                           (bigNum)&BN_P256_a,
+                                           (bigNum)&BN_P256_b,
+                                           {(bigNum)&BN_P256_gX,
+                                            (bigNum)&BN_P256_gY,
+                                            (bigNum)&BN_P256_gZ}};
 #  endif  // ECC_BN_P256
 
 #  if ECC_BN_P638
 const TPMBN_ECC_CURVE_CONSTANTS BN_P638 = {TPM_ECC_BN_P638,
-					   (bigNum)&BN_P638_p,
-					   (bigNum)&BN_P638_n,
-					   (bigNum)&BN_P638_h,
-					   (bigNum)&BN_P638_a,
-					   (bigNum)&BN_P638_b,
-					   {(bigNum)&BN_P638_gX,
-					    (bigNum)&BN_P638_gY,
-					    (bigNum)&BN_P638_gZ}};
+                                           (bigNum)&BN_P638_p,
+                                           (bigNum)&BN_P638_n,
+                                           (bigNum)&BN_P638_h,
+                                           (bigNum)&BN_P638_a,
+                                           (bigNum)&BN_P638_b,
+                                           {(bigNum)&BN_P638_gX,
+                                            (bigNum)&BN_P638_gY,
+                                            (bigNum)&BN_P638_gZ}};
 #  endif  // ECC_BN_P638
 
 #  if ECC_SM2_P256
 const TPMBN_ECC_CURVE_CONSTANTS SM2_P256 = {TPM_ECC_SM2_P256,
-					    (bigNum)&SM2_P256_p,
-					    (bigNum)&SM2_P256_n,
-					    (bigNum)&SM2_P256_h,
-					    (bigNum)&SM2_P256_a,
-					    (bigNum)&SM2_P256_b,
-					    {(bigNum)&SM2_P256_gX,
-					     (bigNum)&SM2_P256_gY,
-					     (bigNum)&SM2_P256_gZ}};
+                                            (bigNum)&SM2_P256_p,
+                                            (bigNum)&SM2_P256_n,
+                                            (bigNum)&SM2_P256_h,
+                                            (bigNum)&SM2_P256_a,
+                                            (bigNum)&SM2_P256_b,
+                                            {(bigNum)&SM2_P256_gX,
+                                             (bigNum)&SM2_P256_gY,
+                                             (bigNum)&SM2_P256_gZ}};
 #  endif  // ECC_SM2_P256
 
 #  define comma
@@ -240,10 +240,10 @@ MUST_BE((sizeof(bnEccCurveData) / sizeof(bnEccCurveData[0])) == (ECC_CURVE_COUNT
 const TPMBN_ECC_CURVE_CONSTANTS* BnGetCurveData(TPM_ECC_CURVE curveId)
 {
     for(int i = 0; i < ECC_CURVE_COUNT; i++)
-	{
-	    if(bnEccCurveData[i]->curveId == curveId)
-		return bnEccCurveData[i];
-	}
+    {
+        if(bnEccCurveData[i]->curveId == curveId)
+            return bnEccCurveData[i];
+    }
     return NULL;
 }
 

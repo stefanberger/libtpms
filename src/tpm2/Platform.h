@@ -58,10 +58,10 @@
 /*										*/
 /********************************************************************************/
 
-/* C.14	Platform.h */
 
-#ifndef    _PLATFORM_H_
-#define    _PLATFORM_H_
+#ifndef _PLATFORM_H_
+#define _PLATFORM_H_
+
 #include "TpmBuildSwitches.h"
 #include "TpmProfile.h"
 #include "BaseTypes.h"

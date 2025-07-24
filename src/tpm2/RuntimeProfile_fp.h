@@ -42,6 +42,8 @@
 #ifndef RUNTIME_PROFILE_H
 #define RUNTIME_PROFILE_H
 
+#include <stdbool.h>
+
 #include "RuntimeAlgorithm_fp.h"
 #include "RuntimeCommands_fp.h"
 #include "RuntimeAttributes_fp.h"

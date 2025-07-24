@@ -78,16 +78,16 @@
 //      TPM_RC_SCHEME       unsupported hash algorithm
 //      TPM_RC_NO_RESULT    cannot get values from random number generator
 TPM_RC TpmEcc_SignEcdaa(
-			TPM2B_ECC_PARAMETER*  nonceK,  // OUT: 'nonce' component of the signature
-			Crypt_Int*            bnS,     // OUT: 's' component of the signature
-			const Crypt_EccCurve* E,       // IN: the curve used in signing
-			Crypt_Int*            bnD,     // IN: the private key
-			const TPM2B_DIGEST*   digest,  // IN: the value to sign (mod 'q')
-			TPMT_ECC_SCHEME*      scheme,  // IN: signing scheme (contains the
-			//      commit count value).
-			OBJECT*     eccKey,            // IN: The signing key
-			RAND_STATE* rand               // IN: a random number state
-			);
+    TPM2B_ECC_PARAMETER*  nonceK,  // OUT: 'nonce' component of the signature
+    Crypt_Int*            bnS,     // OUT: 's' component of the signature
+    const Crypt_EccCurve* E,       // IN: the curve used in signing
+    Crypt_Int*            bnD,     // IN: the private key
+    const TPM2B_DIGEST*   digest,  // IN: the value to sign (mod 'q')
+    TPMT_ECC_SCHEME*      scheme,  // IN: signing scheme (contains the
+                                   //      commit count value).
+    OBJECT*     eccKey,            // IN: The signing key
+    RAND_STATE* rand               // IN: a random number state
+);
 
 #endif  // ALG_ECC && ALG_ECDAA
 #endif  // _TPMECC_SIGNATURE_ECDAA_FP_H_

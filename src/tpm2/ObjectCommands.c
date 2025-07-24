@@ -194,6 +194,32 @@ TPM2_Create(Create_In*  in,  // IN: input parameter list
 #include "Load_fp.h"
 #if CC_Load  // Conditional expansion of this file
 #include "Object_spt_fp.h"
+
+/*(See part 3 specification)
+// Load an ordinary or temporary object
+*/
+//  Return Type: TPM_RC
+//      TPM_RC_ATTRIBUTES       'inPulblic' attributes are not allowed with selected
+//                              parent
+//      TPM_RC_BINDING          'inPrivate' and 'inPublic' are not
+//                              cryptographically bound
+//      TPM_RC_HASH             incorrect hash selection for signing key or
+//                              the 'nameAlg' for 'inPublic' is not valid
+//      TPM_RC_INTEGRITY        HMAC on 'inPrivate' was not valid
+//      TPM_RC_KDF              KDF selection not allowed
+//      TPM_RC_KEY              the size of the object's 'unique' field is not
+//                              consistent with the indicated size in the object's
+//                              parameters
+//      TPM_RC_OBJECT_MEMORY    no available object slot
+//      TPM_RC_SCHEME           the signing scheme is not valid for the key
+//      TPM_RC_SENSITIVE        the 'inPrivate' did not unmarshal correctly
+//      TPM_RC_SIZE             'inPrivate' missing, or 'authPolicy' size for
+//                              'inPublic' or is not valid
+//      TPM_RC_SYMMETRIC        symmetric algorithm not provided when required
+//      TPM_RC_TYPE             'parentHandle' is not a storage key, or the object
+//                              to load is a storage key but its parameters do not
+//                              match the parameters of the parent.
+//      TPM_RC_VALUE            decryption failure
 TPM_RC
 TPM2_Load(
 	  Load_In         *in,            // IN: input parameter list

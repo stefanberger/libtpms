@@ -77,7 +77,7 @@ BOOL ActGetSignaled(TPM_RH actHandle);
 //***ActShutdown()
 // This function saves the current state of the counters
 BOOL ActShutdown(TPM_SU state  //IN: the type of the shutdown.
-		 );
+);
 
 //*** ActIsImplemented()
 // This function determines if an ACT is implemented in both the TPM and the platform
@@ -89,8 +89,8 @@ BOOL ActIsImplemented(UINT32 act);
 // it returns TPM_RC_RETRY so that the update can be tried again later.
 TPM_RC
 ActCounterUpdate(TPM_RH handle,   //IN: the handle of the act
-		 UINT32 newValue  //IN: the value to set in the ACT
-		 );
+                 UINT32 newValue  //IN: the value to set in the ACT
+);
 
 //*** ActGetCapabilityData()
 // This function returns the list of ACT data
@@ -99,14 +99,14 @@ ActCounterUpdate(TPM_RH handle,   //IN: the handle of the act
 //      NO              if no more ACT data to
 TPMI_YES_NO
 ActGetCapabilityData(TPM_HANDLE     actHandle,  // IN: the handle for the starting ACT
-		     UINT32         maxCount,   // IN: maximum allowed return values
-		     TPML_ACT_DATA* actList     // OUT: ACT data list
-		     );
+                     UINT32         maxCount,   // IN: maximum allowed return values
+                     TPML_ACT_DATA* actList     // OUT: ACT data list
+);
 
 //*** ActGetOneCapability()
 // This function returns an ACT's capability, if present.
 BOOL ActGetOneCapability(TPM_HANDLE     actHandle,  // IN: the handle for the ACT
-			 TPMS_ACT_DATA* actData     // OUT: ACT data
-			 );
+                         TPMS_ACT_DATA* actData     // OUT: ACT data
+);
 
 #endif  // _ACT_SPT_FP_H_

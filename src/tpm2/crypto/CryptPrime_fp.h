@@ -75,9 +75,9 @@ BOOL IsPrimeInt(uint32_t n);
 // Will try to eliminate some of the obvious things before going on
 // to perform MillerRabin as a final verification of primeness.
 BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
-			     RAND_STATE* rand    // IN: the random state just
-			     //     in case Miller-Rabin is required
-			     );
+                             RAND_STATE* rand    // IN: the random state just
+                             //     in case Miller-Rabin is required
+);
 
 //*** MillerRabinRounds()
 // Function returns the number of Miller-Rabin rounds necessary to give an
@@ -85,7 +85,7 @@ BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
 // are from FIPS 186-3.
 UINT32
 MillerRabinRounds(UINT32 bits  // IN: Number of bits in the RSA prime
-		  );
+);
 
 //*** MillerRabin()
 // This function performs a Miller-Rabin test from FIPS 186-3. It does
@@ -117,12 +117,12 @@ RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand);
 // for an RSA prime.
 TPM_RC
 TpmRsa_GeneratePrimeForRSA(
-			   Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
-			   //  random value
-			   UINT32      bits,      // IN: number of bits to get
-			   UINT32      exponent,  // IN: the exponent
-			   RAND_STATE* rand       // IN: the random state
-			   );
+    Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
+                           //  random value
+    UINT32      bits,      // IN: number of bits to get
+    UINT32      exponent,  // IN: the exponent
+    RAND_STATE* rand       // IN: the random state
+);
 #endif  // ALG_RSA
 
 #endif  // _CRYPT_PRIME_FP_H_

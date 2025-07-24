@@ -59,12 +59,10 @@
 /*										*/
 /********************************************************************************/
 
-/* C.9 PlatformData.c */
-/* C.9.1. Description */
-/* This file will instance the TPM variables that are not stack allocated. The descriptions for
-   these variables are in Global.h for this project. */
-/* C.9.2. Includes */
+//** Description
+// This file will instance the TPM variables that are not stack allocated. The
+// descriptions for these variables are in Global.h for this project.
 
+//** Includes
 #define _PLATFORM_DATA_C_
-#include    "Platform.h"
-
+#include "Platform.h"

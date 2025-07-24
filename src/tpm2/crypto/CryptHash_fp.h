@@ -89,10 +89,10 @@ CryptGetHashDef(TPM_ALG_ID hashAlg);
 //  Return Type: BOOL
 //      TRUE(1)         hashAlg is a valid, implemented hash on this TPM
 //      FALSE(0)        hashAlg is not valid for this TPM
-BOOL CryptHashIsValidAlg(TPM_ALG_ID hashAlg,        // IN: the algorithm to check
-			 BOOL       isAlgNullValid  // IN: TRUE if TPM_ALG_NULL is to be treated
-						    //     as a valid hash
-			 );
+BOOL CryptHashIsValidAlg(TPM_ALG_ID hashAlg,  // IN: the algorithm to check
+                         BOOL       isAlgNullValid  // IN: TRUE if TPM_ALG_NULL is to be treated
+                                          //     as a valid hash
+);
 
 //*** CryptHashGetAlgByIndex()
 // This function is used to iterate through the hashes. TPM_ALG_NULL
@@ -105,7 +105,7 @@ BOOL CryptHashIsValidAlg(TPM_ALG_ID hashAlg,        // IN: the algorithm to chec
 // TPM_ALG_xxx         a hash algorithm
 // TPM_ALG_NULL        this can be used as a stop value
 LIB_EXPORT TPM_ALG_ID CryptHashGetAlgByIndex(UINT32 index  // IN: the index
-					     );
+);
 
 //*** CryptHashGetDigestSize()
 // Returns the size of the digest produced by the hash. If 'hashAlg' is not a hash
@@ -115,8 +115,8 @@ LIB_EXPORT TPM_ALG_ID CryptHashGetAlgByIndex(UINT32 index  // IN: the index
 //   > 0     the digest size
 //
 LIB_EXPORT UINT16 CryptHashGetDigestSize(
-					 TPM_ALG_ID hashAlg  // IN: hash algorithm to look up
-					 );
+    TPM_ALG_ID hashAlg  // IN: hash algorithm to look up
+);
 
 //*** CryptHashGetBlockSize()
 // Returns the size of the block used by the hash. If 'hashAlg' is not a hash
@@ -126,8 +126,8 @@ LIB_EXPORT UINT16 CryptHashGetDigestSize(
 //   > 0     the digest size
 //
 LIB_EXPORT UINT16 CryptHashGetBlockSize(
-					TPM_ALG_ID hashAlg  // IN: hash algorithm to look up
-					);
+    TPM_ALG_ID hashAlg  // IN: hash algorithm to look up
+);
 
 //*** CryptHashGetOid()
 // This function returns a pointer to DER=encoded OID for a hash algorithm. All OIDs
@@ -138,32 +138,32 @@ LIB_EXPORT const BYTE* CryptHashGetOid(TPM_ALG_ID hashAlg);
 // This function returns the hash algorithm associated with a hash context.
 TPM_ALG_ID
 CryptHashGetContextAlg(PHASH_STATE state  // IN: the context to check
-		       );
+);
 
 //*** CryptHashCopyState
 // This function is used to clone a HASH_STATE.
 LIB_EXPORT void CryptHashCopyState(HASH_STATE* out,  // OUT: destination of the state
-				   const HASH_STATE* in  // IN: source of the state
-				   );
+                                   const HASH_STATE* in  // IN: source of the state
+);
 
 //*** CryptHashExportState()
 // This function is used to export a hash or HMAC hash state. This function
 // would be called when preparing to context save a sequence object.
 void CryptHashExportState(
-			  PCHASH_STATE internalFmt,       // IN: the hash state formatted for use by
-			  //     library
-			  PEXPORT_HASH_STATE externalFmt  // OUT: the exported hash state
-			  );
+    PCHASH_STATE internalFmt,       // IN: the hash state formatted for use by
+                                    //     library
+    PEXPORT_HASH_STATE externalFmt  // OUT: the exported hash state
+);
 
 //*** CryptHashImportState()
 // This function is used to import the hash state. This function
 // would be called to import a hash state when the context of a sequence object
 // was being loaded.
 void CryptHashImportState(
-			  PHASH_STATE internalFmt,         // OUT: the hash state formatted for use by
-			  //     the library
-			  PCEXPORT_HASH_STATE externalFmt  // IN: the exported hash state
-			  );
+    PHASH_STATE internalFmt,         // OUT: the hash state formatted for use by
+                                     //     the library
+    PCEXPORT_HASH_STATE externalFmt  // IN: the exported hash state
+);
 
 //*** CryptHashStart()
 // Functions starts a hash stack
@@ -181,17 +181,17 @@ void CryptHashImportState(
 //  0           hash is TPM_ALG_NULL
 // >0           digest size
 LIB_EXPORT UINT16 CryptHashStart(
-				 PHASH_STATE hashState,  // OUT: the running hash state
-				 TPM_ALG_ID  hashAlg     // IN: hash algorithm
-				 );
+    PHASH_STATE hashState,  // OUT: the running hash state
+    TPM_ALG_ID  hashAlg     // IN: hash algorithm
+);
 
 //*** CryptDigestUpdate()
 // Add data to a hash or HMAC, SMAC stack.
 //
 void CryptDigestUpdate(PHASH_STATE hashState,  // IN: the hash context information
-		       UINT32      dataSize,   // IN: the size of data to be added
-		       const BYTE* data        // IN: data to be hashed
-		       );
+                       UINT32      dataSize,   // IN: the size of data to be added
+                       const BYTE* data        // IN: data to be hashed
+);
 
 //*** CryptHashEnd()
 // Complete a hash or HMAC computation. This function will place the smaller of
@@ -202,9 +202,9 @@ void CryptDigestUpdate(PHASH_STATE hashState,  // IN: the hash context informati
 //       0      no data returned
 //      > 0     the number of bytes in the digest or dOutSize, whichever is smaller
 LIB_EXPORT UINT16 CryptHashEnd(PHASH_STATE hashState,  // IN: the state of hash stack
-			       UINT32      dOutSize,   // IN: size of digest buffer
-			       BYTE*       dOut        // OUT: hash digest
-			       );
+                               UINT32      dOutSize,   // IN: size of digest buffer
+                               BYTE*       dOut        // OUT: hash digest
+);
 
 //*** CryptHashBlock()
 // Start a hash, hash a single block, update 'digest' and return the size of
@@ -215,11 +215,11 @@ LIB_EXPORT UINT16 CryptHashEnd(PHASH_STATE hashState,  // IN: the state of hash 
 //  Return Type: UINT16
 //  >= 0        number of bytes placed in 'dOut'
 LIB_EXPORT UINT16 CryptHashBlock(TPM_ALG_ID  hashAlg,   // IN: The hash algorithm
-				 UINT32      dataSize,  // IN: size of buffer to hash
-				 const BYTE* data,      // IN: the buffer to hash
-				 UINT32 dOutSize,  // IN: size of the digest buffer
-				 BYTE*  dOut       // OUT: digest buffer
-				 );
+                                 UINT32      dataSize,  // IN: size of buffer to hash
+                                 const BYTE* data,      // IN: the buffer to hash
+                                 UINT32 dOutSize,  // IN: size of the digest buffer
+                                 BYTE*  dOut       // OUT: digest buffer
+);
 
 //*** CryptDigestUpdate2B()
 // This function updates a digest (hash or HMAC) with a TPM2B.
@@ -227,8 +227,8 @@ LIB_EXPORT UINT16 CryptHashBlock(TPM_ALG_ID  hashAlg,   // IN: The hash algorith
 // This function can be used for both HMAC and hash functions so the
 // 'digestState' is void so that either state type can be passed.
 LIB_EXPORT void CryptDigestUpdate2B(PHASH_STATE  state,  // IN: the digest state
-				    const TPM2B* bIn     // IN: 2B containing the data
-				    );
+                                    const TPM2B* bIn     // IN: 2B containing the data
+);
 
 //*** CryptHashEnd2B()
 // This function is the same as CryptCompleteHash() but the digest is
@@ -238,19 +238,19 @@ LIB_EXPORT void CryptDigestUpdate2B(PHASH_STATE  state,  // IN: the digest state
 //  Return Type: UINT16
 //      >=0     the number of bytes placed in 'digest.buffer'
 LIB_EXPORT UINT16 CryptHashEnd2B(
-				 PHASH_STATE state,  // IN: the hash state
-				 P2B         digest  // IN: the size of the buffer Out: requested
-				 //     number of bytes
-				 );
+    PHASH_STATE state,  // IN: the hash state
+    P2B         digest  // IN: the size of the buffer Out: requested
+                        //     number of bytes
+);
 
 //*** CryptDigestUpdateInt()
 // This function is used to include an integer value to a hash stack. The function
 // marshals the integer into its canonical form before calling CryptDigestUpdate().
 LIB_EXPORT void CryptDigestUpdateInt(
-				     void*  state,    // IN: the state of hash stack
-				     UINT32 intSize,  // IN: the size of 'intValue' in bytes
-				     UINT64 intValue  // IN: integer value to be hashed
-				     );
+    void*  state,    // IN: the state of hash stack
+    UINT32 intSize,  // IN: the size of 'intValue' in bytes
+    UINT64 intValue  // IN: integer value to be hashed
+);
 
 //*** CryptHmacStart()
 // This function is used to start an HMAC using a temp
@@ -263,10 +263,10 @@ LIB_EXPORT void CryptDigestUpdateInt(
 //  >= 0        number of bytes in digest produced by 'hashAlg' (may be zero)
 //
 LIB_EXPORT UINT16 CryptHmacStart(PHMAC_STATE state,    // IN/OUT: the state buffer
-				 TPM_ALG_ID  hashAlg,  // IN: the algorithm to use
-				 UINT16      keySize,  // IN: the size of the HMAC key
-				 const BYTE* key       // IN: the HMAC key
-				 );
+                                 TPM_ALG_ID  hashAlg,  // IN: the algorithm to use
+                                 UINT16      keySize,  // IN: the size of the HMAC key
+                                 const BYTE* key       // IN: the HMAC key
+);
 
 //*** CryptHmacEnd()
 // This function is called to complete an HMAC. It will finish the current
@@ -276,9 +276,9 @@ LIB_EXPORT UINT16 CryptHmacStart(PHMAC_STATE state,    // IN/OUT: the state buff
 //  Return Type: UINT16
 //  >= 0        number of bytes in 'dOut' (may be zero)
 LIB_EXPORT UINT16 CryptHmacEnd(PHMAC_STATE state,     // IN: the hash state buffer
-			       UINT32      dOutSize,  // IN: size of digest buffer
-			       BYTE*       dOut       // OUT: hash digest
-			       );
+                               UINT32      dOutSize,  // IN: size of digest buffer
+                               BYTE*       dOut       // OUT: hash digest
+);
 
 //*** CryptHmacStart2B()
 // This function starts an HMAC and returns the size of the digest
@@ -295,11 +295,11 @@ LIB_EXPORT UINT16 CryptHmacEnd(PHMAC_STATE state,     // IN: the hash state buff
 //      > 0     the digest size of the algorithm
 //      = 0     the hashAlg was TPM_ALG_NULL
 LIB_EXPORT UINT16 CryptHmacStart2B(
-				   PHMAC_STATE hmacState,  // OUT: the state of HMAC stack. It will be used
-				   //     in HMAC update and completion
-				   TPMI_ALG_HASH hashAlg,  // IN: hash algorithm
-				   P2B           key       // IN: HMAC key
-				   );
+    PHMAC_STATE hmacState,  // OUT: the state of HMAC stack. It will be used
+                            //     in HMAC update and completion
+    TPMI_ALG_HASH hashAlg,  // IN: hash algorithm
+    P2B           key       // IN: HMAC key
+);
 
 //*** CryptHmacEnd2B()
 //   This function is the same as CryptHmacEnd() but the HMAC result
@@ -307,9 +307,9 @@ LIB_EXPORT UINT16 CryptHmacStart2B(
 //  Return Type: UINT16
 //      >=0     the number of bytes placed in 'digest'
 LIB_EXPORT UINT16 CryptHmacEnd2B(
-				 PHMAC_STATE hmacState,  // IN: the state of HMAC stack
-				 P2B         digest      // OUT: HMAC
-				 );
+    PHMAC_STATE hmacState,  // IN: the state of HMAC stack
+    P2B         digest      // OUT: HMAC
+);
 
 //** Mask and Key Generation Functions
 //*** CryptMGF_KDF()
@@ -325,12 +325,12 @@ LIB_EXPORT UINT16 CryptHmacEnd2B(
 //      0       hash algorithm was TPM_ALG_NULL
 //    > 0       should be the same as 'mSize'
 LIB_EXPORT UINT16 CryptMGF_KDF(UINT32 mSize,  // IN: length of the mask to be produced
-			       BYTE*  mask,   // OUT: buffer to receive the mask
-			       TPM_ALG_ID hashAlg,   // IN: hash to use
-			       UINT32     seedSize,  // IN: size of the seed
-			       BYTE*      seed,      // IN: seed size
-			       UINT32     counter    // IN: counter initial value
-			       );
+                               BYTE*  mask,   // OUT: buffer to receive the mask
+                               TPM_ALG_ID hashAlg,   // IN: hash to use
+                               UINT32     seedSize,  // IN: size of the seed
+                               BYTE*      seed,      // IN: seed size
+                               UINT32     counter    // IN: counter initial value
+);
 
 //*** CryptKDFa()
 // This function performs the key generation according to Part 1 of the
@@ -355,20 +355,20 @@ LIB_EXPORT UINT16 CryptMGF_KDF(UINT32 mSize,  // IN: length of the mask to be pr
 //     0            hash algorithm is not supported or is TPM_ALG_NULL
 //    > 0           the number of bytes in the 'keyStream' buffer
 LIB_EXPORT UINT16 CryptKDFa(
-			    TPM_ALG_ID   hashAlg,       // IN: hash algorithm used in HMAC
-			    const TPM2B* key,           // IN: HMAC key
-			    const TPM2B* label,         // IN: a label for the KDF
-			    const TPM2B* contextU,      // IN: context U
-			    const TPM2B* contextV,      // IN: context V
-			    UINT32       sizeInBits,    // IN: size of generated key in bits
-			    BYTE*        keyStream,     // OUT: key buffer
-			    UINT32*      counterInOut,  // IN/OUT: caller may provide the iteration
-			    //     counter for incremental operations to
-			    //     avoid large intermediate buffers.
-			    UINT16 blocks               // IN: If non-zero, this is the maximum number
-			    //     of blocks to be returned, regardless
-			    //     of sizeInBits
-			    );
+    TPM_ALG_ID   hashAlg,       // IN: hash algorithm used in HMAC
+    const TPM2B* key,           // IN: HMAC key
+    const TPM2B* label,         // IN: a label for the KDF
+    const TPM2B* contextU,      // IN: context U
+    const TPM2B* contextV,      // IN: context V
+    UINT32       sizeInBits,    // IN: size of generated key in bits
+    BYTE*        keyStream,     // OUT: key buffer
+    UINT32*      counterInOut,  // IN/OUT: caller may provide the iteration
+                                //     counter for incremental operations to
+                                //     avoid large intermediate buffers.
+    UINT16 blocks               // IN: If non-zero, this is the maximum number
+                                //     of blocks to be returned, regardless
+                                //     of sizeInBits
+);
 
 //*** CryptKDFe()
 // This function implements KDFe() as defined in TPM specification part 1.
@@ -384,12 +384,12 @@ LIB_EXPORT UINT16 CryptKDFa(
 //    > 0           the number of bytes in the 'keyStream' buffer
 //
 LIB_EXPORT UINT16 CryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
-			    TPM2B*       Z,        // IN: Z
-			    const TPM2B* label,    // IN: a label value for the KDF
-			    TPM2B*       partyUInfo,  // IN: PartyUInfo
-			    TPM2B*       partyVInfo,  // IN: PartyVInfo
-			    UINT32 sizeInBits,  // IN: size of generated key in bits
-			    BYTE*  keyStream    // OUT: key buffer
-			    );
+                            TPM2B*       Z,        // IN: Z
+                            const TPM2B* label,    // IN: a label value for the KDF
+                            TPM2B*       partyUInfo,  // IN: PartyUInfo
+                            TPM2B*       partyVInfo,  // IN: PartyVInfo
+                            UINT32 sizeInBits,  // IN: size of generated key in bits
+                            BYTE*  keyStream    // OUT: key buffer
+);
 
 #endif  // _CRYPT_HASH_FP_H_

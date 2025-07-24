@@ -82,10 +82,10 @@
 //  Return Type: TPM_RC
 //      TPM_RC_SCHEME            'scheme' is not supported
 LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
-			       OBJECT* signKey,  // IN: ECC key to sign the hash
-			       const TPM2B_DIGEST* digest,  // IN: digest to sign
-			       TPMT_ECC_SCHEME*    scheme,  // IN: signing scheme
-			       RAND_STATE*         rand);
+                               OBJECT* signKey,  // IN: ECC key to sign the hash
+                               const TPM2B_DIGEST* digest,  // IN: digest to sign
+                               TPMT_ECC_SCHEME*    scheme,  // IN: signing scheme
+                               RAND_STATE*         rand);
 
 //*** CryptEccValidateSignature()
 // This function validates an EcDsa or EcSchnorr signature.
@@ -93,10 +93,10 @@ LIB_EXPORT TPM_RC CryptEccSign(TPMT_SIGNATURE* signature,  // OUT: signature
 //  Return Type: TPM_RC
 //      TPM_RC_SIGNATURE            not a valid signature
 LIB_EXPORT TPM_RC CryptEccValidateSignature(
-					    TPMT_SIGNATURE*     signature,  // IN: signature to be verified
-					    OBJECT*             signKey,    // IN: ECC key signed the hash
-					    const TPM2B_DIGEST* digest      // IN: digest that was signed
-					    );
+    TPMT_SIGNATURE*     signature,  // IN: signature to be verified
+    OBJECT*             signKey,    // IN: ECC key signed the hash
+    const TPM2B_DIGEST* digest      // IN: digest that was signed
+);
 
 //***CryptEccCommitCompute()
 // This function performs the point multiply operations required by TPM2_Commit.
@@ -115,15 +115,15 @@ LIB_EXPORT TPM_RC CryptEccValidateSignature(
 //      TPM_RC_CANCELED         a cancel indication was asserted during this
 //                              function
 LIB_EXPORT TPM_RC CryptEccCommitCompute(
-					TPMS_ECC_POINT*      K,        // OUT: [d]B or [r]Q
-					TPMS_ECC_POINT*      L,        // OUT: [r]B
-					TPMS_ECC_POINT*      E,        // OUT: [r]M
-					TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
-					TPMS_ECC_POINT*      M,        // IN: M (optional)
-					TPMS_ECC_POINT*      B,        // IN: B (optional)
-					TPM2B_ECC_PARAMETER* d,        // IN: d (optional)
-					TPM2B_ECC_PARAMETER* r         // IN: the computed r value (required)
-					);
+    TPMS_ECC_POINT*      K,        // OUT: [d]B or [r]Q
+    TPMS_ECC_POINT*      L,        // OUT: [r]B
+    TPMS_ECC_POINT*      E,        // OUT: [r]M
+    TPM_ECC_CURVE        curveId,  // IN: the curve for the computations
+    TPMS_ECC_POINT*      M,        // IN: M (optional)
+    TPMS_ECC_POINT*      B,        // IN: B (optional)
+    TPM2B_ECC_PARAMETER* d,        // IN: d (optional)
+    TPM2B_ECC_PARAMETER* r         // IN: the computed r value (required)
+);
 #endif  // ALG_ECC
 
 #endif  // _CRYPT_ECC_SIGNATURE_FP_H_

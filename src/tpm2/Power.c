@@ -59,51 +59,42 @@
 /*										*/
 /********************************************************************************/
 
-/* 9.13 Power.c */
-/* 9.13.1 Description */
-/* This file contains functions that receive the simulated power state transitions of the TPM. */
-/* 9.13.2 Includes and Data Definitions */
+//** Description
+
+// This file contains functions that receive the simulated power state
+// transitions of the TPM.
+
+//** Includes and Data Definitions
 #define POWER_C
 #include "Tpm.h"
-/* 9.13.3 Functions */
-/* 9.13.3.1 TPMInit() */
-/* This function is used to process a power on event. */
 
-void
-TPMInit(
-	void
-	)
+//** Functions
+
+//*** TPMInit()
+// This function is used to process a power on event.
+void TPMInit(void)
 {
     // Set state as not initialized. This means that Startup is required
     g_initialized = FALSE;
     return;
 }
 
-/* 9.13.3.2 TPMRegisterStartup() */
-/* This function registers the fact that the TPM has been initialized (a TPM2_Startup() has
-   completed successfully). */
-
-BOOL
-TPMRegisterStartup(
-		   void
-		   )
+//*** TPMRegisterStartup()
+// This function registers the fact that the TPM has been initialized
+// (a TPM2_Startup() has completed successfully).
+BOOL TPMRegisterStartup(void)
 {
     g_initialized = TRUE;
     return TRUE;
 }
 
-/* 9.13.3.3 TPMIsStarted() */
-/* Indicates if the TPM has been initialized (a TPM2_Startup() has completed successfully after a
-   _TPM_Init()). */
-/* Return Values Meaning */
-/* TRUE TPM has been initialized */
-/* FALSE TPM has not been initialized */
-
-BOOL
-TPMIsStarted(
-	     void
-	     )
+//*** TPMIsStarted()
+// Indicates if the TPM has been initialized (a TPM2_Startup() has completed
+// successfully after a _TPM_Init).
+//  Return Type: BOOL
+//      TRUE(1)         TPM has been initialized
+//      FALSE(0)        TPM has not been initialized
+BOOL TPMIsStarted(void)
 {
     return g_initialized;
 }
-

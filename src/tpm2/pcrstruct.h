@@ -144,14 +144,14 @@ typedef struct
 // Get pointer to particular PCR from array if that PCR is allocated.
 // otherwise returns NULL
 BYTE* GetPcrPointerIfAllocated(PCR*       pPcrArray,
-			       TPM_ALG_ID alg,       // IN: algorithm for bank
-			       UINT32     pcrNumber  // IN: PCR number
-			       );
+                               TPM_ALG_ID alg,       // IN: algorithm for bank
+                               UINT32     pcrNumber  // IN: PCR number
+);
 
 // get a PCR pointer from the TPM's internal list, if it's allocated
 // otherwise NULL
 BYTE* GetPcrPointer(TPM_ALG_ID alg,       // IN: algorithm for bank
-		    UINT32     pcrNumber  // IN: PCR number
-		    );
+                    UINT32     pcrNumber  // IN: PCR number
+);
 
 #endif

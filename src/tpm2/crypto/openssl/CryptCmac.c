@@ -80,13 +80,13 @@
 // and block cipher algorithm.
 UINT16
 CryptCmacStart(
-	       SMAC_STATE* state, TPMU_PUBLIC_PARMS* keyParms, TPM_ALG_ID macAlg, TPM2B* key)
+    SMAC_STATE* state, TPMU_PUBLIC_PARMS* keyParms, TPM_ALG_ID macAlg, TPM2B* key)
 {
     tpmCmacState_t*      cState = &state->state.cmac;
     TPMT_SYM_DEF_OBJECT* def    = &keyParms->symDetail.sym;
     //
     if(macAlg != TPM_ALG_CMAC)
-	return 0;
+        return 0;
     MemorySet(cState, 0, sizeof(*cState));  // libtpms bugfix
     // set up the encryption algorithm and parameters
     cState->symAlg      = def->algorithm;
@@ -94,7 +94,7 @@ CryptCmacStart(
     cState->iv.t.size = CryptGetSymmetricBlockSize(def->algorithm, def->keyBits.sym);
     pAssert(cState->iv.t.size > 0 && cState->iv.t.size <= sizeof(cState->iv.t.buffer));	// libtpms added
     MemoryCopy2B(&cState->symKey.b, key, sizeof(cState->symKey.t.buffer));
-    
+
     // Set up the dispatch methods for the CMAC
     state->smacMethods.data = CryptCmacData;
     state->smacMethods.end  = CryptCmacEnd;
@@ -122,26 +122,26 @@ void CryptCmacData(SMAC_STATES* state, UINT32 size, const BYTE* buffer)
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
     // Set up the encryption values based on the algorithm
     switch(algorithm)
-	{
-	    FOR_EACH_SYM(ENCRYPT_CASE)
-	  default:
-	    FAIL(FATAL_ERROR_INTERNAL);
-	}
+    {
+        FOR_EACH_SYM(ENCRYPT_CASE)
+        default:
+            FAIL(FATAL_ERROR_INTERNAL);
+    }
     while(size > 0)
-	{
-	    if(cmacState->bcount == cmacState->iv.t.size)
-		{
-		    ENCRYPT(&keySchedule, cmacState->iv.t.buffer, cmacState->iv.t.buffer);
-		    cmacState->bcount = 0;
-		}
-	    for(; (size > 0) && (cmacState->bcount < cmacState->iv.t.size);
-		size--, cmacState->bcount++)
-		{
-		    cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
-		}
-	}
+    {
+        if(cmacState->bcount == cmacState->iv.t.size)
+        {
+            ENCRYPT(&keySchedule, cmacState->iv.t.buffer, cmacState->iv.t.buffer);
+            cmacState->bcount = 0;
+        }
+        for(; (size > 0) && (cmacState->bcount < cmacState->iv.t.size);
+            size--, cmacState->bcount++)
+        {
+            cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
+        }
+    }
     if (final)			// libtpms added begin
-	FINAL(&keySchedule);	// libtpms added end
+        FINAL(&keySchedule);	// libtpms added end
 }
 
 //*** CryptCmacEnd()
@@ -168,13 +168,13 @@ CryptCmacEnd(SMAC_STATES* state, UINT32 outSize, BYTE* outBuffer)
     // Encrypt a block of zero
     // Set up the encryption values based on the algorithm
     switch(algorithm)
-	{
-	    FOR_EACH_SYM(ENCRYPT_CASE)
-	  default:
-	    return 0;
-	}
+    {
+        FOR_EACH_SYM(ENCRYPT_CASE)
+        default:
+            return 0;
+    }
     ENCRYPT(&keySchedule, subkey.t.buffer, subkey.t.buffer);
-    
+
     // shift left by 1 and XOR with 0x0...87 if the MSb was 0
     xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
     ShiftLeft(&subkey.b);
@@ -184,22 +184,22 @@ CryptCmacEnd(SMAC_STATES* state, UINT32 outSize, BYTE* outBuffer)
     pAssert(cState->bcount <= cState->iv.t.size);
     // If the buffer is full then no need to compute subkey 2.
     if(cState->bcount < cState->iv.t.size)
-	{
-	    //Pad the data
-	    cState->iv.t.buffer[cState->bcount++] ^= 0x80;
-	    // The rest of the data is a pad of zero which would simply be XORed
-	    // with the iv value so nothing to do...
-	    // Now compute K2
-	    xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
-	    ShiftLeft(&subkey.b);
+    {
+        //Pad the data
+        cState->iv.t.buffer[cState->bcount++] ^= 0x80;
+        // The rest of the data is a pad of zero which would simply be XORed
+        // with the iv value so nothing to do...
+        // Now compute K2
+        xorVal = ((subkey.t.buffer[0] & 0x80) == 0) ? 0 : 0x87;
+        ShiftLeft(&subkey.b);
 MUST_BE(MAX_SYM_BLOCK_SIZE == 16);				// libtpms added begin: gcc -Wstringop-overflow=
-	    pAssert(subkey.t.size > 0 &&
-	            subkey.t.size <= sizeof(subkey.t.buffer));	// libtpms added end
-	    subkey.t.buffer[subkey.t.size - 1] ^= xorVal;
-	}
+        pAssert(subkey.t.size > 0 &&
+                subkey.t.size <= sizeof(subkey.t.buffer));	// libtpms added end
+        subkey.t.buffer[subkey.t.size - 1] ^= xorVal;
+    }
     // XOR the subkey into the IV
     for(i = 0; i < subkey.t.size; i++)
-	cState->iv.t.buffer[i] ^= subkey.t.buffer[i];
+        cState->iv.t.buffer[i] ^= subkey.t.buffer[i];
     ENCRYPT(&keySchedule, cState->iv.t.buffer, cState->iv.t.buffer);
     i = (UINT16)MIN(cState->iv.t.size, outSize);
     MemoryCopy(outBuffer, cState->iv.t.buffer, i);

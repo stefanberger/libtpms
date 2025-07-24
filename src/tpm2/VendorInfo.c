@@ -103,16 +103,16 @@ LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode()
 LIB_EXPORT uint32_t _plat__GetVendorCapabilityCode(int index)
 {
     switch(index)
-	{
-	  case 1:
-	    return StringToUint32(VENDOR_STRING_1);
-	  case 2:
-	    return StringToUint32(VENDOR_STRING_2);
-	  case 3:
-	    return StringToUint32(VENDOR_STRING_3);
-	  case 4:
-	    return StringToUint32(VENDOR_STRING_4);
-	}
+    {
+        case 1:
+            return StringToUint32(VENDOR_STRING_1);
+        case 2:
+            return StringToUint32(VENDOR_STRING_2);
+        case 3:
+            return StringToUint32(VENDOR_STRING_3);
+        case 4:
+            return StringToUint32(VENDOR_STRING_4);
+    }
     return 0;
 }
 
@@ -162,22 +162,22 @@ LIB_EXPORT void _plat__SetTpmFirmwareSvn(uint16_t svn)
 // Dummy implmenentation for obtaining a Firmware SVN Secret bound
 // to the given SVN.
 LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
-					      uint16_t  secret_buf_size,
-					      uint8_t*  secret_buf,
-					      uint16_t* secret_size)
+                                              uint16_t  secret_buf_size,
+                                              uint8_t*  secret_buf,
+                                              uint16_t* secret_size)
 {
     int i;
 
     if(svn > currentSvn)
-	{
-	    return -1;
-	}
+    {
+        return -1;
+    }
 
     // INSECURE dummy implementation: repeat the SVN into the secret buffer.
     for(i = 0; i < secret_buf_size; ++i)
-	{
-	    secret_buf[i] = ((uint8_t*)&svn)[i % sizeof(svn)];
-	}
+    {
+        secret_buf[i] = ((uint8_t*)&svn)[i % sizeof(svn)];
+    }
 
     *secret_size = secret_buf_size;
 
@@ -188,17 +188,17 @@ LIB_EXPORT int _plat__GetTpmFirmwareSvnSecret(uint16_t  svn,
 #if FW_LIMITED_SUPPORT
 // Dummy implmenentation for obtaining a Firmware Secret bound
 // to the current firmware image.
-LIB_EXPORT int _plat__GetTpmFirmwareSecret
-    (uint16_t secret_buf_size, uint8_t* secret_buf, uint16_t* secret_size)
+LIB_EXPORT int _plat__GetTpmFirmwareSecret(
+    uint16_t secret_buf_size, uint8_t* secret_buf, uint16_t* secret_size)
 {
     int i;
 
     // INSECURE dummy implementation: repeat the firmware hash into the
     // secret buffer.
     for(i = 0; i < secret_buf_size; ++i)
-	{
-	    secret_buf[i] = ((uint8_t*)&currentHash)[i % sizeof(currentHash)];
-	}
+    {
+        secret_buf[i] = ((uint8_t*)&currentHash)[i % sizeof(currentHash)];
+    }
 
     *secret_size = secret_buf_size;
 
@@ -206,9 +206,8 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret
 }
 #endif  // FW_LIMITED_SUPPORT
 
-	// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
+// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
 LIB_EXPORT uint32_t _plat__GetTpmType()
 {
     return 1;  // just the value the reference code has returned in the past.
 }
-

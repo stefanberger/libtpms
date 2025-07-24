@@ -60,85 +60,85 @@
 
 //**Introduction
 /*
-  The code in this file is used to manage the session context counter.
-  The scheme implemented here is a "truncated counter".
-  This scheme allows the TPM to not need TPM_SU_CLEAR for a
-  very long period of time and still not have the context
-  count for a session repeated.
+    The code in this file is used to manage the session context counter.
+    The scheme implemented here is a "truncated counter".
+    This scheme allows the TPM to not need TPM_SU_CLEAR for a
+    very long period of time and still not have the context
+    count for a session repeated.
 
-  The counter (contextCounter)in this implementation is a UINT64 but
-  can be smaller.  The "tracking array" (contextArray) only
-  has 16-bits per context.  The tracking array is the data
-  that needs to be saved and restored across TPM_SU_STATE so that
-  sessions are not lost when the system enters the sleep state.
-  Also, when the TPM is active, the tracking array is kept in
-  RAM making it important that the number of bytes for each
-  entry be kept as small as possible.
+    The counter (contextCounter)in this implementation is a UINT64 but
+    can be smaller.  The "tracking array" (contextArray) only
+    has 16-bits per context.  The tracking array is the data
+    that needs to be saved and restored across TPM_SU_STATE so that
+    sessions are not lost when the system enters the sleep state.
+    Also, when the TPM is active, the tracking array is kept in
+    RAM making it important that the number of bytes for each
+    entry be kept as small as possible.
 
-  The TPM prevents "collisions" of these truncated values by
-  not allowing a contextID to be assigned if it would be the
-  same as an existing value.  Since the array holds 16 bits,
-  after a context has been saved, an additional 2^16-1 contexts
-  may be saved before the count would again match.  The normal
-  expectation is that the context will be flushed before its count
-  value is needed again but it is always possible to have long-lived
-  sessions.
+    The TPM prevents "collisions" of these truncated values by
+    not allowing a contextID to be assigned if it would be the
+    same as an existing value.  Since the array holds 16 bits,
+    after a context has been saved, an additional 2^16-1 contexts
+    may be saved before the count would again match.  The normal
+    expectation is that the context will be flushed before its count
+    value is needed again but it is always possible to have long-lived
+    sessions.
 
-  The contextID is assigned when the context is saved (TPM2_ContextSave()).
-  At that time, the TPM will compare the low-order 16 bits of
-  contextCounter to the existing values in contextArray and if one
-  matches, the TPM will return TPM_RC_CONTEXT_GAP (by construction,
-  the entry that contains the matching value is the oldest
-  context).
+    The contextID is assigned when the context is saved (TPM2_ContextSave()).
+    At that time, the TPM will compare the low-order 16 bits of
+    contextCounter to the existing values in contextArray and if one
+    matches, the TPM will return TPM_RC_CONTEXT_GAP (by construction,
+    the entry that contains the matching value is the oldest
+    context).
 
-  The expected remediation by the TRM is to load the oldest saved
-  session context (the one found by the TPM), and save it.  Since loading
-  the oldest session also eliminates its contextID value from
-  contextArray, there TPM will always be able to load and save the oldest
-  existing context.
+    The expected remediation by the TRM is to load the oldest saved
+    session context (the one found by the TPM), and save it.  Since loading
+    the oldest session also eliminates its contextID value from
+    contextArray, there TPM will always be able to load and save the oldest
+    existing context.
 
-  In the worst case, software may have to load and save several contexts
-  in order to save an additional one.  This should happen very infrequently.
+    In the worst case, software may have to load and save several contexts
+    in order to save an additional one.  This should happen very infrequently.
 
-  When the TPM searches contextArray and finds that none of the contextIDs
-  match the low-order 16-bits of contextCount, the TPM can copy the low bits
-  to the contextArray associated with the session, and increment contextCount.
+    When the TPM searches contextArray and finds that none of the contextIDs
+    match the low-order 16-bits of contextCount, the TPM can copy the low bits
+    to the contextArray associated with the session, and increment contextCount.
 
-  There is one entry in contextArray for each of the active sessions
-  allowed by the TPM implementation.  This array contains either a
-  context count, an index, or a value indicating the slot is available (0).
+    There is one entry in contextArray for each of the active sessions
+    allowed by the TPM implementation.  This array contains either a
+    context count, an index, or a value indicating the slot is available (0).
 
-  The index into the contextArray is the handle for the session with the region
-  selector byte of the session set to zero.  If an entry in contextArray contains
-  0, then the corresponding handle may be assigned to a session.  If the entry
-  contains a value that is less than or equal to the number of loaded sessions
-  for the TPM, then the array entry is the slot in which the context is loaded.
+    The index into the contextArray is the handle for the session with the region
+    selector byte of the session set to zero.  If an entry in contextArray contains
+    0, then the corresponding handle may be assigned to a session.  If the entry
+    contains a value that is less than or equal to the number of loaded sessions
+    for the TPM, then the array entry is the slot in which the context is loaded.
 
-  EXAMPLE:    If the TPM allows 8 loaded sessions, then the slot numbers would
-  be 1-8 and a contextArrary value in that range would represent the loaded
-  session.
+    EXAMPLE:    If the TPM allows 8 loaded sessions, then the slot numbers would
+    be 1-8 and a contextArrary value in that range would represent the loaded
+    session.
 
-  NOTE:   When the TPM firmware determines that the array entry is for a loaded
-  session, it will subtract 1 to create the zero-based slot number.
+    NOTE:   When the TPM firmware determines that the array entry is for a loaded
+    session, it will subtract 1 to create the zero-based slot number.
 
-  There is one significant corner case in this scheme.  When the contextCount
-  is equal to a value in the contextArray, the oldest session needs to be
-  recycled or flushed. In order to recycle the session, it must be loaded.
-  To be loaded, there must be an available slot.  Rather than require that a
-  spare slot be available all the time, the TPM will check to see if the
-  contextCount is equal to some value in the contextArray when a session is
-  created.  This prevents the last session slot from being used when it
-  is likely that a session will need to be recycled.
+    There is one significant corner case in this scheme.  When the contextCount
+    is equal to a value in the contextArray, the oldest session needs to be
+    recycled or flushed. In order to recycle the session, it must be loaded.
+    To be loaded, there must be an available slot.  Rather than require that a
+    spare slot be available all the time, the TPM will check to see if the
+    contextCount is equal to some value in the contextArray when a session is
+    created.  This prevents the last session slot from being used when it
+    is likely that a session will need to be recycled.
 
-  If a TPM with both 1.2 and 2.0 functionality uses this scheme for both
-  1.2 and 2.0 sessions, and the list of active contexts is read with
-  TPM_GetCapabiltiy(), the TPM will create 32-bit representations of the
-  list that contains 16-bit values (the TPM2_GetCapability() returns a list
-  of handles for active sessions rather than a list of contextID).  The full
-  contextID has high-order bits that are either the same as the current
-  contextCount or one less.  It is one less if the 16-bits
-  of the contextArray has a value that is larger than the low-order 16 bits
-  of contextCount.
+    If a TPM with both 1.2 and 2.0 functionality uses this scheme for both
+    1.2 and 2.0 sessions, and the list of active contexts is read with
+    TPM_GetCapabiltiy(), the TPM will create 32-bit representations of the
+    list that contains 16-bit values (the TPM2_GetCapability() returns a list
+    of handles for active sessions rather than a list of contextID).  The full
+    contextID has high-order bits that are either the same as the current
+    contextCount or one less.  It is one less if the 16-bits
+    of the contextArray has a value that is larger than the low-order 16 bits
+    of contextCount.
 */
 
 //** Includes, Defines, and Local Variables
@@ -147,22 +147,22 @@
 
 //** File Scope Function -- ContextIdSetOldest()
 /*
-  This function is called when the oldest contextID is being loaded or deleted.
-  Once a saved context becomes the oldest, it stays the oldest until it is
-  deleted.
+    This function is called when the oldest contextID is being loaded or deleted.
+    Once a saved context becomes the oldest, it stays the oldest until it is
+    deleted.
 
-  Finding the oldest is a bit tricky.  It is not just the numeric comparison of
-  values but is dependent on the value of contextCounter.
+    Finding the oldest is a bit tricky.  It is not just the numeric comparison of
+    values but is dependent on the value of contextCounter.
 
-  Assume we have a small contextArray with 8, 4-bit values with values 1 and 2
-  used to indicate the loaded context slot number.  Also assume that the array
-  contains hex values of (0 0 1 0 3 0 9 F) and that the contextCounter is an
-  8-bit counter with a value of 0x37. Since the low nibble is 7, that means
-  that values above 7 are older than values below it and, in this example,
-  9 is the oldest value.
+    Assume we have a small contextArray with 8, 4-bit values with values 1 and 2
+    used to indicate the loaded context slot number.  Also assume that the array
+    contains hex values of (0 0 1 0 3 0 9 F) and that the contextCounter is an
+    8-bit counter with a value of 0x37. Since the low nibble is 7, that means
+    that values above 7 are older than values below it and, in this example,
+    9 is the oldest value.
 
-  Note if we subtract the counter value, from each slot that contains a saved
-  contextID we get (- - - - B - 2 - 8) and the oldest entry is now easy to find.
+    Note if we subtract the counter value, from each slot that contains a saved
+    contextID we get (- - - - B - 2 - 8) and the oldest entry is now easy to find.
 */
 static void ContextIdSetOldest(void)
 {
@@ -171,26 +171,27 @@ static void ContextIdSetOldest(void)
     CONTEXT_SLOT smallest = CONTEXT_SLOT_MASKED(~0);	// libtpms changed
     UINT32       i;
     pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
+
     // Set oldestSaveContext to a value indicating none assigned
     s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
     lowBits = CONTEXT_SLOT_MASKED(gr.contextCounter);	// libtpms changed
     for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
-	{
-	    entry = gr.contextArray[i];
+    {
+        entry = gr.contextArray[i];
 
-	    // only look at entries that are saved contexts
-	    if(entry > MAX_LOADED_SESSIONS)
-		{
-		    // Use a less than or equal in case the oldest
-		    // is brand new (= lowBits-1) and equal to our initial
-		    // value for smallest.
-		    if(CONTEXT_SLOT_MASKED(entry - lowBits) <= smallest)	// libtpms changed
-			{
-			    smallest             = CONTEXT_SLOT_MASKED(entry - lowBits);	// libtpms changed
-			    s_oldestSavedSession = i;
-			}
-		}
-	}
+        // only look at entries that are saved contexts
+        if(entry > MAX_LOADED_SESSIONS)
+        {
+            // Use a less than or equal in case the oldest
+            // is brand new (= lowBits-1) and equal to our initial
+            // value for smallest.
+            if(CONTEXT_SLOT_MASKED(entry - lowBits) <= smallest)	// libtpms changed
+            {
+                smallest             = CONTEXT_SLOT_MASKED(entry - lowBits);	// libtpms changed
+                s_oldestSavedSession = i;
+            }
+        }
+    }
     // When we finish, either the s_oldestSavedSession still has its initial
     // value, or it has the index of the oldest saved context.
 }
@@ -204,7 +205,7 @@ BOOL SessionStartup(STARTUP_TYPE type)
     // Initialize session slots.  At startup, all the in-memory session slots
     // are cleared and marked as not occupied
     for(i = 0; i < MAX_LOADED_SESSIONS; i++)
-	s_sessions[i].occupied = FALSE;  // session slot is not occupied
+        s_sessions[i].occupied = FALSE;  // session slot is not occupied
 
     // The free session slots the number of maximum allowed loaded sessions
     s_freeSessionSlots = MAX_LOADED_SESSIONS;
@@ -214,36 +215,36 @@ BOOL SessionStartup(STARTUP_TYPE type)
     // references a session that was in memory during the state save since that
     // memory was not preserved over the ST_SAVE.
     if(type == SU_RESUME || type == SU_RESTART)
-	{
-	    // On ST_SAVE we preserve the contexts that were saved but not the ones
-	    // in memory
-	    for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
-		{
-		    // If the array value is unused or references a loaded session then
-		    // that loaded session context is lost and the array entry is
-		    // reclaimed.
-		    if(gr.contextArray[i] <= MAX_LOADED_SESSIONS)
-			gr.contextArray[i] = 0;
-		}
-	    // Find the oldest session in context ID data and set it in
-	    // s_oldestSavedSession
-	    ContextIdSetOldest();
-	}
+    {
+        // On ST_SAVE we preserve the contexts that were saved but not the ones
+        // in memory
+        for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
+        {
+            // If the array value is unused or references a loaded session then
+            // that loaded session context is lost and the array entry is
+            // reclaimed.
+            if(gr.contextArray[i] <= MAX_LOADED_SESSIONS)
+                gr.contextArray[i] = 0;
+        }
+        // Find the oldest session in context ID data and set it in
+        // s_oldestSavedSession
+        ContextIdSetOldest();
+    }
     else
-	{
-	    // For STARTUP_CLEAR, clear out the contextArray
-	    for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
-		gr.contextArray[i] = 0;
+    {
+        // For STARTUP_CLEAR, clear out the contextArray
+        for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
+            gr.contextArray[i] = 0;
 
-	    // reset the context counter
-	    gr.contextCounter = MAX_LOADED_SESSIONS + 1;
+        // reset the context counter
+        gr.contextCounter = MAX_LOADED_SESSIONS + 1;
 
-	    // Initialize oldest saved session
-	    s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
+        // Initialize oldest saved session
+        s_oldestSavedSession = MAX_ACTIVE_SESSIONS + 1;
 
-	    // Initialize the context slot mask for UINT16
-	    s_ContextSlotMask = 0xffff;	// libtpms added
-	}
+       // Initialize the context slot mask for UINT16
+       s_ContextSlotMask = 0xffff;	// libtpms added
+    }
     return TRUE;
 }
 
@@ -262,10 +263,10 @@ BOOL SessionStartup(STARTUP_TYPE type)
 //      FALSE(0)        session is not loaded
 //
 BOOL SessionIsLoaded(TPM_HANDLE handle  // IN: session handle
-		     )
+)
 {
     pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-	    || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     handle = handle & HR_HANDLE_MASK;
 
@@ -273,7 +274,7 @@ BOOL SessionIsLoaded(TPM_HANDLE handle  // IN: session handle
     // session return false
     if(handle >= MAX_ACTIVE_SESSIONS || gr.contextArray[handle] == 0
        || gr.contextArray[handle] > MAX_LOADED_SESSIONS)
-	return FALSE;
+        return FALSE;
 
     return TRUE;
 }
@@ -291,17 +292,17 @@ BOOL SessionIsLoaded(TPM_HANDLE handle  // IN: session handle
 //      FALSE(0)        session is not saved
 //
 BOOL SessionIsSaved(TPM_HANDLE handle  // IN: session handle
-		    )
+)
 {
     pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-	    || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     handle = handle & HR_HANDLE_MASK;
     // if out of range of possible active session, or not assigned, or
     // assigned to a loaded session, return false
     if(handle >= MAX_ACTIVE_SESSIONS || gr.contextArray[handle] == 0
        || gr.contextArray[handle] <= MAX_LOADED_SESSIONS)
-	return FALSE;
+        return FALSE;
 
     return TRUE;
 }
@@ -310,9 +311,9 @@ BOOL SessionIsSaved(TPM_HANDLE handle  // IN: session handle
 // This function validates that the sequence number and handle value within a
 // saved context are valid.
 BOOL SequenceNumberForSavedContextIsValid(
-					  TPMS_CONTEXT* context  // IN: pointer to a context structure to be
-					  //     validated
-					  )
+    TPMS_CONTEXT* context  // IN: pointer to a context structure to be
+                           //     validated
+)
 {
 #define MAX_CONTEXT_GAP ((UINT64)(CONTEXT_SLOT_MASKED(~0) + 1)) /* libtpms changed */
     pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
@@ -320,16 +321,16 @@ BOOL SequenceNumberForSavedContextIsValid(
     TPM_HANDLE handle = context->savedHandle & HR_HANDLE_MASK;
 
     if(  // Handle must be with the range of active sessions
-	 handle >= MAX_ACTIVE_SESSIONS
-	 // the array entry must be for a saved context
-	 || gr.contextArray[handle] <= MAX_LOADED_SESSIONS
-	 // the array entry must agree with the sequence number
-	 || gr.contextArray[handle] != CONTEXT_SLOT_MASKED(context->sequence) // libtpms changed
-	 // the provided sequence number has to be less than the current counter
-	 || context->sequence > gr.contextCounter
-	 // but not so much that it could not be a valid sequence number
-	 || gr.contextCounter - context->sequence > MAX_CONTEXT_GAP)
-	return FALSE;
+        handle >= MAX_ACTIVE_SESSIONS
+        // the array entry must be for a saved context
+        || gr.contextArray[handle] <= MAX_LOADED_SESSIONS
+        // the array entry must agree with the sequence number
+        || gr.contextArray[handle] != CONTEXT_SLOT_MASKED(context->sequence) // libtpms changed
+        // the provided sequence number has to be less than the current counter
+        || context->sequence > gr.contextCounter
+        // but not so much that it could not be a valid sequence number
+        || gr.contextCounter - context->sequence > MAX_CONTEXT_GAP)
+        return FALSE;
 
     return TRUE;
 }
@@ -344,12 +345,12 @@ BOOL SequenceNumberForSavedContextIsValid(
 //      TRUE(1)         PCR value is current
 //      FALSE(0)        PCR value is not current
 BOOL SessionPCRValueIsCurrent(SESSION* session  // IN: session structure
-			      )
+)
 {
     if(session->pcrCounter != 0 && session->pcrCounter != gr.pcrCounter)
-	return FALSE;
+        return FALSE;
     else
-	return TRUE;
+        return TRUE;
 }
 
 //*** SessionGet()
@@ -358,13 +359,13 @@ BOOL SessionPCRValueIsCurrent(SESSION* session  // IN: session structure
 //
 // The function requires that the session is loaded.
 SESSION* SessionGet(TPM_HANDLE handle  // IN: session handle
-		    )
+)
 {
     size_t       slotIndex;
     CONTEXT_SLOT sessionIndex;
 
     pAssert(HandleGetType(handle) == TPM_HT_POLICY_SESSION
-	    || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
+            || HandleGetType(handle) == TPM_HT_HMAC_SESSION);
 
     slotIndex = handle & HR_HANDLE_MASK;
 
@@ -399,13 +400,13 @@ SESSION* SessionGet(TPM_HANDLE handle  // IN: session handle
 //      TPM_RC_SESSION_HANDLE   there is no slot available in the context array
 //                              for tracking of this session context
 static TPM_RC ContextIdSessionCreate(
-				     TPM_HANDLE* handle,  // OUT: receives the assigned handle. This will
-				     //     be an index that must be adjusted by the
-				     //     caller according to the type of the
-				     //     session created
-				     UINT32 sessionIndex  // IN: The session context array entry that will
-				     //     be occupied by the created session
-				     )
+    TPM_HANDLE* handle,  // OUT: receives the assigned handle. This will
+                         //     be an index that must be adjusted by the
+                         //     caller according to the type of the
+                         //     session created
+    UINT32 sessionIndex  // IN: The session context array entry that will
+                         //     be occupied by the created session
+)
 {
     pAssert(sessionIndex < MAX_LOADED_SESSIONS);
 
@@ -415,28 +416,28 @@ static TPM_RC ContextIdSessionCreate(
     // oldest context if needed.  If the gap is not at maximum, then
     // it will be possible to save a context if it becomes necessary.
     if(s_oldestSavedSession < MAX_ACTIVE_SESSIONS && s_freeSessionSlots == 1)
-	{
-	    // See if the gap is at maximum
-	    // The current value of the contextCounter will be assigned to the next
-	    // saved context. If the value to be assigned would make the same as an
-	    // existing context, then we can't use it because of the ambiguity it would
-	    // create.
-	    if(CONTEXT_SLOT_MASKED(gr.contextCounter) // libtpms changed
-	       == gr.contextArray[s_oldestSavedSession])
-		return TPM_RC_CONTEXT_GAP;
-	}
+    {
+        // See if the gap is at maximum
+        // The current value of the contextCounter will be assigned to the next
+        // saved context. If the value to be assigned would make the same as an
+        // existing context, then we can't use it because of the ambiguity it would
+        // create.
+        if(CONTEXT_SLOT_MASKED(gr.contextCounter) // libtpms changed
+           == gr.contextArray[s_oldestSavedSession])
+            return TPM_RC_CONTEXT_GAP;
+    }
 
     // Find an unoccupied entry in the contextArray
     for(*handle = 0; *handle < MAX_ACTIVE_SESSIONS; (*handle)++)
-	{
-	    if(gr.contextArray[*handle] == 0)
-		{
-		    // indicate that the session associated with this handle
-		    // references a loaded session
-		    gr.contextArray[*handle] = CONTEXT_SLOT_MASKED(sessionIndex + 1); // libtpms changed
-		    return TPM_RC_SUCCESS;
-		}
-	}
+    {
+        if(gr.contextArray[*handle] == 0)
+        {
+            // indicate that the session associated with this handle
+            // references a loaded session
+            gr.contextArray[*handle] = CONTEXT_SLOT_MASKED(sessionIndex + 1); // libtpms changed
+            return TPM_RC_SUCCESS;
+        }
+    }
     return TPM_RC_SESSION_HANDLES;
 }
 
@@ -454,47 +455,47 @@ static TPM_RC ContextIdSessionCreate(
 //      TPM_RC_SESSION_MEMORY       loaded session space is full
 TPM_RC
 SessionCreate(TPM_SE         sessionType,    // IN: the session type
-	      TPMI_ALG_HASH  authHash,       // IN: the hash algorithm
-	      TPM2B_NONCE*   nonceCaller,    // IN: initial nonceCaller
-	      TPMT_SYM_DEF*  symmetric,      // IN: the symmetric algorithm
-	      TPMI_DH_ENTITY bind,           // IN: the bind object
-	      TPM2B_DATA*    seed,           // IN: seed data
-	      TPM_HANDLE*    sessionHandle,  // OUT: the session handle
-	      TPM2B_NONCE*   nonceTpm        // OUT: the session nonce
-	      )
+              TPMI_ALG_HASH  authHash,       // IN: the hash algorithm
+              TPM2B_NONCE*   nonceCaller,    // IN: initial nonceCaller
+              TPMT_SYM_DEF*  symmetric,      // IN: the symmetric algorithm
+              TPMI_DH_ENTITY bind,           // IN: the bind object
+              TPM2B_DATA*    seed,           // IN: seed data
+              TPM_HANDLE*    sessionHandle,  // OUT: the session handle
+              TPM2B_NONCE*   nonceTpm        // OUT: the session nonce
+)
 {
     TPM_RC       result = TPM_RC_SUCCESS;
     CONTEXT_SLOT slotIndex;
     SESSION*     session = NULL;
 
     pAssert(sessionType == TPM_SE_HMAC || sessionType == TPM_SE_POLICY
-	    || sessionType == TPM_SE_TRIAL);
+            || sessionType == TPM_SE_TRIAL);
 
     // If there are no open spots in the session array, then no point in searching
     if(s_freeSessionSlots == 0)
-	return TPM_RC_SESSION_MEMORY;
+        return TPM_RC_SESSION_MEMORY;
 
     // Find a space for loading a session
     for(slotIndex = 0; slotIndex < MAX_LOADED_SESSIONS; slotIndex++)
-	{
-	    // Is this available?
-	    if(s_sessions[slotIndex].occupied == FALSE)
-		{
-		    session = &s_sessions[slotIndex].session;
-		    break;
-		}
-	}
+    {
+        // Is this available?
+        if(s_sessions[slotIndex].occupied == FALSE)
+        {
+            session = &s_sessions[slotIndex].session;
+            break;
+        }
+    }
     // if no spot found, then this is an internal error
     if(slotIndex >= MAX_LOADED_SESSIONS) {		// libtpms changed
-	FAIL(FATAL_ERROR_INTERNAL);
-	// should never get here due to longjmp	in FAIL()  libtpms added begin; cppcheck
-	return TPM_RC_FAILURE;
+        FAIL(FATAL_ERROR_INTERNAL);
+        // should never get here due to longjmp	in FAIL()  libtpms added begin; cppcheck
+        return TPM_RC_FAILURE;
     }							// libtpms added end
     // Call context ID function to get a handle.  TPM_RC_SESSION_HANDLE may be
     // returned from ContextIdHandelAssign()
     result = ContextIdSessionCreate(sessionHandle, slotIndex);
     if(result != TPM_RC_SUCCESS)
-	return result;
+        return result;
 
     //*** Only return from this point on is TPM_RC_SUCCESS
 
@@ -509,26 +510,26 @@ SessionCreate(TPM_SE         sessionType,    // IN: the session type
     session->authHashAlg = authHash;
     // Initialize session type
     if(sessionType == TPM_SE_HMAC)
-	{
-	    *sessionHandle += HMAC_SESSION_FIRST;
-	}
+    {
+        *sessionHandle += HMAC_SESSION_FIRST;
+    }
     else
-	{
-	    *sessionHandle += POLICY_SESSION_FIRST;
+    {
+        *sessionHandle += POLICY_SESSION_FIRST;
 
-	    // For TPM_SE_POLICY or TPM_SE_TRIAL
-	    session->attributes.isPolicy = SET;
-	    if(sessionType == TPM_SE_TRIAL)
-		session->attributes.isTrialPolicy = SET;
+        // For TPM_SE_POLICY or TPM_SE_TRIAL
+        session->attributes.isPolicy = SET;
+        if(sessionType == TPM_SE_TRIAL)
+            session->attributes.isTrialPolicy = SET;
 
-	    SessionSetStartTime(session);
+        SessionSetStartTime(session);
 
-	    // Initialize policyDigest.  policyDigest is initialized with a string of 0
-	    // of session algorithm digest size. Since the session is already clear.
-	    // Just need to set the size
-	    session->u2.policyDigest.t.size =
-		CryptHashGetDigestSize(session->authHashAlg);
-	}
+        // Initialize policyDigest.  policyDigest is initialized with a string of 0
+        // of session algorithm digest size. Since the session is already clear.
+        // Just need to set the size
+        session->u2.policyDigest.t.size =
+            CryptHashGetDigestSize(session->authHashAlg);
+    }
     // Create initial session nonce
     session->nonceTPM.t.size = nonceCaller->t.size;
     CryptRandomGenerate(session->nonceTPM.t.size, session->nonceTPM.t.buffer);
@@ -540,51 +541,51 @@ SessionCreate(TPM_SE         sessionType,    // IN: the session type
     // If there is a bind object or a session secret, then need to compute
     // a sessionKey.
     if(bind != TPM_RH_NULL || seed->t.size != 0)
-	{
-	    // sessionKey = KDFa(hash, (authValue || seed), "ATH", nonceTPM,
-	    //                      nonceCaller, bits)
-	    // The HMAC key for generating the sessionSecret can be the concatenation
-	    // of an authorization value and a seed value
-	    TPM2B_TYPE(KEY, (sizeof(TPMT_HA) + sizeof(seed->t.buffer)));
-	    TPM2B_KEY key;
+    {
+        // sessionKey = KDFa(hash, (authValue || seed), "ATH", nonceTPM,
+        //                      nonceCaller, bits)
+        // The HMAC key for generating the sessionSecret can be the concatenation
+        // of an authorization value and a seed value
+        TPM2B_TYPE(KEY, (sizeof(TPMT_HA) + sizeof(seed->t.buffer)));
+        TPM2B_KEY key;
 
-	    // Get hash size, which is also the length of sessionKey
-	    session->sessionKey.t.size = CryptHashGetDigestSize(session->authHashAlg);
+        // Get hash size, which is also the length of sessionKey
+        session->sessionKey.t.size = CryptHashGetDigestSize(session->authHashAlg);
 
-	    // Get authValue of associated entity
-	    EntityGetAuthValue(bind, (TPM2B_AUTH*)&key);
-	    pAssert(key.t.size + seed->t.size <= sizeof(key.t.buffer));
+        // Get authValue of associated entity
+        EntityGetAuthValue(bind, (TPM2B_AUTH*)&key);
+        pAssert(key.t.size + seed->t.size <= sizeof(key.t.buffer));
 
-	    // Concatenate authValue and seed
-	    MemoryConcat2B(&key.b, &seed->b, sizeof(key.t.buffer));
+        // Concatenate authValue and seed
+        MemoryConcat2B(&key.b, &seed->b, sizeof(key.t.buffer));
 
-	    // Compute the session key
-	    CryptKDFa(session->authHashAlg,
-		      &key.b,
-		      SESSION_KEY,
-		      &session->nonceTPM.b,
-		      &nonceCaller->b,
-		      session->sessionKey.t.size * 8,
-		      session->sessionKey.t.buffer,
-		      NULL,
-		      FALSE);
-	}
+        // Compute the session key
+        CryptKDFa(session->authHashAlg,
+                  &key.b,
+                  SESSION_KEY,
+                  &session->nonceTPM.b,
+                  &nonceCaller->b,
+                  session->sessionKey.t.size * 8,
+                  session->sessionKey.t.buffer,
+                  NULL,
+                  FALSE);
+    }
 
     // Copy the name of the entity that the HMAC session is bound to
     // Policy session is not bound to an entity
     if(bind != TPM_RH_NULL && sessionType == TPM_SE_HMAC)
-	{
-	    session->attributes.isBound = SET;
-	    SessionComputeBoundEntity(bind, &session->u1.boundEntity);
-	}
+    {
+        session->attributes.isBound = SET;
+        SessionComputeBoundEntity(bind, &session->u1.boundEntity);
+    }
     // If there is a bind object and it is subject to DA, then use of this session
     // is subject to DA regardless of how it is used.
     session->attributes.isDaBound = (bind != TPM_RH_NULL)
-				    && (IsDAExempted(bind) == FALSE);
+                                    && (IsDAExempted(bind) == FALSE);
 
     // If the session is bound, then check to see if it is bound to lockoutAuth
     session->attributes.isLockoutBound = (session->attributes.isDaBound == SET)
-					 && (bind == TPM_RH_LOCKOUT);
+                                         && (bind == TPM_RH_LOCKOUT);
     return TPM_RC_SUCCESS;
 }
 
@@ -603,8 +604,8 @@ SessionCreate(TPM_SE         sessionType,    // IN: the session type
 //
 TPM_RC
 SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
-		   CONTEXT_COUNTER* contextID  // OUT: assigned contextID
-		   )
+                   CONTEXT_COUNTER* contextID  // OUT: assigned contextID
+)
 {
     UINT32       contextIndex;
     CONTEXT_SLOT slotIndex;
@@ -618,11 +619,11 @@ SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
        // if the oldest saved session has the same value as the low bits
        // of the contextCounter, then the GAP is maxed out.
        && gr.contextArray[s_oldestSavedSession] == CONTEXT_SLOT_MASKED(gr.contextCounter)) // libtpms changed
-	return TPM_RC_CONTEXT_GAP;
+        return TPM_RC_CONTEXT_GAP;
 
     // if the caller wants the context counter, set it
     if(contextID != NULL)
-	*contextID = gr.contextCounter;
+        *contextID = gr.contextCounter;
 
     contextIndex = handle & HR_HANDLE_MASK;
     pAssert(contextIndex < MAX_ACTIVE_SESSIONS);
@@ -634,25 +635,26 @@ SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
 
     // Set the contextID for the contextArray
     gr.contextArray[contextIndex] = CONTEXT_SLOT_MASKED(gr.contextCounter); // libtpms changed
+
     // Increment the counter
     gr.contextCounter++;
 
     // In the unlikely event that the 64-bit context counter rolls over...
     if(gr.contextCounter == 0)
-	{
-	    // back it up
-	    gr.contextCounter--;
-	    // return an error
-	    return TPM_RC_TOO_MANY_CONTEXTS;
-	}
+    {
+        // back it up
+        gr.contextCounter--;
+        // return an error
+        return TPM_RC_TOO_MANY_CONTEXTS;
+    }
     // if the low-order bits wrapped, need to advance the value to skip over
     // the values used to indicate that a session is loaded
     if(CONTEXT_SLOT_MASKED(gr.contextCounter) == 0) // libtpms changed
-	gr.contextCounter += MAX_LOADED_SESSIONS + 1;
+        gr.contextCounter += MAX_LOADED_SESSIONS + 1;
 
     // If no other sessions are saved, this is now the oldest.
     if(s_oldestSavedSession >= MAX_ACTIVE_SESSIONS)
-	s_oldestSavedSession = contextIndex;
+        s_oldestSavedSession = contextIndex;
 
     // Mark the session slot as unoccupied
     s_sessions[slotIndex].occupied = FALSE;
@@ -679,27 +681,28 @@ SessionContextSave(TPM_HANDLE       handle,    // IN: session handle
 //
 TPM_RC
 SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved context
-		   TPM_HANDLE*  handle    // IN/OUT: session handle
-		   )
+                   TPM_HANDLE*  handle    // IN/OUT: session handle
+)
 {
     UINT32       contextIndex;
     CONTEXT_SLOT slotIndex;
 
     pAssert(s_ContextSlotMask == 0xff || s_ContextSlotMask == 0xffff); // libtpms added
     pAssert(HandleGetType(*handle) == TPM_HT_POLICY_SESSION
-	    || HandleGetType(*handle) == TPM_HT_HMAC_SESSION);
+            || HandleGetType(*handle) == TPM_HT_HMAC_SESSION);
 
     // Don't bother looking if no openings
     if(s_freeSessionSlots == 0)
-	return TPM_RC_SESSION_MEMORY;
+        return TPM_RC_SESSION_MEMORY;
 
     // Find a free session slot to load the session
     for(slotIndex = 0; slotIndex < MAX_LOADED_SESSIONS; slotIndex++)
-	if(s_sessions[slotIndex].occupied == FALSE)
-	    break;
+        if(s_sessions[slotIndex].occupied == FALSE)
+            break;
 
     // if no spot found, then this is an internal error
     pAssert(slotIndex < MAX_LOADED_SESSIONS);
+
     // libtpms: besides the s_freeSessionSlots guard add another array index guard
     if (slotIndex >= MAX_LOADED_SESSIONS) {	// libtpms added begin; cppcheck
 	FAIL(FATAL_ERROR_INTERNAL);
@@ -713,7 +716,7 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
     if(s_oldestSavedSession < MAX_ACTIVE_SESSIONS && s_freeSessionSlots == 1
        && CONTEXT_SLOT_MASKED(gr.contextCounter) == gr.contextArray[s_oldestSavedSession] // libtpms changed
        && contextIndex != s_oldestSavedSession)
-	return TPM_RC_CONTEXT_GAP;
+        return TPM_RC_CONTEXT_GAP;
 
     pAssert(contextIndex < MAX_ACTIVE_SESSIONS);
 
@@ -723,7 +726,7 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
 
     // if this was the oldest context, find the new oldest
     if(contextIndex == s_oldestSavedSession)
-	ContextIdSetOldest();
+        ContextIdSetOldest();
 
     // Copy session data to session slot
     MemoryCopy(&s_sessions[slotIndex].session, session, sizeof(SESSION));
@@ -745,14 +748,14 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
 // This function requires that 'handle' be a valid active session.
 //
 void SessionFlush(TPM_HANDLE handle  // IN: loaded or saved session handle
-		  )
+)
 {
     CONTEXT_SLOT slotIndex;
     UINT32       contextIndex;  // Index into contextArray
 
     pAssert((HandleGetType(handle) == TPM_HT_POLICY_SESSION
-	     || HandleGetType(handle) == TPM_HT_HMAC_SESSION)
-	    && (SessionIsLoaded(handle) || SessionIsSaved(handle)));
+             || HandleGetType(handle) == TPM_HT_HMAC_SESSION)
+            && (SessionIsLoaded(handle) || SessionIsSaved(handle)));
 
     // Flush context ID of this session
     // Convert handle to an index into the contextArray
@@ -768,21 +771,21 @@ void SessionFlush(TPM_HANDLE handle  // IN: loaded or saved session handle
 
     // Is this a saved session being flushed
     if(slotIndex > MAX_LOADED_SESSIONS)
-	{
-	    // Flushing the oldest session?
-	    if(contextIndex == s_oldestSavedSession)
-		// If so, find a new value for oldest.
-		ContextIdSetOldest();
-	}
+    {
+        // Flushing the oldest session?
+        if(contextIndex == s_oldestSavedSession)
+            // If so, find a new value for oldest.
+            ContextIdSetOldest();
+    }
     else
-	{
-	    // Adjust slot index to point to session array index
-	    slotIndex -= 1;
+    {
+        // Adjust slot index to point to session array index
+        slotIndex -= 1;
 
-	    // Free session array index
-	    s_sessions[slotIndex].occupied = FALSE;
-	    s_freeSessionSlots++;
-	}
+        // Free session array index
+        s_sessions[slotIndex].occupied = FALSE;
+        s_freeSessionSlots++;
+    }
 
     return;
 }
@@ -795,8 +798,8 @@ void SessionFlush(TPM_HANDLE handle  // IN: loaded or saved session handle
 // into the bind buffer.  If they will not both fit, the will be overlapped
 // by XORing bytes.  If XOR is required, the bind value will be full.
 void SessionComputeBoundEntity(TPMI_DH_ENTITY entityHandle,  // IN: handle of entity
-			       TPM2B_NAME*    bind           // OUT: binding value
-			       )
+                               TPM2B_NAME*    bind           // OUT: binding value
+)
 {
     TPM2B_AUTH auth;
     BYTE*      pAuth = auth.t.buffer;
@@ -817,7 +820,7 @@ void SessionComputeBoundEntity(TPMI_DH_ENTITY entityHandle,  // IN: handle of en
     MemorySet(&bind->t.name[bind->t.size], 0, sizeof(bind->t.name) - bind->t.size);
     // XOR the authValue at the end of the name
     for(i = sizeof(bind->t.name) - auth.t.size; i < sizeof(bind->t.name); i++)
-	bind->t.name[i] ^= *pAuth++;
+        bind->t.name[i] ^= *pAuth++;
 
     // Set the bind value to the maximum size
     bind->t.size = sizeof(bind->t.name);
@@ -828,7 +831,7 @@ void SessionComputeBoundEntity(TPMI_DH_ENTITY entityHandle,  // IN: handle of en
 //*** SessionSetStartTime()
 // This function is used to initialize the session timing
 void SessionSetStartTime(SESSION* session  // IN: the session to update
-			 )
+)
 {
     session->startTime = g_time;
     session->epoch     = g_timeEpoch;
@@ -839,7 +842,7 @@ void SessionSetStartTime(SESSION* session  // IN: the session to update
 // This function is used to reset the policy data without changing the nonce
 // or the start time of the session.
 void SessionResetPolicyData(SESSION* session  // IN: the session to reset
-			    )
+)
 {
     SESSION_ATTRIBUTES oldAttributes;
     pAssert(session != NULL);
@@ -888,9 +891,9 @@ void SessionResetPolicyData(SESSION* session  // IN: the session to reset
 //      NO          all the available handles has been returned
 TPMI_YES_NO
 SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
-		    UINT32         count,      // IN: count of returned handles
-		    TPML_HANDLE*   handleList  // OUT: list of handle
-		    )
+                    UINT32         count,      // IN: count of returned handles
+                    TPML_HANDLE*   handleList  // OUT: list of handle
+)
 {
     TPMI_YES_NO more = NO;
     UINT32      i;
@@ -902,41 +905,41 @@ SessionCapGetLoaded(TPMI_SH_POLICY handle,     // IN: start handle
 
     // The maximum count of handles we may return is MAX_CAP_HANDLES
     if(count > MAX_CAP_HANDLES)
-	count = MAX_CAP_HANDLES;
+        count = MAX_CAP_HANDLES;
 
     // Iterate session context ID slots to get loaded session handles
     for(i = handle & HR_HANDLE_MASK; i < MAX_ACTIVE_SESSIONS; i++)
-	{
-	    // If session is active
-	    if(gr.contextArray[i] != 0)
-		{
-		    // If session is loaded
-		    if(gr.contextArray[i] <= MAX_LOADED_SESSIONS)
-			{
-			    if(handleList->count < count)
-				{
-				    SESSION* session;
+    {
+        // If session is active
+        if(gr.contextArray[i] != 0)
+        {
+            // If session is loaded
+            if(gr.contextArray[i] <= MAX_LOADED_SESSIONS)
+            {
+                if(handleList->count < count)
+                {
+                    SESSION* session;
 
-				    // If we have not filled up the return list, add this
-				    // session handle to it
-				    // assume that this is going to be an HMAC session
-				    handle  = i + HMAC_SESSION_FIRST;
-				    session = SessionGet(handle);
-				    if(session->attributes.isPolicy)
-					handle = i + POLICY_SESSION_FIRST;
-				    handleList->handle[handleList->count] = handle;
-				    handleList->count++;
-				}
-			    else
-				{
-				    // If the return list is full but we still have loaded object
-				    // available, report this and stop iterating
-				    more = YES;
-				    break;
-				}
-			}
-		}
-	}
+                    // If we have not filled up the return list, add this
+                    // session handle to it
+                    // assume that this is going to be an HMAC session
+                    handle  = i + HMAC_SESSION_FIRST;
+                    session = SessionGet(handle);
+                    if(session->attributes.isPolicy)
+                        handle = i + POLICY_SESSION_FIRST;
+                    handleList->handle[handleList->count] = handle;
+                    handleList->count++;
+                }
+                else
+                {
+                    // If the return list is full but we still have loaded object
+                    // available, report this and stop iterating
+                    more = YES;
+                    break;
+                }
+            }
+        }
+    }
 
     return more;
 }
@@ -949,9 +952,9 @@ BOOL SessionCapGetOneLoaded(TPMI_SH_POLICY handle)  // IN: handle
 
     if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
        && gr.contextArray[(handle & HR_HANDLE_MASK)])
-	{
-	    return TRUE;
-	}
+    {
+        return TRUE;
+    }
 
     return FALSE;
 }
@@ -968,9 +971,9 @@ BOOL SessionCapGetOneLoaded(TPMI_SH_POLICY handle)  // IN: handle
 //      NO          all the available handles has been returned
 TPMI_YES_NO
 SessionCapGetSaved(TPMI_SH_HMAC handle,     // IN: start handle
-		   UINT32       count,      // IN: count of returned handles
-		   TPML_HANDLE* handleList  // OUT: list of handle
-		   )
+                   UINT32       count,      // IN: count of returned handles
+                   TPML_HANDLE* handleList  // OUT: list of handle
+)
 {
     TPMI_YES_NO more = NO;
     UINT32      i;
@@ -982,34 +985,34 @@ SessionCapGetSaved(TPMI_SH_HMAC handle,     // IN: start handle
 
     // The maximum count of handles we may return is MAX_CAP_HANDLES
     if(count > MAX_CAP_HANDLES)
-	count = MAX_CAP_HANDLES;
+        count = MAX_CAP_HANDLES;
 
     // Iterate session context ID slots to get loaded session handles
     for(i = handle & HR_HANDLE_MASK; i < MAX_ACTIVE_SESSIONS; i++)
-	{
-	    // If session is active
-	    if(gr.contextArray[i] != 0)
-		{
-		    // If session is saved
-		    if(gr.contextArray[i] > MAX_LOADED_SESSIONS)
-			{
-			    if(handleList->count < count)
-				{
-				    // If we have not filled up the return list, add this
-				    // session handle to it
-				    handleList->handle[handleList->count] = i + HMAC_SESSION_FIRST;
-				    handleList->count++;
-				}
-			    else
-				{
-				    // If the return list is full but we still have loaded object
-				    // available, report this and stop iterating
-				    more = YES;
-				    break;
-				}
-			}
-		}
-	}
+    {
+        // If session is active
+        if(gr.contextArray[i] != 0)
+        {
+            // If session is saved
+            if(gr.contextArray[i] > MAX_LOADED_SESSIONS)
+            {
+                if(handleList->count < count)
+                {
+                    // If we have not filled up the return list, add this
+                    // session handle to it
+                    handleList->handle[handleList->count] = i + HMAC_SESSION_FIRST;
+                    handleList->count++;
+                }
+                else
+                {
+                    // If the return list is full but we still have loaded object
+                    // available, report this and stop iterating
+                    more = YES;
+                    break;
+                }
+            }
+        }
+    }
 
     return more;
 }
@@ -1022,9 +1025,9 @@ BOOL SessionCapGetOneSaved(TPMI_SH_HMAC handle)  // IN: handle
 
     if((handle & HR_HANDLE_MASK) < MAX_ACTIVE_SESSIONS
        && gr.contextArray[(handle & HR_HANDLE_MASK)])
-	{
-	    return TRUE;
-	}
+    {
+        return TRUE;
+    }
 
     return FALSE;
 }
@@ -1061,10 +1064,10 @@ SessionCapGetActiveNumber(void)
 
     // Iterate the context array to find the number of non-zero slots
     for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
-	{
-	    if(gr.contextArray[i] != 0)
-		num++;
-	}
+    {
+        if(gr.contextArray[i] != 0)
+            num++;
+    }
 
     return num;
 }
@@ -1081,10 +1084,10 @@ SessionCapGetActiveAvail(void)
 
     // Iterate the context array to find the number of zero slots
     for(i = 0; i < MAX_ACTIVE_SESSIONS; i++)
-	{
-	    if(gr.contextArray[i] == 0)
-		num++;
-	}
+    {
+        if(gr.contextArray[i] == 0)
+            num++;
+    }
 
     return num;
 }

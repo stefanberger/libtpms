@@ -116,9 +116,9 @@
 #endif
 
 // Checks the validity of the size making sure that there is no wrap around
-#define CHECK_SIZE(context, length)					\
+#define CHECK_SIZE(context, length)                                         \
     GOTO_ERROR_UNLESS((((length) + (context)->offset) >= (context)->offset) \
-		      && (((length) + (context)->offset) <= (context)->size))
+                      && (((length) + (context)->offset) <= (context)->size))
 #define NEXT_OCTET(context) ((context)->buffer[(context)->offset++])
 #define PEEK_NEXT(context)  ((context)->buffer[(context)->offset])
 
@@ -137,9 +137,9 @@ typedef struct ASN1UnmarshalContext
 {
     BYTE* buffer;  // pointer to the buffer
     INT16 size;    // size of the buffer (a negative number indicates
-    // a parsing failure).
+                   // a parsing failure).
     INT16 offset;  // current offset into the buffer (a negative number
-    // indicates a parsing failure). Not used
+                   // indicates a parsing failure). Not used
     BYTE tag;      // The last unmarshaled tag
 } ASN1UnmarshalContext;
 
@@ -147,7 +147,7 @@ typedef struct ASN1MarshalContext
 {
     BYTE* buffer;  // pointer to the start of the buffer
     INT16 offset;  // place on the top where the last entry was added
-    // items are added from the bottom up.
+                   // items are added from the bottom up.
     INT16 end;     // the end offset of the current value
     INT16 depth;   // how many pushed end values.
     INT16 ends[MAX_DEPTH];

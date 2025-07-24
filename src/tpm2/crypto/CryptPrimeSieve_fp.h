@@ -76,8 +76,8 @@
 // process to stop when an appropriate number of primes have been
 // sieved.
 LIB_EXPORT void RsaAdjustPrimeLimit(uint32_t requestedPrimes,
-				    RAND_STATE* rand		// libtpms added
-				    );
+    RAND_STATE* rand		// libtpms added
+);
 
 //*** RsaNextPrime()
 // This the iterator used during the sieve process. The input is the
@@ -94,10 +94,10 @@ LIB_EXPORT uint32_t RsaNextPrime(uint32_t lastPrime);
 //      <0      no bit is set or no bit with the requested number is set
 //      >=0    the number of the bit in the array that is the nth set
 LIB_EXPORT int FindNthSetBit(
-			     const UINT16 aSize,  // IN: the size of the array to check
-			     const BYTE*  a,      // IN: the array to check
-			     const UINT32 n       // IN, the number of the SET bit
-			     );
+    const UINT16 aSize,  // IN: the size of the array to check
+    const BYTE*  a,      // IN: the array to check
+    const UINT32 n       // IN, the number of the SET bit
+);
 
 //*** PrimeSieve()
 // This function does a prime sieve over the input 'field' which has as its
@@ -114,9 +114,9 @@ LIB_EXPORT int FindNthSetBit(
 // divides and then use smaller divides to get to the final 16 bit (or smaller)
 // remainders.
 LIB_EXPORT UINT32 PrimeSieve(Crypt_Int* bnN,    // IN/OUT: number to sieve
-			     UINT32 fieldSize,  // IN: size of the field area in bytes
-			     BYTE*  field       // IN: field
-			     );
+                             UINT32 fieldSize,  // IN: size of the field area in bytes
+                             BYTE*  field       // IN: field
+);
 #  ifdef SIEVE_DEBUG
 
 //***SetFieldSize()
@@ -139,10 +139,10 @@ LIB_EXPORT uint32_t SetFieldSize(uint32_t newFieldSize);
 //      TPM_RC_NO_RESULT    candidate is not prime and couldn't find and alternative
 //                          in the field
 LIB_EXPORT TPM_RC PrimeSelectWithSieve(
-				       Crypt_Int*  candidate,  // IN/OUT: The candidate to filter
-				       UINT32      e,          // IN: the exponent
-				       RAND_STATE* rand        // IN: the random number generator state
-				       );
+    Crypt_Int*  candidate,  // IN/OUT: The candidate to filter
+    UINT32      e,          // IN: the exponent
+    RAND_STATE* rand        // IN: the random number generator state
+);
 #  if RSA_INSTRUMENT
 
 //*** PrintTuple()
@@ -153,7 +153,7 @@ void RsaSimulationEnd(void);
 
 //*** GetSieveStats()
 LIB_EXPORT void GetSieveStats(
-			      uint32_t* trials, uint32_t* emptyFields, uint32_t* averageBits);
+    uint32_t* trials, uint32_t* emptyFields, uint32_t* averageBits);
 #  endif
 #endif  // RSA_KEY_SIEVE
 #if !RSA_INSTRUMENT

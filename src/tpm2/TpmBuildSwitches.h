@@ -244,7 +244,7 @@
 #define USE_DA_USED                 YES		// libtpms: YES
 
 // This switch is used to enable the self-test capability in AlgorithmTests.c
-#define ENABLE_SELF_TESTS                   YES
+#define ENABLE_SELF_TESTS           YES
 
 // This switch indicates where clock epoch value should be stored. If this value
 // defined, then it is assumed that the timer will change at any time so the

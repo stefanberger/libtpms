@@ -70,26 +70,26 @@
 //  Return Type: TPM_RC
 //      TPM_RC_VALUE         bad curve
 TPM_RC TpmEcc_SignEcSm2(Crypt_Int* bnR,  // OUT: 'r' component of the signature
-			Crypt_Int* bnS,  // OUT: 's' component of the signature
-			const Crypt_EccCurve* E,    // IN: the curve used in signing
-			Crypt_Int*            bnD,  // IN: the private key
-			const TPM2B_DIGEST*   digest,  // IN: the digest to sign
-			RAND_STATE* rand  // IN: random number generator (mostly for
-			//     debug)
-			);
+                        Crypt_Int* bnS,  // OUT: 's' component of the signature
+                        const Crypt_EccCurve* E,    // IN: the curve used in signing
+                        Crypt_Int*            bnD,  // IN: the private key
+                        const TPM2B_DIGEST*   digest,  // IN: the digest to sign
+                        RAND_STATE* rand  // IN: random number generator (mostly for
+                                          //     debug)
+);
 
 //*** TpmEcc_ValidateSignatureEcSm2()
 // This function is used to validate an SM2 signature.
 //  Return Type: TPM_RC
 //      TPM_RC_SIGNATURE            signature not valid
 TPM_RC TpmEcc_ValidateSignatureEcSm2(
-				     Crypt_Int*            bnR,  // IN: 'r' component of the signature
-				     Crypt_Int*            bnS,  // IN: 's' component of the signature
-				     const Crypt_EccCurve* E,    // IN: the curve used in the signature
-				     //     process
-				     Crypt_Point*        ecQ,    // IN: the public point of the key
-				     const TPM2B_DIGEST* digest  // IN: the digest that was signed
-				     );
+    Crypt_Int*            bnR,  // IN: 'r' component of the signature
+    Crypt_Int*            bnS,  // IN: 's' component of the signature
+    const Crypt_EccCurve* E,    // IN: the curve used in the signature
+                                //     process
+    Crypt_Point*        ecQ,    // IN: the public point of the key
+    const TPM2B_DIGEST* digest  // IN: the digest that was signed
+);
 
 #endif  // ALG_ECC && ALG_SM2
 #endif  // _TPMECC_SIGNATURE_SM2_FP_H_

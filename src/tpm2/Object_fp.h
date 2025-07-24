@@ -98,7 +98,7 @@ void ObjectCleanupEvict(void);
 //      FALSE(0)        handle is not an object handle, or it does not
 //                      reference to a loaded object
 BOOL IsObjectPresent(TPMI_DH_OBJECT handle  // IN: handle to be checked
-		     );
+);
 
 //*** ObjectIsSequence()
 // This function is used to check if the object is a sequence object. This function
@@ -107,7 +107,7 @@ BOOL IsObjectPresent(TPMI_DH_OBJECT handle  // IN: handle to be checked
 //      TRUE(1)         object is an HMAC, hash, or event sequence object
 //      FALSE(0)        object is not an HMAC, hash, or event sequence object
 BOOL ObjectIsSequence(OBJECT* object  // IN: handle to be checked
-		      );
+);
 
 //*** HandleToObject()
 // This function is used to find the object structure associated with a handle.
@@ -115,7 +115,7 @@ BOOL ObjectIsSequence(OBJECT* object  // IN: handle to be checked
 // This function requires that 'handle' references a loaded object or a permanent
 // handle.
 OBJECT* HandleToObject(TPMI_DH_OBJECT handle  // IN: handle of the object
-		       );
+);
 
 //*** GetQualifiedName()
 // This function returns the Qualified Name of the object. In this implementation,
@@ -126,8 +126,8 @@ OBJECT* HandleToObject(TPMI_DH_OBJECT handle  // IN: handle of the object
 //
 // This function requires that 'handle' references a loaded object.
 void GetQualifiedName(TPMI_DH_OBJECT handle,     // IN: handle of the object
-		      TPM2B_NAME* qualifiedName  // OUT: qualified name of the object
-		      );
+                      TPM2B_NAME* qualifiedName  // OUT: qualified name of the object
+);
 
 TPMI_RH_HIERARCHY					// libtpms added begin
 ObjectGetHierarchy(
@@ -139,7 +139,7 @@ ObjectGetHierarchy(
 // This function requires that 'handle' references a loaded object.
 TPMI_RH_HIERARCHY
 GetHierarchy(TPMI_DH_OBJECT handle  // IN :object handle
-	     );
+);
 
 //*** FindEmptyObjectSlot()
 // This function finds an open object slot, if any. It will clear the attributes
@@ -149,21 +149,21 @@ GetHierarchy(TPMI_DH_OBJECT handle  // IN :object handle
 //      NULL        no open slot found
 //      != NULL     pointer to available slot
 OBJECT* FindEmptyObjectSlot(TPMI_DH_OBJECT* handle  // OUT: (optional)
-			    );
+);
 
 //*** ObjectAllocateSlot()
 // This function is used to allocate a slot in internal object array.
 OBJECT* ObjectAllocateSlot(TPMI_DH_OBJECT* handle  // OUT: handle of allocated object
-			   );
+);
 
 //*** ObjectSetLoadedAttributes()
 // This function sets the internal attributes for a loaded object. It is called to
 // finalize the OBJECT attributes (not the TPMA_OBJECT attributes) for a loaded
 // object.
 void ObjectSetLoadedAttributes(OBJECT* object,  // IN: object attributes to finalize
-			       TPM_HANDLE parentHandle,  // IN: the parent handle
-			       SEED_COMPAT_LEVEL seedCompatLevel    // IN: seedCompatLevel to use for children
-			       );
+                               TPM_HANDLE parentHandle, // IN: the parent handle
+                               SEED_COMPAT_LEVEL seedCompatLevel    // IN: seedCompatLevel to use for children
+);
 
 //*** ObjectLoad()
 // Common function to load a non-primary object (i.e., either an Ordinary Object,
@@ -174,17 +174,17 @@ void ObjectSetLoadedAttributes(OBJECT* object,  // IN: object attributes to fina
 // not cause the allocated slot to be marked as in use.
 TPM_RC
 ObjectLoad(OBJECT* object,           // IN: pointer to object slot
-	   //     object
-	   OBJECT*      parent,      // IN: (optional) the parent object
-	   TPMT_PUBLIC* publicArea,  // IN: public area to be installed in the object
-	   TPMT_SENSITIVE* sensitive,  // IN: (optional) sensitive area to be
-	   //      installed in the object
-	   TPM_RC blamePublic,         // IN: parameter number to associate with the
-	   //     publicArea errors
-	   TPM_RC blameSensitive,      // IN: parameter number to associate with the
-	   //     sensitive area errors
-	   TPM2B_NAME* name            // IN: (optional)
-	   );
+                                     //     object
+           OBJECT*      parent,      // IN: (optional) the parent object
+           TPMT_PUBLIC* publicArea,  // IN: public area to be installed in the object
+           TPMT_SENSITIVE* sensitive,  // IN: (optional) sensitive area to be
+                                       //      installed in the object
+           TPM_RC blamePublic,         // IN: parameter number to associate with the
+                                       //     publicArea errors
+           TPM_RC blameSensitive,      // IN: parameter number to associate with the
+                                       //     sensitive area errors
+           TPM2B_NAME* name            // IN: (optional)
+);
 
 #if CC_HMAC_Start || CC_MAC_Start
 //*** ObjectCreateHMACSequence()
@@ -193,11 +193,11 @@ ObjectLoad(OBJECT* object,           // IN: pointer to object slot
 //      TPM_RC_OBJECT_MEMORY        if there is no free slot for an object
 TPM_RC
 ObjectCreateHMACSequence(
-			 TPMI_ALG_HASH   hashAlg,    // IN: hash algorithm
-			 OBJECT*         keyObject,  // IN: the object containing the HMAC key
-			 TPM2B_AUTH*     auth,       // IN: authValue
-			 TPMI_DH_OBJECT* newHandle   // OUT: HMAC sequence object handle
-			 );
+    TPMI_ALG_HASH   hashAlg,    // IN: hash algorithm
+    OBJECT*         keyObject,  // IN: the object containing the HMAC key
+    TPM2B_AUTH*     auth,       // IN: authValue
+    TPMI_DH_OBJECT* newHandle   // OUT: HMAC sequence object handle
+);
 #endif
 
 //*** ObjectCreateHashSequence()
@@ -206,9 +206,9 @@ ObjectCreateHMACSequence(
 //      TPM_RC_OBJECT_MEMORY        if there is no free slot for an object
 TPM_RC
 ObjectCreateHashSequence(TPMI_ALG_HASH   hashAlg,   // IN: hash algorithm
-			 TPM2B_AUTH*     auth,      // IN: authValue
-			 TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
-			 );
+                         TPM2B_AUTH*     auth,      // IN: authValue
+                         TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
+);
 
 //*** ObjectCreateEventSequence()
 // This function creates an event sequence object.
@@ -216,13 +216,14 @@ ObjectCreateHashSequence(TPMI_ALG_HASH   hashAlg,   // IN: hash algorithm
 //      TPM_RC_OBJECT_MEMORY        if there is no free slot for an object
 TPM_RC
 ObjectCreateEventSequence(TPM2B_AUTH*     auth,      // IN: authValue
-			  TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
-			  );
+                          TPMI_DH_OBJECT* newHandle  // OUT: sequence object handle
+);
 
 //*** ObjectTerminateEvent()
 // This function is called to close out the event sequence and clean up the hash
 // context states.
 void ObjectTerminateEvent(void);
+
 #if 0	// libtpms added
 //*** ObjectContextLoad()
 // This function loads an object from a saved object context.
@@ -230,10 +231,10 @@ void ObjectTerminateEvent(void);
 //      NULL        if there is no free slot for an object
 //      != NULL     points to the loaded object
 OBJECT* ObjectContextLoad(
-			  ANY_OBJECT_BUFFER* object,  // IN: pointer to object structure in saved
-			  //     context
-			  TPMI_DH_OBJECT* handle      // OUT: object handle
-			  );
+    ANY_OBJECT_BUFFER* object,  // IN: pointer to object structure in saved
+                                //     context
+    TPMI_DH_OBJECT* handle      // OUT: object handle
+);
 #endif	// libtpms added begin
 OBJECT *
 ObjectContextLoadLibtpms(BYTE           *buffer,      // IN: buffer holding the marshaled object
@@ -247,13 +248,13 @@ ObjectContextLoadLibtpms(BYTE           *buffer,      // IN: buffer holding the 
 //
 // This function requires that the object is loaded.
 void FlushObject(TPMI_DH_OBJECT handle  // IN: handle to be freed
-		 );
+);
 
 //*** ObjectFlushHierarchy()
 // This function is called to flush all the loaded transient objects associated
 // with a hierarchy when the hierarchy is disabled.
 void ObjectFlushHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy to be flush
-			  );
+);
 
 //*** ObjectLoadEvict()
 // This function loads a persistent object into a transient object slot.
@@ -265,33 +266,33 @@ void ObjectFlushHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy to be fl
 //      TPM_RC_OBJECT_MEMORY        no object slot
 TPM_RC
 ObjectLoadEvict(TPM_HANDLE* handle,  // IN:OUT: evict object handle.  If success, it
-		// will be replace by the loaded object handle
-		COMMAND_INDEX commandIndex  // IN: the command being processed
-		);
+                                     // will be replace by the loaded object handle
+                COMMAND_INDEX commandIndex  // IN: the command being processed
+);
 
 //*** ObjectComputeName()
 // This does the name computation from a public area (can be marshaled or not).
 TPM2B_NAME* ObjectComputeName(UINT32     size,  // IN: the size of the area to digest
-			      BYTE*      publicArea,  // IN: the public area to digest
-			      TPM_ALG_ID nameAlg,     // IN: the hash algorithm to use
-			      TPM2B_NAME* name        // OUT: Computed name
-			      );
+                              BYTE*      publicArea,  // IN: the public area to digest
+                              TPM_ALG_ID nameAlg,     // IN: the hash algorithm to use
+                              TPM2B_NAME* name        // OUT: Computed name
+);
 
 //*** PublicMarshalAndComputeName()
 // This function computes the Name of an object from its public area.
 TPM2B_NAME* PublicMarshalAndComputeName(
-					TPMT_PUBLIC* publicArea,  // IN: public area of an object
-					TPM2B_NAME*  name         // OUT: name of the object
-					);
+    TPMT_PUBLIC* publicArea,  // IN: public area of an object
+    TPM2B_NAME*  name         // OUT: name of the object
+);
 
 //*** ComputeQualifiedName()
 // This function computes the qualified name of an object.
 void ComputeQualifiedName(
-			  TPM_HANDLE  parentHandle,  // IN: parent's handle
-			  TPM_ALG_ID  nameAlg,       // IN: name hash
-			  TPM2B_NAME* name,          // IN: name of the object
-			  TPM2B_NAME* qualifiedName  // OUT: qualified name of the object
-			  );
+    TPM_HANDLE  parentHandle,  // IN: parent's handle
+    TPM_ALG_ID  nameAlg,       // IN: name hash
+    TPM2B_NAME* name,          // IN: name of the object
+    TPM2B_NAME* qualifiedName  // OUT: qualified name of the object
+);
 
 //*** ObjectIsStorage()
 // This function determines if an object has the attributes associated
@@ -301,7 +302,7 @@ void ComputeQualifiedName(
 //      TRUE(1)         object is a storage key
 //      FALSE(0)        object is not a storage key
 BOOL ObjectIsStorage(TPMI_DH_OBJECT handle  // IN: object handle
-		     );
+);
 
 //*** ObjectCapGetLoaded()
 // This function returns a list of handles of loaded object, starting from
@@ -312,14 +313,14 @@ BOOL ObjectIsStorage(TPMI_DH_OBJECT handle  // IN: object handle
 //      NO          all the available handles has been returned
 TPMI_YES_NO
 ObjectCapGetLoaded(TPMI_DH_OBJECT handle,     // IN: start handle
-		   UINT32         count,      // IN: count of returned handles
-		   TPML_HANDLE*   handleList  // OUT: list of handle
-		   );
+                   UINT32         count,      // IN: count of returned handles
+                   TPML_HANDLE*   handleList  // OUT: list of handle
+);
 
 //*** ObjectCapGetOneLoaded()
 // This function returns whether a handle is loaded.
 BOOL ObjectCapGetOneLoaded(TPMI_DH_OBJECT handle  // IN: handle
-			   );
+);
 
 //*** ObjectCapGetTransientAvail()
 // This function returns an estimate of the number of additional transient

@@ -90,18 +90,18 @@ static uint32_t Root2(uint32_t n)
     //
     // get a starting point
     for(; next != 0; last >>= 1, next >>= 2)
-	;
+        ;
     last++;
     do
-	{
-	    next = (last + (n / last)) >> 1;
-	    diff = next - last;
-	    last = next;
-	    if(stop-- == 0)
-		FAIL(FATAL_ERROR_INTERNAL);
-	} while(diff < -1 || diff > 1);
+    {
+        next = (last + (n / last)) >> 1;
+        diff = next - last;
+        last = next;
+        if(stop-- == 0)
+            FAIL(FATAL_ERROR_INTERNAL);
+    } while(diff < -1 || diff > 1);
     if((n / next) > (unsigned)next)
-	next++;
+        next++;
     pAssert(next != 0);
     pAssert(((n / next) <= (unsigned)next) && (n / (next + 1) < (unsigned)next));
     return next;
@@ -114,22 +114,22 @@ BOOL IsPrimeInt(uint32_t n)
     uint32_t i;
     uint32_t stop;
     if(n < 3 || ((n & 1) == 0))
-	return (n == 2);
+        return (n == 2);
     if(n <= s_LastPrimeInTable)
-	{
-	    n >>= 1;
-	    return ((s_PrimeTable[n >> 3] >> (n & 7)) & 1);
-	}
+    {
+        n >>= 1;
+        return ((s_PrimeTable[n >> 3] >> (n & 7)) & 1);
+    }
     // Need to search
     stop = Root2(n) >> 1;
     // starting at 1 is equivalent to staring at  (1 << 1) + 1 = 3
     for(i = 1; i < stop; i++)
-	{
-	    if((s_PrimeTable[i >> 3] >> (i & 7)) & 1)
-		// see if this prime evenly divides the number
-		if((n % ((i << 1) + 1)) == 0)
-		    return FALSE;
-	}
+    {
+        if((s_PrimeTable[i >> 3] >> (i & 7)) & 1)
+            // see if this prime evenly divides the number
+            if((n % ((i << 1) + 1)) == 0)
+                return FALSE;
+    }
     return TRUE;
 }
 
@@ -139,17 +139,17 @@ BOOL IsPrimeInt(uint32_t n)
 // Will try to eliminate some of the obvious things before going on
 // to perform MillerRabin as a final verification of primeness.
 BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
-			     RAND_STATE* rand    // IN: the random state just
-			     //     in case Miller-Rabin is required
-			     )
+                             RAND_STATE* rand    // IN: the random state just
+                             //     in case Miller-Rabin is required
+)
 {
     uint32_t leastSignificant32 = ExtMath_GetLeastSignificant32bits(prime);
     // is even?
     if((leastSignificant32 & 0x1) == 0)
-	return FALSE;
+        return FALSE;
 
     if(ExtMath_SizeInBits(prime) <= 32)
-	return IsPrimeInt(leastSignificant32);
+        return IsPrimeInt(leastSignificant32);
 
     // this s_LastPrimeInTable check guarantees that the full prime table check
     // is incorporated in IsPrimeInt.  If this fails then something like this
@@ -164,10 +164,10 @@ BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
 
     // check using GCD before doing a full Miller Rabin.
     {
-	CRYPT_INT_VAR(gcd, LARGEST_NUMBER_BITS);
-	ExtMath_GCD(gcd, prime, s_CompositeOfSmallPrimes);
-	if(!ExtMath_IsEqualWord(gcd, 1))
-	    return FALSE;
+        CRYPT_INT_VAR(gcd, LARGEST_NUMBER_BITS);
+        ExtMath_GCD(gcd, prime, s_CompositeOfSmallPrimes);
+        if(!ExtMath_IsEqualWord(gcd, 1))
+            return FALSE;
     }
     return MillerRabin(prime, rand);
 }
@@ -179,12 +179,12 @@ BOOL TpmMath_IsProbablyPrime(Crypt_Int*  prime,  // IN:
 // are from FIPS 186-3.
 UINT32
 MillerRabinRounds(UINT32 bits  // IN: Number of bits in the RSA prime
-		  )
+)
 {
     if(bits < 511)
-	return 8;  // don't really expect this
+        return 8;  // don't really expect this
     if(bits < 1536)
-	return 5;  // for 512 and 1K primes
+        return 5;  // for 512 and 1K primes
     return 4;      // for 3K public modulus and greater
 }
 
@@ -221,58 +221,58 @@ BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand)
     i = (int)(bnWm1->size * RADIX_BITS);
     // Now find the largest power of 2 that divides w1
     for(a = 1; (a < (bnWm1->size * RADIX_BITS)) && (ExtMath_TestBit(bnWm1, a) == 0);
-	a++)
-	{
-	}
+        a++)
+    {
+    }
     // 2. m = (w1) / 2^a
     ExtMath_ShiftRight(bnM, bnWm1, a);
     // 3. wlen = len (w).
     wLen = ExtMath_SizeInBits(bnW);
     // 4. For i = 1 to iterations do
     for(i = 0; i < iterations; i++)
-	{
-	    // 4.1 Obtain a string b of wlen bits from an RBG.
-	    // Ensure that 1 < b < w1.
-	    // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
-	    while(TpmMath_GetRandomInteger(bnB, wLen, rand)
-		  && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
-		      || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
-		;
-	    if(g_inFailureMode)
-		return FALSE;
+    {
+        // 4.1 Obtain a string b of wlen bits from an RBG.
+        // Ensure that 1 < b < w1.
+        // 4.2 If ((b <= 1) or (b >= w1)), then go to step 4.1.
+        while(TpmMath_GetRandomInteger(bnB, wLen, rand)
+              && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
+                  || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
+            ;
+        if(g_inFailureMode)
+            return FALSE;
 
-	    // 4.3 z = b^m mod w.
-	    // if ModExp fails, then say this is not
-	    // prime and bail out.
-	    ExtMath_ModExp(bnZ, bnB, bnM, bnW);
+        // 4.3 z = b^m mod w.
+        // if ModExp fails, then say this is not
+        // prime and bail out.
+        ExtMath_ModExp(bnZ, bnB, bnM, bnW);
 
-	    // 4.4 If ((z == 1) or (z = w == 1)), then go to step 4.7.
-	    if((ExtMath_UnsignedCmpWord(bnZ, 1) == 0)
-	       || (ExtMath_UnsignedCmp(bnZ, bnWm1) == 0))
-		goto step4point7;
-	    // 4.5 For j = 1 to a  1 do.
-	    for(j = 1; j < a; j++)
-		{
-		    // 4.5.1 z = z^2 mod w.
-		    ExtMath_ModMult(bnZ, bnZ, bnZ, bnW);
-		    // 4.5.2 If (z = w1), then go to step 4.7.
-		    if(ExtMath_UnsignedCmp(bnZ, bnWm1) == 0)
-			goto step4point7;
-		    // 4.5.3 If (z = 1), then go to step 4.6.
-		    if(ExtMath_IsEqualWord(bnZ, 1))
-			goto step4point6;
-		}
-	    // 4.6 Return COMPOSITE.
-	step4point6:
-	    INSTRUMENT_INC(failedAtIteration[i]);
-	    goto end;
-	    // 4.7 Continue. Comment: Increment i for the do-loop in step 4.
-	step4point7:
-	    continue;
-	}
+        // 4.4 If ((z == 1) or (z = w == 1)), then go to step 4.7.
+        if((ExtMath_UnsignedCmpWord(bnZ, 1) == 0)
+           || (ExtMath_UnsignedCmp(bnZ, bnWm1) == 0))
+            goto step4point7;
+        // 4.5 For j = 1 to a  1 do.
+        for(j = 1; j < a; j++)
+        {
+            // 4.5.1 z = z^2 mod w.
+            ExtMath_ModMult(bnZ, bnZ, bnZ, bnW);
+            // 4.5.2 If (z = w1), then go to step 4.7.
+            if(ExtMath_UnsignedCmp(bnZ, bnWm1) == 0)
+                goto step4point7;
+            // 4.5.3 If (z = 1), then go to step 4.6.
+            if(ExtMath_IsEqualWord(bnZ, 1))
+                goto step4point6;
+        }
+        // 4.6 Return COMPOSITE.
+step4point6:
+        INSTRUMENT_INC(failedAtIteration[i]);
+        goto end;
+        // 4.7 Continue. Comment: Increment i for the do-loop in step 4.
+step4point7:
+        continue;
+    }
     // 5. Return PROBABLY PRIME
     ret = TRUE;
- end:
+end:
     return ret;
 }
 
@@ -300,18 +300,18 @@ RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand)
     NOT_REFERENCED(rand);
 
     if(modE == 0)
-	// evenly divisible so add two keeping the number odd
-	ExtMath_AddWord(prime, prime, 2);
+        // evenly divisible so add two keeping the number odd
+        ExtMath_AddWord(prime, prime, 2);
     // want 0 != (p - 1) mod e
     // which is 1 != p mod e
     else if(modE == 1)
-	// subtract 2 keeping number odd and insuring that
-	// 0 != (p - 1) mod e
-	ExtMath_SubtractWord(prime, prime, 2);
+        // subtract 2 keeping number odd and insuring that
+        // 0 != (p - 1) mod e
+        ExtMath_SubtractWord(prime, prime, 2);
 
     if(TpmMath_IsProbablyPrime(prime, rand) == 0)
-	ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
- Exit:
+        ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
+Exit:
     return retVal;
 #  else
     return PrimeSelectWithSieve(prime, exponent, rand);
@@ -399,7 +399,7 @@ static void RsaAdjustPrimeCandidate_Rev169(BYTE* bigNumberBuffer, size_t bufSize
 
     // second, get the most significant 32 bits.
     uint32_t msw = (bigNumberBuffer[0] << 24) | (bigNumberBuffer[1] << 16)
-		   | (bigNumberBuffer[2] << 8) | (bigNumberBuffer[3] << 0);
+                   | (bigNumberBuffer[2] << 8) | (bigNumberBuffer[3] << 0);
 
     // Multiplying 0xff...f by 0x4AFB gives 0xff..f - 0xB5050...0
     uint32_t adjusted = (msw >> 16) * 0x4AFB;
@@ -418,12 +418,12 @@ static void RsaAdjustPrimeCandidate_Rev169(BYTE* bigNumberBuffer, size_t bufSize
 // for an RSA prime.
 // succeeds, or enters failure mode.
 static TPM_RC TpmRsa_GeneratePrimeForRSA_Rev169(			// libtpms: renamed
-				  Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
-				  //  random value
-				  UINT32      bits,      // IN: number of bits to get
-				  UINT32      exponent,  // IN: the exponent
-				  RAND_STATE* rand       // IN: the random state
-				  )
+    Crypt_Int* prime,      // IN/OUT: points to the BN that will get the
+                           //  random value
+    UINT32      bits,      // IN: number of bits to get
+    UINT32      exponent,  // IN: the exponent
+    RAND_STATE* rand       // IN: the random state
+)
 {
     // Only try to handle specific sizes of keys.
     // this is necessary so the RsaAdjustPrimeCandidate function works correctly.
@@ -437,20 +437,20 @@ static TPM_RC TpmRsa_GeneratePrimeForRSA_Rev169(			// libtpms: renamed
     BOOL          OK    = (bytes <= sizeof(large.t.buffer));
     BOOL          found = FALSE;
     while(OK && !found)
-	{
-	    OK           = TpmMath_GetRandomBits(large.t.buffer, bits, rand);  // new
-	    large.t.size = bytes;
-	    RsaAdjustPrimeCandidate_Rev169(large.t.buffer, bytes);	// libtpms renamed
-	    // convert from 2B to Integer for prime checks
-	    OK = OK
-		 && (ExtMath_IntFromBytes(prime, large.t.buffer, large.t.size) != NULL);
-	    found = OK && (RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS);
-	}
+    {
+        OK           = TpmMath_GetRandomBits(large.t.buffer, bits, rand);  // new
+        large.t.size = bytes;
+        RsaAdjustPrimeCandidate_Rev169(large.t.buffer, bytes);	// libtpms renamed
+        // convert from 2B to Integer for prime checks
+        OK = OK
+             && (ExtMath_IntFromBytes(prime, large.t.buffer, large.t.size) != NULL);
+        found = OK && (RsaCheckPrime(prime, exponent, rand) == TPM_RC_SUCCESS);
+    }
 
     if(!OK)
-	{
-	    FAIL(FATAL_ERROR_CRYPTO);
-	}
+    {
+        FAIL(FATAL_ERROR_CRYPTO);
+    }
 
     return (OK && found) ? TPM_RC_SUCCESS : TPM_RC_FAILURE;
 }

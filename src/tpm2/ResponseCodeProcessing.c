@@ -59,23 +59,21 @@
 /*										*/
 /********************************************************************************/
 
-/* 9.16 ResponseCodeProcessing.c */
-/* 9.16.1 Description */
-/* This file contains the miscellaneous functions for processing response codes. */
-/* NOTE: Currently, there is only one. */
-/* 9.16.2 Includes and Defines */
+//** Description
+// This file contains the miscellaneous functions for processing response codes.
+// NOTE: Currently, there is only one.
+
+//** Includes and Defines
 #include "Tpm.h"
-/* 9.16.3 RcSafeAddToResult() */
-/* Adds a modifier to a response code as long as the response code allows a modifier and no modifier
-   has already been added. */
+
+//** RcSafeAddToResult()
+// Adds a modifier to a response code as long as the response code allows a modifier
+// and no modifier has already been added.
 TPM_RC
-RcSafeAddToResult(
-		  TPM_RC          responseCode,
-		  TPM_RC          modifier
-		  )
+RcSafeAddToResult(TPM_RC responseCode, TPM_RC modifier)
 {
     if((responseCode & RC_FMT1) && !(responseCode & 0xf40))
-	return responseCode + modifier;
+        return responseCode + modifier;
     else
-	return responseCode;
+        return responseCode;
 }

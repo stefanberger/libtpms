@@ -79,13 +79,13 @@
 #endif                                 // libtpms added end
 
 #ifndef RADIX_BITS
-#  if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__)	\
-    || defined(__amd64) || defined(_WIN64) || defined(_M_X64) || defined(_M_ARM64) \
-    || defined(__aarch64__) || defined(__PPC64__) || defined(__s390x__) \
-    || defined(__powerpc64__) || defined(__ppc64__)
+#  if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__)                 \
+      || defined(__amd64) || defined(_WIN64) || defined(_M_X64) || defined(_M_ARM64) \
+      || defined(__aarch64__) || defined(__PPC64__) || defined(__s390x__)            \
+      || defined(__powerpc64__) || defined(__ppc64__)
 #    define RADIX_BITS 64
 #  elif defined(__i386__) || defined(__i386) || defined(i386) || defined(_WIN32) \
-    || defined(_M_IX86)
+      || defined(_M_IX86)
 #    define RADIX_BITS 32
 #  elif defined(_M_ARM) || defined(__arm__) || defined(__thumb__)
 #    define RADIX_BITS 32
@@ -132,8 +132,8 @@ typedef int64_t  crypt_word_t;
 #  define SWAP_CRYPT_WORD(x) REVERSE_ENDIAN_32((x))
 typedef uint32_t crypt_uword_t;
 typedef int32_t  crypt_word_t;
-#  define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h)			\
-    BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h), BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
+#  define TO_CRYPT_WORD_64(a, b, c, d, e, f, g, h) \
+      BIG_ENDIAN_BYTES_TO_UINT32(e, f, g, h), BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d)
 #define BN_PAD      1    /* libtpms added */
 #endif
 
