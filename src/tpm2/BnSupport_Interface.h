@@ -79,6 +79,7 @@
 #define BN_SUPPORT_INTERFACE_H
 // TODO_RENAME_INC_FOLDER:private refers to the TPM_CoreLib private headers
 #include "GpMacros.h"
+#include "CryptoInterface.h"
 #include "BnValues.h"
 
 //** BnSupportLibInit()
@@ -166,6 +167,14 @@ LIB_EXPORT BOOL BnEccAdd(
     bigPoint R, pointConst S, pointConst Q, const bigCurveData* E);
 
 #endif  // ALG_ECC
+
+#if CRYPTO_LIB_REPORTING
+
+//** BnGetImplementation()
+// This function reports the underlying library being used for bignum operations.
+void BnGetImplementation(_CRYPTO_IMPL_DESCRIPTION* result);
+
+#endif  // CRYPTO_LIB_REPORTING
 
 //			libtpms: added begin
 bigCurveData*
