@@ -81,7 +81,7 @@ typedef struct
 } NV_ReadPublic_Out;
 
 // Response code modifiers
-#    define RC_NV_ReadPublic_nvIndex (TPM_RC_P + TPM_RC_1)
+#    define RC_NV_ReadPublic_nvIndex (TPM_RC_H + TPM_RC_1)
 
 // Function prototype
 TPM_RC
