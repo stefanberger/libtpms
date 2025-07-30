@@ -76,7 +76,7 @@ typedef struct
 
 // Response code modifiers
 #    define RC_HierarchyChangeAuth_authHandle (TPM_RC_H + TPM_RC_1)
-#    define RC_HierarchyChangeAuth_newAuth    (TPM_RC_P + TPM_RC_2)
+#    define RC_HierarchyChangeAuth_newAuth    (TPM_RC_P + TPM_RC_1)
 
 // Function prototype
 TPM_RC
