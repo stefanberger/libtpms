@@ -75,8 +75,8 @@ typedef struct
 } SequenceUpdate_In;
 
 // Response code modifiers
-#    define RC_SequenceUpdate_sequenceHandle (TPM_RC_P + TPM_RC_1)
-#    define RC_SequenceUpdate_buffer         (TPM_RC_P + TPM_RC_2)
+#    define RC_SequenceUpdate_sequenceHandle (TPM_RC_H + TPM_RC_1)
+#    define RC_SequenceUpdate_buffer         (TPM_RC_P + TPM_RC_1)
 
 // Function prototype
 TPM_RC
