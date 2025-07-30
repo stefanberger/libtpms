@@ -189,7 +189,7 @@ static TPM_RC CryptGenerateKeyedHash(
     if(scheme->scheme == TPM_ALG_NULL)
         hashAlg = publicArea->nameAlg;
     else if(scheme->scheme == TPM_ALG_XOR)
-        hashAlg = scheme->details.xorr.hashAlg;
+        hashAlg = scheme->details.xor.hashAlg;
     else
         hashAlg = scheme->details.hmac.hashAlg;
     digestSize = CryptHashGetDigestSize(hashAlg);
@@ -1904,7 +1904,7 @@ CryptValidateKeys(TPMT_PUBLIC*    publicArea,
                     scheme = &params->keyedHashDetail.scheme;
                     if(scheme->scheme == TPM_ALG_XOR)
                     {
-                        maxSize = CryptHashGetBlockSize(scheme->details.xorr.hashAlg);
+                        maxSize = CryptHashGetBlockSize(scheme->details.xor.hashAlg);
                     }
                     else if(scheme->scheme == TPM_ALG_HMAC)
                     {

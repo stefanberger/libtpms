@@ -511,11 +511,11 @@ SchemeChecks(OBJECT*      parentObject,  // IN: parent (null if primary seed)
                 if(IS_ATTRIBUTE(attributes, TPMA_OBJECT, restricted))
                 {
                     if(parms->keyedHashDetail.scheme.details.
-                        xorr.kdf != TPM_ALG_KDF1_SP800_108)
+                       xor.kdf != TPM_ALG_KDF1_SP800_108)
                         return TPM_RCS_SCHEME;
                     // Must select a digest.
                     if(CryptHashGetDigestSize(
-                           parms->keyedHashDetail.scheme.details.xorr.hashAlg)
+                           parms->keyedHashDetail.scheme.details.xor.hashAlg)
                        == 0)
                         return TPM_RCS_HASH;
                 }

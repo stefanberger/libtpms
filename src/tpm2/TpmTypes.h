@@ -1905,7 +1905,7 @@ typedef union
 #endif  // ALG_CAMELLIA
     TPM_KEY_BITS sym;
 #if ALG_XOR
-    TPMI_ALG_HASH xorr;
+    TPMI_ALG_HASH xor ;
 #endif  // ALG_XOR
 } TPMU_SYM_KEY_BITS;
 
@@ -2037,7 +2037,7 @@ typedef union
     TPMS_SCHEME_HMAC hmac;
 #endif  // ALG_HMAC
 #if ALG_XOR
-    TPMS_SCHEME_XOR xorr;
+    TPMS_SCHEME_XOR xor ;
 #endif  // ALG_XOR
 } TPMU_SCHEME_KEYEDHASH;
 

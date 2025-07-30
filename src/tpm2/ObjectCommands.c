@@ -607,8 +607,8 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 
 	    // SP800-108 is the only KDF supported by this implementation and there is
 	    // no default hash algorithm.
-	    pAssert(scheme->details.xorr.hashAlg != TPM_ALG_NULL
-		    && scheme->details.xorr.kdf == TPM_ALG_KDF1_SP800_108);
+	    pAssert(scheme->details.xor.hashAlg != TPM_ALG_NULL
+		    && scheme->details.xor.kdf == TPM_ALG_KDF1_SP800_108);
 	    // Don't derive RSA keys
 	    if(publicArea->type == TPM_ALG_RSA)
 		return TPM_RCS_TYPE + RC_CreateLoaded_inPublic;
@@ -632,8 +632,8 @@ TPM2_CreateLoaded(CreateLoaded_In*  in,  // IN: input parameter list
 		return result;
 	    // Set up the KDF for object generation
 	    DRBG_InstantiateSeededKdf((KDF_STATE*)rand,
-				      scheme->details.xorr.hashAlg,
-				      scheme->details.xorr.kdf,
+				      scheme->details.xor.hashAlg,
+				      scheme->details.xor.kdf,
 				      &parent->sensitive.sensitive.bits.b,
 				      &labelContext.label.b,
 				      &labelContext.context.b,

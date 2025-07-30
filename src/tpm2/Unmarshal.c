@@ -3051,7 +3051,7 @@ TPMU_SYM_KEY_BITS_Unmarshal(TPMU_SYM_KEY_BITS *target, BYTE **buffer, INT32 *siz
 #endif			// libtpms added end
 #if ALG_XOR
       case TPM_ALG_XOR:
-	rc = TPMI_ALG_HASH_Unmarshal(&target->xorr, buffer, size, NO);
+	rc = TPMI_ALG_HASH_Unmarshal(&target->xor, buffer, size, NO);
 	break;
 #endif
       case TPM_ALG_NULL:
@@ -3368,7 +3368,7 @@ TPMU_SCHEME_KEYEDHASH_Unmarshal(TPMU_SCHEME_KEYEDHASH *target, BYTE **buffer, IN
 #endif
 #if ALG_XOR
       case TPM_ALG_XOR:
-	rc = TPMS_SCHEME_XOR_Unmarshal(&target->xorr, buffer, size);
+	rc = TPMS_SCHEME_XOR_Unmarshal(&target->xor, buffer, size);
 	break;
 #endif
       case TPM_ALG_NULL:
