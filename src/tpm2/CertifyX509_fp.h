@@ -86,8 +86,8 @@ typedef struct
 } CertifyX509_Out;
 
 // Response code modifiers
-#    define RC_CertifyX509_signHandle         (TPM_RC_H + TPM_RC_1)
-#    define RC_CertifyX509_objectHandle       (TPM_RC_H + TPM_RC_2)
+#    define RC_CertifyX509_objectHandle       (TPM_RC_H + TPM_RC_1)
+#    define RC_CertifyX509_signHandle         (TPM_RC_H + TPM_RC_2)
 #    define RC_CertifyX509_reserved           (TPM_RC_P + TPM_RC_1)
 #    define RC_CertifyX509_inScheme           (TPM_RC_P + TPM_RC_2)
 #    define RC_CertifyX509_partialCertificate (TPM_RC_P + TPM_RC_3)
