@@ -624,6 +624,8 @@ typedef UINT32 TPM_PT;
 #define TPM_PT_NV_BUFFER_MAX       (TPM_PT)(PT_FIXED + 44)
 #define TPM_PT_MODES               (TPM_PT)(PT_FIXED + 45)
 #define TPM_PT_MAX_CAP_BUFFER      (TPM_PT)(PT_FIXED + 46)
+#define TPM_PT_FIRMWARE_SVN        (TPM_PT)(PT_FIXED + 47)
+#define TPM_PT_FIRMWARE_MAX_SVN    (TPM_PT)(PT_FIXED + 48)
 #define PT_VAR                     (TPM_PT)(PT_GROUP * 2)
 #define TPM_PT_PERMANENT           (TPM_PT)(PT_VAR + 0)
 #define TPM_PT_STARTUP_CLEAR       (TPM_PT)(PT_VAR + 1)
