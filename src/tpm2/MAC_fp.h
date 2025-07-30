@@ -76,8 +76,9 @@ typedef struct
 } MAC_In;
 
 // Output structure definition
-typedef struct {
-    TPM2B_MAX_BUFFER	outMAC;
+typedef struct
+{
+    TPM2B_DIGEST outMAC;
 } MAC_Out;
 
 // Response code modifiers
