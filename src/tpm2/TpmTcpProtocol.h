@@ -112,6 +112,9 @@
 
 #define TPM_TEST_FAILURE_MODE 30
 
+#define TPM_SET_FW_HASH 35
+#define TPM_SET_FW_SVN  36
+
 //** Enumerations and Structures
 enum TpmEndPointInfo
 {
