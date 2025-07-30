@@ -100,8 +100,6 @@ typedef UINT16 TPM_ALG_ID;
 #define TPM_ALG_RSA              (TPM_ALG_ID)(ALG_RSA_VALUE)
 #define ALG_TDES_VALUE           0x0003
 #define TPM_ALG_TDES             (TPM_ALG_ID)(ALG_TDES_VALUE)
-#define     ALG_SHA_VALUE               0x0004
-#define TPM_ALG_SHA                     (TPM_ALG_ID)(ALG_SHA_VALUE)
 #define ALG_SHA1_VALUE           0x0004
 #define TPM_ALG_SHA1             (TPM_ALG_ID)(ALG_SHA1_VALUE)
 #define ALG_HMAC_VALUE           0x0005
@@ -748,6 +746,7 @@ typedef TPM_HANDLE TPM_RH;
 
 // Table "Definition of TPM_HC Constants" (Part 2: Structures)
 typedef TPM_HANDLE TPM_HC;
+#define TYPE_OF_TPM_HC        TPM_HANDLE
 #define HR_HANDLE_MASK        (TPM_HC)(0x00FFFFFF)
 #define HR_RANGE_MASK         (TPM_HC)(0xFF000000)
 #define HR_SHIFT              (TPM_HC)(24)
@@ -841,7 +840,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_ALGORITHM Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_ALGORITHM;
-#define TYPE_OF_TPMA_ALGORITHM      UINT32
 #  define TPMA_ALGORITHM_asymmetric (TPMA_ALGORITHM)(1 << 0)
 #  define TPMA_ALGORITHM_symmetric  (TPMA_ALGORITHM)(1 << 1)
 #  define TPMA_ALGORITHM_hash       (TPMA_ALGORITHM)(1 << 2)
@@ -849,7 +847,7 @@ typedef UINT32 TPMA_ALGORITHM;
 #  define TPMA_ALGORITHM_signing    (TPMA_ALGORITHM)(1 << 8)
 #  define TPMA_ALGORITHM_encrypting (TPMA_ALGORITHM)(1 << 9)
 #  define TPMA_ALGORITHM_method     (TPMA_ALGORITHM)(1 << 10)
-#define TPMA_ALGORITHM_reserved		 0xfffff8f0
+#define TPMA_ALGORITHM_reserved		 0xfffff8f0			// libtpms added
 
 //  This is the initializer for a TPMA_ALGORITHM bit array.
 #  define TPMA_ALGORITHM_INITIALIZER(asymmetric,                            \
@@ -905,8 +903,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_OBJECT Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_OBJECT;
-#define TYPE_OF_TPMA_OBJECT                 UINT32
-#  define TPMA_OBJECT_Reserved_bit_at_0     (TPMA_OBJECT)(1 << 0)
 #  define TPMA_OBJECT_fixedTPM             (TPMA_OBJECT)(1 << 1)
 #  define TPMA_OBJECT_stClear              (TPMA_OBJECT)(1 << 2)
 #  define TPMA_OBJECT_fixedParent          (TPMA_OBJECT)(1 << 4)
@@ -921,7 +917,7 @@ typedef UINT32 TPMA_OBJECT;
 #  define TPMA_OBJECT_decrypt              (TPMA_OBJECT)(1 << 17)
 #  define TPMA_OBJECT_sign                 (TPMA_OBJECT)(1 << 18)
 #  define TPMA_OBJECT_x509sign             (TPMA_OBJECT)(1 << 19)
-#define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f009)
+#define TPMA_OBJECT_reserved		    ((TPMA_OBJECT)0xfff0f009)		// libtpms added
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
@@ -964,14 +960,13 @@ typedef struct
 
 // This implements Table "Definition of TPMA_SESSION Bits" (Part 2: Structures) using bit masking
 typedef UINT8 TPMA_SESSION;
-#define TYPE_OF_TPMA_SESSION            UINT8
 #  define TPMA_SESSION_continueSession (TPMA_SESSION)(1 << 0)
 #  define TPMA_SESSION_auditExclusive  (TPMA_SESSION)(1 << 1)
 #  define TPMA_SESSION_auditReset      (TPMA_SESSION)(1 << 2)
 #  define TPMA_SESSION_decrypt         (TPMA_SESSION)(1 << 5)
 #  define TPMA_SESSION_encrypt         (TPMA_SESSION)(1 << 6)
 #  define TPMA_SESSION_audit           (TPMA_SESSION)(1 << 7)
-#define TPMA_SESSION_reserved		    0x18
+#define TPMA_SESSION_reserved		    0x18			// libtpms added
 
 //  This is the initializer for a TPMA_SESSION bit array.
 #  define TPMA_SESSION_INITIALIZER(continuesession,                        \
@@ -1020,7 +1015,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_LOCALITY Bits" (Part 2: Structures) using bit masking
 typedef UINT8 TPMA_LOCALITY;
-#define TYPE_OF_TPMA_LOCALITY           UINT8
 #  define TPMA_LOCALITY_TPM_LOC_ZERO   (TPMA_LOCALITY)(1 << 0)
 #  define TPMA_LOCALITY_TPM_LOC_ONE    (TPMA_LOCALITY)(1 << 1)
 #  define TPMA_LOCALITY_TPM_LOC_TWO    (TPMA_LOCALITY)(1 << 2)
@@ -1079,7 +1073,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_PERMANENT Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_PERMANENT;
-#define TYPE_OF_TPMA_PERMANENT              UINT32
 #  define TPMA_PERMANENT_ownerAuthSet       (TPMA_PERMANENT)(1 << 0)
 #  define TPMA_PERMANENT_endorsementAuthSet (TPMA_PERMANENT)(1 << 1)
 #  define TPMA_PERMANENT_lockoutAuthSet     (TPMA_PERMANENT)(1 << 2)
@@ -1134,7 +1127,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_STARTUP_CLEAR Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_STARTUP_CLEAR;
-#define TYPE_OF_TPMA_STARTUP_CLEAR      UINT32
 #  define TPMA_STARTUP_CLEAR_phEnable   (TPMA_STARTUP_CLEAR)(1 << 0)
 #  define TPMA_STARTUP_CLEAR_shEnable   (TPMA_STARTUP_CLEAR)(1 << 1)
 #  define TPMA_STARTUP_CLEAR_ehEnable   (TPMA_STARTUP_CLEAR)(1 << 2)
@@ -1178,7 +1170,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_MEMORY Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_MEMORY;
-#define TYPE_OF_TPMA_MEMORY             UINT32
 #  define TPMA_MEMORY_sharedRAM         (TPMA_MEMORY)(1 << 0)
 #  define TPMA_MEMORY_sharedNV          (TPMA_MEMORY)(1 << 1)
 #  define TPMA_MEMORY_objectCopiedToRam (TPMA_MEMORY)(1 << 2)
@@ -1229,8 +1220,8 @@ typedef struct
       }
 #else  // USE_BIT_FIELD_STRUCTURES
 
-typedef UINT32 TPMA_CC;
-#  define TYPE_OF_TPMA_CC             UINT32
+// This implements Table "Definition of TPMA_CC Bits" (Part 2: Structures) using bit masking
+typedef TPM_CC TPMA_CC;
 #  define TPMA_CC_commandIndex       (TPMA_CC)(0xFFFF << 0)
 #  define TPMA_CC_commandIndex_SHIFT 0
 #  define TPMA_CC_nv                 (TPMA_CC)(1 << 22)
@@ -1240,7 +1231,7 @@ typedef UINT32 TPMA_CC;
 #  define TPMA_CC_cHandles_SHIFT     25
 #  define TPMA_CC_rHandle            (TPMA_CC)(1 << 28)
 #  define TPMA_CC_V                  (TPMA_CC)(1 << 29)
-#  define TPMA_CC_reserved	    0xc03f0000
+#  define TPMA_CC_reserved	    0xc03f0000				// libtpms added
 
 //  This is the initializer for a TPMA_CC bit array.
 #  define TPMA_CC_INITIALIZER(commandindex,                          \
@@ -1281,7 +1272,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_MODES Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_MODES;
-#  define TYPE_OF_TPMA_MODES      UINT32
 #  define TPMA_MODES_FIPS_140_2                 (TPMA_MODES)(1 << 0)
 
 // This is the initializer for a TPMA_MODES bit array.
@@ -1337,7 +1327,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_X509_KEY_USAGE Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_X509_KEY_USAGE;
-#define TYPE_OF_TPMA_X509_KEY_USAGE             UINT32
 #  define TPMA_X509_KEY_USAGE_decipherOnly     (TPMA_X509_KEY_USAGE)(1 << 23)
 #  define TPMA_X509_KEY_USAGE_encipherOnly     (TPMA_X509_KEY_USAGE)(1 << 24)
 #  define TPMA_X509_KEY_USAGE_cRLSign          (TPMA_X509_KEY_USAGE)(1 << 25)
@@ -1395,7 +1384,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_ACT Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_ACT;
-#define TYPE_OF_TPMA_ACT            UINT32
 #  define TPMA_ACT_signaled         (TPMA_ACT)(1 << 0)
 #  define TPMA_ACT_preserveSignaled (TPMA_ACT)(1 << 1)
 
@@ -1509,12 +1497,15 @@ typedef union
 
 // Table "Definition of Types for TPM2B_NONCE" (Part 2: Structures)
 typedef TPM2B_DIGEST TPM2B_NONCE;
+#define TYPE_OF_TPM2B_NONCE TPM2B_DIGEST
 
 // Table "Definition of Types for TPM2B_AUTH" (Part 2: Structures)
 typedef TPM2B_DIGEST TPM2B_AUTH;
+#define TYPE_OF_TPM2B_AUTH TPM2B_DIGEST
 
 // Table "Definition of Types for TPM2B_OPERAND" (Part 2: Structures)
 typedef TPM2B_DIGEST TPM2B_OPERAND;
+#define TYPE_OF_TPM2B_OPERAND TPM2B_DIGEST
 
 typedef union
 {  // (Part 2: Structures)
@@ -1565,6 +1556,16 @@ typedef union
     } t;
     TPM2B b;
 } TPM2B_IV;
+
+typedef union
+{  // (Part 2: Structures)
+    struct
+    {
+        UINT16 size;
+        BYTE   buffer[512];
+    } t;
+    TPM2B b;
+} TPM2B_VENDOR_PROPERTY;
 
 typedef union
 {  // (Part 2: Structures)
@@ -1732,6 +1733,12 @@ typedef struct
     UINT32        count;
     TPMS_ACT_DATA actData[MAX_ACT_DATA];
 } TPML_ACT_DATA;
+
+typedef struct
+{  // (Part 2: Structures)
+    UINT32                count;
+    TPM2B_VENDOR_PROPERTY vendorData[MAX_VENDOR_PROPERTY];
+} TPML_VENDOR_PROPERTY;
 
 typedef union
 {  // (Part 2: Structures)
@@ -2027,6 +2034,7 @@ typedef TPM_ALG_ID TPMI_ALG_KEYEDHASH_SCHEME;  // (Part 2: Structures)
 
 // Table "Definition of Types for HMAC_SIG_SCHEME" (Part 2: Structures)
 typedef TPMS_SCHEME_HASH TPMS_SCHEME_HMAC;
+#define TYPE_OF_TPMS_SCHEME_HMAC TPMS_SCHEME_HASH
 
 typedef struct
 {  // (Part 2: Structures)
@@ -2052,13 +2060,19 @@ typedef struct
 
 // Table "Definition of Types for RSA Signature Schemes" (Part 2: Structures)
 typedef TPMS_SCHEME_HASH TPMS_SIG_SCHEME_RSAPSS;
+#define TYPE_OF_TPMS_SIG_SCHEME_RSAPSS TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_SIG_SCHEME_RSASSA;
+#define TYPE_OF_TPMS_SIG_SCHEME_RSASSA TPMS_SCHEME_HASH
 
 // Table "Definition of Types for ECC Signature Schemes" (Part 2: Structures)
 typedef TPMS_SCHEME_ECDAA TPMS_SIG_SCHEME_ECDAA;
+#define TYPE_OF_TPMS_SIG_SCHEME_ECDAA TPMS_SCHEME_ECDAA
 typedef TPMS_SCHEME_HASH TPMS_SIG_SCHEME_ECDSA;
+#define TYPE_OF_TPMS_SIG_SCHEME_ECDSA TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_SIG_SCHEME_ECSCHNORR;
+#define TYPE_OF_TPMS_SIG_SCHEME_ECSCHNORR TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_SIG_SCHEME_SM2;
+#define TYPE_OF_TPMS_SIG_SCHEME_SM2 TPMS_SCHEME_HASH
 
 typedef union
 {  // (Part 2: Structures)
@@ -2094,17 +2108,27 @@ typedef struct
 
 // Table "Definition of Types for Encryption Schemes" (Part 2: Structures)
 typedef TPMS_EMPTY TPMS_ENC_SCHEME_RSAES;
+#define TYPE_OF_TPMS_ENC_SCHEME_RSAES TPMS_EMPTY
 typedef TPMS_SCHEME_HASH TPMS_ENC_SCHEME_OAEP;
+#define TYPE_OF_TPMS_ENC_SCHEME_OAEP TPMS_SCHEME_HASH
 
 // Table "Definition of Types for ECC Key Exchange" (Part 2: Structures)
 typedef TPMS_SCHEME_HASH TPMS_KEY_SCHEME_ECDH;
+#define TYPE_OF_TPMS_KEY_SCHEME_ECDH TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_KEY_SCHEME_ECMQV;
+#define TYPE_OF_TPMS_KEY_SCHEME_ECMQV TPMS_SCHEME_HASH
+typedef TPMS_SCHEME_HASH TPMS_KEY_SCHEME_SM2;
+#define TYPE_OF_TPMS_KEY_SCHEME_SM2 TPMS_SCHEME_HASH
 
 // Table "Definition of Types for KDF Schemes" (Part 2: Structures)
 typedef TPMS_SCHEME_HASH TPMS_KDF_SCHEME_KDF1_SP800_108;
+#define TYPE_OF_TPMS_KDF_SCHEME_KDF1_SP800_108 TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_KDF_SCHEME_KDF1_SP800_56A;
+#define TYPE_OF_TPMS_KDF_SCHEME_KDF1_SP800_56A TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_KDF_SCHEME_KDF2;
+#define TYPE_OF_TPMS_KDF_SCHEME_KDF2 TPMS_SCHEME_HASH
 typedef TPMS_SCHEME_HASH TPMS_KDF_SCHEME_MGF1;
+#define TYPE_OF_TPMS_KDF_SCHEME_MGF1 TPMS_SCHEME_HASH
 
 typedef union
 {  // (Part 2: Structures)
@@ -2155,7 +2179,7 @@ typedef union
     TPMS_SIG_SCHEME_ECDAA ecdaa;
 #endif  // ALG_ECDAA
 #if ALG_SM2
-    TPMS_SIG_SCHEME_SM2 sm2;
+    TPMS_KEY_SCHEME_SM2 sm2;
 #endif  // ALG_SM2
 #if ALG_ECSCHNORR
     TPMS_SIG_SCHEME_ECSCHNORR ecschnorr;
@@ -2259,7 +2283,9 @@ typedef struct
 
 // Table "Definition of Types for Signature" (Part 2: Structures)
 typedef TPMS_SIGNATURE_RSA TPMS_SIGNATURE_RSAPSS;
+#define TYPE_OF_TPMS_SIGNATURE_RSAPSS TPMS_SIGNATURE_RSA
 typedef TPMS_SIGNATURE_RSA TPMS_SIGNATURE_RSASSA;
+#define TYPE_OF_TPMS_SIGNATURE_RSASSA TPMS_SIGNATURE_RSA
 
 typedef struct
 {  // (Part 2: Structures)
@@ -2270,8 +2296,11 @@ typedef struct
 
 // Table "Definition of Types for TPMS_SIGNATURE_ECC" (Part 2: Structures)
 typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECDAA;
+#define TYPE_OF_TPMS_SIGNATURE_ECDAA TPMS_SIGNATURE_ECC
 typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECDSA;
+#define TYPE_OF_TPMS_SIGNATURE_ECDSA TPMS_SIGNATURE_ECC
 typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_ECSCHNORR;
+#define TYPE_OF_TPMS_SIGNATURE_ECSCHNORR TPMS_SIGNATURE_ECC
 typedef TPMS_SIGNATURE_ECC TPMS_SIGNATURE_SM2;
 #define TYPE_OF_TPMS_SIGNATURE_SM2 TPMS_SIGNATURE_ECC
 
@@ -2630,7 +2659,6 @@ typedef struct
 
 // This implements Table "Definition of TPMA_NV Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_NV;
-#define TYPE_OF_TPMA_NV         UINT32
 #  define TPMA_NV_PPWRITE        (TPMA_NV)(1 << 0)
 #  define TPMA_NV_OWNERWRITE     (TPMA_NV)(1 << 1)
 #  define TPMA_NV_AUTHWRITE      (TPMA_NV)(1 << 2)
@@ -2654,7 +2682,7 @@ typedef UINT32 TPMA_NV;
 #  define TPMA_NV_WRITTEN        (TPMA_NV)(1 << 29)
 #  define TPMA_NV_PLATFORMCREATE (TPMA_NV)(1 << 30)
 #  define TPMA_NV_READ_STCLEAR   (TPMA_NV)(1 << 31)
-#define TPMA_NV_RESERVED        (0x00000300 | 0x01f00000)
+#define TPMA_NV_RESERVED        (0x00000300 | 0x01f00000)			// libtpms added
 
 //  This is the initializer for a TPMA_NV bit array.
 #  define TPMA_NV_INITIALIZER(ppwrite,                                          \
@@ -2806,7 +2834,7 @@ typedef UINT64 TPMA_NV_EXP;
 #  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ENCRYPTION   (TPMA_NV_EXP)(1 << 32)
 #  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_INTEGRITY    (TPMA_NV_EXP)(1 << 33)
 #  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ANTIROLLBACK (TPMA_NV_EXP)(1 << 34)
-#  define TPMA_NV_EXP_reserved		            0xfffffff800000000L
+#  define TPMA_NV_EXP_reserved		            0xfffffff800000000L			// libtpms added
 
 //  This is the initializer for a TPMA_NV_EXP bit array.
 #  define TPMA_NV_EXP_INITIALIZER(tpma_nv_ppwrite,                                  \
@@ -2856,7 +2884,7 @@ typedef UINT64 TPMA_NV_EXP;
 
 typedef struct
 {  // (Part 2: Structures)
-    TPMI_RH_NV_INDEX        nvIndex;
+    TPMI_RH_NV_LEGACY_INDEX nvIndex;
     TPMI_ALG_HASH           nameAlg;
     TPMA_NV                 attributes;
     TPM2B_DIGEST            authPolicy;
