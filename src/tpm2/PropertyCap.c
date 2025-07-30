@@ -402,6 +402,12 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
         case TPM_PT_MAX_CAP_BUFFER:
             *value = MAX_CAP_BUFFER;
             break;
+        case TPM_PT_FIRMWARE_SVN:
+            *value = _plat__GetTpmFirmwareSvn();
+            break;
+        case TPM_PT_FIRMWARE_MAX_SVN:
+            *value = _plat__GetTpmFirmwareMaxSvn();
+            break;
 
         // Start of variable commands
         case TPM_PT_PERMANENT:
