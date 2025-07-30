@@ -66,6 +66,34 @@
 //** Defines and Includes
 
 #include "BnOssl.h"
+#include "CryptoInterface.h"
+#include "TpmToOsslSym.h"
+#include "TpmToOsslHash.h"
+#include <openssl/opensslv.h>
+#include <stdio.h>
+
+#if CRYPTO_LIB_REPORTING
+
+//*** OsslGetVersion()
+// Report the version of OpenSSL.
+void OsslGetVersion(_CRYPTO_IMPL_DESCRIPTION* result)
+{
+    snprintf(result->name, sizeof(result->name), "OpenSSL");
+#  if defined(OPENSSL_VERSION_STR)
+    snprintf(result->version, sizeof(result->version), "%s", OPENSSL_VERSION_STR);
+#  else
+    // decode the hex version string according to the rules described in opensslv.h
+    snprintf(result->version,
+             sizeof(result->version),
+             "%d.%d.%d%c",
+             (unsigned char)((OPENSSL_VERSION_NUMBER >> 28) & 0x0f),
+             (unsigned char)((OPENSSL_VERSION_NUMBER >> 20) & 0xff),
+             (unsigned char)((OPENSSL_VERSION_NUMBER >> 12) & 0xff),
+             (char)((OPENSSL_VERSION_NUMBER >> 4) & 0xff) - 1 + 'a');
+#  endif  //OPENSSL_VERSION_STR
+}
+
+#endif  //CRYPTO_LIB_REPORTING
 
 #if defined(HASH_LIB_OSSL) || defined(MATH_LIB_OSSL) || defined(SYM_LIB_OSSL)
 // Used to pass the pointers to the correct sub-keys
@@ -116,5 +144,29 @@ void OsslPopContext(BN_CTX* CTX)
     if(CTX != NULL)
         BN_CTX_end(CTX);
 }
+
+#  if CRYPTO_LIB_REPORTING
+
+#    if defined(SYM_LIB_OSSL) && SIMULATION && CRYPTO_LIB_REPORTING
+//*** _crypto_GetSymImpl()
+// Report the version of OpenSSL being used for symmetric crypto.
+void _crypto_GetSymImpl(_CRYPTO_IMPL_DESCRIPTION* result)
+{
+    OsslGetVersion(result);
+}
+#    else
+#      error huh?
+#    endif  // defined(SYM_LIB_OSSL) && SIMULATION
+
+#    if defined(HASH_LIB_OSSL) && SIMULATION && CRYPTO_LIB_REPORTING
+//*** _crypto_GetHashImpl()
+// Report the version of OpenSSL being used for hashing.
+void _crypto_GetHashImpl(_CRYPTO_IMPL_DESCRIPTION* result)
+{
+    OsslGetVersion(result);
+}
+#    endif  // defined(HASH_LIB_OSSL) && SIMULATION
+
+#  endif  // CRYPTO_LIB_REPORTING
 
 #endif  // HASH_LIB_OSSL || MATH_LIB_OSSL || SYM_LIB_OSSL

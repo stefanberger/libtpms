@@ -110,6 +110,10 @@
 // ones in the Simulator project.
 #define SIMULATION                 NO			// libtpms: changed to NO
 
+// The CRYPTO_LIB_REPORTING switch allows the TPM to report its
+// crypto library implementation, e.g., at simulation startup.
+#define CRYPTO_LIB_REPORTING        NO			// libtpms: NO
+
 // If doing debug, can set the DRBG to print out the intermediate test values.
 // Before enabling this, make sure that the dbgDumpMemBlock() function
 // has been added someplace (preferably, somewhere in CryptRand.c)

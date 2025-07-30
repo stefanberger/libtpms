@@ -73,4 +73,14 @@
 #include "BnMemory_fp.h"
 #include "BnMath_fp.h"
 #include "BnConvert_fp.h"
-#endif
+
+#if CRYPTO_LIB_REPORTING
+#  include <CryptoInterface.h>
+
+//*** OsslGetVersion()
+// Report the current version of OpenSSL.
+void OsslGetVersion(_CRYPTO_IMPL_DESCRIPTION* result);
+
+#endif  // CRYPTO_LIB_REPORTING
+
+#endif  // _BNOSSL_H_

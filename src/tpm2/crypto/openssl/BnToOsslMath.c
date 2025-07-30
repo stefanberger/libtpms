@@ -680,4 +680,15 @@ LIB_EXPORT BOOL BnEccAdd(bigPoint            R,  // OUT: computed point
 
 #  endif  // ALG_ECC
 
+#  if CRYPTO_LIB_REPORTING
+
+//** BnGetImplementation()
+// This function reports the underlying library being used for bignum operations.
+void BnGetImplementation(_CRYPTO_IMPL_DESCRIPTION* result)
+{
+    OsslGetVersion(result);
+}
+
+#  endif  // CRYPTO_LIB_REPORTING
+
 #endif  // MATHLIB OSSL

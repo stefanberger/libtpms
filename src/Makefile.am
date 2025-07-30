@@ -365,6 +365,7 @@ noinst_HEADERS += \
 	tpm2/Create_fp.h \
 	tpm2/CreateLoaded_fp.h \
 	tpm2/CreatePrimary_fp.h \
+	tpm2/CryptoInterface.h \
 	tpm2/CryptSelfTest_fp.h \
 	tpm2/DA_fp.h \
 	tpm2/DebugHelpers_fp.h \
