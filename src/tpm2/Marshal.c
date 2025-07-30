@@ -1245,7 +1245,7 @@ TPMU_SYM_KEY_BITS_Marshal(TPMU_SYM_KEY_BITS *source, BYTE **buffer, INT32 *size,
 #endif		// libtpms added end
 #if ALG_XOR
       case TPM_ALG_XOR:
-	written += TPMI_ALG_HASH_Marshal(&source->xorr, buffer, size);
+	written += TPMI_ALG_HASH_Marshal(&source->xor, buffer, size);
 	break;
 #endif
       case TPM_ALG_NULL:
@@ -1491,7 +1491,7 @@ TPMU_SCHEME_KEYEDHASH_Marshal(TPMU_SCHEME_KEYEDHASH *source, BYTE **buffer, INT3
 #endif
 #if ALG_XOR
       case TPM_ALG_XOR:
-	written += TPMS_SCHEME_XOR_Marshal(&source->xorr, buffer, size);
+	written += TPMS_SCHEME_XOR_Marshal(&source->xor, buffer, size);
 	break;
 #endif
       case TPM_ALG_NULL:
