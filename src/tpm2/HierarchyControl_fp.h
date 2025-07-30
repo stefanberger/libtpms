@@ -70,7 +70,7 @@
 // Input structure definition
 typedef struct
 {
-    TPMI_RH_HIERARCHY      authHandle;
+    TPMI_RH_BASE_HIERARCHY authHandle;
     TPMI_RH_ENABLES        enable;
     TPMI_YES_NO            state;
 } HierarchyControl_In;
