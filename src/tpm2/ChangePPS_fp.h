@@ -74,7 +74,7 @@ typedef struct
 } ChangePPS_In;
 
 // Response code modifiers
-#    define RC_ChangePPS_authHandle (TPM_RC_P + TPM_RC_1)
+#    define RC_ChangePPS_authHandle (TPM_RC_H + TPM_RC_1)
 
 // Function prototype
 TPM_RC
