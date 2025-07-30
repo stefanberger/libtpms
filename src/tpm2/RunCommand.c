@@ -75,10 +75,26 @@
 
 //** Includes and locals
 #include "Platform.h"
+#include <assert.h>
 #include <setjmp.h>
-#include "ExecCommand_fp.h"
+#include <stdio.h>
 
 jmp_buf s_jumpBuffer;
+
+// The following extern globals are copied here from Global.h to avoid including all of Tpm.h here.
+// TODO: Improve the interface by which these values are shared.
+extern BOOL g_inFailureMode;  // Indicates that the TPM is in failure mode
+#if ALLOW_FORCE_FAILURE_MODE
+extern BOOL g_forceFailureMode;  // flag to force failure mode during test
+#endif
+#if FAIL_TRACE
+// The name of the function that triggered failure mode.
+extern const char* s_failFunctionName;
+#endif  // FAIL_TRACE
+extern UINT32 s_failFunction;
+extern UINT32 s_failLine;
+extern UINT32 s_failCode;
+
 //** Functions
 
 //***_plat__RunCommand()
@@ -103,5 +119,23 @@ LIB_EXPORT void _plat__RunCommand(
 // This is the platform depended failure exit for the TPM.
 LIB_EXPORT NORETURN void _plat__Fail(void)
 {
+
+#if ALLOW_FORCE_FAILURE_MODE
+    // The simulator asserts during unexpected (i.e., un-forced) failure modes.
+    if(!g_forceFailureMode)
+    {
+        fprintf(stderr, "Unexpected failure mode (code %d) in ", s_failCode);
+#  if FAIL_TRACE
+        fprintf(stderr, "function '%s' (line %d)\n", s_failFunctionName, s_failLine);
+#  else   // FAIL_TRACE
+        fprintf(stderr, "location code 0x%0x\n", s_locationCode);
+#  endif  // FAIL_TRACE
+        assert(FALSE);
+    }
+
+    // Clear the forced-failure mode flag for next time.
+    g_forceFailureMode = FALSE;
+#endif  // ALLOW_FORCE_FAILURE_MODE
+
     longjmp(&s_jumpBuffer[0], 1);
 }
