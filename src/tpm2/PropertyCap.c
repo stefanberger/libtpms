@@ -387,12 +387,18 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             *value = MAX_NV_BUFFER_SIZE;
             break;
         case TPM_PT_MODES:
+        {
+            union
+            {
+                TPMA_MODES attr;
+                UINT32     u32;
+            } flags = {TPMA_ZERO_INITIALIZER()};
 #if FIPS_COMPLIANT
-            *value = 1;
-#else
-            *value = 0;
+            SET_ATTRIBUTE(flags.attr, TPMA_MODES, FIPS_140_2);
 #endif
-           break; 
+            *value = flags.u32;
+            break;
+        }
         case TPM_PT_MAX_CAP_BUFFER:
             *value = MAX_CAP_BUFFER;
             break;
