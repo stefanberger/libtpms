@@ -63,7 +63,43 @@
 #ifndef _TPM_INCLUDE_PRIVATE_TPMALGORITHMDEFINES_H_
 #define _TPM_INCLUDE_PRIVATE_TPMALGORITHMDEFINES_H_
 
+#include "TpmProfile.h"
+#include "MinMax.h"
+#include "TPMB.h"
+
 #if ALG_ECC
+// Table "Defines for NIST_P192 ECC Values" (TCG Algorithm Registry)
+#  define NIST_P192_ID       TPM_ECC_NIST_P192
+#  define NIST_P192_KEY_SIZE 192
+
+// Table "Defines for NIST_P224 ECC Values" (TCG Algorithm Registry)
+#  define NIST_P224_ID       TPM_ECC_NIST_P224
+#  define NIST_P224_KEY_SIZE 224
+
+// Table "Defines for NIST_P256 ECC Values" (TCG Algorithm Registry)
+#  define NIST_P256_ID       TPM_ECC_NIST_P256
+#  define NIST_P256_KEY_SIZE 256
+
+// Table "Defines for NIST_P384 ECC Values" (TCG Algorithm Registry)
+#  define NIST_P384_ID       TPM_ECC_NIST_P384
+#  define NIST_P384_KEY_SIZE 384
+
+// Table "Defines for NIST_P521 ECC Values" (TCG Algorithm Registry)
+#  define NIST_P521_ID       TPM_ECC_NIST_P521
+#  define NIST_P521_KEY_SIZE 521
+
+// Table "Defines for BN_P256 ECC Values" (TCG Algorithm Registry)
+#  define BN_P256_ID       TPM_ECC_BN_P256
+#  define BN_P256_KEY_SIZE 256
+
+// Table "Defines for BN_P638 ECC Values" (TCG Algorithm Registry)
+#  define BN_P638_ID       TPM_ECC_BN_P638
+#  define BN_P638_KEY_SIZE 638
+
+// Table "Defines for SM2_P256 ECC Values" (TCG Algorithm Registry)
+#  define SM2_P256_ID       TPM_ECC_SM2_P256
+#  define SM2_P256_KEY_SIZE 256
+
 
 // Derived ECC Value
 #  define ECC_CURVES                                                       \
@@ -79,13 +115,33 @@
 // Avoid expanding MAX_ECC_KEY_BITS into a long expression, the compiler slows down
 // and on some compilers runs out of heap space.
 
-#define MAX_ECC_KEY_BITS						\
-    MAX(ECC_BN_P256 * 256,   MAX(ECC_BN_P638 * 638,			\
-    MAX(ECC_NIST_P192 * 192, MAX(ECC_NIST_P224 * 224, \
-    MAX(ECC_NIST_P256 * 256, MAX(ECC_NIST_P384 * 384, \
-    MAX(ECC_NIST_P521 * 521, MAX(ECC_SM2_P256 * 256, \
-    0))))))))
-#define MAX_ECC_KEY_BYTES               BITS_TO_BYTES(MAX_ECC_KEY_BITS)
+// 638
+#  if ECC_BN_P638
+#    define MAX_ECC_KEY_BITS BN_P638_KEY_SIZE
+// 521
+#  elif ECC_NIST_P521
+#    define MAX_ECC_KEY_BITS NIST_P521_KEY_SIZE
+// 384
+#  elif ECC_NIST_P384
+#    define MAX_ECC_KEY_BITS NIST_P384_KEY_SIZE
+// 256
+#  elif ECC_NIST_P256
+#    define MAX_ECC_KEY_BITS NIST_P256_KEY_SIZE
+#  elif TPM_ECC_BN_P256
+#    define MAX_ECC_KEY_BITS BN_P256_KEY_SIZE
+#  elif TPM_ECC_SM2_P256
+#    define MAX_ECC_KEY_BITS SM2_P256_KEY_SIZE
+// 224
+#  elif ECC_NIST_P224
+#    define MAX_ECC_KEY_BITS NIST_P224_KEY_SIZE
+// 192
+#  elif ECC_NIST_P192
+#    define MAX_ECC_KEY_BITS NIST_P192_KEY_SIZE
+#  else
+#    error ALG_ECC enabled, but no ECC Curves Enabled
+#  endif
+
+#  define MAX_ECC_KEY_BYTES ((MAX_ECC_KEY_BITS + 7) / 8)
 
 #endif  // ALG_ECC
 
@@ -114,114 +170,61 @@
 #endif  // ALG_RSA
 
 // Table "Defines for AES Symmetric Cipher Algorithm Constants" (TCG Algorithm Registry)
-#define AES_KEY_SIZES_BITS (128 * AES_128), (192 * AES_192), (256 * AES_256)
-#define MAX_AES_KEY_BITS            AES_MAX_KEY_SIZE_BITS
-#define MAX_AES_KEY_BYTES           ((AES_MAX_KEY_SIZE_BITS + 7) / 8)
-#define AES_128_BLOCK_SIZE_BYTES    (AES_128 * 16)
-#define AES_192_BLOCK_SIZE_BYTES    (AES_192 * 16)
-#define AES_256_BLOCK_SIZE_BYTES    (AES_256 * 16)
-#define AES_BLOCK_SIZES							\
-    AES_128_BLOCK_SIZE_BYTES, AES_192_BLOCK_SIZE_BYTES,			\
-	AES_256_BLOCK_SIZE_BYTES
-#if   ALG_AES
-#   define AES_MAX_BLOCK_SIZE       16
-#else
-#   define AES_MAX_BLOCK_SIZE       0
-#endif
-#define MAX_AES_BLOCK_SIZE_BYTES    AES_MAX_BLOCK_SIZE
-#if   AES_256
-#   define AES_MAX_KEY_SIZE_BITS    256
-#elif AES_192
-#   define AES_MAX_KEY_SIZE_BITS    192
-#elif AES_128
-#   define AES_MAX_KEY_SIZE_BITS    128
-#else
-#   define AES_MAX_KEY_SIZE_BITS    0
-#endif
+#define AES_KEY_SIZES_BITS (AES_128 * 128), (AES_192 * 192), (AES_256 * 256)
+#define AES_MAX_KEY_SIZE_BITS \
+    MAX((AES_256 * 256), MAX((AES_192 * 192), (AES_128 * 128)))
+#define MAX_AES_KEY_BITS  AES_MAX_KEY_SIZE_BITS
+#define MAX_AES_KEY_BYTES BITS_TO_BYTES(MAX_AES_KEY_BITS)
+#define AES_BLOCK_SIZES   (AES_128 * 128 / 8), (AES_192 * 128 / 8), (AES_256 * 128 / 8)
+#define MAX_AES_BLOCK_SIZE_BYTES \
+    MAX((AES_256 * 128 / 8), MAX((AES_192 * 128 / 8), (AES_128 * 128 / 8)))
+#define AES_MAX_BLOCK_SIZE MAX_AES_BLOCK_SIZE_BYTES
 
 // Table "Defines for SM4 Symmetric Cipher Algorithm Constants" (TCG Algorithm Registry)
 #define SM4_KEY_SIZES_BITS       (SM4_128 * 128)
-#if   SM4_128
-#   define SM4_MAX_KEY_SIZE_BITS    128
-#else
-#   define SM4_MAX_KEY_SIZE_BITS    0
-#endif
+#define SM4_MAX_KEY_SIZE_BITS    (SM4_128 * 128)
 #define MAX_SM4_KEY_BITS         SM4_MAX_KEY_SIZE_BITS
-#define MAX_SM4_KEY_BYTES        BITS_TO_BYTES(SM4_MAX_KEY_SIZE_BITS)
-#define SM4_128_BLOCK_SIZE_BYTES    (SM4_128 * 16)
-#define SM4_BLOCK_SIZES             SM4_128_BLOCK_SIZE_BYTES
-#if   ALG_SM4
-#   define SM4_MAX_BLOCK_SIZE       16
-#else
-#   define SM4_MAX_BLOCK_SIZE       0
-#endif
-#define MAX_SM4_BLOCK_SIZE_BYTES    SM4_MAX_BLOCK_SIZE
+#define MAX_SM4_KEY_BYTES        BITS_TO_BYTES(MAX_SM4_KEY_BITS)
+#define SM4_BLOCK_SIZES          (SM4_128 * 128 / 8)
+#define MAX_SM4_BLOCK_SIZE_BYTES (SM4_128 * 128 / 8)
+#define SM4_MAX_BLOCK_SIZE       MAX_SM4_BLOCK_SIZE_BYTES
 
 // Table "Defines for CAMELLIA Symmetric Cipher Algorithm Constants" (TCG Algorithm Registry)
 #define CAMELLIA_KEY_SIZES_BITS \
     (CAMELLIA_128 * 128), (CAMELLIA_192 * 192), (CAMELLIA_256 * 256)
-#if   CAMELLIA_256
-#   define CAMELLIA_MAX_KEY_SIZE_BITS   256
-#elif CAMELLIA_192
-#   define CAMELLIA_MAX_KEY_SIZE_BITS   192
-#elif CAMELLIA_128
-#   define CAMELLIA_MAX_KEY_SIZE_BITS   128
-#else
-#   define CAMELLIA_MAX_KEY_SIZE_BITS   0
-#endif
+#define CAMELLIA_MAX_KEY_SIZE_BITS \
+    MAX((CAMELLIA_256 * 256), MAX((CAMELLIA_192 * 192), (CAMELLIA_128 * 128)))
 #define MAX_CAMELLIA_KEY_BITS  CAMELLIA_MAX_KEY_SIZE_BITS
-#define MAX_CAMELLIA_KEY_BYTES          ((CAMELLIA_MAX_KEY_SIZE_BITS + 7) / 8)
-#define CAMELLIA_128_BLOCK_SIZE_BYTES   (CAMELLIA_128 * 16)
-#define CAMELLIA_192_BLOCK_SIZE_BYTES   (CAMELLIA_192 * 16)
-#define CAMELLIA_256_BLOCK_SIZE_BYTES   (CAMELLIA_256 * 16)
+#define MAX_CAMELLIA_KEY_BYTES BITS_TO_BYTES(MAX_CAMELLIA_KEY_BITS)
 #define CAMELLIA_BLOCK_SIZES \
-    CAMELLIA_128_BLOCK_SIZE_BYTES, CAMELLIA_192_BLOCK_SIZE_BYTES,	\
-        CAMELLIA_256_BLOCK_SIZE_BYTES
-#if   ALG_CAMELLIA
-#   define CAMELLIA_MAX_BLOCK_SIZE      16
-#else
-#   define CAMELLIA_MAX_BLOCK_SIZE      0
-#endif
-#define MAX_CAMELLIA_BLOCK_SIZE_BYTES   CAMELLIA_MAX_BLOCK_SIZE
+    (CAMELLIA_128 * 128 / 8), (CAMELLIA_192 * 128 / 8), (CAMELLIA_256 * 128 / 8)
+#define MAX_CAMELLIA_BLOCK_SIZE_BYTES \
+    MAX((CAMELLIA_256 * 128 / 8),     \
+        MAX((CAMELLIA_192 * 128 / 8), (CAMELLIA_128 * 128 / 8)))
+#define CAMELLIA_MAX_BLOCK_SIZE MAX_CAMELLIA_BLOCK_SIZE_BYTES
 
 //										libtpms added begin
-#define TDES_KEY_SIZES_BITS         (128 * TDES_128), (192 * TDES_192)
-#if   TDES_192
-#   define TDES_MAX_KEY_SIZE_BITS   192
-#elif TDES_128
-#   define TDES_MAX_KEY_SIZE_BITS   128
-#else
-#   define TDES_MAX_KEY_SIZE_BITS   0
-#endif
-#define MAX_TDES_KEY_BITS           TDES_MAX_KEY_SIZE_BITS
-#define MAX_TDES_KEY_BYTES          ((TDES_MAX_KEY_SIZE_BITS + 7) / 8)
-#define TDES_128_BLOCK_SIZE_BYTES   (TDES_128 * 8)
-#define TDES_192_BLOCK_SIZE_BYTES   (TDES_192 * 8)
-#define TDES_BLOCK_SIZES						\
-    TDES_128_BLOCK_SIZE_BYTES, TDES_192_BLOCK_SIZE_BYTES
-#if   ALG_TDES
-#   define TDES_MAX_BLOCK_SIZE      8
-#else
-#   define TDES_MAX_BLOCK_SIZE      0
-#endif
-#define MAX_TDES_BLOCK_SIZE_BYTES   TDES_MAX_BLOCK_SIZE
+#define TDES_KEY_SIZES_BITS         (TDES_128 * 128), (TDES_192 * 192)
+#define TDES_MAX_KEY_SIZE_BITS \
+    MAX((TDES_192 * 192), (TDES_128 * 128))
+#define MAX_TDES_KEY_BITS  TDES_MAX_KEY_SIZE_BITS
+#define MAX_TDES_KEY_BYTES BITS_TO_BYTES(MAX_TDES_KEY_BITS)
+#define TDES_BLOCK_SIZES   (TDES_128 * 8), (TDES_192 * 8)
+#define MAX_TDES_BLOCK_SIZE_BYTES MAX((TDES_192 * 8), (TDES_128 * 8))
+#define TDES_MAX_BLOCK_SIZE MAX_TDES_BLOCK_SIZE_BYTES
 //										libtpms added end
 
 // Derived Symmetric Values
+#define SYM_COUNT ALG_AES + ALG_SM4 + ALG_CAMELLIA + ALG_TDES			// libtpms changed begin
 #define MAX_SYM_BLOCK_SIZE \
-    (MAX(AES_MAX_BLOCK_SIZE,      MAX(CAMELLIA_MAX_BLOCK_SIZE,		\
-				      MAX(SM4_MAX_BLOCK_SIZE,      MAX(TDES_MAX_BLOCK_SIZE, \
-								       0)))))
-#define MAX_SYM_KEY_BITS						\
-    (MAX(AES_MAX_KEY_SIZE_BITS,      MAX(CAMELLIA_MAX_KEY_SIZE_BITS,	\
-					 MAX(SM4_MAX_KEY_SIZE_BITS,      MAX(TDES_MAX_KEY_SIZE_BITS, \
-									     0)))))
+    MAX(TDES_MAX_BLOCK_SIZE, \
+    MAX(CAMELLIA_MAX_BLOCK_SIZE, MAX(SM4_MAX_BLOCK_SIZE, AES_MAX_BLOCK_SIZE)))
+#define MAX_SYM_KEY_BITS \
+    MAX(CAMELLIA_MAX_KEY_SIZE_BITS, MAX(SM4_MAX_KEY_SIZE_BITS, AES_MAX_KEY_SIZE_BITS))
 #define MAX_SYM_KEY_BYTES ((MAX_SYM_KEY_BITS + 7) / 8)
 #if MAX_SYM_KEY_BITS == 0 || MAX_SYM_BLOCK_SIZE == 0
 #   error Bad size for MAX_SYM_KEY_BITS or MAX_SYM_BLOCK
-#endif
-
-
+#endif										// libtpms changed end
 
 // Table "Defines for SHA1 Hash Values" (TCG Algorithm Registry)
 #define SHA1_DIGEST_SIZE 20
