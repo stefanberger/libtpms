@@ -100,17 +100,40 @@
 #  define SM2_P256_ID       TPM_ECC_SM2_P256
 #  define SM2_P256_KEY_SIZE 256
 
+// Table "Defines for BP_P256_R1 ECC Values" (TCG Algorithm Registry)
+#  define BP_P256_R1_ID       TPM_ECC_BP_P256_R1
+#  define BP_P256_R1_KEY_SIZE 256
+
+// Table "Defines for BP_P384_R1 ECC Values" (TCG Algorithm Registry)
+#  define BP_P384_R1_ID       TPM_ECC_BP_P384_R1
+#  define BP_P384_R1_KEY_SIZE 384
+
+// Table "Defines for BP_P512_R1 ECC Values" (TCG Algorithm Registry)
+#  define BP_P512_R1_ID       TPM_ECC_BP_P512_R1
+#  define BP_P512_R1_KEY_SIZE 512
+
+// Table "Defines for CURVE_25519 ECC Values" (TCG Algorithm Registry)
+#  define CURVE_25519_ID       TPM_ECC_CURVE_25519
+#  define CURVE_25519_KEY_SIZE 256
+
+// Table "Defines for CURVE_448 ECC Values" (TCG Algorithm Registry)
+#  define CURVE_448_ID       TPM_ECC_CURVE_448
+#  define CURVE_448_KEY_SIZE 448
 
 // Derived ECC Value
 #  define ECC_CURVES                                                       \
       {                                                                    \
           TPM_ECC_NIST_P192, TPM_ECC_NIST_P224, TPM_ECC_NIST_P256,         \
               TPM_ECC_NIST_P384, TPM_ECC_NIST_P521, TPM_ECC_BN_P256,       \
-              TPM_ECC_BN_P638, TPM_ECC_SM2_P256}
+              TPM_ECC_BN_P638, TPM_ECC_SM2_P256, TPM_ECC_BP_P256_R1,       \
+              TPM_ECC_BP_P384_R1, TPM_ECC_BP_P512_R1, TPM_ECC_CURVE_25519, \
+              TPM_ECC_CURVE_448                                            \
+      }
 
 #  define ECC_CURVE_COUNT                                                            \
       (ECC_NIST_P192 + ECC_NIST_P224 + ECC_NIST_P256 + ECC_NIST_P384 + ECC_NIST_P521 \
-       + ECC_BN_P256 + ECC_BN_P638 + ECC_SM2_P256)
+       + ECC_BN_P256 + ECC_BN_P638 + ECC_SM2_P256 + ECC_BP_P256_R1 + ECC_BP_P384_R1  \
+       + ECC_BP_P512_R1 + ECC_CURVE_25519 + ECC_CURVE_448)
 
 // Avoid expanding MAX_ECC_KEY_BITS into a long expression, the compiler slows down
 // and on some compilers runs out of heap space.
@@ -121,9 +144,16 @@
 // 521
 #  elif ECC_NIST_P521
 #    define MAX_ECC_KEY_BITS NIST_P521_KEY_SIZE
+#  elif ECC_BP_P512_R1
+#    define MAX_ECC_KEY_BITS BP_P512_R1_KEY_SIZE
+// 448
+#  elif ECC_CURVE_448
+#    define MAX_ECC_KEY_BITS CURVE_448_KEY_SIZE
 // 384
 #  elif ECC_NIST_P384
 #    define MAX_ECC_KEY_BITS NIST_P384_KEY_SIZE
+#  elif ECC_BP_P384_R1
+#    define MAX_ECC_KEY_BITS BP_P384_R1_KEY_SIZE
 // 256
 #  elif ECC_NIST_P256
 #    define MAX_ECC_KEY_BITS NIST_P256_KEY_SIZE
@@ -131,6 +161,10 @@
 #    define MAX_ECC_KEY_BITS BN_P256_KEY_SIZE
 #  elif TPM_ECC_SM2_P256
 #    define MAX_ECC_KEY_BITS SM2_P256_KEY_SIZE
+#  elif TPM_ECC_CURVE_25519
+#    define MAX_ECC_KEY_BITS CURVE_25519_KEY_SIZE
+#  elif TPM_ECC_BP_P256_R1
+#    define MAX_ECC_KEY_BITS BP_P256_R1_KEY_SIZE
 // 224
 #  elif ECC_NIST_P224
 #    define MAX_ECC_KEY_BITS NIST_P224_KEY_SIZE
