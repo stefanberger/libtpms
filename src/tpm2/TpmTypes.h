@@ -753,8 +753,8 @@ typedef TPM_HANDLE TPM_HC;
 #define HR_PCR                (TPM_HC)((TPM_HT_PCR << HR_SHIFT))
 #define HR_HMAC_SESSION       (TPM_HC)((TPM_HT_HMAC_SESSION << HR_SHIFT))
 #define HR_POLICY_SESSION     (TPM_HC)((TPM_HT_POLICY_SESSION << HR_SHIFT))
-#define HR_TRANSIENT          (TPM_HC)((TPM_HT_TRANSIENT << HR_SHIFT))
-#define HR_PERSISTENT         (TPM_HC)((TPM_HT_PERSISTENT << HR_SHIFT))
+#define HR_TRANSIENT          (TPM_HC)(((UINT32)TPM_HT_TRANSIENT << HR_SHIFT))	// libtpms changed: UBSAN
+#define HR_PERSISTENT         (TPM_HC)(((UINT32)TPM_HT_PERSISTENT << HR_SHIFT))	// libtpms changed: UBSAN
 #define HR_NV_INDEX           (TPM_HC)((TPM_HT_NV_INDEX << HR_SHIFT))
 #define HR_EXTERNAL_NV        (TPM_HC)((TPM_HT_EXTERNAL_NV << HR_SHIFT))
 #define HR_PERMANENT_NV       (TPM_HC)((TPM_HT_PERMANENT_NV << HR_SHIFT))
@@ -793,7 +793,7 @@ typedef TPM_HANDLE TPM_HC;
 #define HR_NV_AC              (TPM_HC)(((TPM_HT_NV_INDEX << HR_SHIFT) + 0xD00000))
 #define NV_AC_FIRST           (TPM_HC)((HR_NV_AC + 0))
 #define NV_AC_LAST            (TPM_HC)((HR_NV_AC + 0x0000FFFF))
-#define HR_AC                 (TPM_HC)((TPM_HT_AC << HR_SHIFT))
+#define HR_AC                 (TPM_HC)(((UINT32)TPM_HT_AC << HR_SHIFT))		// libtpms changed: UBSAN
 #define AC_FIRST              (TPM_HC)((HR_AC + 0))
 #define AC_LAST               (TPM_HC)((HR_AC + 0x0000FFFF))
 
@@ -1131,13 +1131,13 @@ typedef UINT32 TPMA_STARTUP_CLEAR;
 #  define TPMA_STARTUP_CLEAR_shEnable   (TPMA_STARTUP_CLEAR)(1 << 1)
 #  define TPMA_STARTUP_CLEAR_ehEnable   (TPMA_STARTUP_CLEAR)(1 << 2)
 #  define TPMA_STARTUP_CLEAR_phEnableNV (TPMA_STARTUP_CLEAR)(1 << 3)
-#  define TPMA_STARTUP_CLEAR_orderly    (TPMA_STARTUP_CLEAR)(1 << 31)
+#  define TPMA_STARTUP_CLEAR_orderly    (TPMA_STARTUP_CLEAR)((UINT32)1 << 31)	// libtpms changed: UBSAN
 
 //  This is the initializer for a TPMA_STARTUP_CLEAR bit array.
 #  define TPMA_STARTUP_CLEAR_INITIALIZER(                                      \
       phenable, shenable, ehenable, phenablenv, bits_at_4, orderly)            \
       (TPMA_STARTUP_CLEAR)((phenable << 0) + (shenable << 1) + (ehenable << 2) \
-                           + (phenablenv << 3) + (orderly << 31))
+                           + (phenablenv << 3) + ((UINT32)orderly << 31))	// libtpms chanegd: UBSAN
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
@@ -1335,7 +1335,7 @@ typedef UINT32 TPMA_X509_KEY_USAGE;
 #  define TPMA_X509_KEY_USAGE_dataEncipherment (TPMA_X509_KEY_USAGE)(1 << 28)
 #  define TPMA_X509_KEY_USAGE_keyEncipherment  (TPMA_X509_KEY_USAGE)(1 << 29)
 #  define TPMA_X509_KEY_USAGE_nonrepudiation   (TPMA_X509_KEY_USAGE)(1 << 30)
-#  define TPMA_X509_KEY_USAGE_digitalSignature (TPMA_X509_KEY_USAGE)(1 << 31)
+#  define TPMA_X509_KEY_USAGE_digitalSignature (TPMA_X509_KEY_USAGE)((UINT32)1 << 31)	// libtpms changed: UBSAN
 
 //  This is the initializer for a TPMA_X509_KEY_USAGE bit array.
 #  define TPMA_X509_KEY_USAGE_INITIALIZER(bits_at_0,                           \
@@ -1352,7 +1352,7 @@ typedef UINT32 TPMA_X509_KEY_USAGE;
                             + (crlsign << 25) + (keycertsign << 26)            \
                             + (keyagreement << 27) + (dataencipherment << 28)  \
                             + (keyencipherment << 29) + (nonrepudiation << 30) \
-                            + (digitalsignature << 31))
+                            + ((UINT32)digitalsignature << 31))	// libtpms changed: UBSAN
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
@@ -2559,7 +2559,7 @@ typedef struct
 typedef UINT32 TPM_NV_INDEX;
 #  define TPM_NV_INDEX_index       (TPM_NV_INDEX)(0xFFFFFF << 0)
 #  define TPM_NV_INDEX_index_SHIFT 0
-#  define TPM_NV_INDEX_RH_NV       (TPM_NV_INDEX)(0xFF << 24)
+#  define TPM_NV_INDEX_RH_NV       (TPM_NV_INDEX)((UINT32)0xFF << 24)	// libtpms changed: UBSAN
 #  define TPM_NV_INDEX_RH_NV_SHIFT 24
 
 //  This is the initializer for a TPM_NV_INDEX bit array.
@@ -2681,7 +2681,7 @@ typedef UINT32 TPMA_NV;
 #  define TPMA_NV_READLOCKED     (TPMA_NV)(1 << 28)
 #  define TPMA_NV_WRITTEN        (TPMA_NV)(1 << 29)
 #  define TPMA_NV_PLATFORMCREATE (TPMA_NV)(1 << 30)
-#  define TPMA_NV_READ_STCLEAR   (TPMA_NV)(1 << 31)
+#  define TPMA_NV_READ_STCLEAR   (TPMA_NV)((UINT32)1 << 31)			// libtpms changed: UBSAN
 #define TPMA_NV_RESERVED        (0x00000300 | 0x01f00000)			// libtpms added
 
 //  This is the initializer for a TPMA_NV bit array.
@@ -2716,7 +2716,7 @@ typedef UINT32 TPMA_NV;
                 + (ownerread << 17) + (authread << 18) + (policyread << 19)     \
                 + (no_da << 25) + (orderly << 26) + (clear_stclear << 27)       \
                 + (readlocked << 28) + (written << 29) + (platformcreate << 30) \
-                + (read_stclear << 31))
+                + ((UINT32)read_stclear << 31))		// libtpms changed: UBSAN
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
@@ -2830,10 +2830,10 @@ typedef UINT64 TPMA_NV_EXP;
 #  define TPMA_NV_EXP_TPMA_NV_READLOCKED            (TPMA_NV_EXP)(1 << 28)
 #  define TPMA_NV_EXP_TPMA_NV_WRITTEN               (TPMA_NV_EXP)(1 << 29)
 #  define TPMA_NV_EXP_TPMA_NV_PLATFORMCREATE        (TPMA_NV_EXP)(1 << 30)
-#  define TPMA_NV_EXP_TPMA_NV_READ_STCLEAR          (TPMA_NV_EXP)(1 << 31)
-#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ENCRYPTION   (TPMA_NV_EXP)(1 << 32)
-#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_INTEGRITY    (TPMA_NV_EXP)(1 << 33)
-#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ANTIROLLBACK (TPMA_NV_EXP)(1 << 34)
+#  define TPMA_NV_EXP_TPMA_NV_READ_STCLEAR          (TPMA_NV_EXP)((UINT64)1 << 31)	// libtpms changed begin: UBSAN
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ENCRYPTION   (TPMA_NV_EXP)((UINT64)1 << 32)
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_INTEGRITY    (TPMA_NV_EXP)((UINT64)1 << 33)
+#  define TPMA_NV_EXP_TPMA_EXTERNAL_NV_ANTIROLLBACK (TPMA_NV_EXP)((UINT64)1 << 34)	// libtpms changed end
 #  define TPMA_NV_EXP_reserved		            0xfffffff800000000L			// libtpms added
 
 //  This is the initializer for a TPMA_NV_EXP bit array.
@@ -2875,10 +2875,10 @@ typedef UINT64 TPMA_NV_EXP;
                     + (tpma_nv_policyread << 19) + (tpma_nv_no_da << 25)            \
                     + (tpma_nv_orderly << 26) + (tpma_nv_clear_stclear << 27)       \
                     + (tpma_nv_readlocked << 28) + (tpma_nv_written << 29)          \
-                    + (tpma_nv_platformcreate << 30) + (tpma_nv_read_stclear << 31) \
-                    + (tpma_external_nv_encryption << 32)                           \
-                    + (tpma_external_nv_integrity << 33)                            \
-                    + (tpma_external_nv_antirollback << 34))
+                    + (tpma_nv_platformcreate << 30) + ((UINT64)tpma_nv_read_stclear << 31) /* libtpms changed: UBSAN */ \
+                    + ((UINT64)tpma_external_nv_encryption << 32)	/* libtpms changed: UBSAN */ \
+                    + ((UINT64)tpma_external_nv_integrity << 33)	/* libtpms changed: UBSAN */ \
+                    + ((UINT64)tpma_external_nv_antirollback << 34))	/* libtpms changed: UBSAN */
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
