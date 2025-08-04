@@ -1,3 +1,5 @@
 /* config.h.in. Generated from meson.build by Meson. */
 
 #mesondefine PACKAGE_VERSION
+#mesondefine HAVE_ARPA_INET_H
+#mesondefine HAVE_TIME_H
