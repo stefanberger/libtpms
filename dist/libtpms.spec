@@ -112,6 +112,7 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+
 * Tue Jun 10 2025 Stefan Berger - 0.9.7-1
 - tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
 - tpm2: Remove assigned-to value to offset because it is unused (Coverity)
