@@ -1,6 +1,6 @@
 project('libtpms', 'c',
         version: '0.11.0',
-        license: 'CPL-1.0',
+        license: 'BSD-3-Clause AND LicenseRef-TCGL',
         default_options: ['c_std=c99'])
 
 # Add an include directory that points to the build directory.
