@@ -68,5 +68,7 @@ configure_file(
 )
 
 # Add subdirectories to the build
+# Add subdirectories to the build
 subdir('include')
 subdir('src')
+subdir('man')
