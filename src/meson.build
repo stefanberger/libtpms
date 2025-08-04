@@ -1,3 +1,13 @@
+# Versioning
+libtpms_version = meson.project_version()
+libtpms_version_arr = libtpms_version.split('.')
+libtpms_ver_major = libtpms_version_arr[0].to_int()
+libtpms_ver_minor = libtpms_version_arr[1].to_int()
+
+current = libtpms_ver_major + libtpms_ver_minor
+age = libtpms_ver_minor
+soversion = '@0@'.format(current - age)
+
 # TPM2 requires OpenSSL in this build configuration
 if with_tpm2 and crypto_backend != 'openssl'
   error('TPM2 support currently requires the openssl crypto backend.')
@@ -185,6 +195,11 @@ libtpms = shared_library('tpms',
   dependencies: crypto_deps + extra_deps,
   include_directories: [lib_inc],
   install: true,
+  version: libtpms_version,
+  soversion: soversion,
+  darwin_versions: [soversion, libtpms_version],
+  vs_module_defs: 'libtpms.syms',
+  link_args: ['-Wl,--version-script,@0@'.format(meson.current_source_dir() / 'libtpms.syms')],
 )
 
 libtpms_dep = declare_dependency(
