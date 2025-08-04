@@ -1,0 +1,3 @@
+/* config.h.in. Generated from meson.build by Meson. */
+
+#mesondefine PACKAGE_VERSION
