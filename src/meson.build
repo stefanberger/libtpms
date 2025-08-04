@@ -1,8 +1,3 @@
-# Get build options
-with_tpm1 = get_option('tpm1')
-with_tpm2 = get_option('tpm2')
-crypto_backend = get_option('crypto_backend')
-
 # TPM2 requires OpenSSL in this build configuration
 if with_tpm2 and crypto_backend != 'openssl'
   error('TPM2 support currently requires the openssl crypto backend.')
@@ -74,7 +69,7 @@ common_c_args = [
 ]
 
 if with_tpm1
-  message('Building with TPM 1.2 support')
+  common_c_args += ['-DWITH_TPM1']
   tpm1_sources = files(
     'tpm12/tpm_admin.c', 'tpm12/tpm_audit.c', 'tpm12/tpm_auth.c',
     'tpm12/tpm_cryptoh.c', 'tpm12/tpm_counter.c', 'tpm12/tpm_daa.c',
@@ -108,7 +103,7 @@ if with_tpm1
 endif
 
 if with_tpm2
-  message('Building with TPM 2.0 support')
+  common_c_args += ['-DWITH_TPM2']
   rt_dep = meson.get_compiler('c').find_library('rt', required: false)
   extra_deps += rt_dep
 

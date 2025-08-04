@@ -21,6 +21,11 @@ warning_flags = [
 supported_warning_flags = c_compiler.get_supported_arguments(warning_flags)
 add_project_arguments(supported_warning_flags, language: 'c')
 
+# Get build options
+with_tpm1 = get_option('tpm1')
+with_tpm2 = get_option('tpm2')
+crypto_backend = get_option('crypto_backend')
+
 # Add hardening flags for non-plain build types
 if get_option('buildtype') != 'plain'
   hardening_c_flags = []
@@ -72,3 +77,12 @@ configure_file(
 subdir('include')
 subdir('src')
 subdir('man')
+
+summary_info = {}
+summary_info += {'Build directory':   meson.current_build_dir()}
+summary_info += {'Source path':       meson.current_source_dir()}
+summary_info += {'TPM1':              with_tpm1}
+summary_info += {'TPM2':              with_tpm2}
+summary_info += {'Crypto backend':    crypto_backend}
+
+summary(summary_info, bool_yn: true, section: 'Build environment')
