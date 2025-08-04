@@ -24,6 +24,7 @@ extra_deps = []
 common_c_args = [
   '-DTPM_NV_DISK',
   '-DTPM_LIBTPMS_CALLBACKS',
+  '-DOPENSSL_SUPPRESS_DEPRECATED',
   '-include', 'tpm_library_conf.h'
 ]
 
