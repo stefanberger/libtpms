@@ -1,9 +1,3 @@
-# Versioning
-libtpms_version = meson.project_version()
-libtpms_version_arr = libtpms_version.split('.')
-libtpms_ver_major = libtpms_version_arr[0].to_int()
-libtpms_ver_minor = libtpms_version_arr[1].to_int()
-
 current = libtpms_ver_major + libtpms_ver_minor
 age = libtpms_ver_minor
 soversion = '@0@'.format(current - age)
@@ -174,7 +168,6 @@ if with_tpm2
     c_args: common_c_args + crypto_flags + [
       '-D_POSIX_C_SOURCE=200809L',
       '-DTPM_POSIX',
-      '-include', 'config.h'
     ],
     include_directories: [
       lib_inc,
@@ -190,7 +183,7 @@ endif
 # Define the final shared library
 libtpms = both_libraries('tpms',
   common_sources,
-  c_args: common_c_args + ['-include', 'config.h'],
+  c_args: common_c_args,
   link_with: link_with_libs,
   dependencies: crypto_deps + extra_deps,
   include_directories: [lib_inc],
@@ -214,5 +207,10 @@ pkg.generate(
   name: 'libtpms',
   description: 'A library for TPM emulation.',
   version: meson.project_version(),
+  variables: [
+    'with_tpm1=@0@'.format(with_tpm1 ? '1' : '0'),
+    'with_tpm2=@0@'.format(with_tpm2 ? '1' : '0'),
+    'cryptolib=@0@'.format(crypto_backend),
+  ],
   libraries: libtpms
 )

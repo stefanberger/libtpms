@@ -1,7 +1,10 @@
-project('libtpms', ['c', 'cpp'],
-        version: '0.11.0',
-        license: 'BSD-3-Clause AND LicenseRef-TCGL',
-        default_options: ['c_std=c99'])
+project(
+  'libtpms', ['c', 'cpp'],
+  version: '0.11.0',
+  license: 'BSD-3-Clause AND LicenseRef-TCGL',
+  default_options: ['c_std=c99', 'warning_level=1', 'werror=true'],
+  meson_version: '>=1.1',
+)
 
 c_compiler = meson.get_compiler('c')
 
@@ -10,8 +13,6 @@ add_project_arguments('-I' + meson.current_build_dir(), language: 'c')
 
 # Add common warning flags
 warning_flags = [
-  '-Wall',
-  '-Werror',
   '-Wshadow',
   '-Wreturn-type',
   '-Wsign-compare',
@@ -60,25 +61,26 @@ if get_option('buildtype') != 'plain'
   add_project_link_arguments(hardening_ld_flags, language: 'c')
 endif
 
+# Versioning
+libtpms_version = meson.project_version()
+libtpms_version_arr = libtpms_version.split('.')
+libtpms_ver_major = libtpms_version_arr[0].to_int()
+libtpms_ver_minor = libtpms_version_arr[1].to_int()
+libtpms_ver_micro = libtpms_version_arr[2].to_int()
+
 # Create a configuration header file
 conf_data = configuration_data()
 conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
+conf_data.set('LIBTPMS_VER_MAJOR', libtpms_ver_major)
+conf_data.set('LIBTPMS_VER_MINOR', libtpms_ver_minor)
+conf_data.set('LIBTPMS_VER_MICRO', libtpms_ver_micro)
 
-# Check for headers
-if c_compiler.has_header('arpa/inet.h')
-  conf_data.set('HAVE_ARPA_INET_H', 1)
-endif
-if c_compiler.has_header('time.h')
-  conf_data.set('HAVE_TIME_H', 1)
-endif
-
+# config.h could be dropped if when autotools is removed
 configure_file(
-  input: 'config.h.in',
   output: 'config.h',
   configuration: conf_data
 )
 
-# Add subdirectories to the build
 # Add subdirectories to the build
 subdir('include')
 subdir('src')
@@ -92,4 +94,4 @@ summary_info += {'TPM1':              with_tpm1}
 summary_info += {'TPM2':              with_tpm2}
 summary_info += {'Crypto backend':    crypto_backend}
 
-summary(summary_info, bool_yn: true, section: 'Build environment')
+summary(summary_info, bool_yn: true, section: 'Build configuration')
