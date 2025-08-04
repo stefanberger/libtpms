@@ -7,14 +7,14 @@ endif
 crypto_deps = []
 tpm1_crypto_sources = []
 freebl_inc = []
-openssl_flags = []
+crypto_flags = []
 if crypto_backend == 'openssl'
   crypto_deps += dependency('openssl', version: '>=1.1.0', required: true)
   if with_tpm1
     tpm1_crypto_sources += 'tpm12/tpm_crypto.c'
   endif
   if get_option('use_openssl_functions')
-    openssl_flags += [
+    crypto_flags += [
       '-DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=1',
       '-DUSE_OPENSSL_FUNCTIONS_EC=1',
       '-DUSE_OPENSSL_FUNCTIONS_ECDSA=1',
@@ -22,7 +22,7 @@ if crypto_backend == 'openssl'
       '-DUSE_OPENSSL_FUNCTIONS_SSKDF=1'
     ]
   else
-    openssl_flags += [
+    crypto_flags += [
       '-DUSE_OPENSSL_FUNCTIONS_SYMMETRIC=0',
       '-DUSE_OPENSSL_FUNCTIONS_EC=0',
       '-DUSE_OPENSSL_FUNCTIONS_ECDSA=0',
@@ -88,7 +88,7 @@ if with_tpm1
   )
 
   tpm1_lib = static_library('tpms_tpm12', tpm1_sources,
-    c_args: common_c_args + openssl_flags + [
+    c_args: common_c_args + crypto_flags + [
       '-DTPM_V12',
       '-DTPM_PCCLIENT',
       '-DTPM_POSIX',
@@ -161,7 +161,7 @@ if with_tpm2
   )
 
   tpm2_lib = static_library('tpms_tpm2', tpm2_sources,
-    c_args: common_c_args + openssl_flags + [
+    c_args: common_c_args + crypto_flags + [
       '-D_POSIX_C_SOURCE=200809L',
       '-DTPM_POSIX',
       '-include', 'config.h'

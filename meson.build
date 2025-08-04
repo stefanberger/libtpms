@@ -26,6 +26,12 @@ with_tpm1 = get_option('tpm1')
 with_tpm2 = get_option('tpm2')
 crypto_backend = get_option('crypto_backend')
 
+if crypto_backend == 'openssl'
+  add_project_arguments(['-DUSE_OPENSSL_CRYPTO_LIBRARY=1'], language: 'c')
+else
+  add_project_arguments(['-DUSE_FREEBL_CRYPTO_LIBRARY=1'], language: 'c')
+endif
+
 # Add hardening flags for non-plain build types
 if get_option('buildtype') != 'plain'
   hardening_c_flags = []

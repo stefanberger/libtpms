@@ -82,14 +82,6 @@ static unsigned char sha1Oid[] = {
   local prototypes
 */
 
-static TPM_RESULT TPM_RSAPublicEncryptRaw(unsigned char *encrypt_data,      /* output */
-                                          uint32_t encrypt_data_size, /* input, size of enc buffer */
-                                          unsigned char *decrypt_data,      /* input */
-                                          uint32_t decrypt_data_size, /* input, size of dec buffer */
-                                          unsigned char *narr,              /* public modulus */
-                                          uint32_t nbytes,
-                                          unsigned char *earr,              /* public exponent */
-                                          uint32_t ebytes);
 static void       TPM_RSAPrivateKeyInit(RSAPrivateKey *rsa_pri_key);
 static TPM_RESULT TPM_RSAGeneratePublicToken(RSAPublicKey *rsa_pub_key,
 					     unsigned char *narr,
