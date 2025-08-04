@@ -188,7 +188,7 @@ if with_tpm2
 endif
 
 # Define the final shared library
-libtpms = shared_library('tpms',
+libtpms = both_libraries('tpms',
   common_sources,
   c_args: common_c_args + ['-include', 'config.h'],
   link_with: link_with_libs,

@@ -3,5 +3,4 @@ option('tpm1', type: 'boolean', value: true, description: 'Build with TPM 1.2 su
 option('tpm2', type: 'boolean', value: true, description: 'Build with TPM 2.0 support.')
 option('crypto_backend', type: 'combo', choices: ['openssl', 'freebl'], value: 'openssl', description: 'Choose the cryptographic backend.')
 option('use_openssl_functions', type: 'boolean', value: true, description: 'Use OpenSSL functions for crypto instead of internal code.')
-option('static_tests', type: 'boolean', value: false, description: 'Enable static tests')
 option('fuzzing_engine', type: 'boolean', value: false, description: 'Build with fuzzing engine')

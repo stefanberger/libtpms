@@ -50,14 +50,12 @@ if get_option('tpm2')
   exe = executable('fuzz', fuzz_sources, dependencies: [libtpms_dep], c_args: ['-DTPM_POSIX', '-D_POSIX_C_SOURCE=200809L'])
   test('fuzz.sh', sh, args: files('fuzz.sh'), depends: exe, workdir: meson.current_build_dir())
 
-  if get_option('static_tests')
-    exe = executable('object_size', files('object_size.c'),
-      dependencies: [libtpms_dep],
-      include_directories: src_inc,
-      c_args: ['-static', '-DTPM_POSIX', '-D_POSIX_C_SOURCE=200809L'],
-    )
-    test('object_size', exe, env: test_env)
-  endif
+  exe = executable('object_size', files('object_size.c'),
+    link_with: libtpms.get_static_lib(),
+    include_directories: src_inc,
+    c_args: ['-static', '-DTPM_POSIX', '-D_POSIX_C_SOURCE=200809L'],
+  )
+  test('object_size', exe, env: test_env)
 endif
 
 if crypto_backend == 'freebl'
