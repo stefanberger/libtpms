@@ -186,3 +186,18 @@ libtpms = shared_library('tpms',
   include_directories: [lib_inc],
   install: true,
 )
+
+libtpms_dep = declare_dependency(
+  link_with: libtpms,
+  include_directories: [lib_inc],
+  dependencies: crypto_deps + extra_deps,
+)
+
+# Pkg-config generation
+pkg = import('pkgconfig')
+pkg.generate(
+  name: 'libtpms',
+  description: 'A library for TPM emulation.',
+  version: meson.project_version(),
+  libraries: libtpms
+)

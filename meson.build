@@ -1,4 +1,4 @@
-project('libtpms', 'c',
+project('libtpms', ['c', 'cpp'],
         version: '0.11.0',
         license: 'BSD-3-Clause AND LicenseRef-TCGL',
         default_options: ['c_std=c99'])
@@ -83,6 +83,7 @@ configure_file(
 subdir('include')
 subdir('src')
 subdir('man')
+subdir('tests')
 
 summary_info = {}
 summary_info += {'Build directory':   meson.current_build_dir()}
