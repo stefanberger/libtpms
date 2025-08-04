@@ -16,5 +16,6 @@ configure_file(
   configuration: conf_data
 )
 
-# Add the src subdirectory to the build
+# Add subdirectories to the build
+subdir('include')
 subdir('src')

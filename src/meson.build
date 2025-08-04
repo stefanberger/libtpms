@@ -1,9 +1,8 @@
-# Define an include directory that points to the library's public headers
-project_inc = include_directories('../include/libtpms')
+# Find the OpenSSL dependency (libcrypto)
+crypto_dep = dependency('openssl', version: '>=1.1.0', required: true)
 
-# Define an include directory for the generated config.h in the build directory
-# This is where config.h will be generated.
-build_inc = include_directories('.')
+# Include directory for the library's own public headers
+lib_inc = include_directories('../include/libtpms')
 
 # Start with the absolute minimum common files to prove compilation works
 libtpms_sources = files(
@@ -21,6 +20,7 @@ libtpms = shared_library('tpms',
     '-DTPM_NV_DISK',
     '-include', 'tpm_library_conf.h'
   ],
-  include_directories: [project_inc, build_inc],
+  dependencies: crypto_dep,
+  include_directories: [lib_inc],
   install: true,
 )
