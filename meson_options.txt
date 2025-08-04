@@ -1,2 +1,3 @@
 option('tpm1', type: 'boolean', value: true, description: 'Build with TPM 1.2 support.')
 option('tpm2', type: 'boolean', value: true, description: 'Build with TPM 2.0 support.')
+option('crypto_backend', type: 'combo', choices: ['openssl', 'freebl'], value: 'openssl', description: 'Choose the cryptographic backend.')

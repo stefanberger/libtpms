@@ -1,14 +1,41 @@
-# Find the OpenSSL dependency (libcrypto)
-crypto_dep = dependency('openssl', version: '>=1.1.0', required: true)
+# Get build options
+with_tpm1 = get_option('tpm1')
+with_tpm2 = get_option('tpm2')
+crypto_backend = get_option('crypto_backend')
+
+# TPM2 requires OpenSSL in this build configuration
+if with_tpm2 and crypto_backend != 'openssl'
+  error('TPM2 support currently requires the openssl crypto backend.')
+endif
+
+# --- Crypto Dependencies and Flags ---
+crypto_deps = []
+tpm1_crypto_sources = []
+freebl_inc = []
+if crypto_backend == 'openssl'
+  crypto_deps += dependency('openssl', version: '>=1.1.0', required: true)
+  if with_tpm1
+    tpm1_crypto_sources += 'tpm12/tpm_crypto.c'
+  endif
+else # freebl
+  nss_dep = dependency('nss')
+  nspr_dep = dependency('nspr')
+  gmp_dep = dependency('gmp')
+  crypto_deps += [nss_dep, nspr_dep, gmp_dep]
+  crypto_deps += meson.get_compiler('c').find_library('freebl', required: true)
+  freebl_inc += include_directories(nss_dep.get_variable(pkgconfig: 'includedir'))
+  freebl_inc += include_directories(nspr_dep.get_variable(pkgconfig: 'includedir'))
+  if with_tpm1
+    tpm1_crypto_sources += 'tpm12/tpm_crypto_freebl.c'
+  endif
+endif
+
+# --- Library Definitions ---
 
 # Include directory for the library's own public headers
 lib_inc = include_directories('../include/libtpms')
 
-# Get the value of the options
-with_tpm1 = get_option('tpm1')
-with_tpm2 = get_option('tpm2')
-
-# Start with the common source files
+# Common source files
 common_sources = files(
   'tpm_debug.c',
   'tpm_library.c',
@@ -43,7 +70,8 @@ if with_tpm1
     'tpm12/tpm_sizedbuffer.c', 'tpm12/tpm_startup.c', 'tpm12/tpm_store.c',
     'tpm12/tpm_storage.c', 'tpm12/tpm_ticks.c', 'tpm12/tpm_time.c',
     'tpm12/tpm_transport.c', 'tpm12/tpm_ver.c', 'tpm12/tpm_svnrevision.c',
-    'tpm_tpm12_interface.c', 'tpm_tpm12_tis.c', 'tpm12/tpm_crypto.c'
+    'tpm_tpm12_interface.c', 'tpm_tpm12_tis.c',
+    tpm1_crypto_sources
   )
 
   tpm1_lib = static_library('tpms_tpm12', tpm1_sources,
@@ -56,7 +84,7 @@ if with_tpm1
       '-DTPM_ENABLE_ACTIVATE',
       '-DTPM_VOLATILE_LOAD',
     ],
-    include_directories: [lib_inc],
+    include_directories: [lib_inc] + freebl_inc,
   )
   link_with_libs += tpm1_lib
 endif
@@ -141,7 +169,7 @@ libtpms = shared_library('tpms',
   common_sources,
   c_args: common_c_args + ['-include', 'config.h'],
   link_with: link_with_libs,
-  dependencies: [crypto_dep] + extra_deps,
+  dependencies: crypto_deps + extra_deps,
   include_directories: [lib_inc],
   install: true,
 )
