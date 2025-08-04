@@ -5059,41 +5059,6 @@ SetCapability_COMMAND_DESCRIPTOR_t _SetCapabilityData = {
 #define _SetCapabilityDataAddress 0
 #endif // CC_SetCapability
 
-#if CC_AC_GetCapability
-#include "AC_GetCapability_fp.h"
-typedef TPM_RC  (AC_GetCapability_Entry)(
-					 AC_GetCapability_In *in,
-					 AC_GetCapability_Out *out
-					 );
-typedef const struct {
-    AC_GetCapability_Entry    *entry;
-    UINT16                    inSize;
-    UINT16                    outSize;
-    UINT16                    offsetOfTypes;
-    UINT16                    paramOffsets[3];
-    BYTE                      types[7];
-} AC_GetCapability_COMMAND_DESCRIPTOR_t;
-AC_GetCapability_COMMAND_DESCRIPTOR_t _AC_GetCapabilityData = {
-    /* entry  */          &TPM2_AC_GetCapability,
-    /* inSize */          (UINT16)(sizeof(AC_GetCapability_In)),
-    /* outSize */         (UINT16)(sizeof(AC_GetCapability_Out)),
-    /* offsetOfTypes */   offsetof(AC_GetCapability_COMMAND_DESCRIPTOR_t, types),
-    /* offsets */         {(UINT16)(offsetof(AC_GetCapability_In, capability)),
-			   (UINT16)(offsetof(AC_GetCapability_In, count)),
-			   (UINT16)(offsetof(AC_GetCapability_Out, capabilitiesData))},
-    /* types */           {TPMI_RH_AC_H_UNMARSHAL,
-			   TPM_AT_P_UNMARSHAL,
-			   UINT32_P_UNMARSHAL,
-			   END_OF_LIST,
-			   TPMI_YES_NO_P_MARSHAL,
-			   TPML_AC_CAPABILITIES_P_MARSHAL,
-			   END_OF_LIST}
-};
-#define _AC_GetCapabilityDataAddress (&_AC_GetCapabilityData)
-#else
-#define _AC_GetCapabilityDataAddress 0
-#endif
-
 #if       CC_AC_Send
 #include    "AC_Send_fp.h"
 
@@ -5618,7 +5583,7 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
         (COMMAND_DESCRIPTOR_t*)_EncryptDecrypt2DataAddress,
 #endif // CC_EncryptDecrypt2
 #if (PAD_LIST || CC_AC_GetCapability)
-        (COMMAND_DESCRIPTOR_t*)_AC_GetCapabilityDataAddress,
+        (COMMAND_DESCRIPTOR_t*)_GetCapabilityDataAddress,
 #endif // CC_AC_GetCapability
 #if (PAD_LIST || CC_AC_Send)
         (COMMAND_DESCRIPTOR_t*)_AC_SendDataAddress,
