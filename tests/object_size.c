@@ -70,7 +70,7 @@ int main(void)
         },
         .seedCompatLevel = 1,
     };
-#pragma GCC diagnostics pop
+#pragma GCC diagnostic pop
     static const size_t exp_sizes[7] = {
         0, 3284, 3284, 3284, 3284, 3284, 3288,
     };
