@@ -58,6 +58,7 @@
 /*										*/
 /********************************************************************************/
 
+
 // This file represents the functional interface that all platform libraries must
 // provide because they are called by the Core TPM library.
 #ifndef _TPM_TO_PLATFORM_INTERFACE_H_

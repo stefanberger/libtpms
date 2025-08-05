@@ -58,6 +58,7 @@
 /*										*/
 /********************************************************************************/
 
+
 // this file defines the desired command list that should be built into the
 // Tpm Core Lib.
 
