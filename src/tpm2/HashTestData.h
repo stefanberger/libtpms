@@ -154,9 +154,7 @@ TPM2B_EMPTY c_SHA3_384_digest = {{0, {0}}};
 TPM2B_EMPTY c_SHA3_512_digest = {{0, {0}}};
 #endif
 
-
-// libtpms added begin
-#if SMAC_IMPLEMENTED && ALG_CMAC
+#if SMAC_IMPLEMENTED && ALG_CMAC		// libtpms added begin
 TPM2B_TYPE(AES128, 16);
 static TPM2B_AES128 cmac_aeskey = {{16, {
     0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6,
@@ -213,6 +211,5 @@ static const struct CMACTest {
         .key      = NULL,
     }
 };
-#endif
-// libtpms added end
+#endif						// libtpms added end
 
