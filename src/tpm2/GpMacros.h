@@ -263,7 +263,7 @@
         }                                              \
     } while(0)
 
-#if(defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
+#if (defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
 #  define pAssert(a) ((void)0)
 #else
 #  define pAssert(a)                       \
@@ -349,7 +349,7 @@
 #include "MinMax.h"
 
 #ifndef IsOdd
-#  define IsOdd(a) (((a)&1) != 0)
+#  define IsOdd(a) (((a) & 1) != 0)
 #endif
 
 #ifndef BITS_TO_BYTES

@@ -107,19 +107,18 @@ NvWriteAccessChecks(
 //                         not allowed
 //
 TPM_RC
-NvReadOnlyModeChecks(
-    TPMA_NV    attributes   // IN: the attributes of the index to check
+NvReadOnlyModeChecks(TPMA_NV attributes  // IN: the attributes of the index to check
 )
 {
 
-#  if CC_ReadOnlyControl
+#if CC_ReadOnlyControl
     // When in Read-Only mode only allow the commands listed above on an
     // index with the ORDERLY and CLEAR_STCLEAR attributes set
-    if(gc.readOnly &&
-       !(IS_ATTRIBUTE(attributes, TPMA_NV, ORDERLY) &&
-         IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR)))
+    if(gc.readOnly
+       && !(IS_ATTRIBUTE(attributes, TPMA_NV, ORDERLY)
+            && IS_ATTRIBUTE(attributes, TPMA_NV, CLEAR_STCLEAR)))
         return TPM_RC_READ_ONLY;
-#  endif // CC_ReadOnlyControl 
+#endif  // CC_ReadOnlyControl
 
     return TPM_RC_SUCCESS;
 }
@@ -142,9 +141,8 @@ NvClearOrderly(void)
 //   Return Type: BOOL
 //      TRUE(1)   'index' is found
 //      FALSE(0)  'index' is not found or not an NV index handle
-static BOOL GetIndexAttributesByHandle(
-    TPM_HANDLE index,     // IN:  index handle
-    TPMA_NV*   attributes // OUT: index attributes
+static BOOL GetIndexAttributesByHandle(TPM_HANDLE index,      // IN:  index handle
+                                       TPMA_NV*   attributes  // OUT: index attributes
 )
 {
     if(HandleGetType(index) == TPM_HT_NV_INDEX)
@@ -168,8 +166,8 @@ BOOL NvIsPinPassIndex(TPM_HANDLE index  // IN: Handle to check
 )
 {
     TPMA_NV attributes;
-    return GetIndexAttributesByHandle(index, &attributes) &&
-           IsNvPinPassIndex(attributes);
+    return GetIndexAttributesByHandle(index, &attributes)
+           && IsNvPinPassIndex(attributes);
 }
 
 //*** NvIsPinCountedIndex()
@@ -182,8 +180,8 @@ BOOL NvIsPinCountedIndex(TPM_HANDLE index  // IN: Handle to check
 )
 {
     TPMA_NV attributes;
-    return GetIndexAttributesByHandle(index, &attributes) &&
-           (IsNvPinPassIndex(attributes) || IsNvPinFailIndex(attributes));
+    return GetIndexAttributesByHandle(index, &attributes)
+           && (IsNvPinPassIndex(attributes) || IsNvPinFailIndex(attributes));
 }
 
 //*** NvGetIndexName()

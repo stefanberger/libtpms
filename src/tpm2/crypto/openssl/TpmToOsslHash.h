@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*						*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2023				  	*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 //
@@ -139,46 +81,47 @@ typedef const BYTE* PCBYTE;
 
 // Add data to the hash
 #  define HASH_DATA_METHOD_DEF \
-    void(HASH_DATA_METHOD)(PANY_HASH_STATE state, PCBYTE buffer, size_t size)
+      void(HASH_DATA_METHOD)(PANY_HASH_STATE state, PCBYTE buffer, size_t size)
 #  define HASH_DATA(hashState, dInSize, dIn) \
-    ((hashState)->def->method.data)(&(hashState)->state, dIn, dInSize)
+      ((hashState)->def->method.data)(&(hashState)->state, dIn, dInSize)
 
 // Finalize the hash and get the digest
 #  define HASH_END_METHOD_DEF \
-    void(HASH_END_METHOD)(BYTE * buffer, PANY_HASH_STATE state)
+      void(HASH_END_METHOD)(BYTE * buffer, PANY_HASH_STATE state)
 #  define HASH_END(hashState, buffer) \
-    ((hashState)->def->method.end)(buffer, &(hashState)->state)
+      ((hashState)->def->method.end)(buffer, &(hashState)->state)
 
 // Copy the hash context
 // Note: For import, export, and copy, memcpy() is used since there is no
 // reformatting necessary between the internal and external forms.
 #  define HASH_STATE_COPY_METHOD_DEF \
-    void(HASH_STATE_COPY_METHOD)(    \
-        PANY_HASH_STATE to, PCANY_HASH_STATE from, size_t size)
-#  define HASH_STATE_COPY(hashStateOut, hashStateIn)          \
-    ((hashStateIn)->def->method.copy)(&(hashStateOut)->state, \
-                                      &(hashStateIn)->state,  \
-                                      (hashStateIn)->def->contextSize)
+      void(HASH_STATE_COPY_METHOD)(  \
+          PANY_HASH_STATE to, PCANY_HASH_STATE from, size_t size)
+#  define HASH_STATE_COPY(hashStateOut, hashStateIn)            \
+      ((hashStateIn)->def->method.copy)(&(hashStateOut)->state, \
+                                        &(hashStateIn)->state,  \
+                                        (hashStateIn)->def->contextSize)
 
 // Copy (with reformatting when necessary) an internal hash structure to an
 // external blob
 #  define HASH_STATE_EXPORT_METHOD_DEF \
-    void(HASH_STATE_EXPORT_METHOD)(BYTE * to, PCANY_HASH_STATE from, size_t size)
-#  define HASH_STATE_EXPORT(to, hashStateFrom)         \
-    ((hashStateFrom)->def->method.copyOut)(            \
-        &(((BYTE*)(to))[offsetof(HASH_STATE, state)]), \
-        &(hashStateFrom)->state,                       \
-        (hashStateFrom)->def->contextSize)
+      void(HASH_STATE_EXPORT_METHOD)(BYTE * to, PCANY_HASH_STATE from, size_t size)
+#  define HASH_STATE_EXPORT(to, hashStateFrom)           \
+      ((hashStateFrom)->def->method.copyOut)(            \
+          &(((BYTE*)(to))[offsetof(HASH_STATE, state)]), \
+          &(hashStateFrom)->state,                       \
+          (hashStateFrom)->def->contextSize)
 
 // Copy from an external blob to an internal formate (with reformatting when
 // necessary
 #  define HASH_STATE_IMPORT_METHOD_DEF \
-    void(HASH_STATE_IMPORT_METHOD)(PANY_HASH_STATE to, const BYTE* from, size_t size)
-#  define HASH_STATE_IMPORT(hashStateTo, from)                 \
-    ((hashStateTo)->def->method.copyIn)(                       \
-        &(hashStateTo)->state,                                 \
-        &(((const BYTE*)(from))[offsetof(HASH_STATE, state)]), \
-        (hashStateTo)->def->contextSize)
+      void(HASH_STATE_IMPORT_METHOD)(  \
+          PANY_HASH_STATE to, const BYTE* from, size_t size)
+#  define HASH_STATE_IMPORT(hashStateTo, from)                   \
+      ((hashStateTo)->def->method.copyIn)(                       \
+          &(hashStateTo)->state,                                 \
+          &(((const BYTE*)(from))[offsetof(HASH_STATE, state)]), \
+          (hashStateTo)->def->contextSize)
 
 // Function aliases. The code in CryptHash.c uses the internal designation for the
 // functions. These need to be translated to the function names of the library.
