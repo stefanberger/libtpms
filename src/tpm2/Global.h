@@ -439,8 +439,8 @@ typedef struct SESSION
 #    if CC_PolicyTransportSPDM
 #      error Need Marshaling support
 #    endif
-    TPM2B_DIGEST scKeyNameHash;     // the required secure channel key name hash
-#  endif  // SEC_CHANNEL_SUPPORT
+    TPM2B_DIGEST scKeyNameHash;  // the required secure channel key name hash
+#  endif                         // SEC_CHANNEL_SUPPORT
 } SESSION;
 
 #  define EXPIRES_ON_RESET   INT32_MIN
@@ -820,7 +820,7 @@ typedef struct
 // This implementation only supports a single group of PCR controlled by
 // policy. If more are required, then this structure would be changed to
 // an array.
-#  if defined  NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
+#  if defined NUM_POLICY_PCR_GROUP && NUM_POLICY_PCR_GROUP > 0
     PCR_POLICY pcrPolicies;
 #  endif
 
@@ -1033,13 +1033,13 @@ typedef struct state_clear_data
 #  endif
 #endif			// libtpms added
 
-#if CC_ReadOnlyControl
+#  if CC_ReadOnlyControl
 #error Need Marshaling/Unmarshaling support
     //*****************************************************************************
     //           Read-Only Control
     //*****************************************************************************
-    BOOL readOnly; // default reset is CLEAR
-#endif
+    BOOL readOnly;  // default reset is CLEAR
+#  endif
 
 } STATE_CLEAR_DATA;
 
@@ -1086,11 +1086,11 @@ typedef struct state_reset_data
                              //  object context. The default reset
                              //  value is 0.
     CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];  // This array contains
-        // contains the values used to track
-        // the version numbers of saved
-        // contexts (see
-        // Session.c in for details). The
-        // default reset value is {0}.
+    // contains the values used to track
+    // the version numbers of saved
+    // contexts (see
+    // Session.c in for details). The
+    // default reset value is {0}.
 
     CONTEXT_COUNTER contextCounter;  // This is the value from which the
                                      // 'contextID' is derived. The

@@ -1,63 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			    Hash structure definitions  			*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: CryptHash.h 1658 2021-01-22 23:14:01Z kgoldman $		*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2021				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 // This header contains the hash structure definitions used in the TPM code
@@ -154,15 +95,15 @@ typedef struct SMAC_STATE
 #  define IF_IMPLEMENTED_SHA3_512(op)
 #endif
 
-#define FOR_EACH_HASH(op)     \
-  IF_IMPLEMENTED_SHA1(op)     \
-  IF_IMPLEMENTED_SHA256(op)   \
-  IF_IMPLEMENTED_SHA384(op)   \
-  IF_IMPLEMENTED_SHA512(op)   \
-  IF_IMPLEMENTED_SM3_256(op)  \
-  IF_IMPLEMENTED_SHA3_256(op) \
-  IF_IMPLEMENTED_SHA3_384(op) \
-  IF_IMPLEMENTED_SHA3_512(op)
+#define FOR_EACH_HASH(op)       \
+    IF_IMPLEMENTED_SHA1(op)     \
+    IF_IMPLEMENTED_SHA256(op)   \
+    IF_IMPLEMENTED_SHA384(op)   \
+    IF_IMPLEMENTED_SHA512(op)   \
+    IF_IMPLEMENTED_SM3_256(op)  \
+    IF_IMPLEMENTED_SHA3_256(op) \
+    IF_IMPLEMENTED_SHA3_384(op) \
+    IF_IMPLEMENTED_SHA3_512(op)
 
 #define HASH_TYPE(HASH, Hash) tpmHashState##HASH##_t Hash;
 typedef union
@@ -186,7 +127,7 @@ typedef union
 typedef ANY_HASH_STATE*       PANY_HASH_STATE;
 typedef const ANY_HASH_STATE* PCANY_HASH_STATE;
 
-#define ALIGNED_SIZE(x, b) ((((x) + (b)-1) / (b)) * (b))
+#define ALIGNED_SIZE(x, b) ((((x) + (b) - 1) / (b)) * (b))
 // MAX_HASH_STATE_SIZE will change with each implementation. It is assumed that
 // a hash state will not be larger than twice the block size plus some
 // overhead (in this case, 16 bytes). The overall size needs to be as
@@ -283,20 +224,21 @@ typedef const struct HASH_DEF_STRUCT
 // Macro to fill in the HASH_DEF for an algorithm. For SHA1, the instance would be:
 //  HASH_DEF_TEMPLATE(Sha1, SHA1)
 // This handles the difference in capitalization for the various pieces.
-#define HASH_DEF_TEMPLATE(HASH, Hash)                                               \
-  HASH_DEF Hash##_Def = {{                                                          \
-                             (HASH_START_METHOD*)&tpmHashStart_##HASH,              \
-                             (HASH_DATA_METHOD*)&tpmHashData_##HASH,                \
-                             (HASH_END_METHOD*)&tpmHashEnd_##HASH,                  \
-                             (HASH_STATE_COPY_METHOD*)&tpmHashStateCopy_##HASH,     \
-                             (HASH_STATE_EXPORT_METHOD*)&tpmHashStateExport_##HASH, \
-                             (HASH_STATE_IMPORT_METHOD*)&tpmHashStateImport_##HASH, \
-                         },                                                         \
-                         HASH##_BLOCK_SIZE,  /*block size */                        \
-                         HASH##_DIGEST_SIZE, /*data size */                         \
-                         sizeof(tpmHashState##HASH##_t),                            \
-                         TPM_ALG_##HASH,                                            \
-                         OID_##HASH PKCS1_OID(HASH) ECDSA_OID(HASH)};
+#define HASH_DEF_TEMPLATE(HASH, Hash)                               \
+    HASH_DEF Hash##_Def =                                           \
+        {{                                                          \
+             (HASH_START_METHOD*)&tpmHashStart_##HASH,              \
+             (HASH_DATA_METHOD*)&tpmHashData_##HASH,                \
+             (HASH_END_METHOD*)&tpmHashEnd_##HASH,                  \
+             (HASH_STATE_COPY_METHOD*)&tpmHashStateCopy_##HASH,     \
+             (HASH_STATE_EXPORT_METHOD*)&tpmHashStateExport_##HASH, \
+             (HASH_STATE_IMPORT_METHOD*)&tpmHashStateImport_##HASH, \
+         },                                                         \
+         HASH##_BLOCK_SIZE,  /*block size */                        \
+         HASH##_DIGEST_SIZE, /*data size */                         \
+         sizeof(tpmHashState##HASH##_t),                            \
+         TPM_ALG_##HASH,                                            \
+         OID_##HASH PKCS1_OID(HASH) ECDSA_OID(HASH)};
 
 // These definitions are for the types that can be in a hash state structure.
 // These types are used in the cryptographic utilities. This is a define rather than

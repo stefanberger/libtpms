@@ -25,9 +25,9 @@
 #include "ACT_spt_fp.h"
 #include "PCR_fp.h"
 #include "DA_fp.h"
-#  if SEC_CHANNEL_SUPPORT
-#include "SecChannel_fp.h"
-#  endif  // SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
+#  include "SecChannel_fp.h"
+#endif  // SEC_CHANNEL_SUPPORT
 #include "TpmFail_fp.h"
 #include "SessionProcess_fp.h"
 
@@ -44,9 +44,9 @@
 #include "Response_fp.h"
 #include "CommandDispatcher_fp.h"
 
-#if CC_AC_Send
-#   include "AC_spt_fp.h"
-#endif // CC_AC_Send
+#if CC_AC_Send & 0				// libtpms changed: from #ifdef
+#  include "AC_spt_fp.h"
+#endif  // CC_AC_Send
 
 // Miscellaneous
 #include "Bits_fp.h"

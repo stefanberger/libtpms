@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*		DRBG with a behavior according to SP800-90A			*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 // This file implements a DRBG with a behavior according to SP800-90A using
@@ -167,43 +109,42 @@ static void DfStart(PDF_STATE dfState, uint32_t inputLength)
 {
     BYTE       init[8];
     int        i;
-    UINT32     drbgSeedSize = sizeof(DRBG_SEED);
+    UINT32     drbgSeedSize               = sizeof(DRBG_SEED);
 
-    const BYTE dfKey[DRBG_KEY_SIZE_BYTES] =
-    { 0x00,
-      0x01,
-      0x02,
-      0x03,
-      0x04,
-      0x05,
-      0x06,
-      0x07,
-      0x08,
-      0x09,
-      0x0a,
-      0x0b,
-      0x0c,
-      0x0d,
-      0x0e,
-      0x0f
+    const BYTE dfKey[DRBG_KEY_SIZE_BYTES] = {0x00,
+                                             0x01,
+                                             0x02,
+                                             0x03,
+                                             0x04,
+                                             0x05,
+                                             0x06,
+                                             0x07,
+                                             0x08,
+                                             0x09,
+                                             0x0a,
+                                             0x0b,
+                                             0x0c,
+                                             0x0d,
+                                             0x0e,
+                                             0x0f
 #if DRBG_KEY_SIZE_BYTES > 16
-      ,
-      0x10,
-      0x11,
-      0x12,
-      0x13,
-      0x14,
-      0x15,
-      0x16,
-      0x17,
-      0x18,
-      0x19,
-      0x1a,
-      0x1b,
-      0x1c,
-      0x1d,
-      0x1e,
-      0x1f
+                                             ,
+                                             0x10,
+                                             0x11,
+                                             0x12,
+                                             0x13,
+                                             0x14,
+                                             0x15,
+                                             0x16,
+                                             0x17,
+                                             0x18,
+                                             0x19,
+                                             0x1a,
+                                             0x1b,
+                                             0x1c,
+                                             0x1d,
+                                             0x1e,
+                                             0x1f
 #endif
     };
     memset(dfState, 0, sizeof(DF_STATE));
