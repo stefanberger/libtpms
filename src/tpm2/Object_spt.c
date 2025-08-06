@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			    Object Command Support 				*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Includes
 #include "Tpm.h"
@@ -804,7 +746,7 @@ PublicAttributesValidation(
 //*** FillInCreationData()
 // Fill in creation data for an object.
 //  Return Type: void
-void FillInCreationData(
+TPM_RC FillInCreationData(
     TPMI_DH_OBJECT       parentHandle,   // IN: handle of parent
     TPMI_ALG_HASH        nameHashAlg,    // IN: name hash algorithm
     TPML_PCR_SELECTION*  creationPCR,    // IN: PCR selection
@@ -820,8 +762,10 @@ void FillInCreationData(
     // Fill in TPMS_CREATION_DATA in outCreation
 
     // Compute PCR digest
-    PCRComputeCurrentDigest(
+    TPM_RC result = PCRComputeCurrentDigest(
         nameHashAlg, creationPCR, &outCreation->creationData.pcrDigest);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Put back PCR selection list
     outCreation->creationData.pcrSelect = *creationPCR;
@@ -867,7 +811,7 @@ void FillInCreationData(
     CryptDigestUpdate(&hashState, outCreation->size, creationBuffer);
     CryptHashEnd2B(&hashState, &creationDigest->b);
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** GetSeedForKDF()
@@ -1127,7 +1071,7 @@ static UINT16 MarshalSensitive(
 //  1. marshal TPM2B_SENSITIVE structure into the buffer of TPM2B_PRIVATE
 //  2. apply encryption to the sensitive area.
 //  3. apply outer integrity computation.
-void SensitiveToPrivate(
+TPM_RC SensitiveToPrivate(
     TPMT_SENSITIVE* sensitive,  // IN: sensitive structure
     TPM2B_NAME*     name,       // IN: the name of the object
     OBJECT*         parent,     // IN: The parent object
@@ -1144,7 +1088,7 @@ void SensitiveToPrivate(
     UINT16        integritySize;
     UINT16        ivSize;
     //
-    pAssert(name != NULL && name->t.size != 0);
+    pAssert_RC(name != NULL && name->t.size != 0);
 
     // Find the hash algorithm for integrity computation
     if(parent == NULL)
@@ -1178,7 +1122,8 @@ void SensitiveToPrivate(
     //Produce outer wrap, including encryption and HMAC
     outPrivate->t.size = ProduceOuterWrap(
         parent, &name->b, hashAlg, NULL, TRUE, dataSize, outPrivate->t.buffer);
-    return;
+
+    return TPM_RC_SUCCESS;
 }
 
 //*** PrivateToSensitive()
@@ -1271,7 +1216,7 @@ PrivateToSensitive(TPM2B*     inPrivate,  // IN: input private structure
 //  1. marshal TPMT_SENSITIVE structure into the buffer of TPM2B_PRIVATE
 //  2. apply inner wrap to the sensitive area if required
 //  3. apply outer wrap if required
-void SensitiveToDuplicate(
+TPM_RC SensitiveToDuplicate(
     TPMT_SENSITIVE* sensitive,    // IN: sensitive structure
     TPM2B*          name,         // IN: the name of the object
     OBJECT*         parent,       // IN: The new parent object
@@ -1301,10 +1246,10 @@ void SensitiveToDuplicate(
     BOOL          doOuterWrap = FALSE;
     //
     // Make sure that name is provided
-    pAssert(name != NULL && name->size != 0);
+    pAssert_RC(name != NULL && name->size != 0);
 
     // Make sure symDef and innerSymKey are not NULL
-    pAssert(symDef != NULL && innerSymKey != NULL);
+    pAssert_RC(symDef != NULL && innerSymKey != NULL);
 
     // Starting of sensitive data without wrappers
     sensitiveData = outPrivate->t.buffer;
@@ -1333,6 +1278,7 @@ void SensitiveToDuplicate(
     }
     // Marshal sensitive area
     dataSize = MarshalSensitive(NULL, sensitiveData, sensitive, nameAlg);
+    pAssert_RC(dataSize != 0);  // 0 indicates a failure mode assertion
 
     // Apply inner wrap for duplication blob.  It includes both integrity and
     // encryption
@@ -1357,18 +1303,18 @@ void SensitiveToDuplicate(
         else
         {
             // assume the input key size should matches the symmetric definition
-            pAssert(innerSymKey->t.size == (symDef->keyBits.sym + 7) / 8);
+            pAssert_RC(innerSymKey->t.size == (symDef->keyBits.sym + 7) / 8);
         }
 
         // Encrypt inner buffer in place
-        CryptSymmetricEncrypt(innerBuffer,
-                              symDef->algorithm,
-                              symDef->keyBits.sym,
-                              innerSymKey->t.buffer,
-                              NULL,
-                              TPM_ALG_CFB,
-                              dataSize,
-                              innerBuffer);
+        VERIFY_RC(CryptSymmetricEncrypt(innerBuffer,
+                                        symDef->algorithm,
+                                        symDef->keyBits.sym,
+                                        innerSymKey->t.buffer,
+                                        NULL,
+                                        TPM_ALG_CFB,
+                                        dataSize,
+                                        innerBuffer));
 
         // If the symmetric encryption key is imported, clear the buffer for
         // output
@@ -1385,7 +1331,7 @@ void SensitiveToDuplicate(
     // Data size for output
     outPrivate->t.size = dataSize;
 
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** DuplicateToSensitive()
@@ -1501,11 +1447,11 @@ DuplicateToSensitive(
 //  2. encrypt the private buffer, excluding the leading integrity HMAC area
 //  3. compute integrity HMAC and append to the beginning of the buffer.
 //  4. Set the total size of TPM2B_ID_OBJECT buffer
-void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
-                        TPM2B*           name,        // IN: the name of the object
-                        TPM2B*           seed,        // IN: an external seed.
-                        OBJECT*          protector,   // IN: the protector
-                        TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
+TPM_RC SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
+                          TPM2B*           name,        // IN: the name of the object
+                          TPM2B*           seed,        // IN: an external seed.
+                          OBJECT*          protector,   // IN: the protector
+                          TPM2B_ID_OBJECT* outIDObject  // OUT: output credential
 )
 {
     BYTE*         buffer;         // Auxiliary buffer pointer
@@ -1513,7 +1459,7 @@ void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
     TPMI_ALG_HASH outerHash;      // The hash algorithm for outer wrap
     UINT16        dataSize;       // data blob size
                                   //
-    pAssert(secret != NULL && outIDObject != NULL);
+    pAssert_RC(secret != NULL && outIDObject != NULL);
 
     // use protector's name algorithm as outer hash ????
     outerHash = protector->publicArea.nameAlg;
@@ -1528,7 +1474,7 @@ void SecretToCredential(TPM2B_DIGEST*    secret,      // IN: secret information
     // Apply outer wrap
     outIDObject->t.size = ProduceOuterWrap(
         protector, name, outerHash, seed, FALSE, dataSize, outIDObject->t.credential);
-    return;
+    return TPM_RC_SUCCESS;
 }
 
 //*** CredentialToSecret()
