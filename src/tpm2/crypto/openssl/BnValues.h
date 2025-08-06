@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			  For defining the internal BIGNUM structure   		*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 
@@ -93,12 +35,12 @@
 // specific format without too much difficulty. For the math performed using
 // these numbers, the value is always positive.
 #define BN_STRUCT_DEF(struct_type, count) \
-  struct st_##struct_type##_t             \
-  {                                       \
-    crypt_uword_t allocated;              \
-    crypt_uword_t size;                   \
-    crypt_uword_t d[count + BN_PAD + BN_PAD + BN_PAD]; /* libtpms changed */ \
-  }
+    struct st_##struct_type##_t           \
+    {                                     \
+        crypt_uword_t allocated;          \
+        crypt_uword_t size;               \
+        crypt_uword_t d[count + BN_PAD + BN_PAD + BN_PAD]; /* libtpms changed */ \
+    }
 
 typedef BN_STRUCT_DEF(bnroot, 1) bignum_t;
 
@@ -129,7 +71,7 @@ extern const bignum_t BnConstZero;
 
 // Test to see if a bignum_t is equal to a word type
 #define BnEqualWord(bn, word) \
-  ((BnGetSize(bn) == 1) && (BnGetWord(bn, 0) == (crypt_uword_t)word))
+    ((BnGetSize(bn) == 1) && (BnGetWord(bn, 0) == (crypt_uword_t)word))
 
 // Determine if a bigNum is even. A zero is even. Although the
 // indication that a number is zero is that its size is zero,
@@ -143,24 +85,24 @@ extern const bignum_t BnConstZero;
 // This will call the initialization function for a defined bignum_t.
 // This sets the allocated and used fields and clears the words of 'n'.
 #define BN_INIT(name) \
-  (bigNum) BnInit((bigNum) & (name), BYTES_TO_CRYPT_WORDS(sizeof(name.d)))
+    (bigNum) BnInit((bigNum) & (name), BYTES_TO_CRYPT_WORDS(sizeof(name.d)))
 
 #define CRYPT_WORDS(bytes) BYTES_TO_CRYPT_WORDS(bytes)
 #define MIN_ALLOC(bytes)   (CRYPT_WORDS(bytes) < 1 ? 1 : CRYPT_WORDS(bytes))
 #define BN_CONST(name, bytes, initializer) \
-  typedef const struct name##_type         \
-  {                                        \
-    crypt_uword_t allocated;               \
-    crypt_uword_t size;                    \
-    crypt_uword_t d[MIN_ALLOC(bytes)];     \
-  } name##_type;                           \
-  name##_type name = {MIN_ALLOC(bytes), CRYPT_WORDS(bytes), {initializer}};
+    typedef const struct name##_type       \
+    {                                      \
+        crypt_uword_t allocated;           \
+        crypt_uword_t size;                \
+        crypt_uword_t d[MIN_ALLOC(bytes)]; \
+    } name##_type;                         \
+    name##_type name = {MIN_ALLOC(bytes), CRYPT_WORDS(bytes), {initializer}};
 
 #define BN_STRUCT_ALLOCATION(bits) (BITS_TO_CRYPT_WORDS(bits) + 1)
 
 // Create a structure of the correct size.
 #define BN_STRUCT(struct_type, bits) \
-  BN_STRUCT_DEF(struct_type, BN_STRUCT_ALLOCATION(bits))
+    BN_STRUCT_DEF(struct_type, BN_STRUCT_ALLOCATION(bits))
 
 // Define a bigNum type with a specific allocation
 #define BN_TYPE(name, bits) typedef BN_STRUCT(name, bits) bn_##name##_t
@@ -168,19 +110,19 @@ extern const bignum_t BnConstZero;
 // This creates a local bigNum variable of a specific size and
 // initializes it from a TPM2B input parameter.
 #define BN_INITIALIZED(name, bits, initializer) \
-  BN_STRUCT(name, bits) name##_;                \
-  bigNum name = TpmMath_IntFrom2B(BN_INIT(name##_), (const TPM2B*)initializer)
+    BN_STRUCT(name, bits) name##_;              \
+    bigNum name = TpmMath_IntFrom2B(BN_INIT(name##_), (const TPM2B*)initializer)
 
 // Create a local variable that can hold a number with 'bits'
-#define BN_VAR(name, bits)       \
-  BN_STRUCT(name, bits) _##name; \
-  bigNum name = BN_INIT(_##name)
+#define BN_VAR(name, bits)         \
+    BN_STRUCT(name, bits) _##name; \
+    bigNum name = BN_INIT(_##name)
 
 // Create a type that can hold the largest number defined by the
 // implementation.
 #define BN_MAX(name) BN_VAR(name, LARGEST_NUMBER_BITS)
 #define BN_MAX_INITIALIZED(name, initializer) \
-  BN_INITIALIZED(name, LARGEST_NUMBER_BITS, initializer)
+    BN_INITIALIZED(name, LARGEST_NUMBER_BITS, initializer)
 
 // A word size value is useful
 #define BN_WORD(name) BN_VAR(name, RADIX_BITS)
@@ -188,9 +130,9 @@ extern const bignum_t BnConstZero;
 // This is used to create a word-size bigNum and initialize it with
 // an input parameter to a function.
 #define BN_WORD_INITIALIZED(name, initial) \
-  BN_STRUCT(RADIX_BITS) name##_;           \
-  bigNum name =                            \
-      BnInitializeWord((bigNum)&name##_, BN_STRUCT_ALLOCATION(RADIX_BITS), initial)
+    BN_STRUCT(RADIX_BITS) name##_;         \
+    bigNum name = BnInitializeWord(        \
+        (bigNum) & name##_, BN_STRUCT_ALLOCATION(RADIX_BITS), initial)
 
 // ECC-Specific Values
 
@@ -223,14 +165,14 @@ typedef struct constant_point_t
 // therefore a pointer to bn_point_t (a coords).
 // so bigPoint->coords->x->size is the size of x, and
 // all 3 components are the same size.
-#define BN_POINT_BUF(typename, bits)             \
-  struct bnpt_st_##typename##_t                  \
-  {                                              \
-    bn_point_t coords;                           \
-    BN_STRUCT(typename##_x, MAX_ECC_KEY_BITS) x; \
-    BN_STRUCT(typename##_y, MAX_ECC_KEY_BITS) y; \
-    BN_STRUCT(typename##_z, MAX_ECC_KEY_BITS) z; \
-  }
+#define BN_POINT_BUF(typename, bits)                 \
+    struct bnpt_st_##typename##_t                    \
+    {                                                \
+        bn_point_t coords;                           \
+        BN_STRUCT(typename##_x, MAX_ECC_KEY_BITS) x; \
+        BN_STRUCT(typename##_y, MAX_ECC_KEY_BITS) y; \
+        BN_STRUCT(typename##_z, MAX_ECC_KEY_BITS) z; \
+    }
 
 typedef BN_POINT_BUF(fullpoint, MAX_ECC_KEY_BITS) bn_fullpoint_t;
 
@@ -324,12 +266,12 @@ TPM_INLINE TPM_ECC_CURVE BnCurveGetCurveId(const TPMBN_ECC_CURVE_CONSTANTS* C)
 // Convert bytes in initializers
 // This is used for CryptEccData.c.
 #define BIG_ENDIAN_BYTES_TO_UINT32(a, b, c, d) \
-  (((UINT32)(a) << 24) + ((UINT32)(b) << 16) + ((UINT32)(c) << 8) + ((UINT32)(d)))
+    (((UINT32)(a) << 24) + ((UINT32)(b) << 16) + ((UINT32)(c) << 8) + ((UINT32)(d)))
 
-#define BIG_ENDIAN_BYTES_TO_UINT64(a, b, c, d, e, f, g, h)           \
-  (((UINT64)(a) << 56) + ((UINT64)(b) << 48) + ((UINT64)(c) << 40)   \
-   + ((UINT64)(d) << 32) + ((UINT64)(e) << 24) + ((UINT64)(f) << 16) \
-   + ((UINT64)(g) << 8) + ((UINT64)(h)))
+#define BIG_ENDIAN_BYTES_TO_UINT64(a, b, c, d, e, f, g, h)             \
+    (((UINT64)(a) << 56) + ((UINT64)(b) << 48) + ((UINT64)(c) << 40)   \
+     + ((UINT64)(d) << 32) + ((UINT64)(e) << 24) + ((UINT64)(f) << 16) \
+     + ((UINT64)(g) << 8) + ((UINT64)(h)))
 
 // These macros are used for data initialization of big number ECC constants
 // These two macros combine a macro for data definition with a macro for
@@ -344,17 +286,17 @@ TPM_INLINE TPM_ECC_CURVE BnCurveGetCurveId(const TPMBN_ECC_CURVE_CONSTANTS* C)
 #define MJOIN(a, b)  a b
 
 #if RADIX_BYTES == 64
-#  define B8_TO_BN(a, b, c, d, e, f, g, h)                                \
-    ((((((((((((((((UINT64)a) << 8) | (UINT64)b) << 8) | (UINT64)c) << 8) \
-             | (UINT64)d)                                                 \
-            << 8)                                                         \
-           | (UINT64)e)                                                   \
-          << 8)                                                           \
-         | (UINT64)f)                                                     \
-        << 8)                                                             \
-       | (UINT64)g)                                                       \
-      << 8)                                                               \
-     | (UINT64)h)
+#  define B8_TO_BN(a, b, c, d, e, f, g, h)                                  \
+      ((((((((((((((((UINT64)a) << 8) | (UINT64)b) << 8) | (UINT64)c) << 8) \
+               | (UINT64)d)                                                 \
+              << 8)                                                         \
+             | (UINT64)e)                                                   \
+            << 8)                                                           \
+           | (UINT64)f)                                                     \
+          << 8)                                                             \
+         | (UINT64)g)                                                       \
+        << 8)                                                               \
+       | (UINT64)h)
 #  define B1_TO_BN(a)                   B8_TO_BN(0, 0, 0, 0, 0, 0, 0, a)
 #  define B2_TO_BN(a, b)                B8_TO_BN(0, 0, 0, 0, 0, 0, a, b)
 #  define B3_TO_BN(a, b, c)             B8_TO_BN(0, 0, 0, 0, 0, a, b, c)
@@ -367,7 +309,7 @@ TPM_INLINE TPM_ECC_CURVE BnCurveGetCurveId(const TPMBN_ECC_CURVE_CONSTANTS* C)
 #  define B2_TO_BN(a, b)    B4_TO_BN(0, 0, a, b)
 #  define B3_TO_BN(a, b, c) B4_TO_BN(0, a, b, c)
 #  define B4_TO_BN(a, b, c, d) \
-    (((((((UINT32)a << 8) | (UINT32)b) << 8) | (UINT32)c) << 8) | (UINT32)d)
+      (((((((UINT32)a << 8) | (UINT32)b) << 8) | (UINT32)c) << 8) | (UINT32)d)
 #  define B5_TO_BN(a, b, c, d, e)          B4_TO_BN(b, c, d, e), B1_TO_BN(a)
 #  define B6_TO_BN(a, b, c, d, e, f)       B4_TO_BN(c, d, e, f), B2_TO_BN(a, b)
 #  define B7_TO_BN(a, b, c, d, e, f, g)    B4_TO_BN(d, e, f, g), B3_TO_BN(a, b, c)

@@ -123,7 +123,7 @@ TPM2_PolicyTransportSPDM(PolicyTransportSPDM_In* in  // IN: input parameter list
     CryptHashEnd2B(&hashState, &session->u2.policyDigest.b);
 
     // Update session context
-    session->attributes.checkSecureChannel  = SET;
+    session->attributes.checkSecureChannel = SET;
     if(in->reqKeyName.t.size != 0)
     {
         session->attributes.checkReqKey = SET;
