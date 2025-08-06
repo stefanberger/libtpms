@@ -98,7 +98,8 @@ static TPM_RC CryptHmacSign(TPMT_SIGNATURE* signature,  // OUT: signature
                                       signature->signature.any.hashAlg,
                                       &signKey->sensitive.sensitive.bits.b);
         CryptDigestUpdate2B(&hmacState.hashState, &hashData->b);
-        CryptHmacEnd(&hmacState, digestSize, (BYTE*)&signature->signature.hmac.digest);
+        CryptHmacEnd(
+            &hmacState, digestSize, (BYTE*)&signature->signature.hmac.digest);
         return TPM_RC_SUCCESS;
     }
     return TPM_RC_SCHEME;
@@ -1380,8 +1381,9 @@ BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the 
 // This function checks that a signing scheme is valid. This includes verifying
 // that the scheme signing algorithm is compatible with the signing object type
 // and that the scheme specifies a valid hash algorithm.
-static BOOL CryptIsValidSignScheme(TPMI_ALG_PUBLIC   publicType,  // IN: Type of the object
-                                   TPMT_SIG_SCHEME*  scheme       // IN: the signing scheme
+static BOOL CryptIsValidSignScheme(
+    TPMI_ALG_PUBLIC  publicType,  // IN: Type of the object
+    TPMT_SIG_SCHEME* scheme       // IN: the signing scheme
 )
 {
     BOOL isValidSignScheme = TRUE;
@@ -1585,7 +1587,6 @@ BOOL CryptSelectSignScheme(OBJECT*          signObject,  // IN: signing key
             // valid hash algorithm specified.
             OK = CryptIsValidSignScheme(publicArea->type, scheme);
         }
-
     }
     return OK;
 }

@@ -50,8 +50,7 @@ NvWriteAccessChecks(
 //                         not allowed
 //
 TPM_RC
-NvReadOnlyModeChecks(
-    TPMA_NV    attributes   // IN: the attributes of the index to check
+NvReadOnlyModeChecks(TPMA_NV attributes  // IN: the attributes of the index to check
 );
 
 //*** NvClearOrderly()
