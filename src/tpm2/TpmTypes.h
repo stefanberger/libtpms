@@ -1447,21 +1447,31 @@ typedef TPM_CC TPMA_CC;
 typedef struct
 {
     unsigned FIPS_140_2           : 1;
-    unsigned Reserved_bits_at_1   : 31;
+    unsigned FIPS_140_3           : 1;
+    unsigned FIPS_140_3_INDICATOR : 2;
+    unsigned Reserved_bits_at_4   : 28;
 } TPMA_MODES;
 
-// This is the initializer for a TPMA_MODES structure
-#define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) {fips_140_2, bits_at_1}
+// Initializer for the bit-field structure
+#  define TPMA_MODES_INITIALIZER(                                 \
+      fips_140_2, fips_140_3, fips_140_3_indicator, bits_at_4)    \
+      {                                                           \
+          fips_140_2, fips_140_3, fips_140_3_indicator, bits_at_4 \
+      }
 #else  // USE_BIT_FIELD_STRUCTURES
 
 // This implements Table "Definition of TPMA_MODES Bits" (Part 2: Structures) using bit masking
 typedef UINT32 TPMA_MODES;
 #  define TPMA_MODES_FIPS_140_2                 (TPMA_MODES)(1 << 0)
+#  define TPMA_MODES_FIPS_140_3                 (TPMA_MODES)(1 << 1)
+#  define TPMA_MODES_FIPS_140_3_INDICATOR       (TPMA_MODES)(3 << 2)
+#  define TPMA_MODES_FIPS_140_3_INDICATOR_SHIFT 2
 
-// This is the initializer for a TPMA_MODES bit array.
-#define TPMA_MODES_INITIALIZER(fips_140_2, bits_at_1) 	\
-    (TPMA_MODES)(					\
-    ((fips_140_2 << 0))
+//  This is the initializer for a TPMA_MODES bit array.
+#  define TPMA_MODES_INITIALIZER(                              \
+      fips_140_2, fips_140_3, fips_140_3_indicator, bits_at_4) \
+      (TPMA_MODES)(                                            \
+          (fips_140_2 << 0) + (fips_140_3 << 1) + (fips_140_3_indicator << 2))
 
 #endif  // USE_BIT_FIELD_STRUCTURES
 
