@@ -69,14 +69,14 @@
 CRYPT_INT_TYPE(rsa, MAX_RSA_KEY_BITS);
 #define CRYPT_RSA_VAR(name) CRYPT_INT_VAR(name, MAX_RSA_KEY_BITS)
 #define CRYPT_RSA_INITIALIZED(name, initializer) \
-    CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
+  CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS, initializer)
 
 #define CRYPT_PRIME_VAR(name) CRYPT_INT_VAR(name, (MAX_RSA_KEY_BITS / 2))
 // define ci_prime_t as buffer containing a CRYPT_INT object with space for
 // (MAX_RSA_KEY_BITS/2) of actual data.
 CRYPT_INT_TYPE(prime, (MAX_RSA_KEY_BITS / 2));
 #define CRYPT_PRIME_INITIALIZED(name, initializer) \
-    CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
+  CRYPT_INT_INITIALIZED(name, MAX_RSA_KEY_BITS / 2, initializer)
 
 #if !CRT_FORMAT_RSA
 #  error This verson only works with CRT formatted data
@@ -93,8 +93,8 @@ typedef struct privateExponent
 } privateExponent;
 
 #define NEW_PRIVATE_EXPONENT(X) \
-    privateExponent  _##X;      \
-    privateExponent* X = RsaInitializeExponent(&(_##X))
+  privateExponent  _##X;        \
+  privateExponent* X = RsaInitializeExponent(&(_##X))
 
 					// libtpms added begin: keep old privateExponent
 /* The privateExponentOld is part of the OBJECT and we keep it there even though

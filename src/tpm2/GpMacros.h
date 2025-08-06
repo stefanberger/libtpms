@@ -407,7 +407,7 @@
 #include "MinMax.h"
 
 #ifndef IsOdd
-#  define IsOdd(a) (((a) & 1) != 0)
+#  define IsOdd(a) (((a)&1) != 0)
 #endif
 
 #ifndef BITS_TO_BYTES

@@ -993,7 +993,7 @@ PCRAllocate(TPML_PCR_SELECTION* allocate,      // IN: required allocation
                              newAllocate.pcrSelections[i].sizeofSelect);
 
 #else  // if DRTM PCR is not required, indicate that the allocation is OK
-        pcrDrtm = TRUE;
+        pcrDrtm  = TRUE;
 #endif
 
 #if defined(HCRTM_PCR)
