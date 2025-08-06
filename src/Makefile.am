@@ -208,12 +208,16 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/CommandDispatcher.c \
 	tpm2/ContextCommands.c \
 	tpm2/Context_spt.c \
+	tpm2/Create.c \
+	tpm2/CreateLoaded.c \
+	tpm2/CreatePrimary.c \
 	tpm2/CryptEccData.c \
 	tpm2/CryptSelfTest.c \
 	tpm2/CryptUtil.c \
 	tpm2/DA.c \
 	tpm2/DebugHelpers.c \
 	tpm2/DictionaryCommands.c \
+	tpm2/Duplicate.c \
 	tpm2/DuplicationCommands.c \
 	tpm2/EACommands.c \
 	tpm2/EncryptDecrypt_spt.c \
@@ -227,11 +231,13 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/HashCommands.c \
 	tpm2/Hierarchy.c \
 	tpm2/HierarchyCommands.c \
+	tpm2/Import.c \
 	tpm2/Init.c \
 	tpm2/IntegrityCommands.c \
 	tpm2/IoBuffers.c \
 	tpm2/Locality.c \
 	tpm2/LocalityPlat.c \
+	tpm2/MakeCredential.c \
 	tpm2/ManagementCommands.c \
 	tpm2/Manufacture.c \
 	tpm2/Marshal.c \
@@ -243,13 +249,16 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/NvReserved.c \
 	tpm2/NV_spt.c \
 	tpm2/Object.c \
+	tpm2/ObjectChangeAuth.c \
 	tpm2/ObjectCommands.c \
 	tpm2/Object_spt.c \
 	tpm2/PCR.c \
+	tpm2/PCR_Read.c \
 	tpm2/PlatformACT.c \
 	tpm2/PlatformData.c \
 	tpm2/PlatformPcr.c \
 	tpm2/Policy_spt.c \
+	tpm2/PolicyPCR.c \
 	tpm2/PolicyTransportSPDM.c \
 	tpm2/Power.c \
 	tpm2/PowerPlat.c \
@@ -257,6 +266,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PPPlat.c \
 	tpm2/PrimeData.c \
 	tpm2/PropertyCap.c \
+	tpm2/Quote.c \
 	tpm2/RandomCommands.c \
 	tpm2/ReadOnlyControl.c \
 	tpm2/Response.c \
