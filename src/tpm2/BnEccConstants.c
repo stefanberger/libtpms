@@ -94,12 +94,12 @@
 #  define TO_ECC_640(a, b, c, d, e, f, g, h, i, j) j, i, h, g, f, e, d, c, b, a
 
 #  define BN_MIN_ALLOC(bytes) \
-      (BYTES_TO_CRYPT_WORDS(bytes) == 0) ? 1 : BYTES_TO_CRYPT_WORDS(bytes)
-#  define ECC_CONST(NAME, bytes, initializer)                   \
-      const struct                                              \
-      {                                                         \
-          crypt_uword_t allocate, size, d[BN_MIN_ALLOC(bytes)]; \
-      } NAME = {BN_MIN_ALLOC(bytes), BYTES_TO_CRYPT_WORDS(bytes), {initializer}}
+    (BYTES_TO_CRYPT_WORDS(bytes) == 0) ? 1 : BYTES_TO_CRYPT_WORDS(bytes)
+#  define ECC_CONST(NAME, bytes, initializer)               \
+    const struct                                            \
+    {                                                       \
+      crypt_uword_t allocate, size, d[BN_MIN_ALLOC(bytes)]; \
+    } NAME = {BN_MIN_ALLOC(bytes), BYTES_TO_CRYPT_WORDS(bytes), {initializer}}
 
 // This file contains the raw data for ECC curve constants. The data is wrapped
 // in macros so this file can be included in other files that format the data in

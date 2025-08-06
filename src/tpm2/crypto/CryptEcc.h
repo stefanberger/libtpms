@@ -103,7 +103,7 @@ CRYPT_INT_TYPE(ecc, ECC_BITS);
 #define CRYPT_ECC_NUM(name) CRYPT_INT_VAR(name, ECC_BITS)
 
 #define CRYPT_ECC_INITIALIZED(name, initializer) \
-    CRYPT_INT_INITIALIZED(name, ECC_BITS, initializer)
+  CRYPT_INT_INITIALIZED(name, ECC_BITS, initializer)
 
 typedef struct TPM_ECC_CURVE_METADATA
 {
