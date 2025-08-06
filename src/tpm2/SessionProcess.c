@@ -835,7 +835,7 @@ static TPM_RC CheckPWAuthSession(
 //      sessionAttributes   A byte indicating the attributes associated with the
 //                          particular use of the session.
 */
-static TPM2B_DIGEST* ComputeCommandHMAC(
+static TPM_RC ComputeCommandHMAC(
     COMMAND*      command,       // IN: primary control structure
     UINT32        sessionIndex,  // IN: index of session to be processed
     TPM2B_DIGEST* hmac           // OUT: authorization HMAC
@@ -879,6 +879,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
             // Have to have the nonce for the encrypt session.
             SESSION* encryptSession =
                 SessionGet(s_sessionHandles[s_encryptSessionIndex]);
+            pAssert_RC(encryptSession != NULL);
             nonceEncrypt = &encryptSession->nonceTPM;
         }
     }
@@ -910,7 +911,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
     if(key.t.size == 0 && s_inputAuthValues[sessionIndex].t.size == 0)
     {
         hmac->t.size = 0;
-        return hmac;
+        return TPM_RC_SUCCESS;
     }
     // Start HMAC
     hmac->t.size = CryptHmacStart2B(&hmacState, session->authHashAlg, &key.b);
@@ -932,7 +933,7 @@ static TPM2B_DIGEST* ComputeCommandHMAC(
     // Complete the HMAC computation
     CryptHmacEnd2B(&hmacState, &hmac->b);
 
-    return hmac;
+    return TPM_RC_SUCCESS;
 }
 
 //*** CheckSessionHMAC()
@@ -958,7 +959,9 @@ static TPM_RC CheckSessionHMAC(
     TPM2B_DIGEST hmac;  // authHMAC for comparing
                         //
     // Compute authHMAC
-    ComputeCommandHMAC(command, sessionIndex, &hmac);
+    TPM_RC result = ComputeCommandHMAC(command, sessionIndex, &hmac);
+    if(result != TPM_RC_SUCCESS)
+        return result;
 
     // Compare the input HMAC with the authHMAC computed above.
     if(!MemoryEqual2B(&s_inputAuthValues[sessionIndex].b, &hmac.b))
