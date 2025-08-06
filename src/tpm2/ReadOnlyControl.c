@@ -20,7 +20,7 @@ TPM2_ReadOnlyControl(ReadOnlyControl_In* in  // IN: input parameter list
 
         // modify the read-only state
         gc.readOnly = in->state;
-        
+
         // orderly state should be cleared because of the update to state clear data
         // This gets processed in ExecuteCommand() on the way out.
         g_clearOrderly = TRUE;

@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*		Process the Authorization Sessions     				*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //**  Introduction
 // This file contains the subsystem that process the authorization sessions
@@ -71,9 +13,9 @@
 #include "Tpm.h"
 #include "ACT.h"
 #include "Marshal.h"
-#  if SEC_CHANNEL_SUPPORT
-#include "SecChannel_fp.h"
-#  endif  // SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
+#  include "SecChannel_fp.h"
+#endif  // SEC_CHANNEL_SUPPORT
 
 //
 //**  Authorization Support Functions
@@ -751,19 +693,20 @@ BOOL CompareParametersHash(COMMAND* command,  // IN: main parsing structure
     return MemoryEqual2B(&session->u1.pHash.b, &pHash.b);
 }
 
-#  if SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
 //*** CompareScKeyNameHash()
-// This function computes the secure channel key name hash (from the requester and/or TPM key 
-// used to establish the secure channel session) and compares it to the scKeyNameHash in the 
+// This function computes the secure channel key name hash (from the requester and/or TPM key
+// used to establish the secure channel session) and compares it to the scKeyNameHash in the
 // session data, returning true if they are equal.
-BOOL CompareScKeyNameHash(SESSION* session,        // IN: session structure
-                          TPM2B_NAME* reqKeyName,  // IN: requester secure channel key name
-                          TPM2B_NAME* tpmKeyName   // IN: TPM secure channel key name
+BOOL CompareScKeyNameHash(
+    SESSION*    session,     // IN: session structure
+    TPM2B_NAME* reqKeyName,  // IN: requester secure channel key name
+    TPM2B_NAME* tpmKeyName   // IN: TPM secure channel key name
 )
 {
     HASH_STATE   hashState;
     TPM2B_DIGEST scKeyNameHash;
-    UINT16 zeroSize = 0x0000; 
+    UINT16       zeroSize = 0x0000;
 
     // Compute secure channel key name hash
     // scKeyNameHash = hash(reqKeyName.size || reqKeyName.name || tpmKeyName.size || tpmKeyName.name)
@@ -804,10 +747,11 @@ BOOL CompareScKeyNameHash(SESSION* session,        // IN: session structure
     CryptHashEnd2B(&hashState, &scKeyNameHash.b);
 
     // and compare
-    return MemoryEqual(
-        session->scKeyNameHash.t.buffer, scKeyNameHash.t.buffer, scKeyNameHash.t.size);
+    return MemoryEqual(session->scKeyNameHash.t.buffer,
+                       scKeyNameHash.t.buffer,
+                       scKeyNameHash.t.size);
 }
-#  endif  // SEC_CHANNEL_SUPPORT
+#endif  // SEC_CHANNEL_SUPPORT
 
 //*** CheckPWAuthSession()
 // This function validates the authorization provided in a PWAP session. It
@@ -1179,25 +1123,26 @@ static TPM_RC CheckPolicyAuthSession(
            != (session->attributes.nvWrittenState == SET))
             return TPM_RC_POLICY_FAIL;
     }
-#  if SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
     if(session->attributes.checkSecureChannel)
     {
         TPM2B_NAME reqKeyName;
         TPM2B_NAME tpmKeyName;
 
-        // Check that the authorized TPM command is protected by an SPDM session and 
+        // Check that the authorized TPM command is protected by an SPDM session and
         // if so, get the names of the associated requester and TPM key
         if(!IsSpdmSessionActive(&reqKeyName, &tpmKeyName))
             return TPM_RC_CHANNEL;
 
         // If required, check the requester or TPM secure channel key name by comparing scKeyNameHash
-        if(session->attributes.checkReqKey == SET || session->attributes.checkTpmKey == SET)
+        if(session->attributes.checkReqKey == SET
+           || session->attributes.checkTpmKey == SET)
         {
             if(!CompareScKeyNameHash(session, &reqKeyName, &tpmKeyName))
                 return TPM_RC_CHANNEL_KEY;
         }
     }
-#  endif  // SEC_CHANNEL_SUPPORT
+#endif  // SEC_CHANNEL_SUPPORT
     return TPM_RC_SUCCESS;
 }
 

@@ -1547,13 +1547,13 @@ typedef struct
     TPMA_ACT   attributes;
 } TPMS_ACT_DATA;
 
-#  if SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
 typedef struct
 {  // (Part 2: Structures)
     TPM2B_NAME reqKeyName;
     TPM2B_NAME tpmKeyName;
 } TPMS_SPDM_SESSION_INFO;
-#  endif  // SEC_CHANNEL_SUPPORT
+#endif  // SEC_CHANNEL_SUPPORT
 
 typedef struct
 {  // (Part 2: Structures)
@@ -1633,13 +1633,13 @@ typedef struct
     TPMS_ACT_DATA actData[MAX_ACT_DATA];
 } TPML_ACT_DATA;
 
-#  if SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
 typedef struct
 {  // (Part 2: Structures)
     UINT32                 count;
     TPMS_SPDM_SESSION_INFO spdmSessionInfo[MAX_SPDM_SESS_INFO];
 } TPML_SPDM_SESSION_INFO;
-#  endif  // SEC_CHANNEL_SUPPORT
+#endif  // SEC_CHANNEL_SUPPORT
 
 typedef struct
 {  // (Part 2: Structures)
@@ -2374,13 +2374,13 @@ typedef struct
     TPMT_PUBLIC publicArea;
 } TPM2B_PUBLIC;
 
-#  if SEC_CHANNEL_SUPPORT
+#if SEC_CHANNEL_SUPPORT
 typedef struct
 {  // (Part 2: Structures)
     UINT32       count;
     TPM2B_PUBLIC pubKeys[MAX_PUB_KEYS];
 } TPML_PUB_KEY;
-#  endif  // SEC_CHANNEL_SUPPORT
+#endif  // SEC_CHANNEL_SUPPORT
 
 typedef union
 {  // (Part 2: Structures)
@@ -2393,14 +2393,14 @@ typedef union
     TPML_TAGGED_TPM_PROPERTY tpmProperties;
     TPML_TAGGED_PCR_PROPERTY pcrProperties;
 #if ALG_ECC
-    TPML_ECC_CURVE           eccCurves;
+    TPML_ECC_CURVE eccCurves;
 #endif  // ALG_ECC
-    TPML_TAGGED_POLICY       authPolicies;
-    TPML_ACT_DATA            actData;
-#  if SEC_CHANNEL_SUPPORT
-    TPML_PUB_KEY             pubKeys;
-    TPML_SPDM_SESSION_INFO   spdmSessionInfo;
-#  endif  // SEC_CHANNEL_SUPPORT
+    TPML_TAGGED_POLICY authPolicies;
+    TPML_ACT_DATA      actData;
+#if SEC_CHANNEL_SUPPORT
+    TPML_PUB_KEY           pubKeys;
+    TPML_SPDM_SESSION_INFO spdmSessionInfo;
+#endif  // SEC_CHANNEL_SUPPORT
 } TPMU_CAPABILITIES;
 
 typedef struct
