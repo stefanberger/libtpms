@@ -398,6 +398,18 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 // return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
 LIB_EXPORT uint32_t _plat__GetTpmType(void);	// libtpms changed
 
+#if ENABLE_TPM_DEBUG_PRINT
+
+LIB_EXPORT void   _plat_debug_print(const char* str);
+LIB_EXPORT void   _plat_debug_print_buffer(const void* buf, const size_t size);
+LIB_EXPORT void   _plat_debug_print_int32(const char* name, uint32_t value);
+LIB_EXPORT void   _plat_debug_print_int64(const char* name, uint64_t value);
+LIB_EXPORT void   _plat_debug_printf(const char* fmt, ...);
+LIB_EXPORT size_t _plat_debug_snprintf(
+    char* buf, size_t bufSize, const char* fmt, ...);
+
+#endif  // ENABLE_TPM_DEBUG_PRINT
+
 // platform PCR initialization functions
 #include "platform_pcr_fp.h"
 
