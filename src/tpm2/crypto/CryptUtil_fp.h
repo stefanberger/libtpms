@@ -296,7 +296,8 @@ BOOL CryptIsSplitSign(TPM_ALG_ID scheme  // IN: the algorithm selector
 );
 
 //*** CryptIsAsymSignScheme()
-// This function indicates if a scheme algorithm is a sign algorithm.
+// This function indicates if a scheme algorithm is a sign algorithm valid for the
+// public key type.
 BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the object
                            TPMI_ALG_ASYM_SCHEME scheme       // IN: the scheme
 );
