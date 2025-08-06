@@ -1,63 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			     TPM Size Checks					*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: TpmSizeChecks.c 1628 2020-05-27 19:35:29Z kgoldman $		*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Includes, Defines, and Types
 #include "Tpm.h"
@@ -135,17 +76,20 @@ BOOL TpmSizeChecks(void)
         }
 #    endif  // ALG_RSA
 #    if TABLE_DRIVEN_MARSHAL
-        printf("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
+        TPM_DEBUG_PRINTF("sizeof(MarshalData) = %zu\n", sizeof(MarshalData_st));
 #    endif
 
-        printf("Size of OBJECT = %zu\n", sizeof(OBJECT));
-        printf("Size of components in TPMT_SENSITIVE = %zu\n",
-               sizeof(TPMT_SENSITIVE));
-        printf("    TPMI_ALG_PUBLIC                 %zu\n", sizeof(TPMI_ALG_PUBLIC));
-        printf("    TPM2B_AUTH                      %zu\n", sizeof(TPM2B_AUTH));
-        printf("    TPM2B_DIGEST                    %zu\n", sizeof(TPM2B_DIGEST));
-        printf("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
-               sizeof(TPMU_SENSITIVE_COMPOSITE));
+        TPM_DEBUG_PRINTF("Size of OBJECT = %zu\n", sizeof(OBJECT));
+        TPM_DEBUG_PRINTF("Size of components in TPMT_SENSITIVE = %zu\n",
+                         sizeof(TPMT_SENSITIVE));
+        TPM_DEBUG_PRINTF("    TPMI_ALG_PUBLIC                 %zu\n",
+                         sizeof(TPMI_ALG_PUBLIC));
+        TPM_DEBUG_PRINTF("    TPM2B_AUTH                      %zu\n",
+                         sizeof(TPM2B_AUTH));
+        TPM_DEBUG_PRINTF("    TPM2B_DIGEST                    %zu\n",
+                         sizeof(TPM2B_DIGEST));
+        TPM_DEBUG_PRINTF("    TPMU_SENSITIVE_COMPOSITE        %zu\n",
+                         sizeof(TPMU_SENSITIVE_COMPOSITE));
     }
     // Make sure that the size of the context blob is large enough for the largest
     // context
@@ -175,16 +119,17 @@ BOOL TpmSizeChecks(void)
 
         if(MAX_CONTEXT_SIZE < biggestContext)
         {
-            printf("MAX_CONTEXT_SIZE needs to be increased to at least %d (%d)\n",
-                   biggestContext,
-                   MAX_CONTEXT_SIZE);
+            TPM_DEBUG_PRINTF("MAX_CONTEXT_SIZE needs to be increased to at least %d "
+                             "(%d)\n",
+                             biggestContext,
+                             MAX_CONTEXT_SIZE);
             PASS = FALSE;
         }
         else if(MAX_CONTEXT_SIZE > biggestContext)
         {
-            printf("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
-                   biggestContext,
-                   MAX_CONTEXT_SIZE);
+            TPM_DEBUG_PRINTF("MAX_CONTEXT_SIZE can be reduced to %d (%d)\n",
+                             biggestContext,
+                             MAX_CONTEXT_SIZE);
         }
     }
     {
@@ -201,12 +146,13 @@ BOOL TpmSizeChecks(void)
         SET_ATTRIBUTE(u.attributes, TPMA_OBJECT, fixedTPM);
         if(u.uint32Value != 2)
         {
-            printf("The bit allocation in a TPMA_OBJECT is not as expected");
+            TPM_DEBUG_PRINT("The bit allocation in a TPMA_OBJECT is not as "
+                            "expected");
             PASS = FALSE;
         }
         if(aSize != uSize)  // comparison of two sizeof() values annoys compiler
         {
-            printf("A TPMA_OBJECT is not the expected size.");
+            TPM_DEBUG_PRINT("A TPMA_OBJECT is not the expected size.");
             PASS = FALSE;
         }
     }
@@ -222,7 +168,8 @@ BOOL TpmSizeChecks(void)
                 FOR_EACH_ACT(CASE_ACT_NUMBER)
                 if(!_plat__ACT_GetImplemented(act))
                 {
-                    printf("TPM_RH_ACT_%1X is not implemented by platform\n", act);
+                    TPM_DEBUG_PRINTF(
+                        "TPM_RH_ACT_%1X is not implemented by platform\n", act);
                     PASS = FALSE;
                 }
                 default:
@@ -237,7 +184,8 @@ BOOL TpmSizeChecks(void)
         int t = MAX_DIGEST_SIZE;
         if(t < 20)
         {
-            printf("Check the MAX_DIGEST_SIZE computation (%d)", MAX_DIGEST_SIZE);
+            TPM_DEBUG_PRINTF("Check the MAX_DIGEST_SIZE computation (%d)",
+                             MAX_DIGEST_SIZE);
             PASS = FALSE;
         }
     }
