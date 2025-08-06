@@ -247,7 +247,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PCR.c \
 	tpm2/PlatformACT.c \
 	tpm2/PlatformData.c \
-	tpm2/PlatformPCR.c \
+	tpm2/PlatformPcr.c \
 	tpm2/Policy_spt.c \
 	tpm2/Power.c \
 	tpm2/PowerPlat.c \
