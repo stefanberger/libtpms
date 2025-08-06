@@ -111,7 +111,9 @@ const _UNMARSHAL_T_ unmarshalArray[] = {
             UNMARSHAL_DISPATCH(TPMI_RH_LOCKOUT),
 #define TPMI_RH_NV_AUTH_H_UNMARSHAL             (TPMI_RH_LOCKOUT_H_UNMARSHAL + 1)
             UNMARSHAL_DISPATCH(TPMI_RH_NV_AUTH),
-#define TPMI_RH_NV_INDEX_H_UNMARSHAL            (TPMI_RH_NV_AUTH_H_UNMARSHAL + 1)
+#define TPMI_RH_NV_DEFINED_INDEX_H_UNMARSHAL    (TPMI_RH_NV_AUTH_H_UNMARSHAL + 1)
+            UNMARSHAL_DISPATCH(TPMI_RH_NV_DEFINED_INDEX),
+#define TPMI_RH_NV_INDEX_H_UNMARSHAL      (TPMI_RH_NV_DEFINED_INDEX_H_UNMARSHAL + 1)
             UNMARSHAL_DISPATCH(TPMI_RH_NV_INDEX),
 #define TPMI_RH_PLATFORM_H_UNMARSHAL            (TPMI_RH_NV_INDEX_H_UNMARSHAL + 1)
             UNMARSHAL_DISPATCH(TPMI_RH_PLATFORM),
@@ -4493,7 +4495,7 @@ NV_UndefineSpace_COMMAND_DESCRIPTOR_t _NV_UndefineSpaceData = {
     /* offsetOfTypes */         offsetof(NV_UndefineSpace_COMMAND_DESCRIPTOR_t, types),
     /* offsets       */         {(UINT16)(offsetof(NV_UndefineSpace_In, nvIndex))},
     /* types         */         {TPMI_RH_PROVISION_H_UNMARSHAL,
-                                 TPMI_RH_NV_INDEX_H_UNMARSHAL,
+                                 TPMI_RH_NV_DEFINED_INDEX_H_UNMARSHAL,
                                  END_OF_LIST,
                                  END_OF_LIST}
 };
@@ -4527,7 +4529,7 @@ NV_UndefineSpaceSpecial_COMMAND_DESCRIPTOR_t _NV_UndefineSpaceSpecialData = {
     /* outSize       */         0,
     /* offsetOfTypes */         offsetof(NV_UndefineSpaceSpecial_COMMAND_DESCRIPTOR_t, types),
     /* offsets       */         {(UINT16)(offsetof(NV_UndefineSpaceSpecial_In, platform))},
-    /* types         */         {TPMI_RH_NV_INDEX_H_UNMARSHAL,
+    /* types         */         {TPMI_RH_NV_DEFINED_INDEX_H_UNMARSHAL,
                                  TPMI_RH_PLATFORM_H_UNMARSHAL,
                                  END_OF_LIST,
                                  END_OF_LIST}
