@@ -20,7 +20,7 @@ main()
 
 	while :; do
 		case "$1" in
-			--no-meld|diff-only)
+			--no-meld|--diff-only)
 				flags=$((flags | NO_MELD_FLAG))
 				shift
 				;;
@@ -55,7 +55,9 @@ main()
 		exit 1
 	fi
 
-	for f in $(find "$1" -type f -name '*.[ch]'); do
+	for f in \
+		$(find "$1" -type f -name '*.[ch]') \
+		$(find "$1" -type f -name '*.inl'); do
 		fname=$(basename "$f")
 
 		if [[ "${fname}" =~ ^${SKIP_FILES}$ ]]; then
@@ -81,7 +83,7 @@ main()
 				echo "${f}"
 				diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}"
 			fi
-			if ! diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}" >/dev/null; then
+			if ! diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}" &>/dev/null; then
 				if [ $((flags & NO_MELD_FLAG)) -eq 0 ]; then
 					meld "${upstream}" "$f"
 				fi
