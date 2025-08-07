@@ -7,6 +7,8 @@
 #ifndef _TPMB_H
 #define _TPMB_H
 
+#include "BaseTypes.h"
+
 //*** Size Types
 // These types are used to differentiate the two different size values used.
 //
