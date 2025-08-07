@@ -112,7 +112,7 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
         rc = irc;
 
     if (rc != TPM_RC_SUCCESS)
-        g_inFailureMode = TRUE;
+        _plat__SetInFailureMode(TRUE);
 
     return rc;
 }

@@ -226,7 +226,7 @@ static TPM_RC CryptGenerateKeyedHash(
         sensitive->sensitive.bits.t.size =
             DRBG_Generate(rand, sensitive->sensitive.bits.t.buffer, digestSize);
         if(sensitive->sensitive.bits.t.size == 0)
-            return (g_inFailureMode) ? TPM_RC_FAILURE : TPM_RC_NO_RESULT;
+            return (_plat__InFailureMode()) ? TPM_RC_FAILURE : TPM_RC_NO_RESULT;
     }
     return TPM_RC_SUCCESS;
 }
@@ -409,7 +409,7 @@ static TPM_RC CryptGenerateKeySymmetric(
     {
         sensitive->sensitive.sym.t.size = DRBG_Generate(
             rand, sensitive->sensitive.sym.t.buffer, BITS_TO_BYTES(keyBits));
-        if(g_inFailureMode)
+        if(_plat__InFailureMode())
             result = TPM_RC_FAILURE;
         else if(sensitive->sensitive.sym.t.size == 0)
             result = TPM_RC_NO_RESULT;
@@ -1229,7 +1229,7 @@ CryptCreateObject(OBJECT*                object,  // IN: new object structure po
         DRBG_Generate(rand,
                       sensitive->seedValue.t.buffer,
                       CryptHashGetDigestSize(publicArea->nameAlg));
-    if(g_inFailureMode)
+    if(_plat__InFailureMode())
         return TPM_RC_FAILURE;
     else if(sensitive->seedValue.t.size == 0)
         return TPM_RC_NO_RESULT;

@@ -180,7 +180,7 @@ BOOL MillerRabin(Crypt_Int* bnW, RAND_STATE* rand)
               && ((ExtMath_UnsignedCmpWord(bnB, 1) <= 0)
                   || (ExtMath_UnsignedCmp(bnB, bnWm1) >= 0)))
             ;
-        if(g_inFailureMode)
+        if( _plat__InFailureMode())
             return FALSE;
 
         // 4.3 z = b^m mod w.
@@ -252,7 +252,7 @@ RsaCheckPrime(Crypt_Int* prime, UINT32 exponent, RAND_STATE* rand)
         ExtMath_SubtractWord(prime, prime, 2);
 
     if(TpmMath_IsProbablyPrime(prime, rand) == 0)
-        ERROR_EXIT(g_inFailureMode ? TPM_RC_FAILURE : TPM_RC_VALUE);
+        ERROR_EXIT( _plat__InFailureMode() ? TPM_RC_FAILURE : TPM_RC_VALUE);
 Exit:
     return retVal;
 #  else
@@ -423,12 +423,12 @@ TPM_RC TpmRsa_GeneratePrimeForRSA(
 	    // The change below is to make sure that all keys that are generated from the same
 	    // seed value will be the same regardless of the endianess or word size of the CPU.
 	    //       DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));// old
-	    //       if(g_inFailureMode)                                                // old
+	    //       if(_plat_InFailureMode())                                          // old
 	// libtpms changed begin
 	    switch (DRBG_GetSeedCompatLevel(rand)) {
 	    case SEED_COMPAT_LEVEL_ORIGINAL:
 		DRBG_Generate(rand, (BYTE *)prime->d, (UINT16)BITS_TO_BYTES(bits));
-		if (g_inFailureMode)
+		if (_plat__InFailureMode())
 		    return TPM_RC_FAILURE;
 		RsaAdjustPrimeCandidate_PreRev155(prime);
 		break;

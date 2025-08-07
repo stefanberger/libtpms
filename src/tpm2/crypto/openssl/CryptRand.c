@@ -921,8 +921,7 @@ LIB_EXPORT BOOL DRBG_Instantiate(
     // reseeding does. So, do a reduction on the personalization value (if any)
     // and do a reseed.
     DRBG_Reseed(drbgState, &seed, DfBuffer(&dfResult, pSize, personalization));
-
-    VERIFY(!g_inFailureMode, FATAL_ERROR_ENTROPY, TPM_RC_FAILURE);
+    VERIFY(!_plat__InFailureMode(), FATAL_ERROR_ENTROPY, TPM_RC_FAILURE);
     return TRUE;
 }
 

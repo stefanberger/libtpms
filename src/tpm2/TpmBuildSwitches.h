@@ -101,9 +101,9 @@
 ////////////////////////////////////////////////////////////////
 // The SIMULATION flag can enable test crypto behaviors and caching that
 // significantly change the behavior of the code.  This flag controls only the
-// g_forceFailureMode flag in the TPM library while leaving the rest of the TPM
-// behavior alone.  Useful for testing when the full set of options controlled by
-// SIMULATION may not be desired.
+// ability of the platform library to force failure mode while leaving the rest
+// of the TPM behavior alone.  Useful for testing when the full set of options
+// controlled by SIMULATION may not be desired.
 #define ALLOW_FORCE_FAILURE_MODE    NO		// libtpms: NO
 
 ////////////////////////////////////////////////////////////////
@@ -156,6 +156,8 @@
 ////////////////////////////////////////////////////////////////
 // Implementation alternatives - don't  change external behavior
 ////////////////////////////////////////////////////////////////
+// does the target system have longjmp support, AND we want to use it?
+#define LONGJMP_SUPPORTED           YES		// libtpms: YES
 
 // This define is used to enable the new table-driven marshaling code.
 #define TABLE_DRIVEN_MARSHAL        NO

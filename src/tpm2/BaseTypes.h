@@ -25,4 +25,11 @@ typedef int32_t  INT32;
 typedef uint64_t UINT64;
 typedef int64_t  INT64;
 
+// declare function noreturn macro based on whether longjmp is enabled
+#if LONGJMP_SUPPORTED
+#  define NORETURN_IF_LONGJMP NORETURN
+#else
+#  define NORETURN_IF_LONGJMP
+#endif
+
 #endif  // _TPM_INCLUDE_PUBLIC_BASETYPES_H_
