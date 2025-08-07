@@ -12,6 +12,9 @@
 #include "tpm_library_intern.h"  // libtpms added
 //** Functions
 
+const char TPM_PT_FAMILY_INDICATOR_VALUE[] = "2.0";
+TPM_STATIC_ASSERT(sizeof(TPM_PT_FAMILY_INDICATOR_VALUE) == sizeof(UINT32));
+
 //*** TPMPropertyIsDefined()
 // This function accepts a property selection and, if so, sets 'value'
 // to the value of the property.
@@ -26,28 +29,30 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                                  UINT32* value      // OUT: property value
 )
 {
+    SPEC_CAPABILITY_VALUE spec_capability_value = {0};
+    _plat_GetSpecCapabilityValue(&spec_capability_value);
     switch(property)
     {
         case TPM_PT_FAMILY_INDICATOR:
             // from the title page of the specification
             // For this specification, the value is "2.0".
-            *value = TPM_SPEC_FAMILY;
+            *value = BYTE_ARRAY_TO_UINT32(TPM_PT_FAMILY_INDICATOR_VALUE);
             break;
         case TPM_PT_LEVEL:
             // from the title page of the specification
-            *value = TPM_SPEC_LEVEL;
+            *value = spec_capability_value.tpmSpecLevel;
             break;
         case TPM_PT_REVISION:
             // from the title page of the specification
-            *value = TPM_SPEC_VERSION;
+            *value = spec_capability_value.tpmSpecVersion;
             break;
         case TPM_PT_DAY_OF_YEAR:
             // computed from the date value on the title page of the specification
-            *value = TPM_SPEC_DAY_OF_YEAR;
+            *value = spec_capability_value.tpmSpecDayOfYear;
             break;
         case TPM_PT_YEAR:
             // from the title page of the specification
-            *value = TPM_SPEC_YEAR;
+            *value = spec_capability_value.tpmSpecYear;
             break;
 
         case TPM_PT_MANUFACTURER:
@@ -78,15 +83,19 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
         case TPM_PT_VENDOR_TPM_TYPE:
             // vendor-defined value indicating the TPM model
             // We just make up a number here
-            *value = _plat__GetTpmType();
+            *value = _plat__GetVendorTpmType();
             break;
 
         case TPM_PT_FIRMWARE_VERSION_1:
             // more significant 32-bits of a vendor-specific value
+            // note this value originates in the platform, and is set into gp
+            // during TPM_Manufacture.
             *value = gp.firmwareV1;
             break;
         case TPM_PT_FIRMWARE_VERSION_2:
             // less significant 32-bits of a vendor-specific value
+            // note this value originates in the platform, and is set into gp
+            // during TPM_Manufacture.
             *value = gp.firmwareV2;
             break;
         case TPM_PT_INPUT_BUFFER:
@@ -252,24 +261,26 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             // platform specific values for the TPM_PT_PS parameters from
             // the relevant platform-specific specification
             // In this reference implementation, all of these values are 0.
-            *value = PLATFORM_FAMILY;
+            *value = spec_capability_value.platformFamily;
             break;
         case TPM_PT_PS_LEVEL:
             // level of the platform-specific specification
-            *value = PLATFORM_LEVEL;
+            *value = spec_capability_value.platfromLevel;
             break;
         case TPM_PT_PS_REVISION:
-            // specification Revision times 100 for the platform-specific
-            // specification
-            *value = PLATFORM_VERSION;
+            // The platform spec version is recorded such that 0x00000101 means version 1.01
+            // Note this differs from some TPM/TCG specifications, but matches the behavior of Windows.
+            // more recent TCG specs have discontinued using this field, but Windows displays it, so we
+            // retain it using the historical encoding.
+            *value = spec_capability_value.platformRevision;
             break;
         case TPM_PT_PS_DAY_OF_YEAR:
             // platform-specific specification day of year using TCG calendar
-            *value = PLATFORM_DAY_OF_YEAR;
+            *value = spec_capability_value.platformDayOfYear;
             break;
         case TPM_PT_PS_YEAR:
             // platform-specific specification year using the CE
-            *value = PLATFORM_YEAR;
+            *value = spec_capability_value.platformYear;
             break;
         case TPM_PT_SPLIT_MAX:
             // number of split signing operations supported by the TPM

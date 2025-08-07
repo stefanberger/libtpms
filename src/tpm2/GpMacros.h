@@ -11,7 +11,6 @@
 #endif
 
 #include "endian_swap.h"
-#include "VendorInfo.h"
 #include "TpmFail_fp.h"
 
 //** For Self-test

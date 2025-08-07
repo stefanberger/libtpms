@@ -361,11 +361,11 @@ static TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
  */
 static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
 {
-    const char *tpmspec =
+    const char *tpmspec_temp =
     "\"TPMSpecification\":{"
         "\"family\":\"2.0\","
-        "\"level\":" STRINGIFY(TPM_SPEC_LEVEL_NUM) ","
-        "\"revision\":" STRINGIFY(TPM_SPEC_VERSION)
+        "\"level\": %u,"
+        "\"revision\": %u"
     "}";
     const char *tpmattrs_temp =
     "\"TPMAttributes\":{"
@@ -409,10 +409,12 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
     "]";
     char *fmt = NULL, *buffer;
     bool printed = false;
+    char *tpmspec = NULL;
     char *tpmattrs = NULL;
     char *tpmfeatures = NULL;
     char rsakeys[32];
     char camelliakeys[16];
+    SPEC_CAPABILITY_VALUE spec_capability_value = {0};
     char *runtimeAlgos[RUNTIME_ALGO_NUM] = { NULL, };
     char *runtimeCmds[RUNTIME_CMD_NUM] = { NULL, };
     char *runtimeAttrs[RUNTIME_ATTR_NUM] = { NULL, };
@@ -432,8 +434,14 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         return NULL;
 
     if ((flags & TPMLIB_INFO_TPMSPECIFICATION)) {
+        _plat_GetSpecCapabilityValue(&spec_capability_value);
+
         fmt = buffer;
         buffer = NULL;
+        if (TPMLIB_asprintf(&tpmspec, tpmspec_temp,
+                            spec_capability_value.tpmSpecLevel,
+                            spec_capability_value.tpmSpecVersion) < 0)
+            goto error;
         if (TPMLIB_asprintf(&buffer, fmt, "", tpmspec, "%s%s%s") < 0)
             goto error;
         free(fmt);
@@ -598,6 +606,7 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
 
 exit:
     free(fmt);
+    free(tpmspec);
     free(tpmattrs);
     free(tpmfeatures);
     free(profile);
