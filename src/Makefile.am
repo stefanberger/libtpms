@@ -258,7 +258,12 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/PlatformData.c \
 	tpm2/PlatformPcr.c \
 	tpm2/Policy_spt.c \
+	tpm2/PolicyAuthorize.c \
+	tpm2/PolicyAuthorizeNV.c \
 	tpm2/PolicyPCR.c \
+	tpm2/PolicySecret.c \
+	tpm2/PolicySigned.c \
+	tpm2/PolicyTicket.c \
 	tpm2/PolicyTransportSPDM.c \
 	tpm2/Power.c \
 	tpm2/PowerPlat.c \
