@@ -226,6 +226,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/EphemeralCommands.c \
 	tpm2/ExecCommand.c \
 	tpm2/ExtraData.c \
+	tpm2/Failure.c \
 	tpm2/Global.c \
 	tpm2/Handle.c \
 	tpm2/HashCommands.c \
@@ -481,6 +482,8 @@ noinst_HEADERS += \
 	tpm2/PlatformACT_fp.h \
 	tpm2/PlatformClock.h \
 	tpm2/PlatformData.h \
+	tpm2/PlatformInternal.h \
+	tpm2/platform_failure_mode_fp.h \
 	tpm2/platform_init_fp.h \
 	tpm2/platform_public_interface.h \
 	tpm2/platform_pcr_fp.h \

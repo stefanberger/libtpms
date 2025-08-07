@@ -2179,7 +2179,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                                      (UINT16)size,
                                      &extraKey,
                                      command->parameterBuffer);
-            if(g_inFailureMode)
+            if(_plat__InFailureMode())
             {
                 result = TPM_RC_FAILURE;
                 goto Cleanup;

@@ -308,10 +308,6 @@ LIB_EXPORT int _plat__WasPowerLost(void);
 //      FALSE(0)        if physical presence is not signaled
 LIB_EXPORT int _plat__PhysicalPresenceAsserted(void);
 
-//***_plat__Fail()
-// This is the platform depended failure exit for the TPM.
-LIB_EXPORT NORETURN void _plat__Fail(void);
-
 //** From Unique.c
 
 #if VENDOR_PERMANENT_AUTH_ENABLED == YES
@@ -415,5 +411,8 @@ LIB_EXPORT size_t _plat_debug_snprintf(
 
 // platform initialization functions
 #include "platform_init_fp.h"
+
+// platform failure mode functions
+#include "platform_failure_mode_fp.h"
 
 #endif  // _TPM_TO_PLATFORM_INTERFACE_H_

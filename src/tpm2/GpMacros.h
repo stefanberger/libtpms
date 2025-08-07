@@ -12,6 +12,7 @@
 
 #include "endian_swap.h"
 #include "VendorInfo.h"
+#include "TpmFail_fp.h"
 
 //** For Self-test
 // These macros are used in CryptUtil to invoke the incremental self test.
@@ -33,23 +34,28 @@
 #  define FUNCTION_NAME __FUNCTION__
 #endif
 
-#if defined(FAIL_TRACE) && FAIL_TRACE != 0
-#  define CODELOCATOR() FUNCTION_NAME, __LINE__
+// CODELOCATOR, if defined, returns a 64-bit vendor-defined value that indicates where
+// an event has occurred in the program.  This is a placeholder in the
+// case it is not defined.
+#ifndef CODELOCATOR
+#  define CODELOCATOR() (0ull)
+#endif
+
+// Use no Parens in this macro value because it is pasted into a function call below
+#if defined(FAIL_TRACE) && FAIL_TRACE != NO
+#  define FAILLOCATOR() FUNCTION_NAME, __LINE__, CODELOCATOR()
 #else  // !FAIL_TRACE
-// if provided, use the definition of CODELOCATOR from TpmConfiguration so
-// implementor can customize this.
-#  ifndef CODELOCATOR
-#    define CODELOCATOR() 0
-#  endif
+#  define FAILLOCATOR() CODELOCATOR()
 #endif  // FAIL_TRACE
 
-// SETFAILED calls TpmFail.  It may or may not return based on the NO_LONGJMP flag.
-// CODELOCATOR is a macro that expands to either one 64-bit value that encodes the
-// location, or two parameters: Function Name and Line Number.
-#define SETFAILED(errorCode) (TpmFail(CODELOCATOR(), errorCode))
+// SETFAILED calls EnterFailureMode.  It may or may not return based on the
+// LONGJMP_SUPPORTED flag.  FAILLOCATOR is a macro that expands to either one
+// 64-bit value that encodes the location, or two parameters: Function Name and
+// Line Number.
+#define SETFAILED(errorCode) (EnterFailureMode(FAILLOCATOR(), errorCode))
 
-// If implementation is using longjmp, then calls to TpmFail() will never
-// return.  However, without longjmp facility, TpmFail will return while most of
+// If implementation is using longjmp, then calls to EnterFailureMode() will never
+// return.  However, without longjmp facility, EnterFailureMode will return while most of
 // the code currently expects FAIL() calls to immediately abort the current
 // command. If they don't, some commands return success instead of failure.  The
 // family of macros below are provided to allow the code to be modified to
@@ -73,22 +79,19 @@
 //
 // The TPM library was originally written with a lot of error checking omitted,
 // which means code occurring after a FAIL macro may not expect to be called
-// when the TPM is in failure mode.  When NO_LONGJMP is false (the system has a
-// longjmp API), then none of that code is executed because the sample platform
-// sets up longjmp before calling ExecuteCommand.  However, in the NO_LONGJMP
-// case, code following a FAIL or FAIL_NORET macro will get run.  The
-// conservative assumption is that code is untested and may be unsafe in such a
-// situation.  FAIL_NORET can replace FAIL when the code has been reviewed to
-// ensure the post-FAIL code is safe.  Of course, this is a point-in-time
-// assertion that is only true when the FAIL_NORET macro is first inserted;
-// hence it is better to use one of the early-exit macros to immediately return.
-// However, the necessary return-code plumbing may be large and FAIL/FAIL_NORET
-// are provided to support gradual improvement over time.
+// when the TPM is in failure mode.  When LONGJMP_SUPPORTED is true (the system
+// has a longjmp API), then none of that code is executed because the sample
+// platform sets up longjmp before calling ExecuteCommand.  However, in the
+// !LONGJMP_SUPPORTED case, code following a FAIL or FAIL_NORET macro will get
+// run.  The conservative assumption is that code is untested and may be unsafe
+// in such a situation.  FAIL_NORET can replace FAIL when the code has been
+// reviewed to ensure the post-FAIL code is safe.  Of course, this is a
+// point-in-time assertion that is only true when the FAIL_NORET macro is first
+// inserted; hence it is better to use one of the early-exit macros to
+// immediately return.  However, the necessary return-code plumbing may be large
+// and FAIL/FAIL_NORET are provided to support gradual improvement over time.
 
-#ifndef NO_LONGJMP
-// has longjmp
-// necesary to reference Exit, even though the code is no-return
-#  define TPM_FAIL_RETURN NORETURN void
+#if LONGJMP_SUPPORTED
 
 // see discussion above about FAIL/FAIL_NORET
 #  define FAIL(failCode)                   SETFAILED(failCode)
@@ -105,9 +108,7 @@
           goto Exit;                                 \
       } while(0)
 
-#else  // NO_LONGJMP
-// no longjmp service is available
-#  define TPM_FAIL_RETURN      void
+#else  // !LONGJMP_SUPPORTED
 
 // This macro is provided for existing code and should not be used in new code.
 // see discussion above.
@@ -150,7 +151,7 @@
           goto Exit;                                 \
       } while(0)
 
-#endif
+#endif  // !LONGJMP_SUPPORTED
 
 // This macro tests that a condition is TRUE and puts the TPM into failure mode
 // if it is not. If longjmp is being used, then the macro makes a call from
@@ -183,7 +184,7 @@
 #define VERIFY_RC(rc)                                           \
     do                                                          \
     {                                                           \
-        if(g_inFailureMode)                                     \
+        if(_plat__InFailureMode())                              \
         {                                                       \
             return TPM_RC_FAILURE;                              \
         }                                                       \
@@ -197,7 +198,7 @@
 #define VERIFY_NOT_FAILED()        \
     do                             \
     {                              \
-        if(g_inFailureMode)        \
+        if(_plat__InFailureMode()) \
         {                          \
             return TPM_RC_FAILURE; \
         }                          \
@@ -207,7 +208,7 @@
 #define VERIFY_RC_VOID(rc)                 \
     do                                     \
     {                                      \
-        if(g_inFailureMode)                \
+        if(_plat__InFailureMode())         \
         {                                  \
             return;                        \
         }                                  \
@@ -242,10 +243,10 @@
 #define VERIFY_CRYPTO_OR_NULL(fn) VERIFY((fn), FATAL_ERROR_CRYPTO, NULL)
 
 // these VERIFY_CRYPTO macros all set a result value and goto Exit
-#define VERIFY_CRYPTO_OR_EXIT(fn, returnVar, returnCode) \
+#define VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, returnVar, returnCode) \
     VERIFY_OR_EXIT(fn, FATAL_ERROR_CRYPTO, returnVar, returnCode);
 
-// these VERIFY_CRYPTO_OR_EXIT functions assume the return value variable is
+// these VERIFY_CRYPTO_OR_EXIT_* functions assume the return value variable is
 // named retVal
 #define VERIFY_CRYPTO_OR_EXIT_RC(fn) \
     VERIFY_CRYPTO_OR_EXIT_GENERIC(fn, retVal, TPM_RC_FAILURE)
@@ -263,14 +264,24 @@
         }                                              \
     } while(0)
 
+// pAsserts can assertions that can be compiled out.
+// unlike VERIFY which is always run.
+// The pAssert macros set failure mode and set the error code
+// to FATAL_ERROR_ASSERT.
 #if (defined EMPTY_ASSERT) && (EMPTY_ASSERT != NO)
 #  define pAssert(a) ((void)0)
+#  define pAssert_ZERO(a)
+#  define pAssert_RC(a)
+#  define pAssert_BOOL(a)
+#  define pAssert_NULL(a)
+#  define pAssert_NORET(a)
+#  define pAssert_VOID_OK(a)
 #else
 #  define pAssert(a)                       \
       do                                   \
       {                                    \
           if(!(a))                         \
-              FAIL(FATAL_ERROR_PARAMETER); \
+              FAIL(FATAL_ERROR_ASSERT); \
       } while(0)
 
 #  define pAssert_ZERO(a)                            \
@@ -322,6 +333,11 @@
 
 #endif
 
+// pAssert_SKIPPED indicates a pAssert that was left as-is on purpose.
+// because the code is dead/unsupported, or the work is left for a future
+// review.
+#define pAssert_SKIPPED(a) pAssert(a)
+
 // These macros are commonly used in the "Crypt" code as a way to keep listings from
 // getting too long. This is not to save paper but to allow one to see more
 // useful stuff on the screen at any given time.  Neither macro sets failure mode.
@@ -332,13 +348,13 @@
         goto Exit;             \
     } while(0)
 
-// braces are necessary for this usage:
+// The do loop is to prevent confusion in cases such as this:
 // if (y)
 //     GOTO_ERROR_UNLESS(x)
 // else ...
-// without braces the else would attach to the GOTO macro instead of the
-// outer if statement; given the amount of TPM code that doesn't use braces on
-// if statements, this is a live risk.
+// without braces or the do statement, the else would attach to the GOTO macro
+// instead of the outer if statement; given the amount of TPM code that doesn't
+// use braces on if statements, this is a live risk.
 #define GOTO_ERROR_UNLESS(_X) \
     do                        \
     {                         \

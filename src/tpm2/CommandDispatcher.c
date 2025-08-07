@@ -345,7 +345,8 @@ CommandDispatcher(COMMAND* command)
     // no pointers to data, all of the data being returned has to be in the
     // command action output buffer. If we try to marshal more bytes than
     // could fit into the output buffer, we need to fail.
-    for(; (dType = (type & 0x7F)) <= RESPONSE_PARAMETER_LAST_TYPE && !g_inFailureMode;
+    for(; (dType = (type & 0x7F)) <= RESPONSE_PARAMETER_LAST_TYPE
+          && !_plat__InFailureMode();
         type = *types++)
     {
 #if TABLE_DRIVEN_MARSHAL

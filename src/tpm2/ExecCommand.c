@@ -97,7 +97,7 @@ LIB_EXPORT void ExecuteCommand(
         FAIL_NORET(FATAL_ERROR_NO_INIT);
     }
 
-    if(g_inFailureMode)
+    if(_plat__InFailureMode())
     {
         // Do failure mode processing
         TpmFailureMode(requestSize, request, responseSize, response);
@@ -272,45 +272,60 @@ LIB_EXPORT void ExecuteCommand(
     }
 
 Cleanup:
-    if(g_clearOrderly == TRUE && NV_IS_ORDERLY)
+    if(!_plat__InFailureMode())
     {
+        if(g_clearOrderly == TRUE && NV_IS_ORDERLY)
+        {
 #if USE_DA_USED
-        gp.orderlyState = g_daUsed ? SU_DA_USED_VALUE : SU_NONE_VALUE;
+            gp.orderlyState = g_daUsed ? SU_DA_USED_VALUE : SU_NONE_VALUE;
 #else
-        gp.orderlyState = SU_NONE_VALUE;
+            gp.orderlyState = SU_NONE_VALUE;
 #endif
-        NV_SYNC_PERSISTENT(orderlyState);
+            NV_SYNC_PERSISTENT(orderlyState);
+        }
+        // This implementation loads an "evict" object to a transient object slot in
+        // RAM whenever an "evict" object handle is used in a command so that the
+        // access to any object is the same. These temporary objects need to be
+        // cleared from RAM whether the command succeeds or fails.
+        ObjectCleanupEvict();
+
+        // The parameters and sessions have been marshaled. Now tack on the header and
+        // set the sizes.  This sets command.parameterSize to the size of the entire
+        // response.
+        BuildResponseHeader(&command, *response, result);
+
+        // Try to commit all the writes to NV if any NV write happened during this
+        // command execution. This check should be made for both succeeded and failed
+        // commands, because a failed one may trigger a NV write in DA logic as well.
+        // This is the only place in the command execution path that may call the NV
+        // commit. If the NV commit fails, the TPM should be put in failure mode.
+        // Don't write in failure mode because we can't trust what we are
+        // writing.
+        if((g_updateNV != UT_NONE) && !_plat__InFailureMode())
+        {
+            if(g_updateNV == UT_ORDERLY)
+            {
+                NvUpdateIndexOrderlyData();
+            }
+            if(!NvCommit())
+            {
+                FAIL_NORET(FATAL_ERROR_INTERNAL);
+            }
+            g_updateNV = UT_NONE;
+        }
+
+        pAssert_NORET((UINT32)command.parameterSize <= maxResponse);
+
+        // Clear unused bits in response buffer.
+        MemorySet(*response + *responseSize, 0, maxResponse - *responseSize);
+
+        // as a final act, and not before, update the response size.
+        *responseSize = (UINT32)command.parameterSize;
     }
-    // This implementation loads an "evict" object to a transient object slot in
-    // RAM whenever an "evict" object handle is used in a command so that the
-    // access to any object is the same. These temporary objects need to be
-    // cleared from RAM whether the command succeeds or fails.
-    ObjectCleanupEvict();
 
-    // The parameters and sessions have been marshaled. Now tack on the header and
-    // set the sizes
-    BuildResponseHeader(&command, *response, result);
-
-    // Try to commit all the writes to NV if any NV write happened during this
-    // command execution. This check should be made for both succeeded and failed
-    // commands, because a failed one may trigger a NV write in DA logic as well.
-    // This is the only place in the command execution path that may call the NV
-    // commit. If the NV commit fails, the TPM should be put in failure mode.
-    if((g_updateNV != UT_NONE) && !g_inFailureMode)
+    if(_plat__InFailureMode())
     {
-        if(g_updateNV == UT_ORDERLY)
-            NvUpdateIndexOrderlyData();
-        if(!NvCommit())
-            FAIL(FATAL_ERROR_INTERNAL);
-        g_updateNV = UT_NONE;
+        // something in the command triggered failure mode - handle command as a failure instead
+        TpmFailureMode(requestSize, request, responseSize, response);
     }
-    pAssert_NORET((UINT32)command.parameterSize <= maxResponse);
-
-    // Clear unused bits in response buffer.
-    MemorySet(*response + *responseSize, 0, maxResponse - *responseSize);
-
-    // as a final act, and not before, update the response size.
-    *responseSize = (UINT32)command.parameterSize;
-
-    return;
 }
