@@ -68,6 +68,8 @@
 #include "Tpm.h"
 #include "Marshal.h"
 
+#include "tpm_library_intern.h"		// libtpms added
+
 //****************************************************************************/
 //**     Hash/HMAC Functions
 //****************************************************************************/
@@ -1052,7 +1054,8 @@ CryptParameterDecryption(
         return TPM_RC_INSUFFICIENT;
     }
 
-    if(cipherSize > bufferSize)
+    if(cipherSize > MAX_COMMAND_SIZE || bufferSize <= 0
+       || (UINT32)cipherSize > (UINT32)bufferSize)
     {
         return TPM_RC_SIZE;
     }
