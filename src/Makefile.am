@@ -588,7 +588,6 @@ noinst_HEADERS += \
 	tpm2/TpmTypes.h \
 	tpm2/Unmarshal_fp.h \
 	tpm2/Unseal_fp.h \
-	tpm2/VendorInfo.h \
 	tpm2/VerifyConfiguration.h \
 	tpm2/VerifySignature_fp.h \
 	tpm2/X509.h \

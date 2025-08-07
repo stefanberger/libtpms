@@ -338,23 +338,44 @@ LIB_EXPORT uint32_t _plat__GetUnique(uint32_t       which,
 LIB_EXPORT void _plat__GetPlatformManufactureData(uint8_t* pPlatformPersistentData,
                                                   uint32_t bufferSize);
 
-// return the 4 character Manufacturer Capability code.  This
+// return the 4 character Manufacturer Capability code (TPM_PT_MANUFACTURER).  This
 // should come from the platform library since that is provided by the manufacturer
-LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);	// libtpms changed
+LIB_EXPORT uint32_t _plat__GetManufacturerCapabilityCode(void);
 
-// return the 4 character VendorStrings for Capabilities.
+// return the 4 character VendorStrings for GetCapability (TPM_PT_VENDOR_STRING_1-4)
 // Index is ONE-BASED, and may be in the range [1,4] inclusive.
 // Any other index returns all zeros. The return value will be interpreted
 // as an array of 4 ASCII characters (with no null terminator)
 LIB_EXPORT uint32_t _plat__GetVendorCapabilityCode(int index);
 
 // return the most-significant 32-bits of the TPM Firmware Version reported by
-// getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);	// libtpms changed
+// getCapability (TPM_PT_FIRMWARE_VERSION_1)
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionHigh(void);
 
 // return the least-significant 32-bits of the TPM Firmware Version reported by
-// getCapability.
-LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);	// libtpms changed
+// getCapability (TPM_PT_FIRMWARE_VERSION_2)
+LIB_EXPORT uint32_t _plat__GetTpmFirmwareVersionLow(void);
+
+// return the Vendor TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
+LIB_EXPORT uint32_t _plat__GetVendorTpmType(void);
+
+// Struct to define TPM and platform specific capability value
+typedef struct _spec_capability_value
+{
+    uint32_t tpmSpecLevel;
+    uint32_t tpmSpecVersion;
+    uint32_t tpmSpecYear;
+    uint32_t tpmSpecDayOfYear;
+
+    uint32_t platformFamily;
+    uint32_t platfromLevel;
+    uint32_t platformRevision;
+    uint32_t platformYear;
+    uint32_t platformDayOfYear;
+} SPEC_CAPABILITY_VALUE;
+
+// return info on TPM and Platform Specific capability values.
+LIB_EXPORT void _plat_GetSpecCapabilityValue(SPEC_CAPABILITY_VALUE* returnData);
 
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
@@ -391,8 +412,6 @@ LIB_EXPORT int _plat__GetTpmFirmwareSecret(
 );
 #endif  // FW_LIMITED_SUPPORT
 
-// return the TPM Type returned by TPM_PT_VENDOR_TPM_TYPE
-LIB_EXPORT uint32_t _plat__GetTpmType(void);	// libtpms changed
 
 #if ENABLE_TPM_DEBUG_PRINT
 

@@ -4,6 +4,21 @@
 #include "_TPM_Init_fp.h"
 #include "StateMarshal.h"		// libtpms added
 
+// Move this to a future _plat_NvUpdateData() API and perform this in
+// platform code.
+static void UpgradeNvData()					// libtpms changed: static
+{
+    // only update when required to avoid unnecessary flash defragmentation
+    if(gp.firmwareV1 != _plat__GetTpmFirmwareVersionHigh()
+       || gp.firmwareV2 != _plat__GetTpmFirmwareVersionLow())
+    {
+        gp.firmwareV1 = _plat__GetTpmFirmwareVersionHigh();
+        gp.firmwareV2 = _plat__GetTpmFirmwareVersionLow();
+        NV_SYNC_PERSISTENT(firmwareV1);
+        NV_SYNC_PERSISTENT(firmwareV2);
+    }
+}
+
 // This function is used to process a _TPM_Init indication.
 LIB_EXPORT void _TPM_Init(void)
 {
@@ -71,6 +86,9 @@ LIB_EXPORT void _TPM_Init(void)
         // Load the orderly data (clock and DRBG state).
         // If this is not done here, things break
         NvRead(&go, NV_ORDERLY_DATA, sizeof(go));
+
+        // Update and fix up any NV variables
+        UpgradeNvData();
 
         // Start clock. Need to do this after NV has been restored.
         TimePowerOn();
