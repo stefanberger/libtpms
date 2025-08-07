@@ -5563,7 +5563,8 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
         (COMMAND_DESCRIPTOR_t*)_EncryptDecrypt2DataAddress,
 #endif // CC_EncryptDecrypt2
 #if (PAD_LIST || CC_AC_GetCapability)
-        (COMMAND_DESCRIPTOR_t*)_GetCapabilityDataAddress,
+//#error "Not Implemented the Dispatch structure needs to be created"	// libtpms changed begin
+        (COMMAND_DESCRIPTOR_t*)_GetCapabilityDataAddress,		// libtpms changed end
 #endif // CC_AC_GetCapability
 #if (PAD_LIST || CC_AC_Send)
         (COMMAND_DESCRIPTOR_t*)_AC_SendDataAddress,
@@ -5598,7 +5599,7 @@ COMMAND_DESCRIPTOR_t* s_CommandDataArray[] = {
 #if (PAD_LIST || CC_SetCapability)
         (COMMAND_DESCRIPTOR_t*)_SetCapabilityDataAddress,
 #endif // CC_SetCapability
-#if (PAD_LIST || CC_ReadControl)
+#if (PAD_LIST || CC_ReadOnlyControl)
         (COMMAND_DESCRIPTOR_t*)_ReadOnlyControlDataAddress,
 #endif // CC_ReadOnlyControl  
 #if (PAD_LIST || CC_PolicyTransportSPDM)
