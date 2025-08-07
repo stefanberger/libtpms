@@ -1082,19 +1082,17 @@ typedef struct state_reset_data
     // the TPM will return TPM_RC_RANGE and the TPM will only accept Shutdown(CLEAR).
     UINT32 clearCount;  // The default reset value is 0.
 
-    UINT64 objectContextID;  // This is the context ID for a saved
-                             //  object context. The default reset
-                             //  value is 0.
-    CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];  // This array contains
-    // contains the values used to track
-    // the version numbers of saved
-    // contexts (see
-    // Session.c in for details). The
-    // default reset value is {0}.
+    // This is the context ID for a saved object context. The default reset
+    //  value is 0.
+    UINT64 objectContextID;
 
-    CONTEXT_COUNTER contextCounter;  // This is the value from which the
-                                     // 'contextID' is derived. The
-                                     // default reset value is {0}.
+    // This array contains the values used to track the version numbers of saved
+    // contexts (see Session.c in for details). The default reset value is {0}.
+    CONTEXT_SLOT contextArray[MAX_ACTIVE_SESSIONS];
+
+    // This is the value from which the 'contextID' is derived. The default
+    // reset value is {0}.
+    CONTEXT_COUNTER contextCounter;
 
     //*****************************************************************************
     //           Command Audit
