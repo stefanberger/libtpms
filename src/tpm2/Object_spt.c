@@ -365,9 +365,8 @@ CreateChecks(OBJECT*           parentObject,
                && !IS_ATTRIBUTE(attributes, TPMA_OBJECT, decrypt)
                && IS_ATTRIBUTE(attributes, TPMA_OBJECT, sensitiveDataOrigin))
                 result = TPM_RC_ATTRIBUTES;
-            // comment out the next line in order to prevent a fixedTPM derivation
-            // parent
-            //            break;
+            // fall through to prevent a fixedTPM derivation parent
+            // [[fallthrough]];
         /* fallthrough */                // libtpms added
         case TPM_ALG_SYMCIPHER:
             // A restricted key symmetric key (SYMCIPHER and KEYEDHASH)
