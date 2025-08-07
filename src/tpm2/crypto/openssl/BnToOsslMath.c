@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*			     							*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2023					*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 // The functions in this file provide the low-level interface between the TPM code
@@ -163,7 +105,7 @@ BIGNUM* BigInitialized(BIGNUM* toInit, bigConst initializer)
 #    define BIGNUM_PRINT(label, bn, eol)
 #    define DEBUG_PRINT(x)
 #  else
-#    define DEBUG_PRINT(x)               printf("%s", x)
+#    define DEBUG_PRINT(x)               TPM_DEBUG_PRINTF("%s", x)
 #    define BIGNUM_PRINT(label, bn, eol) BIGNUM_print((label), (bn), (eol))
 
 //*** BIGNUM_print()
@@ -174,14 +116,19 @@ static void BIGNUM_print(const char* label, const BIGNUM* a, BOOL eol)
     int       notZero = FALSE;
 
     if(label != NULL)
-        printf("%s", label);
+    {
+        DEBUG_PRINT("%s", label);
+    }
+
     if(a == NULL)
     {
-        printf("NULL");
+        DEBUG_PRINT("NULL");
         goto done;
     }
     if(a->neg)
-        printf("-");
+    {
+        DEBUG_PRINT("-");
+    }
     for(i = a->top, d = &a->d[i - 1]; i > 0; i--)
     {
         int      j;
@@ -191,14 +138,20 @@ static void BIGNUM_print(const char* label, const BIGNUM* a, BOOL eol)
             BYTE b  = (BYTE)((l >> j) & 0xFF);
             notZero = notZero || (b != 0);
             if(notZero)
-                printf("%02x", b);
+            {
+                DEBUG_PRINT("%02x", b);
+            }
         }
         if(!notZero)
-            printf("0");
+        {
+            DEBUG_PRINT("0");
+        }
     }
 done:
     if(eol)
-        printf("\n");
+    {
+        DEBUG_PRINT("\n");
+    }
     return;
 }
 #  endif
@@ -213,7 +166,9 @@ static BIGNUM* BnNewVariable(BN_CTX* CTX)
     // This check is intended to protect against calling this function without
     // having initialized the CTX.
     if((CTX == NULL) || ((new = BN_CTX_get(CTX)) == NULL))
-        FAIL(FATAL_ERROR_ALLOCATION);
+    {
+        FAIL_NULL(FATAL_ERROR_ALLOCATION);
+    }
     return new;
 }
 
@@ -406,7 +361,6 @@ Exit:
     OSSL_LEAVE();
     return OK;
 }
-#  endif  // ALG_RSA
 
 //*** BnModInverse()
 // Modular multiplicative inverse
@@ -433,6 +387,7 @@ Exit:
     OSSL_LEAVE();
     return OK;
 }
+#  endif  // ALG_RSA
 
 #  if ALG_ECC
 
