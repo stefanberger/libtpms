@@ -152,7 +152,7 @@ TPM_RC ComputeContextIntegrity(TPMS_CONTEXT* contextBlob,  // IN: context blob
         &hmacState.hashState, sizeof(gp.totalResetCount), gp.totalResetCount);
 
     // If this is a ST_CLEAR object, add the clear count
-    // so that this contest cannot be loaded after a TPM Restart
+    // so that this context cannot be loaded after a TPM Restart
     if(contextBlob->savedHandle == 0x80000002)
         CryptDigestUpdateInt(
             &hmacState.hashState, sizeof(gr.clearCount), gr.clearCount);

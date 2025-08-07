@@ -111,11 +111,9 @@ LIB_EXPORT void ExecuteCommand(
     // will go into failure mode.
     NvCheckState();
 
-    // Due to the limitations of the simulation, TPM clock must be explicitly
-    // synchronized with the system clock whenever a command is received.
-    // This function call is not necessary in a hardware TPM. However, taking
-    // a snapshot of the hardware timer at the beginning of the command allows
-    // the time value to be consistent for the duration of the command execution.
+    // Taking a snapshot of the hardware timer at the beginning of the command
+    // allows the time value to be consistent for the duration of the command
+    // execution.  This will also update the NV time state if appropriate.
     TimeUpdateToCurrent();
 
     // Any command through this function will unceremoniously end the
