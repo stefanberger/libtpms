@@ -37,6 +37,7 @@ EncryptDecryptShared(TPMI_DH_OBJECT      keyHandleIn,
     symKey = HandleToObject(keyHandleIn);
     pAssert_RC(symKey != NULL);
     mode = symKey->publicArea.parameters.symDetail.sym.mode.sym;
+
     // The input key should be a symmetric key
     if(symKey->publicArea.type != TPM_ALG_SYMCIPHER)
         return TPM_RCS_KEY + RC_EncryptDecrypt_keyHandle;
