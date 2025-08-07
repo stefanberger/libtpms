@@ -354,7 +354,7 @@ LIB_EXPORT const Crypt_EccCurve* ExtEcc_CurveInitialize(Crypt_EccCurve* E,
 //*** ExtEcc_CurveFree()
 // This function will free the allocated components of the curve and end the
 // frame in which the curve data exists.
-// WARNING: Not guaranteed to be called in presence of LONGJMP.
+// WARNING: Not guaranteed to be called in presence of LONGJMP_SUPPORTED.
 LIB_EXPORT void ExtEcc_CurveFree(const Crypt_EccCurve* E);
 
 // #################

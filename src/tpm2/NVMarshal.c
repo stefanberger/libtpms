@@ -56,6 +56,7 @@
 #include "Simulator_fp.h"
 #include "BackwardsCompatibilityBitArray.h"
 #include "BackwardsCompatibilityObject.h"
+#include "platform_failure_mode_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
@@ -2928,6 +2929,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *Runtime
     TPM2B_AUTH unused = {
         .b.size = 0,
     };
+    BOOL inFailureMode;
+    UINT32 failFunction, failLine, failCode;
 
     written = NV_HEADER_Marshal(buffer, size,
                                 VOLATILE_STATE_VERSION, VOLATILE_STATE_MAGIC,
@@ -3172,7 +3175,8 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *Runtime
     /* s_actionInputBuffer: skip; only used during a single command */
     /* s_actionOutputBuffer: skip; only used during a single command */
 #endif
-    written += BOOL_Marshal(&g_inFailureMode, buffer, size); /* line 1078 */
+    inFailureMode = _plat__InFailureMode();
+    written += BOOL_Marshal(&inFailureMode, buffer, size); /* line 1078 */
 
     /* TPM established bit */
     tpmEst = _rpc__Signal_GetTPMEstablished();
@@ -3187,9 +3191,12 @@ VolatileState_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *Runtime
     written += BLOCK_SKIP_WRITE_PUSH(has_block, buffer, size);
 
 #if defined TPM_FAIL_C || defined GLOBAL_C || 1
-    written += UINT32_Marshal(&s_failFunction, buffer, size);
-    written += UINT32_Marshal(&s_failLine, buffer, size);
-    written += UINT32_Marshal(&s_failCode, buffer, size);
+    failFunction = _plat__GetFailureLocation();
+    written += UINT32_Marshal(&failFunction, buffer, size);
+    failLine = _plat__GetFailureLine();
+    written += UINT32_Marshal(&failLine, buffer, size);
+    failCode = _plat__GetFailureCode();
+    written += UINT32_Marshal(&failCode, buffer, size);
 #else
 # error Unsupport #define value(s)
 #endif // TPM_FAIL_C
@@ -3347,6 +3354,7 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     TPM2B_AUTH unused = {
         .b.size = 0,
     };
+    UINT32 failFunction, failLine, failCode;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
@@ -3675,7 +3683,9 @@ skip_pcr:
 skip_session:
 
     if (rc == TPM_RC_SUCCESS) {
-        rc = BOOL_Unmarshal(&g_inFailureMode, buffer, size); /* line 1078 */
+        BOOL inFailureMode = FALSE;
+        rc = BOOL_Unmarshal(&inFailureMode, buffer, size); /* line 1078 */
+        _plat__SetInFailureMode(inFailureMode);
     }
 
     /* TPM established bit */
@@ -3704,13 +3714,16 @@ skip_session:
 #if defined TPM_FAIL_C || defined GLOBAL_C || 1
     /* appended in v2 */
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT32_Unmarshal(&s_failFunction, buffer, size);
+        rc = UINT32_Unmarshal(&failFunction, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT32_Unmarshal(&s_failLine, buffer, size);
+        rc = UINT32_Unmarshal(&failLine, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = UINT32_Unmarshal(&s_failCode, buffer, size);
+        rc = UINT32_Unmarshal(&failCode, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        _plat__SetFailureModeParameters(NULL, failLine, failCode);
     }
 #else
 # error Unsupport #define value(s)

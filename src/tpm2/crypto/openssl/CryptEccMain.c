@@ -477,7 +477,8 @@ BOOL TpmEcc_GenPrivateScalar(
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
-    return OK && !g_inFailureMode;
+
+    return OK && !_plat__InFailureMode();
 }
 #else                                  // libtpms added begin
 BOOL TpmEcc_GenPrivateScalar(
@@ -511,7 +512,8 @@ BOOL TpmEcc_GenPrivateScalar(
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
-    return OK && !g_inFailureMode;
+
+    return OK && !_plat__InFailureMode();
 }
 #endif // USE_OPENSSL_FUNCTIONS_EC        libtpms added end
 
@@ -751,7 +753,7 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
         digest.t.size = MIN(sensitive->sensitive.ecc.t.size, sizeof(digest.t.buffer));
         // Get a random value to sign using the built in DRBG state
         DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
-        if(g_inFailureMode)
+        if(_plat__InFailureMode())
             return TPM_RC_FAILURE;
         TpmEcc_SignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
         // and make sure that we can validate the signature

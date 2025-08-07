@@ -47,6 +47,7 @@ MUST_BE_0_OR_1(COMPRESSED_LISTS);		// libtpms added
 MUST_BE_0_OR_1(RSA_KEY_SIEVE);
 
 // Implementation alternatives - changes external behavior
+MUST_BE_0_OR_1(LONGJMP_SUPPORTED);
 MUST_BE_0_OR_1(_DRBG_STATE_SAVE);
 MUST_BE_0_OR_1(USE_DA_USED);
 MUST_BE_0_OR_1(ENABLE_SELF_TESTS);

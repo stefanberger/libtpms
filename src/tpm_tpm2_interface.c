@@ -55,8 +55,10 @@
 #include "tpm2/StateMarshal.h"
 #include "tpm2/PlatformACT.h"
 #include "tpm2/PlatformData.h"
+#include "tpm2/PlatformInternal.h"
 #include "tpm2/Volatile.h"
 #include "tpm2/crypto/openssl/ExpDCache_fp.h"
+#include "tpm2/platform_failure_mode_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_nvfile.h" // TPM_NVRAM_Loaddata()
@@ -64,7 +66,6 @@
 #include "tpm_library_intern.h"
 #include "tpm_nvfilename.h"
 
-extern BOOL      g_inFailureMode;
 static BOOL      reportedFailureCommand;
 static char     *g_profile;
 static TPM_BOOL  g_wasManufactured;
@@ -104,7 +105,7 @@ static TPM_RESULT TPM2_MainInit(void)
     bool has_nvram_file;
     bool has_nvram_loaddata_callback;
 
-    g_inFailureMode = FALSE;
+    _plat_internal_resetFailureData();
     reportedFailureCommand = FALSE;
     g_wasManufactured = FALSE;
 
@@ -136,7 +137,7 @@ static TPM_RESULT TPM2_MainInit(void)
                 TPMLIB_LogTPM2Error(
                     "%s: _plat__NVEnable(NULL) failed: %d\n",
                     __func__, ret);
-            if (TPM_Manufacture(TRUE, g_profile) < 0 || g_inFailureMode) {
+            if (TPM_Manufacture(TRUE, g_profile) < 0 || _plat__InFailureMode()) {
                 TPMLIB_LogTPM2Error("%s: TPM_Manufacture(TRUE) failed or TPM in "
                                     "failure mode\n", __func__);
                 reportedFailureCommand = TRUE;
@@ -156,7 +157,7 @@ static TPM_RESULT TPM2_MainInit(void)
     _rpc__Signal_NvOn();
 
     if (ret == TPM_SUCCESS) {
-        if (g_inFailureMode)
+        if (_plat__InFailureMode())
             ret = TPM_RC_FAILURE;
     }
 
@@ -233,7 +234,7 @@ static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
 
     *resp_size = resp.BufferSize;
 
-    if (g_inFailureMode && !reportedFailureCommand) {
+    if (_plat__InFailureMode() && !reportedFailureCommand) {
         reportedFailureCommand = TRUE;
         TPMLIB_LogTPM2Error("%s: Entered failure mode through command:\n",
                             __func__);

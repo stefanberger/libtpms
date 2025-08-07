@@ -1479,27 +1479,6 @@ EXTERN UINT32 s_actionIoAllocation;   // number of UIN64 allocated for the
 #  endif                              // IO_BUFFER_C
 
 //*****************************************************************************
-//*** From TPMFail.c
-//*****************************************************************************
-// This value holds the address of the string containing the name of the function
-// in which the failure occurred. This address value is not useful for anything
-// other than helping the vendor to know in which file the failure  occurred.
-EXTERN BOOL g_inFailureMode;  // Indicates that the TPM is in failure mode
-#  if ALLOW_FORCE_FAILURE_MODE
-EXTERN BOOL g_forceFailureMode;  // flag to force failure mode during test
-#  endif
-
-typedef void(FailFunction)(const char *function, int line, int code);
-#if defined TPM_FAIL_C || defined GLOBAL_C || 1
-EXTERN UINT32 s_failFunction;
-// The line in the file at which the error was signaled.
-EXTERN UINT32 s_failLine;
-// the reason for the failure.
-EXTERN UINT32 s_failCode;
-EXTERN FailFunction    *LibFailCallback;
-#endif // TPM_FAIL_C
-
-//*****************************************************************************
 //*** From ACT_spt.c
 //*****************************************************************************
 // This value is used to indicate if an ACT has been updated since the last

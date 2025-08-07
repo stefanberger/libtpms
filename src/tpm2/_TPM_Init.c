@@ -46,8 +46,24 @@ LIB_EXPORT void _TPM_Init(void)
     g_nvOk = NvPowerOn();
 
     // Initialize cryptographic functions
-    g_inFailureMode |= (g_nvOk == FALSE) || (CryptInit() == FALSE); // libtpms changed
-    if(!g_inFailureMode)
+
+#if 0								// libtpms added
+	                // libtpms: FAIL would do longjmp, but there was no setjmp
+    if(g_nvOk != TRUE)
+    {
+        FAIL(FATAL_ERROR_NV_INIT);
+    }
+    else if(!CryptInit())
+    {
+        FAIL(FATAL_ERROR_CRYPTO_INIT);
+    }
+#else								// libtpms added begin
+    BOOL inFailureMode = (g_nvOk == FALSE) || (CryptInit() == FALSE);
+    if (inFailureMode)
+        _plat__SetInFailureMode(TRUE);
+#endif								// libtpms added end
+
+    if(!_plat__InFailureMode())
     {
         // Load the persistent data
         NvReadPersistent();
@@ -66,7 +82,7 @@ LIB_EXPORT void _TPM_Init(void)
     }
 
     g_initCompleted = TRUE;
-    if(!g_inFailureMode)
+    if(! _plat__InFailureMode())
     {
         _plat__EndOkTpmInit();
     }
