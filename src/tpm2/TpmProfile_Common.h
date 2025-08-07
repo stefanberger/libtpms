@@ -216,6 +216,8 @@
 #endif
 // libtpms added end
 
+// number of vendor properties, must currently be 1.
+#define MAX_VENDOR_PROPERTY                 (1)
 
 //***********************************************
 // Enable VENDOR_PERMANENT_AUTH_HANDLE?

@@ -348,7 +348,7 @@ void TpmFailureMode(uint32_t        inRequestSize,    // IN: command buffer size
                     case TPM_PT_VENDOR_TPM_TYPE:
                         // vendor-defined value indicating the TPM model
                         // We just make up a number here
-                        pt = _plat__GetTpmType();
+                        pt = _plat__GetVendorTpmType();
                         break;
 
                     case TPM_PT_FIRMWARE_VERSION_1:
