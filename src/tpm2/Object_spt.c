@@ -1034,6 +1034,10 @@ static UINT16 MarshalSensitive(
     MemoryPad2B(&sensitive->authValue.b, CryptHashGetDigestSize(nameAlg));
     buffer += 2;
 
+#if !ALG_RSA
+    NOT_REFERENCED(parent);
+#endif
+
     // Marshal the structure
 #if 0 /* ALG_RSA */            // libtpms changed: We never set the RSA_prime_flag!
     // If the sensitive size is the special case for a prime in the type
