@@ -19,28 +19,29 @@
 #define CC_YES YES
 #define CC_NO  NO
 
-//
+// do not format automatically - the comments confuse clang-format.
+// clang-format off
+
 // Defines for Implemented Commands
-//
 
 // Commands that are defined in the spec, but not implemented for various
 // reasons:
 
 // The TPM reference implementation does not implement attached-component
 // features, and the Compliance test suite has no test cases.
-#define CC_AC_GetCapability CC_NO
-#define CC_AC_Send          CC_NO
+#define CC_AC_GetCapability           CC_NO
+#define CC_AC_Send                    CC_NO
 
 // The TPM reference implementation does not implement firmware upgrade.
-#define CC_FieldUpgradeData  CC_NO
-#define CC_FieldUpgradeStart CC_NO
-#define CC_FirmwareRead      CC_NO
+#define CC_FieldUpgradeData           CC_NO
+#define CC_FieldUpgradeStart          CC_NO
+#define CC_FirmwareRead               CC_NO
 
 // A prototype of CertifyX509 is provided here for informative purposes only.
 // While all of the TPM reference implementation is provided "AS IS" without any
 // warranty, the current design and implementation of CertifyX509 are considered
 // to be especially unsuitable for product use.
-#define CC_CertifyX509 CC_YES
+#define CC_CertifyX509                CC_YES
 
 // Normal commands:
 
