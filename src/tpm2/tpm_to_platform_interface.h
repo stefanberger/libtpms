@@ -377,6 +377,22 @@ typedef struct _spec_capability_value
 // return info on TPM and Platform Specific capability values.
 LIB_EXPORT void _plat_GetSpecCapabilityValue(SPEC_CAPABILITY_VALUE* returnData);
 
+// Return enabled self-tests on the platform when TPM SelfTest is called.
+//
+// pToTestVector is a byte array allocated by the TPM library, each bit in the array
+// represents a TPM_ALG_ID to be tested. The bit length of the vector is
+// (8 * toTestVectorSize), which is larger than or equal to TPM_ALG_LAST + 1.
+//
+// Initially the vector have bits set for all implemented algorithms or remaining
+// algorithms to test, based on fullTest option, and platform should update the vector
+// to indicate which tests are actually enabled on the platform based on the its
+// capabilities at the time of the call.
+LIB_EXPORT void _plat_GetEnabledSelfTest(
+    uint8_t  fullTest,         // IN: full test or not
+    uint8_t* pToTestVector,    // INOUT: initialized byte array of tracked tests
+    size_t   toTestVectorSize  // IN: size of the byte array in bytes
+);
+
 // return the TPM Firmware's current SVN.
 LIB_EXPORT uint16_t _plat__GetTpmFirmwareSvn(void);
 
