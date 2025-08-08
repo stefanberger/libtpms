@@ -248,6 +248,10 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/NvDynamic.c \
 	tpm2/NVMem.c \
 	tpm2/NvReserved.c \
+	tpm2/NVVirtual.c \
+	tpm2/NV_Read.c \
+	tpm2/NV_ReadPublic.c \
+	tpm2/NV_ReadPublic2.c \
 	tpm2/NV_spt.c \
 	tpm2/Object.c \
 	tpm2/ObjectChangeAuth.c \
@@ -485,6 +489,7 @@ noinst_HEADERS += \
 	tpm2/PlatformInternal.h \
 	tpm2/platform_failure_mode_fp.h \
 	tpm2/platform_init_fp.h \
+	tpm2/platform_virtual_nv_fp.h \
 	tpm2/platform_public_interface.h \
 	tpm2/platform_pcr_fp.h \
 	tpm2/platform_to_tpm_interface.h \

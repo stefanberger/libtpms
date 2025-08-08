@@ -434,4 +434,7 @@ LIB_EXPORT size_t _plat_debug_snprintf(
 // platform failure mode functions
 #include "platform_failure_mode_fp.h"
 
+// platform virtual NV functions
+#include "platform_virtual_nv_fp.h"
+
 #endif  // _TPM_TO_PLATFORM_INTERFACE_H_

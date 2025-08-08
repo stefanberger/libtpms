@@ -13,6 +13,7 @@
 #include "Tpm.h"
 #include "ACT.h"
 #include "Marshal.h"
+#include "platform_virtual_nv_fp.h"
 #if SEC_CHANNEL_SUPPORT
 #  include "SecChannel_fp.h"
 #endif  // SEC_CHANNEL_SUPPORT
@@ -54,7 +55,18 @@ BOOL IsDAExempted(TPM_HANDLE handle  // IN: entity handle
         }
         case TPM_HT_NV_INDEX:
         {
-            NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
+            NV_INDEX* nvIndex = NULL;
+            NV_INDEX  ekIndex = {0};
+            if(_plat__IsNvVirtualIndex(handle))
+            {
+                _plat__NvVirtual_PopulateNvIndexInfo(
+                    handle, &ekIndex.publicArea, &ekIndex.authValue);
+                nvIndex = &ekIndex;
+            }
+            else
+            {
+                nvIndex = NvGetIndexInfo(handle, NULL);
+            }
             result = IS_ATTRIBUTE(nvIndex->publicArea.attributes, TPMA_NV, NO_DA);
             break;
         }
@@ -327,10 +339,24 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
             // NV Index.
             {
                 NV_REF    locator;
-                NV_INDEX* nvIndex = NvGetIndexInfo(handle, &locator);
+                NV_INDEX* nvIndex = NULL;
                 TPMA_NV   nvAttributes;
                 //
-                pAssert(nvIndex != 0);
+
+                if(_plat__IsNvVirtualIndex(handle))
+                {
+                    NV_INDEX tempIndex = {0};
+                    _plat__NvVirtual_PopulateNvIndexInfo(
+                        handle, &tempIndex.publicArea, &tempIndex.authValue);
+                    nvIndex = &tempIndex;
+
+                    locator = (NV_REF)0;
+                }
+                else
+                {
+                    nvIndex = NvGetIndexInfo(handle, &locator);
+                }
+                pAssert_BOOL(nvIndex != 0);
 
                 nvAttributes = nvIndex->publicArea.attributes;
 
@@ -1502,9 +1528,24 @@ static TPM_RC CheckAuthSession(
     if((TPM_HT_NV_INDEX == HandleGetType(associatedHandle)) && authUsed)
     {
         NV_REF    locator;
-        NV_INDEX* nvIndex = NvGetIndexInfo(associatedHandle, &locator);
+        NV_INDEX* nvIndex = NULL;
         NV_PIN    pinData;
         TPMA_NV   nvAttributes;
+        NV_INDEX  tempIndex = {0};
+
+        if(_plat__IsNvVirtualIndex(associatedHandle))
+        {
+            _plat__NvVirtual_PopulateNvIndexInfo(
+                associatedHandle, &tempIndex.publicArea, &tempIndex.authValue);
+            nvIndex = &tempIndex;
+
+            locator = (NV_REF)0;
+        }
+        else
+        {
+            nvIndex = NvGetIndexInfo(associatedHandle, &locator);
+        }
+
         //
         pAssert_RC(nvIndex != NULL);
         nvAttributes = nvIndex->publicArea.attributes;
