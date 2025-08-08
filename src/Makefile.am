@@ -283,6 +283,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/ResponseCodeProcessing.c \
 	tpm2/RunCommand.c \
 	tpm2/SecChannel.c \
+	tpm2/SelfTest.c \
 	tpm2/Session.c \
 	tpm2/SessionCommands.c \
 	tpm2/SessionProcess.c \

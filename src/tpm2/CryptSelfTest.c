@@ -58,7 +58,7 @@ TPM_RC
 CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
 )
 {
-
+    ALGORITHM_VECTOR toTestVector = {0};
 
     // If the caller requested a full test, then reset the to test vector so that
     // all the tests will be run
@@ -66,7 +66,21 @@ CryptSelfTest(TPMI_YES_NO fullTest  // IN: if full test is required
     {
         MemoryCopy(g_toTest, g_implementedAlgorithms, sizeof(g_toTest));
     }
-    return CryptRunSelfTests(&g_toTest);
+
+    // Some platforms may have alternative crypto libraries and self-test capabilities,
+    // so allow the platform to return the list of tests it wants the TPM code to run
+    // directly. We assume the platform will make alternative arrangements for any
+    // tests it does not return here, consistent with that platform's compliance goals.
+    //
+    // A platform may provide different lists at different times and we leave the
+    // g_toTest flags set for any tests that are not requested by the platform.
+    //
+    // Note that a crypto library may also perform additional self-tests through other
+    // means and/or in response to g_toTest at other points in the code.
+    MemoryCopy(toTestVector, g_toTest, sizeof(toTestVector));
+    _plat_GetEnabledSelfTest(fullTest, toTestVector, sizeof(toTestVector));
+
+    return CryptRunSelfTests(&toTestVector);
 }
 
 //*** CryptIncrementalSelfTest()

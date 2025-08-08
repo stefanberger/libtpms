@@ -800,7 +800,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
         // silently CLEAR it. Decided to just clear.
         if(!TEST_BIT(alg, g_implementedAlgorithms))
         {
-            CLEAR_BIT(alg, *toTest);
+            CLEAR_BOTH(alg);
             continue;
         }
         // Process whatever is left.
@@ -934,7 +934,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
                 break;
 #  endif  // ALG_ECC
             default:
-                CLEAR_BIT(alg, *toTest);
+                CLEAR_BOTH(alg);
                 break;
         }
         if(result != TPM_RC_SUCCESS)
