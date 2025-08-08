@@ -41,6 +41,7 @@
 #define NV_C
 #include "Tpm.h"
 #include "Marshal.h"
+#include "platform_virtual_nv_fp.h"			// libtpms changed
 #include "tpm_library_intern.h"				// libtpms added
 #include "BackwardsCompatibilityObject.h"		// libtpms added
 
@@ -795,9 +796,17 @@ BOOL NvIsOwnerPersistentHandle(TPM_HANDLE handle  // IN: handle
 //      TPM_RC_NV_WRITELOCKED   Index is present but locked for writing and command
 //                              writes to the index
 TPM_RC
-NvIndexIsAccessible(TPMI_RH_NV_INDEX handle  // IN: handle
-)
+NvIndexIsAccessible(TPMI_RH_NV_INDEX handle,  // IN: handle
+                    BOOL             commandAcceptsVirtualHandles)
 {
+    // For virtual indexes nothing is actually stored in the NV
+    // so if it exists, it's considered "accessible", though the relevant
+    // virtual API may return a locked result later.
+    if(_plat__IsNvVirtualIndex(handle))
+    {
+        return commandAcceptsVirtualHandles ? TPM_RC_SUCCESS : TPM_RC_NV_LOCKED;
+    }
+
     NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
     //
     if(nvIndex == NULL)
@@ -908,9 +917,14 @@ void NvGetIndexData(NV_INDEX* nvIndex,  // IN: the in RAM index descriptor
     {
         // Get data from RAM buffer
         NV_RAM_REF ramAddr = NvRamGetIndex(nvIndex->publicArea.nvIndex);
-        pAssert(ramAddr != 0
-                && (size <= ((NV_RAM_HEADER*)ramAddr)->size - sizeof(NV_RAM_HEADER)
-                                - offset));
+
+        // Copy the contents of ramAddr into a local NV_RAM_HEADER variable before
+        // performing the boundary check to avoid potential alignment issues
+        NV_RAM_HEADER nvRamHeader;
+        MemoryCopy(&nvRamHeader, ramAddr, sizeof(NV_RAM_HEADER));
+        pAssert_VOID_OK(
+            ramAddr != 0
+            && (size <= (nvRamHeader.size - sizeof(NV_RAM_HEADER) - offset)));
         MemoryCopy(data, ramAddr + sizeof(NV_RAM_HEADER) + offset, size);
     }
     else
@@ -1191,8 +1205,25 @@ TPM2B_NAME* NvGetNameByIndexHandle(
     TPM2B_NAME*      name     // OUT: name of the index
 )
 {
-    NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
-    //
+    NV_INDEX* nvIndex   = NULL;
+    NV_INDEX  tempIndex = {0};
+
+    if(_plat__IsNvVirtualIndex(handle))
+    {
+        _plat__NvVirtual_PopulateNvIndexInfo(
+            handle, &tempIndex.publicArea, &tempIndex.authValue);
+        nvIndex = &tempIndex;
+    }
+    else
+    {
+        nvIndex = NvGetIndexInfo(handle, NULL);
+        if(nvIndex == NULL)
+        {
+            name->b.size = 0;  // set to empty reply.
+            return name;
+        }
+    }
+
     return NvGetIndexName(nvIndex, name);
 }
 
@@ -1624,6 +1655,10 @@ NvCapGetIndex(TPMI_DH_OBJECT handle,     // IN: start handle
         // used here.
         InsertSort(handleList, count, nvHandle);
     }
+
+    // Check virtual indices as well.
+    more |= _plat__NvVirtual_CapGetIndex(handle, count, handleList);
+
     return more;
 }
 
