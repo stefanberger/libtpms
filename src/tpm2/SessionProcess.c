@@ -351,6 +351,10 @@ static BOOL IsAuthValueAvailable(TPM_HANDLE    handle,        // IN: handle of e
                         NV_PIN pin;
                         if(!IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN))
                             break;  // return false
+
+                        if(locator == (NV_REF)0)
+                            break;  // return false
+
                         // get the index values
                         pin.intVal = NvGetUINT64Data(nvIndex, locator);
                         if(pin.pin.pinCount < pin.pin.pinLimit)
@@ -1509,6 +1513,8 @@ static TPM_RC CheckAuthSession(
         if(IsNvPinFailIndex(nvAttributes)
            && IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN))
         {
+            if(locator == (NV_REF)0)
+                return TPM_RC_AUTH_UNAVAILABLE;
             pinData.intVal = NvGetUINT64Data(nvIndex, locator);
             if(result != TPM_RC_SUCCESS)
                 pinData.pin.pinCount++;
@@ -1525,6 +1531,8 @@ static TPM_RC CheckAuthSession(
                 && IS_ATTRIBUTE(nvAttributes, TPMA_NV, WRITTEN)
                 && result == TPM_RC_SUCCESS)
         {
+            if(locator == (NV_REF)0)
+                return TPM_RC_AUTH_UNAVAILABLE;
             // If the access is valid, then increment the use counter
             pinData.intVal = NvGetUINT64Data(nvIndex, locator);
             pinData.pin.pinCount++;
