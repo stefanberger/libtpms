@@ -223,6 +223,11 @@ CommandDispatcher(COMMAND* command)
     // And the output parameters
     commandOut = (BYTE*)MemoryGetOutBuffer((UINT32)maxOutSize);
 
+    if(commandIn == NULL || commandOut == NULL)
+    {
+        return TPM_RC_FAILURE;
+    }
+
     // Get the address of the action code dispatch
     cmd = desc->command;
 
