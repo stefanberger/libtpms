@@ -8,6 +8,7 @@
 //** Includes
 
 #include "Tpm.h"
+#include "platform_virtual_nv_fp.h"
 
 //** Functions
 //*** EntityGetLoadStatus()
@@ -116,10 +117,14 @@ EntityGetLoadStatus(COMMAND* command  // IN/OUT: command parsing structure
                     result = TPM_RC_REFERENCE_H0;
                 break;
             case TPM_HT_NV_INDEX:
-                // For an NV Index, use the TPM-specific routine
+            {
+                // For an NV Index, use the platform-specific routine
                 // to search the IN Index space.
-                result = NvIndexIsAccessible(handle);
+                BOOL commandAcceptsVirtualHandles =
+                    _plat__NvOperationAcceptsVirtualHandles(command->index);
+                result = NvIndexIsAccessible(handle, commandAcceptsVirtualHandles);
                 break;
+            }
             case TPM_HT_PCR:
                 // Any PCR handle that is unmarshaled successfully referenced
                 // a PCR that is defined.
@@ -167,9 +172,11 @@ EntityGetAuthValue(TPMI_DH_ENTITY handle,  // IN: handle of entity
                    TPM2B_AUTH*    auth     // OUT: authValue of the entity
 )
 {
-    TPM2B_AUTH* pAuth = NULL;
+    TPM2B_AUTH* pAuth     = NULL;
+    NV_INDEX*   nvIndex   = NULL;
+    NV_INDEX    tempIndex = {0};
 
-    auth->t.size      = 0;
+    auth->t.size          = 0;
 
     switch(HandleGetType(handle))
     {
@@ -240,8 +247,18 @@ EntityGetAuthValue(TPMI_DH_ENTITY handle,  // IN: handle of entity
         case TPM_HT_NV_INDEX:
             // authValue for an NV index
             {
-                NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
-                pAssert(nvIndex != NULL);
+                if(_plat__IsNvVirtualIndex(handle))
+                {
+                    _plat__NvVirtual_PopulateNvIndexInfo(
+                        handle, &tempIndex.publicArea, &tempIndex.authValue);
+                    nvIndex = &tempIndex;
+                }
+                else
+                {
+                    nvIndex = NvGetIndexInfo(handle, NULL);
+                }
+                pAssert_ZERO(nvIndex != NULL);
+
                 pAuth = &nvIndex->authValue;
             }
             break;
@@ -328,8 +345,23 @@ EntityGetAuthPolicy(TPMI_DH_ENTITY handle,     // IN: handle of entity
         case TPM_HT_NV_INDEX:
             // authPolicy for a NV index
             {
-                NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
-                pAssert(nvIndex != 0);
+                NV_INDEX* nvIndex   = NvGetIndexInfo(handle, NULL);
+                NV_INDEX  tempNvIndex = {0};
+                if(nvIndex == NULL)
+                {
+                    if(!_plat__IsNvVirtualIndex(handle))
+                    {
+                        FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, TPM_ALG_NULL);
+                    }
+                    else
+                    {
+                        _plat__NvVirtual_PopulateNvIndexInfo(
+                            handle, &tempNvIndex.publicArea, &tempNvIndex.authValue);
+                        nvIndex = &tempNvIndex;
+                    }
+                }
+                // nvIndex guaranteed non-null at this point.
+
                 *authPolicy = nvIndex->publicArea.authPolicy;
                 hashAlg     = nvIndex->publicArea.nameAlg;
             }
@@ -429,16 +461,35 @@ EntityGetHierarchy(TPMI_DH_ENTITY handle  // IN :handle of entity
             // hierarchy for NV index
             {
                 NV_INDEX* nvIndex = NvGetIndexInfo(handle, NULL);
-                pAssert(nvIndex != NULL);
+                if(nvIndex == NULL)
+                {
+                    if(!_plat__IsNvVirtualIndex(handle))
+                    {
+                        FAIL_IMMEDIATE(FATAL_ERROR_INTERNAL, TPM_RH_NULL);
+                    }
+                    else
+                    {
+                        NV_INDEX tempNvIndex = {0};
+                        _plat__NvVirtual_PopulateNvIndexInfo(
+                            handle, &tempNvIndex.publicArea, &tempNvIndex.authValue);
+                        nvIndex = &tempNvIndex;
+                    }
+                }
+                // nvIndex guaranteed non-null at this point.
 
                 // If only the platform can delete the index, then it is
                 // considered to be in the platform hierarchy, otherwise it
                 // is in the owner hierarchy.
-                if(IS_ATTRIBUTE(
+                if(nvIndex != NULL
+                   && IS_ATTRIBUTE(
                        nvIndex->publicArea.attributes, TPMA_NV, PLATFORMCREATE))
+                {
                     hierarchy = TPM_RH_PLATFORM;
+                }
                 else
+                {
                     hierarchy = TPM_RH_OWNER;
+                }
             }
             break;
         case TPM_HT_TRANSIENT:
