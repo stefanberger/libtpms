@@ -64,7 +64,7 @@
 #define UNMARSHAL_FP_H
 
 #include "Tpm.h"
-#include "TpmTypes.h"
+#include <tpm_public/TpmTypes.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -13,6 +13,26 @@ AM_CFLAGS = -I$(top_srcdir)/include $(SANITIZERS)
 AM_LDFLAGS = -no-undefined $(SANITIZERS)
 LDADD = $(top_builddir)/src/libtpms.la
 
+HEADER_CFLAGS = \
+	-I$(top_srcdir)/include/libtpms \
+	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/tpm2 \
+	-I$(top_srcdir)/src/tpm2/crypto/openssl \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/Platform/include/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/Simulator/include/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/Simulator/include/prototypes \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/TpmConfiguration \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/include/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/include/private \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/include/private/prototypes/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/common/include/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/TpmBigNum/include/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/TpmBigNum/include/TpmBigNum/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/Ossl/ \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/Ossl/include \
+	-I$(top_srcdir)/src/tpm2/TPMCmd/tpm/cryptolibs/Ossl/include/Ossl
+
 check_PROGRAMS = \
 	base64decode
 
@@ -42,11 +62,7 @@ endif
 
 nvram_offsets_SOURCES = nvram_offsets.c
 nvram_offsets_CFLAGS = $(AM_CFLAGS) \
-	-I$(top_srcdir)/include/libtpms \
-	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/tpm2 \
-	-I$(top_srcdir)/src/tpm2/crypto \
-	-I$(top_srcdir)/src/tpm2/crypto/openssl \
+	$(HEADER_CFLAGS) \
 	-DTPM_POSIX
 nvram_offsets_LDFLAGS = $(AM_LDFLAGS)
 
@@ -62,12 +78,8 @@ TESTS += \
 
 object_size_SOURCES = object_size.c
 object_size_CFLAGS = $(AM_CFLAGS) \
+	$(HEADER_CFLAGS) \
 	-static \
-	-I$(top_srcdir)/include/libtpms \
-	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/src/tpm2 \
-	-I$(top_srcdir)/src/tpm2/crypto \
-	-I$(top_srcdir)/src/tpm2/crypto/openssl \
 	-DTPM_POSIX
 object_size_LDFLAGS = $(AM_LDFLAGS)
 endif # ENABLE_STATIC_TESTS

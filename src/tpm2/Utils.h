@@ -39,7 +39,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "Memory_fp.h"
+#include "prototypes/Memory_fp.h"
 
 #define TPM2_ROUNDUP(VAL, SIZE) \
   ( ( (VAL) + (SIZE) - 1) / (SIZE) ) * (SIZE)

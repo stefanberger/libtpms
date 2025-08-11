@@ -86,7 +86,9 @@ main()
 			continue
 		fi
 
-		upstream=$(find "${TCG_TPM_HOME}" | grep -E "/${fname}\$")
+		fn=${f:${#1}}
+		upstream="${TCG_TPM_HOME}/${fn}"
+		#echo "$upstream"
 
 		if [ -n "${upstream}" ]; then
 			# find first empty line presumably after license

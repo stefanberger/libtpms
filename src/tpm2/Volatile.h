@@ -39,7 +39,7 @@
 #ifndef VOLATILE_H
 #define VOLATILE_H
 
-#include "BaseTypes.h"
+#include <tpm_public/BaseTypes.h>
 
 TPM_RC VolatileState_Load(BYTE **buffer, INT32 *size);
 UINT16 VolatileState_Save(BYTE **buffer, INT32 *size);
