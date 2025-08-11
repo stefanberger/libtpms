@@ -56,7 +56,7 @@
 #include "Simulator_fp.h"
 #include "BackwardsCompatibilityBitArray.h"
 #include "BackwardsCompatibilityObject.h"
-#include "platform_failure_mode_fp.h"
+#include <platform_interface/prototypes/platform_failure_mode_fp.h>
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"

@@ -40,15 +40,10 @@
 
 #include <stdint.h>
 
-#include "tpm2/Tpm.h"
-#include "tpm2/TpmTypes.h"
-#include "tpm2/TpmBuildSwitches.h"
-#include "tpm2/_TPM_Hash_Start_fp.h"
-#include "tpm2/_TPM_Hash_Data_fp.h"
-#include "tpm2/_TPM_Hash_End_fp.h"
-#include "tpm2/TpmTcpProtocol.h"
-#include "tpm2/Platform_fp.h"
-#include "tpm2/Simulator_fp.h"
+#include "Tpm.h"
+#include "TpmTcpProtocol.h"
+#include "Platform_fp.h"
+#include "Simulator_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"

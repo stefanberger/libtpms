@@ -42,7 +42,7 @@
 #include <stdbool.h>
 
 #include "Tpm.h"
-#include "TpmTypes.h"
+#include "tpm_public/TpmTypes.h"
 #include "RuntimeProfile_fp.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))

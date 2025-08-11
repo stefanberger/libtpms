@@ -40,7 +40,7 @@
 #define BACKWARDS_COMPATIBILITY_BIT_ARRAY_H
 
 #include "Tpm.h"
-#include "TpmTypes.h"
+#include <tpm_public/TpmTypes.h>
 
 TPM_RC
 ConvertFromCompressedBitArray(BYTE         *inAuditCommands,

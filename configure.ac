@@ -11,7 +11,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE([foreign 1.6 subdir-objects])
+AM_INIT_AUTOMAKE([foreign 1.9 subdir-objects tar-pax])
 AM_SILENT_RULES([yes])
 
 LIBTPMS_VER_MAJOR=`echo $PACKAGE_VERSION | awk -F. '{print $1}'`
