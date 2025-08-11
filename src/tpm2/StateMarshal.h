@@ -40,7 +40,7 @@
 #define STATE_MARSHAL_H
 
 #include "Tpm.h"
-#include "TpmTypes.h"
+#include <tpm_public/TpmTypes.h>
 
 /*
  * we keep these in a separate file to avoid symbol clashes when

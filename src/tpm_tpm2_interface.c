@@ -44,21 +44,15 @@
 #ifndef LIB_EXPORT
 #define LIB_EXPORT
 #endif
-#include "tpm2/Tpm.h"
-#include "tpm2/Manufacture_fp.h"
-#include "tpm2/Platform_fp.h"
-#include "tpm2/ExecCommand_fp.h"
-#include "tpm2/TpmTcpProtocol.h"
-#include "tpm2/Simulator_fp.h"
-#include "tpm2/_TPM_Hash_Data_fp.h"
-#include "tpm2/_TPM_Init_fp.h"
-#include "tpm2/StateMarshal.h"
-#include "tpm2/PlatformACT.h"
-#include "tpm2/PlatformData.h"
-#include "tpm2/PlatformInternal.h"
-#include "tpm2/Volatile.h"
-#include "tpm2/crypto/openssl/ExpDCache_fp.h"
-#include "tpm2/platform_failure_mode_fp.h"
+
+#include "Tpm.h"
+#include <TpmTcpProtocol.h>
+#include <Simulator_fp.h>
+#include "PlatformData.h"
+#include "PlatformInternal.h"
+#include "StateMarshal.h"
+#include "Volatile.h"
+#include "ExpDCache_fp.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_nvfile.h" // TPM_NVRAM_Loaddata()
