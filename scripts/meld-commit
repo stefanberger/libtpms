@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+SKIP_FILES="(CMakeLists.txt|.cmake|CMakePresets.json|Makefile.am|configure.ac)$"
+
+if [ ! -d "$1" ]; then
+	echo "$1 is not a directory"
+	exit 1
+fi
+
+COMMIT="$2"
+if [ -z "$2" ]; then
+	echo "2nd parameter must be a commit id. Not given, so assuming 'HEAD'"
+	COMMIT="HEAD"
+fi
+
+if [ -z "${TCG_TPM_HOME}" ]; then
+	echo "TCG_TPM_HOME must be set to the TCG TPM repo checkout."
+	exit 1
+fi
+
+if [ ! -d "${TCG_TPM_HOME}" ]; then
+	echo "TCG_TPM_HOME must point to a directory."
+	exit 1
+fi
+
+set -x
+LIBTPMS_ROOT="$PWD"
+
+pushd "${TCG_TPM_HOME}" >/dev/null || exit 1
+
+git checkout "${COMMIT}" || exit 1
+
+for fname in $(git diff-tree --no-commit-id --name-only "${COMMIT}" -r); do
+	if [[ $(basename "${fname}") =~ ${SKIP_FILES} ]]; then
+		continue
+	fi
+	mkdir -p "$(dirname "${LIBTPMS_ROOT}/${1}/${fname}")"
+	touch "${LIBTPMS_ROOT}/${1}/${fname}"
+	meld "${fname}" "${LIBTPMS_ROOT}/${1}/${fname}"
+	if [ $(stat -c%s "${LIBTPMS_ROOT}/${1}/${fname}") -eq 0 ]; then
+		rm -f "${LIBTPMS_ROOT}/${1}/${fname}"
+	fi
+done
