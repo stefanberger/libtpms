@@ -1014,12 +1014,14 @@ typedef struct state_clear_data
     // The set of PCR to be saved on Shutdown(STATE)
     PCR_SAVE pcrSave;  // default reset is 0...0
 
+#  if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     // This structure hold the authorization values for those PCR that have an
     // update authorization.
     // This implementation only supports a single group of PCR controlled by
     // authorization. If more are required, then this structure would be changed to
     // an array.
     PCR_AUTHVALUE pcrAuthValues;
+#  endif
 
 #ifndef __ACT_DISABLED	// libtpms added
 //*****************************************************************************
