@@ -87,6 +87,7 @@ typedef int socklen_t;
 #  include <unistd.h>
 #  include <errno.h>
 #  include <netinet/in.h>
+#  include <netinet/tcp.h>
 #  include <sys/socket.h>
 #  include <pthread.h>
 // simulate certain windows APIs
