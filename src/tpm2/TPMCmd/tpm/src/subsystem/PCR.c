@@ -17,6 +17,7 @@
 //** Includes, Defines, and Data Definitions
 #define PCR_C
 #include "Tpm.h"
+#include <tpm_public/GpMacros.h>
 
 // verify values from pcrstruct.h. not <= because group #0 is reserved
 // indicating no auth/policy support
@@ -59,7 +60,8 @@ BOOL PCRBelongsAuthGroup(TPMI_DH_PCR handle,     // IN: handle of PCR
         pAssert_BOOL(*groupIndex < NUM_AUTHVALUE_PCR_GROUP);
         return TRUE;
     }
-
+#else
+    NOT_REFERENCED(handle);
 #endif
     return FALSE;
 }
@@ -95,6 +97,8 @@ BOOL PCRBelongsPolicyGroup(
         pAssert_BOOL(*groupIndex < NUM_POLICY_PCR_GROUP);
         return TRUE;
     }
+#else
+    NOT_REFERENCED(handle);
 #endif
     return FALSE;
 }
@@ -114,6 +118,7 @@ static BOOL PCRBelongsTCBGroup(TPMI_DH_PCR handle  // IN: handle of PCR
         _platPcr__GetPcrInitializationAttributes(pcr);
     return currentPcrAttributes.doNotIncrementPcrCounter;
 #else
+    NOT_REFERENCED(handle);
     return FALSE;
 #endif
 }
@@ -137,6 +142,7 @@ BOOL PCRPolicyIsAvailable(TPMI_DH_PCR handle  // IN: PCR handle
 TPM2B_AUTH* PCRGetAuthValue(TPMI_DH_PCR handle  // IN: PCR handle
 )
 {
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     UINT32 groupIndex;
 
     if(PCRBelongsAuthGroup(handle, &groupIndex))
@@ -144,6 +150,9 @@ TPM2B_AUTH* PCRGetAuthValue(TPMI_DH_PCR handle  // IN: PCR handle
         return &gc.pcrAuthValues.auth[groupIndex];
     }
     else
+#else
+    NOT_REFERENCED(handle);
+#endif
     {
         return NULL;
     }
@@ -158,6 +167,7 @@ PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
                  TPM2B_DIGEST* policy   // OUT: policy of PCR
 )
 {
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     UINT32 groupIndex;
 
     if(PCRBelongsPolicyGroup(handle, &groupIndex))
@@ -166,6 +176,9 @@ PCRGetAuthPolicy(TPMI_DH_PCR   handle,  // IN: PCR handle
         return gp.pcrPolicies.hashAlg[groupIndex];
     }
     else
+#else
+    NOT_REFERENCED(handle);
+#endif
     {
         policy->t.size = 0;
         return TPM_ALG_NULL;
@@ -213,7 +226,9 @@ void PCRManufacture(void)
     }
 
     // Store the initial configuration to NV
+#if defined NUM_AUTHVALUE_PCR_GROUP && NUM_AUTHVALUE_PCR_GROUP > 0
     NV_SYNC_PERSISTENT(pcrPolicies);
+#endif
     NV_SYNC_PERSISTENT(pcrAllocated);
 
     return;
