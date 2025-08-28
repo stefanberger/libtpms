@@ -1131,7 +1131,7 @@ UINT16 OSSLCryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
     size_t      buffer_size = 0;
     UINT16      generated = 0;
     size_t      offset = 0;
-    EVP_KDF_CTX *ctx;
+    EVP_KDF_CTX *ctx = NULL;
     EVP_KDF     *kdf;
     char        *buffer;
     INT16       bytes;  // number of bytes to generate
@@ -1197,6 +1197,7 @@ UINT16 OSSLCryptKDFe(TPM_ALG_ID   hashAlg,  // IN: hash algorithm used in HMAC
     generated = bytes;
 
 out:
+    EVP_KDF_CTX_free(ctx);
     EVP_KDF_free(kdf);
     free(buffer);
 
