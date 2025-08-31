@@ -70,6 +70,7 @@ Ubuntu:
 - gcc
 - libc-dev
 - libssl-dev
+- pkg-config
 
 To build for freebl (TPM 1.2 support only), the following development
 packages must have been installed prior to compilation:
