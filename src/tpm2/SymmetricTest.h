@@ -125,7 +125,7 @@ const SYMMETRIC_TEST_VECTOR c_symTestValues[NUM_SYMS + 1] = {
       dataOut_SM4128_OFB,
       dataOut_SM4128_CBC,
       dataOut_SM4128_CFB,
-      dataOut_SM4128_ECB}},
+      dataOut_AES128_ECB}},
 #  endif
 // libtpms added begin
 #if ALG_TDES && TDES_128

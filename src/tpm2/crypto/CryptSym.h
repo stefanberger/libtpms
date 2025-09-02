@@ -135,8 +135,6 @@ typedef union tpmCryptKeySchedule_t {
 
 #define DECRYPT(keySchedule, in, out) decrypt(SWIZZLE(keySchedule, in, out))
 
-#define FINAL(keySchedule) final((void *)(keySchedule)) // libtpms added
-
 // Note that the macros rely on 'encrypt' as local values in the
 // functions that use these macros. Those parameters are set by the macro that
 // set the key schedule to be used for the call.
@@ -145,13 +143,11 @@ typedef union tpmCryptKeySchedule_t {
     case TPM_ALG_##ALG:                                                   \
         TpmCryptSetEncryptKey##ALG(key, keySizeInBits, &keySchedule.alg); \
         encrypt = (TpmCryptSetSymKeyCall_t)TpmCryptEncrypt##ALG;          \
-        final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;          \
-        break; // libtpms changed
+        break;
 #define DECRYPT_CASE(ALG, alg)                                            \
     case TPM_ALG_##ALG:                                                   \
         TpmCryptSetDecryptKey##ALG(key, keySizeInBits, &keySchedule.alg); \
         decrypt = (TpmCryptSetSymKeyCall_t)TpmCryptDecrypt##ALG;          \
-        final = (TpmCryptSymFinal_t)TpmCryptFinal##ALG;                   \
-        break;  // libtpms changed
+        break;
 
 #endif  // CRYPT_SYM_H
