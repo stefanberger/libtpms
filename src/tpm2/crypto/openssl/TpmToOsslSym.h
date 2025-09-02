@@ -80,20 +80,23 @@
 #if ALG_SM4
 #  if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
 #    error "Current version of OpenSSL doesn't support SM4"
-#   //elif OPENSSL_VERSION_NUMBER >= 0x10200000L		// libtpms deactivated
-#   //    include <openssl/sm4.h>				// libtpms deactivated
+#   elif OPENSSL_VERSION_NUMBER >= 0x10200000L
+#       include <openssl/sm4.h>
 #   else
-#       include <openssl/evp.h>					// libtpms changed begin
-        typedef EVP_CIPHER_CTX* SM4_KEY;
-#       define SM4_ENCRYPT 1
-#       define SM4_DECRYPT 0
+// OpenSSL 1.1.1 keeps smX.h headers in the include/crypto directory,
+// and they do not get installed as part of the libssl package
 
-int SM4_set_encrypt_key(const uint8_t *key, SM4_KEY *ks);
-int SM4_set_decrypt_key(const uint8_t *key, SM4_KEY *ks);	// libtpms changed end
+#       define SM4_KEY_SCHEDULE  32
+
+typedef struct SM4_KEY_st {
+    uint32_t rk[SM4_KEY_SCHEDULE];
+} SM4_KEY;
+
+int SM4_set_key(const uint8_t *key, SM4_KEY *ks);
 void SM4_encrypt(const uint8_t* in, uint8_t* out, const SM4_KEY* ks);
 void SM4_decrypt(const uint8_t* in, uint8_t* out, const SM4_KEY* ks);
-void SM4_final(const SM4_KEY *ks);				// libtpms added
-#  endif  // OpenSSL < 1.2
+void SM4_final(const SM4_KEY *ks);
+#   endif // OpenSSL < 1.2
 #endif    // ALG_SM4
 
 #if ALG_CAMELLIA
@@ -121,7 +124,6 @@ void SM4_final(const SM4_KEY *ks);				// libtpms added
 // and decryption.
 typedef void (*TpmCryptSetSymKeyCall_t)(const BYTE* in, BYTE* out, void* keySchedule);
 
-typedef void(*TpmCryptSymFinal_t)(void *keySchedule); /* libtpms added */
 #define SYM_ALIGNMENT   4 /* libtpms: keep old value */
 
 //***************************************************************
@@ -144,7 +146,6 @@ typedef void(*TpmCryptSymFinal_t)(void *keySchedule); /* libtpms added */
 #define TpmCryptEncryptAES AES_encrypt
 #define TpmCryptDecryptAES AES_decrypt
 #define tpmKeyScheduleAES  AES_KEY
-#define TpmCryptFinalAES   NULL  // libtpms added
 
 #define TpmCryptSetEncryptKeyTDES(key, keySizeInBits, schedule)		\
     TDES_set_encrypt_key((key), (keySizeInBits), (tpmKeyScheduleTDES *)(schedule))
@@ -154,7 +155,6 @@ typedef void(*TpmCryptSymFinal_t)(void *keySchedule); /* libtpms added */
 #define TpmCryptEncryptTDES         TDES_encrypt
 #define TpmCryptDecryptTDES         TDES_decrypt
 #define tpmKeyScheduleTDES          DES_key_schedule
-#define TpmCryptFinalTDES           NULL  // libtpms added
 
 #if ALG_TDES  // libtpms added begin
 #include "TpmToOsslDesSupport_fp.h"
@@ -165,16 +165,15 @@ typedef void(*TpmCryptSymFinal_t)(void *keySchedule); /* libtpms added */
 //***************************************************************
 // Macros to set up the encryption/decryption key schedules
 #define TpmCryptSetEncryptKeySM4(key, keySizeInBits, schedule) \
-    SM4_set_encrypt_key((key), (tpmKeyScheduleSM4 *)(schedule)) /* libtpms changed */
+    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
 #define TpmCryptSetDecryptKeySM4(key, keySizeInBits, schedule) \
-    SM4_set_decrypt_key((key), (tpmKeyScheduleSM4 *)(schedule)) /* libtpms changed */
+    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
 
 // Macros to alias encryption calls to specific algorithms. This should be used
 // sparingly.
 #define TpmCryptEncryptSM4 SM4_encrypt
 #define TpmCryptDecryptSM4 SM4_decrypt
 #define tpmKeyScheduleSM4  SM4_KEY
-#define TpmCryptFinalSM4   SM4_final // libtpms added
 
 //***************************************************************
 //** Links to the OpenSSL CAMELLIA code
@@ -190,7 +189,6 @@ typedef void(*TpmCryptSymFinal_t)(void *keySchedule); /* libtpms added */
 #define TpmCryptEncryptCAMELLIA Camellia_encrypt
 #define TpmCryptDecryptCAMELLIA Camellia_decrypt
 #define tpmKeyScheduleCAMELLIA  CAMELLIA_KEY
-#define TpmCryptFinalCAMELLIA            NULL // libtpms added
 
 // Forward reference
 

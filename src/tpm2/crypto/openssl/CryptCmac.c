@@ -117,7 +117,6 @@ void CryptCmacData(SMAC_STATES* state, UINT32 size, const BYTE* buffer)
     UINT16                  keySizeInBits = cmacState->keySizeBits;
     tpmCryptKeySchedule_t   keySchedule;
     TpmCryptSetSymKeyCall_t encrypt;
-    TpmCryptSymFinal_t      final; /* libtpms added */
     //
     memset(&keySchedule, 0, sizeof(keySchedule)); /* libtpms added: coverity */
     // Set up the encryption values based on the algorithm
@@ -140,8 +139,6 @@ void CryptCmacData(SMAC_STATES* state, UINT32 size, const BYTE* buffer)
             cmacState->iv.t.buffer[cmacState->bcount] ^= *buffer++;
         }
     }
-    if (final)			// libtpms added begin
-        FINAL(&keySchedule);	// libtpms added end
 }
 
 //*** CryptCmacEnd()
@@ -158,7 +155,6 @@ CryptCmacEnd(SMAC_STATES* state, UINT32 outSize, BYTE* outBuffer)
     UINT16                  keySizeInBits = cState->keySizeBits;
     tpmCryptKeySchedule_t   keySchedule;
     TpmCryptSetSymKeyCall_t encrypt;
-    TpmCryptSymFinal_t      final; // libtpms added
     TPM2B_IV                subkey = {{0, {0}}};
     BOOL                    xorVal;
     UINT16                  i;
@@ -204,8 +200,6 @@ MUST_BE(MAX_SYM_BLOCK_SIZE == 16);				// libtpms added begin: gcc -Wstringop-ove
     i = (UINT16)MIN(cState->iv.t.size, outSize);
     MemoryCopy(outBuffer, cState->iv.t.buffer, i);
 
-    if (final)				// libtpms added begin
-	FINAL(&keySchedule);		// libtpms added end
     return i;
 }
 #endif

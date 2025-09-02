@@ -176,7 +176,6 @@ LIB_EXPORT TPM_RC CryptSymmetricEncrypt(
     TpmCryptSetSymKeyCall_t encrypt;
     BYTE*                   iv;
     BYTE                    defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    TpmCryptSymFinal_t      final; // libtpms added
     //
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
     memset((void *)&keySchedule, 0, sizeof(keySchedule));	/* silence false positive; coverity */
@@ -299,12 +298,8 @@ LIB_EXPORT TPM_RC CryptSymmetricEncrypt(
             break;
 #endif
         default:
-            if (final)			// libtpms added begin
-                FINAL(&keySchedule);	// libtpms added end
             return TPM_RC_FAILURE;
     }
-    if (final)				// libtpms added begin
-        FINAL(&keySchedule);		// libtpms added end
     return TPM_RC_SUCCESS;
 }
 
@@ -337,8 +332,6 @@ LIB_EXPORT TPM_RC CryptSymmetricDecrypt(
     TpmCryptSetSymKeyCall_t encrypt;
     TpmCryptSetSymKeyCall_t decrypt;
     BYTE                    defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    TpmCryptSymFinal_t      final; /* libtpms added */
-
 
     memset((void *)&keySchedule, 0, sizeof(keySchedule));	/* silence false positive; coverity */
     memset(tmp, 0, sizeof(tmp));
@@ -485,12 +478,8 @@ LIB_EXPORT TPM_RC CryptSymmetricDecrypt(
             break;
 #endif
         default:
-            if (final)			/* libtpms added begin */
-                FINAL(&keySchedule);	/* libtpms added end */
             return TPM_RC_FAILURE;
     }
-    if (final)				/* libtpms added begin */
-        FINAL(&keySchedule);		/* libtpms added end */
     return TPM_RC_SUCCESS;
 }
 

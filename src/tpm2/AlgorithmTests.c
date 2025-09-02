@@ -884,7 +884,7 @@ TestAlgorithm(TPM_ALG_ID alg, ALGORITHM_VECTOR* toTest)
 #  if ALG_SM4
                 // if SM4 is implemented, its test is like other block ciphers but there
                 // aren't any test vectors for it yet
-            case TPM_ALG_SM4: /* libtpms changed */
+                //            case TPM_ALG_SM4:
 #  endif  // ALG_SM4
 #  if ALG_CAMELLIA
             /* fallthrough */
