@@ -5,7 +5,7 @@
 #
 
 AM_CFLAGS = @AM_CFLAGS@
-AM_LDFLAGS = @AM_LDFLAGS@ $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER) 
+AM_LDFLAGS = @AM_LDFLAGS@ $(HARDENING_LDFLAGS) $(SANITIZERS) $(FUZZER)
 noinst_LTLIBRARIES =
 noinst_HEADERS =
 
@@ -156,7 +156,7 @@ libtpms_tpm12_la_CFLAGS += $(shell nss-config --cflags)
 #including nss3/blapi.h requires a look into nspr4 dir
 libtpms_tpm12_la_CFLAGS += $(shell nspr-config --cflags)
 
-else 
+else
 
 if LIBTPMS_USE_OPENSSL
 
