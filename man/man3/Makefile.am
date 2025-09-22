@@ -60,10 +60,18 @@ man3_MANS_generated = \
 
 man3_MANS += $(man3_MANS_generated)
 
+# Ensure the build is reproducible, for details see:
+# https://reproducible-builds.org/docs/source-date-epoch/
 %.3 : %.pod
-	@pod2man -r "libtpms" \
+	@if test -n "$$SOURCE_DATE_EPOCH"; then \
+		BUILD_DATE=$$(date +%F --utc --date="@$$SOURCE_DATE_EPOCH"); \
+	else \
+		BUILD_DATE=$$(date +%F); \
+	fi; \
+	pod2man -r "libtpms" \
 		-c "" \
 		-n $(basename $@) \
+		--date="$$BUILD_DATE" \
 		--section=3 $< > $@
 
 EXTRA_DIST = $(man3_MANS) $(man3_PODS)
