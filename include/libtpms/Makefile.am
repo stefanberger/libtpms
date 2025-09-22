@@ -13,3 +13,5 @@ libtpmsinclude_HEADERS = \
 	tpm_nvfilename.h \
 	tpm_tis.h \
 	tpm_types.h
+
+CLEANFILES = tpm_error.h.gch tpm_library.h.gch
