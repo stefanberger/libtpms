@@ -21,7 +21,7 @@ B<TPM_RESULT TPMLIB_RegisterCallbacks(struct tpmlibrary_callbacks *);>
 
 =head1 DESCRIPTION
 
-The B<TPMLIB_RegisterCallbacks()> functions allows to register several
+The B<TPMLIB_RegisterCallbacks()> functions allows callers to register several
 callback functions with libtpms that enable a user to implement customized
 behavior of several library-internal functions. This feature will typically
 be used if the behavior of the provided internal functions is not as needed.

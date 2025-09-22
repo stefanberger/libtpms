@@ -16,8 +16,8 @@ B<uint32_t TPMLIB_ValidateState(TPMLIB_StateType st,
 
 =head1 DESCRIPTION
 
-The B<TPMLIB_ValidateState()> function allows to validate the
-state blobs that the TPM would read upon B<TPMLIB_MainInit()> or
+The B<TPMLIB_ValidateState()> function allows the caller to validate
+the state blobs that the TPM would read upon B<TPMLIB_MainInit()> or
 once the TPM_Startup command has been sent to it.
 
 This function is useful for TPM state migration between possibly
