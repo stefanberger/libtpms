@@ -668,7 +668,7 @@ check-local:
 	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
-	 ($(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null || \
+	 [[ "$(host_cpu)" =~ "powerpc64" ]] || ($(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null || \
 	 (echo "There are undefined symbols in libtpms ($$LDFLAGS_OS $(LDFLAGS_ARCH))";\
 	  $(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>&1 | grep libtpms))
 	@case $(host_os) in \
@@ -676,7 +676,7 @@ check-local:
 	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
-	$(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null
+	[[ "$(host_cpu)" =~ "powerpc64" ]] || $(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>/dev/null
 	rm a.out || true
 
 EXTRA_DIST = \
