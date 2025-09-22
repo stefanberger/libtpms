@@ -14,8 +14,8 @@ B<char *TPMLIB_GetInfo(TPMLIB_InfoFlags flags);>
 
 =head1 DESCRIPTION
 
-The B<TPMLIB_GetInfo()> function allows to query for TPM implementation
-specifics and get a JSON string in return. Which data is to be returned
+The B<TPMLIB_GetInfo()> function allows the caller to query for TPM implementation
+specifics and to get a JSON string in return. Which data is to be returned
 can be specified in the flags parameter that may be a logical 'or' concatenation
 of flags. If passed flags are not supported, nothing is returned . If a 0 is
 passed in, an empty JSON Object '{}' is returned.

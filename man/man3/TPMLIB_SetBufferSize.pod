@@ -16,7 +16,7 @@ B<uint32_t TPMLIB_SetBufferSize(uint32_t, uint32_t *, uint32_t *);>
 
 The B<TPMLIB_SetBufferSize()> function sets the size of the buffer
 the TPM can use for input and output and that it advertises to users.
-It also allows to get the minimum and maximum supported buffer
+It also allows users to get the minimum and maximum supported buffer
 size.
 
 If 0 is given on input, the currently used buffer size is returned.

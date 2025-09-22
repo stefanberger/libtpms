@@ -45,7 +45,7 @@ libtpms to version 0.9 from a later version.
 
 Profiles with the prefix 'default' enable as many algorithms and commands
 as possible. The 'default-v1' profile, introduced with libtpms v0.10, allows
-to run with libtpms v0.10 and later but will not allow to downgrade to
+to run with libtpms v0.10 and later but will not allow downgrading to
 earlier versions of libtpms, such as v0.9.
 
 A profile is a JSON map in string format. It must contain the 'Name'
@@ -204,8 +204,8 @@ This I<StateFormatLevel> enabled 4096-bit RSA.
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.
 In this case the given I<StateFormatLevel> serves as the maximum
 I<StateFormatLevel> that the given algorithms and commands may require
-(e.g., '2' would not allow to enable the command ECC_Encrypt, which
-requires '3') or allows to enable key sizes, such as AES-192, when for
+(e.g., '2' would not allow enabling the command ECC_Encrypt, which
+requires '3') or allows enabling key sizes, such as AES-192, when for
 example I<StateFormatLevel> '4' is given. If I<StateFormatLevel> '3'
 is given then AES-192 will not be enabled.
 
