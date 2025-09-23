@@ -67,3 +67,4 @@ Makefile
 /debian/libtpms-dev
 /debian/libtpms0
 /debian/tmp
+/include/libtpms/tpm_library.h
