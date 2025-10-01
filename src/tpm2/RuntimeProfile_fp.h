@@ -96,4 +96,6 @@ BOOL
 RuntimeProfileRequiresAttributeFlags(struct RuntimeProfile *RuntimeProfile,
                                      unsigned int           attributeFlags);
 
+unsigned int get_MAX_NV_INDEX_SIZE_by_SFL(unsigned int sfl);
+
 #endif /* RUNTIME_PROFILE_H */

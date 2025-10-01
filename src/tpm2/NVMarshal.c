@@ -3901,7 +3901,7 @@ static const struct _entry {
     { COMPILE_CONSTANT(NUM_AUTHVALUE_PCR_GROUP, EQ) },
     { COMPILE_CONSTANT(MAX_CONTEXT_SIZE, LE) }, /* old: 2474 */
     { COMPILE_CONSTANT(MAX_DIGEST_BUFFER, EQ) },
-    { COMPILE_CONSTANT(MAX_NV_INDEX_SIZE, EQ) },
+    { COMPILE_CONSTANT(2048, EQ) }, /* was MAX_NV_INDEX_SIZE (2048) up to SFL 8 */
     { COMPILE_CONSTANT(MAX_NV_BUFFER_SIZE, EQ) },
     { COMPILE_CONSTANT(MAX_CAP_BUFFER, EQ) },
     { COMPILE_CONSTANT(NV_MEMORY_SIZE, LE) },
@@ -4955,7 +4955,7 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     /*
                      * datasize cannot exceed MAX_NV_INDEX_SIZE (2048 bytes)
                      */
-                    if (datasize > MAX_NV_INDEX_SIZE) {
+                    if (datasize > get_MAX_NV_INDEX_SIZE_by_SFL(g_RuntimeProfile.stateFormatLevel)) {
                         TPMLIB_LogTPM2Error("datasize for NV_INDEX too "
                                             "large: %u\n", datasize);
                         rc = TPM_RC_SIZE;
