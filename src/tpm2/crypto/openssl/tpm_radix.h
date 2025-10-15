@@ -64,15 +64,7 @@
 
 #ifdef TPM_POSIX                       // libtpms added begin
 # include <openssl/bn.h>
-# ifdef THIRTY_TWO_BIT
-#  define RADIX_BITS                     32
-# endif
-# ifdef SIXTY_FOUR_BIT_LONG
-#  define RADIX_BITS                     64
-# endif
-# ifndef RADIX_BITS
-#  error Need to determine RADIX_BITS value
-# endif
+# define RADIX_BITS BN_BITS2
 #endif
 #ifdef TPM_WINDOWS
 #define  RADIX_BITS                      32
