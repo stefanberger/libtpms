@@ -87,7 +87,7 @@
 //#define MAX_CONTEXT_SIZE           2168
 #define MAX_CONTEXT_SIZE           2680	/* libtpms: changed for RSA-3072 */
 #define MAX_DIGEST_BUFFER          1024
-#define MAX_NV_INDEX_SIZE          2048
+#define MAX_NV_INDEX_SIZE          (10 * 1024) /* libtpms: changed; SFL 9 use get_MAX_NV_INDEX_SIZE_by_SFL() */
 #define MAX_NV_BUFFER_SIZE         1024
 #define MAX_CAP_BUFFER             1024
 /* libtmps: 65 OBJECTs in USER NVRAM expanded by 704 bytes due to size
