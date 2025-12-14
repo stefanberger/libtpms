@@ -622,7 +622,7 @@ LIB_EXPORT BOOL BnEccModMult2(bigPoint            R,  // OUT: computed point
         EC_POINT_mul(E->G, pR, bnD, pQ, bnU, E->CTX);
     else
     {
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L || (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x4010000fL)
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
          EC_POINT *pR1 = EC_POINT_new(E->G);
          EC_POINT *pR2 = EC_POINT_new(E->G);
          int OK;

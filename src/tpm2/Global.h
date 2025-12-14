@@ -992,7 +992,7 @@ typedef struct orderly_data
 #  endif                   // ACCUMULATE_SELF_HEAL_TIMER
 
 #ifndef __ACT_DISABLED	// libtpms added
-#error ACT not supported in ORDERLY_DATA!
+#error ACT not suported in ORDERLY_DATA!
 // These are the ACT Timeout values. They are saved with the other timers
 #  define DefineActData(N) ACT_STATE ACT_##N;
     FOR_EACH_ACT(DefineActData)
