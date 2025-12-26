@@ -1,0 +1,1 @@
+subdir('man3')
