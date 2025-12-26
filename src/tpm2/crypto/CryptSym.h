@@ -106,9 +106,7 @@
 typedef union tpmCryptKeySchedule_t {
     FOR_EACH_SYM_WITHOUT_TDES(KEY_SCHEDULE)	/* libtpms changed from FOR_EACH_SYM */
 
-#if ALG_TDES					// libtpms added
     tpmKeyScheduleTDES  tdes[3];		/* libtpms added */
-#endif						// libtpms added
 
 #if SYMMETRIC_ALIGNMENT == 8
     uint64_t alignment;
