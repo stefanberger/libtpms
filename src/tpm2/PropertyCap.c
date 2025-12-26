@@ -196,7 +196,7 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
             break;
         case TPM_PT_NV_INDEX_MAX:
             // maximum size of an NV index data area
-            *value = MAX_NV_INDEX_SIZE;
+            *value = get_MAX_NV_INDEX_SIZE_by_SFL(g_RuntimeProfile.stateFormatLevel); // libtpms changed
             break;
         case TPM_PT_MEMORY:
             // a TPMA_MEMORY indicating the memory management method for the TPM

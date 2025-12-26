@@ -78,7 +78,7 @@ static const struct RuntimeProfileDesc {
      * This basically locks the name of the profile to the stateFormatLevel.
      */
     unsigned int stateFormatLevel;
-#define STATE_FORMAT_LEVEL_CURRENT 8
+#define STATE_FORMAT_LEVEL_CURRENT 9
 #define STATE_FORMAT_LEVEL_UNKNOWN 0 /* JSON didn't provide StateFormatLevel; this is only
 					allowed for the 'default' profile or when user
 					passed JSON via SetProfile() */
@@ -106,6 +106,7 @@ static const struct RuntimeProfileDesc {
  *      - pct
  *      - no-ecc-key-derivation
  *  8 : Enabled 4096-bit RSA support
+ *  9 : MAX_NV_INDEX_SIZE was increased to 10kb
  */
     const char *description;
 #define DESCRIPTION_MAX_SIZE        250
@@ -990,8 +991,8 @@ RuntimeProfileGetSeedCompatLevel(void)
     case 1: /* profile runs on v0.9 */
 	return SEED_COMPAT_LEVEL_RSA_PRIME_ADJUST_FIX;
 
-    case 2 ... 8: /* profile runs on v0.10 */ {
-	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 8); // force update when this changes
+    case 2 ... 9: /* profile runs on v0.10 */ {
+	MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 9); // force update when this changes
 	return SEED_COMPAT_LEVEL_LAST;
     }
 
@@ -1006,4 +1007,25 @@ RuntimeProfileRequiresAttributeFlags(struct RuntimeProfile *RuntimeProfile,
 {
     return RuntimeAttributeCheckRequired(&RuntimeProfile->RuntimeAttributes,
 					 attributeFlags);
+}
+
+LIB_EXPORT unsigned int
+get_MAX_NV_INDEX_SIZE_by_SFL(unsigned int stateFormatLevel)
+{
+    unsigned int size;
+
+    switch (stateFormatLevel) {
+    case 0 ... 8:
+         size = 2048;
+         break;
+    case 9:
+         MUST_BE(STATE_FORMAT_LEVEL_CURRENT == 9); // force update when this changes
+         size = MAX_NV_INDEX_SIZE;
+         break;
+
+    default:
+	FAIL(FATAL_ERROR_INTERNAL);
+    }
+    pAssert(size <= MAX_NV_INDEX_SIZE);
+    return size;
 }
