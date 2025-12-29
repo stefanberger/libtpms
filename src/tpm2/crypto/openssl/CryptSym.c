@@ -520,6 +520,18 @@ static void TDES_CTR(const BYTE *key,            // IN
 }
 #endif
 
+static TPM_RC CryptSymmetricGetUpdatedIV(EVP_CIPHER_CTX *ctx, TPM2B_IV *ivOut)
+{
+    int len = EVP_CIPHER_CTX_get_iv_length(ctx);
+
+    if (len < 0 || (size_t)len > sizeof(ivOut->t.buffer))
+        return TPM_RC_FAILURE;
+
+    ivOut->t.size = len;
+
+    return DoEVPGetUpdatedIV(ctx, ivOut->t.buffer, ivOut->t.size);
+}
+
 /* 10.2.20.5 Symmetric Encryption */
 /* This function performs symmetric encryption based on the mode. */
 /* Error Returns Meaning */
@@ -615,6 +627,9 @@ CryptSymmetricEncrypt(
 
     if (EVP_EncryptFinal_ex(ctx, pOut + outlen1, &outlen2) != 1)
         ERROR_EXIT(TPM_RC_FAILURE);
+
+    if (ivInOut)
+        retVal = CryptSymmetricGetUpdatedIV(ctx, ivInOut);
 
  Exit:
     if (retVal == TPM_RC_SUCCESS && pOut != dOut)
@@ -728,6 +743,9 @@ CryptSymmetricDecrypt(
         ERROR_EXIT(TPM_RC_FAILURE);
 
     pAssert((int)buffersize >= outlen1 + outlen2);
+
+    if (ivInOut)
+        retVal = CryptSymmetricGetUpdatedIV(ctx, ivInOut);
 
  Exit:
     if (retVal == TPM_RC_SUCCESS) {

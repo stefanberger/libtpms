@@ -346,11 +346,10 @@ GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     return GetCachedEVPCipher(evpfn, algIdx, mode, i);
 }
 
-TPM_RC DoEVPGetIV(
-                  EVP_CIPHER_CTX    *ctx,    // IN: required context
-                  unsigned char     *iv,     // IN: pointer to buffer for IV
-                  size_t             iv_len  // IN: size of the buffer
-                  )
+TPM_RC DoEVPGetUpdatedIV(EVP_CIPHER_CTX    *ctx,    // IN: required context
+                         unsigned char     *iv,     // IN: pointer to buffer for IV
+                         size_t             iv_len  // IN: size of the buffer
+                        )
 {
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
     OSSL_PARAM params[] = {

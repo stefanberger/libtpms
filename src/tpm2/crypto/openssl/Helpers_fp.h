@@ -79,11 +79,10 @@ const EVP_CIPHER *GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 			       UINT16       *keyToUseLen      // IN/OUT
 			      );
 
-TPM_RC DoEVPGetIV(
-                  EVP_CIPHER_CTX    *ctx,    // IN: required context
-                  unsigned char     *iv,     // IN: pointer to buffer for IV
-                  size_t             iv_len  // IN: size of the buffer
-                  );
+TPM_RC DoEVPGetUpdatedIV(EVP_CIPHER_CTX    *ctx,    // IN: required context
+                         unsigned char     *iv,     // IN: pointer to buffer for IV
+                         size_t             iv_len  // IN: size of the buffer
+                         );
 
 #endif
 
