@@ -112,6 +112,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libtpms.la
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Jan 02 2026 Stefan Berger - 0.10.2-1
+- tpm2: Fix memory leak by freeing KDF context
+- tpm2: Fix retrieval of updated IV when using OpenSSL >= 3.0 (CVE-2026-21444)
+
 * Tue Jun 10 2025 Stefan Berger - 0.10.1-1
 - tpm2: Fix potential out-of-bound access & abort due to HMAC signing issue (CVE-2025-49133)
 - tpm2: fix build for LibreSSL 4.1.0
