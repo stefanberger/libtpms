@@ -435,7 +435,7 @@ static unsigned char *TPMLIB_GetPlaintext(const char *stream,
                                           const char *endtag,
                                           size_t *length)
 {
-    char *start, *end;
+    const char *start, *end;
     unsigned char *plaintext = NULL;
 
     start = strstr(stream, starttag);
