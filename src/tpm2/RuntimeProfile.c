@@ -351,13 +351,13 @@ RuntimeProfileGetFromJSON(const char  *json,
     }
 
     *value = strndup(&json[match[1].rm_so], match[1].rm_eo - match[1].rm_so);
-    if (removeDuplicates)
-        RuntimeProfileDedupStrItems(*value);
-
     if (*value == NULL) {
 	retVal= TPM_RC_MEMORY;
 	goto exit;
     }
+    if (removeDuplicates)
+        RuntimeProfileDedupStrItems(*value);
+
     retVal = TPM_RC_SUCCESS;
 
 exit:
