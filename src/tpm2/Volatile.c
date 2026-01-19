@@ -48,7 +48,7 @@
 #include "config.h"
 
 #include "assert.h"
-#include "NVMarshal.h"
+#include "Marshal.h"
 #include "Volatile.h"
 #include "RuntimeAlgorithm_fp.h"
 

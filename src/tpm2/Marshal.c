@@ -63,7 +63,7 @@
 #include <string.h>
 
 #include "Tpm.h"
-#include "Marshal_fp.h"
+#include "Marshal.h"
 
 UINT16
 UINT8_Marshal(UINT8 *source, BYTE **buffer, INT32 *size)

@@ -61,6 +61,7 @@
 #ifndef MARSHAL_FP_H
 #define MARSHAL_FP_H
 
+#include "Tpm.h"
 #include "TpmTypes.h"
 
 #ifdef __cplusplus
