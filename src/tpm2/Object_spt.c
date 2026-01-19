@@ -62,7 +62,6 @@
 #include "Tpm.h"
 #include "Object_spt_fp.h"
 #include "Marshal.h"
-#include "TpmTypes.h"		// kgold
 
 //** Local Functions
 
