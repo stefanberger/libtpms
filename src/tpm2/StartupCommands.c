@@ -61,7 +61,6 @@
 
 #include "Tpm.h"
 // TODO_RENAME_INC_FOLDER:platform_interface refers to the TPM_CoreLib platform interface
-#include "PlatformACT_fp.h"		/* added kgold */
 #include "_TPM_Init_fp.h"
 #include "StateMarshal.h"   /* libtpms added */
 
