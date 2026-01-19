@@ -192,7 +192,7 @@ typedef void (*TpmCryptSetSymKeyCall_t)(const BYTE* in, BYTE* out, void* keySche
 
 // Forward reference
 
-// kgold typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
+typedef union tpmCryptKeySchedule_t tpmCryptKeySchedule_t;
 
 // This definition would change if there were something to report
 #define SymLibSimulationEnd()
