@@ -1856,7 +1856,7 @@ NvCapGetCounterAvail(void)
             availNVSpace -= reserved;
     }
     // Compute the available space in RAM
-    availRAMSpace = (RAM_ORDERLY_END - NvRamGetEnd());	/* kgold - removed cast */
+    availRAMSpace = (UINT32)(RAM_ORDERLY_END - NvRamGetEnd());	/* libtpms: fixed cast from 'int' */
 
     // Return the min of counter number in NV and in RAM
     if(availNVSpace / NV_INDEX_COUNTER_SIZE
