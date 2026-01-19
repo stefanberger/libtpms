@@ -155,11 +155,9 @@ TPM_INLINE const TPMBN_ECC_CURVE_CONSTANTS* AccessCurveConstants(
 #define OSSL_ENTER() BN_CTX* CTX = OsslContextEnter()
 #define OSSL_LEAVE() OsslContextLeave(CTX)
 
-#if 0	/* kgold not used */
 // Start and end a local stack frame within the context of the curve frame
 #define ECC_ENTER() BN_CTX* CTX = OsslPushContext(E->CTX)
 #define ECC_LEAVE() OsslPopContext(CTX)
-#endif
 
 #define BN_NEW() BnNewVariable(CTX)
 
