@@ -133,7 +133,6 @@ static int NvFileCommit(void)
 // and SEEK_END => to the end of the file.
 static long NvFileSize(int leaveAt)
 {
-    int	 irc;	/* kgold, added return code checks */
     long fileSize;
     long filePos;
     //
@@ -154,8 +153,7 @@ static long NvFileSize(int leaveAt)
             filePos = 0;
           /* fall through */
         case SEEK_CUR:
-            irc = fseek(s_NvFile, filePos, SEEK_SET);
-            assert(irc == 0);
+            assert(fseek(s_NvFile, filePos, SEEK_SET) == 0); // libtpms: added assert
             break;
         case SEEK_END:
             break;
