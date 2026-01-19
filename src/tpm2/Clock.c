@@ -96,17 +96,10 @@ ClockGetTime(
                clockid_t clk_id
                )
 {
-    uint64_t           time;
-#ifdef TPM_WINDOWS
-#error Not supported for TPM_WINDOWS
-#else
     struct timespec     systime;
 
     clock_gettime(clk_id, &systime);
-    time = (uint64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
-#endif
-
-    return time;
+    return (uint64_t)systime.tv_sec * 1000 + (systime.tv_nsec / 1000000);
 }
 
 /* ClockAdjustPostResume -- adjust time parameters post resume */
@@ -175,12 +168,11 @@ clock_t debugTime;
 LIB_EXPORT uint64_t _plat__RealTime(void)
 {
     clock64_t time;
-    //#ifdef _MSC_VER	kgold		// libtpms changed begin
-#ifdef TPM_WINDOWS
+#ifdef _MSC_VER
     #include <sys/timeb.h>		// libtpms changed end
     struct _timeb sysTime;
     //
-    _ftime(&sysTime);	/* kgold, mingw doesn't have _ftime_s */
+    _ftime_s(&sysTime);
     time = (clock64_t)(sysTime.time) * 1000 + sysTime.millitm;
     // set the time back by one hour if daylight savings
     if(sysTime.dstflag)

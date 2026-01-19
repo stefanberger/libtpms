@@ -65,10 +65,9 @@
 #ifdef TPM_POSIX                       // libtpms added begin
 # include <openssl/bn.h>
 # define RADIX_BITS BN_BITS2
+#else
+# error Target platform is not supported
 #endif
-#ifdef TPM_WINDOWS
-#define  RADIX_BITS                      32
-#endif                                 // libtpms added end
 
 #ifndef RADIX_BITS
 #  if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__)                 \
