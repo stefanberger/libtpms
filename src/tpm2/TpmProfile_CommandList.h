@@ -195,7 +195,7 @@
 #define CC_PolicySigned               CC_YES
 #define CC_PolicyTemplate             CC_YES
 #define CC_PolicyTicket               CC_YES
-#define CC_Policy_AC_SendSelect       CC_NO	/* kgold *//* libtpms: NO */
+#define CC_Policy_AC_SendSelect       CC_NO	/* libtpms: NO */
 #define CC_Quote                      CC_YES
 #define CC_RSA_Decrypt                (CC_YES && ALG_RSA)
 #define CC_RSA_Encrypt                (CC_YES && ALG_RSA)
@@ -221,12 +221,5 @@
 #define CC_NV_DefineSpace2            CC_NO	/* libtpms: NO */
 #define CC_NV_ReadPublic2             CC_NO	/* libtpms: NO */
 #define CC_SetCapability              CC_NO	/* libtpms: NO */
-
-/* kgold */
-#if 0						// libtpms: added
-#define CC_NTC2_PreConfig             CC_YES
-#define CC_NTC2_LockPreConfig         CC_YES
-#define CC_NTC2_GetConfig             CC_YES
-#endif						// libtpms: added
 
 #endif  // _TPM_PROFILE_COMMAND_LIST_H_
