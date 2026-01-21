@@ -657,6 +657,7 @@ noinst_HEADERS += \
 	tpm2/TPMCmd/tpm/cryptolibs/Ossl/include/Ossl/TpmToOsslHash.h \
 	tpm2/TPMCmd/tpm/cryptolibs/Ossl/include/Ossl/TpmToOsslSupport_fp.h \
 	tpm2/TPMCmd/tpm/cryptolibs/Ossl/include/Ossl/TpmToOsslSym.h \
+	tpm2/TPMCmd/tpm/cryptolibs/Ossl/include/Ossl/TpmToOsslSymTDES.h \
 	tpm2/TPMCmd/tpm/cryptolibs/TpmBigNum/include/TpmBigNum/TpmToTpmBigNumMath.h \
 	tpm2/TPMCmd/tpm/include/private/LibSupport.h \
 	tpm2/TPMCmd/tpm/include/tpm_public/tpm_radix.h
