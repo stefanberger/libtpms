@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// SPDX-License-Identifier: BSD-2-Clause
 
 // Private platform internal functions
 
