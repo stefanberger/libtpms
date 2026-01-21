@@ -45,7 +45,6 @@ BOOL CryptSymStartup(void)
 //  Return Type: INT16
 //   <= 0     cipher not supported
 //   > 0      the cipher block size in bytes
-
 LIB_EXPORT INT16 CryptGetSymmetricBlockSize(
     TPM_ALG_ID symmetricAlg,  // IN: the symmetric algorithm
     UINT16     keySizeInBits  // IN: the key size

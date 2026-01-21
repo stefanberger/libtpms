@@ -68,8 +68,13 @@
 
 #include <stddef.h>
 
-//** From Cancel.c
+#if ALLOW_FORCE_FAILURE_MODE
+// From Failure.c
+// allow simulator to force the TPM into failure mode.
+LIB_EXPORT void _plat__SetForceFailureMode();
+#endif
 
+//** From Cancel.c
 // Set cancel flag.
 LIB_EXPORT void _plat__SetCancel(void);
 

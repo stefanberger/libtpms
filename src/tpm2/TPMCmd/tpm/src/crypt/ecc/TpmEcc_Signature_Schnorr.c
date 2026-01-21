@@ -148,7 +148,6 @@ TPM_RC TpmEcc_SignEcSchnorr(
         SchnorrReduce(e, order);
         // Convert hash to number
         TpmMath_IntFrom2B(bnR, e);
-        // libtpms: Note: e is NOT a concern for constant-timeness
         // Do the Schnorr computation
         retVal = TpmEcc_SchnorrCalculateS(
             bnS, bnK, bnR, bnD, ExtEcc_CurveGetOrder(ExtEcc_CurveGetCurveId(E)));

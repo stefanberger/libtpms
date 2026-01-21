@@ -79,10 +79,10 @@
 #define     CAMELLIA_192                (YES * ALG_CAMELLIA) /* since libtpms v0.10 stateFormatLevel 4 */
 #define     CAMELLIA_256                (YES * ALG_CAMELLIA)
 
-#define ALG_TDES                        ALG_YES /* libtpms enabled */
+#define ALG_TDES                        ALG_YES 		/* libtpms added begin; enabled */
 
 #define     TDES_128                    (ALG_TDES && YES)
-#define     TDES_192                    (ALG_TDES && YES)
+#define     TDES_192                    (ALG_TDES && YES)	/* libtpms added end */
 
 // must be yes if any above are yes.
 #define ALG_SYMCIPHER               (ALG_AES || ALG_SM4 || ALG_CAMELLIA)
@@ -152,7 +152,7 @@
 #define ALG_SHA256                          ALG_YES
 #define ALG_SHA256_192                      ALG_NO
 #define ALG_SHA384                          ALG_YES
-#define ALG_SHA512                          ALG_YES
+#define ALG_SHA512                          ALG_YES	// libtpms: enabled
 
 #define ALG_SHA3_256                        ALG_NO
 #define ALG_SHA3_384                        ALG_NO
@@ -271,6 +271,8 @@
 //***********************************************
 // Defines controlling secure channel functionality
 //***********************************************
+// This flag enables support for PolicyTransportSPDM.
+// See CC_PolicyTransportSPDM.
 #define SEC_CHANNEL_SUPPORT                   NO	// libtpms: NO
 
 #endif // _TPM_PROFILE_COMMON_H_

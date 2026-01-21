@@ -86,7 +86,7 @@ uint64_t ClockGetTime(clockid_t clk_id);
 					// libtpms: added end
 
 //** From DebugHelpers.c
-	
+
 #if CERTIFYX509_DEBUG
 
 #if 0					// libtpms: added

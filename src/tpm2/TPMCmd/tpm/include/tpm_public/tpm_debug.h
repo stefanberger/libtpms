@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+
 #ifndef _TPM_DEBUG_H_
 #define _TPM_DEBUG_H_
 

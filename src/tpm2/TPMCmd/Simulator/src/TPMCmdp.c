@@ -126,7 +126,7 @@ void _rpc__Signal_PowerOff(void)
 void _rpc__ForceFailureMode(void)
 {
 #if SIMULATION
-    SetForceFailureMode();
+    _plat__SetForceFailureMode();
 #endif
     return;
 }

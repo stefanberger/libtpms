@@ -83,11 +83,11 @@
 #else
 #  define IF_IMPLEMENTED_CAMELLIA(op)
 #endif
-#if ALG_TDES
+#if ALG_TDES				// libtpms added begin
 #   define IF_IMPLEMENTED_TDES(op)    op(TDES, tdes)
 #else
 #   define IF_IMPLEMENTED_TDES(op)
-#endif
+#endif					// libtpms added end
 
 #define FOR_EACH_SYM(op)   \
     IF_IMPLEMENTED_AES(op) \
@@ -112,9 +112,9 @@ typedef union tpmCryptKeySchedule_t {
     uint64_t alignment;
 #else
     uint32_t alignment;
-# if defined(__x86_64__)
+# if defined(__x86_64__)	// libtpms added begin
 # error Bad SYMMETRIC_ALIGNMENT
-# endif
+# endif				// libtpms added end
 #endif
 } tpmCryptKeySchedule_t;
 

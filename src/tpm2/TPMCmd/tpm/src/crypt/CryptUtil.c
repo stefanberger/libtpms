@@ -1369,7 +1369,6 @@ BOOL CryptIsAsymSignScheme(TPMI_ALG_PUBLIC      publicType,  // IN: Type of the 
 #  endif
             switch(scheme)
             {
-                // Support for ECDSA is required for ECC
                 case TPM_ALG_ECDSA:
 #  if ALG_ECDAA  // ECDAA is optional
                 case TPM_ALG_ECDAA:
