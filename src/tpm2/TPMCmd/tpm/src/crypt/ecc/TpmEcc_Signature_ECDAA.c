@@ -136,7 +136,6 @@ TPM_RC TpmEcc_SignEcdaa(
                 CryptDigestUpdate2B(&state, &digest->b);
                 CryptHashEnd2B(&state, &T.b);
                 TpmMath_IntFrom2B(bnT, &T.b);
-                // libtpms: Note: T is NOT a concern for constant-timeness
                 // Watch out for the name collisions in this call!!
                 retVal = TpmEcc_SchnorrCalculateS(
                     bnS,

@@ -362,8 +362,6 @@
             goto Error;       \
     } while(0)
 
-#include "MinMax.h"
-
 #ifndef IsOdd
 #  define IsOdd(a) (((a) & 1) != 0)
 #endif

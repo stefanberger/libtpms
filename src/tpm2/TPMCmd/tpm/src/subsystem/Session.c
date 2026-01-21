@@ -643,7 +643,7 @@ SessionContextLoad(SESSION_BUF* session,  // IN: session structure from saved co
             break;
 
     // if no spot found, then this is an internal error
-    pAssert(slotIndex < MAX_LOADED_SESSIONS);
+    pAssert_RC(slotIndex < MAX_LOADED_SESSIONS);
 
     // libtpms: besides the s_freeSessionSlots guard add another array index guard
     if (slotIndex >= MAX_LOADED_SESSIONS) {	// libtpms added begin; cppcheck

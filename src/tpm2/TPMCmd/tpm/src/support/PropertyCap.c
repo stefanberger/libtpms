@@ -292,10 +292,7 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
         case TPM_PT_TOTAL_COMMANDS:
             // total number of commands implemented in the TPM
             {
-#if COMPRESSED_LISTS										// libtpms changed begin
-                (*value) = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands); 	// libtpms changed: was COMMAND_COUNT
-#else
-                COMMAND_INDEX commandIndex;
+                COMMAND_INDEX commandIndex;		// libtpms changed begin
                 *value = 0;
 
                 // scan all implemented commands
@@ -304,17 +301,13 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                     commandIndex = GetNextCommandIndex(commandIndex))
                 {
                     (*value)++;  // count of all implemented
-                }
-#endif												// libtpms changed end
+                }					// libtpms changed end
                 break;
             }
         case TPM_PT_LIBRARY_COMMANDS:
             // number of commands from the TPM library that are implemented
             {
-#if COMPRESSED_LISTS										// libtpms changed begin
-                *value = RuntimeCommandsCountEnabled(&g_RuntimeProfile.RuntimeCommands);	// libtpms changed: was LIBRARY_COMMAND_ARRAY_SIZE
-#else
-                COMMAND_INDEX commandIndex;
+                COMMAND_INDEX commandIndex;		// libtpms changed begin
                 *value = 0;
 
                 // scan all implemented commands
@@ -323,8 +316,7 @@ static BOOL TPMPropertyIsDefined(TPM_PT  property,  // IN: property
                     commandIndex = GetNextCommandIndex(commandIndex))
                 {
                     (*value)++;
-                }
-#endif												// libtpms changed end
+                }					// libtpms changed end
                 break;
             }
         case TPM_PT_VENDOR_COMMANDS:

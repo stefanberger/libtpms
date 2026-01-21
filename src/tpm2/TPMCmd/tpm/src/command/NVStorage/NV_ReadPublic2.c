@@ -45,4 +45,3 @@ TPM2_NV_ReadPublic2(NV_ReadPublic2_In*  in,  // IN: input parameter list
 }
 
 #endif  // CC_NV_ReadPublic2
-

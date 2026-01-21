@@ -59,6 +59,7 @@
 /********************************************************************************/
 
 
+
 // This file contains the interface into the platform layer from external callers.
 // External callers are expected to be implementation specific, and may be a simulator
 // or some other implementation
@@ -68,8 +69,13 @@
 
 #include <stddef.h>
 
-//** From Cancel.c
+#if ALLOW_FORCE_FAILURE_MODE
+// From Failure.c
+// allow simulator to force the TPM into failure mode.
+LIB_EXPORT void _plat__SetForceFailureMode();
+#endif
 
+//** From Cancel.c
 // Set cancel flag.
 LIB_EXPORT void _plat__SetCancel(void);
 
