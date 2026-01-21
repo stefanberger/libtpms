@@ -993,6 +993,7 @@ typedef UINT32 TPMA_ALGORITHM;
 typedef UINT32 TPMA_OBJECT;
 #define TPMA_OBJECT_fixedTPM             (TPMA_OBJECT)(1 << 1)
 #define TPMA_OBJECT_stClear              (TPMA_OBJECT)(1 << 2)
+#define TPMA_OBJECT_fixedFirmware        (TPMA_OBJECT)(1 << 3)
 #define TPMA_OBJECT_fixedParent          (TPMA_OBJECT)(1 << 4)
 #define TPMA_OBJECT_sensitiveDataOrigin  (TPMA_OBJECT)(1 << 5)
 #define TPMA_OBJECT_userWithAuth         (TPMA_OBJECT)(1 << 6)
@@ -1778,7 +1779,7 @@ typedef struct
     TPM2B_AUTH   hmac;
 } TPMS_AUTH_RESPONSE;
 
-typedef TPM_KEY_BITS TPMI_TDES_KEY_BITS;
+typedef TPM_KEY_BITS TPMI_TDES_KEY_BITS;		// libtpms added
 typedef TPM_KEY_BITS TPMI_AES_KEY_BITS;       // (Part 2: Structures)
 typedef TPM_KEY_BITS TPMI_SM4_KEY_BITS;       // (Part 2: Structures)
 typedef TPM_KEY_BITS TPMI_CAMELLIA_KEY_BITS;  // (Part 2: Structures)

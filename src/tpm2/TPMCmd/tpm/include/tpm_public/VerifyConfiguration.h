@@ -95,4 +95,10 @@ MUST_BE_0_OR_1(VENDOR_PERMANENT_AUTH_ENABLED);
 #  endif
 #endif
 
+MUST_BE_0_OR_1(SEC_CHANNEL_SUPPORT);
+MUST_BE_0_OR_1(CC_PolicyTransportSPDM);
+#if SEC_CHANNEL_SUPPORT != CC_PolicyTransportSPDM
+#  error SEC_CHANNEL_SUPPORT and CC_PolicyTransportSPDM must have the same value
+#endif
+
 #endif  // _VERIFY_CONFIGURATION_H

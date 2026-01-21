@@ -80,7 +80,7 @@ bool PlatformServer(SOCKET s);
 //*** PlatformSvcRoutine()
 // This function is called to set up the socket interfaces to listen for
 // commands.
-int  PlatformSvcRoutine(LPVOID port);
+DWORD WINAPI PlatformSvcRoutine(LPVOID port);
 
 //*** PlatformSignalService()
 // This function starts a new thread waiting for platform signals.
@@ -88,13 +88,13 @@ int  PlatformSvcRoutine(LPVOID port);
 // received.
 // If PickPorts is true, the server finds the next available port if the specified
 // port was unavailable.
-int PlatformSignalService(int *PortNumberPlatform);
+int PlatformSignalService(int PortNumber, bool PickPorts);
 
 //*** RegularCommandService()
 // This function services regular commands.
 // If PickPorts is true, the server finds the next available port if the specified
 // port was unavailable.
-int RegularCommandService(int *PortNumber);
+int RegularCommandService(int PortNumber, bool PickPorts);
 
 //*** StartTcpServer()
 // This is the main entry-point to the TCP server.  The server listens on the port
@@ -103,8 +103,7 @@ int RegularCommandService(int *PortNumber);
 // port was unavailable.
 //
 // Note that there is no way to specify the network interface in this implementation.
-int StartTcpServer(int *PortNumber, int *PortNumberPlatform);
-
+int StartTcpServer(int PortNumber, bool PickPorts);
 
 //*** ReadBytes()
 // This function reads the indicated number of bytes ('NumBytes') into buffer
