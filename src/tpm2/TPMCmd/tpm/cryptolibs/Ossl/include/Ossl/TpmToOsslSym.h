@@ -1,62 +1,4 @@
-/********************************************************************************/
-/*										*/
-/*		Splice the OpenSSL() library into the TPM code.    		*/
-/*			     Written by Ken Goldman				*/
-/*		       IBM Thomas J. Watson Research Center			*/
-/*										*/
-/*  Licenses and Notices							*/
-/*										*/
-/*  1. Copyright Licenses:							*/
-/*										*/
-/*  - Trusted Computing Group (TCG) grants to the user of the source code in	*/
-/*    this specification (the "Source Code") a worldwide, irrevocable, 		*/
-/*    nonexclusive, royalty free, copyright license to reproduce, create 	*/
-/*    derivative works, distribute, display and perform the Source Code and	*/
-/*    derivative works thereof, and to grant others the rights granted herein.	*/
-/*										*/
-/*  - The TCG grants to the user of the other parts of the specification 	*/
-/*    (other than the Source Code) the rights to reproduce, distribute, 	*/
-/*    display, and perform the specification solely for the purpose of 		*/
-/*    developing products based on such documents.				*/
-/*										*/
-/*  2. Source Code Distribution Conditions:					*/
-/*										*/
-/*  - Redistributions of Source Code must retain the above copyright licenses, 	*/
-/*    this list of conditions and the following disclaimers.			*/
-/*										*/
-/*  - Redistributions in binary form must reproduce the above copyright 	*/
-/*    licenses, this list of conditions	and the following disclaimers in the 	*/
-/*    documentation and/or other materials provided with the distribution.	*/
-/*										*/
-/*  3. Disclaimers:								*/
-/*										*/
-/*  - THE COPYRIGHT LICENSES SET FORTH ABOVE DO NOT REPRESENT ANY FORM OF	*/
-/*  LICENSE OR WAIVER, EXPRESS OR IMPLIED, BY ESTOPPEL OR OTHERWISE, WITH	*/
-/*  RESPECT TO PATENT RIGHTS HELD BY TCG MEMBERS (OR OTHER THIRD PARTIES)	*/
-/*  THAT MAY BE NECESSARY TO IMPLEMENT THIS SPECIFICATION OR OTHERWISE.		*/
-/*  Contact TCG Administration (admin@trustedcomputinggroup.org) for 		*/
-/*  information on specification licensing rights available through TCG 	*/
-/*  membership agreements.							*/
-/*										*/
-/*  - THIS SPECIFICATION IS PROVIDED "AS IS" WITH NO EXPRESS OR IMPLIED 	*/
-/*    WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY OR 	*/
-/*    FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, COMPLETENESS, OR 		*/
-/*    NONINFRINGEMENT OF INTELLECTUAL PROPERTY RIGHTS, OR ANY WARRANTY 		*/
-/*    OTHERWISE ARISING OUT OF ANY PROPOSAL, SPECIFICATION OR SAMPLE.		*/
-/*										*/
-/*  - Without limitation, TCG and its members and licensors disclaim all 	*/
-/*    liability, including liability for infringement of any proprietary 	*/
-/*    rights, relating to use of information in this specification and to the	*/
-/*    implementation of this specification, and TCG disclaims all liability for	*/
-/*    cost of procurement of substitute goods or services, lost profits, loss 	*/
-/*    of use, loss of data or any incidental, consequential, direct, indirect, 	*/
-/*    or special damages, whether under contract, tort, warranty or otherwise, 	*/
-/*    arising in any way out of use or reliance upon this specification or any 	*/
-/*    information herein.							*/
-/*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2023				*/
-/*										*/
-/********************************************************************************/
+// SPDX-License-Identifier: BSD-2-Clause
 
 //** Introduction
 //
@@ -73,30 +15,27 @@
 #define SYM_LIB_OSSL
 
 #include <openssl/aes.h>
-#if ALG_TDES
-#include <openssl/des.h>
-#endif
 
 #if ALG_SM4
 #  if defined(OPENSSL_NO_SM4) || OPENSSL_VERSION_NUMBER < 0x10101010L
 #    error "Current version of OpenSSL doesn't support SM4"
-#   elif OPENSSL_VERSION_NUMBER >= 0x10200000L
-#       include <openssl/sm4.h>
-#   else
+#  elif OPENSSL_VERSION_NUMBER >= 0x10200000L
+#    include <openssl/sm4.h>
+#  else
 // OpenSSL 1.1.1 keeps smX.h headers in the include/crypto directory,
 // and they do not get installed as part of the libssl package
 
-#       define SM4_KEY_SCHEDULE  32
+#    define SM4_KEY_SCHEDULE 32
 
-typedef struct SM4_KEY_st {
+typedef struct SM4_KEY_st
+{
     uint32_t rk[SM4_KEY_SCHEDULE];
 } SM4_KEY;
 
-int SM4_set_key(const uint8_t *key, SM4_KEY *ks);
+int  SM4_set_key(const uint8_t* key, SM4_KEY* ks);
 void SM4_encrypt(const uint8_t* in, uint8_t* out, const SM4_KEY* ks);
 void SM4_decrypt(const uint8_t* in, uint8_t* out, const SM4_KEY* ks);
-void SM4_final(const SM4_KEY *ks);
-#   endif // OpenSSL < 1.2
+#  endif  // OpenSSL < 1.2
 #endif    // ALG_SM4
 
 #if ALG_CAMELLIA
@@ -147,27 +86,16 @@ typedef void (*TpmCryptSetSymKeyCall_t)(const BYTE* in, BYTE* out, void* keySche
 #define TpmCryptDecryptAES AES_decrypt
 #define tpmKeyScheduleAES  AES_KEY
 
-#define TpmCryptSetEncryptKeyTDES(key, keySizeInBits, schedule)		\
-    TDES_set_encrypt_key((key), (keySizeInBits), (tpmKeyScheduleTDES *)(schedule))
-#define TpmCryptSetDecryptKeyTDES(key, keySizeInBits, schedule)		\
-    TDES_set_encrypt_key((key), (keySizeInBits), (tpmKeyScheduleTDES *)(schedule))
-
-#define TpmCryptEncryptTDES         TDES_encrypt
-#define TpmCryptDecryptTDES         TDES_decrypt
-#define tpmKeyScheduleTDES          DES_key_schedule
-
-#if ALG_TDES  // libtpms added begin
-#include "TpmToOsslDesSupport_fp.h"
-#endif        // libtpms added end
+#include "TpmToOsslSymTDES.h" // libtpms added
 
 //***************************************************************
 //** Links to the OpenSSL SM4 code
 //***************************************************************
 // Macros to set up the encryption/decryption key schedules
 #define TpmCryptSetEncryptKeySM4(key, keySizeInBits, schedule) \
-    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
+    SM4_set_key((key), (tpmKeyScheduleSM4*)(schedule))
 #define TpmCryptSetDecryptKeySM4(key, keySizeInBits, schedule) \
-    SM4_set_key((key), (tpmKeyScheduleSM4 *)(schedule))
+    SM4_set_key((key), (tpmKeyScheduleSM4*)(schedule))
 
 // Macros to alias encryption calls to specific algorithms. This should be used
 // sparingly.
