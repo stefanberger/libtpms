@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-2-Clause
 
 /*(Auto-generated)
  *  Created by TpmPrototypes; Version 3.0 July 18, 2017
