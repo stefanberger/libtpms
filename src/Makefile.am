@@ -334,9 +334,6 @@ noinst_HEADERS += \
 	tpm2/TPMCmd/tpm/include/private/prototypes/CryptCmac_fp.h \
 	tpm2/CryptDes_fp.h \
 	tpm2/DebugHelpers_fp.h \
-	tpm2/PlatformACT_fp.h \
-	tpm2/Platform_fp.h \
-	tpm2/TcpServerPosix_fp.h \
 	tpm2/TPMCmd/Platform/include/PlatformACT.h \
 	tpm2/TPMCmd/Platform/include/PlatformClock.h \
 	tpm2/TPMCmd/Platform/include/PlatformData.h \
