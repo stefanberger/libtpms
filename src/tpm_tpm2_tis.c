@@ -42,8 +42,8 @@
 
 #include "Tpm.h"
 #include "TpmTcpProtocol.h"
-#include "Platform_fp.h"
 #include "Simulator_fp.h"
+#include "prototypes/platform_public_interface.h"
 
 #define TPM_HAVE_TPM2_DECLARATIONS
 #include "tpm_library_intern.h"
