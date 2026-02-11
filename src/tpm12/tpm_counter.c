@@ -408,6 +408,11 @@ TPM_RESULT TPM_CounterValue_StorePublic(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT	rc = 0;
 
     printf(" TPM_CounterValue_StorePublic:\n");
+    if (rc == 0) {
+        if (tpm_counter_value == NULL) { // -fanalyzer
+            rc = TPM_FAIL;
+        }
+    }
     /* store tag */
     if (rc == 0) {	
 	rc = TPM_Sbuffer_Append16(sbuffer, TPM_TAG_COUNTER_VALUE); 
