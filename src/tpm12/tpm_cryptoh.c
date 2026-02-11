@@ -2374,7 +2374,7 @@ TPM_RESULT TPM_CryptoTest(void)
     if (rc == 0) {
 	printf(" TPM_CryptoTest: Test 1 - SHA1 one part\n");
 	rc = TPM_SHA1(actual,
-		      sizeof(buffer1) - 1, buffer1,
+		      (uint32_t)sizeof(buffer1) - 1, buffer1,
 		      0, NULL);
     }
     if (rc == 0) {
@@ -2390,7 +2390,7 @@ TPM_RESULT TPM_CryptoTest(void)
 	printf(" TPM_CryptoTest: Test 2 - SHA1 two parts\n");
 	rc = TPM_SHA1(actual,
 		      16, buffer1,	/* first 16 */
-		      sizeof(buffer1) - 17, buffer1 + 16,	/* rest */
+		      (uint32_t)sizeof(buffer1) - 17, buffer1 + 16,	/* rest */
 		      0, NULL);
     }
     if (rc == 0) {
