@@ -182,6 +182,11 @@ TPM_RESULT TPM_AuthSessionData_Store(TPM_STORE_BUFFER *sbuffer,
     TPM_RESULT		rc = 0;
 
     printf(" TPM_AuthSessionData_Store:\n");
+    if (rc == 0) {
+        if (tpm_auth_session_data == NULL) { // -fanalyzer
+            rc = TPM_FAIL;
+        }
+    }
     /* store handle */
     if (rc == 0) {
 	rc = TPM_Sbuffer_Append32(sbuffer, tpm_auth_session_data->handle);
@@ -3047,10 +3052,10 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
     TPM_BOOL			transportEncrypt;	/* wrapped in encrypted transport session */
     TPM_STORE_BUFFER		b1_sbuffer;		/* serialization of b1 */
     TPM_STCLEAR_DATA		*v1StClearData = NULL;
-    TPM_KEY_HANDLE_ENTRY	*tpm_key_handle_entry;	/* key table entry for the handle */
+    TPM_KEY_HANDLE_ENTRY	*tpm_key_handle_entry = NULL;	/* key table entry for the handle */
     TPM_AUTH_SESSION_DATA	*tpm_auth_session_data = NULL; /* session table entry for the handle */
-    TPM_TRANSPORT_INTERNAL	*tpm_transport_internal; /* transport table entry for the handle */
-    TPM_DAA_SESSION_DATA	*tpm_daa_session_data;	/* daa session table entry for the handle */
+    TPM_TRANSPORT_INTERNAL	*tpm_transport_internal = NULL; /* transport table entry for the handle */
+    TPM_DAA_SESSION_DATA	*tpm_daa_session_data = NULL;	/* daa session table entry for the handle */
     TPM_NONCE			*n1ContextNonce = NULL;
     TPM_SYMMETRIC_KEY_TOKEN 	k1ContextKey = NULL;
     TPM_STORE_BUFFER		r1ContextSensitive; /* serialization of sensitive data clear text */
@@ -3180,6 +3185,11 @@ TPM_RESULT TPM_Process_SaveContext(tpm_state_t *tpm_state,
 	printf("TPM_Process_SaveContext: Locating nonce\n");
 	/* a. If resourceType is TPM_RT_KEY */
 	if (resourceType == TPM_RT_KEY) {
+	    if (returnCode == TPM_SUCCESS) {
+	        if (tpm_key_handle_entry == NULL) { // -fanalyzer
+	            returnCode = TPM_FAIL;
+	        }
+	    }
 	    if (returnCode == TPM_SUCCESS) {
 		/* i. If TPM_STCLEAR_DATA -> contextNonceKey is NULLS */
 		TPM_Nonce_IsZero(&isZero, tpm_state->tpm_stclear_data.contextNonceKey);
