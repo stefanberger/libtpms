@@ -5,6 +5,27 @@ SKIP_FILES="(Marshal.c|Marshal_fp.h)"
 
 NO_MELD_FLAG=$((1<<0))
 
+help()
+{
+	cat <<_EOF_
+Usage: TCG_TPM_HOME=... $1 [options] TPM2-directory
+
+The following options are available:
+
+--no-meld,--diff-only   : Only display diffs between files; the first two lines
+                          are related to the license and are ignore for the diff.
+--help                  : Display this help screen and exit.
+
+The environmet variable TCG_TPM_HOME must be set and point to
+the TCG TPM2 git checkout.
+
+Example:
+
+TCG_TPM_HOME=\$HOME/TPM $1 --diff-only src/tpm2
+
+_EOF_
+}
+
 main()
 {
 	local opts f fname upstream flags
@@ -74,14 +95,18 @@ main()
 				if [ $((flags & NO_MELD_FLAG)) -eq 0 ]; then
 					meld "${upstrean}" "${f}"
 				else
-					echo "Something wrong with file $f"
+					echo "Something is wrong with file $f"
 				fi
 			fi
 			line=$((line+1))
 			if [ $((flags & NO_MELD_FLAG)) -ne 0 ]; then
 				echo "============================================================================"
-				echo "${f}"
-				diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}"
+				if [ ! -f "${upstream}" ]; then
+					echo "${f}: file does not exist upstream"
+				else
+					echo "${f}"
+					diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}"
+				fi
 			fi
 			if ! diff --ignore-trailing-space <(sed -n "${line},\$p" < "${f}") "${upstream}" &>/dev/null; then
 				if [ $((flags & NO_MELD_FLAG)) -eq 0 ]; then
