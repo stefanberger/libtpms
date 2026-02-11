@@ -418,6 +418,9 @@ GetStateFormatLevelFromJSON(const char   *json,
     if (retVal)
 	return retVal;
 
+    if (!str) /* str==NULL cannot happen without retVal having been set; -fanalyzer issue */
+        return TPM_RC_FAILURE;
+
     errno = 0;
     v = strtoul(str, NULL, 10);
     if (v > UINT_MAX || errno) {
