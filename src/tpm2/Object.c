@@ -226,7 +226,10 @@ TPMI_RH_HIERARCHY
 GetHierarchy(TPMI_DH_OBJECT handle  // IN :object handle
 )
 {
-    return HandleToObject(handle)->hierarchy;
+    OBJECT *object = HandleToObject(handle);	// libtpms changed begin: -fanalyzer
+
+    pAssert(object);
+    return object->hierarchy;			// libtpms changed end
 }
 
 //*** FindEmptyObjectSlot()
