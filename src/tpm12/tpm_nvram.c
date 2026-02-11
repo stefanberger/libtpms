@@ -2896,6 +2896,11 @@ TPM_RESULT TPM_Process_NVDefineSpace(tpm_state_t *tpm_state,
     if (returnCode == TPM_SUCCESS) {
 	returnCode = TPM_NVIndexEntries_GetFreeEntry(&d1_new, &(tpm_state->tpm_nv_index_entries));
     }    
+    if (returnCode == TPM_SUCCESS) {
+        if (d1_new == NULL) { // -fanalyzer
+            returnCode = TPM_FAIL;
+        }
+    }
     /* get pubInfo parameter */
     if (returnCode == TPM_SUCCESS) {
 	pubInfo = &(d1_new->pubInfo);	/* pubInfo is an input parameter */
