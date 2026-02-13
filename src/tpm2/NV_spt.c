@@ -407,7 +407,7 @@ TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
     {
         case TPM_NT_ORDINARY:
             // Can't exceed the allowed size for the implementation
-            if(publicInfo->dataSize > MAX_NV_INDEX_SIZE)
+            if(publicInfo->dataSize > get_MAX_NV_INDEX_SIZE_by_SFL(g_RuntimeProfile.stateFormatLevel)) // libtpms changed
                 return TPM_RCS_SIZE + blamePublic;
             break;
         case TPM_NT_EXTEND:

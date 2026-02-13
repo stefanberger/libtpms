@@ -4762,7 +4762,7 @@ TPMS_NV_PUBLIC_Unmarshal(TPMS_NV_PUBLIC *target, BYTE **buffer, INT32 *size)
 	rc = UINT16_Unmarshal(&target->dataSize, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (target->dataSize > MAX_NV_INDEX_SIZE) {
+	if (target->dataSize > get_MAX_NV_INDEX_SIZE_by_SFL(g_RuntimeProfile.stateFormatLevel)) {
 	    rc = TPM_RC_SIZE;
 	    target->dataSize = 0; // libtpms added
 	}
@@ -4842,7 +4842,7 @@ TPMS_NV_PUBLIC_EXP_ATTR_Unmarshal(TPMS_NV_PUBLIC_EXP_ATTR *target, BYTE **buffer
 	rc = UINT16_Unmarshal(&target->dataSize, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-	if (target->dataSize > MAX_NV_INDEX_SIZE) {
+	if (target->dataSize > get_MAX_NV_INDEX_SIZE_by_SFL(g_RuntimeProfile.stateFormatLevel)) {
 	    rc = TPM_RC_SIZE;
 	}
     }
