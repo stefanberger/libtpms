@@ -88,7 +88,8 @@ B<TPM_VOLATILESTATE_NAME>, or B<TPM_PERMANENT_ALL_NAME> and indicates
 which one of the 3 types of state is supposed to be loaded.
 
 Upon success this function should return B<TPM_SUCCESS>, a failure code
-otherwise.
+otherwise. B<TPM_RETRY> is returned if no state file existed so far. It should
+not be treated as an error.
 
 The default implementation writes the TPM's state into files in a directory
 where the I<TPM_PATH> environment variable pointed to when
