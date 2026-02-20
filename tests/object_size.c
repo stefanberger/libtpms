@@ -27,7 +27,14 @@ int main(void)
                     .keyBits = 256,
                     .mode = TPM_ALG_ECB,
                 },
-                .scheme = TPM_ALG_RSAPSS,
+                .scheme = {
+                    .scheme = TPM_ALG_RSAPSS,
+                    .details = {
+                        .rsapss = {
+                            .hashAlg = TPM_ALG_SHA256,
+                        },
+                    },
+                },
                 .keyBits = MAX_RSA_KEY_BITS,
                 .exponent = 0x10001,
             },
