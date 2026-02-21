@@ -32,7 +32,6 @@ static TPM_RC CryptHmacSign(TPMT_SIGNATURE* signature,  // OUT: signature
     if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpms added begin
                                              TPM_ALG_HMAC,
                                              signKey->sensitive.sensitive.bits.t.size * 8,
-                                             TPM_ECC_NONE,
                                              g_RuntimeProfile.stateFormatLevel))
 	return TPM_RC_KEY_SIZE;							// libtpms added end
 
@@ -70,7 +69,6 @@ static TPM_RC CryptHMACVerifySignature(
     if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpm added begin
 					     TPM_ALG_HMAC,
 					     signKey->sensitive.sensitive.bits.t.size * 8,
-					     TPM_ECC_NONE,
 					     g_RuntimeProfile.stateFormatLevel))
 	return TPM_RC_KEY_SIZE;							// libtpms added end
 

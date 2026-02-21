@@ -534,13 +534,13 @@ RuntimeAlgorithmCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
  * it needs to be filtered-out so that the profile doesn't need an upgrade to
  * stateFormatLevel '4'.
  */
-LIB_EXPORT BOOL
-RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
-				    TPM_ALG_ID               algId,			// IN: the algorithm to check
-				    UINT16                   keySizeInBits,		// IN: size of the key in bits
-				    TPM_ECC_CURVE            curveId,			// IN: curve Id if algId == TPM_ALG_ECC
-				    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
-				    )
+static BOOL _RuntimeAlgorithmKeySizeCheckEnabled(
+    struct RuntimeAlgorithm *RuntimeAlgorithm,
+    TPM_ALG_ID               algId,			// IN: the algorithm to check
+    UINT16                   keySizeInBits,		// IN: size of the key in bits
+    unsigned int             maxStateFormatLevel,	// IN: maximum stateFormatLevel
+    TPM_ECC_CURVE            curveId			// IN: curve Id for TPM_ALG_ECC
+)
 {
     const struct KeySizes *keysizes;
     UINT16 minKeySize;
@@ -576,6 +576,41 @@ RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
     }
 
     return TRUE;
+}
+
+LIB_EXPORT BOOL
+RuntimeAlgorithmKeySizeCheckEnabled(
+    struct RuntimeAlgorithm *RuntimeAlgorithm,
+    TPM_ALG_ID               algId,			// IN: the algorithm to check
+    UINT16                   keySizeInBits,		// IN: size of the key in bits
+    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
+   )
+{
+    return _RuntimeAlgorithmKeySizeCheckEnabled(
+        RuntimeAlgorithm,
+        algId,
+        keySizeInBits,
+        maxStateFormatLevel,
+        TPM_ECC_NONE
+    );
+}
+
+LIB_EXPORT BOOL
+RuntimeAlgorithmEccKeySizeCheckEnabled(
+    struct RuntimeAlgorithm *RuntimeAlgorithm,
+    TPM_ALG_ID               algId,			// IN: the algorithm to check
+    UINT16                   keySizeInBits,		// IN: size of the key in bits
+    TPM_ECC_CURVE            curveId,			// IN: curve Id if algId == TPM_ALG_ECC
+    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
+   )
+{
+    return _RuntimeAlgorithmKeySizeCheckEnabled(
+        RuntimeAlgorithm,
+        algId,
+        keySizeInBits,
+        maxStateFormatLevel,
+        curveId
+    );
 }
 
 static char *

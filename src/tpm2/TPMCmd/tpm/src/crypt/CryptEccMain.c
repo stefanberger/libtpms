@@ -128,11 +128,11 @@ CryptCapGetECCCurve(TPM_ECC_CURVE   curveID,   // IN: the starting ECC curve
             continue;
         if (!CryptEccIsCurveRuntimeUsable(curve))	// libtpms added begin
            continue;
-        if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
-                                                 TPM_ALG_ECC,
-                                                 CryptEccGetKeySizeForCurve(curve),
-                                                 curve,
-                                                 g_RuntimeProfile.stateFormatLevel))
+        if (!RuntimeAlgorithmEccKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+                                                    TPM_ALG_ECC,
+                                                    CryptEccGetKeySizeForCurve(curve),
+                                                    curve,
+                                                    g_RuntimeProfile.stateFormatLevel))
             continue;					// libtpms added end
         if(curveList->count < maxCount)
         {
@@ -160,11 +160,11 @@ BOOL CryptCapGetOneECCCurve(TPM_ECC_CURVE curveID  // IN: the  ECC curve
     UINT16 i;
 
     if (!CryptEccIsCurveRuntimeUsable(curveID) ||	// libtpms added begin
-	!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
-					     TPM_ALG_ECC,
-					     CryptEccGetKeySizeForCurve(curveID),
-					     curveID,
-					     g_RuntimeProfile.stateFormatLevel))
+	!RuntimeAlgorithmEccKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+                                                TPM_ALG_ECC,
+                                                CryptEccGetKeySizeForCurve(curveID),
+                                                curveID,
+                                                g_RuntimeProfile.stateFormatLevel))
 	return FALSE;					// libtpms added end
 
     // Scan the eccCurveValues array
