@@ -132,23 +132,25 @@ static const struct {
     /* all newly added algorithms must have .canBedisable=true so they can be disabled */
 };
 
-static const struct {
+struct AlgorithmShortcuts {
     const char   *name;
     BOOL          canBeDisabled;
     const char   *prefix;
-} s_EccShortcuts[] = {
+};
+static const struct AlgorithmShortcuts s_EccShortcuts[] = {
 #define ECC_SHORTCUT(NAME, CANDISABLE, PREFIX) \
     { .name = NAME, .canBeDisabled = CANDISABLE, .prefix = PREFIX }
     [RUNTIME_ALGORITHM_ECC_NIST_BIT] = ECC_SHORTCUT("ecc-nist", true, "ecc-nist-p"),
     [RUNTIME_ALGORITHM_ECC_BN_BIT] = ECC_SHORTCUT("ecc-bn", true, "ecc-bn-p"),
 };
 
-static const struct {
+struct AlgorithmProperties {
     const char   *name;
     UINT16        keySize;
     BOOL          canBeDisabled;
     unsigned int  stateFormatLevel; /* required stateFormatLevel to support this */
-} s_EccAlgorithmProperties[] = {
+};
+static const struct AlgorithmProperties s_EccAlgorithmProperties[] = {
 #define ECC(ENABLED, NAME, KEYSIZE, CANDISABLE, SFL) \
     { .name = ENABLED ? NAME : NULL, .keySize = KEYSIZE, .canBeDisabled = CANDISABLE, .stateFormatLevel = SFL }
 
@@ -239,6 +241,64 @@ RuntimeAlgorithmSetDefault(struct RuntimeAlgorithm *RuntimeAlgorithm)
     RuntimeAlgorithmEnableAllAlgorithms(RuntimeAlgorithm);
 }
 
+static TPM_RC RuntimeAlgorithmSetProfileShortcuts(
+    const struct AlgorithmShortcuts *shortcuts, size_t shortcuts_len,
+    const struct AlgorithmProperties *algProps, size_t algProps_len,
+    const char *token, const size_t token_len,
+    unsigned int *stateFormatLevel, const unsigned int maxStateFormatLevel,
+    unsigned char *enabledShortcuts, size_t enabledShortcuts_len,
+    unsigned char *enabledAlgorithms, size_t enabledAlgorithms_len,
+    const char *type,
+    bool *found)
+{
+    size_t prefix_len = token_len;
+    const char *prefix = token;
+    bool match_one = true;
+    size_t cmplen = 0;
+    size_t idx;
+    size_t algId;
+
+    for (idx = 0; idx < shortcuts_len; idx++) {
+        cmplen = MAX(strlen(shortcuts[idx].name), token_len);
+        if (!strncmp(token, shortcuts[idx].name, cmplen)) {
+            SetBit(idx, enabledShortcuts, enabledShortcuts_len);
+            match_one = false;
+            prefix = shortcuts[idx].prefix;
+            prefix_len = strlen(prefix);
+            break;
+        }
+    }
+    for (algId = 0; algId < algProps_len; algId++) {
+        if (!algProps[algId].name)
+            continue;
+
+        if (match_one)
+            cmplen = MAX(strlen(algProps[algId].name), token_len);
+        else
+            cmplen = prefix_len;
+
+        if (!strncmp(prefix, algProps[algId].name, cmplen)) {
+            if (algProps[algId].stateFormatLevel > maxStateFormatLevel) {
+                /* specific match that is not allowed causes error, otherwise skip */
+                if (match_one) {
+                    TPMLIB_LogTPM2Error("Requested %s %s requires StateFormatLevel %u but maximum allowed is %u.\n",
+                                        type,
+                                        algProps[algId].name,
+                                        algProps[algId].stateFormatLevel,
+                                        maxStateFormatLevel);
+                    return TPM_RC_VALUE;
+                }
+                continue;
+            }
+            *stateFormatLevel = MAX(*stateFormatLevel,
+                                    algProps[algId].stateFormatLevel);
+            SetBit(algId, enabledAlgorithms, enabledAlgorithms_len);
+            *found = true;
+        }
+    }
+    return TPM_RC_SUCCESS;
+}
+
 /* Set the given profile and runtime-enable the given algorithms. A NULL pointer
  * for the profile parameter sets the default profile which enables all algorithms
  * and all key sizes without any restrictions.
@@ -253,8 +313,8 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 			   unsigned int	             maxStateFormatLevel	// IN: maximum allowed stateFormatLevel
 			   )
 {
-    size_t toklen, cmplen, i, prefix_len, idx;
-    const char *token, *comma, *prefix;
+    size_t toklen, cmplen, i;
+    const char *token, *comma;
     const struct KeySizes *keysizes;
     TPM_RC retVal = TPM_RC_SUCCESS;
     unsigned long minKeySize;
@@ -350,51 +410,18 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	}
 
 	if (!found) {
-	    bool match_one = true;
-
 	    /* handling of ECC curves: shortcuts */
-	    for (idx = 0; idx < ARRAY_SIZE(s_EccShortcuts); idx++) {
-		cmplen = MAX(strlen(s_EccShortcuts[idx].name), toklen);
-		if (!strncmp(token, s_EccShortcuts[idx].name, cmplen)) {
-		    SET_BIT(idx, RuntimeAlgorithm->enabledEccShortcuts);
-		    match_one = false;
-		    prefix = s_EccShortcuts[idx].prefix;
-		    prefix_len = strlen(prefix);
-		    break;
-		}
-	    }
-	    if (match_one) {
-		prefix = token;
-		prefix_len = toklen;
-	    }
-	    for (curveId = 0; curveId < ARRAY_SIZE(s_EccAlgorithmProperties); curveId++) {
-		if (!s_EccAlgorithmProperties[curveId].name)
-		    continue;
-
-		if (match_one)
-		    cmplen = MAX(strlen(s_EccAlgorithmProperties[curveId].name), toklen);
-		else
-		    cmplen = prefix_len;
-
-		if (!strncmp(prefix, s_EccAlgorithmProperties[curveId].name, cmplen)) {
-		    if (s_EccAlgorithmProperties[curveId].stateFormatLevel > maxStateFormatLevel) {
-			/* specific match that is not allowed causes error, otherwise skip */
-			if (match_one) {
-			    TPMLIB_LogTPM2Error("Requested curve %s requires StateFormatLevel %u but maximum allowed is %u.\n",
-						s_EccAlgorithmProperties[curveId].name,
-						s_EccAlgorithmProperties[curveId].stateFormatLevel,
-						maxStateFormatLevel);
-			    retVal = TPM_RC_VALUE;
-			    goto exit;
-			}
-			continue;
-		    }
-		    *stateFormatLevel = MAX(*stateFormatLevel,
-					    s_EccAlgorithmProperties[curveId].stateFormatLevel);
-		    SET_BIT(curveId, RuntimeAlgorithm->enabledEccCurves);
-		    found = true;
-		}
-	    }
+	    retVal = RuntimeAlgorithmSetProfileShortcuts(
+	                s_EccShortcuts, ARRAY_SIZE(s_EccShortcuts),
+	                s_EccAlgorithmProperties, ARRAY_SIZE(s_EccAlgorithmProperties),
+	                token, toklen,
+	                stateFormatLevel, maxStateFormatLevel,
+	                RuntimeAlgorithm->enabledEccShortcuts, sizeof(RuntimeAlgorithm->enabledEccShortcuts),
+	                RuntimeAlgorithm->enabledEccCurves, sizeof(RuntimeAlgorithm->enabledEccCurves),
+	                "curve",
+	                &found);
+            if (retVal != TPM_RC_SUCCESS)
+                goto exit;
 	}
 
 	if (!found) {
@@ -552,82 +579,100 @@ RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
 }
 
 static char *
-RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
-		       enum RuntimeAlgorithmType rat,
-		       char                      *buffer,
-		       BOOL                      *first)
+RuntimeAlgorithmGet(
+    const struct AlgorithmShortcuts  *shortcuts, size_t shortcuts_len,
+    const struct AlgorithmProperties *algProps,  size_t algProps_len,
+    unsigned char *enabledShortcuts, size_t enabledShortcuts_len,
+    unsigned char *enabledAlgorithms, size_t enabledAlgorithms_len,
+    enum RuntimeAlgorithmType rat,
+    char *buffer,
+    BOOL *first)
 {
-    TPM_ECC_CURVE curveId;
     char *nbuffer = NULL;
     size_t idx;
     int n;
 
-    for (idx = 0; idx < ARRAY_SIZE(s_EccShortcuts); idx++) {
-	switch (rat) {
-	case RUNTIME_ALGO_IMPLEMENTED:
-	    // no filter;
-	    break;
-	case RUNTIME_ALGO_CAN_BE_DISABLED:
-	    if (!s_EccShortcuts[idx].canBeDisabled)
-		continue;
-	    break;
-	case RUNTIME_ALGO_ENABLED:
-	    if (!TEST_BIT(idx, RuntimeAlgorithm->enabledEccShortcuts))
-		continue;
-	    break;
-	case RUNTIME_ALGO_DISABLED:
-	    if (TEST_BIT(idx, RuntimeAlgorithm->enabledEccShortcuts))
-		continue;
-	    break;
-	default:
-	    break;
-	}
-	n = asprintf(&nbuffer, "%s%s%s",
-		     buffer,
-		     *first ? "" : ALGO_SEPARATOR_STR,
-		     s_EccShortcuts[idx].name);
-	free(buffer);
-	if (n < 0)
-	    return NULL;
-	buffer = nbuffer;
-	*first = false;
+    for (idx = 0; idx < shortcuts_len; idx++) {
+        switch (rat) {
+        case RUNTIME_ALGO_IMPLEMENTED:
+            // no filter;
+            break;
+        case RUNTIME_ALGO_CAN_BE_DISABLED:
+            if (!shortcuts[idx].canBeDisabled)
+                continue;
+            break;
+        case RUNTIME_ALGO_ENABLED:
+            if (!TestBit(idx, enabledShortcuts, enabledShortcuts_len))
+                continue;
+            break;
+        case RUNTIME_ALGO_DISABLED:
+            if (TestBit(idx, enabledShortcuts, enabledShortcuts_len))
+                continue;
+            break;
+        default:
+            break;
+        }
+        n = asprintf(&nbuffer, "%s%s%s",
+                     buffer,
+                     *first ? "" : ALGO_SEPARATOR_STR,
+                     shortcuts[idx].name);
+        free(buffer);
+        if (n < 0)
+            return NULL;
+        buffer = nbuffer;
+        *first = false;
     }
 
-    for (curveId = 0; curveId < ARRAY_SIZE(s_EccAlgorithmProperties); curveId++) {
-	if (!s_EccAlgorithmProperties[curveId].name)
-	    continue;
+    for (idx = 0; idx < algProps_len; idx++) {
+        if (!algProps[idx].name)
+            continue;
 
-	switch (rat) {
-	case RUNTIME_ALGO_IMPLEMENTED:
-	    // no filter
-	    break;
-	case RUNTIME_ALGO_CAN_BE_DISABLED:
-	    if (!s_EccAlgorithmProperties[curveId].canBeDisabled)
-	       continue;
-	    break;
-	case RUNTIME_ALGO_ENABLED:
-	    if (!TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves))
-		continue;
-	    break;
-	case RUNTIME_ALGO_DISABLED:
-	    if (TEST_BIT(curveId, RuntimeAlgorithm->enabledEccCurves))
-		continue;
-	    break;
-	default:
-	    break;
-	}
-	n = asprintf(&nbuffer, "%s%s%s",
-		     buffer,
-		     *first ? "" : ALGO_SEPARATOR_STR,
-		     s_EccAlgorithmProperties[curveId].name);
-	free(buffer);
-	if (n < 0)
-	    return NULL;
-	buffer = nbuffer;
-	*first = FALSE;
+        switch (rat) {
+        case RUNTIME_ALGO_IMPLEMENTED:
+            // no filter
+            break;
+        case RUNTIME_ALGO_CAN_BE_DISABLED:
+            if (!algProps[idx].canBeDisabled)
+               continue;
+            break;
+        case RUNTIME_ALGO_ENABLED:
+            if (!TestBit(idx, enabledAlgorithms, enabledAlgorithms_len))
+                continue;
+            break;
+        case RUNTIME_ALGO_DISABLED:
+            if (TestBit(idx, enabledAlgorithms, enabledAlgorithms_len))
+                continue;
+            break;
+        default:
+            break;
+        }
+        n = asprintf(&nbuffer, "%s%s%s",
+                     buffer,
+                     *first ? "" : ALGO_SEPARATOR_STR,
+                     algProps[idx].name);
+        free(buffer);
+        if (n < 0)
+            return NULL;
+        buffer = nbuffer;
+        *first = FALSE;
     }
 
     return buffer;
+}
+
+static char *
+RuntimeAlgorithmGetEcc(struct RuntimeAlgorithm   *RuntimeAlgorithm,
+                       enum RuntimeAlgorithmType rat,
+                       char                      *buffer,
+                       BOOL                      *first)
+{
+    return RuntimeAlgorithmGet(
+        s_EccShortcuts, ARRAY_SIZE(s_EccShortcuts),
+        s_EccAlgorithmProperties, ARRAY_SIZE(s_EccAlgorithmProperties),
+        RuntimeAlgorithm->enabledEccShortcuts, sizeof(RuntimeAlgorithm->enabledEccShortcuts),
+        RuntimeAlgorithm->enabledEccCurves, sizeof(RuntimeAlgorithm->enabledEccCurves),
+        rat, buffer, first
+    );
 }
 
 LIB_EXPORT char *
