@@ -223,11 +223,11 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 		!CryptEccIsCurveRuntimeUsable(*target)) {
 	      rc = TPM_RC_CURVE;
 	    }
-	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
-						     TPM_ALG_ECC,
-						     CryptEccGetKeySizeForCurve(*target),
-						     *target,
-						     g_RuntimeProfile.stateFormatLevel)) {
+	    if (!RuntimeAlgorithmEccKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+						        TPM_ALG_ECC,
+							CryptEccGetKeySizeForCurve(*target),
+							*target,
+						        g_RuntimeProfile.stateFormatLevel)) {
 		rc = TPM_RC_CURVE;
 	    }						// libtpms added end
 	    break;
@@ -2872,7 +2872,6 @@ TPMI_AES_KEY_BITS_Unmarshal(TPMI_AES_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
 						     TPM_ALG_AES,
 						     *target,
-						     TPM_ECC_NONE,
 						     g_RuntimeProfile.stateFormatLevel)) {
 		rc = TPM_RC_VALUE;
 	    }											// libtpms added end
@@ -2912,7 +2911,6 @@ TPMI_CAMELLIA_KEY_BITS_Unmarshal(TPMI_CAMELLIA_KEY_BITS *target, BYTE **buffer, 
 	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
 						     TPM_ALG_CAMELLIA,
 						     *target,
-						     TPM_ECC_NONE,
 						     g_RuntimeProfile.stateFormatLevel)) {
 		rc = TPM_RC_VALUE;
 	    }											// libtpms added end
@@ -2975,7 +2973,6 @@ TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *si
 	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,// libtpms added begin
 						     TPM_ALG_TDES,
 						     *target,
-						     TPM_ECC_NONE,
 						     g_RuntimeProfile.stateFormatLevel)) {
 		rc = TPM_RC_VALUE;
 	    }										// libtpms added end
@@ -3961,7 +3958,6 @@ TPMI_RSA_KEY_BITS_Unmarshal(TPMI_RSA_KEY_BITS *target, BYTE **buffer, INT32 *siz
 	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
 						     TPM_ALG_RSA,
 						     *target,
-						     TPM_ECC_NONE,
 						     g_RuntimeProfile.stateFormatLevel)) {
 		rc = TPM_RC_VALUE;
 	    }										// libtpms added end

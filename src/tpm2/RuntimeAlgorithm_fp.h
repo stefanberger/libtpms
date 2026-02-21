@@ -43,12 +43,21 @@ RuntimeAlgorithmCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
 			     );
 
 BOOL
-RuntimeAlgorithmKeySizeCheckEnabled(struct RuntimeAlgorithm *RuntimeAlgorithm,
-				    TPM_ALG_ID               algId,			// IN: the algorithm to check
-				    UINT16                   keySizeInBits,		// IN: size of the key in bits
-				    TPM_ECC_CURVE	     curveId,			// IN: curveId if algId == TPM_ALG_ECC
-				    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
-				    );
+RuntimeAlgorithmKeySizeCheckEnabled(
+    struct RuntimeAlgorithm *RuntimeAlgorithm,
+    TPM_ALG_ID               algId,			// IN: the algorithm to check
+    UINT16                   keySizeInBits,		// IN: size of the key in bits
+    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
+);
+
+BOOL
+RuntimeAlgorithmEccKeySizeCheckEnabled(
+    struct RuntimeAlgorithm *RuntimeAlgorithm,
+    TPM_ALG_ID               algId,			// IN: the algorithm to check
+    UINT16                   keySizeInBits,		// IN: size of the key in bits
+    TPM_ECC_CURVE	     curveId,			// IN: curveId if algId == TPM_ALG_ECC
+    unsigned int             maxStateFormatLevel	// IN: maximum stateFormatLevel
+);
 
 enum RuntimeAlgorithmType {
     RUNTIME_ALGO_IMPLEMENTED,
