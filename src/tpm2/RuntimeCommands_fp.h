@@ -27,13 +27,14 @@ RuntimeCommandsFree(struct RuntimeCommands *RuntimeCommands);
 
 TPM_RC
 RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
-			  const char             *newProfile,
+			  char                   **newProfile,
 			  unsigned int           *stateFormatLevel,
-			  unsigned int		 maxStateFormatLevel);
+			  unsigned int		 maxStateFormatLevel,
+			  bool                   filterByMaxSFL);
 
 TPM_RC
 RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
-			     const char               *newProfile,
+			     char                     *newProfile,
 			     unsigned int              maxStateFormatLevel,
 			     char                    **oldProfile
 			     );
