@@ -57,6 +57,7 @@ enum RuntimeCommandType {
 
 char *
 RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
-		     enum RuntimeCommandType   rct);
+		     enum RuntimeCommandType   rct,
+		     const char                *quote);
 
 #endif /* RUNTIME_COMMANDS_H */
