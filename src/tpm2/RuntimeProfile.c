@@ -179,12 +179,13 @@ RuntimeProfileFree(struct RuntimeProfile *RuntimeProfile)
 }
 
 static TPM_RC
-RuntimeProfileSetRuntimeProfile(struct RuntimeProfile           *RuntimeProfile,
-				const char                      *algorithmsProfile,
-				const char                      *commandsProfile,
-				const char                      *attributesProfile,
-				unsigned int                    *stateFormatLevel,	// IN/OUT: required stateFormatLevel
-				unsigned int                    maxStateFormatLevel	// IN: maximum allowed stateFormatLevel
+RuntimeProfileSetRuntimeProfile(struct RuntimeProfile *RuntimeProfile,
+				const char            *algorithmsProfile,
+				char                  **commandsProfile,  // IN/OUT: commandsProfile
+				bool                  filterCommandsByMaxSFL,
+				const char            *attributesProfile,
+				unsigned int          *stateFormatLevel,  // IN/OUT: required stateFormatLevel
+				unsigned int          maxStateFormatLevel // IN: maximum allowed stateFormatLevel
 				)
 {
     TPM_RC retVal;
@@ -200,7 +201,8 @@ RuntimeProfileSetRuntimeProfile(struct RuntimeProfile           *RuntimeProfile,
 	return retVal;
 
     return RuntimeCommandsSetProfile(&RuntimeProfile->RuntimeCommands, commandsProfile,
-				     stateFormatLevel, maxStateFormatLevel);
+				     stateFormatLevel, maxStateFormatLevel,
+				     filterCommandsByMaxSFL);
 }
 
 static TPM_RC
@@ -690,6 +692,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 {
     unsigned int stateFormatLevelJSON = STATE_FORMAT_LEVEL_UNKNOWN;
     const struct RuntimeProfileDesc *rp = NULL;
+    bool filterCommandsByMaxSFL = false;
     unsigned int maxStateFormatLevel;
     char *runtimeProfileJSON = NULL;
     char *profileDescription = NULL;
@@ -733,6 +736,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
     if (!commandsProfile && rp->commandsProfile) {
 	if (!(commandsProfile = strdup(rp->commandsProfile)))
 	    goto error;
+	filterCommandsByMaxSFL = true;
     }
     if (!profileDescription && rp->description) {
 	if (!(profileDescription = strdup(rp->description)))
@@ -744,6 +748,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 	    /* StateFormatLevels are controlled by internal profile */
 	    maxStateFormatLevel = rp->stateFormatLevel;
 	    RuntimeProfile->stateFormatLevel = rp->stateFormatLevel;
+	    filterCommandsByMaxSFL = false;
 	} else {
 	    if (stateFormatLevelJSON != STATE_FORMAT_LEVEL_UNKNOWN) {
 		if (stateFormatLevelJSON < 2) {
@@ -762,10 +767,12 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 	/* JSON was from TPM 2 state */
 	maxStateFormatLevel = stateFormatLevelJSON;
 	RuntimeProfile->stateFormatLevel = stateFormatLevelJSON;
+	filterCommandsByMaxSFL = false;
     }
     retVal = RuntimeProfileSetRuntimeProfile(RuntimeProfile,
 					     algorithmsProfile,
-					     commandsProfile,
+					     &commandsProfile,
+					     filterCommandsByMaxSFL,
 					     attributesProfile,
 					     &RuntimeProfile->stateFormatLevel,
 					     maxStateFormatLevel);
@@ -903,8 +910,8 @@ RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
 					      &oldProfile);
 	if (retVal == TPM_RC_SUCCESS)
 	    retVal = RuntimeCommandsSetProfile(&RuntimeProfile->RuntimeCommands,
-					       oldProfile, &stateFormatLevel,
-					       ~0);
+					       &oldProfile, &stateFormatLevel,
+					       ~0, false);
     }
 
 error:

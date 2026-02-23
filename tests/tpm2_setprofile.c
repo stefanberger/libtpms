@@ -43,19 +43,19 @@ static const struct {
     const char            *exp_profile;
     const struct transfer *tx;
 } testcases[] = {
-    {
+    { // 1
         .profile = NULL,
         .exp_fail = false,
         .exp_profile = null_profile,
-    }, {
+    }, { // 2
         // StateFormatLevel not allowed to be passed
         .profile = "{\"Name\":\"default-v1\",\"StateFormatLevel\":2}",
         .exp_fail = true,
-    }, {
+    }, { // 3
         .profile = "{\"Name\":\"null\"}",
         .exp_fail = false,
         .exp_profile = null_profile,
-    }, {
+    }, { // 4
         .profile = "{\"Name\":\"default-v2\"}",
         .exp_profile =
           "{\"ActiveProfile\":{"
@@ -75,7 +75,7 @@ static const struct {
                               "commands and algorithms. This profile is compatible with "
                               "libtpms >= v0.11.\""
           "}}",
-    }, {
+    }, { // 5
         .profile = "{\"Name\":\"default-v1\"}",
         .exp_profile =
           "{\"ActiveProfile\":{"
@@ -95,7 +95,7 @@ static const struct {
                               "commands and algorithms. This profile is compatible with "
                               "libtpms >= v0.10.\""
           "}}",
-    }, {
+    }, { // 6
         .profile = "{"
                     "\"Name\":\"custom\","
                     "\"StateFormatLevel\":2,"
@@ -123,7 +123,32 @@ static const struct {
             "\"Attributes\":\"\","
             "\"Description\":\"test\""
           "}}",
-    }, {
+    }, { // 7
+        .profile = "{"
+                    "\"Name\":\"custom\","
+                    "\"StateFormatLevel\":2,"  // CC 0x199 and 0x19a must be missing
+                    "\"Attributes\":\"\","
+                    "\"Description\":\"test\""
+                   "}",
+        .exp_fail = false,
+        .exp_profile =
+          "{\"ActiveProfile\":{"
+            "\"Name\":\"custom\","
+            "\"StateFormatLevel\":2,"
+            "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
+                           "0x15b-0x15e,0x160-0x165,0x167-0x174,0x176-0x178,"
+                           "0x17a-0x193,0x197\","
+            "\"Algorithms\":\"rsa,rsa-min-size=1024,tdes,tdes-min-size=128,"
+                             "sha1,hmac,aes,aes-min-size=128,mgf1,keyedhash,"
+                             "xor,sha256,sha384,sha512,null,rsassa,rsaes,rsapss,"
+                             "oaep,ecdsa,ecdh,ecdaa,sm2,ecschnorr,ecmqv,"
+                             "kdf1-sp800-56a,kdf2,kdf1-sp800-108,ecc,ecc-min-size=192,"
+                             "ecc-nist,ecc-bn,ecc-sm2-p256,symcipher,camellia,"
+                             "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
+            "\"Attributes\":\"\","
+            "\"Description\":\"test\""
+          "}}",
+    }, { // 8
         .profile = "{"
                     "\"Name\":\"custom\","
                     "\"StateFormatLevel\":2,"
@@ -234,7 +259,7 @@ static const struct {
                // keep last
             }
         }
-    }, {
+    }, { // 9
         // commands 0x199-0x19a require StateFormatLevel 3
         .profile = "{"
                     "\"Name\":\"custom\","
@@ -245,7 +270,7 @@ static const struct {
                     "\"Description\":\"test\""
                    "}",
         .exp_fail = true,
-    }, {
+    }, { // 10
         .profile = "{"
                     "\"Name\":\"custom\","
                     "\"StateFormatLevel\":3,"
@@ -271,7 +296,7 @@ static const struct {
                              "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
-    }, {
+    }, { // 11
         // commands 0x19b-0x19c require StateFormatLevel 5
         .profile = "{"
                     "\"Name\":\"custom\","
@@ -282,7 +307,7 @@ static const struct {
                     "\"Description\":\"test\""
                    "}",
         .exp_fail = true,
-    }, {
+    }, { // 12
         .profile = "{"
                     "\"Name\":\"custom\","
                     "\"StateFormatLevel\":0,"
@@ -308,7 +333,7 @@ static const struct {
                              "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
-    }, {
+    }, { // 13
         // choosen StateFormatLevel 4 not require by commands but enables bugfix
         // -> stays at StateFormatLevel 4
         .profile = "{"
@@ -336,7 +361,7 @@ static const struct {
                              "camellia-min-size=128,cmac,ctr,ofb,cbc,cfb,ecb\","
             "\"Description\":\"test\""
           "}}",
-    }, {
+    }, { // 14
         .profile = "{"
                     "\"Name\":\"custom\","
                     "\"StateFormatLevel\":4,"
@@ -344,7 +369,7 @@ static const struct {
                     "\"Description\":\"test\""
                    "}",
         .exp_fail = true, /* StateFormatLevel 7 required */
-    }, {
+    }, { // 15
         .profile = "{" /* StateFormatLevel 7 is chosen */
                     "\"Name\":\"custom\","
                     "\"Commands\":\"0x11f-0x122,0x124-0x12e,0x130-0x140,0x142-0x159,"
@@ -375,7 +400,7 @@ static const struct {
                              "no-ecc-key-derivation\","
             "\"Description\":\"test\""
           "}}",
-    }, {
+    }, { // 16
         .profile = "{" /* StateFormatLevel 7 is chosen */
                     "\"Name\":\"custom:test\","
                     "\"Algorithms\":\"rsa,rsa-min-size=1024,tdes,tdes-min-size=128,"

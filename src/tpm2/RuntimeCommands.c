@@ -241,32 +241,41 @@ parseRange(const char *buffer,
 /* Set the given profile and runtime-enable the given commands. A NULL pointer
  * for the profile command sets the default profile which enables all commands.
  *
+ * Only if filterByMaxSFL is 'true', then this function may modify the
+ * newProfile by filtering-out commands that exceed the given
+ * maxStateFormatLevel and generate a string with only the commands that are
+ * valid for the maxStateFormatLevel. If filterByMaxSFL is 'false' then this
+ * function returns with an error code if any of the commands in the newProfile
+ * exceed the maxStateFormatLevel.
+ *
  * This function will adjust the stateFormatLevel to the number required for the
  * given algorithms and key sizes.
  */
 LIB_EXPORT
 TPM_RC
 RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
-			  const char		 *newProfile,		// IN: comma-separated list of command codes and ranges
+			  char			 **newProfile,		// IN/OUT: comma-separated list of command codes and ranges
 			  unsigned int           *stateFormatLevel,	// IN/OUT: stateFormatLevel
-			  unsigned int            maxStateFormatLevel	// IN: maximum stateFormatLevel
+			  unsigned int            maxStateFormatLevel,	// IN: maximum stateFormatLevel
+			  bool			  filterByMaxSFL
 			  )
 {
     TPM_CC commandCodeLo, commandCodeHi;
     TPM_RC retVal = TPM_RC_VALUE;
     const char *token, *comma;
     COMMAND_INDEX commandIndex;
+    bool filtered = false;
     size_t toklen;
 
     /* NULL pointer for profile enables all */
-    if (!newProfile) {
+    if (*newProfile == NULL) {
 	RuntimeCommandsSetDefault(RuntimeCommands, maxStateFormatLevel);
 	return TPM_RC_SUCCESS;
     }
 
     MemorySet(&RuntimeCommands->enabledCommands, 0, sizeof(RuntimeCommands->enabledCommands));
 
-    token = newProfile;
+    token = *newProfile;
     while (1) {
 	/* expecting: 20 or 0x32 or 20-30 or 0x30x-0x50 */
 	comma = strchr(token, ',');
@@ -296,11 +305,16 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
 		goto exit;
 	    }
 	    if (s_CommandProperties[commandIndex].stateFormatLevel > maxStateFormatLevel) {
-	        TPMLIB_LogTPM2Error("Requested command code 0x%x requires stateFormatLevel '%u' but maximum allowed is '%u'.\n",
-                                    IdxToCc(commandIndex),
-                                    s_CommandProperties[commandIndex].stateFormatLevel,
-                                    maxStateFormatLevel);
-                goto exit;
+	        if (!filterByMaxSFL) {
+		    TPMLIB_LogTPM2Error("Requested command code 0x%x requires stateFormatLevel '%u' but maximum allowed is '%u'.\n",
+                                        IdxToCc(commandIndex),
+                                        s_CommandProperties[commandIndex].stateFormatLevel,
+                                        maxStateFormatLevel);
+                    goto exit;
+                }
+                /* do not set enabled bit for this command */
+                filtered = true;
+                continue;
 	    }
 	    SET_BIT(IdxToCc(commandIndex), RuntimeCommands->enabledCommands);
 	    assert(s_CommandProperties[commandIndex].stateFormatLevel > 0);
@@ -325,6 +339,16 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
         }
     }
 
+    if (filtered) {
+        /* if commands were filtered-out create a new string */
+        char *tmp = RuntimeCommandsPrint(RuntimeCommands, RUNTIME_CMD_ENABLED, "");
+        if (!tmp) {
+            retVal = TPM_RC_MEMORY;
+            goto exit;
+        }
+        free(*newProfile);
+        *newProfile = tmp;
+    }
 
     retVal = TPM_RC_SUCCESS;
 
@@ -340,7 +364,7 @@ exit:
  */
 LIB_EXPORT TPM_RC
 RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
-			     const char               *newProfile,
+			     char                     *newProfile,
 			     unsigned int              maxStateFormatLevel,
 			     char                    **oldProfile)
 {
@@ -350,11 +374,13 @@ RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
     *oldProfile = RuntimeCommands->commandsProfile;
     RuntimeCommands->commandsProfile = NULL;
 
-    retVal = RuntimeCommandsSetProfile(RuntimeCommands, newProfile,
-				       &stateFormatLevel, maxStateFormatLevel);
+    retVal = RuntimeCommandsSetProfile(RuntimeCommands, &newProfile,
+				       &stateFormatLevel, maxStateFormatLevel,
+				       false);
     if (retVal != TPM_RC_SUCCESS) {
-	RuntimeCommandsSetProfile(RuntimeCommands, *oldProfile,
-				  &stateFormatLevel, maxStateFormatLevel);
+	RuntimeCommandsSetProfile(RuntimeCommands, oldProfile,
+				  &stateFormatLevel, maxStateFormatLevel,
+				  false);
 	*oldProfile = NULL;
     }
     return retVal;
