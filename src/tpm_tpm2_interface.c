@@ -506,7 +506,8 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         fmt = buffer;
         buffer = NULL;
         for (rct = RUNTIME_CMD_IMPLEMENTED; rct < RUNTIME_CMD_NUM; rct++) {
-            runtimeCmds[rct] = RuntimeCommandsPrint(&g_RuntimeProfile.RuntimeCommands, rct);
+            runtimeCmds[rct] = RuntimeCommandsPrint(&g_RuntimeProfile.RuntimeCommands, rct,
+                                                    "\"");
             if (!runtimeCmds[rct])
                 goto error;
         }

@@ -431,14 +431,15 @@ RuntimeCommandPrint(char           *buffer,
 
 LIB_EXPORT char *
 RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
-		     enum RuntimeCommandType    rct)
+		     enum RuntimeCommandType    rct,
+		     const char                *quote)
 {
     COMMAND_INDEX commandIndex, commandCodeLo = 0, commandCodeHi = 0;
     char *buffer, *nbuffer = NULL;
     BOOL first = true, doPrint;
     int n;
 
-    buffer = strdup("\"");
+    buffer = strdup(quote);
     if (!buffer)
 	return NULL;
 
@@ -497,7 +498,7 @@ RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
     if (commandCodeLo != 0)
 	buffer = RuntimeCommandPrint(buffer, first, commandCodeLo, commandCodeHi);
 
-    n = asprintf(&nbuffer, "%s\"", buffer);
+    n = asprintf(&nbuffer, "%s%s", buffer, quote);
     free(buffer);
     if (n < 0)
 	return NULL;
