@@ -74,6 +74,31 @@ For patch submissions, please use a Signed-off-by: <your email> to indicate
 agreement to the DCO1.1.txt.
 
 
+Building
+--------
+
+There are two build systems available for libtpms: autotools and meson.
+The GitHub CI runs builds using both build systems.
+
+### Autotools
+
+To build with autotools, run the following commands:
+
+    $ ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
+    $ make
+    $ make check
+    $ sudo make install
+
+### Meson
+
+To build with meson, run the following commands:
+
+    $ meson setup build --prefix=/usr
+    $ meson compile -C build
+    $ meson test -C build
+    $ sudo meson install -C build
+
+
 Fuzzing
 -------
 Initial fuzzing is possible with clang & libfuzzer.

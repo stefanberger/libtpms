@@ -72,3 +72,21 @@ jobs:
           exit 0
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+  meson-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build pkg-config openssl libssl-dev
+
+      - name: meson build
+        run: |
+          meson setup build --prefix=/usr
+          meson compile -C build
+          meson test -C build
+          meson dist -C build
+          tar -tf build/meson-dist/*.tar.xz
