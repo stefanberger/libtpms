@@ -443,6 +443,7 @@ TPM_RC NvDefineSpace(TPMI_RH_PROVISION authHandle,
             // It is not allowed to create a PIN Index that can't be modified.
             if(!IS_ATTRIBUTE(attributes, TPMA_NV, NO_DA))
                 return TPM_RCS_ATTRIBUTES + blamePublic;
+            /* fallthrough */
 #endif
 #ifdef TPM_NT_PIN_PASS
         case TPM_NT_PIN_PASS:
