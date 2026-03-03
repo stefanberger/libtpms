@@ -994,7 +994,7 @@ CryptParameterDecryption(
         return TPM_RC_INSUFFICIENT;
     }
 
-    if(cipherSize > MAX_COMMAND_SIZE || bufferSize <= 0
+    if(cipherSize > MAX_COMMAND_SIZE /* || bufferSize <= 0 */  // libtpms: deactivate bad check (issue #559)
        || (UINT32)cipherSize > (UINT32)bufferSize)
     {
         return TPM_RC_SIZE;
