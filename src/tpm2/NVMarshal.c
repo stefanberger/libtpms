@@ -4087,7 +4087,7 @@ static UINT16
 PERSISTENT_DATA_PPList_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
                                UINT16 blob_version, UINT32 commandCount)
 {
-    UINT8 ppList[(110 + 7) / 8];
+    UINT8 ppList[BITS_TO_BYTES(110)];
     UINT16 array_size;
     UINT16 written;
     UINT8 *ptr;
@@ -4140,8 +4140,11 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
                 if (array_size > sizeof(data->ppList))
                     array_size = sizeof(data->ppList);
 
-                memset(data->ppList, 0, sizeof(data->ppList));
                 memcpy(data->ppList, buf, array_size);
+                /* clear the rest of byte array */
+                MUST_BE(sizeof(data->ppList[0]) == sizeof(BYTE));
+                while (array_size < ARRAY_SIZE(data->ppList))
+                    data->ppList[array_size++] = 0;
             }
         }
     }
@@ -4152,7 +4155,7 @@ static UINT16
 PERSISTENT_DATA_AuditCommands_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
                                       UINT16 blob_version, UINT32 commandCount)
 {
-    UINT8 auditCommands[(110 + 1 + 7) / 8];
+    UINT8 auditCommands[BITS_TO_BYTES(110 + 1)];
     UINT16 array_size;
     UINT16 written;
     UINT8 *ptr;
@@ -4164,7 +4167,7 @@ PERSISTENT_DATA_AuditCommands_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT3
          * was using a COMPRESSED_LIST.
          */
         assert(commandCount <= 110);
-        array_size = ((commandCount + 1) + 7) / 8;	/* same as in Global.h PERSISTENT_DATA */
+        array_size = BITS_TO_BYTES(commandCount + 1);	/* same as in Global.h PERSISTENT_DATA */
         assert(sizeof(auditCommands) >= array_size);
         ConvertToCompressedBitArray(data->auditCommands, sizeof(data->auditCommands),
                                     auditCommands, array_size);
@@ -4206,8 +4209,11 @@ PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, IN
                 if (array_size > sizeof(data->auditCommands))
                     array_size = sizeof(data->auditCommands);
 
-                memset(data->auditCommands, 0, sizeof(data->auditCommands));
                 memcpy(data->auditCommands, buf, array_size);
+                /* clear the rest of byte array */
+                MUST_BE(sizeof(data->auditCommands[0]) == sizeof(BYTE));
+                while (array_size < ARRAY_SIZE(data->auditCommands))
+                    data->auditCommands[array_size++] = 0;
             }
         }
     }
