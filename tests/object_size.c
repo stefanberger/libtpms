@@ -78,8 +78,9 @@ int main(void)
         .seedCompatLevel = 1,
     };
 #pragma GCC diagnostics pop
-    static const size_t exp_sizes[7] = {
-        0, 3284, 3284, 3284, 3284, 3284, 3288,
+    static const size_t exp_sizes[9] = {
+        /* SFL: 0 .. 5 */ 0   , 3284, 3284, 3284, 3284, 3284,
+        /* SFL: 6 .. 8 */ 3288, 3288, 3288,
     };
     BYTE buffer[2 * MAX_MARSHALLED_OBJECT_SIZE];
     UINT32 stateFormatLevel;
@@ -87,7 +88,9 @@ int main(void)
     INT32 size;
     BYTE *buf;
 
-    for (stateFormatLevel = 1; stateFormatLevel <= 6; stateFormatLevel++) {
+    for (stateFormatLevel = 1;
+         stateFormatLevel < ARRAY_SIZE(exp_sizes);
+         stateFormatLevel++) {
         /* this buffer must only be filled to <= MAX_MARSHALLED_OBJECT_SIZE bytes */
         buf = buffer;
         size = sizeof(buffer);
