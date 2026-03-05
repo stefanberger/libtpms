@@ -9,7 +9,7 @@
 # ifdef THIRTY_TWO_BIT
 #  define RADIX_BITS                     32
 # endif
-# ifdef SIXTY_FOUR_BIT_LONG
+# if defined(SIXTY_FOUR_BIT_LONG) || defined(SIXTY_FOUR_BIT) // x32 architecture
 #  define RADIX_BITS                     64
 # endif
 # ifndef RADIX_BITS
