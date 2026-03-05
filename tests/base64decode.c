@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <libtpms/tpm_types.h>
 #include <libtpms/tpm_library.h>
@@ -16,19 +17,27 @@ static unsigned char *read_file(const char *name, size_t *len)
     FILE *f = fopen(name, "rb");
 
     if (!f) {
-        printf("Could not open file %s for reading.", name);
+        printf("Could not open file %s for reading.\n", name);
         exit(EXIT_FAILURE);
     }
 
-    fseek(f, 0, SEEK_END);
+    if (fseek(f, 0, SEEK_END) < 0) {
+        printf("Could not seek to end-of-file %s: %s\n", name, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     sz = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (fseek(f, 0, SEEK_SET) < 0) {
+        printf("Could not seek to start-of-file %s: %s\n", name, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     res = malloc(sz + 1);
-    if (res != NULL) {
-        *len = fread(res, 1, sz, f);
-        res[sz] = 0;
+    if (!res) {
+        printf("Could not allocate %ld bytes.\n", sz + 1);
+        exit(EXIT_FAILURE);
     }
+    *len = fread(res, 1, sz, f);
+    res[sz] = 0;
 
     fclose(f);
 
