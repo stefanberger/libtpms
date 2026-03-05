@@ -2697,6 +2697,7 @@ typedef struct
 {  // (Part 2: Structures)
     TPMI_RH_NV_LEGACY_INDEX nvIndex;
     TPMI_ALG_HASH           nameAlg;
+    ARCH_PADDING(pad1, 2);		// libtpms added: m68k
     TPMA_NV                 attributes;
     TPM2B_DIGEST            authPolicy;
     UINT16                  dataSize;

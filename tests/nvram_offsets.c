@@ -59,14 +59,18 @@ int main(void)
     }
 #endif /* __x86_64__ */
 
-    /* Same for NV_INDEX */
-#define NV_INDEX_EXP_SIZE 148
-    if (sizeof(NV_INDEX) != NV_INDEX_EXP_SIZE) {
-        fprintf(stderr,
-                "sizeof(NV_INDEX) does not have expected size of %u bytes"
-                "but %zu bytes\n", NV_INDEX_EXP_SIZE, sizeof(NV_INDEX));
-        return EXIT_FAILURE;
-    }
+    /*
+     * NV_INDEX structure is (still) directly copied into NVRAM memory using
+     * memcpy. sizeof(NV_INDEX) MUST have the same size on all architectures.
+     */
+MUST_BE(offsetof(TPMS_NV_PUBLIC, nameAlg)    == 4);
+MUST_BE(offsetof(TPMS_NV_PUBLIC, attributes) == 4 + 4);
+MUST_BE(offsetof(TPMS_NV_PUBLIC, authPolicy) == 4 + 4 + 4);
+MUST_BE(offsetof(TPMS_NV_PUBLIC, dataSize)   == 4 + 4 + 4 + 66);
+MUST_BE(sizeof(TPMS_NV_PUBLIC) == 80);
+MUST_BE(sizeof(TPM2B_AUTH) == 2 + BITS_TO_BYTES(512));
+MUST_BE(offsetof(NV_INDEX, authValue) == 80);
+MUST_BE(sizeof(NV_INDEX) == 148);
 
     return EXIT_SUCCESS;
 }

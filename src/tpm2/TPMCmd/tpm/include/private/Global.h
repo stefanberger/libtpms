@@ -516,6 +516,7 @@ typedef struct NV_INDEX
 {
     TPMS_NV_PUBLIC publicArea;
     TPM2B_AUTH     authValue;
+    ARCH_PADDING(pad1, 2);	// libtpms added: m68k
 } NV_INDEX;
 
 //*** NV_REF
