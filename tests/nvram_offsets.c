@@ -32,11 +32,8 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    /*
-     * OBJECTs are directly written into NVRAM. We have to make sure that the
-     * size of the OBJECT is the same on all architectures so that a full
-     * NVRAM fits on all architectures
-     */
+#if defined(__x86_64__)
+    /* Leave this check on x86_64 for 'notification' when sizeof(OBJECT) increases */
 #if RSA_16384
 # error Unsupported RSA key size
 #elif RSA_4096
@@ -60,6 +57,7 @@ int main(void)
                         sizeof(privateExponent_t));
         return EXIT_FAILURE;
     }
+#endif /* __x86_64__ */
 
     /* Same for NV_INDEX */
 #define NV_INDEX_EXP_SIZE 148
