@@ -413,6 +413,8 @@ RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands)
     TPM_CC commandCode;
     UINT32 count = 0;
 
+    /* the following assert must never change */
+    MUST_BE(TPM_CC_FIRST == TPM_CC_NV_UndefineSpaceSpecial);
     for (commandCode = TPM_CC_FIRST;
 	 commandCode < sizeof(RuntimeCommands->enabledCommands) * 8;
 	 commandCode++) {
