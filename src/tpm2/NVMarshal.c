@@ -4136,8 +4136,11 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
                 rc = ConvertFromCompressedBitArray(buf, array_size,
                                                    data->ppList, sizeof(data->ppList));
             } else {
+                /* later versions of libtpms may write bigger arrays - truncate them */
+                if (array_size > sizeof(data->ppList))
+                    array_size = sizeof(data->ppList);
+
                 memset(data->ppList, 0, sizeof(data->ppList));
-                assert(array_size <= sizeof(data->ppList));
                 memcpy(data->ppList, buf, array_size);
             }
         }
@@ -4199,8 +4202,11 @@ PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, IN
                 rc = ConvertFromCompressedBitArray(buf, array_size,
                                                    data->auditCommands, sizeof(data->auditCommands));
             } else {
+                /* later versions of libtpms may write bigger arrays - truncate them */
+                if (array_size > sizeof(data->auditCommands))
+                    array_size = sizeof(data->auditCommands);
+
                 memset(data->auditCommands, 0, sizeof(data->auditCommands));
-                assert(array_size <= sizeof(data->auditCommands));
                 memcpy(data->auditCommands, buf, array_size);
             }
         }
