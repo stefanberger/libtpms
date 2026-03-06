@@ -1757,7 +1757,7 @@ ParseSessionBuffer(COMMAND* command  // IN: the structure that contains
             extraKey.b.size = 0;
         }
         size = DecryptSize(command->index);
-        pAssert_RC(command->parameterSize <= INT32_MAX);
+        // pAssert_RC(command->parameterSize <= INT32_MAX);	// libtpms deactivated (Coverity)
         result = CryptParameterDecryption(s_sessionHandles[s_decryptSessionIndex],
                                           &s_nonceCaller[s_decryptSessionIndex].b,
                                           command->parameterSize,
@@ -2215,7 +2215,7 @@ BuildResponseSession(COMMAND* command  // IN: structure that has relevant comman
                                    &extraKey);
             }
             size = EncryptSize(command->index);
-            pAssert_RC(command->parameterSize <= INT32_MAX);
+            // pAssert_RC(command->parameterSize <= INT32_MAX);	// libtpms deactivated (Coverity)
             // This function operates on internally-generated data that is
             // expected to be well-formed for parameter encryption.
             // In the event that there is a bug elsewhere in the code and the
