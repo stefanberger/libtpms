@@ -423,14 +423,23 @@ LIB_EXPORT UINT32
 RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands)
 {
     COMMAND_INDEX commandIndex;
+    unsigned int val = 0;
     UINT32 count = 0;
 
+    MUST_BE(sizeof(val) == 4);
+
     for (commandIndex = 0;
-	 commandIndex < sizeof(RuntimeCommands->enabledCommandsByIdx) * 8;
-	 commandIndex++) {
-	if (TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx))
-	    count++;
+         commandIndex < sizeof(RuntimeCommands->enabledCommandsByIdx);
+         commandIndex++) {
+        val <<= 8;
+        val |= RuntimeCommands->enabledCommandsByIdx[commandIndex];
+        if ((commandIndex & 0x3) == 0x3) {
+            count += __builtin_popcount(val);
+            val = 0;
+        }
     }
+    if (val)
+        count += __builtin_popcount(val);
     return count;
 }
 
