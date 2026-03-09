@@ -9,15 +9,15 @@
 #include <tpm_public/TpmTypes.h>
 
 TPM_RC
-ConvertFromCompressedBitArray(BYTE         *inAuditCommands,
-                              size_t        inAuditCommandsLen,
-                              BYTE         *outAuditCommands,
-                              size_t        outAuditCommandsLen);
+ConvertFromCompressedBitArray(BYTE*  inAuditCommands,
+                              size_t inAuditCommandsLen,
+                              BYTE*  outAuditCommands,
+                              size_t outAuditCommandsLen);
 
 TPM_RC
-ConvertToCompressedBitArray(BYTE         *inAuditCommands,
-                            size_t        inAuditCommandsLen,
-                            BYTE         *outAuditCommands,
-                            size_t        outAuditCommandsLen);
+ConvertToCompressedBitArray(BYTE*  inAuditCommands,
+                            size_t inAuditCommandsLen,
+                            BYTE*  outAuditCommands,
+                            size_t outAuditCommandsLen);
 
 #endif

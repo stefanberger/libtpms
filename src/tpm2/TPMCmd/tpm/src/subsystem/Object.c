@@ -629,15 +629,17 @@ ObjectContextLoadLibtpms(BYTE           *buffer,
     if(newObject != NULL)
     {
         rc = ANY_OBJECT_Unmarshal(newObject, &mybuf, &mysize, false);
-        if (rc) {
-             /* Attempt to load an old OBJECT that was copied out directly from
-              * an older version of OBJECT.
-              */
-        rc = RSA2048_OBJECT_Buffer_To_OBJECT(newObject, buffer, size);
-        if (rc) {
-            FlushObject(*handle);
-            newObject = NULL;
-        }
+        if (rc)
+        {
+            /* Attempt to load an old OBJECT that was copied out directly from
+             * an older version of OBJECT.
+             */
+            rc = RSA2048_OBJECT_Buffer_To_OBJECT(newObject, buffer, size);
+            if (rc)
+            {
+                FlushObject(*handle);
+                newObject = NULL;
+            }
         }
     }
     return newObject;
