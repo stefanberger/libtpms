@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-// (c) Copyright IBM Corporation 2017,2018.
+// (c) Copyright IBM Corporation 2017-2026
 
 #include <assert.h>
 
@@ -20,6 +20,15 @@ MUST_BE(sizeof(TPMU_PUBLIC_PARMS) == 20);
  * that help to resume key and hash contexts (TPM2_ContextSave/Load) from this
  * earlier version. All structures that have different sizes in 0.8 are found
  * here.
+ *
+ * The functions RSA3072_OBJECT_Buffer_To_OBJECT and
+ * RSA2048_OBJECT_Buffer_to_OBJECT fill an old 2048/3072 OBJECT data structure
+ * by directly copying from a byte array into this data structure. Since data
+ * structure are supposed to be interchangeable between architectures (at least
+ * if they have the same endianess in this case) the fields in the OBJECT must
+ * be located at the same offsets. This is the reason why there are paddings
+ * in some data structures for architectures where the compiler does not pad
+ * automatically as expected (m68k).
  */
 typedef union {
     struct {
