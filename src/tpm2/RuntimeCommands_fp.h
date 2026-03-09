@@ -52,7 +52,7 @@
 #define NUM_ENTRIES_COMMAND_PROPERTIES  (CcToIdx(TPM_CC_LAST) + 1)
 
 struct RuntimeCommands {
-    unsigned char enabledCommands[(IdxToCc(NUM_ENTRIES_COMMAND_PROPERTIES) + 7) / 8];
+    unsigned char enabledCommandsByIdx[BITS_TO_BYTES(TPM_CC_LAST - TPM_CC_FIRST + 1)];
     char *commandsProfile;
 };
 

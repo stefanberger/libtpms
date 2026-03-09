@@ -52,6 +52,9 @@
 
 #define CMD_SEPARATOR_STR ","
 
+/* the following assert must never change */
+MUST_BE(TPM_CC_FIRST == TPM_CC_NV_UndefineSpaceSpecial);
+
 /* List of supported commands sorted by command codes.
  * Commands can be disabled that are optional or recommended in automotive
  * thin profile.
@@ -204,14 +207,15 @@ RuntimeCommandsEnableAllCommands(struct RuntimeCommands *RuntimeCommands,
 
     assert(maxStateFormatLevel >= 1);
 
-    MemorySet(RuntimeCommands->enabledCommands, 0 , sizeof(RuntimeCommands->enabledCommands));
+    MemorySet(RuntimeCommands->enabledCommandsByIdx, 0 ,
+              sizeof(RuntimeCommands->enabledCommandsByIdx));
 
     for (commandIndex = 0; commandIndex < ARRAY_SIZE(s_CommandProperties); commandIndex++) {
 	/* skip over unsupported commands or those exceeding the max. stateFormatLevel */
 	if (!s_CommandProperties[commandIndex].name ||
 	    s_CommandProperties[commandIndex].stateFormatLevel > maxStateFormatLevel)
 	    continue;
-	SET_BIT(IdxToCc(commandIndex), RuntimeCommands->enabledCommands);
+	SET_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx);
     }
 }
 
@@ -299,7 +303,8 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
 	return TPM_RC_SUCCESS;
     }
 
-    MemorySet(&RuntimeCommands->enabledCommands, 0, sizeof(RuntimeCommands->enabledCommands));
+    MemorySet(&RuntimeCommands->enabledCommandsByIdx, 0,
+              sizeof(RuntimeCommands->enabledCommandsByIdx));
 
     token = newProfile;
     while (1) {
@@ -337,7 +342,7 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
                                     maxStateFormatLevel);
                 goto exit;
 	    }
-	    SET_BIT(IdxToCc(commandIndex), RuntimeCommands->enabledCommands);
+	    SET_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx);
 	    assert(s_CommandProperties[commandIndex].stateFormatLevel > 0);
 	    *stateFormatLevel = MAX(*stateFormatLevel,
 	                            s_CommandProperties[commandIndex].stateFormatLevel);
@@ -353,7 +358,7 @@ RuntimeCommandsSetProfile(struct RuntimeCommands *RuntimeCommands,
         if (!s_CommandProperties[commandIndex].name)
             continue;
         if (!s_CommandProperties[commandIndex].canBeDisabled &&
-            !TEST_BIT(IdxToCc(commandIndex), RuntimeCommands->enabledCommands)) {
+            !TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx)) {
             TPMLIB_LogTPM2Error("Command %s (0x%x) must be enabled.\n",
                                 s_CommandProperties[commandIndex].name, IdxToCc(commandIndex));
             goto exit;
@@ -395,37 +400,44 @@ RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
     return retVal;
 }
 
-/* Check whether the given command is runtime-disabled */
-LIB_EXPORT BOOL
-RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
-			    TPM_CC	            commandCode      // IN: the commandCode to check
-			    )
+/* Check whether the given command is runtime-enabled given it's index */
+static BOOL
+RuntimeCommandsCheckEnabledByIdx(struct RuntimeCommands *RuntimeCommands,
+			         COMMAND_INDEX	         commandIndex      // IN: the index of the Command to Check
+			         )
 {
-    if (CcToIdx(commandCode) >= ARRAY_SIZE(s_CommandProperties)) {
+    if (commandIndex >= ARRAY_SIZE(s_CommandProperties)) {
         TPMLIB_LogPrintf("IsEnabled(0x%x): out-of-range command code\n",
-                         commandCode);
+                         IdxToCc(commandIndex));
         return FALSE;
     }
     TPMLIB_LogPrintf("IsEnEnabled(0x%x = '%s'): %d\n",
-		     commandCode,
-		     s_CommandProperties[CcToIdx(commandCode)].name,
-		     TEST_BIT(commandCode, RuntimeCommands->enabledCommands));
-    if (!TEST_BIT(commandCode, RuntimeCommands->enabledCommands))
+		     IdxToCc(commandIndex),
+		     s_CommandProperties[commandIndex].name,
+		     TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx));
+    if (!TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx))
 	return FALSE;
     return TRUE;
+}
+
+LIB_EXPORT BOOL
+RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
+                            TPM_CC                  cc)
+{
+    return RuntimeCommandsCheckEnabledByIdx(RuntimeCommands, CcToIdx(cc));
 }
 
 /* Get the number of enabled commands. */
 LIB_EXPORT UINT32
 RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands)
 {
-    TPM_CC commandCode;
+    COMMAND_INDEX commandIndex;
     UINT32 count = 0;
 
-    for (commandCode = TPM_CC_FIRST;
-	 commandCode < sizeof(RuntimeCommands->enabledCommands) * 8;
-	 commandCode++) {
-	if (TEST_BIT(commandCode, RuntimeCommands->enabledCommands))
+    for (commandIndex = 0;
+	 commandIndex < sizeof(RuntimeCommands->enabledCommandsByIdx) * 8;
+	 commandIndex++) {
+	if (TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx))
 	    count++;
     }
     return count;
@@ -492,11 +504,11 @@ RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
 	    break;
 	case RUNTIME_CMD_ENABLED:
 	    // skip over disabled ones
-	    doPrint = RuntimeCommandsCheckEnabled(RuntimeCommands, IdxToCc(commandIndex));
+	    doPrint = RuntimeCommandsCheckEnabledByIdx(RuntimeCommands, commandIndex);
 	    break;
 	case RUNTIME_CMD_DISABLED:
 	    // skip over enabled ones
-	    doPrint = !RuntimeCommandsCheckEnabled(RuntimeCommands, IdxToCc(commandIndex));
+	    doPrint = !RuntimeCommandsCheckEnabledByIdx(RuntimeCommands, commandIndex);
 	    break;
 	default:
 	    continue;
