@@ -4982,12 +4982,10 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 break;
             case TPM_HT_PERSISTENT:
                 if (rc == TPM_RC_SUCCESS &&
-                    o + offset + sizeof(TPM_HANDLE) + sizeof(obj) >
-                      array_size) {
-                    o += offset + sizeof(TPM_HANDLE) + sizeof(obj);
+                    o + offset + sizeof(TPM_HANDLE) > array_size) {
+                    o += offset + sizeof(TPM_HANDLE);
                     goto exit_size;
                 }
-
                 if (rc == TPM_RC_SUCCESS) {
                     BYTE objBuffer[MAX_MARSHALLED_OBJECT_SIZE];
                     UINT32 marshalledObjectSize;
@@ -5000,6 +4998,11 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     pAssert(rc == TPM_RC_SUCCESS);
                     // convert the OBJECT into a buffer to copy into NVRAM
                     marshalledObjectSize = NvObjectToBuffer(&obj, objBuffer, sizeof(objBuffer));
+
+                    if (o + offset + marshalledObjectSize > array_size) {
+                        o += offset + marshalledObjectSize;
+                        goto exit_size;
+                    }
                     NvWrite(entryRef + o + offset, marshalledObjectSize, objBuffer);
                     offset += marshalledObjectSize;
 
