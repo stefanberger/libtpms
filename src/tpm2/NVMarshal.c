@@ -4106,7 +4106,8 @@ skip_future_versions:
 
 static UINT16
 PERSISTENT_DATA_PPList_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
-                               UINT16 blob_version, UINT32 commandCount)
+                               UINT16 blob_version,
+                               UINT32 commandCount, UINT32 commandArraySize)
 {
     UINT8 ppList[(110 + 7) / 8];
     UINT16 array_size;
@@ -4126,7 +4127,8 @@ PERSISTENT_DATA_PPList_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size
         ptr = ppList;
     } else {
         /* write the array as it is */
-        array_size = sizeof(data->ppList);
+        array_size = commandArraySize;
+        assert(array_size <= sizeof(data->ppList));
         ptr = data->ppList;
     }
     written = UINT16_Marshal(&array_size, buffer, size);
@@ -4171,7 +4173,8 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
 
 static UINT16
 PERSISTENT_DATA_AuditCommands_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
-                                      UINT16 blob_version, UINT32 commandCount)
+                                      UINT16 blob_version,
+                                      UINT32 commandCount, UINT32 commandArraySize)
 {
     UINT8 auditCommands[(110 + 1 + 7) / 8];
     UINT16 array_size;
@@ -4192,7 +4195,8 @@ PERSISTENT_DATA_AuditCommands_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT3
         ptr = auditCommands;
     } else {
         /* write the array as it is */
-        array_size = sizeof(data->auditCommands);
+        array_size = commandArraySize;
+        assert(array_size <= sizeof(data->auditCommands));
         ptr = data->auditCommands;
     }
     written = UINT16_Marshal(&array_size, buffer, size);
@@ -4244,6 +4248,7 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
                         struct RuntimeProfile *RuntimeProfile)
 {
     UINT32 commandCount = RuntimeCommandsCountEnabled(&RuntimeProfile->RuntimeCommands);
+    UINT32 commandArraySize = RuntimeCommandsGetArraySize(&RuntimeProfile->RuntimeCommands);
     UINT16 written;
     UINT8 clocksize;
     BOOL has_block;
@@ -4299,7 +4304,8 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
 
     written += TPML_PCR_SELECTION_Marshal(&data->pcrAllocated, buffer, size);
 
-    written += PERSISTENT_DATA_PPList_Marshal(data, buffer, size, blob_version, commandCount);
+    written += PERSISTENT_DATA_PPList_Marshal(data, buffer, size, blob_version,
+                                              commandCount, commandArraySize);
     written += UINT32_Marshal(&data->failedTries, buffer, size);
     written += UINT32_Marshal(&data->maxTries, buffer, size);
     written += UINT32_Marshal(&data->recoveryTime, buffer, size);
@@ -4307,7 +4313,8 @@ PERSISTENT_DATA_Marshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *size,
     written += BOOL_Marshal(&data->lockOutAuthEnabled, buffer, size);
     written += UINT16_Marshal(&data->orderlyState, buffer, size);
 
-    written += PERSISTENT_DATA_AuditCommands_Marshal(data, buffer, size, blob_version, commandCount);
+    written += PERSISTENT_DATA_AuditCommands_Marshal(data, buffer, size, blob_version,
+                                                     commandCount, commandArraySize);
     written += TPM_ALG_ID_Marshal(&data->auditHashAlg, buffer, size);
     written += UINT64_Marshal(&data->auditCounter, buffer, size);
     written += UINT32_Marshal(&data->algorithmSet, buffer, size);

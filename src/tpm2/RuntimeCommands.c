@@ -476,6 +476,28 @@ RuntimeCommandPrint(char           *buffer,
     return nbuffer;
 }
 
+/*
+ * Determine the size of a byte array where each bit represents a command.
+ * The size of the array depends on the command with the highest command code
+ * that is enabled. This function can be used to determine how many bytes
+ * of the ppList and auditCommands bitmaps are used at maximum and need to be
+ * written.
+ */
+LIB_EXPORT size_t
+RuntimeCommandsGetArraySize(struct RuntimeCommands *RuntimeCommands)
+{
+    size_t i;
+
+    /* search for byte where command with highest code is enabled */
+    for (i = sizeof(RuntimeCommands->enabledCommandsByIdx) - 1;
+         i >= 0;
+         i--) {
+        if (RuntimeCommands->enabledCommandsByIdx[i])
+            return i + 1;
+    }
+    return 0;
+}
+
 LIB_EXPORT char *
 RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
 		     enum RuntimeCommandType    rct)
