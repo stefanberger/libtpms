@@ -80,6 +80,9 @@ RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
 			    TPM_CC		    cc      // IN: the command code to check
 			    );
 
+size_t
+RuntimeCommandsGetArraySize(struct RuntimeCommands *RuntimeCommands);
+
 LIB_EXPORT UINT32
 RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands);
 
