@@ -11,11 +11,11 @@
  * A bit in the PERSISTEN_DATA.auditCommands array corresponds to the index in
  * this array where the command code can be found.
  */
-static const struct {
+static const struct
+{
     TPM_CC cc;
 
-#define ENTRY(CC, INDEX)  \
-    [INDEX] = { .cc = CC }
+#define ENTRY(CC, INDEX) [INDEX] = {.cc = CC}
 
 } CCToCompressedListIndex[] = {
     ENTRY(TPM_CC_NV_UndefineSpaceSpecial, 0),
@@ -144,35 +144,38 @@ static const struct {
  * to an array where the indices do NOT correspond to a COMPRESSED_LIST.
  */
 TPM_RC
-ConvertFromCompressedBitArray(BYTE         *inAuditCommands,
-			      size_t        inAuditCommandsLen,
-			      BYTE         *outAuditCommands,
-			      size_t        outAuditCommandsLen)
+ConvertFromCompressedBitArray(BYTE*  inAuditCommands,
+                              size_t inAuditCommandsLen,
+                              BYTE*  outAuditCommands,
+                              size_t outAuditCommandsLen)
 {
     size_t max_bit = MIN(inAuditCommandsLen * 8, ARRAY_SIZE(CCToCompressedListIndex));
-    size_t bit = 0;
+    size_t bit     = 0;
 
     MemorySet(outAuditCommands, 0, outAuditCommandsLen);
 
-    while (bit < max_bit) {
-	BYTE bits = inAuditCommands[bit >> 3];
-	BYTE mask = 1;
-	size_t lbit = bit;
+    while(bit < max_bit)
+    {
+        BYTE   bits = inAuditCommands[bit >> 3];
+        BYTE   mask = 1;
+        size_t lbit = bit;
 
-	while (bits != 0 && lbit < max_bit) {
-	    if ((bits & mask) != 0) {
-		TPM_CC cc = CCToCompressedListIndex[lbit].cc;
-		COMMAND_INDEX idx = cc - TPM_CC_NV_UndefineSpaceSpecial;
+        while(bits != 0 && lbit < max_bit)
+        {
+            if((bits & mask) != 0)
+            {
+                TPM_CC        cc  = CCToCompressedListIndex[lbit].cc;
+                COMMAND_INDEX idx = cc - TPM_CC_NV_UndefineSpaceSpecial;
 
-		assert(idx != UNIMPLEMENTED_COMMAND_INDEX);
+                assert(idx != UNIMPLEMENTED_COMMAND_INDEX);
 
-		SetBit(idx, outAuditCommands, outAuditCommandsLen);
-		bits ^= mask; /* unset bit */
-	    }
-	    mask <<= 1;
-	    lbit++;
-	}
-	bit += 8;
+                SetBit(idx, outAuditCommands, outAuditCommandsLen);
+                bits ^= mask; /* unset bit */
+            }
+            mask <<= 1;
+            lbit++;
+        }
+        bit += 8;
     }
 
     return TPM_RC_SUCCESS;
@@ -183,19 +186,25 @@ static size_t FindCCInCompressedListIndexArray(TPM_CC cc)
     size_t e_index = ARRAY_SIZE(CCToCompressedListIndex) - 1;
     size_t s_index = 0;
 
-    while (true) {
+    while(true)
+    {
         size_t index = (e_index + s_index) >> 1;
 
-        if (cc == CCToCompressedListIndex[index].cc) {
+        if(cc == CCToCompressedListIndex[index].cc)
+        {
             return index;
         }
-        if (e_index == s_index) {
+        if(e_index == s_index)
+        {
             break;
         }
-        if (cc < CCToCompressedListIndex[index].cc) {
+        if(cc < CCToCompressedListIndex[index].cc)
+        {
             e_index = index;
-        } else {
-            if (s_index != index)
+        }
+        else
+        {
+            if(s_index != index)
                 s_index = index;
             else
                 s_index++;
@@ -209,34 +218,37 @@ static size_t FindCCInCompressedListIndexArray(TPM_CC cc)
  * from an array where the indices do NOT correspond to a COMPRESSED_LIST.
  */
 TPM_RC
-ConvertToCompressedBitArray(BYTE         *inAuditCommands,
-			    size_t        inAuditCommandsLen,
-			    BYTE         *outAuditCommands,
-			    size_t        outAuditCommandsLen)
+ConvertToCompressedBitArray(BYTE*  inAuditCommands,
+                            size_t inAuditCommandsLen,
+                            BYTE*  outAuditCommands,
+                            size_t outAuditCommandsLen)
 {
     size_t max_idx = inAuditCommandsLen * 8;
-    size_t idx = 0;
+    size_t idx     = 0;
 
     MemorySet(outAuditCommands, 0, outAuditCommandsLen);
 
-    while (idx < max_idx) {
-	BYTE bits = inAuditCommands[idx >> 3];
-	BYTE mask = 1;
-	size_t lidx = idx;
+    while(idx < max_idx)
+    {
+        BYTE   bits = inAuditCommands[idx >> 3];
+        BYTE   mask = 1;
+        size_t lidx = idx;
 
-	/* handle bits set in one byte in the loop */
-	while (bits != 0 && lidx < max_idx) {
-	    if ((bits & mask) != 0) {
-		TPM_CC cc = lidx + TPM_CC_NV_UndefineSpaceSpecial;
-		size_t bit = FindCCInCompressedListIndexArray(cc);
+        /* handle bits set in one byte in the loop */
+        while(bits != 0 && lidx < max_idx)
+        {
+            if((bits & mask) != 0)
+            {
+                TPM_CC cc  = lidx + TPM_CC_NV_UndefineSpaceSpecial;
+                size_t bit = FindCCInCompressedListIndexArray(cc);
 
-		SetBit(bit, outAuditCommands, outAuditCommandsLen);
-		bits ^= mask; /* unset bit */
-	    }
-	    mask <<= 1;
-	    lidx++;
-	}
-	idx += 8;
+                SetBit(bit, outAuditCommands, outAuditCommandsLen);
+                bits ^= mask; /* unset bit */
+            }
+            mask <<= 1;
+            lidx++;
+        }
+        idx += 8;
     }
 
     return TPM_RC_SUCCESS;
