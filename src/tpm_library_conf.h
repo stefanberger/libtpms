@@ -53,6 +53,8 @@
 /* maximum size of the IO buffer used for requests and responses */
 #define TPM_BUFFER_MAX             4096
 
+#define TPM2_BUFFER_MAX            4096
+
 /*
  * Below the following acronyms are used to identify what
  * #define influences which one of the state blobs the TPM

@@ -199,15 +199,15 @@ static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
     req.Buffer = command;
 
     /* have the TPM 2 write directly into the response buffer */
-    if (*respbufsize < TPM_BUFFER_MAX || !*respbuffer) {
-        tmp = realloc(*respbuffer, TPM_BUFFER_MAX);
+    if (*respbufsize < TPM2_BUFFER_MAX || !*respbuffer) {
+        tmp = realloc(*respbuffer, TPM2_BUFFER_MAX);
         if (!tmp) {
             TPMLIB_LogTPM2Error("Could not allocated %u bytes.\n",
-                                TPM_BUFFER_MAX);
+                                TPM2_BUFFER_MAX);
             return TPM_SIZE;
         }
         *respbuffer = tmp;
-        *respbufsize = TPM_BUFFER_MAX;
+        *respbufsize = TPM2_BUFFER_MAX;
     }
     resp.BufferSize = *respbufsize;
     resp.Buffer = *respbuffer;
@@ -321,12 +321,16 @@ static TPM_RESULT TPM2_GetTPMProperty(enum TPMLIB_TPMProperty prop,
                                       int *result)
 {
     switch (prop) {
-    case  TPMPROP_TPM_RSA_KEY_LENGTH_MAX:
+    case TPMPROP_TPM_RSA_KEY_LENGTH_MAX:
         *result = MAX_RSA_KEY_BITS;
         break;
 
-    case  TPMPROP_TPM_KEY_HANDLES:
+    case TPMPROP_TPM_KEY_HANDLES:
         *result = MAX_HANDLE_NUM;
+        break;
+
+    case TPMPROP_TPM2_BUFFER_MAX: /* v0.11 */
+        *result = TPM2_BUFFER_MAX;
         break;
 
     /* not supported for TPM 2 */
@@ -629,7 +633,7 @@ error:
     goto exit;
 }
 
-static uint32_t tpm2_buffersize = TPM_BUFFER_MAX;
+static uint32_t tpm2_buffersize = TPM2_BUFFER_MAX;
 
 static uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
                                    uint32_t *min_size,
@@ -643,7 +647,7 @@ static uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
      * (plus a generous 128 bytes) and the TPM_ContextLoad/Save commands.
      */
     const uint32_t min = sizeof(TPMS_CONTEXT) + 128;
-    const uint32_t max = TPM_BUFFER_MAX;
+    const uint32_t max = TPM2_BUFFER_MAX;
 
     if (min_size)
         *min_size = min;

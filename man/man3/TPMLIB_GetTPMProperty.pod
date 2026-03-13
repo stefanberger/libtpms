@@ -94,6 +94,10 @@ The maximum size of the savestate blob (includes the space safety margin).
 The maximum size of the volatile state blob (includes the space saferty
 margin).
 
+=item B<TPMPROP_TPM2_BUFFER_MAX> (since v0.11)
+
+The maximum sizes of the TPM2 command and result buffers.
+
 =back
 
 =head1 ERRORS
