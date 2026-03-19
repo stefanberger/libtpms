@@ -1961,6 +1961,12 @@ CryptSelectMac(TPMT_PUBLIC* publicArea, TPMI_ALG_MAC_SCHEME* inMac)
     }
     if(!CryptMacIsValidForKey(publicArea->type, *inMac, FALSE))
         return TPM_RCS_SCHEME;
+
+    if(macAlg == TPM_ALG_SHA1 &&						// libtpms added begin
+       RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,
+                                            RUNTIME_ATTRIBUTE_NO_SHA1_HMAC_CREATION))
+        return TPM_RC_HASH;							// libtpms added end
+
     return TPM_RC_SUCCESS;
 }
 
