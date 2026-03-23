@@ -415,6 +415,8 @@ LIB_EXPORT BOOL
 RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
                             TPM_CC                  cc)
 {
+    if (cc > TPM_CC_LAST || cc < TPM_CC_FIRST)
+        return FALSE;
     return RuntimeCommandsCheckEnabledByIdx(RuntimeCommands, CcToIdx(cc));
 }
 
