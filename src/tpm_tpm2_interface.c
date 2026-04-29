@@ -635,7 +635,14 @@ static uint32_t TPM2_SetBufferSize(uint32_t wanted_size,
                                    uint32_t *min_size,
                                    uint32_t *max_size)
 {
-    const uint32_t min = MAX_CONTEXT_SIZE + 128;
+    /*
+     * The maximum size is equivalent to the size of the buffer supported by
+     * TPM 2 TIS and SPAPR (= 4kb). The CRB only supports 3968 bytes. No command
+     * or response of the TPM 2 currently requires that many bytes. The maximum
+     * buffer size used for requests or responses is related to TPMS_CONTEXT
+     * (plus a generous 128 bytes) and the TPM_ContextLoad/Save commands.
+     */
+    const uint32_t min = sizeof(TPMS_CONTEXT) + 128;
     const uint32_t max = TPM_BUFFER_MAX;
 
     if (min_size)
