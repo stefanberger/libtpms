@@ -231,7 +231,11 @@ static TPM_RESULT TPM2_Process(unsigned char **respbuffer, uint32_t *resp_size,
         memcpy(*respbuffer, resp.Buffer, resp.BufferSize);
     }
 
-    *resp_size = resp.BufferSize;
+    /*
+     * Limit the response buffer size to the TPMLIB_SetBufferSize-negotiated
+     * maximum response size even if this means we truncate the response.
+     */
+    *resp_size = MIN(resp.BufferSize, TPM2_GetBufferSize());
 
     if (g_inFailureMode && !reportedFailureCommand) {
         reportedFailureCommand = TRUE;
