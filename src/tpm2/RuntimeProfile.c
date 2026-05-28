@@ -266,9 +266,9 @@ RuntimeProfileDedupStrItems(char *input)
         while (true) {
             dup = strstr(ncomma + 1, pos);
             if (dup) {
-                /* ensure 'dup' is a prefix of 'pos' with either ',' or '\0' before it */
-                if (((dup[-1] == ',' || dup[-1] == 0) && dup[slen] == exp) ||
-                     (dup[slen] == 0) /* last item in list */) {
+                /* ensure 'dup' is a whole token: valid left boundary AND right boundary */
+                if ((dup[-1] == ',' || dup[-1] == 0) &&
+                    (dup[slen] == exp || dup[slen] == 0)) {
                     memmove(pos, comma + 1, strlen(comma + 1) + 1);
                     /* keep pos as-is */
                     found = true;
