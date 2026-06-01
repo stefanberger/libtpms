@@ -708,10 +708,8 @@ LDFLAGS_ARCH += $(findstring -m64, $(AM_CFLAGS))
 LDFLAGS_ARCH += $(findstring -m32, $(AM_LDFLAGS))
 LDFLAGS_ARCH += $(findstring -m64, $(AM_LDFLAGS))
 
-check-local: SHELL?="/usr/bin/env bash"
 check-local:
 	@case $(host_os) in \
-	  openbsd*) ADDLIBS="-lc" ;; \
 	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
@@ -719,7 +717,6 @@ check-local:
 	 (echo "There are undefined symbols in libtpms ($$LDFLAGS_OS $(LDFLAGS_ARCH))";\
 	  $(CC) $$LDFLAGS_OS $(LDFLAGS_ARCH) -nostdlib -L./.libs -ltpms $$ADDLIBS 2>&1 | grep libtpms))
 	@case $(host_os) in \
-	  openbsd*) ADDLIBS="-lc" ;; \
 	  darwin*|freebsd*) LDFLAGS_OS="-shared" ;; \
 	  *) ADDLIBS="" ;; \
 	esac; \
