@@ -12,13 +12,11 @@
 # if defined(SIXTY_FOUR_BIT_LONG) || defined(SIXTY_FOUR_BIT) // x32 architecture
 #  define RADIX_BITS                     64
 # endif
-# ifndef RADIX_BITS
-#  error Need to determine RADIX_BITS value
-# endif
 #else
 # error Target platform is not supported
 #endif                                 // libtpms added end
 
+// reachable with LibreSSL:
 #ifndef RADIX_BITS
 #  if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__)                 \
       || defined(__amd64) || defined(_WIN64) || defined(_M_X64) || defined(_M_ARM64) \
