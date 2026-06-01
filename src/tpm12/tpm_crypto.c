@@ -135,9 +135,7 @@ static TPM_RESULT TPM_SymmetricKeyData_Crypt(unsigned char *data_out,
 
 #include <openssl/aes.h>
 
-#if defined(__OpenBSD__)
- # define OPENSSL_OLD_API
-#elif OPENSSL_VERSION_NUMBER < 0x10100000
+#if OPENSSL_VERSION_NUMBER < 0x10100000
  #define OPENSSL_OLD_API
 #endif
 
