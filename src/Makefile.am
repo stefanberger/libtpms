@@ -708,7 +708,7 @@ LDFLAGS_ARCH += $(findstring -m64, $(AM_CFLAGS))
 LDFLAGS_ARCH += $(findstring -m32, $(AM_LDFLAGS))
 LDFLAGS_ARCH += $(findstring -m64, $(AM_LDFLAGS))
 
-check-local: SHELL?="/usr/bin/env bash"
+check-local: SHELL?="$(/usr/bin/env bash)"
 check-local:
 	@case $(host_os) in \
 	  openbsd*) ADDLIBS="-lc" ;; \
