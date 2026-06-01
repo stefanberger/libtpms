@@ -12,9 +12,6 @@
 # if defined(SIXTY_FOUR_BIT_LONG) || defined(SIXTY_FOUR_BIT) // x32 architecture
 #  define RADIX_BITS                     64
 # endif
-# ifndef RADIX_BITS
-#  error Need to determine RADIX_BITS value
-# endif
 #else
 # error Target platform is not supported
 #endif                                 // libtpms added end
