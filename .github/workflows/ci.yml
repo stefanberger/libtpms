@@ -5,14 +5,24 @@ on:
     branches: [ "master", "stable-*" ]
 
 jobs:
-  build-ubuntu-jammy:
-    runs-on: ubuntu-22.04
+  build-ubuntu-resolute-non-openssl-functions:
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:26.04
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - name: Build
         run: |
-          CFLAGS="-O3" ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --disable-use-openssl-functions
+          if ! type -P sudo; then
+            apt-get -y update
+            apt-get -y upgrade
+            apt-get -y install sudo git automake autoconf libtool pkgconf libssl-dev make g++
+          fi
+          CFLAGS="-O3" ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
           set +e
           make -j$((2 * $(nproc))) distcheck
           if [ $? -ne 0 ]; then
@@ -21,13 +31,23 @@ jobs:
           fi
           exit 0
 
-  build-ubuntu-noble:
+  build-ubuntu-resolute:
     runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:26.04
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - name: Build
         run: |
+          if ! type -P sudo; then
+            apt-get -y update
+            apt-get -y upgrade
+            apt-get -y install sudo git automake autoconf libtool pkgconf libssl-dev make g++
+          fi
           ./autogen.sh --with-openssl --prefix=/usr --with-tpm2
           set +e
           make -j$((2 * $(nproc))) distcheck
@@ -38,12 +58,31 @@ jobs:
           exit 0
 
   build-coveralls:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:26.04
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
 
       - name: Build for coveralls.io
         run: |
+          if ! type -P sudo; then
+            apt-get -y update
+            apt-get -y upgrade
+            apt-get -y install sudo git automake autoconf libtool pkgconf libssl-dev make g++
+          fi
+          git clone https://github.com/kgoldman/ibmtss.git
+          pushd ibmtss
+            git checkout tags/v2.5.0
+            autoreconf --force --install
+            ./configure --prefix=/usr --disable-tpm-1.2
+            make -j$((2 * $(nproc)))
+            sudo make install
+          popd
+          rm -rf ibmtss
           ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage
           make -j$((2 * $(nproc)))
           make -j$((2 * $(nproc))) check
@@ -51,10 +90,10 @@ jobs:
           git clone https://github.com/stefanberger/swtpm.git
           pushd swtpm
             sudo apt -y update
-            sudo apt -y install devscripts equivs python3-twisted expect \
-              libtasn1-dev socat findutils gnutls-dev gnutls-bin tss2 \
-              libjson-glib-dev libseccomp-dev
-            ./autogen.sh --with-gnutls --prefix=/usr
+            sudo apt -y install devscripts equivs expect net-tools gawk libgmp-dev \
+              libtasn1-dev socat findutils libjson-glib-dev libseccomp-dev curl \
+              python3-pip
+            ./autogen.sh --prefix=/usr
             set +e
             SWTPM_TEST_EXPENSIVE=1 SWTPM_TEST_IBMTSS2=1 make -j$((2 * $(nproc))) check
             rc=$?
@@ -65,7 +104,7 @@ jobs:
             git clone https://github.com/eddyxu/cpp-coveralls
             pushd cpp-coveralls
              git checkout tags/v0.4.2
-             pip install -e .
+             sudo pip install -e . --break-system-packages
             popd
             cpp-coveralls -b src -e tests -e swtpm --gcov-options '\-lp'
           else
