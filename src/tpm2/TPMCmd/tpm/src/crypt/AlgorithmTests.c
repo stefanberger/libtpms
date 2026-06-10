@@ -138,9 +138,9 @@ TestSMAC(
 
 //*** MakeIv()
 // Internal function to make the appropriate IV depending on the mode.
-static UINT32 MakeIv(TPM_ALG_ID mode,  // IN: symmetric mode
-                     UINT32     size,  // IN: block size of the algorithm
-                     BYTE*      iv     // OUT: IV to fill in
+static UINT32 MakeIv(TPM_ALG_ID     mode,  // IN: symmetric mode
+                     UINT32         size,  // IN: block size of the algorithm
+                     volatile BYTE* iv     // OUT: IV to fill in; 'volatile' for gcc15
 )
 {
     BYTE i;
