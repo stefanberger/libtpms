@@ -434,27 +434,45 @@ static TPM_RC OaepDecode(
 
     // find the start of the data
     pm = &mask[hLen];
+    j = 0;  // will hold the position (from the end) of the first non-zero byte found
+    // Scan the entire DB region in constant time to find the first non-zero byte
     for(i = (UINT32)padded->size - (2 * hLen) - 1; i > 0; i--)
     {
-        if(*pm++ != 0)
-            break;
+        UINT32 is_nonzero = (*pm != 0);  // 0 or 1
+        UINT32 not_found_yet = (j == 0); // 1 if we haven't found a non-zero yet
+        // Latch position on first non-zero: if is_nonzero AND not_found_yet, set j = i
+        j |= (i & (0 - (is_nonzero & not_found_yet)));
+        pm++;
     }
-    // If we ran out of data or didn't end with 0x01, then return an error
-    bad |= i == 0;
-    bad |= pm[-1] != 0x01; /* due to pm++ above, pm[-1] is valid */
+    // If we ran out of data (j == 0 means no non-zero byte found), or the byte at the
+    // found position is not 0x01, then return an error
+    bad |= (j == 0);
+    // pm now points past the end of the scanned region; mask[hLen + (scanlen - j)] is the byte we found
+    // Since scanlen = padded->size - 2*hLen - 1, and we scanned from the start,
+    // the byte is at: mask[hLen + scanlen - j] = mask[padded->size - hLen - 1 - j]
+    // But pm = mask[hLen] + scanlen, so pm[-j] gives us the byte at position j from the end
+    bad |= (pm[-j] != 0x01);
 
     // pm should be pointing at the first part of the data
-    // and i is one greater than the number of bytes to move
-    i--;
+    // j is the number of bytes from pm backwards to the delimiter, so pm - j + 1 is the start of data
+    // and j - 1 is the number of data bytes
+    // Fix Issue 2: avoid underflow when j == 0 (no delimiter found)
+    // Compute i = j - 1 if j > 0, else 0, without branches:
+    // Create a mask that is 0xFFFFFFFF if j != 0, else 0
+    k = (0 - (j != 0));  // mask: all 1s if j!=0, all 0s if j==0
+    i = (j - 1) & k;     // If j==0, i=0. If j>0, i=j-1.
     bad |= i > dataOut->size;
 
+    // Adjust pm to point to the start of the actual data (one byte past the delimiter)
+    pm = pm - j + 1;
+
     // Limit i to dataOut->size;
-    j = i;
-    k = dataOut->size;
-    if(i > k)
-        i = k;
-    else
+    k = i;
+    j = dataOut->size;
+    if(i > j)
         i = j;
+    else
+        i = k;
 
     memcpy(dataOut->buffer, pm, i);
     dataOut->size = (UINT16)i;
