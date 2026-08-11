@@ -78,6 +78,7 @@
 // Note: This could be converted to a macro.
 void ObjectFlush(OBJECT* object)
 {
+    MemorySet(object, 0, sizeof(*object));
     object->attributes.occupied = CLEAR;
 }
 
