@@ -490,7 +490,7 @@ RuntimeCommandsGetArraySize(struct RuntimeCommands *RuntimeCommands)
 
     /* search for byte where command with highest code is enabled */
     for (i = sizeof(RuntimeCommands->enabledCommandsByIdx) - 1;
-         i >= 0;
+         (ssize_t)i >= 0;
          i--) {
         if (RuntimeCommands->enabledCommandsByIdx[i])
             return i + 1;
