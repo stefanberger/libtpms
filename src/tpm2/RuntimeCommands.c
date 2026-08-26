@@ -424,8 +424,8 @@ RuntimeCommandsCheckEnabled(struct RuntimeCommands *RuntimeCommands,
 LIB_EXPORT UINT32
 RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands)
 {
-    COMMAND_INDEX commandIndex;
     unsigned int val = 0;
+    size_t commandIndex;
     UINT32 count = 0;
 
     MUST_BE(sizeof(val) == 4);
@@ -449,10 +449,10 @@ RuntimeCommandsCountEnabled(struct RuntimeCommands *RuntimeCommands)
  * Return a new buffer and free the given buffer.
  */
 static char *
-RuntimeCommandPrint(char           *buffer,
-		    BOOL            first,
-		    COMMAND_INDEX   commandCodeLo,
-		    COMMAND_INDEX   commandCodeHi)
+RuntimeCommandPrint(char   *buffer,
+		    BOOL    first,
+		    TPM_CC  commandCodeLo,
+		    TPM_CC  commandCodeHi)
 {
     char bufferlo[12], bufferhi[12];
     char *nbuffer = NULL;
@@ -505,9 +505,10 @@ RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
 		     enum RuntimeCommandType    rct,
 		     const char                *quote)
 {
-    COMMAND_INDEX commandIndex, commandCodeLo = 0, commandCodeHi = 0;
+    TPM_CC commandCodeLo = 0, commandCodeHi = 0;
     char *buffer, *nbuffer = NULL;
     BOOL first = true, doPrint;
+    size_t commandIndex;
     int n;
 
     buffer = strdup(quote);
@@ -544,7 +545,7 @@ RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
 		commandCodeLo = commandCodeHi = IdxToCc(commandIndex);
 		continue;
 	    }
-	    if (commandCodeHi + 1 == (COMMAND_INDEX)IdxToCc(commandIndex)) {
+	    if (commandCodeHi + 1 == (TPM_CC)IdxToCc(commandIndex)) {
 		commandCodeHi++;
 		continue;
 	    }
