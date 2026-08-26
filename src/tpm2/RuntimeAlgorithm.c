@@ -820,8 +820,8 @@ RuntimeAlgorithmsFilterPCRSelection(TPML_PCR_SELECTION *pcrSelection // IN/OUT: 
     while (i < pcrSelection->count) {
 	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
 					  pcrSelection->pcrSelections[i].hash)) {
-	    pcrSelection->count--;
-	    if (pcrSelection->count - 1 > i) {
+	    pcrSelection->count--; /* worst case: count == i */
+	    if (pcrSelection->count != i) {
 		MemoryCopy(&pcrSelection->pcrSelections[i],
 			   &pcrSelection->pcrSelections[i + 1],
 			   sizeof(pcrSelection->pcrSelections[0]) * (pcrSelection->count - i));
