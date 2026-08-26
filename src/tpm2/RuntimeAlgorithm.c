@@ -122,7 +122,7 @@ static const struct {
     [TPM_ALG_CAMELLIA] = SYMMETRIC(ALG_CAMELLIA, "camellia", s_KeySizesCamellia, true, 1),
     [TPM_ALG_SHA3_256] = HASH(ALG_SHA3_256, "sha3-256", true, 0), // not supported
     [TPM_ALG_SHA3_384] = HASH(ALG_SHA3_384, "sha3-384", true, 0), // not supported
-    [TPM_ALG_SHA3_512] = HASH(ALG_SHA3_512, "sha3-256", true, 0), // not supported
+    [TPM_ALG_SHA3_512] = HASH(ALG_SHA3_512, "sha3-512", true, 0), // not supported
     [TPM_ALG_CMAC] = SIGNING(ALG_CMAC, "cmac", true, 1),
     [TPM_ALG_CTR] = ENCRYPTING(ALG_CTR, "ctr", true, 1),
     [TPM_ALG_OFB] = ENCRYPTING(ALG_OFB, "ofb", true, 1),
