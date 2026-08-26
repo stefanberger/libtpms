@@ -226,6 +226,7 @@ parseRange(const char *buffer,
     *commandCodeLo = v;
 
     if (endptr[0] == '-') {
+	errno = 0;
 	v = strtoul(&endptr[1], &endptr, 0);
 	if (errno != 0)
 	    return -1;
