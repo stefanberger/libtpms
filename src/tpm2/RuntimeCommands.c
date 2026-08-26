@@ -402,7 +402,7 @@ RuntimeCommandsCheckEnabledByIdx(struct RuntimeCommands *RuntimeCommands,
                          IdxToCc(commandIndex));
         return FALSE;
     }
-    TPMLIB_LogPrintf("IsEnEnabled(0x%x = '%s'): %d\n",
+    TPMLIB_LogPrintf("IsEnabled(0x%x = '%s'): %d\n",
 		     IdxToCc(commandIndex),
 		     s_CommandProperties[commandIndex].name,
 		     TEST_BIT(commandIndex, RuntimeCommands->enabledCommandsByIdx));
