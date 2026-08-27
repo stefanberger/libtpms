@@ -28,7 +28,7 @@ const char defaultAlgorithmsProfile[] =
 
 static const struct RuntimeProfileDesc {
     const char *name;
-#define MAX_PROFILE_NAME_LEN  32
+#define MAX_PROFILE_NAME_LEN  (32 + 1)
     const char *prefix;
     size_t prefix_len;
     const char *commandsProfile;
@@ -71,7 +71,7 @@ static const struct RuntimeProfileDesc {
  *  8 : Enabled 4096-bit RSA support
  */
     const char *description;
-#define DESCRIPTION_MAX_SIZE        250
+#define DESCRIPTION_MAX_SIZE        (250 + 1)
     bool allowModifications; /* user is allowed to modify algorithms profile */
 } RuntimeProfileDescs[] = {
 #define PROFILE_DEFAULT_V2_IDX	0
@@ -342,8 +342,8 @@ RuntimeProfileGetNameFromJSON(const char  *json,
     retVal = RuntimeProfileGetFromJSON(json, regex, name, false, false);
     if (!retVal) {
         len = strlen(*name);
-        if (len > MAX_PROFILE_NAME_LEN)
-            (*name)[MAX_PROFILE_NAME_LEN] = 0;
+        if (len >= MAX_PROFILE_NAME_LEN)
+            (*name)[MAX_PROFILE_NAME_LEN - 1] = 0;
     }
 
     return retVal;
@@ -364,8 +364,8 @@ RuntimeProfileGetDescriptionFromJSON(const char  *json,
     }
     if (retVal == TPM_RC_SUCCESS && *description != NULL) {
 	len = strlen(*description);
-	if (len > DESCRIPTION_MAX_SIZE)
-	    (*description)[DESCRIPTION_MAX_SIZE] = 0;
+	if (len >= DESCRIPTION_MAX_SIZE)
+	    (*description)[DESCRIPTION_MAX_SIZE - 1] = 0;
     }
     return retVal;
 }
