@@ -221,7 +221,7 @@ parseRange(const char *buffer,
     v = strtoul(buffer, &endptr, 0);
     if (errno != 0)
 	return -1;
-    if (v > (unsigned int)~0)
+    if (v > UINT32_MAX)
 	return -1;
     *commandCodeLo = v;
 
@@ -230,7 +230,7 @@ parseRange(const char *buffer,
 	v = strtoul(&endptr[1], &endptr, 0);
 	if (errno != 0)
 	    return -1;
-	if (v > (unsigned int)~0)
+	if (v > UINT32_MAX)
 	    return -1;
 	*commandCodeHi = v;
     } else {
