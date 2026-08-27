@@ -731,25 +731,30 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 
     free(RuntimeProfile->RuntimeAlgorithm.algorithmProfile);
     RuntimeProfile->RuntimeAlgorithm.algorithmProfile = algorithmsProfile;
+    algorithmsProfile = NULL;
 
     free(RuntimeProfile->RuntimeCommands.commandsProfile);
     RuntimeProfile->RuntimeCommands.commandsProfile = commandsProfile;
+    commandsProfile = NULL;
 
     free(RuntimeProfile->RuntimeAttributes.attributesProfile);
     RuntimeProfile->RuntimeAttributes.attributesProfile = attributesProfile;
+    attributesProfile = NULL;
 
     free(RuntimeProfile->profileName);
     RuntimeProfile->profileName = profileName;
+    profileName = NULL;
 
     free(RuntimeProfile->profileDescription);
     RuntimeProfile->profileDescription = profileDescription;
+    profileDescription = NULL;
 
     /* Indicate whether the profile was mapped to the default profile due to
      * a NULL pointer read from the state.
      */
     RuntimeProfile->wasNullProfile = (jsonProfile == NULL) && (jsonProfileIsFromUser == FALSE);
     /* Another way is if the user passed in the null profile */
-    if (jsonProfileIsFromUser && !strcmp("null", profileName))
+    if (jsonProfileIsFromUser && !strcmp("null", RuntimeProfile->profileName))
 	RuntimeProfile->wasNullProfile = true;
 
     return TPM_RC_SUCCESS;
