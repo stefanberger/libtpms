@@ -804,8 +804,11 @@ RuntimeAlgorithmPrint(struct RuntimeAlgorithm   *RuntimeAlgorithm,
 	}
 
 skip:
-	if (algId == TPM_ALG_ECC)
+	if (algId == TPM_ALG_ECC) {
 	    buffer = RuntimeAlgorithmGetEcc(RuntimeAlgorithm, rat, buffer, &first);
+	    if (!buffer)
+		return NULL;
+        }
     }
 
     n = asprintf(&nbuffer, "%s\"", buffer);
