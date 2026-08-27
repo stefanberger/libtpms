@@ -504,8 +504,13 @@ RuntimeAlgorithmSwitchProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
     retVal = RuntimeAlgorithmSetProfile(RuntimeAlgorithm, newProfile,
                                         &stateFormatLevel, maxStateFormatLevel);
     if (retVal != TPM_RC_SUCCESS) {
-	RuntimeAlgorithmSetProfile(RuntimeAlgorithm, *oldProfile,
-	                           &stateFormatLevel, ~0);
+	if (RuntimeAlgorithmSetProfile(RuntimeAlgorithm, *oldProfile,
+	                               &stateFormatLevel, ~0)) {
+            /* roll-back failed */
+	    TPMLIB_LogTPM2Error("RuntimeAlgorithmSwitchProfile: Unable to roll back to previously used algorithm profile: '%s'\n",
+			        *oldProfile);
+        }
+        free(*oldProfile);
 	*oldProfile = NULL;
     }
     return retVal;

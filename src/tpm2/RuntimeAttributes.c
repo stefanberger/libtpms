@@ -147,8 +147,13 @@ RuntimeAttributesSwitchProfile(struct RuntimeAttributes *RuntimeAttributes,
     retVal = RuntimeAttributesSetProfile(RuntimeAttributes, newProfile,
 					 &stateFormatLevel, maxStateFormatLevel);
     if (retVal != TPM_RC_SUCCESS) {
-	RuntimeAttributesSetProfile(RuntimeAttributes, *oldProfile,
-				    &stateFormatLevel, ~0);
+	if (RuntimeAttributesSetProfile(RuntimeAttributes, *oldProfile,
+					&stateFormatLevel, ~0)) {
+            /* roll-back failed */
+	    TPMLIB_LogTPM2Error("RuntimeAttributesSwitchProfile: Unable to roll back to previously used attributes profile: '%s'\n",
+			        *oldProfile);
+	}
+	free(*oldProfile);
 	*oldProfile = NULL;
     }
     return retVal;
