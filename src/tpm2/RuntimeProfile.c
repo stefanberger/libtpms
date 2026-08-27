@@ -228,69 +228,6 @@ exit:
     return retVal;
 }
 
-/*
- * RuntimeProfileDedupStrItems does in-place deduplication of comma-separated
- * items in a string. If an item contains '=' (rsa-min-size=) then the part
- * before the '=' is deduplicated. When deduplicating always the later item is
- * kept.
- */
-static void
-RuntimeProfileDedupStrItems(char *input)
-{
-    char *comma, *equals, *dup, *ncomma;
-    char *pos = input;
-    size_t slen;
-    bool found;
-    char exp;
-
-    while (true) {
-        comma = index(pos, ',');
-        if (!comma)
-            return;
-
-        /* temporarily terminate string here */
-        *comma = '\0';
-        equals = index(pos, '=');
-        if (equals) {
-            *equals = '\0';
-            exp = '=';
-            slen = equals - pos;
-        } else {
-            exp = ',';
-            slen = comma - pos;
-        }
-
-        found = false;
-        ncomma = comma;
-        /* search for string after the comma */
-        while (true) {
-            dup = strstr(ncomma + 1, pos);
-            if (dup) {
-                /* ensure 'dup' is a whole token: valid left boundary AND right boundary */
-                if ((dup[-1] == ',' || dup[-1] == 0) &&
-                    (dup[slen] == exp || dup[slen] == 0)) {
-                    memmove(pos, comma + 1, strlen(comma + 1) + 1);
-                    /* keep pos as-is */
-                    found = true;
-                    break;
-                }
-                /* only a prefix matched; continue search after comma */
-                ncomma = index(dup, ',');
-                if (!ncomma)
-                    break;
-            } else {
-                break;
-            }
-        }
-        if (!found) {
-            *comma = ',';
-            if (equals)
-               *equals = '=';
-            pos = comma + 1;
-        }
-    }
-}
-
 static TPM_RC
 RuntimeProfileGetFromJSON(const char  *json,
 			  const char  *regex,
@@ -321,7 +258,7 @@ RuntimeProfileGetFromJSON(const char  *json,
 	goto exit;
     }
     if (removeDuplicates)
-        RuntimeProfileDedupStrItems(*value);
+        RuntimeUtilsDedupStrItems(*value);
 
     retVal = TPM_RC_SUCCESS;
 
