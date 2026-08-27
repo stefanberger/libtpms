@@ -10,6 +10,7 @@
 #include "RuntimeAlgorithm_fp.h"
 #include "RuntimeCommands_fp.h"
 #include "RuntimeAttributes_fp.h"
+#include "RuntimeUtils_fp.h"
 
 struct RuntimeProfile {
     struct RuntimeAlgorithm RuntimeAlgorithm;

@@ -326,6 +326,7 @@ libtpms_tpm2_la_SOURCES = \
 	tpm2/RuntimeAttributes.c \
 	tpm2/RuntimeCommands.c \
 	tpm2/RuntimeProfile.c \
+	tpm2/RuntimeUtils.c \
 	tpm2/StateMarshal.c \
 	tpm2/Volatile.c
 
@@ -614,6 +615,7 @@ noinst_HEADERS += \
 	tpm2/RuntimeAttributes_fp.h \
 	tpm2/RuntimeCommands_fp.h \
 	tpm2/RuntimeProfile_fp.h \
+	tpm2/RuntimeUtils_fp.h \
 	tpm2/StateMarshal.h \
 	tpm2/Utils.h \
 	tpm2/Volatile.h
