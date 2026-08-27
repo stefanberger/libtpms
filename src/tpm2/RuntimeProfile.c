@@ -491,7 +491,7 @@ RuntimeProfileFormat(char          **json,
 
     n = asprintf(&ret,
 		 "{\"Name\":\"%s\","
-		  "\"StateFormatLevel\":%d",
+		  "\"StateFormatLevel\":%u",
 		  profileName, stateFormatLevel);
     if (n < 0)
 	return TPM_RC_MEMORY;
