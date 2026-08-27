@@ -394,7 +394,7 @@ RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
 				       &stateFormatLevel, maxStateFormatLevel);
     if (retVal != TPM_RC_SUCCESS) {
 	RuntimeCommandsSetProfile(RuntimeCommands, *oldProfile,
-				  &stateFormatLevel, maxStateFormatLevel);
+				  &stateFormatLevel, ~0);
 	*oldProfile = NULL;
     }
     return retVal;
