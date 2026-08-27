@@ -127,9 +127,9 @@ static const struct {
     [TPM_ALG_CTR] = ENCRYPTING(ALG_CTR, "ctr", true, 1),
     [TPM_ALG_OFB] = ENCRYPTING(ALG_OFB, "ofb", true, 1),
     [TPM_ALG_CBC] = ENCRYPTING(ALG_CBC, "cbc", true, 1),
-    [TPM_ALG_CFB] = ENCRYPTING(ALG_CFB, "cfb", false, 1), // never disable: context entryption
+    [TPM_ALG_CFB] = ENCRYPTING(ALG_CFB, "cfb", false, 1), // never disable: context encryption
     [TPM_ALG_ECB] = ENCRYPTING(ALG_ECB, "ecb", true, 1),
-    /* all newly added algorithms must have .canBedisable=true so they can be disabled */
+    /* all newly added algorithms must have .canBeDisable=true so they can be disabled */
 };
 
 struct AlgorithmShortcuts {
