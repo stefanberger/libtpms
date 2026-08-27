@@ -824,10 +824,20 @@ RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
 	retVal = RuntimeAttributesSwitchProfile(&RuntimeProfile->RuntimeAttributes,
                                                 attributesProfile, maxStateFormatLevel,
                                                 &oldProfile);
-	if (retVal == TPM_RC_SUCCESS)
+	if (retVal == TPM_RC_SUCCESS) {
 	    retVal = RuntimeAttributesSetProfile(&RuntimeProfile->RuntimeAttributes,
-						 oldProfile, &stateFormatLevel,
+					         oldProfile, &stateFormatLevel,
 						 ~0);
+	    if (retVal) {
+		TPMLIB_LogTPM2Error("RuntimeProfileTest: Unable to roll back to previously used attributes profile: '%s'\n",
+				    oldProfile);
+		goto error;
+	    }
+	} else {
+	    goto error;
+	}
+	free(oldProfile);
+	oldProfile = NULL;
     }
 
     if (algorithmsProfile) {
@@ -835,10 +845,20 @@ RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
 	retVal = RuntimeAlgorithmSwitchProfile(&RuntimeProfile->RuntimeAlgorithm,
 					       algorithmsProfile, maxStateFormatLevel,
 					       &oldProfile);
-	if (retVal == TPM_RC_SUCCESS)
+	if (retVal == TPM_RC_SUCCESS) {
 	    retVal = RuntimeAlgorithmSetProfile(&RuntimeProfile->RuntimeAlgorithm,
 						oldProfile, &stateFormatLevel,
 						~0);
+	    if (retVal) {
+		TPMLIB_LogTPM2Error("RuntimeProfileTest: Unable to roll back to previously used algorithms profile: '%s'\n",
+				    oldProfile);
+		goto error;
+	    }
+	} else {
+	    goto error;
+	}
+	free(oldProfile);
+	oldProfile = NULL;
     }
 
     if (commandsProfile) {
@@ -846,10 +866,20 @@ RuntimeProfileTest(struct RuntimeProfile *RuntimeProfile,
 	retVal = RuntimeCommandsSwitchProfile(&RuntimeProfile->RuntimeCommands,
 					      commandsProfile, maxStateFormatLevel,
 					      &oldProfile);
-	if (retVal == TPM_RC_SUCCESS)
+	if (retVal == TPM_RC_SUCCESS) {
 	    retVal = RuntimeCommandsSetProfile(&RuntimeProfile->RuntimeCommands,
 					       &oldProfile, &stateFormatLevel,
 					       ~0, false);
+	    if (retVal) {
+		TPMLIB_LogTPM2Error("RuntimeProfileTest: Unable to roll back to previously used commands profile: '%s'\n",
+				    oldProfile);
+		goto error;
+	    }
+	} else {
+	    goto error;
+	}
+	free(oldProfile);
+	oldProfile = NULL;
     }
 
 error:
@@ -858,6 +888,7 @@ error:
     free(commandsProfile);
     free(algorithmsProfile);
     free(profileName);
+    free(oldProfile);
 
     return retVal;
 }
