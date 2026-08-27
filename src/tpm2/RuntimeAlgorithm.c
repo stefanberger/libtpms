@@ -565,7 +565,7 @@ static BOOL _RuntimeAlgorithmKeySizeCheckEnabled(
     }
 
     keysizes = s_AlgorithmProperties[algId].u.keySizes;
-    for (i = 0; keysizes[i].size != 0; i++) {
+    for (i = 0; keysizes != NULL && keysizes[i].size != 0; i++) {
 	if (keysizes[i].size == keySizeInBits) {
 	    if (keysizes[i].enabled &&
 		keysizes[i].stateFormatLevel > maxStateFormatLevel) {
