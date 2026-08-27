@@ -384,8 +384,13 @@ RuntimeCommandsSwitchProfile(struct RuntimeCommands   *RuntimeCommands,
 				       &stateFormatLevel, maxStateFormatLevel,
 				       false);
     if (retVal != TPM_RC_SUCCESS) {
-	RuntimeCommandsSetProfile(RuntimeCommands, oldProfile,
-				  &stateFormatLevel, ~0, false);
+	if (RuntimeCommandsSetProfile(RuntimeCommands, oldProfile,
+				      &stateFormatLevel, ~0, false)) {
+            /* roll-back failed */
+	    TPMLIB_LogTPM2Error("RuntimeCommandsSwitchProfile: Unable to roll back to previously used commands profile: '%s'\n",
+			        *oldProfile);
+	}
+	free(*oldProfile);
 	*oldProfile = NULL;
     }
     return retVal;
