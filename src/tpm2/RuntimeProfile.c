@@ -754,6 +754,7 @@ RuntimeProfileSet(struct RuntimeProfile *RuntimeProfile,
 		if (stateFormatLevelJSON < 2) {
 		    TPMLIB_LogTPM2Error("The minimum required StateFormatLevel for '%s' profile is '2'\n",
 					profileName);
+		    retVal = TPM_RC_VALUE;
 		    goto error;
 		}
 		maxStateFormatLevel = stateFormatLevelJSON;
