@@ -4039,7 +4039,7 @@ PACompileConstants_Unmarshal(BYTE **buffer, INT32 *size)
             exp_array_size = 88;
             break;
         case 3:
-            /* PA_COMPILE_CONSTANTS_VERSION 3 had 104 entries */
+            /* PA_COMPILE_CONSTANTS_VERSION 3 had 120 entries */
             exp_array_size = 120;
             break;
         default:
