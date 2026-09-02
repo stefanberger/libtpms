@@ -931,7 +931,7 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
         }
         if (t) {
             if (rc == TPM_RC_SUCCESS) {
-                algs_needed &= ~(1 << algid);
+                algs_needed &= ~((UINT64)1 << algid);
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
@@ -1113,7 +1113,7 @@ PCR_Unmarshal(PCR *data, BYTE **buffer, INT32 *size,
         }
         if (t) {
             if (rc == TPM_RC_SUCCESS) {
-                algs_needed &= ~(1 << algid);
+                algs_needed &= ~((UINT64)1 << algid);
                 rc = UINT16_Unmarshal(&array_size, buffer, size);
             }
             if (rc == TPM_RC_SUCCESS && array_size != needed_size) {
