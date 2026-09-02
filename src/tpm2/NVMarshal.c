@@ -1565,7 +1565,7 @@ ci_prime_t_Unmarshal(ci_prime_t *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         /* coverity: num_bytes is sanitized here! */
-        data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_word_t);
+        data->size = (numbytes + sizeof(crypt_uword_t) - 1) / sizeof(crypt_uword_t);
         if (data->size > data->allocated) {
             TPMLIB_LogTPM2Error("ci_prime_t: Require size larger %zu than "
                                 "allocated %zu\n",
