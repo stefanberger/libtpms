@@ -1549,6 +1549,12 @@ Exit:
         if (retVal)
             retVal = TPM_RC_FAILURE;
     }						// libtpms added end
+    // libtpms added begin: Z holds the generated RSA private key (primes P,
+    // Q and their CRT parameters); clear it here rather than leaving it in
+    // this stack frame. Harmless no-op on the OpenSSL key-generation path,
+    // where Z is never populated.
+    OPENSSL_cleanse(Z, sizeof(*Z));
+    // libtpms added end
     return retVal;
 }
 

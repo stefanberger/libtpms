@@ -7,6 +7,8 @@
 #include "TpmEcc_Signature_ECDSA_fp.h"  // required for pairwise test in key generation
 #include "Helpers_fp.h"                // libtpms added
 
+#include <openssl/crypto.h>  // libtpms added
+
 #if ALG_ECC
 //** Functions
 
@@ -478,6 +480,12 @@ BOOL TpmEcc_GenPrivateScalar(
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
 
+    // libtpms added begin: bnExtraBits_buf holds the raw random value that
+    // dOut (the private scalar) is directly derived from; clear it here
+    // rather than leaving it in this stack frame.
+    OPENSSL_cleanse(&bnExtraBits_buf, sizeof(bnExtraBits_buf));
+    // libtpms added end
+
     return OK && !_plat__InFailureMode();
 }
 #else                                  // libtpms added begin
@@ -512,6 +520,11 @@ BOOL TpmEcc_GenPrivateScalar(
     OK = OK && ExtMath_SubtractWord(nMinus1, order, 1);
     OK = OK && ExtMath_Mod(bnExtraBits, nMinus1);
     OK = OK && ExtMath_AddWord(dOut, bnExtraBits, 1);
+
+    // bnExtraBits_buf holds the raw random value that dOut (the private
+    // scalar) is directly derived from; clear it here rather than
+    // leaving it in this stack frame.
+    OPENSSL_cleanse(&bnExtraBits_buf, sizeof(bnExtraBits_buf));
 
     return OK && !_plat__InFailureMode();
 }
@@ -573,6 +586,10 @@ BOOL TpmEcc_GenerateKeyPair(Crypt_Int*            bnD,  // OUT: private scalar
     } else {
         OK = OK && ExtEcc_PointMultiply(ecQ, NULL, bnD, E);
     }
+    // bnD1_buf is bnD + order (order is public), so it trivially reveals
+    // the private scalar bnD; clear it here rather than leaving it in
+    // this stack frame.
+    OPENSSL_cleanse(&bnD1_buf, sizeof(bnD1_buf));
     return OK;
 }
 
@@ -754,7 +771,8 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
         // Get a random value to sign using the built in DRBG state
         DRBG_Generate(NULL, digest.t.buffer, digest.t.size);
         if(_plat__InFailureMode())
-            return TPM_RC_FAILURE;
+            ERROR_EXIT(TPM_RC_FAILURE); // libtpms changed: fall through to
+                                        // Exit so bnD_buf is cleared below
         TpmEcc_SignEcdsa(bnT, bnS, E, bnD, &digest, NULL);
         // and make sure that we can validate the signature
         OK = TpmEcc_ValidateSignatureEcdsa(bnT, bnS, E, ecQ, &digest)
@@ -763,6 +781,10 @@ LIB_EXPORT TPM_RC CryptEccGenerateKey(
 //#  endif										// libtpms changed
     retVal = (OK) ? TPM_RC_SUCCESS : TPM_RC_NO_RESULT;
 Exit:
+    // libtpms added begin: bnD_buf holds the generated ECC private key (the
+    // scalar 'd'); clear it here rather than leaving it in this stack frame.
+    OPENSSL_cleanse(&bnD_buf, sizeof(bnD_buf));
+    // libtpms added end
     CRYPT_CURVE_FREE(E);
     return retVal;
 }
