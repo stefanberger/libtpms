@@ -83,7 +83,7 @@ jobs:
             sudo make install
           popd
           rm -rf ibmtss
-          ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --enable-test-coverage
+          ./autogen.sh --with-openssl --prefix=/usr --with-tpm2 --with-tpm1 --enable-test-coverage
           make -j$((2 * $(nproc)))
           make -j$((2 * $(nproc))) check
           sudo make install
