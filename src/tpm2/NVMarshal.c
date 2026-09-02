@@ -875,9 +875,8 @@ PCR_SAVE_Unmarshal(PCR_SAVE *data, BYTE **buffer, INT32 *size,
     }
     if (rc == TPM_RC_SUCCESS &&
         array_size != NUM_STATIC_PCR) {
-        TPMLIB_LogTPM2Error("Non-matching PCR_SAVE NUM_STATIC_PCR. "
-                            "Expected %zu, got %u\n",
-                            sizeof(NUM_STATIC_PCR), array_size);
+        TPMLIB_LogTPM2Error("Non-matching PCR_SAVE NUM_STATIC_PCR. Expected %d, got %hu\n",
+                            NUM_STATIC_PCR, array_size);
         rc = TPM_RC_SIZE;
     }
 
