@@ -4135,6 +4135,9 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
 
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
+        /* check array_size for a reasonable maximum that should never be reached */
+        if (rc == TPM_RC_SUCCESS && array_size > 1024)
+            rc = TPM_RC_SIZE;
     }
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
@@ -4206,6 +4209,9 @@ PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, IN
 
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
+        /* check array_size for a reasonable maximum that should never be reached */
+        if (rc == TPM_RC_SUCCESS && array_size > 1024)
+            rc = TPM_RC_SIZE;
     }
     if (rc == TPM_RC_SUCCESS) {
         BYTE buf[array_size];
