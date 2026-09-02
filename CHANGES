@@ -1,5 +1,9 @@
 CHANGES - changes for libtpms
 
+version 0.11.0:
+  - NOTE: TPM 1.2 support is now deprecated; it will not be built by
+          default anymore (must configure with --with-tpm1)
+
 version 0.10.0:
   - tpm2: Support for profiles: default-v1 & custom
   - tpm2: Add new API call TPMLIB_SetProfile to enable user to set a profile

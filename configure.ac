@@ -42,7 +42,7 @@ m4_if(
 AM_CONDITIONAL([HAVE_VERSION_SCRIPT], [test "x$have_version_script" = "xyes"])
 
 AC_ARG_WITH([tpm1],
-    AS_HELP_STRING([--with-tpm1], [build libtpms with TPM 1.2 support]), [], [with_tpm1=yes])
+    AS_HELP_STRING([--with-tpm1], [build libtpms with TPM 1.2 support]), [], [with_tpm1=no])
 AM_CONDITIONAL([WITH_TPM1], [test "x$with_tpm1" != "xno"])
 AS_IF([test "x$with_tpm1" != "xno"], [
     AC_DEFINE([WITH_TPM1], [1], [With TPM 1.2 support])
