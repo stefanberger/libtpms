@@ -284,9 +284,11 @@ String_Marshal(const char *source, BYTE **buffer, INT32 *size)
     written += UINT16_Marshal(&len, buffer, size);
 
     if (len > 0 && *size >= len) {
-        memcpy(*buffer, source, len);
-        *buffer += len;
-        *size -= len;
+        if (buffer != NULL) {
+            memcpy(*buffer, source, len);
+            *buffer += len;
+            *size -= len;
+        }
 
         written += len;
     }
