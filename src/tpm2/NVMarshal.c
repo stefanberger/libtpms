@@ -106,10 +106,13 @@ block_skip_write_push(block_skip_t *bs, BOOL has_block,
  * needed.
  */
 static void
-block_skip_write_pop(block_skip_t *bs, INT32 *size) {
+block_skip_write_pop(block_skip_t *bs, INT32 *size)
+{
     UINT16 skip;
-    unsigned i = --bs->idx;
-    pAssert_VOID_OK((int)bs->idx >= 0);
+    unsigned i;
+
+    pAssert_VOID_OK(bs->idx > 0);
+    i = --bs->idx;
     skip = bs->pos[i].size - *size - sizeof(UINT16);
     UINT16_Marshal(&skip, &bs->pos[i].buffer, &bs->pos[i].size);
 }
