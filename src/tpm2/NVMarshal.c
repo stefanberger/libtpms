@@ -4991,7 +4991,11 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
 
                     memset(&obj, 0, sizeof(obj));
                     rc = ANY_OBJECT_Unmarshal(&obj, buffer, size, true);
-                    pAssert(rc == TPM_RC_SUCCESS);
+                    if (rc != TPM_RC_SUCCESS) {
+                        TPMLIB_LogTPM2Error("USER_NVRAM: Failed to unmarshal ANY_OBJECT: 0x%08x\n",
+                                            rc);
+                        return rc;
+                    }
                     // convert the OBJECT into a buffer to copy into NVRAM
                     marshalledObjectSize = NvObjectToBuffer(&obj, objBuffer, sizeof(objBuffer));
 
