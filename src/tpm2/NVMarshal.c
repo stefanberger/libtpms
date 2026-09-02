@@ -4841,7 +4841,11 @@ USER_NVRAM_Marshal(BYTE **buffer, INT32 *size, struct RuntimeProfile *RuntimePro
 
             written += NV_INDEX_Marshal(&nvi, buffer, size);
             /* after that: bulk data */
+            /* ensure TPM code gives good entry_size */
+            pAssert(entrysize >= sizeof(UINT32) + sizeof(nvi));
             datasize = entrysize - sizeof(UINT32) - sizeof(nvi);
+            /* datasize must be bounded by MAX_NV_INDEX_SIZE by TPM code */
+            pAssert(datasize <= MAX_NV_INDEX_SIZE);
             written += UINT32_Marshal(&datasize, buffer, size);
             if (datasize > 0) {
                 BYTE buf[datasize];
