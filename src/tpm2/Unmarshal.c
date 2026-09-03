@@ -2123,6 +2123,14 @@ TPMS_TAGGED_PCR_SELECT_Unmarshal(TPMS_TAGGED_PCR_SELECT *target, BYTE **buffer, 
 	rc = UINT8_Unmarshal(&target->sizeofSelect, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        // FIXME: Can sizeofSelect be 0?
+	if ((target->sizeofSelect < PCR_SELECT_MIN) ||
+	    (target->sizeofSelect > PCR_SELECT_MAX)) {
+	    rc = TPM_RC_VALUE;
+	    target->sizeofSelect = 0; // libtpms added
+	}
+    }
+    if (rc == TPM_RC_SUCCESS) {
 	rc = Array_Unmarshal(target->pcrSelect, target->sizeofSelect, buffer, size);
     }
      return rc;
