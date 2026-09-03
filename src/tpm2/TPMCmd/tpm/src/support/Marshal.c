@@ -238,7 +238,7 @@ TPM_ST_Marshal(TPM_ST *source, BYTE **buffer, INT32 *size)
 
 /* Table 2:22 - Definition of TPM_CAP Constants (EnumTable()) */
 
-INT16
+UINT16
 TPM_CAP_Marshal(TPM_CAP *source, BYTE **buffer, INT32 *size)
 {
     UINT16 written = 0;

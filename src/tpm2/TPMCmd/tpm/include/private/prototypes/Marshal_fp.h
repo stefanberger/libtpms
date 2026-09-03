@@ -74,7 +74,7 @@ extern "C" {
     TPM_RC_Marshal(TPM_RC *source, BYTE **buffer, INT32 *size);
     UINT16
     TPM_ST_Marshal(TPM_ST *source, BYTE **buffer, INT32 *size);
-    INT16
+    UINT16
     TPM_CAP_Marshal(TPM_CAP *source, BYTE **buffer, INT32 *size);
     UINT16
     TPM_PT_Marshal(TPM_PT *source, BYTE **buffer, INT32 *size);
