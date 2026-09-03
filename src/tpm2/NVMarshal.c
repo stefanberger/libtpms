@@ -283,15 +283,17 @@ String_Marshal(const char *source, BYTE **buffer, INT32 *size)
         len = (UINT16)strlen(source) + 1;
     written += UINT16_Marshal(&len, buffer, size);
 
-    if (len > 0 && *size >= len) {
-        if (buffer != NULL) {
+    if (len > 0 && buffer != NULL) {
+        if ((size == NULL) || (*size > 0 && (UINT32)*size >= len)) {
             memcpy(*buffer, source, len);
             *buffer += len;
-            *size -= len;
+            if (size != NULL)
+                *size -= len;
+        } else {
+            pAssert(FALSE);
         }
-
-        written += len;
     }
+    written += len; // can determine needed buffer size with buffer == NULL
 
     return written;
 }
@@ -308,7 +310,7 @@ String_Unmarshal(char **target, BYTE **buffer, INT32 *size)
         rc = UINT16_Unmarshal(&len, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
-        if (*size < len) {
+        if (*size < 0 || (UINT32)*size < len) {
             rc = TPM_RC_INSUFFICIENT;
         } else if (len > 0) {
             *target = malloc(len);
