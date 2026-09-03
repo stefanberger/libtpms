@@ -19,7 +19,7 @@
 TPM_RC
 UINT8_Unmarshal(UINT8 *target, BYTE **buffer, INT32 *size)
 {
-    if ((UINT32)*size < sizeof(UINT8)) {
+    if (*size < 0 || (UINT32)*size < sizeof(UINT8)) {
 	return TPM_RC_INSUFFICIENT;
     }
     *target = (*buffer)[0];
@@ -37,7 +37,7 @@ INT8_Unmarshal(INT8 *target, BYTE **buffer, INT32 *size)
 TPM_RC
 UINT16_Unmarshal(UINT16 *target, BYTE **buffer, INT32 *size)
 {
-    if ((UINT32)*size < sizeof(UINT16)) {
+    if (*size < 0 || (UINT32)*size < sizeof(UINT16)) {
 	return TPM_RC_INSUFFICIENT;
     }
     *target = ((UINT16)((*buffer)[0]) << 8) |
@@ -50,7 +50,7 @@ UINT16_Unmarshal(UINT16 *target, BYTE **buffer, INT32 *size)
 TPM_RC
 UINT32_Unmarshal(UINT32 *target, BYTE **buffer, INT32 *size)
 {
-    if ((UINT32)*size < sizeof(UINT32)) {
+    if (*size < 0 || (UINT32)*size < sizeof(UINT32)) {
 	return TPM_RC_INSUFFICIENT;
     }
     *target = ((UINT32)((*buffer)[0]) << 24) |
@@ -65,7 +65,7 @@ UINT32_Unmarshal(UINT32 *target, BYTE **buffer, INT32 *size)
 TPM_RC
 UINT64_Unmarshal(UINT64 *target, BYTE **buffer, INT32 *size)
 {
-    if ((UINT32)*size < sizeof(UINT64)) {
+    if (*size < 0 || (UINT32)*size < sizeof(UINT64)) {
 	return TPM_RC_INSUFFICIENT;
     }
     *target = ((UINT64)((*buffer)[0]) << 56) |
@@ -86,7 +86,7 @@ Array_Unmarshal(BYTE *targetBuffer, UINT16 targetSize, BYTE **buffer, INT32 *siz
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
-    if (targetSize > *size) {
+    if (*size < 0 || targetSize > (UINT32)*size) {
 	rc = TPM_RC_INSUFFICIENT;
     }
     else {
