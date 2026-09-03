@@ -221,9 +221,10 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 #  endif  // ECC_CURVE_448
 	    if (*target != TPM_ECC_NONE &&		// libtpms added begin
 		!CryptEccIsCurveRuntimeUsable(*target)) {
-	      rc = TPM_RC_CURVE;
+	        rc = TPM_RC_CURVE;
 	    }
-	    if (!RuntimeAlgorithmEccKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
+	    if (rc == TPM_RC_SUCCESS && *target != TPM_ECC_NONE &&
+	        !RuntimeAlgorithmEccKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,
 						        TPM_ALG_ECC,
 							CryptEccGetKeySizeForCurve(*target),
 							*target,
