@@ -12,6 +12,8 @@
 #include "RuntimeAttributes_fp.h"
 #include "RuntimeUtils_fp.h"
 
+#define MAX_PROFILE_SIZE    (32 * 1024)
+
 struct RuntimeProfile {
     struct RuntimeAlgorithm RuntimeAlgorithm;
     struct RuntimeCommands  RuntimeCommands;
