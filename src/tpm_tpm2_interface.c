@@ -683,13 +683,9 @@ static TPM_RESULT TPM2_ValidateState(enum TPMLIB_StateType st,
     TPM_RC rc = TPM_RC_SUCCESS;
     unsigned char *data = NULL;
     uint32_t length;
-    unsigned char bak_NV[NV_MEMORY_SIZE];
     INT32 size;
     BYTE *buffer;
     BOOL restored;
-
-    /* make backup of current NvChip memory */
-    memcpy(bak_NV, s_NV, sizeof(bak_NV));
 
 #ifdef TPM_LIBTPMS_CALLBACKS
     struct libtpms_callbacks *cbs = TPMLIB_GetCallbacks();
