@@ -2958,10 +2958,10 @@ TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *siz
 
 #if ALG_TDES		// libtpms added begin
 TPM_RC
-TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *size)
+TPMI_TDES_KEY_BITS_Unmarshal(TPMI_TDES_KEY_BITS *target, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
-    TPMI_SM4_KEY_BITS orig_target = *target; // libtpms added
+    TPMI_TDES_KEY_BITS orig_target = *target; // libtpms added
 
     if (rc == TPM_RC_SUCCESS) {
 	rc = TPM_KEY_BITS_Unmarshal(target, buffer, size);

@@ -291,7 +291,7 @@ extern "C" {
     LIB_EXPORT TPM_RC
     TPMI_CAMELLIA_KEY_BITS_Unmarshal(TPMI_CAMELLIA_KEY_BITS *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC /* libtpms added */
-    TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *size);
+    TPMI_TDES_KEY_BITS_Unmarshal(TPMI_TDES_KEY_BITS *target, BYTE **buffer, INT32 *size);
     LIB_EXPORT TPM_RC
     TPMU_SYM_KEY_BITS_Unmarshal(TPMU_SYM_KEY_BITS *target, BYTE **buffer, INT32 *size, UINT32 selector);
     LIB_EXPORT TPM_RC
