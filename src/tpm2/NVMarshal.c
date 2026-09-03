@@ -4939,7 +4939,12 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
             /* the entrysize also depends on the sizeof(nvi); we may have to
                update it if sizeof(nvi) changed between versions */
             entrysize_offset = o;
-            NvWrite(entryRef + o, sizeof(entrysize), &entrysize);
+            if (!NvWrite(entryRef + o, sizeof(entrysize), &entrysize)) {
+                TPMLIB_LogTPM2Error("USER_NVRAM: Could not write 'entrysize' to NVRAM at offset %lu\n",
+                                    o);
+                rc = TPM_RC_SIZE;
+                break;
+            }
             offset = sizeof(UINT32);
             if (entrysize == 0)
                 break;
@@ -4960,8 +4965,13 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 if (rc == TPM_RC_SUCCESS) {
                     rc = NV_INDEX_Unmarshal(&nvi, buffer, size);
                     if (rc == TPM_RC_SUCCESS) {
-                        NvWrite(entryRef + o + offset, sizeof(nvi), &nvi);
-                        offset += sizeof(nvi);
+                        if (!NvWrite(entryRef + o + offset, sizeof(nvi), &nvi)) {
+                            TPMLIB_LogTPM2Error("USER_NVRAM: Could not write 'nvi' NVRAM at offset %lu\n",
+                                                o + offset);
+                            rc = TPM_RC_SIZE;
+                        } else {
+                            offset += sizeof(nvi);
+                        }
                     }
                 }
                 if (rc == TPM_RC_SUCCESS) {
@@ -4985,7 +4995,13 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 if (rc == TPM_RC_SUCCESS && datasize > 0) {
                     BYTE buf[MAX_NV_INDEX_SIZE];
                     rc = Array_Unmarshal(buf, datasize, buffer, size);
-                    NvWrite(entryRef + o + offset, datasize, buf);
+                    if (rc == TPM_RC_SUCCESS &&
+                        !NvWrite(entryRef + o + offset, datasize, buf)) {
+                        TPMLIB_LogTPM2Error("USER_NVRAM: Could not write data of size %u to NVRAM at offset %lu\n",
+                                            datasize, o + offset);
+                        rc = TPM_RC_SIZE;
+                        break;
+                    }
                     offset += datasize;
 
                     /* update the entry size; account for expanding nvi */
@@ -5002,7 +5018,12 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                     BYTE objBuffer[MAX_MARSHALLED_OBJECT_SIZE];
                     UINT32 marshalledObjectSize;
 
-                    NvWrite(entryRef + o + offset, sizeof(handle), &handle);
+                    if (!NvWrite(entryRef + o + offset, sizeof(handle), &handle)) {
+                        TPMLIB_LogTPM2Error("USER_NVRAM: Could not write 'handle' to NVRAM at offset %lu\n",
+                                            o + offset);
+                        rc = TPM_RC_SIZE;
+                        break;
+                    }
                     offset += sizeof(TPM_HANDLE);
 
                     memset(&obj, 0, sizeof(obj));
@@ -5019,7 +5040,12 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                         o += offset + marshalledObjectSize;
                         goto exit_size;
                     }
-                    NvWrite(entryRef + o + offset, marshalledObjectSize, objBuffer);
+                    if (!NvWrite(entryRef + o + offset, marshalledObjectSize, objBuffer)) {
+                        TPMLIB_LogTPM2Error("USER_NVRAM: Failed to write OBJECT of size %d to NVRAM at offset %lu\n",
+                                            marshalledObjectSize, o + offset);
+                        rc = TPM_RC_SIZE;
+                        break;
+                    }
                     offset += marshalledObjectSize;
 
                     entrysize = sizeof(UINT32) + sizeof(TPM_HANDLE) + marshalledObjectSize;
@@ -5032,8 +5058,11 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                 rc = TPM_RC_HANDLE;
             }
 
-            if (rc == TPM_RC_SUCCESS) {
-                NvWrite(entryRef + entrysize_offset, sizeof(entrysize), &entrysize);
+            if (rc == TPM_RC_SUCCESS &&
+                !NvWrite(entryRef + entrysize_offset, sizeof(entrysize), &entrysize)){
+                TPMLIB_LogTPM2Error("USER_NVRAM: Could not write 'entrysize' into NVRAM at offset %lu.\n",
+                                    entrysize_offset);
+                rc = TPM_RC_SIZE;
             }
         }
         if (rc == TPM_RC_SUCCESS) {
@@ -5047,7 +5076,12 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&maxCount, buffer, size);
-        NvWrite(entryRef + o + offset, sizeof(maxCount), &maxCount);
+        if (rc == TPM_RC_SUCCESS &&
+            !NvWrite(entryRef + o + offset, sizeof(maxCount), &maxCount)) {
+            TPMLIB_LogTPM2Error("USER_NVRAM: Could not write %zu bytes for maxCount into NVRAM.\n",
+                                sizeof(maxCount));
+            rc = TPM_RC_SIZE;
+        }
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
@@ -5249,11 +5283,11 @@ skip_future_versions:
     }
 
     if (rc == TPM_RC_SUCCESS) {
-        NvWrite(NV_PERSISTENT_DATA, sizeof(pd), &pd);
-        NvWrite(NV_ORDERLY_DATA, sizeof(od), &od);
-        NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd);
-        NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
-        NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
+        pAssert(NvWrite(NV_PERSISTENT_DATA, sizeof(pd), &pd));
+        pAssert(NvWrite(NV_ORDERLY_DATA, sizeof(od), &od));
+        pAssert(NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd));
+        pAssert(NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd));
+        pAssert(NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam));
         /* Activate a profile read from the state of the TPM 2 */
         rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON, false);
     }
