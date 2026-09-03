@@ -2176,29 +2176,31 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                                  ANY_HASH_STATE_MAGIC);
     }
 
-    switch (hashAlg) {
+    if (rc == TPM_RC_SUCCESS) {
+        switch (hashAlg) {
 #if ALG_SHA1
-    case ALG_SHA1_VALUE:
-        rc = tpmHashStateSHA1_Unmarshal(&data->Sha1, buffer, size);
-        break;
+        case ALG_SHA1_VALUE:
+            rc = tpmHashStateSHA1_Unmarshal(&data->Sha1, buffer, size);
+            break;
 #endif
 #if ALG_SHA256
-    case ALG_SHA256_VALUE:
-        rc = tpmHashStateSHA256_Unmarshal(&data->Sha256, buffer, size);
-        break;
+        case ALG_SHA256_VALUE:
+            rc = tpmHashStateSHA256_Unmarshal(&data->Sha256, buffer, size);
+            break;
 #endif
 #if ALG_SHA384
-    case ALG_SHA384_VALUE:
-        rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size,
-                                          ALG_SHA384_VALUE);
-        break;
+        case ALG_SHA384_VALUE:
+            rc = tpmHashStateSHA512_Unmarshal(&data->Sha384, buffer, size,
+                                              ALG_SHA384_VALUE);
+            break;
 #endif
 #if ALG_SHA512
-    case ALG_SHA512_VALUE:
-        rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size,
-                                          ALG_SHA512_VALUE);
-        break;
+        case ALG_SHA512_VALUE:
+            rc = tpmHashStateSHA512_Unmarshal(&data->Sha512, buffer, size,
+                                              ALG_SHA512_VALUE);
+            break;
 #endif
+        }
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
