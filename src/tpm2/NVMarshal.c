@@ -1699,7 +1699,7 @@ HASH_STATE_TYPE_Marshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT16
+static TPM_RC
 HASH_STATE_TYPE_Unmarshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 {
     return UINT8_Unmarshal(data, buffer, size);
@@ -1711,7 +1711,7 @@ SHA_LONG_Marshal(SHA_LONG *data, BYTE **buffer, INT32 *size)
     return UINT32_Marshal(data, buffer, size);
 }
 
-static inline UINT16
+static inline TPM_RC
 SHA_LONG_Unmarshal(SHA_LONG *data, BYTE **buffer, INT32 *size)
 {
     return UINT32_Unmarshal(data, buffer, size);
@@ -1724,7 +1724,7 @@ SHA_LONG64_Marshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
     return UINT64_Marshal((UINT64 *)data, buffer, size);
 }
 
-static inline UINT16
+static inline TPM_RC
 SHA_LONG64_Unmarshal(SHA_LONG64 *data, BYTE **buffer, INT32 *size)
 {
     assert(sizeof(*data) == 8);
@@ -1772,10 +1772,10 @@ tpmHashStateSHA1_Marshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT16
+static TPM_RC
 tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
     UINT16 array_size;
 
@@ -1882,10 +1882,10 @@ tpmHashStateSHA256_Marshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *siz
     return written;
 }
 
-static UINT16
+static TPM_RC
 tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
     size_t i;
     UINT16 array_size;
     NV_HEADER hdr;
@@ -2003,11 +2003,11 @@ tpmHashStateSHA512_Marshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
     return written;
 }
 
-static UINT16
+static TPM_RC
 tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
                              UINT16 hashAlg)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
     size_t i;
     UINT16 array_size;
     NV_HEADER hdr;
@@ -2129,11 +2129,11 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
     return written;
 }
 
-static UINT16
+static TPM_RC
 ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                          UINT16 hashAlg)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2208,10 +2208,10 @@ HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT16
+static TPM_RC
 HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
 
     if (rc == TPM_RC_SUCCESS) {
@@ -2259,10 +2259,10 @@ TPM2B_HASH_BLOCK_Marshal(TPM2B_HASH_BLOCK *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static inline UINT16
+static inline TPM_RC
 TPM2B_HASH_BLOCK_Unmarshal(TPM2B_HASH_BLOCK *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 rc;
+    TPM_RC rc;
 
     rc = TPM2B_Unmarshal(&data->b, sizeof(data->t.buffer), buffer, size);
 
@@ -2280,10 +2280,10 @@ HMAC_STATE_Marshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT16
+static TPM_RC
 HMAC_STATE_Unmarshal(HMAC_STATE *data, BYTE **buffer, INT32 *size)
 {
-    UINT16 rc = TPM_RC_SUCCESS;
+    TPM_RC rc = TPM_RC_SUCCESS;
 
     if (rc == TPM_RC_SUCCESS) {
         rc = HASH_STATE_Unmarshal(&data->hashState, buffer, size);
@@ -2334,7 +2334,7 @@ HASH_OBJECT_Marshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
     return written;
 }
 
-static UINT16
+static TPM_RC
 HASH_OBJECT_Unmarshal(HASH_OBJECT *data, BYTE **buffer, INT32 *size)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
