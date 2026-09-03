@@ -113,6 +113,8 @@ block_skip_write_pop(block_skip_t *bs, INT32 *size)
 
     pAssert_VOID_OK(bs->idx > 0);
     i = --bs->idx;
+    pAssert_VOID_OK(*size >= 0 &&
+                    (size_t)bs->pos[i].size >= (size_t)*size + sizeof(UINT16));
     skip = bs->pos[i].size - *size - sizeof(UINT16);
     UINT16_Marshal(&skip, &bs->pos[i].buffer, &bs->pos[i].size);
 }
