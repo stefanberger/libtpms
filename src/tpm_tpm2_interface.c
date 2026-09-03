@@ -280,34 +280,42 @@ TPM_RESULT TPM2_PersistentAllStore(unsigned char **buf,
     return ret;
 }
 
-static TPM_RESULT TPM2_VolatileAllStore(unsigned char **buffer,
+static TPM_RESULT TPM2_VolatileAllStore(unsigned char **buf,
                                         uint32_t *buflen)
 {
-    TPM_RESULT rc = 0;
-    INT32 size = NV_MEMORY_SIZE;
-    UINT16 written;
-    unsigned char *statebuffer = NULL;
+    TPM_RESULT ret = TPM_SUCCESS;
+    unsigned char *nbuffer;
+    UINT32 written = 0;
+    BYTE *buffer;
+    INT32 size;
 
-    *buffer = NULL;
-    statebuffer = malloc(size);
-    if (!statebuffer) {
-        TPMLIB_LogTPM2Error("Could not allocate %u bytes.\n", size);
-        return TPM_SIZE;
-    }
+    *buflen = 64 * 1024;
+    *buf = NULL;
 
-    /* statebuffer will change */
-    *buffer = statebuffer;
+    /* the marshal functions do not indicate insufficient
+       buffer; to make sure we didn't run out of buffer,
+       we check that enough room for the biggest type of
+       chunk (32k) is available and try again. */
+    do {
+        *buflen += 32 * 1024;
 
-    written = VolatileSave(&statebuffer, &size);
-    if (written >= size) {
-        free(*buffer);
-        *buffer = NULL;
-        rc = TPM_FAIL;
-    } else {
-        *buflen = written;
-    }
+        nbuffer = realloc(*buf, *buflen);
+        if (nbuffer == NULL) {
+            free(*buf);
+            *buf = NULL;
+            ret = TPM_SIZE;
+            written = 0;
+            break;
+        }
 
-    return rc;
+        *buf = buffer = nbuffer;
+        size = *buflen;
+        written = VolatileSave(&buffer, &size);
+    } while (size < 32 * 1024);
+
+    *buflen = written;
+
+    return ret;
 }
 
 static TPM_RESULT TPM2_CancelCommand(void)
