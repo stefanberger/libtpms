@@ -120,7 +120,8 @@ void MemorySet(void* dest, int value, size_t size)
 // Function to pad a TPM2B with zeros and adjust the size.
 void MemoryPad2B(TPM2B* b, UINT16 newSize)
 {
-    MemorySet(&b->buffer[b->size], 0, newSize - b->size);
+    if (newSize > b->size)		// libtpms changed: safe memset
+        MemorySet(&b->buffer[b->size], 0, newSize - b->size);
     b->size = newSize;
 }
 
