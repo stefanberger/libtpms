@@ -479,6 +479,9 @@ GetParametersFromJSON(const char    *jsonProfile,
 	return TPM_RC_SUCCESS;
     }
 
+    if (strlen(jsonProfile) > MAX_PROFILE_SIZE)
+        return TPM_RC_SIZE;
+
     retVal = RuntimeProfileCheckJSON(jsonProfile);
     if (retVal != TPM_RC_SUCCESS)
 	return retVal;
