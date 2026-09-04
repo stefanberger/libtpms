@@ -456,6 +456,9 @@ TPM_RESULT TPMLIB_DecodeBlob(const char *buffer, enum TPMLIB_BlobType type,
 {
     TPM_RESULT res = TPM_SUCCESS;
 
+    if (type < TPMLIB_BLOB_TYPE_INITSTATE || type >= TPMLIB_BLOB_TYPE_LAST)
+        return TPM_FAIL;
+
     *result = TPMLIB_GetPlaintext(buffer,
                                   tags_and_indices[type].starttag,
                                   tags_and_indices[type].endtag,
