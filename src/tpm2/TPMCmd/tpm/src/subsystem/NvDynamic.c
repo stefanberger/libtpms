@@ -921,6 +921,7 @@ void NvGetIndexData(NV_INDEX* nvIndex,  // IN: the in RAM index descriptor
         // Copy the contents of ramAddr into a local NV_RAM_HEADER variable before
         // performing the boundary check to avoid potential alignment issues
         NV_RAM_HEADER nvRamHeader;
+        pAssert_VOID_OK(ramAddr != 0); 		// libtpms added: check before MemoryCopy!
         MemoryCopy(&nvRamHeader, ramAddr, sizeof(NV_RAM_HEADER));
         pAssert_VOID_OK(
             ramAddr != 0
