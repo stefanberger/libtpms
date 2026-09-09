@@ -77,6 +77,11 @@ TPM2_Certify(
 	return TPM_RCS_KEY + RC_Certify_signHandle;
     if(!CryptSelectSignScheme(signObject, &in->inScheme))
 	return TPM_RCS_SCHEME + RC_Certify_inScheme;
+
+    // Cannot certify a sequence object
+    if(ObjectIsSequence(certifiedObject))
+	return TPM_RCS_TYPE + RC_Certify_objectHandle;
+
     // Command Output
     // Filling in attest information
     // Common fields
@@ -119,6 +124,10 @@ TPM2_CertifyCreation(
     OBJECT                  *certified = HandleToObject(in->objectHandle);
     OBJECT                  *signObject = HandleToObject(in->signHandle);
     // Input Validation
+    // Cannot certify creation of a sequence object
+    if(ObjectIsSequence(certified))
+	return TPM_RCS_TYPE + RC_CertifyCreation_objectHandle;
+
     if(!IsSigningObject(signObject))
 	return TPM_RCS_KEY + RC_CertifyCreation_signHandle;
     if(!CryptSelectSignScheme(signObject, &in->inScheme))

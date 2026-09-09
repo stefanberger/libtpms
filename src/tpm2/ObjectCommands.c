@@ -248,6 +248,11 @@ TPM2_ActivateCredential(
        || !IS_ATTRIBUTE(object->publicArea.objectAttributes,
 			TPMA_OBJECT, restricted))
 	return TPM_RCS_TYPE + RC_ActivateCredential_keyHandle;
+
+    // Cannot activate credential of sequence object
+    if(ObjectIsSequence(activateObject))
+	return TPM_RCS_TYPE + RC_ActivateCredential_activateHandle;
+
     // Command output
     // Decrypt input credential data via asymmetric decryption.  A
     // TPM_RC_VALUE, TPM_RC_KEY or unmarshal errors may be returned at this
