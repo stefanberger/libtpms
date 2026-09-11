@@ -75,6 +75,7 @@ ObjectFlush(
 	    OBJECT          *object
 	    )
 {
+    MemorySet(object, 0, sizeof(*object));
     object->attributes.occupied = CLEAR;
 }
 /* 8.6.3.2 ObjectSetInUse() */
