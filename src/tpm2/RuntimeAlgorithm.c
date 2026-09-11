@@ -514,7 +514,7 @@ RuntimeAlgorithmSwitchProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
                                         &stateFormatLevel, maxStateFormatLevel);
     if (retVal != TPM_RC_SUCCESS) {
 	RuntimeAlgorithmSetProfile(RuntimeAlgorithm, *oldProfile,
-	                           &stateFormatLevel, maxStateFormatLevel);
+	                           &stateFormatLevel, ~0);
 	*oldProfile = NULL;
     }
     return retVal;
