@@ -668,6 +668,16 @@ void NvReadObject(NV_REF  ref,    // IN: points to NV where index is located
 
     return;						// libtpms changed end
 }
+							// libtpms added begin
+static void NvReadObjectAttributes(NV_REF             ref,       // IN: points to NV where index is located,
+                                   OBJECT_ATTRIBUTES* attributes // OUT: place to receive the object attributes
+)
+{
+    OBJECT obj = { 0 };
+
+    NvReadObject(ref, &obj);
+    *attributes = obj.attributes;
+}							// libtpms added end
 
 //*** NvFindEvict()
 // This function will return the NV offset of an evict object
@@ -1414,10 +1424,13 @@ NvFlushHierarchy(TPMI_RH_HIERARCHY hierarchy  // IN: hierarchy to be flushed.
 		{
 		    OBJECT_ATTRIBUTES attributes;
 		    //
+#if 0								// libtpms changed begin
 		    NvRead(&attributes,
 			   (UINT32)(currentAddr + sizeof(TPM_HANDLE)
 				    + offsetof(OBJECT, attributes)),
 			   sizeof(OBJECT_ATTRIBUTES));
+#endif
+		    NvReadObjectAttributes(currentAddr, &attributes);	// libtpms changed end
 		    // If the evict object belongs to the hierarchy to be flushed...
 		    if((hierarchy == TPM_RH_PLATFORM && attributes.ppsHierarchy == SET)
 		       || (hierarchy == TPM_RH_OWNER && attributes.spsHierarchy == SET)
