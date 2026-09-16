@@ -935,6 +935,7 @@ void NvGetIndexData(NV_INDEX* nvIndex,  // IN: the in RAM index descriptor
         MemoryCopy(&nvRamHeader, ramAddr, sizeof(NV_RAM_HEADER));
         pAssert_VOID_OK(
             ramAddr != 0
+            && (nvRamHeader.size >= (uint64_t)sizeof(NV_RAM_HEADER) + offset)  // libtpms added: prevent int overflow
             && (size <= (nvRamHeader.size - sizeof(NV_RAM_HEADER) - offset)));
         MemoryCopy(data, ramAddr + sizeof(NV_RAM_HEADER) + offset, size);
     }
