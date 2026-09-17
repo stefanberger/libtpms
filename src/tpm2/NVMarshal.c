@@ -4136,7 +4136,7 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
         /* check array_size for a reasonable maximum that should never be reached */
-        if (rc == TPM_RC_SUCCESS && array_size > 1024)
+        if (rc == TPM_RC_SUCCESS && (array_size > 1024 || array_size == 0))
             rc = TPM_RC_SIZE;
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -4156,7 +4156,7 @@ PERSISTENT_DATA_PPList_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, INT32 *si
                 memcpy(data->ppList, buf, array_size);
                 /* clear the rest of byte array */
                 MUST_BE(sizeof(data->ppList[0]) == sizeof(BYTE));
-                while (array_size < ARRAY_SIZE(data->ppList))
+                while (array_size < (UINT16)ARRAY_SIZE(data->ppList))
                     data->ppList[array_size++] = 0;
             }
         }
@@ -4210,7 +4210,7 @@ PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, IN
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT16_Unmarshal(&array_size, buffer, size);
         /* check array_size for a reasonable maximum that should never be reached */
-        if (rc == TPM_RC_SUCCESS && array_size > 1024)
+        if (rc == TPM_RC_SUCCESS && (array_size > 1024 || array_size == 0))
             rc = TPM_RC_SIZE;
     }
     if (rc == TPM_RC_SUCCESS) {
@@ -4230,7 +4230,7 @@ PERSISTENT_DATA_AuditCommands_Unmarshal(PERSISTENT_DATA *data, BYTE **buffer, IN
                 memcpy(data->auditCommands, buf, array_size);
                 /* clear the rest of byte array */
                 MUST_BE(sizeof(data->auditCommands[0]) == sizeof(BYTE));
-                while (array_size < ARRAY_SIZE(data->auditCommands))
+                while (array_size < (UINT16)ARRAY_SIZE(data->auditCommands))
                     data->auditCommands[array_size++] = 0;
             }
         }
