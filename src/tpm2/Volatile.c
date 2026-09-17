@@ -31,7 +31,7 @@ VolatileState_Load(BYTE **buffer, INT32 *size)
     char *oldProfile = NULL;
 
     if (rc == TPM_RC_SUCCESS) {
-        if ((UINT32)*size < sizeof(hash))
+        if (*size < (INT32)sizeof(hash))
             return TPM_RC_INSUFFICIENT;
 
         rc = RuntimeAlgorithmSwitchProfile(&g_RuntimeProfile.RuntimeAlgorithm,
