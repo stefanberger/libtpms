@@ -630,6 +630,7 @@ void NvReadObject(NV_REF  ref,    // IN: points to NV where index is located
 
     /* read size of object in NVRAM; this includes the NV_ENTRY_HEADER */
     NvRead(&entrysize, ref - sizeof(UINT32), sizeof(entrysize));
+    pAssert_VOID_OK(entrysize >= sizeof(NV_ENTRY_HEADER));
     entrysize -= sizeof(NV_ENTRY_HEADER);
 
     /* read the flat object into a buffer */
