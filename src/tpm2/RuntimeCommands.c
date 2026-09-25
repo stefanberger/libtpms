@@ -572,8 +572,11 @@ RuntimeCommandsPrint(struct RuntimeCommands    *RuntimeCommands,
 	}
     }
 
-    if (commandCodeLo != 0)
+    if (commandCodeLo != 0) {
 	buffer = RuntimeCommandPrint(buffer, first, commandCodeLo, commandCodeHi);
+	if (!buffer)
+	    return NULL;
+    }
 
     n = asprintf(&nbuffer, "%s%s", buffer, quote);
     free(buffer);
