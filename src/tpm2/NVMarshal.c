@@ -2662,6 +2662,9 @@ ANY_OBJECT_Unmarshal(OBJECT *data, BYTE **buffer, INT32 *size, BOOL verbose)
             rc = HASH_OBJECT_Unmarshal((HASH_OBJECT *)data, buffer, size);
         else
             rc = OBJECT_Unmarshal(data, buffer, size);
+
+        if (rc != TPM_RC_SUCCESS)
+            memset(data, 0, sizeof(*data));
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
