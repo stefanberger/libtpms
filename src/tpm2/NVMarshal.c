@@ -1431,7 +1431,7 @@ skip_alg_ecc:
         BLOCK_SKIP_READ(skip_future_versions, hdr.version >= 3, buffer, size,
                         "STATE_RESET_DATA", "version 3 or later");
         if (rc == TPM_RC_SUCCESS) {
-            rc = SEED_COMPAT_LEVEL_Unmarshal(&gr.nullSeedCompatLevel,
+            rc = SEED_COMPAT_LEVEL_Unmarshal(&data->nullSeedCompatLevel,
                                              buffer, size, "nullSeed");
         }
 
