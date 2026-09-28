@@ -4593,6 +4593,21 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         /* nrhp may point to misaligned address (ubsan), so use 'nrh'; first access only 'size' */
         memcpy(&nrh, nrhp, sizeof(nrh.size));
 
+        if (nrh.size != 0) {
+            /* Validate the size before writing the header to avoid a partial entry. */
+            if (nrh.size > array_size - offset) {
+                TPMLIB_LogTPM2Error(
+                    "INDEX_ORDERLY_RAM: nrh->size corrupted: %" PRIu32 "\n",
+                    nrh.size);
+                nrh.size = 0;
+            } else if (nrh.size < sizeof(NV_RAM_HEADER)) {
+                TPMLIB_LogTPM2Error(
+                    "INDEX_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %" PRIu32 "< %zu\n",
+                    nrh.size, sizeof(NV_RAM_HEADER));
+                nrh.size = 0;
+            }
+        }
+
         /* write the NVRAM header;
            nrh->size holds the complete size including data;
            nrh->size = 0 indicates the end */
@@ -4605,18 +4620,7 @@ INDEX_ORDERLY_RAM_Marshal(void *array, size_t array_size,
         written += TPM_HANDLE_Marshal(&nrh.handle, buffer, size);
         written += TPMA_NV_Marshal(&nrh.attributes, buffer, size);
 
-        if (offset + nrh.size > array_size) {
-            TPMLIB_LogTPM2Error("INDEX_ORDERLY_RAM: nrh->size corrupted: %d\n",
-                                nrh.size);
-            break;
-        }
         /* write data size before array */
-        if (nrh.size < sizeof(NV_RAM_HEADER)) {
-            TPMLIB_LogTPM2Error(
-                "INDEX_ORDERLY_RAM: nrh->size < sizeof(NV_RAM_HEADER): %d < %zu\n",
-                (int)nrh.size, sizeof(NV_RAM_HEADER));
-            break;
-        }
         datasize = nrh.size - sizeof(NV_RAM_HEADER);
         written += UINT16_Marshal(&datasize, buffer, size);
         if (datasize > 0) {
