@@ -1824,6 +1824,12 @@ tpmHashStateSHA1_Unmarshal(tpmHashStateSHA1_t *data, BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->num, buffer, size);
     }
+    if (rc == TPM_RC_SUCCESS && data->num >= sizeof(data->data)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA1: Bad num for data; "
+                            "must be < %zu, got %u\n",
+                            sizeof(data->data), data->num);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
 
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
@@ -1933,8 +1939,20 @@ tpmHashStateSHA256_Unmarshal(tpmHashStateSHA256_t *data, BYTE **buffer, INT32 *s
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->num, buffer, size);
     }
+    if (rc == TPM_RC_SUCCESS && data->num >= sizeof(data->data)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad num for data; "
+                            "must be < %zu, got %u\n",
+                            sizeof(data->data), data->num);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->md_len, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS && data->md_len > SHA256_DIGEST_SIZE) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA256: Bad md_len; "
+                            "must be <= %u, got %u\n",
+                            SHA256_DIGEST_SIZE, data->md_len);
+        rc = TPM_RC_BAD_PARAMETER;
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
@@ -2060,8 +2078,24 @@ tpmHashStateSHA512_Unmarshal(SHA512_CTX *data, BYTE **buffer, INT32 *size,
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->num, buffer, size);
     }
+    if (rc == TPM_RC_SUCCESS && data->num >= sizeof(data->u.p)) {
+        TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad num for u.p; "
+                            "must be < %zu, got %u\n",
+                            sizeof(data->u.p), data->num);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT32_Unmarshal(&data->md_len, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        UINT32 max_md_len = (hashAlg == ALG_SHA384_VALUE) ? SHA384_DIGEST_SIZE
+                                                          : SHA512_DIGEST_SIZE;
+        if (data->md_len > max_md_len) {
+            TPMLIB_LogTPM2Error("HASH_STATE_SHA512: Bad md_len; "
+                                "must be <= %u, got %u\n",
+                                max_md_len, data->md_len);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
