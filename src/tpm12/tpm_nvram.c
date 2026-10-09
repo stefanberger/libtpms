@@ -1529,7 +1529,8 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 		/* a. Set S1 to offset + dataSize */
 		s1Last = offset + dataSize; /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
-		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
+		if (s1Last < offset ||
+		    s1Last > d1NvdataSensitive->pubInfo.dataSize) {
 		    printf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
@@ -1564,7 +1565,7 @@ TPM_RESULT TPM_Process_NVReadValue(tpm_state_t *tpm_state,
 	/* DIR is hard coded as a TPM_DIRVALUE array */
 	if (returnCode == TPM_SUCCESS) {
 	    s1Last = offset + dataSize;	    /* set to last data point */
-	    if (s1Last > TPM_DIGEST_SIZE) {
+	    if (s1Last < offset || s1Last > TPM_DIGEST_SIZE) {
 		printf("TPM_Process_NVReadValue: Error, NVRAM dataSize %u too small\n",
 		       TPM_DIGEST_SIZE);
 		returnCode = TPM_NOSPACE;
@@ -1853,7 +1854,8 @@ TPM_RESULT TPM_Process_NVReadValueAuth(tpm_state_t *tpm_state,
 		/* a. Set S1 to offset + dataSize */
 		s1Last = offset + dataSize; /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
-		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
+		if (s1Last < offset ||
+		    s1Last > d1NvdataSensitive->pubInfo.dataSize) {
 		    printf("TPM_Process_NVReadValueAuth: Error, NVRAM dataSize %u too small\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
@@ -2302,7 +2304,8 @@ TPM_RESULT TPM_Process_NVWriteValue(tpm_state_t *tpm_state,
 		/* a. Set S1 to offset + dataSize */
 		s1Last = offset + data.size;	    /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
-		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
+		if (s1Last < offset ||
+		    s1Last > d1NvdataSensitive->pubInfo.dataSize) {
 		    printf("TPM_Process_NVWriteValue: Error, NVRAM dataSize %u too small\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
@@ -2686,7 +2689,8 @@ TPM_RESULT TPM_Process_NVWriteValueAuth(tpm_state_t *tpm_state,
 		/* a. Set S1 to offset + dataSize */
 		s1Last = offset + data.size;	    /* set to last data point */
 		/* b. If S1 > D1 -> dataSize return TPM_NOSPACE */
-		if (s1Last > d1NvdataSensitive->pubInfo.dataSize) {
+		if (s1Last < offset ||
+		    s1Last > d1NvdataSensitive->pubInfo.dataSize) {
 		    printf("TPM_Process_NVWriteValueAuth: Error, NVRAM dataSize %u\n",
 			   d1NvdataSensitive->pubInfo.dataSize);
 		    returnCode = TPM_NOSPACE;
