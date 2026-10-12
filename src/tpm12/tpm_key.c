@@ -388,6 +388,12 @@ TPM_RESULT TPM_Key_LoadPubData(TPM_KEY *tpm_key,	/* result */
     TPM_RESULT		rc = 0;
    
     printf(" TPM_Key_LoadPubData:\n");
+    /* need at least one byte to peek at */
+    if (rc == 0) {
+	if (*stream_size == 0) {
+	    rc = TPM_BAD_PARAM_SIZE;
+	}
+    }
     /* peek at the first byte */
     if (rc == 0) {
 	/* TPM_KEY[0] is major (non zero) */
