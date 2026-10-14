@@ -247,6 +247,11 @@ AC_ARG_ENABLE([test-coverage],
     )]
 )
 
+AC_ARG_ENABLE([docs],
+    [AS_HELP_STRING([--disable-docs], [Disable building documentation])],,
+    [enable_docs=yes])
+AM_CONDITIONAL(ENABLE_DOCS, [test "$enable_docs" = "yes"])
+
 LT_INIT
 AC_PROG_CC
 AC_PROG_CXX
@@ -345,5 +350,6 @@ echo "Use openssl crypto for  : $use_openssl_functions_for"
 echo "Test coverage           : $enable_test_coverage"
 echo "Static build            : $enable_static"
 echo "Statically linked tests : $enable_static_tests"
+echo "Build documentation     : $enable_docs"
 echo
 echo
