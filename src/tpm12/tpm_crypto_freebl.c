@@ -2323,9 +2323,9 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
     printf(" TPM_SymmetricKeyData_Decrypt: Length %u\n", encrypt_length);
     cx = NULL;    /* freed @1 */
 
-    /* sanity check encrypted length */
+    /* sanity check encrypted length; CBC requires a whole number of blocks */
     if (rc == 0) {
-        if (encrypt_length < TPM_AES_BLOCK_SIZE) {
+        if ((encrypt_length % TPM_AES_BLOCK_SIZE) != 0) {
             printf("TPM_SymmetricKeyData_Decrypt: Error, bad length\n");
             rc = TPM_DECRYPT_ERROR;
         }
