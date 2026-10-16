@@ -2862,9 +2862,10 @@ TPM_RESULT TPM_SymmetricKeyData_Decrypt(unsigned char **decrypt_data,   /* outpu
 	(TPM_SYMMETRIC_KEY_DATA *)tpm_symmetric_key_token;
     
     printf(" TPM_SymmetricKeyData_Decrypt: Length %u\n", encrypt_length);
-    /* sanity check encrypted length */
+    /* sanity check encrypted length; CBC requires a whole number of blocks,
+       otherwise AES_cbc_encrypt() reads past the end of the input buffer */
     if (rc == 0) {
-        if (encrypt_length < TPM_AES_BLOCK_SIZE) {
+        if ((encrypt_length % TPM_AES_BLOCK_SIZE) != 0) {
             printf("TPM_SymmetricKeyData_Decrypt: Error, bad length\n");
             rc = TPM_DECRYPT_ERROR;
         }

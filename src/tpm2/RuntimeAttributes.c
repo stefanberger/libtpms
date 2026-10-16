@@ -185,7 +185,7 @@ RuntimeAttributesSwitchProfile(struct RuntimeAttributes *RuntimeAttributes,
 					 &stateFormatLevel, maxStateFormatLevel);
     if (retVal != TPM_RC_SUCCESS) {
 	RuntimeAttributesSetProfile(RuntimeAttributes, *oldProfile,
-				    &stateFormatLevel, maxStateFormatLevel);
+				    &stateFormatLevel, ~0);
 	*oldProfile = NULL;
     }
     return retVal;
