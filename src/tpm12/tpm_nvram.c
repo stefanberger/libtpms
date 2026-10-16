@@ -649,6 +649,13 @@ TPM_RESULT TPM_NVIndexEntries_Load(TPM_NV_INDEX_ENTRIES *tpm_nv_index_entries,
     if (rc == 0) {
 	rc = TPM_Load32(&(tpm_nv_index_entries->nvIndexCount), stream, stream_size); 
     }
+    /* bound nvIndexCount so that sizeof(TPM_NV_DATA_SENSITIVE) * nvIndexCount cannot overflow */
+    if ((rc == 0) &&
+	(tpm_nv_index_entries->nvIndexCount > TPM_ALLOC_MAX / sizeof(TPM_NV_DATA_SENSITIVE))) {
+	printf("TPM_NVIndexEntries_Load: Error (fatal), nvIndexCount %u too large\n",
+	       tpm_nv_index_entries->nvIndexCount);
+	rc = TPM_FAIL;
+    }
     /* allocate memory for the array, nvIndexCount TPM_NV_DATA_SENSITIVE structures */
     if ((rc == 0) && (tpm_nv_index_entries->nvIndexCount > 0)) {
 	printf("  TPM_NVIndexEntries_Load: Loading %u slots\n", tpm_nv_index_entries->nvIndexCount);

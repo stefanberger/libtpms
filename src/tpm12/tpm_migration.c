@@ -203,7 +203,14 @@ TPM_RESULT TPM_MsaComposite_Load(TPM_MSA_COMPOSITE *tpm_msa_composite,
 	    rc = TPM_INVALID_STRUCTURE;
 	}
     }
-    /* FIXME add MSAlist limit */
+    /* bound MSAlist so that MSAlist * TPM_DIGEST_SIZE cannot overflow the allocation */
+    if (rc == 0) {
+	if (tpm_msa_composite->MSAlist > TPM_ALLOC_MAX / TPM_DIGEST_SIZE) {
+	    printf("TPM_MsaComposite_Load: Error, MSAlist %u too large\n",
+		   tpm_msa_composite->MSAlist);
+	    rc = TPM_INVALID_STRUCTURE;
+	}
+    }
     /* allocate memory for the migAuthDigest array */
     if (rc == 0) {
 	rc = TPM_Malloc((unsigned char **)&(tpm_msa_composite->migAuthDigest),
