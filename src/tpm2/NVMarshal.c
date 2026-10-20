@@ -5044,7 +5044,8 @@ USER_NVRAM_Unmarshal(BYTE **buffer, INT32 *size)
                         break;
                     }
                     offset += datasize;
-
+                }
+                if (rc == TPM_RC_SUCCESS) {
                     /* update the entry size; account for expanding nvi */
                     entrysize = sizeof(UINT32) + sizeof(nvi) + datasize;
                 }
