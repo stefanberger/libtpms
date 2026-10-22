@@ -1702,7 +1702,26 @@ HASH_STATE_TYPE_Marshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 static TPM_RC
 HASH_STATE_TYPE_Unmarshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 {
-    return UINT8_Unmarshal(data, buffer, size);
+    TPM_RC rc;
+
+    rc = UINT8_Unmarshal(data, buffer, size);
+    if (rc == TPM_RC_SUCCESS) {
+        switch (*data) {
+        case HASH_STATE_EMPTY:
+        case HASH_STATE_HASH:
+        case HASH_STATE_HMAC:
+            break;
+        default:
+            /* HASH_STATE_SMAC: ANY_HASH_STATE_Marshal never writes the SMAC
+             * state and the smacMethods function pointers in it cannot be
+             * restored from a blob. */
+            TPMLIB_LogTPM2Error("HASH_STATE_TYPE: Unsupported type %u\n",
+                                *data);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+    }
+
+    return rc;
 }
 
 static inline UINT16
