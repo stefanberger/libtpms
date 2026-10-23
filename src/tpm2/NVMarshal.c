@@ -1694,6 +1694,18 @@ HASH_STATE_TYPE_Marshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
 
+    switch (*data) {
+        case HASH_STATE_EMPTY:
+        case HASH_STATE_HASH:
+        case HASH_STATE_HMAC:
+        case HASH_STATE_SMAC:
+            break;
+        default:
+            TPMLIB_LogTPM2Error("HASH_STATE_TYPE: Marshalling unsupported type %u\n",
+                                *data);
+            pAssert(FALSE);
+            break;
+    }
     written = UINT8_Marshal(data, buffer, size);
 
     return written;
@@ -1702,7 +1714,28 @@ HASH_STATE_TYPE_Marshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 static TPM_RC
 HASH_STATE_TYPE_Unmarshal(HASH_STATE_TYPE *data, BYTE **buffer, INT32 *size)
 {
-    return UINT8_Unmarshal(data, buffer, size);
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT8_Unmarshal(data, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        switch (*data) {
+        case HASH_STATE_EMPTY:
+        case HASH_STATE_HASH:
+        case HASH_STATE_HMAC:
+        case HASH_STATE_SMAC:
+            break;
+        default:
+            /*
+             * State blobs from ~v0.6 may contain undefined values for HASH_STATE_TYPE
+             * likely due to OBJECTs not having been cleared. Normalize them.
+             */
+            *data = HASH_STATE_EMPTY;
+            break;
+        }
+    }
+    return rc;
 }
 
 static inline UINT16
@@ -2112,12 +2145,192 @@ skip_future_versions:
 }
 #endif
 
+#if ALG_CMAC
+static UINT16
+SMAC_METHODS_Marshal(SMAC_METHODS *smacMethods, BYTE **buffer, INT32 *size,
+                     TPM_ALG_ID *selector)
+{
+    if (smacMethods->data == CryptCmacData && smacMethods->end == CryptCmacEnd) {
+        *selector = TPM_ALG_CMAC;
+    } else {
+        pAssert(FALSE);
+    }
+    return TPM_ALG_ID_Marshal(selector, buffer, size);
+}
+
+static TPM_RC
+SMAC_METHODS_Unmarshal(SMAC_METHODS *smacMethods, BYTE **buffer, INT32 *size, TPM_ALG_ID *selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(selector, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        switch (*selector) {
+        case TPM_ALG_CMAC:
+            smacMethods->data = CryptCmacData;
+            smacMethods->end = CryptCmacEnd;
+            break;
+        default:
+            rc = TPM_RC_BAD_PARAMETER;
+            break;
+        }
+    }
+    return rc;
+}
+
+#define TPM_CMAC_STATE_MAGIC     0xab658cde
+#define TPM_CMAC_STATE_VERSION   1
+
+static UINT16
+tpmCmacState_Marshal(tpmCmacState_t *state, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+
+    written += NV_HEADER_Marshal(buffer, size,
+                                 TPM_CMAC_STATE_VERSION,
+                                 TPM_CMAC_STATE_MAGIC, 1);
+    written += TPM_ALG_ID_Marshal(&state->symAlg, buffer, size);
+    written += UINT16_Marshal(&state->keySizeBits, buffer, size);
+    written += UINT16_Marshal((UINT16 *)&state->bcount, buffer, size);
+    written += TPM2B_IV_Marshal(&state->iv, buffer, size);
+    written += TPM2B_SYM_KEY_Marshal(&state->symKey, buffer, size);
+
+    return written;
+}
+
+static TPM_RC
+tpmCmacState_Unmarshal(tpmCmacState_t *state, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = 0;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 TPM_CMAC_STATE_VERSION,
+                                 TPM_CMAC_STATE_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM_ALG_ID_Unmarshal(&state->symAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&state->keySizeBits, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal((UINT16 *)&state->bcount, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_IV_Unmarshal(&state->iv, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = TPM2B_SYM_KEY_Unmarshal(&state->symKey, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        (state->bcount < 0 ||
+         state->bcount > state->iv.t.size ||
+         BITS_TO_BYTES(state->keySizeBits) != state->symKey.t.size ||
+         state->iv.t.size == 0 ||
+         CryptGetSymmetricBlockSize(state->symAlg, state->keySizeBits) !=
+             state->iv.t.size)) {
+        rc = TPM_RC_BAD_PARAMETER;
+    }
+    return rc;
+}
+
+#define SMAC_STATES_MAGIC 0x5f9a5962
+#define SMAC_STATES_VERSION 1
+
+static UINT16
+SMAC_STATES_Marshal(SMAC_STATES *state, BYTE **buffer, INT32 *size, TPM_ALG_ID selector)
+{
+    UINT16 written = 0;
+
+    written += NV_HEADER_Marshal(buffer, size,
+                                 SMAC_STATES_VERSION,
+                                 SMAC_STATES_MAGIC, 1);
+
+    switch (selector) {
+    case TPM_ALG_CMAC:
+        written += tpmCmacState_Marshal(&state->cmac, buffer, size);
+        break;
+    default:
+        pAssert(FALSE);
+        break;
+    }
+    return written;
+}
+
+static TPM_RC
+SMAC_STATES_Unmarshal(SMAC_STATES *state, BYTE **buffer, INT32 *size, TPM_ALG_ID selector)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 SMAC_STATES_VERSION,
+                                 SMAC_STATES_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        switch (selector) {
+        case TPM_ALG_CMAC:
+            rc = tpmCmacState_Unmarshal(&state->cmac, buffer, size);
+            break;
+        default:
+            rc = TPM_RC_BAD_PARAMETER;
+            break;
+        }
+    }
+    return rc;
+}
+
+#define SMAC_STATE_MAGIC 0x336e28b9
+#define SMAC_STATE_VERSION 1
+
+static UINT16
+SMAC_STATE_Marshal(SMAC_STATE *smac, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    TPM_ALG_ID selector;
+
+    written += NV_HEADER_Marshal(buffer, size,
+                                 SMAC_STATE_VERSION,
+                                 SMAC_STATE_MAGIC, 1);
+    written += SMAC_METHODS_Marshal(&smac->smacMethods, buffer, size, &selector);
+    written += SMAC_STATES_Marshal(&smac->state, buffer, size, selector);
+
+    return written;
+}
+
+static TPM_RC
+SMAC_STATE_Unmarshal(SMAC_STATE *smac, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    TPM_ALG_ID selector;
+    NV_HEADER hdr;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
+                                 SMAC_STATE_VERSION,
+                                 SMAC_STATE_MAGIC);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SMAC_METHODS_Unmarshal(&smac->smacMethods, buffer, size, &selector);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        rc = SMAC_STATES_Unmarshal(&smac->state, buffer, size, selector);
+    }
+    return rc;
+}
+#endif /* ALG_CMAC */
+
 #define ANY_HASH_STATE_MAGIC 0x349d494b
 #define ANY_HASH_STATE_VERSION 2
 
 static UINT16
 ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
-                       UINT16 hashAlg)
+                       UINT16 hashAlg, HASH_STATE_TYPE type)
 {
     UINT16 written;
     BLOCK_SKIP_INIT;
@@ -2127,6 +2340,13 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
                                 ANY_HASH_STATE_MAGIC, 1);
 
     switch (hashAlg) {
+    case 0:
+#if ALG_CMAC
+        if (type == HASH_STATE_SMAC) {
+            written += SMAC_STATE_Marshal(&data->smac, buffer, size);
+        }
+#endif
+        break;
 #if ALG_SHA1
     case ALG_SHA1_VALUE:
         written += tpmHashStateSHA1_Marshal(&data->Sha1, buffer, size);
@@ -2165,7 +2385,7 @@ ANY_HASH_STATE_Marshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
 
 static TPM_RC
 ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
-                         UINT16 hashAlg)
+                         UINT16 hashAlg, HASH_STATE_TYPE type)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
     NV_HEADER hdr;
@@ -2178,6 +2398,13 @@ ANY_HASH_STATE_Unmarshal(ANY_HASH_STATE *data, BYTE **buffer, INT32 *size,
 
     if (rc == TPM_RC_SUCCESS) {
         switch (hashAlg) {
+        case 0:
+#if ALG_CMAC
+            if (rc == TPM_RC_SUCCESS && type == HASH_STATE_SMAC) {
+                rc = SMAC_STATE_Unmarshal(&data->smac, buffer, size);
+            }
+#endif
+            break;
 #if ALG_SHA1
         case ALG_SHA1_VALUE:
             rc = tpmHashStateSHA1_Unmarshal(&data->Sha1, buffer, size);
@@ -2217,22 +2444,32 @@ skip_future_versions:
 }
 
 #define HASH_STATE_MAGIC 0x562878a2
-#define HASH_STATE_VERSION 2
+#define HASH_STATE_VERSION 3
 
 static UINT16
 HASH_STATE_Marshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
 {
     UINT16 written;
     BLOCK_SKIP_INIT;
+    UINT16 version = 2;
+    UINT16 min_version = 1;
+
+    if (data->type == HASH_STATE_SMAC) {
+        /* SMAC is only supported starting in v3 */
+        assert(data->hashAlg == 0);
+        version = 3;
+        min_version = 3;
+    }
 
     written = NV_HEADER_Marshal(buffer, size,
-                                HASH_STATE_VERSION,
-                                HASH_STATE_MAGIC, 1);
+                                version,
+                                HASH_STATE_MAGIC, min_version);
 
     written += HASH_STATE_TYPE_Marshal(&data->type, buffer, size);
     written += TPM_ALG_ID_Marshal(&data->hashAlg, buffer, size);
     /* def does not need to be written */
-    written += ANY_HASH_STATE_Marshal(&data->state, buffer, size, data->hashAlg);
+    written += ANY_HASH_STATE_Marshal(&data->state, buffer, size,
+                                      data->hashAlg, data->type);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
@@ -2259,7 +2496,22 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
         rc = HASH_STATE_TYPE_Unmarshal(&data->type, buffer, size);
     }
     if (rc == TPM_RC_SUCCESS) {
+        if (data->type == HASH_STATE_SMAC && hdr.version <= 2) {
+            TPMLIB_LogTPM2Error("HASH_STATE_Unmarshal: Unsupported HASH_STATE_SMAC "
+                                "for version %u; must be at least '3'.\n",
+                                hdr.version);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
         rc  = TPM_ALG_ID_Unmarshal(&data->hashAlg, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (data->type == HASH_STATE_SMAC && data->hashAlg != 0) {
+            TPMLIB_LogTPM2Error("HASH_STATE_Unmarshal: HASH_STATE_SMAC requires "
+                                "hashAlg 0, got 0x%02x\n", data->hashAlg);
+            rc = TPM_RC_BAD_PARAMETER;
+        }
     }
     if (rc == TPM_RC_SUCCESS) {
         data->def = CryptGetHashDef(data->hashAlg);
@@ -2270,7 +2522,8 @@ HASH_STATE_Unmarshal(HASH_STATE *data, BYTE **buffer, INT32 *size)
         }
     }
     if (rc == TPM_RC_SUCCESS) {
-        rc = ANY_HASH_STATE_Unmarshal(&data->state, buffer, size, data->hashAlg);
+        rc = ANY_HASH_STATE_Unmarshal(&data->state, buffer, size,
+                                      data->hashAlg, data->type);
     }
 
     /* version 2 starts having indicator for next versions that we can skip;
