@@ -2134,6 +2134,20 @@ TPM_RESULT TPM_Sha1Context_Load(void **context,
     if ((rc== 0) && contextPresent) {
 	rc = TPM_Load32(&(sha_ctx->num), stream, stream_size);
     }
+    /* 'num' is the number of bytes buffered in sha_ctx->data and is used by
+       OpenSSL as the write offset in SHA1_Update()/SHA1_Final(); it must be
+       less than the block size, else a later update walks off the context. */
+    if ((rc== 0) && contextPresent) {
+	if (sha_ctx->num >= SHA_CBLOCK) {
+	    printf("TPM_Sha1Context_Load: Error, num %u out of range\n",
+		   sha_ctx->num);
+	    rc = TPM_BAD_PARAMETER;
+	}
+    }
+    if ((rc != 0) && contextPresent && (*context != NULL)) {
+	free(*context);
+	*context = NULL;
+    }
     return rc;
 }
 
