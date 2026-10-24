@@ -326,6 +326,14 @@ String_Unmarshal(char **target, BYTE **buffer, INT32 *size)
             memcpy(*target, *buffer, len);
             *buffer += len;
             *size -= len;
+            /* String_Marshal always writes the trailing NUL as part of len;
+               reject a blob that omits it so callers can rely on a terminated
+               C string (strlen/regexec) and not read past the allocation */
+            if ((*target)[len - 1] != '\0') {
+                free(*target);
+                *target = NULL;
+                rc = TPM_RC_BAD_PARAMETER;
+            }
         }
     }
 
