@@ -199,6 +199,10 @@ This I<StateFormatLevel> enabled the following profile attributes:
 
 This I<StateFormatLevel> enabled 4096-bit RSA.
 
+=item 8: (since v0.10)
+
+This I<StateFormatLevel> enabled the I<fips-140-3> attribute.
+
 =back
 
 A user may specify the I<StateFormatLevel> when using the I<custom> profile.
@@ -311,6 +315,33 @@ keys
 
 =back
 
+=item B<fips-140-3>
+
+This verb enables the following:
+
+=over 2
+
+=item * Prohibits raw RSA encryption and decryption
+
+=item * Forbids SHA1 signature generation
+
+=item * Forbids RSA < 2048 signature generation
+
+=item * Forbids RSA < 2048 key generation
+
+=item * Prevents derivation of ECC keys from derivation parent and for creation
+of ephemeral keys
+
+=item * Performs a pairwise consistency test on RSA keys and ECC signing keys
+
+=item * Enables continous DRBG test
+
+=back
+
+Note that usage of the I<fips-140-3> verb does not translate into a claim that
+the TPM 2 instance is FIPS-140-3 compliant but merely restricts the usage of
+crypto algorithms by the TPM 2 following the above list.
+
 =back
 
 =head1 FIPS mode on the host
@@ -343,6 +374,10 @@ A profile should contain the following verbs for minimum key sizes:
 =item * rsa-min-size=2048
 
 =item * ecc-min-size=224
+
+=back
+
+=over 4
 
 =back
 
