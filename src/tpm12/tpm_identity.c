@@ -1282,7 +1282,14 @@ TPM_RESULT TPM_Process_ActivateIdentity(tpm_state_t *tpm_state,
 	stream = b1Blob;		/* b1 must be preserved for the free */
 	stream_size = b1BlobLength;
 	/* convert possible tag to uint16_t */
-	hTag = ntohs(*(TPM_STRUCTURE_TAG *)b1Blob);
+	if (b1BlobLength >= sizeof(TPM_STRUCTURE_TAG)) {
+	    hTag = ntohs(*(TPM_STRUCTURE_TAG *)b1Blob);
+	}
+	else {
+	    /* too short to hold a tag; treat as TPM_ASYM_CA_CONTENTS, whose
+	       loader validates the length and fails cleanly */
+	    hTag = 0;
+	}
 	/* a. If B1 -> tag is TPM_TAG_EK_BLOB then */
 	if (hTag == TPM_TAG_EK_BLOB) {
 	    /* i. B1 is a TPM_EK_BLOB */

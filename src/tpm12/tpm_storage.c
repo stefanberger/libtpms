@@ -929,7 +929,8 @@ TPM_RESULT TPM_Process_Seal(tpm_state_t *tpm_state,
 	else {				/* b. Else */
 	    /* i. Point X1 as TPM_PCR_INFO_LONG structure to pcrInfo  */
 	    /* ii. If X1 -> tag is TPM_TAG_PCR_INFO_LONG  */
-	    if (htons(*(uint16_t *)(pcrInfo.buffer)) == TPM_TAG_PCR_INFO_LONG) {
+	    if ((pcrInfo.size >= sizeof(uint16_t)) &&
+		(htons(*(uint16_t *)(pcrInfo.buffer)) == TPM_TAG_PCR_INFO_LONG)) {
 		v1PcrVersion = 2;			/* (1) Set V1 to 2  */
 	    }
 	    else {			/* iii. Else */
