@@ -2287,7 +2287,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 							tpm_state->tpm_permanent_flags.FIPS);
     }
     if (returnCode == TPM_SUCCESS) {
-	if (entityType == TPM_ET_DEL_KEY_BLOB) {
+	if ((entityType & 0x00ff) == TPM_ET_DEL_KEY_BLOB) {
 	    /* map the entity type to a key */
 	    authSession->entityTypeByte = TPM_ET_KEYHANDLE;
 	    /* Save the entityDigest for comparison during use.	 */
@@ -2303,7 +2303,7 @@ TPM_RESULT TPM_Process_DSAP(tpm_state_t *tpm_state,
 	    TPM_Digest_Copy(authSession->entityDigest, tpm_state->tpm_permanent_data.ownerAuth);
 	    /* Save the TPM_DELEGATE_PUBLIC to check the permissions and pcrInfo at DSAP session
 	       use. */
-	    if (entityType == TPM_ET_DEL_OWNER_BLOB) {
+	    if ((entityType & 0x00ff) == TPM_ET_DEL_OWNER_BLOB) {
 		returnCode = TPM_DelegatePublic_Copy(&(authSession->pub),
 						     &(b1DelegateOwnerBlob.pub));
 	    }
