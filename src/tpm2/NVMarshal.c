@@ -3584,6 +3584,12 @@ skip_accumulate_self_heal_timer_1:
     if (rc == TPM_RC_SUCCESS) {
         rc = Array_Unmarshal(s_indexOrderlyRam, array_size, buffer, size);
     }
+    if (rc == TPM_RC_SUCCESS &&
+        !NvIndexOrderlyRamCheck(s_indexOrderlyRam, sizeof(s_indexOrderlyRam))) {
+        TPMLIB_LogTPM2Error("%s: orderly RAM data does not match the NV indices\n",
+                            __func__);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT64_Unmarshal(&s_maxCounter, buffer, size); /* line 992 */
     }
@@ -5307,6 +5313,12 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
         rc = USER_NVRAM_Unmarshal(buffer, size);
         /* if rc == TPM_RC_SUCCESS, we know that there is enough
            NVRAM to fit everything. */
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        !NvIndexOrderlyRamCheck(indexOrderlyRam, sizeof(indexOrderlyRam))) {
+        TPMLIB_LogTPM2Error("%s: orderly RAM data does not match the NV indices\n",
+                            __func__);
+        rc = TPM_RC_BAD_PARAMETER;
     }
 
     /* version 2 starts having indicator for next versions that we can skip;

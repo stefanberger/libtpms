@@ -18,6 +18,13 @@ NvWriteNvListEnd(NV_REF end);
 // store.
 void NvUpdateIndexOrderlyData(void);
 
+//*** NvIndexOrderlyRamCheck()					// libtpms added begin
+// This function checks orderly RAM data restored from a state blob against the
+// NV Indices in NV.
+BOOL NvIndexOrderlyRamCheck(const BYTE* ram,     // IN: orderly RAM data
+                            UINT32      ramSize  // IN: size of the RAM data
+);								// libtpms added end
+
 //*** NvReadIndex()
 // This function is used to read the NV Index NV_INDEX. This is used so that the
 // index information can be compressed and only this function would be needed
