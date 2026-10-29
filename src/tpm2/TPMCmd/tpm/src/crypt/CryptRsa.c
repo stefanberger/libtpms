@@ -1607,7 +1607,7 @@ CryptRsaEncrypt(
           case TPM_ALG_NULL:  // 'raw' encryption
 	    if (RuntimeProfileRequiresAttributeFlags(&g_RuntimeProfile,	// libtpms added begin
 						     RUNTIME_ATTRIBUTE_NO_UNPADDED_ENCRYPTION))
-		return TPM_RC_SCHEME;					// libtpms added end
+		ERROR_EXIT(TPM_RC_SCHEME);				// libtpms added end
 
 	    {
 		INT32                 i;
