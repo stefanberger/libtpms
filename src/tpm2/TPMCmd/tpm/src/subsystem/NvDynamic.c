@@ -462,6 +462,53 @@ void NvUpdateIndexOrderlyData(void)
     NvWrite(NV_INDEX_RAM_DATA, sizeof(s_indexOrderlyRam), s_indexOrderlyRam);
 }
 
+//*** NvIndexOrderlyRamCheck()					// libtpms added begin
+// This function checks orderly RAM data restored from a state blob against the
+// NV Indices in NV. The entries must not run past the end of the RAM data and
+// each orderly NV Index must have an entry that can hold all of its data.
+//  Return Type: BOOL
+//      TRUE(1)         RAM data is consistent with the NV Indices
+//      FALSE(0)        RAM data is not consistent with the NV Indices
+BOOL NvIndexOrderlyRamCheck(const BYTE* ram,     // IN: orderly RAM data
+                            UINT32      ramSize  // IN: size of the RAM data
+)
+{
+    NV_REF        iter = NV_REF_INIT;
+    NV_REF        currentAddr;
+    NV_INDEX      nvIndex;
+    NV_RAM_HEADER header;
+    UINT32        offset;
+    //
+    // Walk the entries the same way NvRamNext() does
+    for(offset = 0; offset + sizeof(NV_RAM_HEADER) <= ramSize; offset += header.size)
+    {
+        memcpy(&header, ram + offset, sizeof(header));
+        if(header.size == 0)
+            break;
+        if(header.size < sizeof(NV_RAM_HEADER) || header.size > ramSize - offset)
+            return FALSE;
+    }
+    // The first entry with the handle of an orderly index is the one that
+    // NvRamGetIndex() will find; it must hold dataSize bytes
+    while((currentAddr = NvNextIndex(NULL, &iter)) != 0)
+    {
+        NvReadNvIndexInfo(currentAddr, &nvIndex);
+        if(!IS_ATTRIBUTE(nvIndex.publicArea.attributes, TPMA_NV, ORDERLY))
+            continue;
+        for(offset = 0; offset + sizeof(NV_RAM_HEADER) <= ramSize;
+            offset += header.size)
+        {
+            memcpy(&header, ram + offset, sizeof(header));
+            if(header.size == 0 || header.handle == nvIndex.publicArea.nvIndex)
+                break;
+        }
+        if(offset + sizeof(NV_RAM_HEADER) > ramSize || header.size == 0
+           || header.size < sizeof(NV_RAM_HEADER) + nvIndex.publicArea.dataSize)
+            return FALSE;
+    }
+    return TRUE;
+}								// libtpms added end
+
 //*** NvAddRAM()
 // This function adds a new data area to RAM.
 //
