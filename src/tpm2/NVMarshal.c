@@ -4540,7 +4540,7 @@ skip_num_policy_pcr_group:
 #if CLOCK_STOPS
         if (clocksize != sizeof(UINT64)) {
             TPMLIB_LogTPM2Error("Unexpected clocksize for epoch; "
-                                "Expected %u, got %u\n",
+                                "Expected %zu, got %u\n",
                                 sizeof(UINT64), clocksize);
             rc = TPM_RC_BAD_PARAMETER;
         }
