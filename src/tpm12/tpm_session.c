@@ -5498,7 +5498,9 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
 					       FALSE,			/* keepHandle */
 					       v1StClearData->authSessions,
 					       &tpm_auth_session_data);
-	auth_session_added = TRUE;
+	if (returnCode == TPM_SUCCESS) {
+	    auth_session_added = TRUE;
+	}
     }
     /*
       response
@@ -5551,7 +5553,9 @@ TPM_RESULT TPM_Process_LoadAuthContext(tpm_state_t *tpm_state,
     /* if there was a failure, roll back */
     if ((rcf != 0) || (returnCode != TPM_SUCCESS)) {
 	if (auth_session_added) {
-	    TPM_AuthSessionData_Delete(&tpm_auth_session_data);
+	    /* if there was a failure and the session was stored in the session list, free the
+	       session.  Ignore errors, since only one error code can be returned. */
+	    TPM_AuthSessions_TerminateHandle(v1StClearData->authSessions, authHandle);
 	}
     }
     return rcf;
