@@ -4852,7 +4852,9 @@ TPM_RESULT TPM_Process_LoadKeyContext(tpm_state_t *tpm_state,
 						   FALSE,		/* keep handle */
 						   tpm_state->tpm_key_handle_entries,
 						   &tpm_key_handle_entry);
-	key_added = TRUE;
+	if (returnCode == TPM_SUCCESS) {
+	    key_added = TRUE;
+	}
     }
     /*
       response
