@@ -118,7 +118,8 @@ static TPM_RC C_2_2_MQV(TPMS_ECC_POINT* outZ,   // OUT: the computed point
 
     // QsB := [XeB]QsB
     TpmEcc_PointMult(pQsB, pQsB, bnXeB, NULL, NULL, E);
-    ExtEcc_PointAdd(pQeB, pQeB, pQsB, E);
+    if (!ExtEcc_PointAdd(pQeB, pQeB, pQsB, E))	// libtpms changed
+        ERROR_EXIT(TPM_RC_NO_RESULT);		// libtpms added
 
     // QeB := [tA]QeB = [tA](QsB + [Xe,B]QeB) and check for at infinity
     // If the result is not the point at infinity, return QeB
@@ -315,7 +316,8 @@ LIB_EXPORT TPM_RC SM2KeyExchange(
     // Ta = avf(XeA);
     // do Ta = de,A * Ta = deA * avf(XeA)
     ExtMath_Copy(QeA_X, ExtEcc_PointX(QeA));  // create mutable copy
-    ExtMath_Multiply(Ta, deA, avfSm2(QeA_X, w));
+    if (!ExtMath_Multiply(Ta, deA, avfSm2(QeA_X, w)))	// libtpms changed
+        goto Exit;					// libtpms added
     // now Ta = dsA + Ta =  dsA + deA * avf(XeA)
     ExtMath_Add(Ta, dsA, Ta);
     ExtMath_Mod(Ta, ExtEcc_CurveGetOrder(curveId));

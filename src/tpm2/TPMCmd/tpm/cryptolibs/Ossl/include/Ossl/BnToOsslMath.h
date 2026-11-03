@@ -63,16 +63,18 @@ struct bignum_st
 // Allocate a local BIGNUM value. For the allocation, a bigNum structure is created
 // as is a local BIGNUM. The bigNum is initialized and then the BIGNUM is
 // set to reference the local value.
+#if 0 					// libtpms added: unused
 #define BIG_VAR(name, bits)      \
   BN_VAR(name##Bn, (bits));      \
-  BIGNUM* _##name = BN_new();			/* libtpms */	\
   BIGNUM* name = BigInitialized(_##name	/* libtpms */	\
       , BnInit(name##Bn, BYTES_TO_CRYPT_WORDS(sizeof(_##name##Bn.d))))
+#endif
 
 // Allocate a BIGNUM and initialize with the values in a bigNum initializer
 #define BIG_INITIALIZED(name, initializer) \
-  BIGNUM* _##name = BN_new();				/* libtpms */	\
-  BIGNUM* name = BigInitialized(_##name, initializer) /* libtpms */
+  BIGNUM* _##name = BN_new();				/* libtpms */ \
+  BIGNUM* name = BigInitialized(_##name, initializer);	/* libtpms */ \
+  if (!name) { BN_free(_##name); _##name = NULL; }	/* libtpms */
 
 typedef struct
 {

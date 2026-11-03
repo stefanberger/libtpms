@@ -1480,7 +1480,11 @@ LIB_EXPORT TPM_RC CryptRsaGenerateKey(
             continue;
 
         //Form the public modulus and set the unique value
-        ExtMath_Multiply(bnN, Z->P, Z->Q);
+        if (!ExtMath_Multiply(bnN, Z->P, Z->Q))				// libtpms changed
+        {								// libtpms added begin
+            retVal = TPM_RC_MEMORY;
+            goto Exit;
+        }								// libtpms added end
         TpmMath_IntTo2B(
             bnN, &publicArea->unique.rsa.b, (NUMBYTES)BITS_TO_BYTES(keySizeInBits));
         // Make sure everything came out right. The MSb of the values must be one
