@@ -733,6 +733,16 @@ TPM_RESULT TPM_StclearData_Load(TPM_STCLEAR_DATA *tpm_stclear_data,
     if (rc == 0) {
         rc = TPM_Load32(&(tpm_stclear_data->contextCount), stream, stream_size);
     }
+    /* contextCount is incremented on each SaveContext.  Cap it to prevent a crafted
+       state blob from wrapping the counter to 0, which would mark saved contexts as
+       free slots in the context list, making all existing saved contexts unloadable. */
+    if (rc == 0) {
+        if (tpm_stclear_data->contextCount == UINT32_MAX) {
+            printf("TPM_StclearData_Load: Error, contextCount %u too large\n",
+                   tpm_stclear_data->contextCount);
+            rc = TPM_BAD_PARAMETER;
+        }
+    }
     /* load contextList */
     if (rc == 0) {
         rc = TPM_ContextList_Load(tpm_stclear_data->contextList, stream, stream_size);
