@@ -510,8 +510,11 @@ ComputePrivateExponentD(
        /* D too small? A key generated following SP800-56B rev 1
         * 6.3.1.1 step 3 should not exist -> fall back to Euler
         */
-       if (BN_num_bits(*D) <= (nbits >> 1))
+       if (BN_num_bits(*D) <= (nbits >> 1)) {
+           BN_clear_free(*D);
+           *D = NULL;
            return ComputePrivateExponentD_Euler(P, Q, E, N, D);
+       }
        return TRUE;
     } else {
        return ComputePrivateExponentD_Euler(P, Q, E, N, D);
