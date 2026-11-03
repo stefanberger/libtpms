@@ -480,13 +480,24 @@ static TPM_RESULT TPM_RSAGeneratePublicToken(RSA **rsa_pub_key,		/* freed by cal
         (*rsa_pub_key)->n = n;
         (*rsa_pub_key)->e = e;
         (*rsa_pub_key)->d = NULL;
+        n = NULL;
+        e = NULL;
 #else
 	int irc = RSA_set0_key(*rsa_pub_key, n, e, NULL);
 	if (irc != 1) {
             printf("TPM_RSAGeneratePublicToken: Error in RSA_set0_key()\n");
             rc = TPM_SIZE;
+	} else {
+	    n = NULL;
+	    e = NULL;
 	}
 #endif
+    }
+    if (rc != 0) {
+	RSA_free(*rsa_pub_key);
+	*rsa_pub_key = NULL;
+	BN_free(n);
+	BN_free(e);
     }
     return rc;
 }
@@ -539,14 +550,28 @@ static TPM_RESULT TPM_RSAGeneratePrivateToken(RSA **rsa_pri_key,	/* freed by cal
         (*rsa_pri_key)->e = e;
 	(*rsa_pri_key)->d = d;
 	BN_set_flags(d, BN_FLG_CONSTTIME); // d is private
+	n = NULL;
+	e = NULL;
+	d = NULL;
 #else
 	int irc = RSA_set0_key(*rsa_pri_key, n, e, d);
 	if (irc != 1) {
             printf("TPM_RSAGeneratePrivateToken: Error in RSA_set0_key()\n");
             rc = TPM_SIZE;
+	} else {
+	    n = NULL;
+	    e = NULL;
+	    d = NULL;
 	}
 #endif
-     }
+    }
+    if (rc != 0) {
+	RSA_free(*rsa_pri_key);
+	*rsa_pri_key = NULL;
+	BN_free(n);
+	BN_free(e);
+	BN_clear_free(d);
+    }
     return rc;
 }
 
