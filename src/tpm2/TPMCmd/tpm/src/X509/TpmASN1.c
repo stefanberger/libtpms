@@ -335,7 +335,7 @@ ASN1PushLength(ASN1MarshalContext* ctx, INT16 len)
 Error:
     ctx->offset = -1;
 Exit:
-    return (ctx->offset > 0) ? start - ctx->offset : 0;
+    return (ctx->offset >= 0) ? start - ctx->offset : 0;
 }
 
 //*** ASN1PushTagAndLength()
