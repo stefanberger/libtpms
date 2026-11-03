@@ -38,7 +38,8 @@ TPM_RC TpmEcc_SchnorrCalculateS(
         return TPM_RC_NO_RESULT;
     // compute s = (k + r * d)(mod n)
     // r * d
-    ExtMath_Multiply(bnT1, bnT1, bnD);
+    if (!ExtMath_Multiply(bnT1, bnT1, bnD))	// libtpms changed
+        return TPM_RC_MEMORY;			// libtpms added; Use RC_MEMORY so caller does not retry forever
     // k + r * d
     ExtMath_Add(bnT1, bnT1, bnK);
     // k + r * d (mod n)
