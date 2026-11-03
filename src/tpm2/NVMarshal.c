@@ -3388,6 +3388,17 @@ VolatileState_Unmarshal(BYTE **buffer, INT32 *size)
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&g_DRTMHandle, buffer, size); /* line 448 */
     }
+    /* g_DRTMHandle must be unassigned or reference a transient object slot;
+       ObjectTerminateEvent() passes it to HandleToObject() and dereferences
+       the result, which is NULL for any other permanent handle */
+    if (rc == TPM_RC_SUCCESS &&
+        g_DRTMHandle != TPM_RH_UNASSIGNED &&
+        (g_DRTMHandle < TRANSIENT_FIRST ||
+         g_DRTMHandle > TRANSIENT_LAST)) {
+        TPMLIB_LogTPM2Error("Volatile state: Bad value for g_DRTMHandle: "
+                            "0x%08x\n", g_DRTMHandle);
+        rc = TPM_RC_BAD_PARAMETER;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = BOOL_Unmarshal(&g_DrtmPreStartup, buffer, size); /* line 453 */
     }
@@ -3628,6 +3639,13 @@ skip_nv:
     }
     for (i = 0; i < array_size && rc == TPM_RC_SUCCESS; i++) {
         rc = ANY_OBJECT_Unmarshal(&s_objects[i], buffer, size, true);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        g_DRTMHandle != TPM_RH_UNASSIGNED &&
+        s_objects[g_DRTMHandle - TRANSIENT_FIRST].attributes.occupied == FALSE) {
+        TPMLIB_LogTPM2Error("Volatile state: g_DRTMHandle does not reference "
+                            "an occupied object slot: 0x%08x\n", g_DRTMHandle);
+        rc = TPM_RC_BAD_PARAMETER;
     }
 #else
 # error Unsupport #define value(s)
