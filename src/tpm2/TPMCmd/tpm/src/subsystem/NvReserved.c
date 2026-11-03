@@ -158,7 +158,7 @@ void NvRead(void*  outBuffer,  // OUT: buffer to receive data
     // Input addresses must be inside the memory buffer.
     // void is OK because we simply skip the read, which is the only reasonable
     // response.
-    pAssert_VOID_OK(nvOffset + size < NV_MEMORY_SIZE);
+    pAssert_VOID_OK((uint64_t)nvOffset + size < NV_MEMORY_SIZE);  // libtpms changed: prevent int overflow
     _plat__NvMemoryRead(nvOffset, size, outBuffer);
     return;
 }
@@ -172,7 +172,7 @@ BOOL NvWrite(UINT32 nvOffset,  // IN: location in NV to receive data
 )
 {
     // Input type should be valid
-    pAssert_BOOL(nvOffset + size <= NV_MEMORY_SIZE);
+    pAssert_BOOL((uint64_t)nvOffset + size <= NV_MEMORY_SIZE);  // libtpms changed: prevent int overflow
     // Set the flag that a NV write happened
     SET_NV_UPDATE(UT_NV);
     return _plat__NvMemoryWrite(nvOffset, size, inBuffer);
