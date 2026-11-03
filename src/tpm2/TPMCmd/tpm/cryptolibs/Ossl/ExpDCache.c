@@ -114,7 +114,8 @@ BIGNUM *ExpDCacheFind(const BIGNUM *P, const BIGNUM *N, const BIGNUM *E, BIGNUM 
     BIGNUM *D;
 
     for (i = 0; i < ARRAY_SIZE(ExpDCache); i++) {
-        if (BN_cmp(ExpDCache[i].P, P) == 0 && BN_cmp(ExpDCache[i].N, N) == 0 &&
+        if (ExpDCache[i].D != NULL &&
+            BN_cmp(ExpDCache[i].P, P) == 0 && BN_cmp(ExpDCache[i].N, N) == 0 &&
             BN_cmp(ExpDCache[i].E, E) == 0) {
             /* entry found */
             myage = ExpDCache[i].age;
