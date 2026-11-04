@@ -712,6 +712,8 @@ ORDERLY_DATA_Unmarshal(ORDERLY_DATA *data, BYTE **buffer, INT32 *size)
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = UINT8_Unmarshal(&data->clockSafe, buffer, size);
+        /* normalize the value */
+        data->clockSafe = data->clockSafe ? YES : NO;
     }
 
     if (rc == TPM_RC_SUCCESS) {
