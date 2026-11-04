@@ -148,7 +148,9 @@ LIB_EXPORT TPM_RC CryptEccDecrypt(
     if(TPM_ALG_KDF2 != scheme->scheme)
         ERROR_EXIT(TPM_RC_SCHEME);
     // Generate the Z value
-    TpmEcc_PointMult(C1, C1, D, NULL, NULL, E);
+    retVal = TpmEcc_PointMult(C1, C1, D, NULL, NULL, E);	// libtpms changed begin
+    if(retVal != TPM_RC_SUCCESS)
+        goto Exit;						// libtpms changed end
     TpmEcc_PointTo2B(&p2, C1, E);
 
     // Start the hash to check the algorithm
