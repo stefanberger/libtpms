@@ -369,9 +369,12 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 	                    namelen) ||
 	            strncmp(&token[namelen], "-min-key-size=", 14))
 	            continue;
+                /* leading spaces and ' +1024' is accepted */
 		minKeySize = strtoul(&token[namelen + 14], &endptr, 10);
 		if ((*endptr != ALGO_SEPARATOR_C && *endptr != '\0')
 		    || minKeySize > MAX_SYM_DATA * 8) {
+                    TPMLIB_LogTPM2Error("Bad key size found for %.*s.\n",
+                                        (int)namelen + 13, token);
 		    retVal = TPM_RC_KEY_SIZE;
 		    goto exit;
 		}
@@ -385,9 +388,12 @@ RuntimeAlgorithmSetProfile(struct RuntimeAlgorithm  *RuntimeAlgorithm,
 		if (strncmp(token, s_AlgorithmProperties[algId].name, algnamelen) ||
 		    strncmp(&token[algnamelen], "-min-size=", 10))
 		    continue;
+                /* leading spaces and ' +1024' is accepted */
 		minKeySize = strtoul(&token[algnamelen + 10], &endptr, 10);
 		if ((*endptr != ALGO_SEPARATOR_C && *endptr != '\0') ||  minKeySize > 4096) {
 		    retVal = TPM_RC_KEY_SIZE;
+                    TPMLIB_LogTPM2Error("Bad key size found for %.*s.\n",
+                                        (int)algnamelen + 9, token);
 		    goto exit;
 		}
 
