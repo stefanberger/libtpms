@@ -52,7 +52,9 @@ A profile is a JSON map in string format. It must contain the 'Name'
 field with the name of a known profile. It may contain a field
 'Algorithms' that holds a comma-separated list of algorithms (verbs) to
 enable or the field 'Commands' that holds a comma-separated list of ranges
-of command codes to enable.
+of command codes to enable. Ranges must be in ascending order with the
+first value being lower than the second. Ranges in reverse order will be
+ignored even if their individual values are acceptable (not rejected).
 
 The following are examples of TPM 2 profiles:
 
