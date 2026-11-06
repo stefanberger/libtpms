@@ -134,12 +134,13 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
     int           retVal;
     const BIGNUM* r;
     const BIGNUM* s;
-    BIGNUM*       d = BN_new();
+    BIGNUM*       _d = BN_new();
+    BIGNUM*       d;
 
-    if (!d)
+    if (!_d)
         return TPM_RC_MEMORY;
 
-    d = BigInitialized(d, (bigConst)bnD);
+    d = BigInitialized(_d, (bigConst)bnD);
 
     eckey = EC_KEY_new();
 
@@ -163,7 +164,7 @@ TpmEcc_SignEcdsa(Crypt_Int*            bnR,   // OUT: 'r' component of the signa
     retVal = TPM_RC_SUCCESS;
 
  Exit:
-    BN_clear_free(d);
+    BN_clear_free(_d);
     EC_KEY_free(eckey);
     ECDSA_SIG_free(sig);
 
@@ -251,11 +252,13 @@ TpmEcc_ValidateSignatureEcdsa(
     int        rc;
     ECDSA_SIG* sig = NULL;
     EC_KEY*    eckey = NULL;
-    BIGNUM*    r = BN_new();
-    BIGNUM*    s = BN_new();
+    BIGNUM*    _r = BN_new();
+    BIGNUM*    _s = BN_new();
+    BIGNUM*    r = NULL;
+    BIGNUM*    s = NULL;
     EC_POINT*  q = EcPointInitialized((bn_point_t*)ecQ, E);
 
-    if (!r || !s)
+    if (!_r || !_s)
         ERROR_EXIT(TPM_RC_MEMORY);
 
     if (digest->b.size == CryptHashGetDigestSize(TPM_ALG_SHA1) &&
@@ -263,8 +266,8 @@ TpmEcc_ValidateSignatureEcdsa(
 					     RUNTIME_ATTRIBUTE_NO_SHA1_VERIFICATION))
 	ERROR_EXIT(TPM_RC_HASH);
 
-    r = BigInitialized(r, (bigConst)bnR);
-    s = BigInitialized(s, (bigConst)bnS);
+    r = BigInitialized(_r, (bigConst)bnR);
+    s = BigInitialized(_s, (bigConst)bnS);
 
     sig = ECDSA_SIG_new();
     eckey = EC_KEY_new();
@@ -282,8 +285,8 @@ TpmEcc_ValidateSignatureEcdsa(
         ERROR_EXIT(TPM_RC_FAILURE);
 
     /* sig now owns r and s */
-    r = NULL;
-    s = NULL;
+    _r = r = NULL;
+    _s = s = NULL;
 
     rc = ECDSA_do_verify(digest->b.buffer, digest->b.size, sig, eckey);
     switch (rc) {
@@ -302,8 +305,8 @@ TpmEcc_ValidateSignatureEcdsa(
     EC_KEY_free(eckey);
     ECDSA_SIG_free(sig);
     EC_POINT_clear_free(q);
-    BN_clear_free(r);
-    BN_clear_free(s);
+    BN_clear_free(_r);
+    BN_clear_free(_s);
 
     return retVal;
 }
