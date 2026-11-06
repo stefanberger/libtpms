@@ -806,13 +806,16 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BIGNUM       *Qr = NULL;
     BIGNUM       *D = NULL;
     /* for CRT format: dP, dQ, qInv */
-    BIGNUM       *dP = BN_new();
-    BIGNUM       *dQ = BN_new();
-    BIGNUM       *qInv = BN_new();
+    BIGNUM       *_dP = BN_new();
+    BIGNUM       *_dQ = BN_new();
+    BIGNUM       *_qInv = BN_new();
+    BIGNUM       *dP = NULL;
+    BIGNUM       *dQ = NULL;
+    BIGNUM       *qInv = NULL;
     BN_CTX       *ctx = NULL;
     TPM_RC        retVal;
 
-    if (!dP || !dQ || !qInv)
+    if (!_dP || !_dQ || !_qInv)
         ERROR_EXIT(TPM_RC_MEMORY);
 
     retVal = ObjectGetPublicParameters(rsaKey, &N, &E);
@@ -849,9 +852,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     DoRSACheckKey(P, Q, N, E, D);
 
     /* CRT parameters are not absolutely needed but may speed up ops */
-    dP = BigInitialized(dP, (bigConst)&rsaKey->privateExponent.dP);
-    dQ = BigInitialized(dQ, (bigConst)&rsaKey->privateExponent.dQ);
-    qInv = BigInitialized(qInv, (bigConst)&rsaKey->privateExponent.qInv);
+    dP = BigInitialized(_dP, (bigConst)&rsaKey->privateExponent.dP);
+    dQ = BigInitialized(_dQ, (bigConst)&rsaKey->privateExponent.dQ);
+    qInv = BigInitialized(_qInv, (bigConst)&rsaKey->privateExponent.qInv);
     if (dP == NULL || dQ == NULL || qInv == NULL)
         ERROR_EXIT(TPM_RC_FAILURE);
 
@@ -868,9 +871,9 @@ InitOpenSSLRSAPrivateKey(OBJECT     *rsaKey,   // IN
     BN_free(N);
     BN_free(E);
     BN_clear_free(D);
-    BN_clear_free(dP);
-    BN_clear_free(dQ);
-    BN_clear_free(qInv);
+    BN_clear_free(_dP);
+    BN_clear_free(_dQ);
+    BN_clear_free(_qInv);
 
     if (retVal != TPM_RC_SUCCESS) {
         EVP_PKEY_free(*ppkey);
