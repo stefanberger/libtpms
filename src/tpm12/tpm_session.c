@@ -3761,28 +3761,36 @@ TPM_RESULT TPM_Process_LoadContext(tpm_state_t *tpm_state,
 						       keepHandle,
 						       tpm_state->tpm_key_handle_entries,
 						       &tpm_key_handle_entry);
-	    key_added = TRUE;
+	    if (returnCode == TPM_SUCCESS) {
+		key_added = TRUE;
+	    }
 	    break;
 	  case TPM_RT_AUTH:
 	    returnCode = TPM_AuthSessions_AddEntry(&(b1ContextBlob.handle),	/* input/output */
 						   keepHandle,
 						   v1StClearData->authSessions,
 						   &tpm_auth_session_data);
-	    auth_session_added = TRUE;
+	    if (returnCode == TPM_SUCCESS) {
+		auth_session_added = TRUE;
+	    }
 	    break;
 	  case TPM_RT_TRANS:
 	    returnCode = TPM_TransportSessions_AddEntry(&(b1ContextBlob.handle), /* input/output */
 							keepHandle,
 							v1StClearData->transSessions,
 							&tpm_transport_internal);
-	    trans_session_added = TRUE;
+	    if (returnCode == TPM_SUCCESS) {
+		trans_session_added = TRUE;
+	    }
 	    break;
 	  case TPM_RT_DAA_TPM:
 	    returnCode = TPM_DaaSessions_AddEntry(&(b1ContextBlob.handle),	/* input/output */
 						  keepHandle,
 						  v1StClearData->daaSessions,
 						  &tpm_daa_session_data);
-	    daa_session_added = TRUE;
+	    if (returnCode == TPM_SUCCESS) {
+		daa_session_added = TRUE;
+	    }
 	    break;
 	  default:
 	    printf("TPM_Process_LoadContext: Error, invalid resourceType %08x\n",
