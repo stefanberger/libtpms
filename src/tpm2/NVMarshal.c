@@ -3502,12 +3502,27 @@ skip_da:
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&s_encryptSessionIndex, buffer, size);
     }
+    /*
+     * encrypt/decrypt session indices are used to index s_sessionHandles[]
+     * but are only used after RetrieveSessionData. Quietly initialize them.
+     */
+    if (rc == TPM_RC_SUCCESS &&
+        s_encryptSessionIndex != UNDEFINED_INDEX &&
+        s_encryptSessionIndex >= MAX_SESSION_NUM) {
+        s_encryptSessionIndex = UNDEFINED_INDEX;
+    }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&s_decryptSessionIndex, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS &&
+        s_decryptSessionIndex != UNDEFINED_INDEX &&
+        s_decryptSessionIndex >= MAX_SESSION_NUM) {
+        s_decryptSessionIndex = UNDEFINED_INDEX;
     }
     if (rc == TPM_RC_SUCCESS) {
         rc = TPM_HANDLE_Unmarshal(&s_auditSessionIndex, buffer, size);
     }
+    /* s_auditSessionIndex is so far only used locally(!) in RetrieveSessionData */
 
 #if CC_GetCommandAuditDigest
     needs_block = TRUE;
